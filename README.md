@@ -29,9 +29,6 @@ This program is made possible by a donation from the [CHIPS Alliance](https://ch
 - December 2-15, 2022: Register for conference, obtain letter from ISSCC registrar for visa application (if needed) 
 - February 19-23, 2023: Attend ISSCC
 
-
-
-IEEE SSCS Resource Center (extensive archive, free for SSCS members): [https://resourcecenter.sscs.ieee.org/](https://resourcecenter.sscs.ieee.org/)
 ## Contact
 - Mehdi Saligane (mehdi@umich.edu)
 - Boris Murmann (murmann@stanford.edu)
