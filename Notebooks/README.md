@@ -8,6 +8,7 @@ Participants are required to send their [GitHub Pull Request](https://docs.githu
   - More silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
 - PRs are expected to be placed in the Notebooks folder where a [https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/Notebooks/temp_sense_gencollab.ipynb](template) is provided.
  - Feel free to create a subfolder for your Notebook with the name of the project.
- - Make sure to spell out your team members.
+ - Make sure to spell out your team members at the top of you Notebook.
+ - Feel free to open GitHub issues if you have any questioons regarding this process.
 
 Please refer to this general documentation on how to start a [Colab](https://colab.research.google.com/) or [Jupyter](https://jupyter-notebook.readthedocs.io/) Notebooks.
