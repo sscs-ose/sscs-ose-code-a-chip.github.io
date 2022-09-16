@@ -10,12 +10,15 @@ This program is made possible by a donation from the [CHIPS Alliance](https://ch
 
 ## How to Apply
 Participants are required to send their [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to this repository by November 21, 2022, 11:59 AM Pacific Time. 
-- Notebook examples are provide in () which consists of:
+
+**_Note_:** Please do not make any modifications to your Pull Request after the above deadline. All PRs will be merged after the deadline is passed.
+- The following Notebooks could be used as a reference:
   - A [temperature sensor generator](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/temp_sense_genCollab.ipynb)
   - An [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane)
   - More silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
 
 
+Please refer to this general documentation on how to start a [Colab](https://colab.research.google.com/) or [Jupyter](https://jupyter-notebook.readthedocs.io/) Notebooks.
 ## Program Rules
 - The program is open to anyone (no restrictions). Membership in the IEEE Solid-State Circuits Society (SSCS) membership is encouraged, but not required. Teaming is encouraged, but each team must identify a single leader who can travel to the ISSCC from February 19-23, 2023, to receive the award.  
 - Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source tools 
