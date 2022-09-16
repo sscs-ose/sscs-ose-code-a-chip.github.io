@@ -7,6 +7,15 @@
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
 
 This program is made possible by a donation from the [CHIPS Alliance](https://chipsalliance.org/), a non-profit organization hosted by The [Linux Foundation](https://linuxfoundation.org/).  
+
+## How to Apply
+Participants are required to send their [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to this repository by November 21, 2022, 11:59 AM Pacific Time. 
+- Notebook examples are provide in () which consists of:
+  - A [temperature sensor generator](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/temp_sense_genCollab.ipynb)
+  - An [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane)
+  - More silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
+
+
 ## Program Rules
 - The program is open to anyone (no restrictions). Membership in the IEEE Solid-State Circuits Society (SSCS) membership is encouraged, but not required. Teaming is encouraged, but each team must identify a single leader who can travel to the ISSCC from February 19-23, 2023, to receive the award.  
 - Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source tools 
