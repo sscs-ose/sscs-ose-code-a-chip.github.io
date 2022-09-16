@@ -6,7 +6,7 @@
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and 
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
 
-This program is made possible by a donation from the [CHIPS Alliance](https://chipsalliance.org/), a non-profit organization hosted by The [Linux Foundation](https://linuxfoundation.org/).  
+This program is made possible by a donation from the [CHIPS Alliance](https://chipsalliance.org), a non-profit organization hosted by The [Linux Foundation](https://linuxfoundation.org/).  
 Notebooks submission must follow guidelines in the [How to Apply](/Notebooks/README.md) section.
 
 ## Program Rules
