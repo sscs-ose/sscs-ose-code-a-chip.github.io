@@ -5,7 +5,7 @@ This FAQ is a WIP in progress. Ideally, our FAQ should link to GitHub issues.
 ## FAQ
 **Question:** What is the recommended way to install tools in my Notebook?
 
-**Answer:** Since we are using Notebooks, it is necessary not to bloat your Notebook with makefiles. The tools aren't meant to be installed from their source code. To address that, the main EDA toolsnecessary to design your chip  have been packaged and can be simply installed as follows:
+    **Answer:** Since we are using Notebooks, it is necessary not to bloat your Notebook with makefiles. The tools aren't meant to be installed from their source code. To address that, the main EDA toolsnecessary to design your chip  have been packaged and can be simply installed as follows:
 
 ```
 import os
