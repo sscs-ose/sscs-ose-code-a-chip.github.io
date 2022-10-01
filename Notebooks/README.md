@@ -3,7 +3,7 @@ Participants are required to send their [GitHub Pull Request](https://docs.githu
 
 **_Note_:** Please do not make any modifications to your Pull Request after the above deadline. All PRs will be merged after the deadline is passed.
 - The following Notebooks could be used as a reference:
-  - A [temperature sensor generator](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/temp_sense_genCollab.ipynb)
+  - A [temperature sensor generator](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp_sense_genCollab.ipynb)
   - An [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane)
   - More silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
 - PRs are expected to be placed in the Notebooks folder where a [template](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/Notebooks/temp_sense_gencollab.ipynb) is provided.
