@@ -8,6 +8,8 @@
 
 This program is made possible by a donation from the [CHIPS Alliance](https://chipsalliance.org/), a non-profit organization hosted by The [Linux Foundation](https://linuxfoundation.org/).  
 Notebooks submission must follow guidelines in the [How to Apply](/Notebooks/README.md) section.
+## [FAQ](FAQ.md)
+
 
 ## Program Rules
 - The program is open to anyone (no restrictions). Membership in the IEEE Solid-State Circuits Society (SSCS) membership is encouraged, but not required. Teaming is encouraged, but each team must identify a single leader who can travel to the ISSCC from February 19-23, 2023, to receive the award.  
@@ -19,6 +21,7 @@ Notebooks submission must follow guidelines in the [How to Apply](/Notebooks/REA
     - *Category 2*: A new idea that could be the basis for a future tapeout, with the same objectives regarding open **dissemination** and **reproducibility** as in Category 1.
 - Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can reimburse travel and a portion of your accommodations until the dollar amount is used up. Complimentary registration for the conference itself will also be provided by ISSCC.
 - Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
+
 ## Program Logisitcs
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal (Please check for further details and instructions).
 - The winners are expected to attend the ISSCC’s Student-Research Preview session (Sunday evening) to be recognized for their awards, as well as an open source meetup event (details TBA).
@@ -30,6 +33,7 @@ Notebooks submission must follow guidelines in the [How to Apply](/Notebooks/REA
 - December 1, 2022: Announcement of winners
 - December 2-15, 2022: Register for conference, obtain letter from ISSCC registrar for visa application (if needed) 
 - February 19-23, 2023: Attend ISSCC
+
 
 ## Contact
 - Mehdi Saligane (mehdi@umich.edu)
