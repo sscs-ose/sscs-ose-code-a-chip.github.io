@@ -1,4 +1,4 @@
-# IEEE SSCS Open-Source Ecosystem “Code-a-Chip”: SonarOnChip design
+# IEEE SSCS Open-Source Ecosystem “Code-a-Chip”: SonarOnChip Channel
 
 (More info here: https://github.com/HALxmont/SonarOnChip8)
 
