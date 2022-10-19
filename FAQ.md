@@ -52,3 +52,7 @@ Please refer to the template and examples for more details.
 **Question:** How much details should my Notebook include?
 
 **Answer:** Documenting your Notebook and explaining thoroughly each steps is highly recommended. The goal of this competition is to promote reuse and reproducibility. Simulation results, carefully made figures and straight to the point explanations are encouraged.
+##
+**Question:** Is it required to have a GDS as a result of my notebook?
+
+**Answer:** An end-to-end flow is encouraged but not required. Focusing on the key idea as well as providing simulation graphs and documenting thoroughly your notebook would be more interesting.
