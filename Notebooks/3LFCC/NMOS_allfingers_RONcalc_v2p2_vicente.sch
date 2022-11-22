@@ -60,8 +60,7 @@ set appendwrite
 end
 
 
-print VDS
-plot VDS
+
 *print 1/@m.xm1.msky130_fd_pr__nfet_g5v0d10v5[gds]
 *plot 1/@m.xm1.msky130_fd_pr__nfet_g5v0d10v5[gds]
 .endc
