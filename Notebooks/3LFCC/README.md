@@ -5,9 +5,16 @@ Our project focuses on designing and implementing a DC-DC buck converter demonst
 This converter core was entirely designed in the context of the 2022 SSCS "PICO" Open-Source Chipathon contest. More information can be found at https://platform.efabless.com/projects/881.
 
 
-## Details of the Project
+## Block diagram
 
-...
+</br>
+
+<div>
+<img src="Images/3LFC_states.png" width="450"/>
+</div>
+
+</br> 
+
 
 ## Team Mebers 
 
