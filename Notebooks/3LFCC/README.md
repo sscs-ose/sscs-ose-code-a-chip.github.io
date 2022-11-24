@@ -1,28 +1,39 @@
 # IEEE SSCE Open-Source Ecosystem "Code-a-Chip": 3 Level Flying Cap Converter
 
-Git link
+Our project focuses on designing and implementing a DC-DC buck converter demonstrator based on the three-level flying capacitor converter (3L-FCC) architecture, a simple but versatile type of flyingcapacitor multi-level (FCML) converter, using the Skywater 130nm CMOS technology (SKY130). This notebook shows the main steps of the analog design flow, namely simulation, layout and verification of a single converter core.
 
-## Detailsf the Project
+This converter core was entirely designed in the context of the 2022 SSCS "PICO" Open-Source Chipathon contest. More information can be found at https://platform.efabless.com/projects/881.
 
-...
+
+## Block diagram
+
+</br>
+
+<div>
+<img src="Images/3LFC_states.png" width="450"/>
+</div>
+
+</br> 
+
 
 ## Team Mebers 
 
-...
-
-
-BORRAR 
-
-Participants are required to send their [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to this repository by November 21, 2022, 11:59 AM Pacific Time. 
-
-**_Note_:** Please do not make any modifications to your Pull Request after the above deadline. All PRs will be merged after the deadline is passed.
-- The following Notebooks could be used as a reference:
-  - A [temperature sensor generator](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
-  - An [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane)
-  - More silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
-- PRs are expected to be placed in the Notebooks folder where a [template](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/Notebooks/temp_sense_gencollab.ipynb) is provided.
- - Feel free to create a subfolder for your Notebook with the name of the project.
- - Make sure to spell out your team members at the top of your Notebook.
- - Feel free to open GitHub issues if you have any questioons regarding this process.
-
-Please refer to this general documentation on how to start a [Colab](https://colab.research.google.com/) or [Jupyter](https://jupyter-notebook.readthedocs.io/) Notebooks.
+|Name|Affiliation|IEEE Member|SSCS Member|
+|:--:|:----------:|:----------:|:----------:|
+| Jorge Marín (Team Coordinator, Postdoctoral Fellow) <br /> Email ID: jorge.marinn@usm.cl|AC3E (Chile)| Yes |Yes|
+| Christian Rojas (Professor Advisor) <br /> Email ID: c.a.rojas@ieee.org|AC3E, Universidad Técnica Federico Santa María (Chile)| Yes |No|
+| Joel Gak (Professor Advisor) |Universidad Católica de Uruguay (Uruguay)| Yes |No|
+| Alejandro Oliva (Professor Advisor) |Universidad Nacional del Sur (Argentina)| Yes |No|
+| Esteban Lindstrom (Advisor) |Allegro MicroSystems (Argentina)| Yes |No|
+| Nicolás Calarco (Postdoctoral Fellow) |Universidad Católica de Uruguay (Uruguay)| Yes |No|
+| Alfonso Cortés (Master Student) |AC3E, Universidad Técnica Federico Santa María (Chile)| Yes |No|
+| Aquiles Viza (Undergraduate Student) |AC3E, Universidad Técnica Federico Santa María (Chile)| No |No|
+| Kevin Pizarro (Master Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Sebastián Neira (Graduate Student) |AC3E, Universidad Técnica Federico Santa María (Chile)| No |No|
+| Vicente Osorio (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Tomás Velásquez(Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Max Vega (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Julio Contreras (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Diego Almonacid (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Carolina Beckmann (Master Student) |Universidad Técnica Federico Santa María (Chile)| Yes |No|
+| Pablo Vera (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
