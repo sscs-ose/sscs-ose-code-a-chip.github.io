@@ -10,7 +10,7 @@ This converter core was entirely designed in the context of the 2022 SSCS "PICO"
 </br>
 
 <div>
-<img src="Images/3LFC_states.png" width="450"/>
+<img src="Images/block_diagram.png" width="450"/>
 </div>
 
 </br> 
