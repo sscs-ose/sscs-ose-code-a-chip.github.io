@@ -18,12 +18,13 @@ This converter core was entirely designed in the context of the 2022 SSCS "PICO"
 
 ## To run this Jupyter notebook
 
-To install the Micromamba environment with all the dependencies, run the following commands:
+To install the Micromamba environment with all the dependencies, open a console and run the following commands:
 chmod +x init.sh
 chmod +x scripts/download_micromamba.sh
 chmod +x scripts/micromamba_env.sh
 ./init.sh
 
+This also executes jupyter-notebook
 
 ## Team Mebers 
 
