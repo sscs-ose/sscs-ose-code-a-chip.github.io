@@ -29,7 +29,7 @@ Notebooks submission must follow guidelines in the [How to Apply](/Notebooks/REA
 
 
 ## Program Schedule
-- November 21, 2022, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- November ~21~ 25, 2022, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - December 1, 2022: Announcement of winners
 - December 2-15, 2022: Register for conference, obtain letter from ISSCC registrar for visa application (if needed) 
 - February 19-23, 2023: Attend ISSCC

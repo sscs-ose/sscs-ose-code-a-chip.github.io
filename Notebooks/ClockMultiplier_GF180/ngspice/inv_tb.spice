@@ -1,0 +1,47 @@
+** sch_path: /home/shahidosic/GFProjects/inv/Xschem/inv_tb.sch
+**.subckt inv_tb
+xinv1 VDD VSS IN OUT inv
+C1 OUT VSS 20f m=1
+V1 VSS GND 0
+.save i(v1)
+V2 VDD VSS 3
+.save i(v2)
+V3 IN VSS pulse(0 3 0 10p 10p 100n 200n)
+.save i(v3)
+**** begin user architecture code
+
+.include ./design.spice
+.lib ./sm141064.spice typical
+
+
+
+.control
+save all
+tran 10p 1u
+plot v(IN) v(OUT)
+WRDATA inv.csv v(IN) v(OUT) 
+write inv_tb.raw
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  /home/shahidosic/GFProjects/inv/Xschem/inv.sym # of pins=4
+** sym_path: /home/shahidosic/GFProjects/inv/Xschem/inv.sym
+** sch_path: /home/shahidosic/GFProjects/inv/Xschem/inv.sch
+.subckt inv VDD VSS IN OUT
+*.ipin IN
+*.iopin VDD
+*.iopin VSS
+*.opin OUT
+XM1 OUT IN VSS VSS nmos_3p3 L=1u W=4u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XM2 OUT IN VDD VDD pmos_3p3 L=1u W=12u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+.GLOBAL GND
+.end

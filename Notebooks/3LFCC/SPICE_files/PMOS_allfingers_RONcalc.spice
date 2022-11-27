@@ -1,0 +1,42 @@
+** sch_path:
+*+ /foss/designs/sscs-ose-code-a-chip.github.io/Notebooks/3LFCC/PMOS_allfingers_RONcalc.sch
+**.subckt PMOS_allfingers_RONcalc
+VGS G VDD {VGS}
+IDS net1 VDD 300m
+VIDSMEAS D net1 0
+XM1 D G VDD VDD sky130_fd_pr__pfet_g5v0d10v5 L=0.5 W=4.38 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=4506 m=4506
+VDD VDD GND 5
+**** begin user architecture code
+
+
+.param VIN = 20
+.param VGS = 1
+.option temp=70
+*.ic v(V_CFTOP) = VIN/2
+.lib /foss/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.control
+save all
+compose voltage start=-5 stop=-2 step=0.5
+foreach volt $&voltage
+alterparam VGS=$volt
+reset
+dc IDS 0.25 0.35 0.001
+run
+wrdata /foss/designs/personal/3LFCC_AC3E/xschem/dev_switches/PMOS_R_on_calc.txt dc.v(D) dc.v(VDD)
+set appendwrite
+end
+
+
+*print 1/@m.xm1.msky130_fd_pr__nfet_g5v0d10v5[gds]
+*plot 1/@m.xm1.msky130_fd_pr__nfet_g5v0d10v5[gds]
+.endc
+
+
+
+**** end user architecture code
+**.ends
+.GLOBAL GND
+.end
