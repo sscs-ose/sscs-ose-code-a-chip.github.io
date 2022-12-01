@@ -44,7 +44,7 @@ This also executes jupyter-notebook
 | Aquiles Viza (Undergraduate Student) |AC3E, Universidad Técnica Federico Santa María (Chile)| No |No|
 | Kevin Pizarro (Master Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
 | Sebastián Neira (Graduate Student) |AC3E, Universidad Técnica Federico Santa María (Chile)| No |No|
-| Vicente Osorio (Undergraduate Student, **Team Lead**) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Vicente Osorio (Undergraduate Student, **Code-a-Chip Team Lead**) |Universidad Técnica Federico Santa María (Chile)| No |No|
 | Tomás Velásquez(Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
 | Max Vega (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
 | Julio Contreras (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
