@@ -1,4 +1,4 @@
-## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at ISSCC'23
+## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'23](https://www.isscc.org/information-for-students)
 
 **List of Accepted Notebooks:**
 
