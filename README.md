@@ -28,6 +28,7 @@ Notebooks submissions must follow guidelines in the [How to Apply](/Notebooks/RE
 
 
 ## Program Schedule (tentative)
+- Info Session: ~ Feb. 15th 8 AM PST 
 - April 3, 2023, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - April 14, 2023: Announcement of winners
 - April 17-21, 2023: Register for conference, obtain letter for visa application (if needed) 
