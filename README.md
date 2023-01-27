@@ -6,14 +6,14 @@
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
 
 
-Notebooks submissions must follow guidelines in the **[How to Apply](/Notebooks/README.md)** section.
+Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
 ## [FAQ](FAQ.md)
 
 
 ## Program Rules
 - The program is open to anyone (no restrictions). Membership in the IEEE Solid-State Circuits Society (SSCS) membership is encouraged, but not required. Teaming is encouraged, but each team must identify a single leader who can travel to the Symposium on VLSI from June 11-16, 2023, to receive the award.  
 - Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. 
-    - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb), more silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
+    - Examples: [Inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [Temperature Sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb), more silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
 - Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
 - Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can reimburse conference registration, travel and a portion of your accommodations until the dollar amount is used up. 
 - Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
