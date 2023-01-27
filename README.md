@@ -12,6 +12,7 @@
 - Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
 - A jury will evaluate the submissions and select up to 10 winners.
 - Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can reimburse conference registration, travel and a portion of your accommodations until the dollar amount is used up.
+
 - Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
 
 ## Program Logistics
