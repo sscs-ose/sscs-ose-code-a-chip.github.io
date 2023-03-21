@@ -1,5 +1,5 @@
-#The MixPix project. 
-##A mixed signal circuit for smart imaging
+# The MixPix project. 
+## A mixed signal circuit for smart imaging
 
 * Multi macro placement flow
 * Efabless Caravel compatible
