@@ -15,6 +15,8 @@
 
 - Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
 
+**Note: As a reference, previous Notebook winners at ISSCC'23 can be found [here](ISSCC23/README.md).**
+
 ## Program Logistics
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
 - Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
