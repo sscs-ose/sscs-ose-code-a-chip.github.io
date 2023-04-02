@@ -1,3 +1,7 @@
+<a target="_blank" href="https://colab.research.google.com/github/onurkrts/sscs-ose-code-a-chip.github.io/blob/main/VLSI23/ChipWizard/ChipWizard.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
 # ChipWizard 
 
 ```
