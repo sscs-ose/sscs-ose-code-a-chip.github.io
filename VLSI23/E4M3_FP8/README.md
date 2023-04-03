@@ -33,6 +33,13 @@ efficient resource utilization. As the demand for powerful AI solutions grows,
 open-source implementations like our E4M3 FP8 addition module play a vital role
 in democratizing AI and propelling the development of cutting-edge technologies.
 
+
+
+## Team Members
+
+- Kauna Lei, kaunalei 'at' gmail
+- Alex May Ramirez, meap09121 'at' gmail
+
 ---
 
 Footnotes:
