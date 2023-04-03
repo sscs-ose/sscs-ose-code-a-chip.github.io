@@ -27,5 +27,5 @@ We recomend to open the notebook on https://colab.research.google.com
 | Jorge Marín (Team Coordinator, Postdoctoral Fellow) <br /> Email ID: jorge.marinn@usm.cl|AC3E (Chile)| Yes |Yes|
 | Christian Rojas (Professor Advisor) <br /> Email ID: c.a.rojas@ieee.org|AC3E, Universidad Técnica Federico Santa María (Chile)| Yes |No|
 | Alfonso Cortés (Master Student) |AC3E, Universidad Técnica Federico Santa María (Chile)| Yes |No|
-| Vicente Osorio (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
+| Vicente Osorio (Undergraduate Student)(**Team lead**) |Universidad Técnica Federico Santa María (Chile)| No |No|
 | Ítalo Muñoz (Undergraduate Student) |Universidad Técnica Federico Santa María (Chile)| No |No|
