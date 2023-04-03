@@ -2,6 +2,10 @@
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
 
+```
+SPDX-License-Identifier: Apache-2.0
+```
+
 # An Open Source E4M3 FP8 Addition Module for Accelerating Decoder-only Generative Neural Networks
 
 Recent advancements in transformers and specialized accelerators, such as
@@ -39,8 +43,3 @@ Footnotes:
 
 [^3]: See table showing dropping of int4 and int8 for the H100, and addition of fp8 in the H100, https://en.wikipedia.org/wiki/Hopper_(microarchitecture)
 
-## License
-
-```
-SPDX-License-Identifier: Apache-2.0
-```
