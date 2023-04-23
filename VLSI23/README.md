@@ -4,7 +4,9 @@
 
 | Name        | Affiliation                                                     | Notebook Title                                                          |  
 | ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-
+| Zonghao Li | University of Toronto, Canada | Design and Optimization of Analog LDO with Relational Graph Neural Network and Reinforcement Learning |
+| Vicente Osorio | Universidad Técnica Federico Santa María, Chile | Automated Generation of Power Transistors and 3LFC DC-DC Converter |
+| HyungJoo Park | Hanyang University, South Korea | Process-Portable Full-Custom Memory Compiler using Laygo2 with Yosys Integration |
 
 ***Note: Many thanks everyone for your participation! We recommend to resubmit your Notebooks to the next code-a-chip Notebook competition with revisions. Stay tuned!***
 
