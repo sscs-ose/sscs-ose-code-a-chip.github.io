@@ -1,4 +1,4 @@
-## IEEE SSCS “Code-a-Chip” Travel Grant Awards at the [2023 Symposium on VLSI Technology and Circuits](https://www.vlsisymposium.org/)
+## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'24](https://www.isscc.org/information-for-students)
 
 
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
@@ -15,7 +15,7 @@
 
 - Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
 
-**Note: As a reference, previous Notebook winners at ISSCC'23 can be found [here](ISSCC23/README.md).**
+**Note: As a reference, previous Notebook winners at [ISSCC'23](ISSCC23/README.md) and [VLSI'23](VLSI23/README.md).**
 
 ## Program Logistics
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
@@ -25,11 +25,11 @@
 
 
 ## Program Schedule
-- February 15, 2023, 8:00 AM Pacific Time: Info session (meeting link to follow)
-- April 3, 2023, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
-- April 14, 2023: Announcement of winners
-- April 17-21, 2023: Register for conference, obtain letter for visa application (if needed)
-- June 11-16, 2023: Attend conference
+- September 27, 2024, 8:00 AM Pacific Time: Info session (meeting link to follow)
+- November 26, 2024, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- December 1, 2024: Announcement of winners
+- December 2-15, 2024: Register for conference, obtain letter for visa application (if needed)
+- February 18-22, 2024: Attend conference
 
 ## [FAQ](FAQ.md)
 
