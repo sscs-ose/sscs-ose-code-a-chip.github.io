@@ -24,10 +24,10 @@
 
 
 ## Program Schedule
-- September 27, 2024, 8:00 AM Pacific Time: Info session (meeting link to follow)
-- November 26, 2024, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
-- December 1, 2024: Announcement of winners
-- December 2-15, 2024: Register for conference, obtain letter for visa application (if needed)
+- September 27, 2023, 8:00 AM Pacific Time: Info session (meeting link to follow)
+- November 26, 2023, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- December 1, 2023: Announcement of winners
+- December 2-15, 2023: Register for conference, obtain letter for visa application (if needed)
 - February 18-22, 2024: Attend conference
 
 ## [FAQ](FAQ.md)
