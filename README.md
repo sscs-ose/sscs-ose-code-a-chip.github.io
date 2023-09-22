@@ -24,7 +24,7 @@
 
 
 ## Program Schedule
-- September 27, 2023, 8:00 AM Pacific Time: Info session (meeting link to follow)
+- September 27, 2023, 8:00 AM Pacific Time: Info session [Zoom meeting link](https://us06web.zoom.us/j/86188807208?pwd=QnhNdnZMZlR2ckxRcE42c3ppRzU0dz09)
 - November 26, 2023, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - December 1, 2023: Announcement of winners
 - December 2-15, 2023: Register for conference, obtain letter for visa application (if needed)
