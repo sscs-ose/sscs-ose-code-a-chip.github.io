@@ -5,7 +5,7 @@
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to IEEE SSCS conferences and interact with the leading-edge chip design community.
 
-**NOTE:** You can join the [open-source slack channel](https://join.slack.com/t/open-source-silicon/shared_invite/zt-24bmv1wfk-llGlAxQ95R1Mbja0z0daqA) to discuss your submissions or ask about tools issues etc.
+**Note:** You can join the [open-source slack channel](https://join.slack.com/t/open-source-silicon/shared_invite/zt-24bmv1wfk-llGlAxQ95R1Mbja0z0daqA) to discuss your submissions or ask about tools issues etc. Channel name: # ieee-sscs-cac
 
 ## Program Rules
 - The program is open to anyone (no restrictions). IEEE Solid-State Circuits Society (SSCS) membership is encouraged, but not required. Teaming is encouraged, but each team must identify a single leader who can travel to the ISSCC from February 18-22, 2024, to receive the award and participate in networking events.  
