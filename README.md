@@ -35,5 +35,4 @@
 ## Contact
 - Mehdi Saligane (mehdi@umich.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
-
-You can join the [open-source slack channel](https://join.slack.com/t/open-source-silicon/shared_invite/zt-24bmv1wfk-llGlAxQ95R1Mbja0z0daqA) to discuss your submissions or ask about tools issues etc. Channel name: #ieee-sscs-cac
+- You can join the [open-source slack channel](https://join.slack.com/t/open-source-silicon/shared_invite/zt-24bmv1wfk-llGlAxQ95R1Mbja0z0daqA) to discuss your submissions or ask about tools issues etc. Channel name: #ieee-sscs-cac
