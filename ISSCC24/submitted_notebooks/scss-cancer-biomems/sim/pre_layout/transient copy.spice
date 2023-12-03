@@ -1,0 +1,81 @@
+* Transient simulation
+
+.lib "../skywater_pdk/sky130_fd_pr/models/sky130.lib.spice" tt
+
+* OpAmp circuit
+.include avsd_opamp.cir
+
+* Stage 1 - Differential amplifier
+X1 vss vdd gnd in1 in2 out2 asvd_opamp
+R1 in2 gnd 0.5Meg
+R2 in1 out2 0.5Meg
+
+* BVD model resistance (to emulate MEMS)
+Rmems1 in1 inAC1 0.1Meg
+Rmems2 in2 inAC2 0.1Meg
+
+v1 vdd gnd dc 1.8
+v2 vss gnd dc -1.8
+v3 inAC1 gnd sine(0 1m 500k)
+v4 inAC2 gnd sine(0 -1m 500k)
+
+* High-pass filter
+C1 out2 out3 10n
+R3 out3 gnd 50k
+
+* Buffer
+X2 vss vdd gnd out4 out3 out4 asvd_opamp
+
+* Stage 2 - Non-inverting amplifier
+X3 vss vdd gnd in12 in22 out5 asvd_opamp
+R4 in12 gnd 1k
+R5 in12 out5 20.03k
+
+* Noninv forced offset
+R6 in22 out4 1.03k
+R7 in22 inOff 20k
+
+v5 inOff gnd 1.2
+
+* Stage 3 - Comparator circuit
+
+* Comparator circuit
+.include avsd_cmp.cir
+
+X4 vcc gnd en out6 inOff out5 net4 avsd_cmp
+
+Ihyst vcc net4 0
+v6 vcc gnd 3.3
+v7 en gnd 3.3
+
+* Stage 4 - Pulse generator circuit
+
+* Pulsegen circuit
+.include pulsegen.cir
+
+X5 vcc gnd out6 out7p out7m pulsegen
+
+* Output load
+C2 out7p gnd 50f 
+C3 out7m gnd 50f
+
+*Simulation Command
+.tran 0.05u 4u
+
+* ngspice control statements
+.control
+
+run
+* print allv > plot_data_v.txt
+* print alli > plot_data_i.txt
+
+*For Transient Analysis
+plot v(inAC1) v(inAC2) v(out2) ; diff amplifier
+plot v(out2) v(out3) v(out4) ; high-pass filter and buffer
+plot v(inOff) v(out4) v(out5) ; non-inv amplifier
+plot v(out5) v(inOff) v(out6) ; comparator
+plot v(out6) v(out7p) v(out7m) ; pulse generator
+
+.endc
+
+.end

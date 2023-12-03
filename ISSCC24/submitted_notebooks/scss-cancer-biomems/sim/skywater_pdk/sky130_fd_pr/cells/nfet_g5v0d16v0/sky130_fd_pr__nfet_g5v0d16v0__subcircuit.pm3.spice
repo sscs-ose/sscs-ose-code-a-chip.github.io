@@ -1,0 +1,24 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+.subckt  sky130_fd_pr__nfet_g5v0d16v0 d g s b  w=5.0 l=0.7 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0 delvto=0 mf=1 m=1 sa=0.28 sb=2.41 sd=0 mult=1
+.param  sky130_fd_pr__nfet_g5v0d16v0__rdiff=5.906500e+003 sky130_fd_pr__nfet_g5v0d16v0__rdiff_tc1=1.483000e-003 sky130_fd_pr__nfet_g5v0d16v0__rdiff_tc2=7.824000e-006
+*.param sb_cadfixedvalue_nvhv=2.41
+.param sb_cadfixedvalue_nvhv=1.585
+xmain1 d1 g s b sky130_fd_pr__nfet_g5v0d16v0__base  w=w l=l ad=0 as=as pd=0 ps=ps nrd=nrd nrs=nrs delvto=delvto m=m mult=mult sa=sa sb=sb_cadfixedvalue_nvhv
+rldd_nvhv d d1 R='(1/w)*sky130_fd_pr__nfet_g5v0d16v0__rdiff*sky130_fd_pr__nfet_g5v0d16v0__rdiff_mult' tc1 = 'sky130_fd_pr__nfet_g5v0d16v0__rdiff_tc1' tc2 = 'sky130_fd_pr__nfet_g5v0d16v0__rdiff_tc2'
+dnw1 b d sky130_fd_pr__model__parasitic__diode_ps2nw  area='ad/2' pj='pd/2'
+dnw2 b d1 sky130_fd_pr__model__parasitic__diode_ps2nw area='ad/2' pj='pd/2'
+.ends sky130_fd_pr__nfet_g5v0d16v0

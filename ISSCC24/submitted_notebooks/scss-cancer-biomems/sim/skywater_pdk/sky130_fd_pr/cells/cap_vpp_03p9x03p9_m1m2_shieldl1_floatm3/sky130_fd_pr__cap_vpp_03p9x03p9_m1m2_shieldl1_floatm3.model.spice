@@ -1,0 +1,51 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+.param sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3__slope = 0.0
+* statistics {
+*   mismatch {
+*     vary  sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3__slope dist=gauss std=0.0183
+*   }
+* }
+.subckt  sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3 c0 c1 b m3
++ 
+.param  mult = 1.0
++ 
++ ctot_a = {578.275e-18*sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3__cor+1.04797/sqrt(mult/0.50527)*sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3__slope*578.275e-18*sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3__cor}
++ cm3_c0 = {0.444e-15*cm3m2_vpp}
++ cm3_c1 = {0.179e-15*cm3m2_vpp}
++ cli2s = {0.104e-15*cli2s_vpp}
++ rat_m2 = 0.596
++ rat_m1 = 0.387
++ rat_m1li = 0.017
++ cap_m2 = {rat_m2*ctot_a}
++ cap_m1 = {rat_m1*ctot_a}
++ cap_m1li = {rat_m1li*ctot_a}
++ nvia_c0 = 8.0
++ nvia_c1 = 4.0
++ ncon_c0 = 16.0
+ccmvpp1p8x1p8_m3shield m3 c0  c = {cm3_c0}
+cm3_1 m3 c1 c = {cm3_c1}
+rm21 c0 a1 r = {28*rm2}
+cm2 a1 c1 c = {cap_m2}
+rvia1 c0 d0 r = {rcvia/nvia_c0}
+rvia2 c1 d1 r = {rcvia/nvia_c1}
+rm11 d0 b1 r = {22*rm1}
+cm1 b1 d1 c = {cap_m1}
+rcon d0 e0 r = {rcl1/ncon_c0}
+rli1 e0 f0 r = {rl1}
+cli2b f0 b c = {cli2s}
+cm1li d1 e0 c = {cap_m1li}
+.ends sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3

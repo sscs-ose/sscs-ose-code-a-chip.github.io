@@ -1,0 +1,73 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+* statistics {
+*   mismatch {
+*   }
+* }
+.subckt  sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4 c0 c1 b m4
++ 
+.param  mult = 1.0
++ 
++ ctot_a = {118.52e-15*sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4__cor+0.0283/sqrt(11.5*11.7*mult*2)*118.52e-15*sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4__cor*sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4__slope}
++ cm4_c0 = {7.48e-15*c0m4m3_vpp}
++ cm4_c1 = {5.06e-15*c1m4m3_vpp}
++ c0_sub = {(4.99e-15-5.84e-16)*cli2s_vpp}
++ c1_sub = {2.34e-15*cli2s_vpp}
++ rat_m3 = 0.1539
++ rat_m2 = 0.4074
++ rat_m1 = 0.4025
++ rat_li = 0.0362
++ cap_m3 = {rat_m3*ctot_a}
++ cap_m2 = {rat_m2*ctot_a}
++ cap_m1 = {rat_m1*ctot_a}
++ cap_li = {rat_li*ctot_a}
++ ll1 = 5.070
++ lm1 = 5.215
++ lm2 = 5.095
++ lm3 = 5.050
++ wl1 = 0.170
++ wm1 = 0.140
++ wm2 = 0.140
++ wm3 = 0.300
++ nfl1 = 62.0
++ nfm1 = 72.0
++ nfm2 = 72.0
++ nfm3 = 34.0
++ nvia2_c0 = 104.0
++ nvia2_c1 = 49.0
++ nvia_c0 = 124.0
++ nvia_c1 = 62.0
++ ncon_c0 = 116.0
++ ncon_c1 = 28.0
+ccmvpp11p5x11p7_m4shield m4 b0  c = {cm4_c0}
+cm4_1 m4 b1 c = {cm4_c1}
+rsm3 b0 b2 r = {rm3*lm3/wm3*(1/3)*(1/nfm3)}
+cm3 b2 b1 c = {cap_m3}
+rvia2_0 b0 c0 r = {rcvia2/nvia2_c0}
+rvia2_1 b1 c1 r = {rcvia2/nvia2_c1}
+rsm2 c0 c2 r = {rm2*lm2/wm2*(1/3)*(1/nfm2)}
+cm2 c2 c1 c = {cap_m2}
+rvia_0 c0 d0 r = {rcvia/nvia_c0}
+rvia_1 c1 d1 r = {rcvia/nvia_c1}
+rsm1 d0 d2 r = {rm1*lm1/wm1*(1/3)*(1/nfm1)}
+cm1 d2 d1 c = {cap_m1}
+rcon1 d0 e0 r = {rcl1/ncon_c0}
+rcon2 d1 e1 r = {rcl1/ncon_c1}
+rli1 e0 e2 r = {rl1*ll1/wl1*(1/3)*(1/nfl1)}
+cli e2 e1 c = {cap_li}
+cli2b_0 e0 b c = {c0_sub}
+cli2b_1 e1 b c = {c1_sub}
+.ends sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4

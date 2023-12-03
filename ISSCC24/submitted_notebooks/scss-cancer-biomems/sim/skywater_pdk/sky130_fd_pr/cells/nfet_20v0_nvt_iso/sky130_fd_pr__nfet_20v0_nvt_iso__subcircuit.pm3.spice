@@ -1,0 +1,343 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+.subckt  sky130_fd_pr__nfet_20v0_nvt_iso d g s b sub  w=60u l=2u m=1 t=30
++ ad=0 as=0 pd=0 ps=0 nrd=2 nrs=2 mf=1 sa=0 sb=0
+.PARAM  rdrift_tnom=1.648600e+004 vgdep_tnom=1.102900e-001 vth_tnom=7.000000e-001 vbdep_tnom=-5.260300e-001
++ vth2=+1.048000e-001 hvvsat_tnom=1.878600 avsat_tnom=7.467500e-001 deltaw=9.000000e-001 hvnel_n20vhviso1=1.50 hvvbdep=-2.490600e-002
+.param
++ sky130_fd_pr__nfet_20v0__pgatejunction_mult = 1.7357
++ sky130_fd_pr__nfet_20v0__mjswgatejunction_mult = 5.3981e-1
++ sky130_fd_pr__nfet_20v0__pbswgatejunction_mult = 3.4999e+0
+.param
++ sky130_fd_pr__nfet_20v0__vgdep_mult=1
++ n20vhv1res_vth0_diff=0.0
++ sky130_fd_pr__nfet_20v0__vbdep_mult=1
++ sky130_fd_pr__nfet_20v0__avsat_mult=1
+.param
++ w_n20vhv1 = 30.00
++ nrd_n20vhv1 = 2.0
++ nrs_n20vhv1 = 2.0
++ ad_n20vhviso1 = 125.8
++ as_n20vhv1 = 8.7
++ pd_n20vhviso1 = 75.4
++ ps_n20vhv1 = 60.58
++ delvto_n20vhv1 = 0.0
+.param
++ ad_n20vhv1isopsub = 403.5
++ pd_n20vhv1isopsub = 60.16
+.param tc1_vgdep=0
+.param tc1_vth=0
+.param tc1_vbdep=0
+.param tc1_hvvsat_n20nativevhviso1=0.0061411164700097
+.param tc2_rdrift_n20nativevhviso1=0.000021055807983754
+.param tc2_vgdep=0
+.param tc2_vth=0
+.param tc2_vbdep=0
+.param tc2_hvvsat_n20nativevhviso1=3.61396725197052E-05
+.param tc2_avsat_n20nativevhviso1=3.0122688512968E-06
+*.param tc1_rdrift_n20nativevhviso1=1.2314e-02
+*.param tc1_hvvsat_n20nativevhviso1=-2.5733e-02
+.param tc1_rdrift_n20nativevhviso1=7.6637e-03
+.param tc1_avsat_n20nativevhviso1=-7.4563e-04
+.param
++ rdrift='rdrift_tnom*((w_n20vhv1-deltaw)/w_n20vhv1)*(1+tc1_rdrift_n20nativevhviso1*(temper-30)+tc2_rdrift_n20nativevhviso1*(temper-30)*(temper-30))*sky130_fd_pr__nfet_20v0_nvt_iso__rdrift_mult'
++ vgdep='vgdep_tnom*(1+tc1_vgdep*(temper-30)+tc2_vgdep*(temper-30)*(temper-30))*sky130_fd_pr__nfet_20v0__vgdep_mult'
++ vth='vth_tnom*(1+tc1_vth*(temper-30)+tc2_vth*(temper-30)*(temper-30))+n20vhv1res_vth0_diff'
++ vbdep='vbdep_tnom*(1+tc1_vbdep*(temper-30)+tc2_vbdep*(temper-30)*(temper-30))*sky130_fd_pr__nfet_20v0__vbdep_mult'
++ hvvsat='hvvsat_tnom*(1+tc1_hvvsat_n20nativevhviso1*(temper-30)+tc2_hvvsat_n20nativevhviso1*(temper-30)*(temper-30))*sky130_fd_pr__nfet_20v0_nvt_iso__hvvsat_mult'
++ avsat='avsat_tnom*(1+tc1_avsat_n20nativevhviso1*(temper-30)+tc2_avsat_n20nativevhviso1*(temper-30)*(temper-30))*sky130_fd_pr__nfet_20v0__avsat_mult'
+m1 d1 g s b sky130_fd_pr__nfet_20v0__base  w=w_n20vhv1 l=hvnel_n20vhviso1 ad=0 as=0 pd=0 ps=0 nrd=nrd_n20vhv1 nrs=nrs_n20vhv1 delvto=delvto_n20vhv1 m=m
+rldd d d1 r='abs((1/w_n20vhv1)*(rdrift/(1+vgdep*(v(g,s)-vth-vbdep*v(b,s))))*(1+pwr((abs(v(d,s)+vth2-min(v(d1,s),60))/(hvvsat*(1+hvvbdep*v(b,s)))),avsat)))' tc1 = 0 tc2 = 0 m = {m}
+dNDrain1 b d sky130_fd_pr__model__parasitic__diode_pw2dn__extended_drain area='0.5*ad_n20vhviso1' pj='0.5*pd_n20vhviso1' m=m
+dNDrain2 b d1 sky130_fd_pr__model__parasitic__diode_pw2dn__extended_drain area='0.5*ad_n20vhviso1' pj='0.5*pd_n20vhviso1' m=m
+dNSrc b s sky130_fd_pr__diode_pw2nd_05v5 area=as_n20vhv1 pj='ps_n20vhv1-w_n20vhv1' m=m
+dDrnPsub sub d sky130_fd_pr__model__parasitic__diode_ps2dn__extended_drain area='0.5*ad_n20vhv1isopsub' pj='0.5*pd_n20vhv1isopsub' m=m
+.model sky130_fd_pr__nfet_20v0__base.0 nmos
+* DC IV MOS Parameters
++ lmin = 4.95e-07 lmax = 3.05e-06 wmin = 1.9995e-05 wmax = 6.0005e-5
++ level = 54.0
++ tnom = 30.0
++ version = 4.5
++ toxm = 1.16e-8
++ xj = 1.5e-7
++ lln = 1.0
++ lwn = 1.0
++ wln = 1.0
++ wwn = 1.0
++ lint = '7.6507e-08 + sky130_fd_pr__nfet_20v0__lint_diff'
++ ll = 0.0
++ lw = 0.0
++ lwl = 0.0
++ wint = '2.1346e-08 + sky130_fd_pr__nfet_20v0__wint_diff'
++ wl = 0.0
++ ww = 0.0
++ wwl = 0.0
++ xl = 0.0
++ xw = 0.0
++ mobmod = 0.0
++ binunit = 2.0
++ dwg = -4.1292e-9
++ dwb = -1.6944e-9
+* BSIM4 - Model Selectors
++ igcmod = 0.0
++ igbmod = 0.0
++ rgatemod = 0.0
++ rbodymod = 1.0
++ trnqsmod = 0.0
++ acnqsmod = 0.0
++ fnoimod = 1.0
++ tnoimod = 1.0
++ permod = 1.0
++ geomod = 0.0
++ rdsmod = 0.0
++ tempmod = 0.0
++ lintnoi = 0.0
++ vfbsdoff = 0.0
++ lambda = 0.0
++ vtl = 0.0
++ lc = 5.0e-9
++ xn = 3.0
++ rnoia = 0.794
++ rnoib = 0.38
++ tnoia = 7.5e+6
++ tnoib = 7.2e+6
+* BSIM4 - Process Parameters
++ epsrox = 3.9
++ toxe = '1.16e-08*sky130_fd_pr__nfet_20v0__toxe_mult'
++ dtox = 0.0
++ ndep = 1.7e+17
++ nsd = 1.0e+20
++ rshg = 0.1
++ rsh = '1.0*sky130_fd_pr__nfet_20v0__rshn_mult'
+* Threshold Voltage Parameters
++ vth0 = '0.84689 + sky130_fd_pr__nfet_20v0_nvt_iso__vth0_diff - 0.600'
++ k1 = 1.019
++ k2 = '-0.055829 + sky130_fd_pr__nfet_20v0_nvt_iso__k2_diff'
++ k3 = -0.884
++ dvt0 = 0.0
++ dvt1 = 0.53
++ dvt2 = -0.19251
++ dvt0w = 0.16
++ dvt1w = 6.9091e+6
++ dvt2w = -0.036016
++ w0 = 0.0
++ k3b = 0.43
+* NEW BSIM4 Parameters for Level 54
++ phin = 0.0
++ lpe0 = 0.0
++ lpeb = -2.182e-7
++ vbm = -3.0
++ dvtp0 = 0.0
++ dvtp1 = 0.0
+* Mobility Parameters
++ vsat = 2.2883e+5
++ ua = -1.131400e-10
++ ub = 4.1888e-18
++ uc = 7.0353e-11
++ rdsw = 3856.7
++ prwb = 0.36549
++ prwg = 0.002801
++ wr = 1.0
++ u0 = 0.10816
++ a0 = 0.96953
++ keta = -0.18204
++ a1 = 0.37848
++ a2 = 0.54362
++ ags = 0.60228
++ b0 = 3.2933e-8
++ b1 = 0.0
+* BSIM4 - Mobility Parameters
++ eu = 1.67
++ rdswmin = 0.0
++ rdw = 0.0
++ rdwmin = 0.0
++ rsw = 0.0
++ rswmin = 0.0
+* Subthreshold Current Parameters
++ voff = -0.20613
++ nfactor = 0.2786
++ up = 0.0
++ ud = 0.0
++ lp = 1.0
++ tvfbsdoff = 0.0
++ tvoff = 0.0
++ cit = -0.0008
++ cdsc = 0.0
++ cdscb = 0.0
++ cdscd = 0.0
++ eta0 = 0.038662
++ etab = -0.028284
++ dsub = 0.42
+* BSIM4 - Sub-threshold parameters
++ voffl = -4.2579486e-7
++ minv = 0.0
+* Rout Parameters
++ pclm = 0.2
++ pdiblc1 = 0.21098
++ pdiblc2 = 0.0002
++ pdiblcb = -0.26831
++ drout = 0.36075
++ pscbe1 = 4.0572e+9
++ pscbe2 = 1.68e-6
++ pvag = 1.99
++ delta = 0.14671
++ alpha0 = 1.6301e-8
++ alpha1 = 0.0
++ beta0 = 36.96
+* BSIM4 - Rout Parameters
++ fprout = 10.125
++ pdits = 0.0
++ pditsl = 0.0
++ pditsd = 0.0
+* BSIM4 - Gate Induced Drain Leakage Model Parameters
++ agidl = 5.06e-16
++ bgidl = 1.058e+9
++ cgidl = 4000.0
++ egidl = 0.8
+* BSIM4 - Gate Leakage Current Parameters
++ aigbacc = 1.0
++ bigbacc = 0.0
++ cigbacc = 0.0
++ nigbacc = 1.0
++ aigbinv = 0.35
++ bigbinv = 0.03
++ cigbinv = 0.006
++ eigbinv = 1.1
++ nigbinv = 3.0
++ aigc = 0.43
++ bigc = 0.054
++ cigc = 0.075
++ nigc = 1.0
++ aigsd = 0.43
++ bigsd = 0.054
++ cigsd = 0.075
++ dlcig = 0.0
++ poxedge = 1.0
++ pigcd = 1.0
++ ntox = 1.0
++ toxref = 1.16e-8
+* Temperature Effects Parameters
++ kt1 = -0.34636
++ kt2 = -0.042078
++ at = 69440.0
++ ute = -0.67527
++ ua1 = 3.0525e-9
++ ub1 = -1.5515e-18
++ uc1 = -5.9821e-11
++ kt1l = 0.0
++ prt = 0.0
+* BSIM4 - High Speed RF Model Parameters
++ xrcrg1 = 12.0
++ xrcrg2 = 1.0
++ rbpb = 50.0
++ rbpd = 50.0
++ rbps = 50.0
++ rbdb = 50.0
++ rbsb = 50.0
++ gbmin = 1.0e-12
+* BSIM4 - Flicker and Thermal Noise Parameters
++ noia = 2.6e+41
++ noib = 0.0
++ noic = 0.0
++ em = 4.1000000e+7
++ af = 1.0
++ ef = 0.89
++ kf = 0.0
++ ntnoi = 1.0
+* BSIM4 - Layout Dependent Parasitic Model Parameters
++ dmcg = 0.0
++ dmcgt = 0.0
++ dmdg = 0.0
++ xgw = 0.0
++ xgl = 0.0
++ ngcon = 1.0
+* Diode DC IV Parameters
+* BSIM4 - Diode DC IV parameters
++ diomod = 1.0
++ njs = 1.0773
++ jss = 0.000375
++ jsws = 5.84e-11
++ xtis = 0.76
++ bvs = 12.636
++ xjbvs = 1.0
++ ijthsrev = 0.1
++ ijthsfwd = 0.1
+* Diode and FET Capacitance Parameters
++ tpb = 0.001344
++ tpbsw = 0.00099005
++ tpbswg = 0.0
++ tcj = 0.00067434
++ tcjsw = 0.0002493
++ tcjswg = -0.005
++ cgdo = '4.3400e-010*sky130_fd_pr__nfet_20v0__overlap_mult'
++ cgso = '4.3400e-010*sky130_fd_pr__nfet_20v0__overlap_mult'
++ cgbo = 0.0
++ capmod = 2.0
++ xpart = 0.0
++ cgsl = '5e-011*sky130_fd_pr__nfet_20v0__overlap_mult'
++ cgdl = '5e-011*sky130_fd_pr__nfet_20v0__overlap_mult'
++ cf = 0.0
++ clc = 1.0e-7
++ cle = 0.6
++ dlc = '6.5995e-08+sky130_fd_pr__nfet_20v0__dlc_diff'
++ dwc = '0.0+sky130_fd_pr__nfet_20v0__dwc_diff'
++ vfbcv = -1.0
++ acde = 0.4176
++ moin = 15.0
++ noff = 4.0
++ voffcv = -0.4104
++ ngate = 1.0e+23
++ lwc = 0.0
++ llc = 0.0
++ lwlc = 0.0
++ wlc = 0.0
++ wwc = 0.0
++ wwlc = 0.0
+* BSIM4 - FET and Diode capacitance parameters
++ ckappas = 0.6
++ cjs = '0.0008512*sky130_fd_pr__nfet_20v0__ajunction_mult'
++ mjs = 0.295
++ pbs = 0.72468
++ cjsws = '1.5204e-011*sky130_fd_pr__nfet_20v0__pjunction_mult'
++ mjsws = 0.037586
++ pbsws = 0.29067
++ cjswgs = '5.4e-011*sky130_fd_pr__nfet_20v0__pgatejunction_mult*sky130_fd_pr__nfet_20v0__pjunction_mult'
++ mjswgs = '0.78692*sky130_fd_pr__nfet_20v0__mjswgatejunction_mult'
++ pbswgs = '0.54958*sky130_fd_pr__nfet_20v0__pbswgatejunction_mult'
+* Stress Parameters
++ saref = 1.81e-6
++ sbref = 1.81e-6
++ wlod = 0.0
++ kvth0 = 1.1e-8
++ lkvth0 = 0.0
++ wkvth0 = 6.5e-7
++ pkvth0 = 0.0
++ llodvth = 0.0
++ wlodvth = 1.0
++ stk2 = 0.0
++ lodk2 = 1.0
++ lodeta0 = 1.0
++ ku0 = -4.5e-8
++ lku0 = 0.0
++ wku0 = 2.0e-7
++ pku0 = 0.0
++ llodku0 = 0.0
++ wlodku0 = 1.0
++ kvsat = 0.3
++ steta0 = 0.0
++ tku0 = 0.0
+.ends sky130_fd_pr__nfet_20v0_nvt_iso
+*.END
