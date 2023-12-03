@@ -1,0 +1,19 @@
+* Resistor value test
+
+* Include SkyWater sky130 device models
+.lib "../../../models/sky130.lib.spice" tt
+
+* Simple voltage across a modeled device resistor
+V1 0 A DC 1.8
+
+X1 0 A 0 sky130_fd_pr__res_xhigh_po_1p41 l=10
+
+.control
+op lin 0 3.3
+run
+echo resistance
+print V(A)/V1#branch
+quit
+.endc
+
+.end

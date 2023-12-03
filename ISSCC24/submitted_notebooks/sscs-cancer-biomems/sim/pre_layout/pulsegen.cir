@@ -1,0 +1,49 @@
+.subckt inv vdd vss in out
+
+* in = input
+* out = output
+* vdd = positive supply
+* vss = negative supply
+
+xm1 out in vdd vdd sky130_fd_pr__pfet_01v8 l=2.5 w=65
+xm2 out in vss vss sky130_fd_pr__nfet_01v8 l=2.5 w=25
+
+.ends inv
+
+.subckt nand vdd vss in_a in_b out
+
+* in_a = input A
+* in_b = input B
+* out = output
+* vdd = positive supply
+* vss = negative supply
+
+xm1 out in_a vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=25
+xm2 out in_b vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=25
+xm3 out in_a vint vss sky130_fd_pr__nfet_01v8 l=1 w=10
+xm4 vint in_b vss vss sky130_fd_pr__nfet_01v8 l=1 w=10
+
+
+.ends nand
+
+.subckt pulsegen vdd vss in outp outm
+
+* Inverter chain for delay generation
+X1 vdd vss in in1 inv
+X2 vdd vss in1 in2 inv
+X3 vdd vss in2 in3 inv
+X4 vdd vss in3 in4 inv
+X5 vdd vss in4 in5 inv
+X6 vdd vss in5 in6 inv
+X7 vdd vss in6 in7 inv
+X8 vdd vss in7 in8 inv
+
+* NAND gates for generating the (low) pulses on rising/falling edges
+X9 vdd vss in in7 outp_n nand
+X10 vdd vss in1 in8 outm_n nand
+
+* Inverters to generate high pulses
+X11 vdd vss outp_n outp inv
+X12 vdd vss outm_n outm inv
+
+.ends pulsegen

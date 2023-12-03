@@ -1,0 +1,30 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+.subckt  sky130_fd_pr__model__parasitic__rf_diode_pw2dn c0 c1
++ 
+.param  area = -1 perim = -1.0
++ 
++ ra1 = 4.94e+4
++ ra2 = 130.0
++ rp1_diode = 7920.0
++ wl = {sqrt(0.0625*perim*perim-area)}
++ wi = {perim/4+wl}
++ le = {perim/4-wl}
+rdnwdiode_pwell_rf c0     a1  r = {(ra1/area+ra2/(le/wi+wi/le))*(9.82e-01*2-sky130_fd_pr__model__parasitic__diode_pw2dn__ajunction_mult)}
+rp c0    p1 r = {(rp1_diode/perim)*(9.6304e-01*2-sky130_fd_pr__model__parasitic__diode_pw2dn__pjunction_mult)}
+da a1    c1 sky130_fd_pr__model__parasitic__diode_pw2dn_noresistor area = {area}
+dp p1    c1 sky130_fd_pr__model__parasitic__diode_pw2dn_noresistor area = 1.0e-18
+.ends sky130_fd_pr__model__parasitic__rf_diode_pw2dn

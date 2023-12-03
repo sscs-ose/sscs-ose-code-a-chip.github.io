@@ -1,0 +1,30 @@
+.subckt asvd_opamp vss vdd gnd in1 in2 out2
+
+* in1 = inverting input
+* in2 = non-inverting input
+
+* Stage 1 - Differential amplifier
+xm1 net-_m1-pad1_ in1 net-_m1-pad3_ net-_m1-pad3_ sky130_fd_pr__nfet_01v8 l=1 w=1.79
+xm2 out1 in2 net-_m1-pad3_ net-_m1-pad3_ sky130_fd_pr__nfet_01v8 l=1 w=1.79
+xm3 net-_m1-pad1_ net-_m1-pad1_ vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=10
+xm4 out1 net-_m1-pad1_ vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=10
+
+* Current Mirror
+xm5 net-_m1-pad3_ ref vss vss sky130_fd_pr__nfet_01v8 l=1 w=20
+xm6 ref ref vss vss sky130_fd_pr__nfet_01v8 l=1 w=10
+
+* Stage 2 - PMOS Common Source Amplifier
+xm7 out2 out1 vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=62.83
+xm8 out2 ref vss vss sky130_fd_pr__nfet_01v8 l=1 w=62.83
+
+
+* Circuit Bias
+* v1  vdd gnd dc 1
+* v2  vss gnd dc -1
+xR1 vdd ref gnd sky130_fd_pr__res_high_po_0p69 l=100
+
+
+* v3 in1 gnd sine(0 1m 60)
+* v4 in2 gnd sine(0 -1m 60)
+
+.ends
