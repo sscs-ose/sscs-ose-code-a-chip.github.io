@@ -1,5 +1,6 @@
 ## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'24](https://www.isscc.org/information-for-students)
 
+**[List of Accepted Notebooks at ISSCC'24!!](https://github.com/msaligane/sscs-ose-code-a-chip.github.io/blob/main/ISSCC24/README.md)**
 
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and
