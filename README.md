@@ -9,7 +9,7 @@
 - The program is open to anyone (no restrictions). IEEE Solid-State Circuits Society (SSCS) membership is encouraged, but not required. Teaming is encouraged, but each team must identify a single leader who can travel to the Symposium on VLSI from June 16-20, 2024, to receive the award and participate in networking events.  
 - Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. Generating a final layout of your circuit is encouraged but not required.
     - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
-    - Submissions of previous winners: [ISSCC'24](ISSCC24/README.md) [ISSCC'23](ISSCC23/README.md) and [VLSI'23](VLSI23/README.md)
+    - Submissions of previous winners: [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md) and [VLSI'23](VLSI23/README.md)
 - Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
 - A jury will evaluate the submissions and select up to 10 winners.
 - Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can be used to reimburse travel and a portion of your accommodations until the dollar amount is used up.
