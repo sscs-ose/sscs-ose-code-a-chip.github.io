@@ -24,7 +24,7 @@
 
 
 ## Program Schedule
-- February 27, 2024, 8:00 AM Pacific Time: [Zoom meeting link TBD]()
+- February 27, 2024, 8:00 AM Pacific Time: Info Session [Zoom meeting link TBD]()
 - April 3, 2024, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - April 14, 2023: Announcement of winners
 - April 17-21, 2023: Register for conference, obtain letter for visa application (if needed)
