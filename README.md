@@ -18,6 +18,10 @@
 
 ## Program Logistics
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
+    - Fork the source repo https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io to your local repo.
+    - Create a new directory `VLSI24/submitted_notebooks/<my_project_name>` in your local repo.
+    - Add your Jupyter notebook to the directory.
+    - Create a pull request from your local repo to the source repo.
 - Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
 - The winners are expected to attend the conference to be recognized for their awards and to present a poster.
 - Reimbursement will be provided after the conference when air and accommodation receipts are sent to the conference Treasurer.
