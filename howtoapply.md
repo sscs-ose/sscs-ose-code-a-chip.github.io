@@ -1,5 +1,5 @@
 ## How to Apply
-Participants are required to send their [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to this repository by November 26, 2023, 11:59 AM Pacific Time. 
+Participants are required to send their [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to this repository by April 3, 2024, 11:59 AM Pacific Time. 
 
 **_Note_:** Please do not make any modifications to your Pull Request after the above deadline. All PRs will be merged after the deadline is passed.
 
@@ -8,8 +8,8 @@ The following Notebooks could be used as a reference:
   - An [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane)
   - More silicon Notebooks hosted by [CHIPS Alliance](https://github.com/chipsalliance/silicon-notebooks)
 
-Pull Requests are expected to be placed in the [ISSCC24](ISSCC24). To help with the review process, please follow the guidelines below:
-  - Create a **subfolder** inside [ISSCC24](ISSCC24) which includes Notebook with your project name and any files or README that are needed.
+Pull Requests are expected to be placed in the [VLSI24](VLSI24). To help with the review process, please follow the guidelines below:
+  - Create a **subfolder** inside [VLSI24](VLSI24) which includes Notebook with your project name and any files or README that are needed.
   - Spell out your team members at the top of your Notebook.
   - Add References to your work which includes Notebooks you have reused.
   - Feel free to open GitHub issues if you have any questions regarding this process.
