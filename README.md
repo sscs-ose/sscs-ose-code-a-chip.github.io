@@ -29,9 +29,9 @@
 
 ## Program Schedule
 - February 27, 2024, 8:00 AM Pacific Time: Info Session [Zoom meeting link](https://us06web.zoom.us/j/84811963095?pwd=11Cqzcb4T5bPoQeLhHQxqtQ46cFz6k.1 )
-- April 3, 2024, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- April ~~3~~ 15, 2024, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - April 14, 2024: Announcement of winners
-- April 17-21, 2024: Register for conference, obtain letter for visa application (if needed)
+- April 17-21, 2024: Register for the conference, and obtain a letter for visa application (if needed)
 - June 16-20, 2024: Attend conference
 
 ## [FAQ](FAQ.md)
