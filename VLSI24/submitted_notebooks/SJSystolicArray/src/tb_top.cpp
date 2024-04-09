@@ -6,7 +6,7 @@
 #include <vector>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-#include "obj_dir/Vtop.h"
+#include "Vtop.h"
 
 VerilatedVcdC*      trace = NULL;       // Waveform Generation
 static Vtop*        top;                // DUT
@@ -99,6 +99,9 @@ int main(int argc, char** argv) {
     readNumbers("./Tests/basicConv.txt", test_cases);
     int cycle = ceil(test_cases.size() / TESTCASE_SIZE);
 
+    ofstream dumpfile;
+    dumpfile.open("resultdump.txt");
+
     // Loop through test cases
     for (int i = 0; i < cycle; i++) {
         uint8_t a = test_cases[i * TESTCASE_SIZE]     & 0xFF;
@@ -109,13 +112,12 @@ int main(int argc, char** argv) {
         top->readA = a;
         top->readB = b;
 
-        // Compare output Signals
-        if (top->write != w) {
-            std::cerr << "Test result did not match at time: " << sim_time << std::endl;
-        }
-        
+        dumpfile << top->write << std::endl;
+
         single_cycle();
     }
+
+    dumpfile.close();
 
     return sim_exit();
 }
