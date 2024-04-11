@@ -20,11 +20,11 @@ state_t state, nextState;
 logic [4:0] PEReadNaive;
 
 logic [2:0] countPE, nextCountPE;
-logic [4:0] countRow, nextCountRow;
-logic [4:0] countTile, nextCountTile;
+logic [7:0] countRow, nextCountRow;
+logic [6:0] countTile, nextCountTile;
 
-logic [4:0] rowLen, nextRowLen;
-logic [4:0] colTiles, nextColTiles;
+logic [7:0] rowLen, nextRowLen;
+logic [6:0] colTiles, nextColTiles;
 
 always_ff @(posedge clk, negedge nRST) begin
     if(nRST == '0) begin
@@ -75,8 +75,8 @@ always_comb begin
             nextCountRow = '0;
             nextCountTile = '0;
             if(readA[7]) begin
-                nextRowLen = readA[4:0];
-                nextColTiles = readB[4:0];
+                nextRowLen = {readA[6:0], readB[7]};
+                nextColTiles = readB[6:0];
                 nextCountPE = 3'd1;
                 nextState = loadInit;
             end
@@ -87,17 +87,18 @@ always_comb begin
             nextCountPE = countPE + 3'd1;
             if(countPE == 3'd4) begin
                 nextCountPE = 3'd1;
-                nextCountRow = countRow + 5'd1;
+                nextCountRow = countRow + 8'd1;
             end
-            if(countRow == 5'd2) begin
+            if(countRow == 8'd2) begin
                 PEStart = PEReadNaive;
             end
-            if(countRow == 5'd3) begin
+            if(countRow == 8'd3) begin
                 nextCountPE = 3'd1;
                 PEStart[4] = 1'b1;
                 filtRead = '0;
                 PERead = '0;
                 nextState = loadSingle;
+                nextCountRow = 8'd1;
             end
         end
         loadSingle: begin
@@ -106,10 +107,10 @@ always_comb begin
             nextCountPE = countPE + 3'd1;
             if(countPE == 3'd5) begin
                 nextCountPE = 3'd1;
-                nextCountRow = countRow + 5'd1;
-                if(nextCountRow == rowLen) begin
+                nextCountRow = countRow + 8'd1;
+                if(countRow == rowLen) begin
                     nextState = reload;
-                    nextCountTile = countTile + 5'd1;
+                    nextCountTile = countTile + 7'd1;
                     nextCountRow = '0;
                 end
             end
@@ -119,17 +120,18 @@ always_comb begin
             nextCountPE = countPE + 3'd1;
             if(countPE == 3'd4) begin
                 nextCountPE = 3'd1;
-                nextCountRow = countRow + 5'd1;
+                nextCountRow = countRow + 8'd1;
             end
-            if(countRow == 5'd2) begin
-                    PEStart = PEReadNaive;
+            if(countRow == 8'd2) begin
+                PEStart = PEReadNaive;
             end
-            if(countRow == 5'd3) begin
-                    nextCountPE = 3'd1;
-                    PEStart[4] = 1'b1;
-                    filtRead = '0;
-                    PERead = '0;
-                    nextState = loadSingle;
+            if(countRow == 8'd3) begin
+                nextCountPE = 3'd1;
+                PEStart[4] = 1'b1;
+                filtRead = '0;
+                PERead = '0;
+                nextState = loadSingle;
+                nextCountRow = 8'd1;
             end
             if(countTile == colTiles) begin
                 nextState = idle;
