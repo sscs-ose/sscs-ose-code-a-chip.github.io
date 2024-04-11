@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 
     // Read in test cases
     std::vector<int> test_cases;
-    readNumbers("basicConv.txt", test_cases);
+    readNumbers("convInput.txt", test_cases);
     int cycle = ceil(test_cases.size() / TESTCASE_SIZE);
 
     std::ofstream dumpfile;
