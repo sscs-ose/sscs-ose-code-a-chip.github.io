@@ -63,7 +63,7 @@ for seq in torch.tensor(load_seq_y):
 f.close()
 
 os.system("cp seq_x.txt /content/convInput.txt")
-os.system("/content/obj_dir/Vtop > /content/SystolicArray/src/python/seq_x_SA1.txt")
+os.system("/content/obj_dir/Vtop > /content/SystolicArray/src/python/seq_x_SA.txt")
 
 # Get the Systolic Array result
 result_x_seq_sa = []
@@ -81,7 +81,7 @@ for seq, ele in zip(load_seq_idx, result_x_seq_sa):
         result_x_sa[seq[2][1], seq[2][2]] = ele[2]
 
 os.system("cp seq_y.txt /content/convInput.txt")
-os.system("/content/obj_dir/Vtop > /content/SystolicArray/src/python/seq_y_SA1.txt")
+os.system("/content/obj_dir/Vtop > /content/SystolicArray/src/python/seq_y_SA.txt")
 #os.system("rm /content/convInput.txt")
 
 result_y_seq_sa = []
