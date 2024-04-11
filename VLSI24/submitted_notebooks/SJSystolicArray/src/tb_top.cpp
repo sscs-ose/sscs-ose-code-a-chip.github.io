@@ -96,11 +96,11 @@ int main(int argc, char** argv) {
 
     // Read in test cases
     std::vector<int> test_cases;
-    readNumbers("convInput.txt", test_cases);
+    readNumbers("/content/convInput.txt", test_cases);
     int cycle = ceil(test_cases.size() / TESTCASE_SIZE);
 
     std::ofstream dumpfile;
-    dumpfile.open("resultdump.txt");
+    //dumpfile.open("resultdump.txt");
 
     // Loop through test cases
     for (int i = 0; i < cycle; i++) {
@@ -112,12 +112,12 @@ int main(int argc, char** argv) {
         top->readA = a;
         top->readB = b;
 
-        dumpfile << +top->write << std::endl;
+        std::cout << "0,0," << +top->write << std::endl;
 
         single_cycle();
     }
 
-    dumpfile.close();
+    //dumpfile.close();
 
     return sim_exit();
 }

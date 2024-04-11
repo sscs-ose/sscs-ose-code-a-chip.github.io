@@ -5,6 +5,8 @@ from canny import CannyFilter
 from seq_generator import (gen_load_seq_idx, gen_load_seq, binary, fp32_to_fxps86binary, 
                            fp32_to_fxps86, add_result_seq, gen_load_result_seq)
 
+import os
+
 filter_size = 3
 pad = filter_size // 2
 image_size = 256
@@ -41,6 +43,7 @@ result_x = torch.load('soble_result_x_0.pt').squeeze()//2
 result_x = torch.clamp(result_x, min=-127, max=127)
 load_seq_x = gen_load_result_seq(ifmap, filter, psum, result_x, load_seq_idx)
 f = open("seq_x.txt", "w")
+f.write("255,214,0\n")
 for seq in torch.tensor(load_seq_x):
     print_seq = ','.join([str(x) for x in seq.to(dtype=torch.uint8).tolist()])
     f.write(f'{print_seq}\n')
@@ -53,10 +56,14 @@ result_y = torch.load('soble_result_y_0.pt').squeeze()//2
 result_y = torch.clamp(result_y, min=-127, max=127)
 load_seq_y = gen_load_result_seq(ifmap, filter, psum, result_y, load_seq_idx)
 f = open("seq_y.txt", "w")
+f.write("255,214,0\n")
 for seq in torch.tensor(load_seq_y):
     print_seq = ','.join([str(x) for x in seq.to(dtype=torch.uint8).tolist()])
     f.write(f'{print_seq}\n')
 f.close()
+
+os.system("cp seq_x.txt /content/convInput.txt")
+os.system("/content/obj_dir/Vtop > /content/SystolicArray/src/python/seq_x_SA1.txt")
 
 # Get the Systolic Array result
 result_x_seq_sa = []
@@ -72,6 +79,10 @@ result_x_sa = torch.zeros(result_x.shape, dtype=torch.int8)
 for seq, ele in zip(load_seq_idx, result_x_seq_sa):
     if seq[2][0] != -1:
         result_x_sa[seq[2][1], seq[2][2]] = ele[2]
+
+os.system("cp seq_y.txt /content/convInput.txt")
+os.system("/content/obj_dir/Vtop > /content/SystolicArray/src/python/seq_y_SA1.txt")
+#os.system("rm /content/convInput.txt")
 
 result_y_seq_sa = []
 with open("seq_y_SA.txt", "r") as filestream:
