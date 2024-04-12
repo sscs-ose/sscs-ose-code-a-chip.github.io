@@ -6,12 +6,28 @@ from seq_generator import (gen_load_seq_idx, gen_load_seq, binary, fp32_to_fxps8
                            fp32_to_fxps86, add_result_seq, gen_load_result_seq)
 
 import os
+import sys
+
+if len(sys.argv) != 2:
+    print("Usage: python3 full_flow.py <filename>\n filename is either \"rubikscube\" or \"userinput\"")
+    sys.exit(1)
+filenamearg = sys.argv[1].strip()
+if filenamearg == "rubikscube":
+    name = 'rubiks_cube'
+elif filenamearg == "userinput":
+    name = 'uploadedimage'
+else:
+  print("Usage: python3 full_flow.py <filename>\n filename is either \"rubikscube\" or \"userinput\"")
+filename = name + '.jpg'
+edge_filename = 'edge_' + name + '.jpg'
+edge_sa_filename = 'edge_' + name + '_sa.jpg'
+
 
 filter_size = 3
 pad = filter_size // 2
 image_size = 256
 psum_size = int(image_size - 2*((filter_size-1)/2) + 2*pad)
-filename = 'rubiks_cube.jpg'
+
 
 # Read image, resize and convert to grayscale
 image = cv2.imread(filename) 
@@ -27,7 +43,7 @@ model = CannyFilter()
 grad_x, grad_y, grad_magnitude, grad_orientation, thin_edges = model(img_tensor.float())
 
 # Save image results
-cv2.imwrite('edge_rubiks_cube.jpg', grad_magnitude[0].permute(1, 2, 0).detach().numpy())
+cv2.imwrite(edge_filename, grad_magnitude[0].permute(1, 2, 0).detach().numpy())
 
 # Generate load sequence for Systolic Array
 ifmap = torch.load('img_0.pt').squeeze()//2
@@ -107,4 +123,4 @@ grad_x, grad_y, grad_magnitude, grad_orientation, thin_edges = model(img_tensor.
                                                                      use_sa=True,
                                                                      grad_x_sa=result_x_sa.unsqueeze(0).unsqueeze(0)*2,
                                                                      grad_y_sa=result_y_sa.unsqueeze(0).unsqueeze(0)*2)
-cv2.imwrite('edge_rubiks_cube_sa.jpg', grad_magnitude[0].permute(1, 2, 0).detach().numpy())
+cv2.imwrite(edge_sa_filename, grad_magnitude[0].permute(1, 2, 0).detach().numpy())
