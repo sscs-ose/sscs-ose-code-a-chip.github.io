@@ -100,7 +100,7 @@ for seq, ele in zip(load_seq_idx, result_y_seq_sa):
 
 # Verify Systolic Array result
 compare = result_x_sa.eq(result_x)
-print(f'Systolic Array Result Correct: {torch.all(compare)}')
+# print(f'Systolic Array Result Correct: {torch.all(compare)}')
 
 # Plot Systolic Array result
 grad_x, grad_y, grad_magnitude, grad_orientation, thin_edges = model(img_tensor.float(),

@@ -147,8 +147,8 @@ class CannyFilter(nn.Module):
                 write_to_pt_file(img[:, c:c+1], f'img_{c}.pt')
                 write_to_pt_file(soble_result_x, f'soble_result_x_{c}.pt')
                 write_to_pt_file(soble_result_y, f'soble_result_y_{c}.pt')
-            write_to_pt_file(self.sobel_filter_x.weight, f'soble_filter_x_weight.pt', print_data=True)
-            write_to_pt_file(self.sobel_filter_y.weight, f'soble_filter_y_weight.pt', print_data=True)
+            write_to_pt_file(self.sobel_filter_x.weight, f'soble_filter_x_weight.pt')
+            write_to_pt_file(self.sobel_filter_y.weight, f'soble_filter_y_weight.pt')
 
         # thick edges
         grad_x, grad_y = grad_x / C, grad_y / C
