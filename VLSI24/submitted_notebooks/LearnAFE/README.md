@@ -119,8 +119,10 @@ _background_noise_/white_noise.wav
 
 
 ##  License
-This project is licensed under the MIT License. See LICENSE for more details.
+This project is licensed under the MIT License. See LICENSE for more details.<br />
+Additionally the first version of this work has been accepted for publication in DAC. The following citation can be modified once the proceeding is made available.<br />
+J. Hu, Z. Zhang, C. S. Leow, W. L. Goh, and Y. Gao, “Late Breaking Results: Circuit-Algorithm Co-design for Learnable Audio Analog Front-End,” in 61st ACM/IEEE Design Automation Conf. (DAC), accepted, 2024.
 
 
 ##  Acknowledgement
-This work was supported by the Agency for Science, Technology and Research (A*STAR), Singapore under the Nanosystems at the Edge programme, grant No. A18A1b0055. We thank Professor Zhengya Zhang for his insightful comments to strengthen this work.
+This work was supported by the Agency for Science, Technology and Research (A*STAR), Singapore under the Nanosystems at the Edge programme, grant No. A18A1b0055. We thank Professor Zhengya Zhang for his insightful comments.
