@@ -15,6 +15,7 @@ There is also a Python bit-true algorithm model for the Verilog project: https:/
 Here are some quick pieces to get you some basic ideas about the project.
 
 - [[The main features and innovative points](#The-main-features-and-innovative-points)]
+- [[The main references contributing to this project](#The-main-references-contributing-to-this-project)]
 - [[The main contents of the Python notebook](#The-main-contents-of-the-Python-notebook)]
 - [[The top architecture and the BTLE chip refers to the LE controller](#The-top-architecture-and-the-BTLE-chip-refers-to-the-LE-controller)]
 - [[The LE controller principle and the scope of this project](#The-LE-controller-principle-and-the-scope-of-this-project)]
@@ -41,6 +42,19 @@ Here are some quick pieces to get you some basic ideas about the project.
   - Support non-standard frequency deviation
 - 16MHz main clock speed. 8x oversampling in both transmitter and receiver
   - oversampling rate is customizable in design time
+
+## The main references contributing to this project
+
+Link|Role
+----|----
+https://www.bluetooth.com/specifications/specs/core-specification-5-3/|Core Specification 5.3 is the main reference. Mainly PartA&B of Vol6: Low Energy Controller
+https://github.com/JiaoXianjun/BTLE|The starting point of this project. Created ~10 years ago by me. The new design files are in BTLE/python and BTLE/verilog directories
+https://colab.research.google.com/github/efabless/openlane2/blob/main/notebook.ipynb|The OpenLane2 work flow I learnt/copied
+https://github.com/halftop/Interface-Protocol-in-Verilog|general_uart is used for HCI (Host Controller Interface)
+https://github.com/KennethWilke/sv-dpram|Dual port ram (modified in this project) IP
+https://public.ccsds.org/Pubs/413x0g3e1.pdf|Figure 3-3: GMSK Using a Quadrature Modulator -- The GFSK modulation method adopted in this project
+https://research.utwente.nl/en/publications/bluetooth-demodulation-algorithms-and-their-performance|Fig. 6. Phase-shift discriminator -- The GFSK demodulation method adopted in this project
+
 
 ## The main contents of the Python notebook
 - **BTLE chip architecture**
