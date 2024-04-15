@@ -7,7 +7,7 @@
 
 Automated generation of a PMIC for SKY130
 
-> :warning: Repository under work in progress, not ready for normal usage
+> :warning: Suggested usage for this version is via Google Colab, docker usage may have broken paths.
 
 ## Usage
 
