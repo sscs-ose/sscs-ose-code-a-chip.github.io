@@ -2,8 +2,9 @@
 
 
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
- 1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and
- 2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to IEEE SSCS conferences and interact with the leading-edge chip design community.
+ 1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows,
+ 2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to IEEE SSCS conferences and interact with the leading-edge chip design community, and
+ 3. <span style='color: skyblue;'>Broaden educational value and accessibility within the open-source chip design community, fostering a more inclusive environment for dissemination, learning, and innovation.</span>
 
 ## Program Rules
 - The program is open to anyone (no restrictions). IEEE Solid-State Circuits Society (SSCS) membership is encouraged, but not required. Teaming is encouraged, but each team must identify a single leader who can travel to the Symposium on VLSI from June 16-20, 2024, to receive the award and participate in networking events.  
@@ -11,10 +12,16 @@
     - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
     - Submissions of previous winners: [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md) and [VLSI'23](VLSI23/README.md)
 - Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
-- A jury will evaluate the submissions and select up to 10 winners.
-- Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can be used to reimburse travel and a portion of your accommodations until the dollar amount is used up.
-
 - Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
+- <span style='color: skyblue;'>❗️Starting from the ISSCC 2025 grant, the submission categories and criteria for selecting finalists will be expanded to include creative educational purposes of chip design. This can include:
+  - innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
+  - exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).</span>
+
+## Evaluation
+- A jury will evaluate the submissions and select up to 10 winners.
+
+## Grant Amount
+- Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can be used to reimburse travel and a portion of your accommodations until the dollar amount is used up.
 
 ## Program Logistics
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
