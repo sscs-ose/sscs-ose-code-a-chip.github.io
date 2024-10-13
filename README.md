@@ -26,7 +26,7 @@
 ## Program Logistics
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
     - Fork the source repo https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io to your local repo.
-    - Create a new directory `ISSC25/submitted_notebooks/<my_project_name>` in your local repo.
+    - Create a new directory `ISSCC25/submitted_notebooks/<my_project_name>` in your local repo.
     - Add your Jupyter notebook to the directory.
     - Create a pull request from your local repo to the source repo.
 - Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
@@ -35,7 +35,6 @@
 
 
 ## Program Schedule
-- October 24, 2025, 8:00 AM Pacific Time: Info Session [Zoom meeting link TBD](https://us06web.zoom.us/j/84811963095?pwd=11Cqzcb4T5bPoQeLhHQxqtQ46cFz6k.1 )
 - December 5, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - December 12, 2025: Announcement of [winners](ISSCC25/README.md)
 - December 12-30, 2025: Register for the conference, and obtain a letter for visa application (if needed)
