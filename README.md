@@ -39,7 +39,7 @@
 - December 5, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - December 12, 2025: Announcement of [winners](ISSCC25/README.md)
 - December 12-30, 2025: Register for the conference, and obtain a letter for visa application (if needed)
-- February 16-20, 2025: Attend conference
+- February 16-20, 2026: Attend conference
 
 ## [FAQ](FAQ.md)
 
