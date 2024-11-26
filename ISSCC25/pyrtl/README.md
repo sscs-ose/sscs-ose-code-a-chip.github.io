@@ -3,7 +3,7 @@
 In this introductory tutorial, we will discuss <a href = "https://en.wikipedia.org/wiki/Hardware_description_language">Hardware Description Languages</a>, and the <a href = "https://pyrtl.readthedocs.io/en/latest">PyRTL</a> framework, in order to gain a base understanding of how to perform Logic Design hardware in computers.
 
 
-These notebooks and guides were initially developed in the Fall 2022 Semester of <a href ="https://canvas.nd.edu/courses/53612/pages/lecture-notes-and-schedule">CSE 10001 - Principles of Computing for Business Majors</a> at the University of Notre Dame by Professor <a href ="https://engineering.nd.edu/faculty/matthew-morrison">Matthew Morrison</a>.\n"
+These notebooks and guides were initially developed in the Fall 2022 Semester of <a href ="https://canvas.nd.edu/courses/53612/pages/lecture-notes-and-schedule">CSE 10001 - Principles of Computing for Business Majors</a> at the University of Notre Dame by Professor <a href ="https://engineering.nd.edu/faculty/matthew-morrison">Matthew Morrison</a>."
 
 These notebooks were implemented in a two-week sequence to help business majors learn the importance of logic design in the context of the impact of computing hardware on the economy, especially with the passage of the CHIPS Act.
 
@@ -34,6 +34,7 @@ Prior to the Logic Design sequence, the students covered topics including:
     <li>Images and Image Filters</li>
     <li>Intellectual Property</li>
     <li>The Internet and Networks</li>
+</ul>
 
 ## Outline
 
