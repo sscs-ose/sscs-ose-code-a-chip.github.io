@@ -10,13 +10,13 @@ These notebooks were implemented in a two-week sequence to help business majors 
 The objective of introducing these topics to Business majors was presented to the students as follows:
 > The objective for this reading assignment and final project is to <b>position you as an informed leader in the semiconductor space, so you can productively manage and lead hardware desginers on your team while simultaneously effectively conveying your challenges, achievements, and vision to investors</b>."
 
-## Prerequisites
+## Prerequisites for Completion
 
-The students had completed 10 weeks of Python programming using Jupyter Notebooks.\n
-
-The full course Lecture Notes and Schedule may be found at the following link: https://canvas.nd.edu/courses/53612/pages/lecture-notes-and-schedule"
+The students had completed 10 weeks of Python programming using Jupyter Notebooks.
 
 The introductory directions for installing all the appropriate tools in Jupyter for the class may be found here at the beginning of the first homework assignment: <a href = "https://canvas.nd.edu/courses/91978/pages/homework-01-hardware-programming">Homework 01 - Hardware, Programming</a>
+
+The full course Lecture Notes and Schedule may be found at the following link: https://canvas.nd.edu/courses/53612/pages/lecture-notes-and-schedule"
 
 Prior to the Logic Design sequence, the students covered topics including:
 <ul>
