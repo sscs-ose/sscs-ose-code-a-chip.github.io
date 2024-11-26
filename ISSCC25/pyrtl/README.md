@@ -1,26 +1,15 @@
-{
- "cells": [
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "# Introduction to Logic Design using PyRTL"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "In this introductory tutorial, we will discuss <a href = \"https://en.wikipedia.org/wiki/Hardware_description_language\">Hardware Description Languages</a>, and the <a href = \"https://pyrtl.readthedocs.io/en/latest/\">PyRTL</a> framework, in order to gain a base understanding of how to perform Logic Design hardware in computers.\n",
-    "\n",
-    "These notebooks and guides were initially developed in the Fall 2022 Semester of <a href = \"https://canvas.nd.edu/courses/53612/pages/lecture-notes-and-schedule\">CSE 10001 - Principles of Computing for Business Majors</a> at the University of Notre Dame by Professor <a href = \"https://engineering.nd.edu/faculty/matthew-morrison/\">Matthew Morrison</a>.\n",
-    "\n",
-    "These notebooks were implemented in a two-week sequence to help business majors learn the importance of logic design in the context of the impact of computing hardware on the economy, especially with the passage of the CHIPS Act.\n",
-    "\n",
-    "The objective of introducing these topics to Business majors was presented to the students as follows:\n",
-    "> The objective for this reading assignment and final project is to <b>position you as an informed leader in the semiconductor space, so you can productively manage and lead hardware desginers on your team while simultaneously effectively conveying your challenges, achievements, and vision to investors</b>."
-   ]
-  },
+# Introduction to Logic Design using PyRTL"
+
+In this introductory tutorial, we will discuss <a href = \"https://en.wikipedia.org/wiki/Hardware_description_language\">Hardware Description Languages</a>, and the <a href = \"https://pyrtl.readthedocs.io/en/latest/\">PyRTL</a> framework, in order to gain a base understanding of how to perform Logic Design hardware in computers.
+
+
+These notebooks and guides were initially developed in the Fall 2022 Semester of <a href ="https://canvas.nd.edu/courses/53612/pages/lecture-notes-and-schedule\">CSE 10001 - Principles of Computing for Business Majors</a> at the University of Notre Dame by Professor <a href ="https://engineering.nd.edu/faculty/matthew-morrison/\">Matthew Morrison</a>.\n"
+
+These notebooks were implemented in a two-week sequence to help business majors learn the importance of logic design in the context of the impact of computing hardware on the economy, especially with the passage of the CHIPS Act.
+
+The objective of introducing these topics to Business majors was presented to the students as follows:
+> The objective for this reading assignment and final project is to <b>position you as an informed leader in the semiconductor space, so you can productively manage and lead hardware desginers on your team while simultaneously effectively conveying your challenges, achievements, and vision to investors</b>."
+
   {
    "cell_type": "markdown",
    "metadata": {},
