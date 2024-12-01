@@ -1,0 +1,41 @@
+** sch_path: /home/sscspico/test_tools/coc_analog_vibes/ISSCC25/submitted_notebooks/analog_vibes/sim_pex/runs/RUN_2024-12-01_16-14-17/parameters/slew_params/run_16/tb_slew_pex.sch
+**.subckt tb_slew_pex
+V0 AVSS GND 0
+V1 AVDD AVSS 1.8
+I1 AVDD IBIAS1_10U 9.999999999999999e-06
+C1 VOUT AVSS 8e-11 m=1
+E1 INP IPCM DIFFIN AVSS 0.5
+E3 INM IPCM DIFFIN AVSS -0.5
+V4 IPCM AVSS 0.9
+V5 DIFFIN AVSS pulse(-1.8 1.8 50us 100ns 100ns 50us 100us)
+I2 AVDD IBIAS2_10U 9.999999999999999e-06
+x1 AVSS AVDD INM INP VOUT IBIAS2_10U IBIAS1_10U ota_pex
+**** begin user architecture code
+
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/corners/tt.spice
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical.spice
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/corners/tt/specialized_cells.spice
+
+
+.control
+tran 10n 150u
+let rise_slew = maximum(deriv(v(VOUT)))
+let fall_slew = minimum(deriv(v(VOUT)))*-1
+echo $&rise_slew $&fall_slew > /home/sscspico/test_tools/coc_analog_vibes/ISSCC25/submitted_notebooks/analog_vibes/sim_pex/runs/RUN_2024-12-01_16-14-17/parameters/slew_params/run_16/tb_slew_pex_16.data
+quit
+.endc
+
+
+.temp 27
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  xschem/ota_pex.sym # of pins=7
+** sym_path: /home/sscspico/test_tools/coc_analog_vibes/ISSCC25/submitted_notebooks/analog_vibes/sim_pex/xschem/ota_pex.sym
+.include /home/sscspico/test_tools/coc_analog_vibes/ISSCC25/submitted_notebooks/analog_vibes/sim_pex/xschem/ota_pex.spice
+.GLOBAL GND
+.end
