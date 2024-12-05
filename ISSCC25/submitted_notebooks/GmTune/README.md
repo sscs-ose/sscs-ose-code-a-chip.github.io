@@ -6,11 +6,8 @@ This repository contains code for AI-assisted tunable transconductor design and 
 1. [Structure](#structure)
 2. [Getting Started](#getting-started)
 3. [Customization](#customization)
-4. [Architecture](#architecture)
-5. [Results](#results)
-6. [Updates](#updates)
-7. [License](#license)
-8. [Acknowledgement](#acknowledgement)
+4. [License](#license)
+5. [Acknowledgement](#acknowledgement)
 
 
 ##  Structure
