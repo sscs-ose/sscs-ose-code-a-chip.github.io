@@ -1,0 +1,67 @@
+--- a/MUMPS/examples/c_example.c	2011-05-10 08:56:40.000000000 -0400
++++ MUMPS/examples/c_example.c	2016-11-25 05:20:40.562687719 -0500
+@@ -10,7 +10,11 @@
+  * Solution is [1 2]^T */
+ #include <stdio.h>
+ #include <string.h>
++#ifdef MPI
+ #include "mpi.h"
++#else
++#include "mumps_mpi.h"
++#endif
+ #include "dmumps_c.h"
+ #define JOB_INIT -1
+ #define JOB_END -2
+--- a/MUMPS/libseq/mpic.c	2011-05-10 08:56:39.000000000 -0400
++++ MUMPS/libseq/mpic.c	2016-11-25 05:17:47.318664538 -0500
+@@ -47,7 +47,7 @@
+  *   systems. Parallel Computing Vol 32 (2), pp 136-156 (2006).
+  *
+  */
+-#include <mpi.h>
++#include "mumps_mpi.h"
+ int MPI_Init(int *pargc, char ***pargv)
+ {
+   return 0;
+--- a/MUMPS/src/mumps_orderings.c	2011-05-10 08:56:41.000000000 -0400
++++ MUMPS/src/mumps_orderings.c	2016-11-25 05:22:56.511565349 -0500
+@@ -347,7 +347,12 @@
+ }
+ #endif /* scotch */
+ #if defined(ptscotch)
+-/*#include "mpi.h"
++/*
++#ifdef MPI
++#include "mpi.h"
++#else
++#include "mumps_mpi.h"
++#endif
+ #include <stdio.h>
+ #include "ptscotch.h"
+ int mumps_dgraphinit( SCOTCH_Dgraph *, MPI_Fint *, MPI_Fint *);
+--- a/MUMPS/src/mumps_orderings.h	2011-05-10 08:56:41.000000000 -0400
++++ MUMPS/src/mumps_orderings.h	2016-11-25 05:24:10.333871363 -0500
+@@ -86,7 +86,11 @@
+               int * const        ncmpa );
+ #endif /*scotch or ptscotch*/
+ #if defined(ptscotch)
++#ifdef MPI
+ #include "mpi.h"
++#else
++#include "mumps_mpi.h"
++#endif
+ #include <stdio.h>
+ #include "ptscotch.h"
+ int mumps_dgraphinit( SCOTCH_Dgraph *, MPI_Fint *, MPI_Fint *);
+@@ -96,7 +100,11 @@
+ MUMPS_DGRAPHINIT(SCOTCH_Dgraph *graphptr, MPI_Fint *comm, MPI_Fint *ierr);
+ #endif /*ptscotch*/
+ #if defined(parmetis)
++#ifdef MPI
+ #include "mpi.h"
++#else
++#include "mumps_mpi.h"
++#endif
+ #include "parmetis.h"
+ void mumps_parmetis(int *first,      int *vertloctab, 
+                    int *edgeloctab, int *numflag, 

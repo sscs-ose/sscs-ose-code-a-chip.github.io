@@ -1,0 +1,277 @@
+SYMPHONY Version 3.0 README
+
+Welcome to SYMPHONY. SYMPHONY is now distributed under the Common Public
+License and is freely redistributable. However, it is vital to the survival
+of projects such as this one that we be able to justify our existence through
+usage statistics. Therefore, we ask that you become a registered user of this
+software if you have not already. Registration is free, but helps us maintain
+our funding. Please visit SYMPHONY's registration page at
+http://branchandcut.org/SYMPHONY/license.htm to receive an official copy of
+the distribution. All source code and documentation is Copyright 2000-2002 by
+Ted Ralphs. This README may be distributed freely.
+
+DOCUMENTATION
+
+Full documentation comes with your distribution in the directory
+SYMPHONY-3.0/Doc and can also be downloaded at
+ftp://branchandcut.org/pub/reference/. There is a user's guide
+(SYMPHONY-3.0-Manual.pdf) that should be read prior to developing an
+application.
+
+WHAT'S NEW
+
+1. An interface to the LP solver OSL is now included. This interface is a beta
+version, but has performed properly in initial testing.
+
+2. A few small bugs were fixed.
+
+3. Added support for ccmalloc to the Makefile.
+
+4. Added support for starting up the drawgraph process on a specific machine.
+
+5. Added support for new distance types in the VRP application.
+
+6. Added ROOT_NODE_ONLY compiler directive that directs the solver to process
+only the root node of the branch and bound tree. This is useful for research
+purposes when one wants to test the change in lower bound in the root node
+after the addition of some cutting plane procedures.
+
+6. Added "deletable" field to the data structure for cuts. This field allows
+the user to specify that certain cuts should never be removed after being
+added. It is set to TRUE by default which maintains the legacy behavior.
+
+7. Added support for compiling with MS Visual Studio 6.0.
+
+CHANGES TO THE USER INTERFACE
+
+See item #6 above.
+
+******************************************************************************
+*        COMPILING THE SAMPLE APPLICATION (UNIX Operating Systems)           *
+******************************************************************************
+
+Here is a sketch outline of how to get started with SYMPHONY in Unix. These
+instructions will lead you through the steps required to compile the sample
+application, a VRP and TSP solver. For information on developing your own
+applications, please see the user's manual. Because SYMPHONY is intended to
+run over nonhomogeneous networks of workstations, installation is not fully
+automated, but requires the user to make minor edits to the Makefile.  With
+this setup, compilation for multiple architectures and configurations can be
+done in a single directory without reconfiguring or "cleaning". This is
+convenient on nonhomogeneous networks, but it means that you might need to
+know a little about your computing environment in order to make SYMPHONY
+compile. For the casual user, this is limited to editing providing some path
+names. There may be some complaints from the compiler because of missing
+function prototypes, etc.
+
+For more information about how to use the SYMPHONY VRP solver, see the file
+SYMPHONY-3.0/Vrp/README. 
+
+GETTING STARTED
+
+1. Download the file SYMPHONY-3.0.tgz.
+
+2. Unpack the distribution with "tar -xzf SYMPHONY-3.0.tgz". This will
+create a subdirectory called SYMPHONY-3.0/ containing the distribution.
+
+3. Edit the the Makefile (SYMPHONY-3.0/Makefile) to reflect your
+environment. Only minor edits should be required. An explanation of what has
+to be set is contained in the comments in the Makefile.
+
+COMPILING THE SEQUENTIAL VERSION
+
+1. Type "make" in the SYMPHONY root directory. This will first make the
+SYMPHONY library (sequential version). After making the SYMPHONY library, make
+will compile the user code into a separate library and link the executable for
+the sample application, a vehicle routing and traveling salesman problem
+solver. The name of the executable will be
+"SYMPHONY-3.0/Vrp/bin.$(ARCH)/master_tm_lp_cg_cp", indicating that all
+modules are contained in a single executable. The makefile must be modified to
+enable parallel execution of the code.
+
+2. After this step is completed, you are free to type "make clean" and/or
+delete the directories SYMPHONY-3.0/obj.* and SYMPHONY-3.0/dep.* if you
+want to save disk space. You should only have to remake the SYMPHONY library
+if you change something in SYMPHONY's internal files.
+
+3. To test the sample program, a sample data file is included with the
+distribution. Type "Vrp/bin.$(ARCH)/master_tm_lp_cg_cp -F Vrp/sample.vrp -N 5 -u
+522" in the SYMPHONY-3.0 directory. The -N argument gives the number of
+routes, which must be specified in advance. The -u argument supplies an
+initial upper bound which is used until a better feasible solution is
+found. TSP instances can also be solved by adding the option -T TSP. In the
+case of the TSP, the number of routes does not need to be specified. You can
+get additional problem data files from http://branchandcut.org/VRP/data/ or
+the TSPLIB
+(http://www.iwr.uni-heidelberg.de/iwr/comopt/software/TSPLIB95/). The file
+format is described on the TSPLIB Web site.
+
+4. That's it! Now you are ready to develop your own application. See the
+user manual for help.
+
+COMPILING FOR SHARED MEMORY
+
+1. To compile a shared memory version, 
+obtain an OpenMP compliant compiler, such as Omni (free from
+http://phase.etl.go.jp/Omni). Other options are listed at
+http://www.openmp.org.
+
+2. Follow the instructions above for configuring the makefile. Set the
+variable CC to the compiler name in the Makefile and compile as above. Note
+that if you have previously compiled the sequential version, then you should
+first type "make clean_all", as this version uses the same directories.  With
+one thread allowed, it should run exactly the same as the sequential version
+so there is no need to compile both versions.
+
+3. Voila, you have a shared memory parallel solver! As above, to test the
+sample program, a sample data file is included with the distribution. Type
+"Vrp/bin.$(ARCH)/master_tm_lp_cg_cp -F Vrp/sample.vrp -N 5 -u 522" in the
+SYMPHONY-3.0 directory. The -N argument gives the number of routes, which
+must be specified in advance. The -u argument supplies an initial upper bound
+which is used until a better feasible solution is found. TSP instances can
+also be solved by adding the option -T TSP. In the case of the TSP, the number
+of routes does not need to be specified. You can get additional problem data
+files from http://branchandcut.org/VRP/data/ or the TSPLIB8
+(http://www.iwr.uni-heidelberg.de/iwr/comopt/software/TSPLIB95/). The file
+format is described on the TSPLIB Web site.
+
+4. That's it! Now you are ready to develop your own application. See the
+user manual for help.
+
+COMPILING FOR DISTRIBUTED NETWORKS
+
+1. If you wish to compile a distributed version of the code, obtain and
+install PVM from http://www.csm.ornl.gov/pvm/.
+
+2. In the Makefile, be sure to set the COMM_PROTOCOL variable to "PVM". Also,
+change one or more of COMPILE_IN_TM, COMPILE_IN_LP, COMPILE_IN_CG, and
+COMPILE_IN_CP, to FALSE, or you will end up with the sequential
+version. Various combinations of these variables will give you different
+configurations and different executables. See the manual for more information
+on setting them. Also, be sure to set the path variables in the Makefile
+appropriately so that make can find the PVM library.
+
+3. Type "make" in the SYMPHONY root directory to make the distributed
+libraries. As in Step 1 of the sequential version, you may type "make clean"
+after making the library. It should not have to remade again unless you modify
+SYMPHONY's internal files.
+
+4. After the SYMPHONY libraries, user code will be compiled and required 
+executables linked.
+
+5. Make sure there are links from your $PVM_ROOT/bin/$PVM_ARCH/ directory to
+each of the executables in your $(USERROOT)/bin.$(ARCH) directory. This is
+required by PVM.
+
+6. Start the PVM daemon by typing "pvm" on the command line and then typing
+"quit".
+
+7. To test the sample program, a sample data file is included with the
+distribution. Type "Vrp/bin.$(ARCH)/master -F Vrp/sample.vrp -N 5 -u 522" in the
+SYMPHONY-3.0 directory (the actual executable name may not be "master" if
+COMPILE_IN_TM is set to TRUE). The -N argument gives the number of routes,
+which must be specified in advance. The -u argument supplies an initial upper
+bound which is used until a better feasible solution is found. TSP instances
+can also be solved by adding the option -T TSP. In the case of the TSP, the
+number of routes does not need to be specified. You can get additional problem
+data files from http://branchandcut.org/VRP/data/ or the TSPLIB
+(http://www.iwr.uni-heidelberg.de/iwr/comopt/software/TSPLIB95/). The file
+format is described on the TSPLIB Web site.
+
+8. That's it! Now you are ready to develop your own application. See the
+user manual for help.
+
+*******************************************************************************
+*         COMPILING THE SAMPLE APPLICATION (Microsoft Windows)                *
+*******************************************************************************
+
+Here is a sketch outline of how to get started with \BB\ in Windows. These
+instructions will lead you through the steps required to compile the sample
+application, a VRP and TSP solver. For information on developing your own
+applications, please see the user's manual. Direct support is provided for
+compilation under MS Visual Studio 6.0. Compilation for other compilers should
+also be possible. Note that the windows version has some limitations. Detailed
+timing information is not currently provided.  Support is only provided for
+running in sequential mode at this time.
+
+1. Download SYMPHONY-3.0.zip and unzip the archive. This will create a
+subdirectory called SYMPHONY-3.0/ containing all the source files.
+
+2. In MS Visual C++ 6.0, open the workspace SYMPHONY-3.0/WIN32/symphony.dsw.
+Note that there are two projects, one called "symphony" and one called "vrp".
+The symphony project compiles the source of the internal library. The vrp
+project compiles a separate library containing the user-defined functions
+needed for the VRP solver. Note that to develop a solver of your own, you
+would replace the VRP library with one of your own.
+
+3. By default, SYMPHONY is set up to use CPLEX 7.0 installed in a folder
+called "C:\ILOG\CPLEX70". To use a different LP solver or to specify a
+different location for CPLEX, there are a number of changes that need to be
+made.
+
+  --You must specify the name of and path to the library to be linked. Do this
+by right-clicking on the symphony project and choosing "Add Files to
+Project..." Then locate the library file for the LP solver you are using
+(either CPLEX or OSL). For CPLEX, you need the library called cplex**.lib,
+where ** is your CPLEX version.
+
+  --You must set the include path for the solver header files. Do this by
+right-clicking on the symphony project and choosing "Settings..." Then choose
+the "C/C++" tab, and choose the category "Preprocessor" on the drop-down menu.
+Edit the path in the "Additional include directories" window.
+
+  --You must set the compiler defines so that the right LP solver interface
+will be used. Follow the procedure above to get to the preprocessor settings
+and make sure that __OSLLIB__ is defined if you are using OSL or __CPLEX**__
+is defined if you are using CPLEX, where ** is your version of CPLEX, i.e.,
+__CPLEX70__ for CPLEX 7.0. DO NOT CHANGE COMPILER DEFINES NOT RELATED TO THE
+LP SOLVER. 
+
+4. Note that there are a number of additional compiler defines that control
+the functionality of SYMPHONY. These defines are described in
+SYMPHONY-3.0/Makefile, a Unix-style make file included with the
+distribution. To enable the functionality associated with a particular
+compiler define, simply add it to the list of defines under the preprocessor
+settings, as above.
+
+5. You must also be sure to have any .dll files required for your LP solver to
+be in your search path. Either move the required .dll to the directory
+containing symphony.exe or add the path to the "PATH" Windows environment
+variable.
+
+6. Once you have the proper settings for your LP solver, choose "Build
+symphony.exe" from the Build menu. This should successfully build the
+executable.
+
+7. To test the executable, right click on the symphony project, go to the
+"Debug" tab and set the Program arguments to "-F
+SYMPHONY-3.0\Vrp\sample.vrp -N 5 -u 522." Note that command-line
+switches are Unix-style. The argument to -N is the number of routes that
+should be used in the solution and the -u argument supplies the solver with an
+initial upper bound.
+
+8. Now choose "Execute" from the build menu and the solver should solve the
+sample VRP file.
+
+9. Note that there is some functionality missing from the Windows
+version. Most prominently, the timing functions do not work. I suppose this
+functionality should be easy to add -- let me know if you are interested in
+doing it and I will give you all the help I can. In addition, the Windows
+version will only run in sequential mode for a variety of reasons. However, it
+should be relatively easy to get it running in parallel if you can get PVM
+working under Windows. Let me know if you are interested.
+
+LIST SERVE
+
+There is a list serve for SYMPHONY users. To subscribe, send a message
+containing "subscribe symphony-users" to majordomo@branchandcut.org.
+
+AUTHORS
+
+SYMPHONY was jointly developed by Ted Ralphs (ted@lehigh.edu) and      Laci
+Ladanyi (ladanyi@us.ibm.com).
+
+BUG REPORTS
+
+Bug reports should be sent to symphony-bugs@branchandcut.org.
+

@@ -1,0 +1,200 @@
+#!/bin/tcsh -ef
+
+cp CVS/Entries CVS/Entries.bak 
+cp CVS/Entries CVS/Entries.bak2
+cp CVS/Repository CVS/Repository.bak
+
+sed -e '/^D\//d' CVS/Entries.bak >CVS/Entries.bak2
+sed -e '$a\D/Applications////\nD/Doc////\nD/Examples////\nD/Osi////\nD/include////\nD/scripts////\nD/src////' \
+CVS/Entries.bak2 >CVS/Entries
+
+mkdir -p Applications
+mkdir -p Examples
+
+mv -f FLOPC++ Examples/
+mkdir -p Examples/CVS
+cp -f CVS/Root Examples/CVS
+
+sed -e '/^D\/FLOPC++/\!d' CVS/Entries.bak >Examples/CVS/Entries
+
+sed -e 's/SYMPHONY/SYMPHONY\/Examples/g' CVS/Repository.bak\
+>Examples/CVS/Repository
+
+sed -e 's/SYMPHONY/SYMPHONY\/Examples\/FLOPC++/g' CVS/Repository.bak\
+>Examples/FLOPC++/CVS/Repository
+
+mv -f Template USER
+mv -f Vrp VRP
+
+mkdir -p src
+mkdir -p src/CVS
+cp -f CVS/Root src/CVS
+
+sed -e '/^D\//d' CVS/Entries.bak >CVS/Entries.bak2
+sed -e '$a\D/Common////\nD/CutGen////\nD/CutPool////\nD/DrawGraph////\nD/GMPL////\nD/LP////\nD/Master////\nD/TreeManager////\nD/WIN32////' \
+CVS/Entries.bak2 >CVS/Entries.bak
+sed -e '/^D\//\!d' CVS/Entries.bak >src/CVS/Entries
+
+sed -e 's/SYMPHONY/SYMPHONY\/src/g' CVS/Repository.bak >src/CVS/Repository
+
+sed -e 's/SYMPHONY/SYMPHONY\/src\/CutGen\/Decomp/g' CVS/Repository.bak\
+>CutGen/Decomp/CVS/Repository
+
+sed -e 's/SYMPHONY/SYMPHONY\/src\/DrawGraph\/IGD_1.0/g' CVS/Repository.bak\
+>DrawGraph/IGD_1.0/CVS/Repository
+
+foreach dir(Doc Simple_version)
+sed -e "s/SYMPHONY/SYMPHONY\/src\/DrawGraph\/IGD_1.0\/$dir/g" CVS/Repository.bak\
+>DrawGraph/IGD_1.0/$dir/CVS/Repository
+end
+
+foreach dir(Common CutGen CutPool DrawGraph GMPL LP Master TreeManager WIN32)
+sed -e "s/SYMPHONY/SYMPHONY\/src\/$dir/g" CVS/Repository.bak\
+>$dir/CVS/Repository
+
+mv -f $dir src/
+end
+
+foreach dir(CNRP SPP SPP+CUTS)
+
+cp $dir/CVS/Entries $dir/CVS/Entries.bak
+
+sed -e '/^D/d' $dir/CVS/Entries >$dir/CVS/Entries.bak
+sed -e '$a\D/include////\nD/src////' $dir/CVS/Entries.bak\
+>$dir/CVS/Entries
+
+rm $dir/CVS/Entries.bak
+
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir/g" CVS/Repository.bak\
+>$dir/CVS/Repository
+
+mkdir -p $dir/src
+mkdir -p $dir/src/CVS
+cp -f CVS/Root $dir/src/CVS
+
+sed -e '/^D\//d' CVS/Entries.bak >CVS/Entries.bak2
+sed -e '$a\D/Common////\nD/CutGen////\nD/CutPool////\nD/DrawGraph////\nD/LP////\nD/Master////\nD/WIN32////' CVS/Entries.bak2 >CVS/Entries.bak
+sed -e '/^D\//\!d' CVS/Entries.bak >$dir/src/CVS/Entries
+
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/src/g" CVS/Repository.bak\
+>$dir/src/CVS/Repository
+
+rm $dir/include/CVS/Repository
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/include/g" CVS/Repository.bak\
+>$dir/include/CVS/Repository
+
+foreach subdir(Common CutGen CutPool DrawGraph LP Master WIN32)
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/src\/$subdir/g"\
+CVS/Repository.bak >$dir/$subdir/CVS/Repository
+mv -f $dir/$subdir $dir/src/
+end
+mv $dir Applications/
+end
+
+foreach dir(MPP MATCH USER)
+
+cp $dir/CVS/Entries $dir/CVS/Entries.bak
+
+sed -e '/^D/d' $dir/CVS/Entries >$dir/CVS/Entries.bak
+sed -e '$a\D/include////\nD/src////' $dir/CVS/Entries.bak\
+>$dir/CVS/Entries
+
+rm $dir/CVS/Entries.bak
+
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir/g" CVS/Repository.bak\
+>$dir/CVS/Repository
+
+mkdir -p $dir/src
+mkdir -p $dir/src/CVS
+
+sed -e '/^D\//d' CVS/Entries.bak >CVS/Entries.bak2
+sed -e '$a\D/CutGen////\nD/CutPool////\nD/DrawGraph////\nD/LP////\nD/Master////\nD/WIN32////' CVS/Entries.bak2 >CVS/Entries.bak
+sed -e '/^D\//\!d' CVS/Entries.bak >$dir/src/CVS/Entries
+
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/src/g" CVS/Repository.bak\
+>$dir/src/CVS/Repository
+
+rm $dir/include/CVS/Repository
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/include/g" CVS/Repository.bak\
+>$dir/include/CVS/Repository
+
+foreach subdir(CutGen CutPool DrawGraph LP Master WIN32)
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/src\/$subdir/g"\
+CVS/Repository.bak >$dir/$subdir/CVS/Repository
+mv -f $dir/$subdir $dir/src/
+end
+mv $dir Applications/
+end
+
+foreach dir(VRP)
+
+cp $dir/CVS/Entries $dir/CVS/Entries.bak
+
+sed -e '/^D/d' $dir/CVS/Entries >$dir/CVS/Entries.bak
+sed -e '$a\D/include////\nD/src////' $dir/CVS/Entries.bak\
+>$dir/CVS/Entries
+
+rm $dir/CVS/Entries.bak
+
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir/g" CVS/Repository.bak\
+>$dir/CVS/Repository
+
+mkdir -p $dir/src
+mkdir -p $dir/src/CVS
+cp -f CVS/Root $dir/src/CVS
+
+sed -e '/^D\//d' CVS/Entries.bak >CVS/Entries.bak2
+sed -e '$a\D/Common////\nD/CutGen////\nD/CutPool////\nD/DrawGraph////\nD/Heuristics////\nD/LP////\nD/Master////\nD/WIN32////' CVS/Entries.bak2 >CVS/Entries.bak
+sed -e '/^D\//\!d' CVS/Entries.bak >$dir/src/CVS/Entries
+
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/src/g" CVS/Repository.bak\
+>$dir/src/CVS/Repository
+
+rm $dir/include/CVS/Repository
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/include/g" CVS/Repository.bak\
+>$dir/include/CVS/Repository
+
+foreach subdir(Common CutGen CutPool DrawGraph Heuristics LP Master WIN32)
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/$dir\/src\/$subdir/g"\
+CVS/Repository.bak >$dir/$subdir/CVS/Repository
+mv -f $dir/$subdir $dir/src/
+end
+
+mv $dir Applications/
+end
+
+sed -e 's/SYMPHONY/SYMPHONY\/Applications\/MCKP/g'\
+CVS/Repository.bak >MCKP/CVS/Repository
+sed -e 's/SYMPHONY/SYMPHONY\/Applications\/MCKP\/WIN32/g'\
+CVS/Repository.bak >MCKP/WIN32/CVS/Repository
+mv -f MCKP Applications/
+
+rm Applications/VRP/src/Master/Heuristics/CVS/Repository
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/VRP\/src\/Master\/Heuristics/g"\
+CVS/Repository.bak >Applications/VRP/src/Master/Heuristics/CVS/Repository
+
+foreach dir(decomp heurs min_cut)
+rm Applications/VRP/include/$dir/CVS/Repository
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/VRP\/include\/$dir/g"\
+CVS/Repository.bak >Applications/VRP/include/$dir/CVS/Repository
+end
+
+foreach dir(Decomp MinCut)
+rm Applications/VRP/src/CutGen/$dir/CVS/Repository
+sed -e "s/SYMPHONY/SYMPHONY\/Applications\/VRP\/src\/CutGen\/$dir/g"\
+CVS/Repository.bak >Applications/VRP/src/CutGen/$dir/CVS/Repository
+end
+
+mkdir -p Applications/CVS
+cp CVS/Root Applications/CVS
+
+sed -e '/^D\//d' CVS/Entries.bak >CVS/Entries.bak2
+sed -e '$a\D/CNRP////\nD/MATCH////\nD/MCKP////\nD/MPP////\nD/SPP////\nD/SPP+CUTS////\nD/USER////\nD/VRP////' CVS/Entries.bak2 >CVS/Entries.bak
+sed -e '/^D\//\!d' CVS/Entries.bak >Applications/CVS/Entries
+
+sed -e 's/SYMPHONY/SYMPHONY\/Applications/g' CVS/Repository.bak\
+>Applications/CVS/Repository
+
+rm CVS/Entries.bak
+rm CVS/Entries.bak2
+rm CVS/Repository.bak

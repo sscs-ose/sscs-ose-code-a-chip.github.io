@@ -1,0 +1,37 @@
+:
+src='../../shared/commonlib.c ../../colamd/colamd.c lp_LUSOL.c ../../lp_utils.c ../../shared/myblas.c LUSOL/lusol.c'
+
+c=cc
+
+#determine platform (32/64 bit)
+>/tmp/platform.c
+echo '#include <stdlib.h>'>>/tmp/platform.c
+echo '#include <stdio.h>'>>/tmp/platform.c
+echo 'main(){printf("ux%d", (int) (sizeof(void *)*8));}'>>/tmp/platform.c
+$c /tmp/platform.c -o /tmp/platform
+PLATFORM=`/tmp/platform`
+rm /tmp/platform /tmp/platform.c >/dev/null 2>&1
+
+mkdir bin bin/$PLATFORM >/dev/null 2>&1
+
+opts='-O3'
+#opts=''
+
+if [ "$PLATFORM" = "RS6000" ]
+then opts="$opts"
+     so="-bM:SRE -bE:../bfp_lpsolve.exp"
+     #so="$so -e _nostart"
+     so="$so -bnoentry"
+elif [ "$PLATFORM" = "SCO_UNIX" ]
+then
+     opts='-O0'
+     so="-G -dy"
+     opts="$opts -DNOLONGLONG $so"
+else opts="$opts -fpic"
+     so="-shared -Wl,-Bsymbolic -Wl,-soname,libbfp_LUSOL.so"
+fi
+
+$c -s -c $opts -I.. -I../.. -I../../colamd -I../../shared -ILUSOL -I. -DRoleIsExternalInvEngine -DINVERSE_ACTIVE=INVERSE_LUSOL $src
+$c $so -o bin/$PLATFORM/libbfp_LUSOL.so `echo $src|sed s/[.]c/.o/g|sed 's/[^ ]*\///g'` -lc -lm -ldl
+
+rm *.o >/dev/null

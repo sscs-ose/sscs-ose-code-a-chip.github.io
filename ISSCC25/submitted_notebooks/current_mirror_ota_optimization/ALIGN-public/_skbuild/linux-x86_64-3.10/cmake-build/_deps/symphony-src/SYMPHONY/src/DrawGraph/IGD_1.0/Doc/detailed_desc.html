@@ -1,0 +1,250 @@
+<html>
+<head>
+<title> IGD-1.0 Description </title>
+</head>
+
+<body>
+
+<h3> Interactive Graph Drawing IGD-1.0 </h3>
+IGD is a library of Tcl/Tk functions for displaying, manipulating,
+scaling and printing undirected graphs. The primary goal of this
+application is to provide an easy-to-use visualization tool that is
+flexible enough for a wide range of situations, like debugging and
+displaying results of graph algorithms, or creating postscript
+pictures of graphs. This package does NOT contain graph layout
+algorithms. The idea of how to move around the nodes on the canvas 
+is borrowed from John Ousterhout's book, Tcl and the Tk Toolkit.
+<p>
+IGD is implemented using Tcl version 7.5p1+ and Tk version 4.1p1+dash
+(that is Tcl 7.5p1 with the plus patch and Tk 4.1p1 with the plus and
+dash patches). It is very likely to work with Tcl 7.6 and Tk 4.2. 
+(If you don't have Tcl/Tk or the patches installed on your system, take a 
+look at the 
+<A HREF="http://www.sco.com/Technology/tcl/Tcl.html">Tcl WWW Info page</A> 
+to see where you can find it, etc.) 
+<p>
+The library can be used in two ways: 
+<ul>
+   <li> The functions can be sourced into wish and then directly invoked. 
+        The library was implemented for this purpose (we use IGD for 
+        displaying graphs while running a complex application).
+   <li> As soon as one application window is displayed (and this can be
+        done with the short script called igd.tcl) the user can directly
+        manipulate the windows and graphs via menus, buttons and mouse
+        clicks (which are all linked to functions in the library); hence
+        the adjective interactive. This way IGD can be used as a stand-alone 
+        application, and the user does not have to know details about
+        the library functions. 
+</ul>
+
+This documentation intends to describe the second way. The library functions 
+(along with the global variables) are fully documented in .......ps.
+<p>
+Implementation of an interface that links other applications with IGD is
+on the way, it will be available soon.
+
+<h4> Description </h4>
+The basic units of this application are windows. These windows contain
+a canvas on which (undirected) graphs are displayed, menus, buttons,
+etc. Defaults for some window and graph properties (i.e., how and what
+is displayed) are associated with each window. A window gets
+these default values from the default list for the entire application
+when the window is created. Default values corresponding to one
+particular window can be changed through menu options, but those
+corresponding to the entire application can be changed only by editing
+the procedure Igd_StartUp. (Sorry about this, but as mentioned
+above we mainly use the library directly; in that case the application
+defaults can be simply set with a function call.)
+<p>
+The following is a list of window properties with a short explanation;
+their values can be set from the Window menu. All values must be 
+nonnegative integers unless specified otherwise.
+<ul>
+   <li> canvas_width and canvas_height are the width and the height 
+        (in pixels) of the canvas (on which graphs are displayed). 
+        Can be changed through the Resize canvas menu option.  
+   <li> viewable_width and viewable_height are the width and height of the 
+        display window. The canvas can be bigger than the display window,
+        the scrollbar can be used to move the desired part of the canvas into
+        the display window. Can be changed through the Resize viewable window 
+        menu option, or by any option your window manager provides to resize a 
+        window.  
+   <li> disp_nodelabels, disp_nodeweights and disp_egdeweights are binary
+        values indicating whether to display labels and weights of nodes and
+        weights of edges (see more details later). Can be changed by clicking 
+        on the radio buttons under the canvas.
+   <li> node_dash and edge_dash are patterns that determine the outline of 
+        nodes and edges. A dash pattern is a sequence of nonnegative integers
+        indicating the lengths of line segments and gaps in the outline. 
+        E.g., {3 3} will produce a dashed line with line segments and gaps 
+        both 3 pixels long. The empty pattern produces a solid outline.
+        Can be changed through the Default dash patterns menu option for 
+        all the nodes or edges at once, or by the Modify node/edge options 
+        in the Node and Edge menus.
+   <li> node_radius is the radius of nodes in the graph. Can be changed 
+        through the Default node radius option for all the nodes at once or
+        by the Modify node option in the Node menu.
+   <li> interactive_mode is a binary value indicating whether some mouse 
+        actions are enabled or disabled (if the interactive mode is disabled
+        nodes can be created, erased or moved only through the menus but not 
+        with mouse actions as described later). Can be changed through the 
+        Interactive mode menu option.
+   <li> mouse_tracking is a binary value indicating whether the mouse tracking 
+        option is enabled or not. The mouse tracker is a small rectangle in
+        the bottom-right corner of the display window showing the current
+        position of the mouse over the canvas. Can be changed through the 
+        Mouse tracking menu option.
+   <li> scale_factor indicates by how much the canvas has been rescaled, it
+        need not be an integer. Scaling is done from the origin (top-left
+        corner of the canvas); the size of the nodes is not changed, only 
+        their relative positions. Can be changed through the (re)Scale
+        graph menu option.
+   <li> nodelabel_font, nodeweight_font and edgeweight_font are the fonts 
+        used for node labels and weights and edge weights. The font names can
+        be any standard X font name. Can be changed through the Default fonts
+        menu option. 
+</ul>
+There are additional options not mentioned above in the Window menu:
+new windows can be created using the Clone window or New window menu
+options; windows can be erased (i.e, graphs deleted from the canvas)
+by Erase window; individual windows can be destroyed by Quit from window.
+<p>
+Graphs displayed in the windows are undirected. Nodes are represented
+with a circle (different nodes can have different radii and different
+outlines), a label (a short text displayed within the circle) and an
+optional weight (a short text displayed North-East from the
+circle). Nodes can be created, modified, moved, raised, lowered and
+deleted through the menu options in Node menu. There are shortcuts for
+these actions; e.g, if the left mouse button is clicked twice over a
+position, a new node will be displayed there. Edges are represented
+with lines (different edges can have different outlines) with optional
+weights (short texts placed East from the middle of the line). Edges
+can be added, modified and deleted through menu options in Edge menu.
+Also, nodes can be moved around by clicking on the middle mouse button
+and dragging the node with the button pressed down; edges attached to a
+node will move with the node.
+<p>
+To make the menu options easier to use, two registers have been added.
+The first (second) register stores a position -- and a node if there
+is one at that position -- if the left (right) mouse button is clicked
+over that position. Whenever a menu option is chosen from the Node menu,
+if there is a node in the first register, it will be proposed. Whenever 
+a menu option is chosen from the Edge menu, if there are nodes in both 
+of the registers they will be proposed as endpoints of the edge. The 
+registers can be cleared with the 'clear register 1(2)' buttons.
+<p>
+The following mouse-keyboard actions can be used instead of some 
+menu options:
+<ul>
+   <li> Add a new node: click twice on the left mouse button over the 
+        desired position
+   <li> Move a node: Click on the node with the middle mouse button and 
+        drag the node with the button pressed down.
+   <li> Delete a node: Click on the node with the left mouse button and 
+        press 'd'.
+   <li> Raise a node: Click on the node with the left mouse button and 
+        press 'r'.
+   <li> Lower a node: Click on the node with the left mouse button and 
+        press 'l'.
+   <li> Display information about a node: Click on the node with the left
+        mouse button and press '?'.
+   <li> Add an edge: Click on one of the endpoints with the left mouse button 
+        and then click twice on the other endpoint with the right mouse
+        button. Edges can be deleted only from the menu.
+</ul>
+Graphs can be loaded into windows from files using the Load from file
+option in the File menu. See the input format below. Graphs can be
+saved in this format with the Save to file menu option. Also, a
+greyscale version of the graph in the display window can be saved in
+PostScript format using the Save PostScript option (picture will be
+rescaled/rotated if it doesn't fit an 8x11 paper as it is).
+<p>
+The format in which the graph is saved or can be loaded is the
+following. See any of the files with .g extension that came with the
+package as an example. Note that values containing spaces must be
+enclosed in brackets {}. The data has to be in the order given below
+with the exeption of comments that can be placed anywhere.
+<blockquote>
+<dl compact>
+   <dt> c
+   <dd> Empty lines or lines starting with a 'c' are skipped (comment).
+   <dt> w 
+   <dd> node_dash {2 2} <br>
+        Window properties listed in lines starting with a w.
+   <dt> p 
+   <dd> nodenum edgenum <br>
+        The number of nodes and edges in the graph.
+   <dt> n
+   <dd> node_id x y key [weight] [label] [dash] [radius] <br>
+	Description of a node. Nodes are displayed in the order they
+are listed. <br>
+	node_id: identifier of node, must be unique <br>
+        x, y: coordinates of the node <br>
+        key: indicates (as a binary number) which of the following  
+           data is given: weight, label, dash pattern, radius.
+           e.g., if key = 11 = 8+2+1 then the weight, dash pattern, 
+           and radius are listed after the key (in this order), but 
+           not the label.
+   <dt> a
+   <dd> edge_id node_id_1 node_id_2 key [weight] [dash] <br>
+        Description of an edge. Edges are displayed in the order they
+are listed. <br>
+	edge_id: identifier of the edge <br>
+	node_id_1, node_id_2: node identifiers of the endpoints of the
+edge <br>
+	key: indicates (as a binary number) which of the following
+           data is given: weight, dash pattern. To be consistent with
+           notation at nodes, weight adds 8, dash pattern adds 2 to key.
+</dl>
+</blockquote>
+<p>
+A short decription of each menu option is provided in the Help menu. 
+Help windows can be kept open during the application. 
+
+<h4> How to use IGD </h4>
+There is a short script included with the source code called igd.tcl.
+Edit the first line of the script to have the correct path to wish on
+your system there, then make the file executable and run it.  igd.tcl
+will source the library and then it displays a window. Now using the
+Load from file option in the File menu load one of the example graphs
+(any file with extension .g). Experiment with the menu options and the
+mouse-keyboard actions described above. Use the Help menu for a quick
+reference.
+
+<h4> Copyright information </h4>
+IGD-1.0 Interactive graph drawing (displays and manipulates undirected graphs)
+<br>
+Copyright (C) 1996 Marta Eso
+<p>
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+<p>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+<p>
+You should have received a copy of the 
+<A HREF="http://www.delorie.com/gnu/docs/gnu1/gpl.html">GNU General 
+Public License</A>
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+<h4> Author </h4>
+Marta Eso <br>
+<A HREF="http://www.orie.cornell.edu">OR&IE</A>, Cornell University, Ithaca, NY 14853 <br>
+<A HREF="mailto://eso@orie.cornell.edu">eso@orie.cornell.edu</A> <br>
+<A HREF="http://www.orie.cornell.edu/~eso">http://www.orie.cornell.edu/~eso/</A> <br>
+<p>
+The author is partially supported by NSF through grant DMS-9527124
+funding the Advanced Computational Optimization Laboratory of the <A
+HREF="http://www.tc.cornell.edu/">Cornell Theory Center</A>, and also
+by NSF through grant DMS-9505155 and ONR through grant
+N00014-96-1-0050 via the <A
+HREF="http://www.cs.cornell.edu/Info/Projects/ccop/index.html">Cornell
+Computational Optimization Project</A>.
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+%===========================================================================%
+%                                                                           %
+% This file is part of the documentation for the SYMPHONY MILP Solver.      %
+%                                                                           %
+% SYMPHONY was jointly developed by Ted Ralphs (ted@lehigh.edu) and         %
+% Laci Ladanyi (ladanyi@us.ibm.com).                                        %
+%                                                                           %
+% (c) Copyright 2000-2015 Ted Ralphs. All Rights Reserved.                  %
+%                                                                           %
+% SYMPHONY is licensed under the Eclipse Public License. Please see         %
+% accompanying file for terms.                                              %
+%                                                                           %
+%===========================================================================%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Cut pool module callbacks}
+
+Due to the relative simplicity of the cut pool, there are no wrapper
+functions implemented for CP. Consequently, there are no default
+options and no post-processing.
+
+%begin{latexonly}
+\bd
+%end{latexonly}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_receive_cutpool_data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\firstfuncdef{user\_receive\_cp\_data}
+\label{user_receive_cp_data}
+\sindex[cf]{user\_receive\_cp\_data}
+\begin{verbatim}
+int user_receive_cp_data(void **user)
+\end{verbatim}
+
+\bd
+
+\item[Description:] \hfill
+
+The user has to receive here all problem-specific information sent
+from \hyperref{{\tt user\_send\_cp\_data()}}{\ptt{user\_send\_cp\_data()}
+(see Section }{)}{user_send_cp_data} function in the master module.
+The user has to allocate space for all the data structures, including
+{\tt user} itself. Note that this function is only called if the
+either the Tree Manager, LP, or CP are running as a separate process
+(i.e.~either {\tt COMPILE\_IN\_TM}, {\tt COMPILE\_IN\_LP}, or {\tt
+COMPILE\_IN\_CP} are set to {\tt FALSE} in the {\tt make} file).
+Otherwise, this is done in {\tt \htmlref{user\_send\_cp\_data()}
+{user_send_cp_data}}. See the
+description of that function for more details.
+
+\item[Arguments:] \hfill
+
+\bt{llp{280pt}}
+{\tt void **user} & INOUT & Pointer to the user-defined data structure. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. Cut pool module exits. \\
+{\tt USER\_SUCCESS} & The user received data successfully. \\
+{\tt USER\_DEFAULT} & The user did not send any data to be received. \\
+\et
+
+\item[Invoked from:] {\tt cp\_initialize} at module start-up.
+
+\ed
+
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_receive_lp_solution_cp
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_receive\_lp\_solution\_cp}
+\sindex[cf]{user\_receive\_lp\_solution\_cp}
+\begin{verbatim}
+void user_receive_lp_solution_cp(void *user)
+\end{verbatim}
+
+\bd
+
+\item[Description:] \hfill
+
+This function is invoked only in the case parallel computation and only if in
+the {\tt \htmlref{user\_send\_lp\_solution()}{user_send_lp_solution}} function
+of the LP module, the user opted for packing the current LP solution in a
+custom format. Here she must receive the data she sent there.
+
+\item[Arguments:] \hfill
+
+\bt{llp{250pt}}
+{\tt void *user} & IN & Pointer to the user-defined data structure. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Cuts are not checked for this LP solution. \\
+{\tt USER\_SUCCESS} & The user function executed properly. \\
+{\tt USER\_DEFAULT} & SYMPHONY's default format should be used. \\
+\et
+
+\item[Invoked from:] Whenever an LP solution is received.
+
+\item[Note:] \hfill
+
+\BB\ automatically unpacks the level, index and iteration number
+corresponding to the current LP solution within the current search
+tree node.
+
+\ed
+
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_prepare_to_check_cuts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_prepare\_to\_check\_cuts}
+\sindex[cf]{user\_prepare\_to\_check\_cuts}
+\label{user_prepare_to_check_cuts}
+\begin{verbatim}
+int user_prepare_to_check_cuts(void *user, int varnum, int *indices, 
+                               double *values)
+\end{verbatim}
+
+\bd
+
+\item[Description:] \hfill
+
+This function is invoked after an LP solution is received but before any cuts
+are tested. Here the user can build up data structures
+(e.g., a graph representation of the solution) that can make the testing of
+cuts easier in the {\tt \htmlref{user\_check\_cuts}{user_check_cuts}} function.
+
+\item[Arguments:] \hfill
+
+\bt{llp{285pt}}
+{\tt void *user} & IN & Pointer to the user-defined data structure. \\
+{\tt int varnum} & IN & The number of nonzero/fractional variables described
+in {\tt indices} and {\tt values}. \\
+{\tt int *indices} & IN & The user indices of the nonzero/fractional
+variables. \\
+{\tt double *values} & IN & The nonzero/fractional values. \\ 
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Cuts are not checked for this LP solution. \\
+{\tt USER\_SUCCESS} & The user is prepared to check cuts. \\
+{\tt USER\_DEFAULT} & There are no user-defined cuts in the pool. \\
+\et
+
+\item[Invoked from:] Whenever an LP solution is received.
+
+\ed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_check_cut
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_check\_cut}
+\label{user_check_cuts}
+\sindex[cf]{user\_check\_cut}
+\begin{verbatim}
+int user_check_cut(void *user, double lpetol, int varnum, 
+                   int *indices, double *values, cut_data *cut,
+                   int *is_violated, double *quality)
+\end{verbatim}
+
+\bd
+
+\item[Description:] \hfill
+
+The user has to determine whether a given cut is violated by the given
+LP solution (see Section \ref{user-written-lp} for a description of
+the {\tt \htmlref{cut\_data data}{cut_data}} data structure). Also,
+the user can assign a number to the cut called the {\em quality}. This
+number is used in deciding which cuts to check and purge. See the
+section on \htmlref{Cut Pool Parameters}{cut_pool_params} for more
+information.
+
+\item[Arguments:] \hfill
+
+\bt{llp{255pt}}
+{\tt void *user} & INOUT & The user defined part of p. \\
+{\tt double lpetol} & IN & The $\epsilon$ tolerance in the LP module. \\
+{\tt int varnum} & IN & Same as the previous function. \\
+{\tt int *indices} & IN & Same as the previous function. \\
+{\tt double *values} & IN & Same as the previous function. \\
+{\tt cut\_data *cut} & IN & Pointer to the cut to be tested. \\
+{\tt int *is\_violated} & OUT & TRUE/FALSE based on whether the cut is violated
+or not. \\
+{\tt double *quality} & OUT & a number representing the relative
+strength of the cut.
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Cut is not sent to the LP, regardless of the value of
+{\tt *is\_violated}. \\
+{\tt USER\_SUCCESS} & The user function exited properly. \\
+{\tt USER\_DEFAULT} & Same as error. \\
+\et
+
+\item[Invoked from:] Whenever a cut needs to be checked.
+
+\item[Note:] \hfill
+
+The same note applies to {\tt number}, {\tt indices} and {\tt values} as in
+the previous function.
+
+\ed
+
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_finished_to_check_cuts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_finished\_checking\_cuts}
+\sindex[cf]{user\_finished\_checking\_cuts}
+\begin{verbatim}
+int user_finished_checking_cuts(void *user)
+\end{verbatim}
+
+\bd
+
+\item[Description:] \hfill
+
+When this function is invoked there are no more cuts to be checked, so the
+user can dismantle data structures he created in {\tt 
+\htmlref{user\_prepare\_to\_check\_cuts}{user_prepare_to_check_cuts}}. Also, 
+if he received and stored the LP solution himself he can delete it now.
+
+\item[Arguments:] \hfill
+
+\bt{llp{250pt}}
+{\tt void *user} & IN & Pointer to the user-defined data structure. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Ignored. \\
+{\tt USER\_SUCCESS} & The user function exited properly. \\
+{\tt USER\_DEFAULT} & There are no user-defined cuts in the pool. \\
+\et
+
+\item[Invoked from:] After all cuts have been checked.
+
+\ed
+
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_free_cp
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_free\_cp}
+\sindex[cf]{user\_free\_cp}
+\begin{verbatim}
+int user_free_cp(void **user)
+\end{verbatim}
+
+\bd
+
+\item[Description:] \hfill
+
+The user has to free all the data structures within {\tt user}, and also free
+{\tt user} itself. The user can use the built-in macro {\tt FREE} that checks
+the existence of a pointer before freeing it. 
+
+\item[Arguments:] \hfill
+
+\bt{llp{280pt}}
+{\tt void **user} & INOUT & Pointer to the user-defined data structure
+(should be {\tt NULL} on exit). \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Ignored. \\
+{\tt USER\_SUCCESS} & The user freed all data structures. \\
+{\tt USER\_DEFAULT} & There is nothing to be freed. \\
+\et
+
+\item[Invoked from:] cp\_close() at module shutdown.
+
+\ed
+
+\vspace{1ex}
+
+%begin{latexonly}
+\ed
+%end{latexonly}

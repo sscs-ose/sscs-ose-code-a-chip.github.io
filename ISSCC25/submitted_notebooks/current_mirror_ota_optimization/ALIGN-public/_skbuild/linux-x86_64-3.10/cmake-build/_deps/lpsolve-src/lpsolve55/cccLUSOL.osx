@@ -1,0 +1,44 @@
+src='../lp_MDO.c ../shared/commonlib.c ../shared/mmio.c ../shared/myblas.c ../ini.c ../fortify.c ../colamd/colamd.c ../lp_rlp.c ../lp_crash.c ../bfp/bfp_LUSOL/lp_LUSOL.c ../bfp/bfp_LUSOL/LUSOL/lusol.c ../lp_Hash.c ../lp_lib.c ../lp_wlp.c ../lp_matrix.c ../lp_mipbb.c ../lp_MPS.c ../lp_params.c ../lp_presolve.c ../lp_price.c ../lp_pricePSE.c ../lp_report.c ../lp_scale.c ../lp_simplex.c ../lp_SOS.c ../lp_utils.c ../yacc_read.c ../bfp/bfp_LUSOL/lusol.c'
+c=cc
+
+#determine platform (32/64 bit)
+>/tmp/platform.c
+echo '#include <stdlib.h>'>>/tmp/platform.c
+echo '#include <stdio.h>'>>/tmp/platform.c
+echo 'main(){printf("ux%d", (int) (sizeof(void *)*8));}'>>/tmp/platform.c
+$c /tmp/platform.c -o /tmp/platform
+PLATFORM=`/tmp/platform`
+rm /tmp/platform /tmp/platform.c >/dev/null 2>&1
+
+mkdir bin bin/$PLATFORM >/dev/null 2>&1
+
+#check if this system has the isnan function
+>/tmp/isnan.c
+echo '#include <stdio.h>'>>/tmp/isnan.c
+echo '#include <stdlib.h>'>>/tmp/isnan.c
+echo '#include <math.h>'>>/tmp/isnan.c
+echo 'main(){isnan(0.0);return 0;}'>>/tmp/isnan.c
+$c /tmp/isnan.c -o /tmp/isnan $math >/dev/null 2>&1
+if [ $? = 0 ]
+then NOISNAN=
+else NOISNAN=-DNOISNAN
+fi
+rm /tmp/isnan.c /tmp/isnan >/dev/null 2>&1
+
+def=
+so=
+dl=-ldl
+so=y
+
+opts='-idirafter /usr/include/sys -O3 -DINTEGERTIME -Wno-long-double'
+
+$c -s -c -I.. -I../shared -I../bfp -I../bfp/bfp_LUSOL -I../bfp/bfp_LUSOL/LUSOL -I../colamd $opts $def $NOISNAN -DYY_NEVER_INTERACTIVE -DPARSER_LP -DINVERSE_ACTIVE=INVERSE_LUSOL -DRoleIsExternalInvEngine $src
+libtool -static -o bin/$PLATFORM/liblpsolve55.a `echo $src|sed s/[.]c/.o/g|sed 's/[^ ]*\///g'`
+
+if [ "$so" != "" ]
+then
+  $c -fPIC -fno-common -s -c -I.. -I../shared -I../bfp -I../bfp/bfp_LUSOL -I../bfp/bfp_LUSOL/LUSOL -I../colamd -I. $opts $NOISNAN -DYY_NEVER_INTERACTIVE -DPARSER_LP -DINVERSE_ACTIVE=INVERSE_LUSOL -DRoleIsExternalInvEngine $src
+  $c -dynamiclib bin/$PLATFORM/liblpsolve55.a -compatibility_version 5.5.0 -current_version 5.5.0 -o bin/$PLATFORM/liblpsolve55.dylib `echo $src|sed s/[.]c/.o/g|sed 's/[^ ]*\///g'` -lc
+fi
+
+rm *.o 2>/dev/null

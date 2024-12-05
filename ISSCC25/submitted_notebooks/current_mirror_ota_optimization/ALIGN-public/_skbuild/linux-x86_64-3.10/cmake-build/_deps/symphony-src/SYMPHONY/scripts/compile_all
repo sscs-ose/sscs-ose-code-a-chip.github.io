@@ -1,0 +1,14 @@
+#! /bin/tcsh -f
+
+foreach dir (Template Vrp CNRP MCKP MATCH MPP SPP SPP+CUTS)
+cd $HOME/SYMPHONY/$dir
+foreach solver (CPLEX OSL)
+echo ================= Compiling $dir with $solver ===============
+make LP_SOLVER=$solver
+end
+foreach solver (CPLEX OSL CLP GLPK)
+echo ================= Compiling $dir with OSI_$solver ===============
+make LP_SOLVER=OSI OSI_INTERFACE=$solver
+end
+end
+

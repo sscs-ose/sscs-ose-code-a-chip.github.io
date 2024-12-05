@@ -1,0 +1,17 @@
+#!/bin/tcsh -f
+
+foreach file (E/E-n13-k4 E/E-n22-k4 E/E-n23-k3 E/E-n30-k3 E/E-n31-k7 E/E-n33-k4 V/bayg-n29-k4 V/bays-n29-k5 V/ulysses-n16-k3 V/ulysses-n22-k4 V/gr-n17-k3 V/gr-n21-k3 V/gr-n24-k4 V/fri-n26-k3 V/swiss-n42-k5 V/gr-n48-k3 V/hk-n48-k V/att-n48-k4 E/E-n51-k5 A/A-n32-k5 A/A-n33-k5 A/A-n33-k6 A/A-n34-k5 A/A-n36-k5 A/A-n37-k5 A/A-n38-k5 A/A-n39-k5 A/A-n39-k6 A/A-n45-k6 A/A-n46-k7 B/B-n31-k5 B/B-n34-k5 B/B-n35-k5 B/B-n38-k6 B/B-n39-k5 B/B-n41-k6 B/B-n43-k6 B/B-n44-k7 B/B-n45-k5 B/B-n50-k7 B/B-n51-k7 B/B-n52-k7 B/B-n56-k7 B/B-n64-k9 A/A-n48-k7 A/A-n53-k7)
+
+#foreach file (eil13 eil22 eil23 eil30 eil31 eil33 bayg29 bays29 ulysses16 ulysses22 gr17 gr21 gr24 fri26 swiss42 gr48 hk48 att48 eil51 A/A-n32-k5 A/A-n33-k5 A/A-n33-k6 A/A-n34-k5 A/A-n36-k5 A/A-n37-k5 A/A-n38-k5 A/A-n39-k5 A/A-n39-k6 A/A-n45-k6 A/A-n46-k7 B/B-n31-k5 B/B-n34-k5 B/B-n35-k5 B/B-n38-k6 B/B-n39-k5 B/B-n41-k6 B/B-n43-k6 B/B-n44-k7 B/B-n45-k5 B/B-n50-k7 B/B-n51-k7 B/B-n52-k7 B/B-n56-k7 B/B-n64-k9 A/A-n48-k7 A/A-n53-k7)
+
+#foreach file (A/A-n37-k6 A/A-n44-k6 A/A-n45-k7 A/A-n54-k7 A/A-n55-k9 A/A-n60-k9 A/A-n61-k9 A/A-n62-k8 A/A-n63-k10 A/A-n63-k9 A/A-n64-k9 A/A-n65-k9 A/A-n69-k9 A/A-n80-k10 B/B-n45-k6 B/B-n50-k8 B/B-n57-k7 B/B-n57-k9 B/B-n63-k10 B/B-n66-k9 B/B-n67-k10 B/B-n68-k9 B/B-n78-k10)
+
+foreach solver (CPLEX OSL OSI_CPLEX OSI_OSL OSI_CLP OSI_GLPK)
+echo ============ Solving VRP instance $file:r with $solver ============= 
+echo
+$1/SYMPHONY/Vrp/bin.LINUX/$solver/vrp -F $1/vrplib/$file.vrp -S $1/small_graph/$file.sg 
+echo
+end
+
+end
+

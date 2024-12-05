@@ -1,0 +1,143 @@
+#!/bin/tcsh -f
+
+VER=5.0
+mkdir $1
+awk -f scripts/reformat.awk Makefile.dist > $1/Makefile
+foreach file (LICENSE README-$VER)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/Common
+foreach file (Common/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/LP
+foreach file (LP/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/Master
+foreach file (Master/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/TreeManager
+foreach file (TreeManager/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/CutPool
+foreach file (CutPool/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/CutGen
+foreach file (CutGen/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/include
+foreach file (include/*.h)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/DrawGraph
+foreach file (DrawGraph/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/DrawGraph/IGD_1.0
+foreach file (DrawGraph/IGD_1.0/*.txt)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+foreach file (DrawGraph/IGD_1.0/*.tcl)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+foreach file (DrawGraph/IGD_1.0/*.g)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/DrawGraph/IGD_1.0/Simple_version
+foreach file (DrawGraph/IGD_1.0/Simple_version/*.txt)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+foreach file (DrawGraph/IGD_1.0/Simple_version/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+
+foreach app (Vrp MATCH CNRP MCKP MPP SPP SPP+CUTS Template)
+mkdir $1/$app
+foreach file ($app/Makefile $app/sample.*)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (FLOPC++)
+mkdir $1/$app
+foreach file ($app/Makefile $app/tap.*)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (Vrp CNRP MATCH MPP SPP SPP+CUTS Template)
+mkdir $1/$app/LP
+foreach file ($app/LP/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/$app/Master
+foreach file ($app/Master/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/$app/CutPool
+foreach file ($app/CutPool/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/$app/CutGen
+foreach file ($app/CutGen/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/$app/include
+foreach file ($app/include/*.h)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+mkdir $1/$app/DrawGraph
+foreach file ($app/DrawGraph/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (Vrp MATCH CNRP MCKP MPP SPP SPP+CUTS Template)
+mkdir $1/$app/WIN32
+foreach file ($app/WIN32/*.dsp)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+foreach file ($app/WIN32/*.dsw)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+foreach file ($app/WIN32/*.mak)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (Vrp CNRP FLOPC++ MCKP MATCH MPP SPP SPP+CUTS Template)
+foreach file ($app/README)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (Vrp CNRP MCKP MATCH MPP SPP SPP+CUTS)
+foreach file ($app/LICENSE)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (Vrp CNRP SPP SPP+CUTS)
+mkdir $1/$app/Common
+foreach file ($app/Common/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (MCKP)
+foreach file ($app/*.c)
+awk -f scripts/reformat.awk $file > $1/$file
+end
+end
+
+foreach app (Vrp CNRP MATCH MCKP MPP SPP SPP+CUTS)
+mv $1/$app $1/$app-$VER
+end
+mv $1/Vrp-$VER $1/VRP-$VER
+mv $1/Template $1/USER
+mv $1/README* $1/README
