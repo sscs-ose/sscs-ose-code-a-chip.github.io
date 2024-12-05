@@ -1,0 +1,362 @@
+#--------------------------------------------------------------
+# CACE circuit characterization file
+#--------------------------------------------------------------
+
+name:           ota
+description:    A FVF Based OTA
+PDK:            sky130A
+
+cace_format:    5.2
+
+authorship:
+  designer:         Analog Vibes
+  company:          Analog Vibes
+  creation_date:    Nov 23, 2024
+  license:          Apache 2.0
+
+paths:
+  root:             ..
+  schematic:        xschem
+    #layout:           gds
+  netlist:          netlist
+  documentation:    docs
+
+pins:
+  AVDD:
+    description: Positive analog power supply
+    type: power
+    direction: inout
+  AVSS:
+    description: Analog ground
+    type: ground
+    direction: inout
+  NBC_10U:
+    description: Bias current input
+    type: signal
+    direction: input
+  NB_10U:
+    description: Bias current input
+    type: signal
+    direction: input
+  INP:
+    description: Voltage positive input
+    type: signal
+    direction: input
+  INM:
+    description: Voltage negative input
+    type: signal
+    direction: input
+  VOUT:
+    description: Voltage output
+    type: signal
+    direction: output
+
+default_conditions:
+  AVDD:
+    description: Analog power supply voltage
+    display: Vdd
+    unit: V
+    typical: 1.8
+  IPCM:
+    description: Input common mode voltage
+    display: Vcm
+    unit: V
+    typical: 1.2 
+  IB:
+    description: Bias current
+    display: Ib
+    unit: uA
+    typical: 10
+  C_LOAD:
+    description: Output load capacitance
+    display: CLoad
+    unit: pF
+    maximum: 80
+  corner:
+    description: Process corner
+    display: Corner
+    typical: tt
+  temperature:
+    description: Ambient temperature
+    display: Temp
+    unit: °C
+    typical: 27
+
+parameters:
+  ac_params:
+    display: AC Params
+    spec:
+      A0:
+        display: DC gain
+        description: The DC gain of the OTA
+        unit: dB
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+      UGF:
+        display: Unity Gain Frequency
+        description: The unity gain frequency of the OTA
+        unit: Hz
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+      PM:
+        display: Phase Margin
+        description: The phase margin of the OTA
+        unit: °
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: tb_ac.sch
+        format: ascii
+        suffix: .data
+        variables: [A0, UGF, PM]
+    conditions:
+      corner:
+        enumerate: [tt, ss, ff, sf, fs]
+      AVDD:
+        minimum: 1.7
+        typical: 1.8
+        maximum: 1.9
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+   
+  cmrr_params:
+    display: CMRR Params
+    spec:
+      CMRR_DC:
+        display: DC CMRR
+        description: The DC CMRR of the OTA
+        unit: dB
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: tb_cmrr.sch
+        format: ascii
+        suffix: .data
+        variables: [CMRR_DC]
+    conditions:
+      corner:
+        enumerate: [tt, ss, ff, sf, fs]
+      AVDD:
+        minimum: 1.7
+        typical: 1.8
+        maximum: 1.9
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+
+  psrr_params:
+    display: PSRR Params
+    spec:
+      PSRR_DC:
+        display: DC PSRR
+        description: The DC PSRR of the OTA
+        unit: dB
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: tb_psrr.sch
+        format: ascii
+        suffix: .data
+        variables: [PSRR_DC]
+    conditions:
+      corner:
+        enumerate: [tt, ss, ff, sf, fs]
+      AVDD:
+        minimum: 1.7
+        typical: 1.8
+        maximum: 1.9
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+
+  lin_params:
+    display: Linearity Params
+    spec:
+      HD2:
+        display: HD2 at 0.8V(p-p), 1kHz
+        description: HD2 at 0.8V(p-p), 1kHz
+        unit: dB
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+      HD3:
+        display: HD3 at 0.8V(p-p), 1kHz
+        description: HD3 at 0.8V(p-p), 1kHz
+        unit: dB
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: tb_lin.sch
+        format: ascii
+        suffix: .data
+        variables: [HD2, HD3]
+    conditions:
+      corner:
+        enumerate: [tt, ss, ff, fs, sf]
+      AVDD:
+        minimum: 1.7
+        typical: 1.8
+        maximum: 1.9
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+
+  noise_params:
+    display: Noise Params
+    spec:
+      vin_noi_rms:
+        display: Noise:Vin(rms) (1kHz to 1MHz)
+        description: Input referred Noise (rms) (1kHz to 1MHz)
+        unit: uVrms
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: tb_noise.sch
+        format: ascii
+        suffix: .data
+        variables: [vin_noi_rms]
+    conditions:
+      corner:
+        enumerate: [tt, ss, ff, sf, fs]
+      AVDD:
+        minimum: 1.7
+        typical: 1.8
+        maximum: 1.9
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+
+  slew_params:
+    display: Slew Params
+    spec:
+      rise_slew:
+        display: Rise Slew Rate
+        description: Rise Slew Rate
+        unit: V/us
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+      fall_slew:
+        display: Fall Slew Rate
+        description: Fall Slew Rate
+        unit: V/us
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: tb_slew.sch
+        format: ascii
+        suffix: .data
+        variables: [rise_slew, fall_slew]
+    conditions:
+      corner:
+        enumerate: [tt, ss, ff, sf, fs]
+      AVDD:
+        minimum: 1.7
+        typical: 1.8
+        maximum: 1.9
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+
+  power_params:
+    display: Static Power Params
+    spec:
+      power_tot:
+        display: Total Static Power
+        description: Total Static Power
+        unit: uW
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+      power_ota_core:
+        display: Power - OTA Core
+        description: Power - OTA Core
+        unit: uW
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+      power_ota_bias:
+        display: Power - OTA Bias
+        description: Power - OTA Bias
+        unit: uW
+        minimum:
+          value: any
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: tb_power.sch
+        format: ascii
+        suffix: .data
+        variables: [power_tot, power_ota_core, power_ota_bias]
+    conditions:
+      corner:
+        enumerate: [tt, ss, ff, fs, sf]
+      AVDD:
+        minimum: 1.7
+        typical: 1.8
+        maximum: 1.9
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 130
+ 

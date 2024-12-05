@@ -1,0 +1,47 @@
+** sch_path: /home/sscspico/test_tools/coc_analog_vibes/ISSCC25/submitted_notebooks/analog_vibes/sim_pex/runs/RUN_2024-12-01_16-10-40/parameters/lin_params/run_39/tb_lin_pex.sch
+**.subckt tb_lin_pex
+V0 AVSS GND 0
+V1 AVDD AVSS 1.7
+I1 AVDD IBIAS1_10U 9.999999999999999e-06
+V2 IPCM AVSS 1.2
+V3 VIN IPCM sin(0 0.4 1035.15625 0 0 45.0)
+C1 VOUT AVSS 8e-11 m=1
+I2 AVDD IBIAS2_10U 9.999999999999999e-06
+x1 AVDD AVSS VIN VOUT IBIAS1_10U IBIAS2_10U VOUT ota_pex
+**** begin user architecture code
+
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/corners/fs.spice
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical.spice
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice
+.include /home/sscspico/miniconda3/share/pdk/sky130A/libs.tech/ngspice/corners/fs/specialized_cells.spice
+
+
+.control
+tran 50u 51.2m
+linearize v(VOUT)
+set specwindow=blackman
+fft v(VOUT)
+let out_db = db(mag(v(VOUT)))
+meas ac H1 find out_db at=1035.15625
+meas ac H2 find out_db at=2070.3125
+meas ac H3 find out_db at=3105.46875
+let HD2=H1-H2
+let HD3=H1-H3
+echo $&HD2 $&HD3 > /home/sscspico/test_tools/coc_analog_vibes/ISSCC25/submitted_notebooks/analog_vibes/sim_pex/runs/RUN_2024-12-01_16-10-40/parameters/lin_params/run_39/tb_lin_pex_39.data
+quit
+
+.endc
+
+
+.temp 125
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  xschem/ota_pex.sym # of pins=7
+** sym_path: /home/sscspico/test_tools/coc_analog_vibes/ISSCC25/submitted_notebooks/analog_vibes/sim_pex/xschem/ota_pex.sym
+.include ./ota_pex.spice
+.GLOBAL GND
+.end
