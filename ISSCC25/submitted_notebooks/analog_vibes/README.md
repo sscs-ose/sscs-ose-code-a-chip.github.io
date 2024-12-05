@@ -9,7 +9,8 @@ SPDX-License-Identifier: Apache-2.0 <br>
 ## Please go through `/fvf_based_ota.pynb` file for details (Easily Opens in Colab :))
 
 ### The FVF based OTA schematic
-![fvfota (1)](https://github.com/user-attachments/assets/8ad01ad7-23b0-4c4b-af3b-b99e7a1f238a)
+![fvfota (3)](https://github.com/user-attachments/assets/ddba20d1-747e-4d61-8d2e-ba9ca323b0d8)
+
 
 ### Layout of the FVF based OTA (Automated using Python)
 ![klayout_printout-1](https://github.com/user-attachments/assets/50417ed2-26c3-43e2-aa4c-fd47d0be25f8)
