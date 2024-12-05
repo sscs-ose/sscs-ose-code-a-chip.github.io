@@ -1,0 +1,28 @@
+:
+src='../../shared/commonlib.c ../../colamd/colamd.c lp_LUSOL.c ../../lp_utils.c ../../shared/myblas.c LUSOL/lusol.c'
+
+c=cc
+
+#determine platform (32/64 bit)
+>/tmp/platform.c
+echo '#include <stdlib.h>'>>/tmp/platform.c
+echo '#include <stdio.h>'>>/tmp/platform.c
+echo 'main(){printf("osx%d", (int) (sizeof(void *)*8));}'>>/tmp/platform.c
+$c /tmp/platform.c -o /tmp/platform
+PLATFORM=`/tmp/platform`
+rm /tmp/platform /tmp/platform.c >/dev/null 2>&1
+
+mkdir bin bin/$PLATFORM >/dev/null 2>&1
+
+opts='-idirafter /usr/include/sys -O3 -DINTEGERTIME -Wno-long-double'
+
+$c -s -c $opts -I.. -I../.. -I../../colamd -I../../shared -ILUSOL -I. -DRoleIsExternalInvEngine -DINVERSE_ACTIVE=INVERSE_LUSOL $src
+libtool -static -o libbfp_LUSOL.a `echo $src|sed s/[.]c/.o/g|sed 's/[^ ]*\///g'`
+
+opts="$opts -fPIC -fno-common"
+so="-dynamiclib"
+
+$c -s -c $opts -I.. -I../.. -I../../colamd -I../../shared -ILUSOL -I. -DRoleIsExternalInvEngine -DINVERSE_ACTIVE=INVERSE_LUSOL $src
+$c $so libbfp_LUSOL.a -compatibility_version 5.5.0 -current_version 5.5.0 -o bin/$PLATFORM/libbfp_LUSOL.so `echo $src|sed s/[.]c/.o/g|sed 's/[^ ]*\///g'` -lc -lm
+
+rm *.o >/dev/null

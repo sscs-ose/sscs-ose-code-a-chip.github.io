@@ -1,0 +1,22 @@
+2024-09-01 23:59:56 align.main INFO : Reading netlist: /home/adair/Documents/CAD/magic_cds/extraction_custom/current_mirror_ota/current_mirror_ota.sp subckt=CURRENT_MIRROR_OTA, flat=0
+2024-09-01 23:59:56 align.compiler.compiler INFO : Starting topology identification...
+2024-09-01 23:59:56 align.schema.parser WARNING : Unknown device found N_DIFF_PAIR {}, creating a generic model for this
+2024-09-01 23:59:56 align.cmdline ERROR : Fatal Error. Cannot proceed
+Traceback (most recent call last):
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/cmdline.py", line 197, in parse_args
+    return schematic2layout(**vars(arguments))
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/main.py", line 167, in schematic2layout
+    primitive_lib = generate_hierarchy(netlist, subckt, topology_dir, flatten, pdk_dir)
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/compiler/compiler.py", line 27, in generate_hierarchy
+    ckt_data, primitive_library = compiler_input(
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/compiler/compiler.py", line 76, in compiler_input
+    ckt_parser.parse(lines)
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/schema/parser.py", line 88, in parse
+    self._dispatch(cache)
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/schema/parser.py", line 104, in _dispatch
+    self._process_declaration(token.value.upper(), args, kwargs)
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/schema/parser.py", line 187, in _process_declaration
+    self.library.append(subckt)
+  File "/home/adair/Documents/CAD/venv/lib/python3.10/site-packages/align/schema/library.py", line 25, in append
+    assert not self.find(item.name), f'Duplicate model/subcircuit name {item.name} New: {item}, Existing: {self.find(item.name)}'
+AssertionError: Duplicate model/subcircuit name N_DIFF_PAIR New: name='N_DIFF_PAIR' base=None pins=['SOURCE', 'D0', 'G0', 'D1', 'G1', 'VSS'] parameters={} prefix='' elements=List[Instance](__root__=[]) generator=Dict[str, str](__root__={}) constraints=ConstraintDB(__root__=[]), Existing: name='N_DIFF_PAIR' base=None pins=['P0', 'P1', 'P2', 'P3', 'P4', 'P5'] parameters={} prefix=''

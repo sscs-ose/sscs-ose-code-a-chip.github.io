@@ -1,0 +1,1720 @@
+%===========================================================================%
+%                                                                           %
+% This file is part of the documentation for the SYMPHONY MILP Solver.      %
+%                                                                           %
+% SYMPHONY was jointly developed by Ted Ralphs (ted@lehigh.edu) and         %
+% Laci Ladanyi (ladanyi@us.ibm.com).                                        %
+%                                                                           %
+% (c) Copyright 2000-2015 Ted Ralphs. All Rights Reserved.                  %
+%                                                                           %
+% SYMPHONY is licensed under the Eclipse Public License. Please see         %
+% accompanying file for terms.                                              %
+%                                                                           %
+%===========================================================================%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{LP module callbacks}
+\label{user-written-lp}
+
+\subsubsection{Data Structures}
+\label{data_structures}
+
+We first describe a few structures that are used to pass
+data into and out of the user functions of the LP module.
+
+\begin{description}
+
+\begin{htmlonly}
+\paragraph{MIPdesc}
+\end{htmlonly}
+%\begin{latexonly}
+\firstfuncdef{MIPdesc}
+%\end{latexonly}
+\label{MIPdesc}
+
+One of the few internally defined data structures that the user has to deal
+with frequently is the \texttt{MIPdesc} data structure, which holds the data
+needed to describe a MILP. This data structure is used by SYMPHONY for two
+purposes. First, it is used to store the description of a generic MILP that is
+either read in from an MPS or AMPL file. More importantly, it is the data
+structure the user must use to pass the subproblem descriptions back to
+SYMPHONY at the time a new search tree node is created in the function
+\hyperref{{\tt user\_create\_subproblem()}} {\ptt {user\_create\_subproblem()}
+(see Section }{)}{user_create_subproblem}. The structure has 14 fields (listed
+below) that must be filled out to describe a subproblem (some fields are
+optional). \\
+\\
+A subproblem is a mixed-integer program defined by a matrix of constraints, an
+objective function, bounds on both the right hand side values of the
+constraints and the variables, an array indicating which variables are
+integer, and (optionally) an array of column names that allows SYMPHONY to
+report the solution back in terms of column names instead of user indices. If
+the subproblem has \texttt{n} variables and \texttt{m} constraints, the
+constraints are given by a constraint coefficient matrix of size \texttt{m}
+$\times$ \texttt{n} (described in the next paragraph). The sense of each
+constraint, the right hand side values and bounds on the right hand side
+(called {\em range}) are vectors are of size \texttt{m}. The objective
+function coefficients and the lower and upper bounds on the variables are
+vectors of length \texttt{n}. The sense of each constraint can be either 'L'
+($\leq$), 'E' ($=$), 'G' ($\geq$) or 'R' (ranged). For non-ranged rows the
+range value is {\tt 0}, for a ranged row the range value must be non-negative
+and the constraint means that the row activity level has to be between the
+right hand side value and the right hand side increased by the range value. \\
+\\
+Since the coefficient matrix is very often sparse, only the nonzero entries
+are stored. Each entry of the matrix has a column index, a row index and a
+coefficient value associated with it. A matrix is specified in the form of the
+three arrays \texttt{matval}, \texttt{matind}, and \texttt{matbeg}. The array
+\texttt{matval} contains the values of the nonzero entries of the matrix in
+\emph{column order}; that is, all the entries for the $0^{th}$ column come 
+first, then the entries for the $1^{st}$ column, etc. The row index
+corresponding to each entry of \texttt{matval} is listed in \texttt{matind}
+(both of them are of length \texttt{nz}, the number of nonzero entries in the
+matrix). Finally,
+\texttt{matbeg} contains the starting positions of each of the columns in 
+\texttt{matval} and \texttt{matind}. Thus, \texttt{matbeg[i]} is the position
+of the first entry of column \texttt{i} in both \texttt{matval} and
+\texttt{matind}). By convention \texttt{matbeg} is allocated to be of length
+\texttt{n+1}, with \texttt{matbeg[n]} containing the position after the very
+last entry in \texttt{matval} and \texttt{matind} (so it is very conveniently
+equal to \texttt{nz}). This representation of a matrix is known as a {\em
+column ordered} or {\em column major} representation. Below are listed the
+fields that must be filled out to describe a subproblem.\\
+\\
+
+\begin{description}
+\item [\texttt{int n} --] The number of columns.
+\item [\texttt{int m} --] The number of rows.
+\item [\texttt{int nz} --] The number of nonzeros.
+\item [\texttt{double obj\_offset} --] Constant to be added to the objective
+function value when printed.
+\item [\texttt{char obj\_sense} --] Objective sense (set to \texttt{MAXIMIZE}
+or \texttt{MINIMIZE}).
+\item [\texttt{char *is\_int} --] Indicates which variables are required to be 
+integer.
+\item [\texttt{int *matbeg} -- ] The array containing the starting positions
+for each column.  
+\item [\texttt{int *matind} --] The array containing the indices for each
+column. 
+\item [\texttt{double *matval} --] The array containing the matrix values for
+each column.
+\item [\texttt{double *obj} --] The objective function coefficients for the second objective (for multicriteria solve).
+\item [\texttt{double *obj2} --] The objective function coefficients.
+\item [\texttt{double *rhs} --] The right hand side values for the
+constraints. 
+\item [\texttt{double *rngval} --] The range values for the constraints
+(optional). 
+\item [\texttt{char *sense} --] The senses of the constraints. 
+\item [\texttt{double *lb} --] The lower bounds of the variables.
+\item [\texttt{double *ub} --] The upper bounds of the variables.
+\item [\texttt{char **colname} --] The column names.
+\end{description}
+
+\begin{htmlonly}
+\paragraph{cut\_data}
+\end{htmlonly}
+%\begin{latexonly}
+\functiondef{cut\_data}
+%\end{latexonly}
+\label{cut_data}
+
+Another of the internally defined data structures that the user has to
+deal with frequently is the {\tt cut\_data} data structure, used to
+store the packed form of cuts. This structure has 8 fields listed
+below.
+\begin{description}
+\item [{\tt int size} --] The size of the {\tt coef} array.
+\item [{\tt char *coef} --] An array containing the packed form of the
+cut, which is defined and constructed by the user. Given this packed
+form and a list of the variables active in the current relaxation, the
+user must be able to construct the corresponding constraint.
+\item [{\tt double rhs} --] The right hand side of the constraint.
+\item [{\tt double range} --] The range of the constraint. It is zero for
+a standard form constraint. Otherwise, the row activity level is
+limited to between {\tt rhs} and ${\tt rhs}+{\tt range}$.
+\item [{\tt char type} --] A user-defined type identifier that represents the
+general class that the cut belongs to.
+\item [{\tt char sense} --] The sense of the constraint. Can be either 'L' 
+($\leq$), 'E' ($=$), 'G' ($\geq$) or 'R' (ranged). This may be evident
+from the {\tt type}.
+\item [{\tt char deletable} --] Determines whether or not a cut can be
+deleted once added to the formulation. {\tt TRUE} by default.
+\item [{\tt char branch} --] Determines whether the cut can be branched
+on or not. Possible initial values are {\tt DO\_NOT\_BRANCH\_ON\_THIS\_ROW}
+and {\tt ALLOWED\_TO\_BRANCH\_ON}.
+\item [{\tt int name} --] Identifier used by \BB. The user should not
+set this.
+\end{description}
+
+\begin{htmlonly}
+\paragraph{waiting\_row}
+\end{htmlonly}
+%\begin{latexonly}
+\functiondef{waiting\_row}
+\label{waiting_row}
+%\end{latexonly}
+
+A closely related data structure is the {\tt waiting\_row},
+essentially the ``unpacked'' form of a cut. There are six fields.
+
+\begin{description}
+
+\item[{\tt source\_pid} --] Used internally by \BB.
+
+\item[{\tt cut\_data *cut} --] Pointer to the cut from which the row was generated.
+
+\item[{\tt int nzcnt, *matind, *matval} --] Fields describing the row. {\tt nzcnt} is the number of nonzeros in
+the row, i.e., the length of the {\tt matind} and {\tt matval} arrays,
+which are the variable indices (wrt. the current LP relaxation) and
+nonzero coefficients in the row.
+
+\item[{\tt double violation} --] If the constraint corresponding to the cut is violated, this value
+contains the degree of violation (the absolute value of the difference
+between the row activity level (i.e., lhs) and the right hand
+side). This value does not have to be set by the user.
+
+\end{description}
+
+\begin{htmlonly}
+\paragraph{var\_desc}
+\end{htmlonly}
+%\begin{latexonly}
+\functiondef{var\_desc}
+%\end{latexonly}
+
+The {\tt var\_desc} structure is used list the variables in the current
+relaxation. There are four fields.
+
+\begin{description}
+\item[{\tt int userind} --] The user index of the variables,
+\item[{\tt int colind} --] The column index of the variables (in the
+current relaxation),
+\item[{\tt double lb} --] The lower bound of the variable,
+\item[{\tt double ub} --] The upper bound of the variable.
+\end{description}
+
+\end{description}
+
+\newpage
+\subsubsection{Function Descriptions}
+\noindent Now we describe the functions themselves.
+
+\bd
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_receive_lp_data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\firstfuncdef{user\_receive\_lp\_data} 
+\label{user_receive_lp_data}
+\sindex[cf]{user\_receive\_lp\_data}
+\begin{verbatim}
+int user_receive_lp_data (void **user)
+\end{verbatim}
+
+\bd
+
+\describe
+
+This function only has to be filled out for parallel execution and only if
+either the TM or LP modules are configured as separate processes. Otherwise,
+data will have been copied into appropriate locations in the master function
+\hyperref{{\tt user\_send\_lp\_data()}} {\ptt {user\_send\_lp\_data()} (see
+Section }{)}{user_send_lp_data}. The two cases can be handled by means of {\tt
+\#ifdef} statements. See comments in the source code stubs for more details. \\
+\\
+Here, the user must receive all problem-specific information sent from
+the master, set up necessary data structures, etc. Note that the data must be
+received in exactly the same order as it was sent in \hyperref{{\tt
+user\_send\_lp\_data()}} {\ptt {user\_send\_lp\_data()} (see Section
+}{)}{user_send_lp_data}. See Section \ref{communication} for more notes on
+receiving data.
+
+\args
+
+\bt{llp{250pt}}
+{\tt void **user} & OUT & Pointer to the user-defined LP data
+structure. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. \BB\ aborts this LP module. \\
+{\tt USER\_SUCCESS} & User received the data successfully. \\
+{\tt USER\_DEFAULT} & User did not send any data. \\
+\et
+
+\item[Wrapper invoked from:] 
+{\tt lp\_initialize()} at process start.
+
+\ed
+
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_create_subproblem
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_create\_subproblem}
+\label{user_create_subproblem}
+\sindex[cf]{user\_create\_subproblem}
+\begin{verbatim}
+int user_create_subproblem(void *user, int *indices, MIPdesc *mip,
+                           int *maxn, int *maxm, int *maxnz)
+\end{verbatim}
+
+\bd
+
+\describe
+
+Based on the instance data contained in the user data structure and the list
+of base and extra variables that are active in the current subproblem, the
+user has to create the subproblem for the search node. The matrix describing
+the subproblem must contain those variables whose user indices are listed in
+the array \texttt{indices} (in the same order) and the base constraints. The
+extra (dynamically generated) constraints are added automatically by SYMPHONY
+after the initial subproblem description is created. \\
+\\
+In this function, the user is required to construct a description of the
+subproblem in column-ordered format and pass it back to SYMPHONY by filling
+out the \texttt{MIPdesc} data structure, described \hyperref{here}{in Section
+}{}{MIPdesc}. The user is not responsible for allocating extra memory to allow
+for the addition of dynamically generated cuts and variables. The arrays
+allocated in \ptt{user\_create\_subproblem()} are owned by SYMPHONY after
+allocation and are freed as soon as the relaxation is loaded into the
+solver. However, if the user has an idea as to the maximum number of variables
+and constraints that are likely to be generated during processing of the
+subproblem, this information can be passed to SYMPHONY in the variables
+\texttt{*maxn}, \texttt{*maxm}, and \texttt{*maxnz}. These numbers are only
+estimates that SYMPHONY can use to perform memory allocation. They do not have
+to be exact numbers. In fact, these estimates need not be provided at all. The
+\texttt{obj\_sense} and \texttt{obj\_offset} fields are set globally in the
+function \hyperref{{\tt user\_initialize\_root\_node()}} {\ptt{
+user\_initialize\_root\_node()} (see
+Section}{)}{user_initialize_root_node}. Setting them here will have no
+effect.\\
+\\
+Note that, the user should return ``USER\_DEFAULT'' if an MPS or GMPL/AMPL 
+file was read in to describe the original MILP. \BB\ will allocate the 
+corresponding arrays and specify the constraint matrix automatically in this 
+case.
+
+\args
+
+\bt{llp{257pt}}
+{\tt void *user} & IN & Pointer to the user-defined LP data structure. \\ & \\
+{\tt int *indices} & IN & The list of the active variables (base and extra).\\
+{\tt MIPdesc *mip} & OUT & Pointer to the MIPdesc data structure. \\ 
+{\tt int *maxn} & OUT & Estimated maximum number of variables.\\
+{\tt int *maxm} & OUT & Estimated maximum number of constraints.\\
+{\tt int *maxnz} & OUT & Estimated maximum number of nonzeros. \\
+\et
+
+\returns
+
+\bt{lp{330pt}}
+{\tt USER\_ERROR} & Error. The LP module is aborted. \\
+{\tt USER\_SUCCESS} & User created the constraint matrix with the base
+constraints. \\
+{\tt USER\_DEFAULT} & This return code is used when the default routines for
+reading in an MPS or AMPL file were used and the user wants to let SYMPHONY
+set up the subproblem automatically. This return will cause an error if the
+default I/O routines were not used. \\
+\et
+
+\postp
+
+The extra constraints are added to the matrix by calling the 
+{\tt \htmlref{user\_unpack\_cuts()}{user_unpack_cuts}} subroutine and 
+then adding the corresponding rows to the matrix. This is easier for
+the user to implement, but less efficient than adding the cuts at the
+time the original matrix was being constructed.
+
+\item[Wrapper invoked from:] {\tt process\_chain()} which is
+invoked when setting up a the initial search node in a chain.
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_is_feasible
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_is\_feasible}
+\sindex[cf]{user\_is\_feasible}
+\begin{verbatim}
+int user_is_feasible(void *user, double lpetol, int varnum, int
+                     *indices, double *values, int *feasible, 
+                     double *objval, int branching, double *heur_solution)
+\end{verbatim}
+
+\bd
+\describe
+
+The user can test the feasibility status of the solution to the current LP
+relaxation and/or return a feasible solution generated by a primal heuristic.
+This function is primarily used in cases where a solution satisfying
+integrality restrictions may not be feasible, i.e., it may violate an
+inequality not present in the current relaxation that will be generated by the
+user during the cut generation phase. In such a case, it is not possible for
+SYMPHONY to determine this and the user should set {\tt *feasible} to {\tt
+IP\_INFEASIBLE} and return {\tt USER\_SUCCESS}. If the user tests the
+feasibility status of the solution and determines that the current solution is
+feasible, then {\tt *feasible} should be set to {\tt IP\_FEASIBLE} instead. IN
+this case, the user can set {\tt *objval} to the true objective function value
+of the feasible solution to account for any round-ff error introduced by the
+solver if desired. If all integral solution must be feasible, the user can ask
+SYMPHONY to simply test the integrality status by returning {\tt
+USER\_DEFAULT}.
+
+If the user is able to generate a feasible solution using a primal heuristic,
+then the solution can be returned in a dense format in the array {\tt
+heur\_solution}. In this case, {\tt *objval} should be set to the value of the
+solution and {\tt *feasible} should be set to {\tt IP\_HEUR\_FEASIBLE}. 
+
+\args
+
+\bt{llp{265pt}}
+{\tt void *user} & INOUT & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt double lpetol} & IN & The $\epsilon$ tolerance of the LP solver. \\
+{\tt int varnum} & IN & The length of the {\tt indices} and {\tt values}
+arrays.\\ 
+{\tt int *indices} & IN & User indices of variables at nonzero level in the
+current solution.\\ 
+{\tt double *values} & IN & Values of the variables listed in {\tt indices}.\\
+& & \\
+{\tt int *feasible} & OUT & Feasibility status of the solution ({\tt
+IP\_INFEASIBLE}, {\tt IP\_FEASIBLE}, or {\tt IP\_HEUR\_FEASIBLE}). \\
+{\tt double *objval} & INOUT & The user can return the ``true'' objective
+function value of the solution in the case it is feasible, i.e., eliminating
+the round-off error. This variable should also be set to the value of the
+heuristic solution, if one is found. \\
+{\tt int branching} & In & Indicates whether the function is being invoked
+during strong branching (from {\tt select\_branching\_object()}) or after
+solving an Lp relaxation (from {\tt fathom\_branch()}). \\
+{\tt double *heur\_solution} & OUT & Used to return a solution determined
+heuristically.
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. Solution is considered to be not feasible.\\
+{\tt USER\_SUCCESS} & User checked IP feasibility. \\
+{\tt USER\_DEFAULT} & SYMPHONY should test the integrality of the solution to
+determine if it is feasible.
+\et
+
+\item[Wrapper invoked from:] {\tt select\_branching\_object()} after
+pre-solving the LP relaxation of a child corresponding to a candidate and from
+{\tt fathom\_branch()} after solving an LP relaxation.
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_send_feasible_solution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_send\_feasible\_solution}
+\label{user_send_feasible_solution}
+\sindex[cf]{user\_send\_feasible\_solution}
+\begin{verbatim}
+int user_send_feasible_solution(void *user, double lpetol,
+                                int varnum, int *indices, double *values)
+\end{verbatim}
+
+\bd
+\describe
+
+This function is only used for parallel computation. The user can send a
+feasible solution in custom format to the master module if desired. However,
+the default routine suffices in most situations. The solution is sent using
+the communication functions described in Section
+\ref{communication} in whatever logical format the user wants to use.
+The default is to pack the user indices and values of variables at
+non-zero level. If the user packs the
+solution herself then the same data must be packed here that will be
+received in the {\tt \htmlref{user\_receive\_feasible\_solution()}
+{user_receive_feasible_solution}} function in
+the master module. See the description of that function for details.
+This function will only be called when either the LP or tree manager
+are running as a separate executable. Otherwise, the solution gets
+stored within the LP user data structure.
+
+\args
+
+\bt{llp{290pt}}
+{\tt void *user} & IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt double lpetol} & IN & The $\epsilon$ tolerance of the LP solver. \\
+{\tt int varnum} & IN & The length of the {\tt indices} and {\tt
+values} arrays.\\
+{\tt int *indices} & IN & User indices of variables at nonzero level
+in the current solution.\\
+{\tt double *values} & IN & Values of the variables listed in {\tt indices}.\\
+\et
+
+\returns
+
+\bt{lp{315pt}}
+{\tt USER\_ERROR} & Error. Do the default.\\
+{\tt USER\_SUCCESS} & User packed the solution.\\
+{\tt USER\_DEFAULT} & Regulated by the parameter {\tt
+pack\_feasible\_solution\_default}, but set to {\tt SEND\_NONZEROS}
+unless overridden by the user.\\
+{\tt SEND\_NONZEROS} & Pack the nonzero values and their indices.\\
+\et
+
+\item[Wrapper invoked:] as soon as feasibility is detected anywhere.
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_display_lp_solution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_display\_lp\_solution}
+\sindex[cf]{user\_display\_lp\_solution}
+\begin{verbatim}
+int user_display_lp_solution(void *user, int which_sol,
+                          int varnum, int *indices, double *values)
+\end{verbatim}
+
+\bd
+\describe
+
+Given a solution to an LP relaxation (the indices and values of the nonzero
+variables) the user can (graphically) display it. The {\tt which\_sol}
+argument shows what kind of solution is passed to the function: {\tt
+DISP\_FEAS\_SOLUTION} indicates a solution feasible to the original IP
+problem, {\tt DISP\_RELAXED\_SOLUTION} indicates the solution to any LP
+relaxation and {\tt DISP\_FINAL\_RELAXED\_SOLUTION} indicates the solution to
+an LP relaxation when no cut has been found. There is no post-processing.
+Default options print out user indices and values of nonzero or fractional
+variables on the standard output.
+
+\args
+
+\bt{llp{290pt}}
+{\tt void *user} & IN & Pointer to the user-defined LP data structure.\\
+& & \\
+{\tt int which\_sol} & IN & The type of solution passed on to the
+displaying function. Possible values are {\tt DISP\_FEAS\_SOLUTION},
+{\tt DISP\_RELAXED\_SOLUTION} and {\tt DISP\_FINAL\_RELAXED\_SOLUTION}. \\
+{\tt int varnum} & IN & The number of variables in the current
+solution at nonzero level (the length of the {\tt indices} and {\tt
+values} arrays). \\
+{\tt int *indices} & IN & User indices of variables at
+nonzero level in the current solution.\\
+{\tt double *values} & IN & Values of the nonzero variables.\\
+\et
+
+\returns
+
+\bt{lp{317pt}}
+{\tt USER\_ERROR} & Error. \BB\ ignores error message. \\
+{\tt USER\_SUCCESS} & User displayed whatever she wanted to.\\
+{\tt USER\_DEFAULT} & Regulated by the parameter {\tt
+display\_solution\_default}, but set to {\tt DISP\_NZ\_INT} unless overridden
+by the user.\\
+{\tt DISP\_NOTHING} & Display nothing. \\
+{\tt DISP\_NZ\_INT} & Display user indices (as integers) and values of
+nonzero variables. \\
+{\tt DISP\_NZ\_HEXA} & Display user indices (as hexadecimals) and
+values of nonzero variables. \\
+{\tt DISP\_FRAC\_INT} & Display user indices (as integers) and values
+of variables not at their lower or upper bounds. \\
+{\tt DISP\_FRAC\_HEXA} & Display user indices (as hexadecimals) and
+values of variables not at their lower and upper bounds. \\
+\et
+
+\item[Wrapper invoked from:] {\tt fathom\_branch()} with {\tt
+DISP\_FEAS\_SOLUTION} or {\tt DISP\_RELAXED\_SOLUTION} after solving an LP
+relaxation and checking its feasibility status. If it was not feasible and no
+cut could be added either then the wrapper is invoked once more, now with {\tt
+DISP\_FINAL\_RELAXED\_SOLUTION}. 
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_shall_we_branch  and  user_select_candidates
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_shall\_we\_branch}
+\label{user_shall_we_branch}
+\sindex[cf]{user\_shall\_we\_branch}
+\begin{verbatim}
+int user_shall_we_branch(void *user, double lpetol, int cutnum, 
+                         int slacks_in_matrix_num,
+                         cut_data **slacks_in_matrix,
+                         int slack_cut_num, cut_data **slack_cuts,
+                         int varnum, var_desc **vars, double *x, 
+                         char *status, int *cand_num, 
+                         branch_obj ***candidates, int *action)
+\end{verbatim}
+
+\bd
+
+\describe
+
+There are two user-written functions invoked from {\tt
+select\_candidates\_u}. The first one
+({\tt \htmlref{user\_shall\_we\_branch()}{user_shall_we_branch}}) decides
+whether to branch at all, the second one ({\tt
+\htmlref{user\_select\_candidates()}{user_select_candidates}}) chooses
+the branching objects. The argument lists of the two functions are the
+same, and if branching occurs (see discussion below) then the contents
+of {\tt *cand\_num} and {\tt *candidates} will not change between the
+calls to the two functions.\\
+\\
+The first of these two functions is invoked in each iteration
+after solving the LP relaxation and (possibly) generating cuts.
+Therefore, by the time it is called, some violated cuts might be known.
+Still, the user might decide to branch anyway. The second function is
+invoked only when branching is decided on.\\
+\\
+Given (1) the number of known violated cuts that can be added to the
+problem when this function is invoked, (2) the constraints that are
+slack in the LP relaxation, (3) the slack cuts not in the matrix that
+could be branched on (more on this later), and (4) the solution to the
+current LP relaxation, the user must decide whether to branch or not.
+Branching can be done either on variables or slack cuts. A pool of
+slack cuts which has been removed from the problem and kept for
+possible branching is passed to the user. If any of these happen to
+actually be violated (it is up to the user to determine this), they
+can be passed back as branching candidate type {\tt VIOLATED\_SLACK}
+and will be added into the current relaxation. In this case, branching
+does not have to occur (the structure of the {\tt *candidates} array
+is described below in {\tt \htmlref{user\_select\_candidates()}
+{user_select_candidates}}). \\
+\\
+This function has two outputs. The first output is {\tt *action} which
+can take four values: {\tt USER\_\_DO\_BRANCH} if the user wants to
+branch, {\tt USER\_\_DO\_NOT\_BRANCH} if he doesn't want to branch,
+{\tt USER\_\_BRANCH\_IF\_MUST} if he wants to branch only if there are
+no known violated cuts, or finally {\tt USER\_\_BRANCH\_IF\_TAILOFF} if he
+wants to branch in case tailing off is detected. The second output is the
+number of candidates and their description. In this function the only
+sensible ``candidates'' are {\tt VIOLATED\_SLACK}s. \\
+\\
+There is no post processing, but in case branching is
+selected, the {\tt col\_gen\_before\_branch()} function is invoked
+before the branching would take place. If that function finds dual
+infeasible variables then (instead of branching) they are added to the
+LP relaxation and the problem is resolved. (Note that the behavior of
+the {\tt col\_gen\_before\_branch()} is governed by the {\tt
+colgen\_strat[]} TM parameters.)
+
+\args
+
+\bt{llp{205pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+{\tt double lpetol} & IN & The $\epsilon$ tolerance of the LP solver. \\
+& & \\
+{\tt int cutnum} & IN & The number of violated cuts (known before invoking
+this function) that could be added to the problem (instead of branching).\\
+& & \\
+{\tt int slacks\_in\_matrix\_num} & IN & Number of slack constraints in the
+matrix. \\
+{\tt cut\_data **slacks\_in\_matrix} & IN & The description of the cuts
+corresponding to these constraints (see Section \ref{cut_data}). \\
+& & \\
+{\tt int slack\_cut\_num} & IN & The number of slack cuts not in the
+matrix. \\
+{\tt cut\_data **slack\_cuts} & IN & Array of pointers to these cuts
+(see Section \ref{cut_data}).\\
+{\tt int varnum} & IN & The number of variables in the current lp
+relaxation (the length of the following three arrays).\\
+{\tt var\_desc **vars} & IN & Description of the variables in the
+relaxation. \\
+{\tt double *x} & IN & The corresponding solution values (in the optimal
+solution to the relaxation).\\
+{\tt char *status} & IN & The stati of the variables. 
+There are five possible status values: 
+{\tt NOT\_\-FIXED}, {\tt TEMP\_\-FIXED\_\-TO\_\-UB}, {\tt
+PERM\_\-FIXED\_\-TO\_\-UB}, {\tt TEMP\_\-FIXED\_\-TO\_\-LB} and {\tt
+PERM\_\-FIXED\_\-TO\_\-LB}.\\ 
+& & \\
+{\tt int *cand\_num} & OUT & Pointer to the number of candidates
+returned (the length of {\tt *candidates}).\\
+{\tt candidate ***candidates} & OUT & Pointer to the array of
+candidates generated (see description below).\\
+{\tt int *action} & OUT & What to do. Must be one of the four above described
+values unless the return code is {\tt USER\_DEFAULT}.
+\et
+
+\returns
+
+\bt{lp{340pt}}
+{\tt USER\_ERROR} & Error. {\tt DEFAULT} is used. \\
+{\tt USER\_SUCCESS} & The user filled out {\tt *action} (and possibly {\tt
+*cand\_num} and {\tt *candidates}). \\
+{\tt USER\_DEFAULT} & Action taken is controlled by the parameter {\tt
+shall\_we\_branch\_default}, which is initially
+{\tt USER\_\_BRANCH\_IF\_MUST} unless overridden by the user. \\ 
+\et
+
+\item[Notes:] \hfill
+\begin{itemize}
+	\item The user has to allocate the pointer array for the
+	candidates and place the pointer for the array into {\tt
+	***candidates} (if candidates are returned).
+
+	\item Candidates of type {\tt VIOLATED\_SLACK} are always
+	added to the LP relaxation regardless of what {\tt action} is
+	chosen and whether branching will be carried out or not.
+
+	\item Also note that the user can change his mind in 
+	{\tt \htmlref{user\_select\_candidates()}
+	{user_select_candidates}} and not branch after all, even if
+	she chose to branch in this function. A possible scenario:
+	{\tt cut\_num} is zero when this function is invoked and the
+	user asks for {\tt USER\_\_BRANCH\_IF\_MUST} without checking
+	the slack constraints and slack cuts. Afterward no columns
+	are generated (no dual infeasible variables found) and thus
+	\BB\ decides branching is called for and invokes 
+	{\tt \htmlref{user\_select\_candidates()}{user_select_candidates}}. 
+	However, in that function the
+	user checks the slack cuts, finds that some are violated,
+	cancels the branching request and adds the violated cuts to
+	the relaxation instead.
+\end{itemize}
+
+\item [\bf Warning:] 
+
+The cuts the user unpacks and wants to be added to the
+problem (either because they are of type {\tt VIOLATED\_SLACK} or type
+{\tt CANDIDATE\_CUT\_NOT\_IN\_MATRIX}) will be deleted from the list
+of slack cuts after this routine returns. Therefore the same
+warning applies here as in the function {\tt 
+\htmlref{user\_unpack\_cuts()}{user_unpack_cuts}}.
+
+\item[Wrapper invoked from:] {\tt select\_branching\_object()}.
+
+\ed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_select_candidates
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\functiondef{user\_select\_candidates}
+\label{user_select_candidates}
+\sindex[cf]{user\_select\_candidates}
+\begin{verbatim}
+int user_select_candidates(void *user, double lpetol, int cutnum, 
+                           int slacks_in_matrix_num,
+                           cut_data **slacks_in_matrix,
+                           int slack_cut_num, cut_data **slack_cuts,
+                           int varnum, var_desc **vars, double *x, 
+                           char *status, int *cand_num, 
+                           branch_obj ***candidates, int *action,
+                           int bc_level)
+\end{verbatim}
+
+\bd
+
+\describe
+
+The purpose of this function is to generate branching candidates. Note
+that {\tt *action} from {\tt \htmlref{user\_shall\_we\_branch()}
+{user_shall_we_branch}} is passed on to
+this function (but its value can be changed here, see notes at the
+previous function), as well as the candidates in {\tt **candidates}
+and their number in {\tt *cand\_num} if there were any. \\
+\\
+Violated cuts found among the slack cuts (not in the matrix) can be
+added to the candidate list. These violated cuts will be added to the
+LP relaxation regardless of the value of {\tt *action}. \\
+\\
+The {\tt branch\_obj} structure contains fields similar to the
+{\tt \htmlref{cut\_data}{cut_data}} data structure. Branching is
+accomplished by imposing inequalities which divide the current
+subproblem while cutting off the corresponding fractional solution.
+Branching on cuts and variables is treated symmetrically and branching
+on a variable can be thought of as imposing a constraint with a single
+unit entry in the appropriate column. Following is a list of the
+fields of the {\tt branch\_obj} data structure which must be set by
+the user.
+
+\begin{description}
+
+\item[\tt char type] Can take five values:
+\begin{description}
+\item[\tt CANDIDATE\_VARIABLE] The object is a variable.
+\item[\tt CANDIDATE\_CUT\_IN\_MATRIX] The object is a cut (it must
+be slack) which is in the current formulation.
+\item[\tt CANDIDATE\_CUT\_NOT\_IN\_MATRIX] The object is a cut (it
+must be slack) which has been deleted from the formulation and is listed among
+the slack cuts.
+\item[\tt VIOLATED\_SLACK] The object is not offered as a candidate for
+branching, but rather it is selected because it was among the slack cuts but
+became violated again.
+\item[\tt SLACK\_TO\_BE\_DISCARDED] The object is not selected as a candidate
+for branching rather it is selected because it is a slack cut which should be
+discarded even from the list of slack cuts.
+\end{description}
+
+\item[\tt int position]
+
+The position of the object in the appropriate array (which is one of {\tt
+vars}, {\tt slacks\_in\_matrix}, or {\tt slack\_cuts}.
+
+\item[\tt waiting\_row *row] 
+
+Used only if the type is {\tt CANDIDATE\_CUT\_NOT\_IN\_MATRIX} or {\tt
+VIOLATED\_SLACK}. In these cases this field holds the row extension
+corresponding to the cut. This structure can be filled out easily
+using a call to {\tt \htmlref{user\_unpack\_cuts()}{user_unpack_cuts}}.
+
+\item[\tt int child\_num] \hfill
+
+The number of children of this branching object.
+
+\item[\tt char *sense, double *rhs, double *range, int *branch] \hfill
+
+The description of the children. These arrays determine the sense,
+rhs, etc. for the cut to be imposed in each of the children. These are
+defined and used exactly as in the {\tt \htmlref{cut\_data}{cut_data}}
+data structure. {\bf Note:} If a limit is defined on the number of
+children by defining the {\tt MAX\_CHILDREN\_NUM} macro to be a number
+(it is pre-defined to be 4 as a default), then these arrays will be
+statically defined to be the correct length and don't have to be
+allocated. This option is highly recommended. Otherwise, the user must
+allocate them to be of length {\tt child\_num}.
+
+\item[\tt double lhs] 
+
+The activity level for the row (for branching cuts). This field is
+purely for the user's convenience. \BB\ doesn't use it so it need not
+be filled out.
+
+\item[\tt double *objval, int *termcode, int *iterd, int *feasible] \hfill
+
+The objective values, termination codes, number of iterations and
+feasibility stati of the children after pre-solving them. These are all
+filed out by \BB\ during strong branching. The user may access them in
+{\tt \htmlref{user\_compare\_candidates()}{user_compare_candidates}} 
+(see below).
+
+\end{description}
+
+There are three default options (see below), each chooses a few variables (the
+number is determined by the \hyperref{strong branching parameters}
+{strong branching parameters (see Section } {)} {strong_branching}.
+
+\args
+
+Same as for \htmlref{\tt user\_shall\_we\_branch()}
+{user_shall_we_branch}, except
+that {\tt *action} must be either {\tt USER\_\_DO\_BRANCH} or {\tt
+USER\_\_DO\_NOT\_BRANCH}, and if branching is asked for, there must be
+a real candidate in the candidate list (not only {\tt
+VIOLATED\_SLACK}s and {\tt SLACK\_TO\_BE\_DISCARDED}s). Also, the
+argument {\tt bc\_level} is the level in the tree. This could be used
+in deciding how many strong branching candidates to use.
+
+\returns
+
+\bt{lp{210pt}}
+{\tt USER\_ERROR} & Error. {\tt DEFAULT} is used. \\
+{\tt USER\_SUCCESS} & User generated branching candidates. \\
+{\tt USER\_DEFAULT} & Regulated by the {\tt select\_candidates\_default} 
+parameter, but set to {\tt USER\_\_CLOSE\_TO\_HALF} unless overridden by the
+user.\\
+{\tt USER\_\_CLOSE\_TO\_HALF} & Choose variables with values closest to half.\\
+{\tt USER\_\_CLOSE\_TO\_HALF\_AND\_EXPENSIVE} & Choose variables
+with values close to half and with high objective function coefficients.\\
+{\tt USER\_\_CLOSE\_TO\_ONE\_AND\_CHEAP} & Choose variables with
+values close to one and with low objective function coefficients.\\
+\et
+
+\item[Wrapper invoked from:] {\tt select\_branching\_object()}.
+
+\item[Notes:] See the notes at {\tt \htmlref{user\_shall\_we\_branch()}
+{user_shall_we_branch}}.
+
+\ed
+
+\vspace{1ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_compare_candidates
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_compare\_candidates}
+\label{user_compare_candidates}
+\sindex[cf]{user\_compare\_candidates}
+\begin{verbatim}
+int user_compare_candidates(void *user, branch_obj *can1, branch_obj *can2,
+                            double ub, double granularity, 
+                            int *which_is_better)
+\end{verbatim}
+
+\bd
+\describe
+
+By the time this function is invoked, the children of the current search tree
+node corresponding to each branching candidate have been pre-solved, i.e., the
+{\tt objval}, {\tt termcode}, {\tt iterd}, and {\tt feasible} fields of the
+{\tt can1} and {\tt can2} structures are filled out. Note that if the
+termination code for a child is {\tt LP\_D\_UNBOUNDED} or {\tt LP\_D\_OBJLIM},
+i.e., the dual problem is unbounded or the objective limit is reached, then
+the objective value of that child is set to {\tt MAXDOUBLE / 2}. Similarly, if
+the termination code is one of {\tt LP\_D\_ITLIM} (iteration limit reached),
+{\tt LP\_D\_INFEASIBLE} (dual infeasible) or {\tt LP\_ABANDONED} (because of
+numerical difficulties) then the objective value of that child is set to that
+of the parent's.\\
+\\
+Based on this information the user must choose which candidate he
+considers better and whether to branch on this better one immediately
+without checking the remaining candidates. As such, there are four
+possible answers: {\tt FIRST\_CANDIDATE\_BETTER}, \hfill {\tt
+SECOND\_CANDIDATE\_BETTER}, \hfill {\tt
+FIRST\_CANDIDATE\_BETTER\_AND\_BRANCH\_ON\_IT} and {\tt
+SECOND\_CANDIDATE\_BETTER\_AND\_BRANCH\_ON\_IT}. An answer ending with
+{\tt \_AND\_BRANCH\_ON\_IT} indicates that the user wants to terminate
+the strong branching process and select that particular candidate for
+branching.\\
+\\
+There are several default options. In each of them, objective values of
+the pre-solved LP relaxations are compared. 
+
+\args
+
+\bt{llp{245pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt branch\_obj *can1} & IN & One of the candidates to be compared.\\
+{\tt branch\_obj *can2} & IN & The other candidate to be compared. \\
+{\tt double ub} & IN & The current best upper bound. \\
+{\tt double granularity} & IN & Defined tolerance  \\
+{\tt int *which\_is\_better} & OUT & The user's choice. See the description
+above. \\
+\et
+
+\newpage
+\returns
+
+\bt{lp{290pt}}
+{\tt USER\_ERROR} & Error. {\tt DEFAULT} is used. \\
+{\tt USER\_SUCCESS} & User filled out {\tt *which\_is\_better}. \\
+{\tt USER\_DEFAULT} & Regulated by the {\tt compare\_candidates\_default}
+parameter, initially set to {\tt LOWEST\_LOW\_OBJ} unless overridden by the
+user. \\
+{\tt BIGGEST\_DIFFERENCE\_OBJ} & Prefer the candidate with the biggest
+difference between highest and lowest objective function values.\\
+{\tt LOWEST\_LOW\_OBJ} & Prefer the candidate with the lowest minimum
+objective function value. The minimum is taken over the objective function
+values of all the children. \\
+{\tt HIGHEST\_LOW\_OBJ} & Prefer the candidate with the highest minimum
+objective function value. \\
+{\tt LOWEST\_HIGH\_OBJ} & Prefer the candidate with the lowest maximum
+objective function value. \\
+{\tt HIGHEST\_HIGH\_OBJ} & Prefer the candidate with the highest maximum
+objective function value .\\
+{\tt LOWEST\_LOW\_FRAC} & Prefer the candidate with the lowest minimum
+number of fractional variables. The minimum is taken over the number of
+fractional variables in all the children. Fractional branching options are 
+only available if the fractional branching compile-time option is set in the
+makefile.\\ 
+{\tt HIGHEST\_LOW\_FRAC} & Prefer the candidate with the highest minimum
+number of fractional variables. \\
+{\tt LOWEST\_HIGH\_FRAC} & Prefer the candidate with the lowest maximum
+number of fractional variables. \\
+{\tt HIGHEST\_HIGH\_FRAC} & Prefer the candidate with the highest maximum
+number of fractional variables. \\
+\et
+
+\item[Wrapper invoked from:] {\tt select\_branching\_object()} after
+the LP relaxations of the children have been pre-solved.
+
+\ed
+
+\vspace{1ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_select_child
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_select\_child}
+\label{user_select_child}
+\sindex[cf]{user\_select\_child}
+\begin{verbatim}
+int user_select_child(void *user, double ub, branch_obj *can, char *action)
+\end{verbatim}
+
+\bd
+
+\describe
+
+By the time this function is invoked, the candidate for branching has
+been chosen. Based on this information and the current best upper
+bound, the user has to decide what to do with each child. Possible
+actions for a child are {\tt KEEP\_THIS\_CHILD} (the child will be
+kept at this \LP\ for further processing, i.e., the process {\em
+dives} into that child), {\tt PRUNE\_THIS\_CHILD} (the child will be
+pruned based on some problem specific property---no questions
+asked...), {\tt PRUNE\_THIS\_CHILD\_FATHOMABLE} (the child will be
+pruned based on its pre-solved LP relaxation) and {\tt
+RETURN\_THIS\_CHILD} (the child will be sent back to tree manager).
+Note that at most one child can be kept at the current LP module.
+
+There are two default options---in both of them, objective values of the
+pre-solved LP relaxations are compared (for those children whose pre-solve
+did not terminate with primal infeasibility or high cost). One rule
+prefers the child with the lowest objective function value and the
+other prefers the child with the higher objective function value.
+
+\args
+
+\bt{llp{270pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int ub} & IN & The current best upper bound. \\
+{\tt branch\_obj *can} & IN & The branching candidate. \\
+& & \\
+{\tt char *action} & OUT & Array of actions for the children. The array is
+already allocated to length {\tt can->number}.\\
+\et
+
+\returns
+
+\bt{lp{265pt}}
+{\tt USER\_ERROR} & Error. {\tt DEFAULT} is used. \\
+{\tt USER\_SUCCESS} & User filled out {\tt *action}. \\
+{\tt USER\_DEFAULT} & Regulated by the {\tt select\_child\_default}
+parameter, which is initially set to {\tt PREFER\_LOWER\_OBJ\_VALUE},
+unless overridden by the user. \\
+{\tt PREFER\_HIGHER\_OBJ\_VALUE} & Choose child with the highest
+objective value.\\
+{\tt PREFER\_LOWER\_OBJ\_VALUE} & Choose child with the lowest
+objective value.\\
+{\tt PREFER\_MORE\_FRACTIONAL} & Choose child with the most fractional
+variables. Fractional branching options are 
+only available if the fractional branching compile-time option is set in the
+makefile.\\
+{\tt PREFER\_LESS\_FRACTIONAL} & Choose child with the lowest number of
+fractional variables.\\
+\et
+
+\postp
+
+Checks which children can be fathomed based on the
+objective value of their pre-solved LP relaxation.
+
+\item[Wrapper invoked from:] {\tt branch()}.
+
+\ed
+
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_print_branch_stat
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_print\_branch\_stat}
+\sindex[cf]{user\_print\_branch\_stat}
+\begin{verbatim}
+int user_print_branch_stat(void *user, branch_obj *can, cut_data *cut,
+                           int n, var_desc **vars, char *action)
+\end{verbatim}
+
+\bd
+
+\describe
+
+Print out information about branching candidate {\tt can}, such as a
+more explicit problem-specific description than \BB\ can provide (for
+instance, end points of an edge). If {\tt verbosity} is set
+high enough, the identity of the branching object and the children
+(with objective values and termination codes for the pre-solved LPs) is
+printed out to the standard output by \BB.
+
+\args
+
+\bt{llp{285pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt branch\_obj *can} & IN & The branching candidate. \\
+{\tt cut\_data *cut} & IN & The description of the cut if the
+branching object is a cut. \\
+{\tt int n} & IN & Number of variables. \\
+{\tt var\_desc **vars} & IN & Array of variables in the current relaxation.\\
+{\tt char *action} & IN & Array of actions for the children. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. Ignored by \BB. \\
+{\tt USER\_SUCCESS} & The user printed out whatever she wanted to. \\
+{\tt USER\_DEFAULT} & SYMPHONY prints out its own branching information. \\
+\et
+
+\item[Wrapper invoked from:] {\tt branch()} after the best candidate has been
+selected, pre-solved, and the action is decided on for the children.
+
+\ed
+
+\vspace{1ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_add_to_desc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_add\_to\_desc}
+\sindex[cf]{user\_add\_to\_desc}
+\begin{verbatim}
+int user_add_to_desc(void *user, int *desc_size, char **desc)
+\end{verbatim}
+
+\bd
+\describe
+
+Before a node description is sent to the TM, the user can provide a
+pointer to a data structure that will be appended to the description
+for later use by the user in reconstruction of the node. This
+information must be placed into {\tt *desc}. Its size should be
+returned in {\tt *desc\_size}.\\
+\\
+There is only one default option: the description to be added is considered to
+be of zero length, i.e., there is no additional description.
+
+\args
+
+\bt{llp{275pt}}
+{\tt void *user} & IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int *desc\_size} & OUT & The size of the additional information, the
+length of {\tt *desc} in bytes. \\
+{\tt char **desc} & OUT & Pointer to the additional information (space must be
+allocated by the user).\\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. {\tt DEFAULT} is used. \\
+{\tt USER\_SUCCESS} & User filled out {\tt *desc\_size} and {\tt *desc}.\\
+{\tt USER\_DEFAULT} & No description is appended. \\
+\et
+
+\item[Wrapper invoked from:] {\tt create\_explicit\_node\_desc()} before a
+node is sent to the tree manager.
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_same_cuts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_same\_cuts}
+\sindex[cf]{user\_same\_cuts}
+\begin{verbatim}
+int user_same_cuts (void *user, cut_data *cut1, cut_data *cut2, 
+                    int *same_cuts)
+\end{verbatim}
+
+\bd
+\describe
+
+Determine whether the two cuts are comparable (the normals of the half-spaces
+corresponding to the cuts point in the same direction) and if yes, which one
+is stronger. The default is to declare the cuts comparable only if the {\tt
+type}, {\tt sense} and {\tt coef} fields of the two cuts are the same byte by
+byte; and if this is the case to compare the right hand sides to decide which
+cut is stronger.
+
+\args
+
+\bt{llp{275pt}}
+{\tt void *user} & IN & Pointer to the user-defined LP data structure.\\
+& & \\
+{\tt cut\_data *cut1} & IN & The first cut.\\
+{\tt cut\_data *cut2} & IN & The second cut.\\
+{\tt int *same\_cuts} & OUT & Possible values: {\tt SAME}, {\tt
+FIRST\_CUT\_BETTER}, {\tt SECOND\_CUT\_BETTER} and {\tt DIFFERENT} (i.e., not
+comparable).\\
+\et
+
+\returns
+
+\bt{lp{295.386pt}}
+{\tt USER\_ERROR} & Error. {\tt DEFAULT} is used.\\
+{\tt USER\_SUCCESS} & User did the comparison, filled out {\tt *same\_cuts}. \\
+{\tt USER\_DEFAULT} & Compare byte by byte (see above). \\
+\et
+
+\item[Wrapper invoked from:] {\tt process\_message()} when a {\tt PACKED\_CUT}
+arrives.
+
+\item[Note:] \hfill
+
+This function is used to check whether a newly arrived cut is already
+in the local pool. If so, or if it is weaker than a cut in the local
+pool, then the new cut is discarded; if it is stronger then a cut in
+the local pool, then the new cut replaces the old one and if the new
+is different from all the old ones, then it is added to the local pool.
+
+\ed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_unpack_cuts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_unpack\_cuts}
+\label{user_unpack_cuts}
+\sindex[cf]{user\_unpack\_cuts}
+\begin{verbatim}
+int user_unpack_cuts(void *user, int from, int type, int varnum, 
+                     var_desc **vars, int cutnum, cut_data **cuts,
+                     int *new_row_num, waiting_row ***new_rows)
+\end{verbatim}
+
+\bd
+\describe
+
+If the user has defined application-specific cut classes, these cuts must be
+interpreted as constraints for the current LP relaxation, i.e., the user must
+decode the compact representation of the cuts (see the {\tt
+\htmlref{cut\_data}{cut_data}} structure) into rows for the matrix. A pointer
+to the array of generated rows must be returned in {\tt ***new\_rows} (the
+user has to allocate this array) and their number in {\tt *new\_row\_num}. \\
+\\
+Note that SYMPHONY has built-in support for cuts generated explicitly as
+matrix rows with no user-defined packed form, i.e., cuts whose indices and
+coefficients are given explicitly (see the function
+\hyperref{{\tt user\_find\_cuts()}} {\ptt {user\_find\_cuts()} in Section
+}{}{user_find_cuts}. These cuts can be constructed and added using the helper
+function
+\hyperref{\texttt{cg\_add\_explicit\_cut()}} {\texttt{cg\_add\_explicit\_cut()} (see
+the description of \ptt{user\_find\_cuts()} in Section }{)}{user_find_cuts}
+and are packed and unpacked automatically, so the user does not need to
+implement this function. In post processing, SYMPHONY unpacks explicitly
+defined cuts and internally generated generic cuts.
+
+\args
+
+\bt{llp{225pt}}
+{\tt void *user} & IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int from} & IN & See below in ``Notes''. \\
+{\tt int type} & IN & {\tt UNPACK\_CUTS\_SINGLE} or {\tt
+UNPACK\_CUTS\_MULTIPLE} (see notes below). \\
+{\tt int varnum} & IN & The number of variables. \\
+{\tt var\_desc **vars} & IN & The variables currently in the problem. \\
+{\tt int cutnum} & IN & The number of cuts to be decoded. \\
+{\tt cut\_data **cuts} & IN & Cuts that need to be converted to rows
+for the current LP. See ``Warning'' below. \\
+& & \\
+{\tt int *new\_row\_num} & OUT & Pointer to the number of rows in
+{\tt **new\_rows}. \\
+{\tt waiting\_row ***new\_rows} & OUT & Pointer to the array of
+pointers to the new rows. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. The cuts are discarded.\\
+{\tt USER\_SUCCESS} & User unpacked the cuts. \\
+{\tt USER\_DEFAULT} & There are no user cut types defined. In this case,
+SYMPHONY deals with only explicit cuts and internally generated cuts.  \\
+\et
+
+\item[Wrapper invoked from:] Wherever a cut needs to be unpacked
+(multiple places).
+
+\postp
+
+Explicit row cuts are processed, as well as SYMPHONY's internally generated
+cuts. Also, the pointers to each cut are transferred to the
+\texttt{waiting\_rows} data structure (in previous version, this was done by
+the user).   
+
+\newpage
+\item[Notes:] \hfill
+
+\begin{itemize}
+
+\item When decoding the cuts, the expanded constraints have to be adjusted to
+the current LP, i.e., coefficients corresponding to variables currently not in
+the LP have to be left out.
+
+\item If the {\tt one\_row\_only} flag is set to {\tt
+UNPACK\_CUTS\_MULTIPLE}, then the user can generate as many
+constraints (even zero!) from a cut as she wants (this way she can
+lift the cuts, thus adjusting them for the current LP).
+However, if the flag is set to {\tt UNPACK\_CUTS\_SINGLE}, then for
+each cut the user must generate a unique row, the same one that had
+been generated from the cut before. (The flag is set to this value
+only when regenerating a search tree node.)
+
+\item The {\tt from} argument can take on six different values:
+{\tt CUT\_FROM\_CG}, {\tt CUT\_FROM\_CP}, {\tt CUT\_FROM\_TM}, {\tt
+CUT\_LEFTOVER} (these are cuts from a previous LP relaxation that are
+still in the local pool), {\tt CUT\_NOT\_IN\_MATRIX\_SLACK} and {\tt
+CUT\_VIOLATED\_SLACK} indicating where the cut came from. This might
+be useful in deciding whether to lift the cut or not.
+
+\item The {\tt matind} fields of the rows must be filled with indices with
+respect to the position of the variables in {\tt **vars}.
+
+\item {\bf Warning:} For each row, the user must make sure that the
+cut the row was generated from (and can be uniquely regenerated from
+if needed later) is safely stored in the {\tt 
+\htmlref{waiting\_row}{waiting_row}} structure. \BB\ will free the entries in
+{\tt cuts} after this function returns. If a row is generated from a
+cut in {\tt cuts} (and not from a lifted cut), the user has the option
+of physically copying the cut into the corresponding part of the
+{\tt \htmlref{waiting\_row}{waiting_row}} structure, or copying the
+pointer to the cut into the {\tt \htmlref{waiting\_row}{waiting_row}}
+structure and erasing the pointer in {\tt cuts}. If a row is generated
+from a lifted cut, the user should store a copy of the lifted cut in
+the corresponding part of {\tt \htmlref{waiting\_row}{waiting_row}}.
+
+\end{itemize}
+
+\ed
+
+\vspace{1ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_send_lp_solution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_send\_lp\_solution} 
+\label{user_send_lp_solution}
+\sindex[cf]{user\_send\_lp\_solution} 
+\begin{verbatim}
+int user_send_lp_solution(void *user, int varnum, var_desc **vars, 
+                          double *x, int where)
+\end{verbatim}
+
+\bd
+\describe
+
+This function is only used in the case of parallel execution. 
+The user has the option to send the LP solution to either the cut pool
+or the cut generator in some user-defined form if desired. There are
+two default options---sending the indices and values for all nonzero
+variables ({\tt SEND\_NONZEROS}) and sending the indices and values
+for all fractional variables ({\tt SEND\_FRACTIONS}).
+
+\args
+
+\bt{llp{285pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int varnum} & IN & The number of variables currently in the LP
+relaxation. (The length of the {\tt *vars} and {\tt x} arrays.) \\
+{\tt var\_desc **vars} & IN & The variables currently in the LP relaxation.\\
+{\tt double *x} & IN & Values of the above variables.\\
+{\tt int where} & IN & Where the solution is to be sent---{\tt
+LP\_SOL\_TO\_CG} or {\tt LP\_SOL\_TO\_CP}. \\
+\et
+
+\returns
+
+\bt{lp{315pt}}
+{\tt USER\_ERROR} & Error. No message will be sent. \\
+{\tt USER\_SUCCESS} & User packed and sent the message. \\
+{\tt USER\_DEFAULT} & Regulated by the {\tt pack\_lp\_solution\_default}
+parameter, initially set to {\tt SEND\_NOZEROS}. \\
+{\tt SEND\_NONZEROS} & Send user indices and values of variables
+at nonzero level.\\
+{\tt SEND\_FRACTIONS} & Send user indices and values of variables
+at fractional level.\\
+\et
+
+\item[Wrapper invoked from:] {\tt fathom\_branch()} after an LP relaxation has
+been solved. The message is always sent to the cut generator (if there is
+one). The message is sent to the cut pool if a search tree node at the top of
+a chain is being processed (except at the root in the first phase), or if a
+given number ({\tt cut\_pool\_check\_freq}) of LP relaxations have
+been solved since the last check.
+
+\item[Note:] \hfill
+
+The wrapper automatically packs the level, index, and iteration number
+corresponding to the current LP solution within the current search
+tree node, as well as the objective value and upper bound in case the
+solution is sent to a cut generator. This data will be unpacked by
+\BB\ on the receiving end, the user will have to unpack there exactly
+what he has packed here.
+
+\ed
+\vspace{1ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_logical_fixing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_logical\_fixing}
+\sindex[cf]{user\_logical\_fixing}
+\begin{verbatim}
+int user_logical_fixing(void *user, int varnum, var_desc **vars, 
+                        double *x, char *status, int *num_fixed)
+\end{verbatim}
+
+\bd
+\describe
+
+Logical fixing is modifying the stati of variables based on logical
+implications derived from problem-specific information. In this
+function the user can modify the status of any variable. Valid stati
+are: {\tt NOT\_FIXED}, {\tt TEMP\_FIXED\_TO\_LB}, {\tt
+PERM\_FIXED\_TO\_LB}, {\tt TEMP\_FIXED\_TO\_UB} and {\tt
+PERM\_FIXED\_TO\_UB}. Be forewarned that fallaciously fixing a
+variable in this function can cause the algorithm to terminate
+improperly. Generally, a variable can only be fixed permanently if the
+matrix is {\em full} at the time of the fixing (i.e. all variables
+that are not fixed are in the matrix). There are no default options.
+
+\args
+
+\bt{llp{260pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int varnum} & IN & The number of variables currently in the LP
+relaxation. (The length of the {\tt *vars} and {\tt x} arrays.) \\
+{\tt var\_desc **vars} & IN & The variables currently in the LP relaxation.\\
+{\tt double *x} & IN & Values of the above variables.\\
+{\tt char *status} & INOUT & Stati of variables currently in the LP
+relaxation. \\
+{\tt int *num\_fixed} & OUT & Number of fixed variables.\\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. Ignored by \BB. \\
+{\tt USER\_SUCCESS} & User changed the stati of the variables she
+wanted. \\
+{\tt USER\_DEFAULT} & No logical fixing rules are implemented. \\
+\et
+
+\item[Wrapper invoked from:] {\tt fix\_variables()} after doing reduced cost
+fixing, but only when a specified number of variables have been fixed
+by reduced cost (see LP parameter settings).
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_generate_column
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_generate\_column}
+\sindex[cf]{user\_generate\_column}
+\begin{verbatim}
+int user_generate_column(void *user, int generate_what, int cutnum, 
+                         cut_data **cuts, int prevind, int nextind, 
+                         int *real_nextind, double *colval, 
+                         int *colind, int *collen, double *obj,
+                         double *lb, double *ub)
+\end{verbatim}
+
+\bd
+\describe
+
+This function is called when pricing out the columns that are not
+already fixed and are not explicitly represented in the matrix. Only
+the user knows the explicit description of these columns. When a
+missing variable need to be priced, the user is asked to provide the
+corresponding column. \BB\ scans through the known variables in the
+order of their user indices. After testing a variable in the matrix
+({\tt prevind}), \BB\ asks the user if there are any missing variables
+to be priced before the next variable in the matrix ({\tt nextind}).
+If there are missing variables before {\tt nextind}, the user has to
+supply the user index of the real next variable ({\tt real\_nextind})
+along with the corresponding column. Occasionally \BB\ asks the user to
+simply supply the column corresponding to {\tt nextind}. The {\tt
+generate\_what} flag is used for making a distinction between the two
+cases: in the former case it is set to {\tt GENERATE\_REAL\_NEXTIND}
+and in the latter it is set to {\tt GENERATE\_NEXTIND}.
+
+\newpage
+\args
+
+\bt{llp{260pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int generate\_what} & IN & {\tt GENERATE\_NEXTIND} or {\tt
+GENERATE\_REAL\_NEXTIND} (see description above). \\
+{\tt int cutnum} & IN & The number of added rows in the LP formulation
+(i.e., the total number of rows less the number of base constraints).
+This is the length of the {\tt **cuts} array.\\ 
+{\tt cut\_data **cuts} & IN & Description of the cuts corresponding to
+the added rows of the current LP formulation. The user is supposed to
+know about the cuts corresponding to the base constraints. \\
+{\tt int prevind} & IN & The last variable processed ($-1$ if there was
+none) by \BB.\\
+{\tt int nextind} & IN & The next variable ($-1$ if there are none)
+known to \BB.\\
+& & \\
+{\tt int *real\_nextind} & OUT & Pointer to the user index of the next
+variable ($-1$ if there is none). \\
+{\tt double *colval} & OUT & Values of the nonzero entries in the
+column of the next variable. (Sufficient space is already allocated for this
+array.) \\
+{\tt int *colind} & OUT & Row indices of the nonzero entries in the column.
+(Sufficient space is already allocated for this array.) \\
+{\tt int *collen} & OUT & The length of the {\tt colval} and {\tt
+colind} arrays.\\
+{\tt double *obj} & OUT & Objective coefficient corresponding to the
+next variable.\\
+{\tt double *lb} & OUT & Lower bound of the next variable.\\
+{\tt double *ub} & OUT & Upper bound of the next variable.\\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. The LP process is aborted.\\
+{\tt USER\_SUCCESS} & User filled out {\tt *real\_nextind} and
+generated its column if needed.\\
+{\tt USER\_DEFAULT} & No column generation is done. \\
+\et
+
+\item[Wrapper invoked from:] {\tt price\_all\_vars()} and {\tt
+restore\_lp\_feasibility()}.
+
+\item[Note:] \hfill
+
+{\tt colval}, {\tt colind}, {\tt collen} and {\tt obj} do not need to
+be filled out if {\tt real\_nextind} is the same as {\tt nextind} and {\tt
+generate\_what} is {\tt GENERATE\_REAL\_NEXTIND}.
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_void generate_cuts_in_lp
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_generate\_cuts\_in\_lp}
+\label{user_generate_cuts_in_lp}
+\sindex[cf]{user\_generate\_cuts\_in\_lp}
+\begin{verbatim}
+int user_generate_cuts_in_lp(void *user, LPdata *lp_data, int varnum,
+                             var_desc **vars, double *x, int *new_row_num,
+                             cut_data ***cuts)
+\end{verbatim}
+
+\bd
+\describe
+
+The user might decide to generate cuts directly within the LP module instead
+of using the cut generator. This can be accomplished either through a call to
+this function or simply by configuring \BB\ such that the cut generator is
+called directly from the LP solver. One example of when this might be done is
+when generating Gomory cuts or something else that requires knowledge of the
+current LP tableau. The user must return the list of generated cuts by
+allocating an array of \texttt{cut\_data} structures and setting
+\texttt{*cuts} to point to this array. Post-processing consists of
+checking if any of the new cuts are already in the local pool (or dominated by
+a cut in the local pool).
+
+\args
+
+\bt{llp{225pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt LPdata *lp\_data} & IN & A pointer to SYMPHONY's internal data structure for
+storing the LP relaxation and related data. \\
+{\tt int varnum} & IN & The number of variables currently in the LP
+relaxation. (The length of the {\tt *vars} and {\tt x} arrays.) \\
+{\tt var\_desc **vars} & IN & The variables currently in the LP relaxation.\\
+{\tt double *x} & IN & Values of the above variables.\\
+{\tt int *new\_row\_num} & OUT & The number of cuts generated. \\
+{\tt cut\_data ***cuts} & OUT & The cuts and the corresponding rows. \\
+\et
+
+\returns
+
+\bt{lp{330pt}}
+{\tt USER\_ERROR} & Error. Interpreted as if no cuts were generated. \\
+{\tt USER\_SUCCESS} & Cuts were generated. \\
+{\tt USER\_DEFAULT} & No cuts were generated. By default, SYMPHONY uses the
+CGL to generate generic cuts, according to parameter settings. \\
+{\tt GENERATE\_CGL\_CUTS} & Generate generic CGL cuts, according to parameter
+settings. \\
+{\tt DO\_NOT\_GENERATE\_CGL\_CUTS} & No additional cuts are generated. \\
+\et
+
+\postp
+
+\BB\ checks if any of the newly generated cuts are already in the
+local pool. 
+
+\item[Wrapper invoked from:] {\tt receive\_cuts()} before the cuts from the CG
+module are received. Since the user will probably use this function
+to generate tableau-dependent cuts, it is highly unlikely that any of
+the new cuts would already be in the pool. Therefore the user will
+probably return {\tt USER\_AND\_PP} to force \BB\ to skip post-processing.
+
+\item[Notes:] \hfill \\
+
+\begin{itemize}
+\vspace{-3ex}
+\item Just like in {\tt \htmlref{user\_unpack\_cuts()}{user_unpack_cuts}}, 
+the user has to allocate space for the rows.
+\item Unless the {\tt name} field of a cut is explicitly set to 
+{\tt CUT\_\_SEND\_TO\_CP}, \BB\ will assume that the cut is locally
+valid only and set that field to {\tt CUT\_\_DO\_NOT\_SEND\_TO\_CP}.
+\end{itemize}
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_print_stat_on_cuts_added
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_print\_stat\_on\_cuts\_added}
+\sindex[cf]{user\_print\_stat\_on\_cuts\_added}
+\begin{verbatim}
+int user_print_stat_on_cuts_added(void *user, int rownum, waiting_row **rows)
+\end{verbatim}
+
+\bd
+\describe
+
+The user can print out some information (if he wishes to) on the cuts that
+will be added to the LP formulation. The default is to print out the number of
+cuts added. 
+
+\args
+
+\bt{llp{265pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int rownum} & IN & The number of cuts added. \\
+{\tt waiting\_row **rows} & IN & Array of waiting rows containing the
+cuts added. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Revert to default. \\
+{\tt USER\_SUCCESS} & User printed whatever he wanted. \\
+{\tt USER\_DEFAULT} & Print out the number of cuts added. \\
+\et
+
+\item[Wrapper invoked from:] {\tt add\_best\_waiting\_rows()} after it has been decided how many cuts to
+add and after the cuts have been selected from the local pool.
+
+\ed
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_purge_waiting_rows
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_purge\_waiting\_rows}
+\sindex[cf]{user\_purge\_waiting\_rows}
+\begin{verbatim}
+int user_purge_waiting_rows(void *user, int rownum,
+                            waiting_row **rows, char *delete_rows)
+\end{verbatim}
+
+\bd
+\describe
+
+The local pool is purged from time to time to control its size. In
+this function the user has the power to decide which cuts to purge
+from this pool if desired. To mark the {\tt i$^{\tt th}$} waiting row
+(an element of the pre-pool) for removal she has to set {\tt
+delete\_rows[i]} to be {\tt TRUE} ({\tt delete\_rows} is allocated before the
+function is called and its elements are set to {\tt FALSE} by
+default).\\
+\\
+Post-processing consists of actually deleting those entries from the waiting
+row list and compressing the list. The default is to discard the least
+violated waiting rows and keep no more than what can be added in the next
+iteration (this is determined by the {\tt max\_cut\_num\_per\_iter}
+parameter).
+
+\args
+
+\bt{llp{255pt}}
+{\tt void *user} &  IN & Pointer to the user-defined LP data structure. \\
+& & \\
+{\tt int rownum} & IN & The number of waiting rows. \\
+{\tt waiting\_row **rows} & IN & The array of waiting rows.\\
+{\tt char *delete\_rows} & OUT & An array of indicators showing which waiting 
+rows are to be deleted. \\ 
+\et
+
+\returns
+
+\bt{lp{330pt}}
+{\tt USER\_ERROR} & Purge every single waiting row. \\
+{\tt USER\_SUCCESS} & The user marked in {\tt delete} the rows to be deleted. 
+\\
+{\tt USER\_DEFAULT} & Described above. \\
+\et
+
+\postp
+
+The marked rows are deleted.
+
+\item[Wrapper invoked from:] {\tt receive\_cuts()} after cuts have been added.
+
+\ed
+
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% user_free_lp
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\functiondef{user\_free\_lp}
+\sindex[cf]{user\_free\_lp}
+\begin{verbatim}
+int user_free_lp(void **user)
+\end{verbatim}
+
+\bd
+
+\describe
+
+The user has to free all the data structures within {\tt *user}, and also free
+{\tt user} itself. The user can use the built-in macro {\tt FREE} that checks
+the existence of a pointer before freeing it. 
+
+\args
+
+\bt{llp{250pt}}
+{\tt void **user} & INOUT & Pointer to the user-defined LP data structure. \\
+\et
+
+\returns
+
+\bt{lp{300pt}}
+{\tt USER\_ERROR} & Error. \BB\ ignores error message. \\
+{\tt USER\_SUCCESS} & User freed everything in the user space. \\
+{\tt USER\_DEFAULT} & There is no user memory to free. \\
+\et
+
+\item[Wrapper invoked from:] {\tt lp\_close()} at module shutdown.
+
+\ed
+
+\vspace{1ex}
+
+%begin{latexonly}
+\ed
+%end{latexonly}
+
+

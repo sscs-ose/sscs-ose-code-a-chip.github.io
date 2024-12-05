@@ -1,0 +1,190 @@
+#!/bin/tcsh -ef
+
+set VER=5.0
+set DIR=$HOME/SYMPHONY-$VER
+mkdir $DIR
+awk -f scripts/reformat.awk Makefile > $DIR/Makefile
+foreach file (LICENSE README-$VER sample.*)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/Common
+foreach file (Common/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/LP
+foreach file (LP/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/Master
+foreach file (Master/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/TreeManager
+foreach file (TreeManager/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/CutPool
+foreach file (CutPool/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/CutGen
+foreach file (CutGen/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/include
+foreach file (include/*.h)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/DrawGraph
+foreach file (DrawGraph/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/DrawGraph/IGD_1.0
+foreach file (DrawGraph/IGD_1.0/*.txt)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+foreach file (DrawGraph/IGD_1.0/*.tcl)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+foreach file (DrawGraph/IGD_1.0/*.g)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/DrawGraph/IGD_1.0/Simple_version
+foreach file (DrawGraph/IGD_1.0/Simple_version/*.txt)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+foreach file (DrawGraph/IGD_1.0/Simple_version/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/WIN32
+foreach file (WIN32/*.dsp)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+foreach file (WIN32/*.dsw)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+foreach file (WIN32/*.mak)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+
+foreach app (Vrp CNRP MCKP MATCH MPP SPP SPP+CUTS Template)
+mkdir $DIR/$app
+foreach file ($app/Makefile $app/sample.*)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (FLOPC++)
+mkdir $DIR/$app
+foreach file ($app/Makefile $app/tap.*)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (Vrp CNRP MATCH MPP SPP SPP+CUTS Template)
+mkdir $DIR/$app/LP
+foreach file ($app/LP/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/$app/Master
+foreach file ($app/Master/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/$app/CutPool
+foreach file ($app/CutPool/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/$app/CutGen
+foreach file ($app/CutGen/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/$app/include
+foreach file ($app/include/*.h)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+mkdir $DIR/$app/DrawGraph
+foreach file ($app/DrawGraph/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (Vrp CNRP MCKP MATCH MPP SPP SPP+CUTS Template)
+mkdir $DIR/$app/WIN32
+foreach file ($app/WIN32/*.dsp)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+foreach file ($app/WIN32/*.dsw)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+foreach file ($app/WIN32/*.mak)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (Vrp CNRP FLOPC++ MCKP MATCH MPP SPP SPP+CUTS Template)
+foreach file ($app/README)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (Vrp CNRP MCKP MATCH MPP SPP SPP+CUTS)
+foreach file ($app/LICENSE)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (Vrp CNRP SPP SPP+CUTS)
+mkdir $DIR/$app/Common
+foreach file ($app/Common/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (MCKP)
+foreach file ($app/*.c)
+awk -f scripts/reformat.awk $file > $DIR/$file
+end
+end
+
+foreach app (Vrp CNRP MCKP MATCH MPP SPP SPP+CUTS)
+mv $DIR/$app $DIR/$app-$VER
+end
+mv $DIR/Vrp-$VER $DIR/VRP-$VER
+mv $DIR/Template $DIR/USER
+mv $DIR/README* $DIR/README
+
+mkdir $DIR/Doc
+cd Doc
+latex man
+dvipdfm man
+mv man.pdf $DIR/Doc/SYMPHONY-$VER-Manual.pdf 
+dvips -o man.ps man
+mv man.ps $DIR/Doc/SYMPHONY-$VER-Manual.ps
+tar -czvf SYMPHONY-$VER-Manual-Tex.tgz *.tex 
+latex2html man
+if (-e man-$VER) rm man-$VER
+endif
+ln -s man man-$VER
+tar -czvf SYMPHONY-$VER-Manual-HTML.tgz man-$VER/*
+zip -r SYMPHONY-$VER-Manual-HTML.zip man-$VER/*
+mv SYMPHONY-$VER-Manual-HTML.* $DIR/Doc/
+latex Walkthrough
+dvipdfm Walkthrough
+mv Walkthrough.pdf $DIR/Doc/SYMPHONY-Walkthrough.pdf
+cd $HOME
+foreach app (VRP CNRP MCKP MATCH MPP SPP SPP+CUTS)
+mv $DIR/$app-$VER .
+tar -czvf SYMPHONY-$app-$VER.tgz $app-$VER/*
+zip -r SYMPHONY-$app-$VER.zip $app-$VER/* 
+end
+tar --exclude '$DIR/Doc/*.zip' -czvf SYMPHONY-$VER.tgz SYMPHONY-$VER/*
+zip -r SYMPHONY-$VER.zip SYMPHONY-$VER/* -x \*.tgz
+mv SYMPHONY-$VER.* $DIR
+foreach app (VRP CNRP MCKP MATCH MPP SPP SPP+CUTS)
+mv $app-$VER $DIR
+mv SYMPHONY-$app-$VER.* $DIR
+end
+#scp $DIR/*.zip $DIR/*.tgz branchandcut@branchandcut.org:www/SYMPHONY/Download/
+#scp $DIR/Doc/*.zip $DIR/Doc/*.tgz $DIR/Doc/*.pdf $DIR/Doc/*.ps branchandcut@branchandcut.org:anonftp/pub/reference/
+#ssh branchandcut@branchandcut.org "chmod a+r www/SYMPHONY/Download/*"
+#ssh branchandcut@branchandcut.org "chmod a+r anonftp/pub/reference/*"

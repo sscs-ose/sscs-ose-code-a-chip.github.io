@@ -1,0 +1,118 @@
+##############################################################################
+##############################################################################
+#                                                                            #
+# This file is part of a demonstration application for use with the          #
+# SYMPHONY MILP Solver Framework.          This application is a solver for  #
+# multi-criteria knapsack.                                                   #
+#                                                                            #
+# (c) Copyright 2005 Lehigh University. All Rights Reserved.                 #
+#                                                                            #
+# This application was written by Ted Ralphs (ted@lehigh.edu).               #
+#                                                                            #
+# This software is licensed under the Eclipse Public License. Please see     #
+# accompanying file for terms.                                               #
+#                                                                            #
+##############################################################################
+##############################################################################
+
+CC = g++
+OPT = -g
+
+# Automatically set the architecture
+
+UNAME = $(shell uname -a)
+
+ifeq ($(findstring Linux,${UNAME}),Linux)
+    ARCH = LINUX
+else
+ifeq ($(findstring alpha,${UNAME}),alpha)
+    ARCH = ALPHA
+else
+ifeq ($(findstring AIX,${UNAME}),AIX)
+    ARCH = RS6K
+else
+ifeq ($(findstring SunOS,${UNAME}),SunOS)
+     ifeq ($(findstring i86pc,${UNAME}),i86pc)
+           ARCH = X86SOL2
+     else
+     ifeq ($(findstring 5.,$(UNAME)),5.)
+           ARCH = SUN4SOL2
+           NP = $(shell mpstat | wc -l -gt -a)
+                  ifeq ($(NP,ON)
+                         ARCH = SUNMP
+                  endif
+     endif
+     endif
+else
+ifeq ($(findstring CYGWIN,${UNAME}),CYGWIN)
+    ARCH = CYGWIN
+endif
+ifeq ($(findstring Darwin,${UNAME}),Darwin)
+    ARCH = DARWIN
+endif
+endif
+endif
+endif
+endif
+
+SYMPHONYROOT = ../..
+COINROOT = ../../..
+MCKPROOT = .
+
+LP_SOLVER = OSI
+OSI_INTERFACE = CLP
+
+LPINCDIR = $(SYMPHONYROOT)/include
+LPLIB    = -lsym
+
+ifeq ($(LP_SOLVER),CPLEX)
+       LPINCDIR += /usr/local/include/
+       LPLIBPATHS = /usr/local/lib/ 
+       LPLIBPATHS += $(SYMPHONYROOT)/lib/${ARCH}/$(LP_SOLVER)
+       LPLIB += -lcplex -sym_lp.hread
+endif
+
+ifeq ($(LP_SOLVER),OSL)
+       LPINCDIR +=  $(HOME)/OSL/osllib/include/
+       LPLIBPATHS = $(HOME)/OSL/osllib/lib
+       LPLIBPATHS += $(SYMPHONYROOT)/lib/${ARCH}/$(LP_SOLVER)
+       LPLIB += -losl
+endif
+
+ifeq ($(LP_SOLVER),OSI)
+       LPINCDIR += $(COINROOT)/include
+       LPLIBPATHS += $(COINROOT)/lib
+       LPLIBPATHS += $(SYMPHONYROOT)/lib/${ARCH}/$(LP_SOLVER)_$(OSI_INTERFACE)
+ifeq ($(OSI_INTERFACE),CPLEX)
+       LPINCDIR += /usr/local/include/
+       LPLIBPATHS += /usr/local/lib/
+       LPLIB += -lOsiCpx -lcplex -sym_lp.hread
+endif
+ifeq ($(OSI_INTERFACE),OSL)
+       LPINCDIR += $(HOME)/OSL/osllib/include
+       LPLIBPATHS += $(HOME)/OSL/osllib/lib
+       LPLIB += -lOsiOsl -losl
+endif
+ifeq ($(OSI_INTERFACE),CLP)
+       LPINCDIR += 
+       LPLIBPATHS +=
+       LPLIB += -lOsiClp -lClp
+endif
+ifeq ($(OSI_INTERFACE),GLPK)
+       LPINCDIR += ${HOME}/GLPK/glpk-4.3/include
+       LPLIBPATHS += ${HOME}/GLPK/glpk-4.3/src
+       LPLIB += -lOsiGlpk -lglpk
+endif
+       LPLIB +=  -lCgl -lOsi -lCoinUtils
+endif
+
+INCDIR        = $(addprefix -I,${LPINCDIR})
+LDFLAGS       = $(addprefix -L,${LPLIBPATHS})
+
+mckp : mckp_main.c
+
+	$(CC) $(OPT) $(LDFLAGS) $(INCDIR) $< -o $@ $(LPLIB)
+
+clean : 
+
+	rm mckp

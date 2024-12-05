@@ -1,0 +1,189 @@
+{
+  "modules": [
+    {
+      "parameters": [
+        "OUT",
+        "INN",
+        "INP",
+        "IREF"
+      ],
+      "constraints": [
+        {
+          "constraint": "PowerPorts",
+          "ports": [
+            "AVDD_1V8"
+          ],
+          "propagate": true
+        },
+        {
+          "constraint": "GroundPorts",
+          "ports": [
+            "AVSS"
+          ],
+          "propagate": true
+        },
+        {
+          "constraint": "SymmetricBlocks",
+          "pairs": [
+            [
+              "X_M1_M2"
+            ],
+            [
+              "X_M3_M8",
+              "X_M4_M7"
+            ]
+          ],
+          "direction": "V"
+        },
+        {
+          "constraint": "SymmetricBlocks",
+          "pairs": [
+            [
+              "X_M10_M9"
+            ],
+            [
+              "X_M5_M6"
+            ]
+          ],
+          "direction": "V"
+        },
+        {
+          "constraint": "SymmetricNets",
+          "net1": "NET7",
+          "net2": "NET8",
+          "pins1": [
+            "X_M3_M8/DA",
+            "X_M1_M2/DA"
+          ],
+          "pins2": [
+            "X_M4_M7/DA",
+            "X_M1_M2/DB"
+          ],
+          "direction": "V"
+        }
+      ],
+      "instances": [
+        {
+          "instance_name": "X_M10_M9",
+          "fa_map": [
+            {
+              "formal": "DA",
+              "actual": "IREF"
+            },
+            {
+              "formal": "DB",
+              "actual": "SOURCE"
+            },
+            {
+              "formal": "S",
+              "actual": "AVSS"
+            }
+          ],
+          "abstract_template_name": "SCM_NMOS_38434623_X4_Y1"
+        },
+        {
+          "instance_name": "X_M3_M8",
+          "fa_map": [
+            {
+              "formal": "DA",
+              "actual": "NET7"
+            },
+            {
+              "formal": "DB",
+              "actual": "OUT"
+            },
+            {
+              "formal": "S",
+              "actual": "AVDD_1V8"
+            }
+          ],
+          "abstract_template_name": "SCM_PMOS_61005845_X5_Y1"
+        },
+        {
+          "instance_name": "X_M4_M7",
+          "fa_map": [
+            {
+              "formal": "DA",
+              "actual": "NET8"
+            },
+            {
+              "formal": "DB",
+              "actual": "NET9"
+            },
+            {
+              "formal": "S",
+              "actual": "AVDD_1V8"
+            }
+          ],
+          "abstract_template_name": "SCM_PMOS_61005845_X5_Y1"
+        },
+        {
+          "instance_name": "X_M5_M6",
+          "fa_map": [
+            {
+              "formal": "B",
+              "actual": "AVSS"
+            },
+            {
+              "formal": "DA",
+              "actual": "NET9"
+            },
+            {
+              "formal": "DB",
+              "actual": "OUT"
+            },
+            {
+              "formal": "S",
+              "actual": "SOURCE"
+            }
+          ],
+          "abstract_template_name": "SCM_NMOS_B_8106910_X9_Y2"
+        },
+        {
+          "instance_name": "X_M1_M2",
+          "fa_map": [
+            {
+              "formal": "B",
+              "actual": "AVSS"
+            },
+            {
+              "formal": "DA",
+              "actual": "NET7"
+            },
+            {
+              "formal": "DB",
+              "actual": "NET8"
+            },
+            {
+              "formal": "GA",
+              "actual": "VINN"
+            },
+            {
+              "formal": "GB",
+              "actual": "VINP"
+            },
+            {
+              "formal": "S",
+              "actual": "SOURCE"
+            }
+          ],
+          "abstract_template_name": "DP_NMOS_B_13499319_X4_Y1"
+        }
+      ],
+      "name": "CURRENT_MIRROR_OTA"
+    }
+  ],
+  "leaves": null,
+  "global_signals": [
+    {
+      "prefix": "global_power",
+      "formal": "supply0",
+      "actual": "AVSS"
+    },
+    {
+      "prefix": "global_power",
+      "formal": "supply1",
+      "actual": "AVDD_1V8"
+    }
+  ]
+}
