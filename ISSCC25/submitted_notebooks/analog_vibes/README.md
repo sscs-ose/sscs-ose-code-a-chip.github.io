@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0 <br>
 |Shubham Kumar|Texas Instruments, India <br> Indian Institute of Technology(IIT) Kharagpur, India|No|No|
 
 ## Please go through `/fvf_based_ota.pynb` file for details (Easily Opens in Colab :))
+### Feel free to go through `./PPT_FVF_OTA.pdf` and this README
 
 ### The FVF based OTA schematic
 ![fvfota (3)](https://github.com/user-attachments/assets/ddba20d1-747e-4d61-8d2e-ba9ca323b0d8)
