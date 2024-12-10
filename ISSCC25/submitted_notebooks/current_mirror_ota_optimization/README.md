@@ -3,7 +3,8 @@
 This repository contains the code, jupyter notebook, and support scripts for a N-Input 8 transistor beta multiplier OTA. 
 
 ## Repository File Structure
-.
+```
+./
 |
 ├───current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
 │
@@ -24,8 +25,6 @@ This repository contains the code, jupyter notebook, and support scripts for a N
 │                   ├── cm_ota.sym
 │                   ├── tb_cm_ota_dcop.sch
 │                   └── tb_cm_ota.sch
-
-
 ├───current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
 │   ├───magic
 │   └───open_pdks
@@ -35,4 +34,4 @@ This repository contains the code, jupyter notebook, and support scripts for a N
 ├───current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
 │   ├───magic
 │   └───open_pdks
-current_mirror_ota_optimization.ipynb is the submission or code a chip 2025
+```
