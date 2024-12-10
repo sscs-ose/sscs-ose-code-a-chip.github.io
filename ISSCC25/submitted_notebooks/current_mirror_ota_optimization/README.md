@@ -2,6 +2,18 @@
 
 This repository contains the code, jupyter notebook, and support scripts for a N-Input 8 transistor beta multiplier OTA. 
 
+This submission contains python code to optimize a current mirror OTA using the C/ID analog design methodology. A detailed
+analysis for the analytical optimization can be found in the PDF file AnalyticalOptimization-OTA.pdf. This manuscript is under
+review for DAC 2025 and any potential conflict of interests in the review process should be stated upon review of this submission.
+
+The top level notebook to be run for the submission is current_mirror_ota_optimization.ipynb
+
+## Getting Started
+This submission requires the following tools to be installed
+  - magic VLSI (open source layout editor) to be installed with the executable command magic accesible from a users $PATH environment variable
+  - ngspice (open source SPICE simulator) to be installed with the executable command "ngspice" accessible from a users $PATH environment
+  - Skywater130 open source PDK installed to $PDK_ROOT variable. This PDK is available at https://github.com/RTimothyEdwards/open_pdks with instructions for installation included.
+
 ## Repository File Structure
 ```
 ./
@@ -136,3 +148,5 @@ This repository contains the code, jupyter notebook, and support scripts for a N
 │                 ├── ArialNarrow.zip
 │                 └── COPYRIGHT.txt
 ```
+##  License
+This project is licensed under the GPL 3.0 License. See LICENSE for more details.
