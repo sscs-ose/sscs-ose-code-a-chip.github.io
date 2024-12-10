@@ -4,7 +4,7 @@
 
 | Name        | Affiliation                                                     | Notebook Title                                                          |  
 | ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Qi Tian | National ASIC Center, School of Integrate Circuits, Southeast University | ChatChisel: Enabling Agile Hardware Design with Large Language Models |
+| Tianyang Liu | National ASIC Center, School of Integrate Circuits, Southeast University | ChatChisel: Enabling Agile Hardware Design with Large Language Models |
 | Ckristian Duran | Universidad Industrial de Santander (UIS), The University of Tokyo| OBS Demo: A demonstration of standard-cell based obfuscation for imaging security in SKY130 |
 | Yifei Zhu | RIOS Lab, Tsinghua-Berkeley Shenzhen Institute, Tsinghua University | RISC-V 3D Chip Design with TSV and Thermal Modeling |
 | Zachary Ellis | Georgia Institute of Technology | Row Stationary Systolic Array With Openlane |
