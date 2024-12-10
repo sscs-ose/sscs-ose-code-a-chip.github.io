@@ -1,4 +1,5 @@
-# Current Mirror Synthesis, Optimization and Design - Code A Chip Challenge 2025
+# Current Mirror Synthesis, Optimization and Design
+# Code A Chip Challenge 2025
 
 This repository contains the code, jupyter notebook, and support scripts for a N-Input 8 transistor beta multiplier OTA. 
 
