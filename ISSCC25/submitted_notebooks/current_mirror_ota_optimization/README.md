@@ -6,32 +6,133 @@ This repository contains the code, jupyter notebook, and support scripts for a N
 ```
 ./
 |
-├───current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
+├── current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
 │
-├───AnalyticalOptimization-OTA.pdf - Detailed Analytical Analysis of Optimization - In Review for DAC 2025
+├── AnalyticalOptimization-OTA.pdf - Detailed Analytical Analysis of Optimization - In Review for DAC 2025
 │   
-├── characterization - Contains Characterization LUTs and LUT Generation Characterization Scripts Used in current_mirror_ota_optimization.ipynb
+├── characterization - Contains Characterization LUTs and LUT Generation Characterization Scripts Used in notebook
+│			│  
 │           ├── char_template.cir - ngspice netlist template for LUT generation
+│           │  
 │           └── sky130 - directory to hold Skywater130A LUTs and Process Specific Data
-│               ├── LUTs_SKY130 - directory to hold Skywater130A LUTs - each subdirectory represents LUTs for 1 device i.e. 
+│               │ 
+│               ├── LUTs_SKY130 - directory to hold Skywater130A LUTs - each subdirectory represents LUTs for 1 device i.e. n_01v8
 │               │           ├── n_01v8 - example device
-│               │           │           ├── LUT_N_1000 lookup table 
+│               │           │           ├── LUT_N_1000 -> direcotrylookup table 
 │               │           │           │           ├── nfetff-25.csv
 │               │           │           │           ├── nfetff27.csv
 │               │           │           │           ├── nfetff75.csv
-│               └── schematics - 
-│                   ├── cid_characterization.sch
-│                   ├── cm_ota.sch
-│                   ├── cm_ota.sym
-│                   ├── tb_cm_ota_dcop.sch
-│                   └── tb_cm_ota.sch
-├───current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
-│   ├───magic
-│   └───open_pdks
-├───current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
-│   ├───magic
-│   └───open_pdks
-├───current_mirror_ota_optimization.ipynb - Top Level Notebook to be run for submission
-│   ├───magic
-│   └───open_pdks
+│               │    		.			.			.
+│               │    		.			.			.
+│               └── schematics -> contains xschem schematics for LUT characterization, OTA schematic & symbol art, and testbenches
+│                   ├── cid_characterization.sch - LUT generation schematic
+│                   ├── cm_ota.sch - Current Mirror OTA schematic
+│                   ├── cm_ota.sym - Current Mirror OTA symbol
+│                   ├── tb_cm_ota_dcop.sch - OTA DC operating point testbench
+│                   └── tb_cm_ota.sch - OTA general testbench
+│
+├── design --> Directory To Hold Generated Design Data Such As GDS files, Extracted Netlists and Simulation Data
+│			│  - This directory also holds the ALIGN generator netlist template 
+│ 			│  - The subdirectories 
+│           │
+│           ├── align_netlist_template.txt - ALIGN Netlist Template for Layout Generation 
+│           ├── gds_-25c -> contains layout and GDS data for -25C optimization
+│           │           ├── clean - script to remove generated data such as extracted netlists and GDS
+│           │           ├── cm_ota_align - directory to hold ALIGN input data and ALIGN generated data
+│           │           │           ├── align_input - input directory for ALIGN generator
+│           │           │           │           ├── current_mirror_ota.const.json - constraint file given as input to ALIGN
+│           │           │           │           └── current_mirror_ota.sp - ALIGN netlist for layout generation
+│           │           │           ├── clean - script to remove ALIGN generated data such as GDS files for subcells
+│           │           │           └── create_gds.csh - script to generate GDS using ALIGN
+│           │           │ 
+│           │           ├── extract_current_mirror_ota.tcl - TCL Magic script to extract a post layout SPICE netlist for simulation
+│           │           │       						   
+│           │           │ 
+│           │           └── run_extraction.csh - cshell script to extract a post layout SPICE netlist for simulation using magic
+│           │  
+│			.
+│ 			.
+│           └── simulation
+│               ├── cm_ota_params_template.sp
+│               ├── golden_sims -> Golden standard simulations
+│               │           ├──────25──── simulations for 25 C
+│               │           │           ├── ac_output_ext.txt - post layout AC spice simulation data
+│               │           │           └── ac_output.txt - ideal schematic AC spice simulation data
+│               │           ├──────75────
+│               │           │           ├── ac_output_ext.txt - post layout AC spice simulation data
+│               │           │           └── ac_output.txt - post layout AC spice simulation data
+│               │           └────neg_25──
+│               │              			├── ac_output_ext.txt - post layout AC spice simulation data
+│               │               		└── ac_output.txt - post layout AC spice simulation data
+│               │
+│               ├── spice -> directory to run spice simulations 
+│               │           ├── clean - script to remove generated spice data
+│               │           ├── cm_ota_extracted.sp - spice file to hold extracted netlist
+│               │           ├── cm_ota_params.sp - spice file to hold ideal spice ota parameters (device widths and lengths)
+│               │           ├── cm_ota_schematic.sp - spice netlist for the ota
+│               │           ├── run_tb.csh - cshell script to run spice testench
+│               │           ├── tb_cm_ota_preprocessed.sp - spice netlist for testbench with $PDK_ROOT declared
+│               │           └── tb_cm_ota.sp - post processed spice netlist testbench with $PDK_ROOT replaced with users $PDK_ROOT
+│
+│
+├─── eda -> Directory for process specific EDA files 
+│           ├── ALIGN-pdk-sky130 -> Directory to hold Skywater130 specific files for ALIGN
+│           │           ├── LICENSE - ALIGN Skywater130 PDK License
+│           │           ├── README.md - ALIGN Skywater130 PDK README file
+│           │           └── SKY130_PDK - ALIGN Skywater130 PDK files
+│           │               ├── Align_primitives.py
+│           │               ├── cap.py
+│           │               ├── fabric_Cap.py
+│           │               ├── fabric_Res.py
+│           │               ├── fabric_ring.py
+│           │               ├── gen_param.py
+│           │               ├── guard_ring.py
+│           │               ├── __init__.py
+│           │               ├── layers.json
+│           │               ├── models.sp
+│           │               ├── mos.py
+│           │               ├── __pycache__
+│           │               │           ├── canvas.cpython-38.pyc
+│           │               │           ├── cap.cpython-310.pyc
+│           │               │           ├── cap.cpython-38.pyc
+│           │               │           ├── gen_param.cpython-310.pyc
+│           │               │           ├── guard_ring.cpython-310.pyc
+│           │               │           ├── guard_ring.cpython-38.pyc
+│           │               │           ├── __init__.cpython-310.pyc
+│           │               │           ├── __init__.cpython-38.pyc
+│           │               │           ├── mos.cpython-310.pyc
+│           │               │           ├── mos.cpython-38.pyc
+│           │               │           ├── res.cpython-310.pyc
+│           │               │           ├── res.cpython-38.pyc
+│           │               │           └── via.cpython-38.pyc
+│           │               └── res.py
+│           ├── sky130.magicrc - startup file for magic layout tool - used when extracting layouts
+│
+├── images -> Directory to hold images used in notebook
+│           │
+│           ├── ac_simulation_plot.png
+│           ├── ac_simulation_plot.svg
+│           ├── analysis_page1.png
+│           ├── analysis_page2.png
+│           ├── analysis_page3.png
+│           ├── analysis_page4.png
+│           ├── cid_tb.png
+│           ├── fig_bode_plot.png
+│           ├── fig_cm_ota_all_gds.png
+│           ├── fig_design_space.png
+│           ├── fig_flowchart_dac.png
+│           └── fig_ota_schematic.png
+│
+├── LICENSE - GPL 3.0 License File
+│ 
+├───src───
+│         ├── cid.py - python object for storing lookup tables and performing lookups
+│         └── fonts - directory containing fonts for graphing
+│             └── ArialNarrow
+│                 ├── arialnarrow_bolditalic.ttf
+│                 ├── arialnarrow_bold.ttf
+│                 ├── arialnarrow_italic.ttf
+│                 ├── arialnarrow.ttf
+│                 ├── ArialNarrow.zip
+│                 └── COPYRIGHT.txt
 ```
