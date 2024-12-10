@@ -1,0 +1,145 @@
+SYMPHONY 5.5 APPLICATION INSTALLATION
+==========================================
+
+This file contains instructions on building all of the SYMPHONY Applications.
+Specific instructions for each particular application are in the individual 
+INSTALL files. These instructions are for SYMPHONY 5.5.0, but should work
+for other versions 5.5.* as well.
+
+******************************************************************************
+*     Building in Unix-like environments (UNIX/LINUX/CYGWIN/MINGW/OSX)       *
+******************************************************************************
+
+To build an application, you must first build the SYMPHONY Application library
+as follows.
+
+1. You can obtain the SYMPHONY source code either via the subversion 
+repository or in the form of daily tarballs. 
+
+The recommended method is to use subversion because it makes it easier to 
+obtain updates. In a Unix-like environment (such as Linux or CYGWIN), 
+the following command may be used to obtain SYMPHONY from 
+source using SVN in most cases:
+
+   svn checkout https://projects.coin-or.org/svn/SYMPHONY/releases/5.5.0 SYMPHONY-5.5.0
+
+The alternative way is to get a daily snapshot of the source code as a tarball 
+from  the download page of COIN-OR:
+
+   http://www.coin-or.org/download/source/SYMPHONY
+
+2. If the code is obtained as a tarball, unpack the distribution with 
+
+   tar -xzf SYMPHONY-5.5.0.tgz
+
+3. In order to compile SYMPHONY's applications, you must first compile the 
+application specific library. Type
+
+   cd 
+   cd SYMPHONY-5.5.0
+   ./configure --with-application
+   make
+   make install
+
+This will create the Makefile of each application together with SYMPHONY's
+application library called 'libSymAppl' to be used while building the app. Note
+that the sequential version library and the executable of SYMPHONY will also be
+made and installed.
+
+4. You are free to move the application directory to wherever you want one
+everrything has been configured. Go to the application directory,
+(SYMPHONY/Applications/XXX if the package was not moved). You can optionally
+modify the variables in the Makefile if you want to add your own defines,
+source or library files, but if you are just building the application, you
+shouldn't need to make any modifications. Then, type
+
+   make
+
+The executable "xxx" should be successfully made here. 
+
+4. Test the application using the sample file included with the distribution
+according to the instructions in the individual INSTALL files. To specify the
+file name, use the "-F" command-line option, i.e., type something like
+
+   xxx -F sample.xxx 
+
+COMPILING FOR DISTRIBUTED NETWORKS
+==================================
+
+PLEASE NOTE THAT THE DISTRIBUTED MEMORY PARALLEL VERSION HAS NOT BEEN TESTED
+IN A VERY LONG TIME. PLEASE LET ME KNOW IF YOU WANT TO USE IT AND I WILL GET
+IT WORKING.
+
+1. If you wish to compile a distributed version of the code, obtain and
+install PVM from http://www.csm.ornl.gov/pvm/.
+
+2. Type, 
+
+   cd 
+   cd COIN-SYMPHONY
+   ./configure --with-application --with-pvm
+   make
+   make install
+
+This will create the the Makefile of the application together with 
+SYMPHONY's parallel version application libraries to be used while 
+building the application. Note that the sequential version library and the 
+executable of SYMPHON will also be made and installed. 
+Be sure that, you have PVM installed either in system path or PVM_ROOT
+set as a bash environment variable. By default, configuration will assume
+the following module dependencies: '--with-cg=yes --with-cp=yes --with-lp=no 
+--with-tm=yes' (see the user manual or the file 'share/config.site' for more 
+information). If you configure with
+
+   ./configure --with-application --with-pvm --with-lp=yes
+
+then you will end up with the sequential version. Therefore, if you want 
+to override the default set up, you must configure without one or more of 
+module dependencies. 
+
+3. Now you are free to move the application directory to wherever you want. Go
+to the application directory, (SYMPHONY/Applications/XXX if the package was
+not moved). You can optionally modify the variables in the Makefile if you
+want to add your own defines, source or library files, but if you are just
+building the application, you shouldn't need to make any modifications. Then,
+type
+
+   make
+
+The executable "xxx_m$(EXT)", where $(EXT) is an extension to be added 
+according to the chosen module dependencies, should be successfully made here. 
+
+4. Make sure there are links from your '$PVM_ROOT/bin/$PVM_ARCH/' subdirectory 
+to each of the executables in your 'bin/' directory. This is required by PVM.
+
+5. Start the PVM daemon by typing "pvm" on the command line and then typing
+"quit".
+
+6. Test the application using the sample file included with the distribution
+according to the instructions in the individual INSTALL files. To specify the
+file name, use the "-F" command-line option, i.e., type something like
+
+   xxx_m$(EXT) -F sample.xxx
+
+*******************************************************************************
+*            BUILDING APPLICATIONS in MS Windows                              *
+*******************************************************************************
+
+Here is a sketch outline of how to compile SYMPHONY applications in Microsoft
+Windows. For information on developing your own applications, please see the
+quick start guide below or the detailed explanation in the user's manual.
+Direct support is provided for compilation under MS Visual Studio 10.
+Compilation for other compilers should also be possible. Note that the Windows
+version has some limitations. Detailed timing information is not currently
+provided. Support is only provided for running in sequential mode at this
+time.
+
+First, download SYMPHONY and unpack the archive if it is required. You now
+have three options. Follow the instructions for building SYMPHONY in the
+SYMPHONY INSTALL file, except use the solution file in go to the
+SYMPHONY/Applications/XXX/v10 directory and build the solution. To test the
+executable, type, e.g.,
+
+   Debug/xxx.exe -F ..\..\sample.xxx
+
+in a terminal window.

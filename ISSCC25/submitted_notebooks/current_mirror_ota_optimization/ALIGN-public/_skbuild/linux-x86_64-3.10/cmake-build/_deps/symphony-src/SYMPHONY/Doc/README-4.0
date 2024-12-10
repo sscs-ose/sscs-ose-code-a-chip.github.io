@@ -1,0 +1,600 @@
+SYMPHONY Version 4.0 README
+===========================
+
+Welcome to SYMPHONY. SYMPHONY is distributed under the Common Public License
+Version 1.0 and is freely redistributable. However, it is vital to the
+survival of projects such as this one that we be able to justify our existence
+through usage statistics. Therefore, we ask that you become a registered user
+of this software if you have not already. Registration is free, but helps us
+maintain our funding. Please visit SYMPHONY's registration page at
+http://branchandcut.org/SYMPHONY/license.htm to receive an official copy of
+the distribution. All source code and documentation is Copyright 2000-2004 by
+Ted Ralphs. This README may be distributed freely.
+
+DOCUMENTATION
+=============
+
+Full documentation comes with your distribution in the directory
+SYMPHONY-4.0/Doc and can also be downloaded at
+ftp://branchandcut.org/pub/reference/. There is a user's guide
+(SYMPHONY-4.0-Manual.pdf) that should be read prior to developing an
+application.
+
+WHAT'S NEW
+==========
+
+There has been a significant amount on new development since the last version
+of SYMPHONY was released. We hope this will make version 4.0 significantly
+easier to use, as well as significantly more powerful. Unfortunately, this
+also means that there have been a number of changes to the API. Code written
+for previous versions of SYMPHONY will be broken and will have to be
+ported. All this change has also undoubtedly introduced bugs. There are now a
+VERY large number of configurations in which SYMPHONY can be used and we have
+tested many of them, but it is not possible to test them all. Please keep this
+is mind and report all bugs that you find.
+
+1. All reported bugs have been fixed. A few memory leaks have also been
+eradicated.
+
+2. SYMPHONY now works out of the box as a full-featured, parallel MILP solver,
+with a wide variety of options for developing custom solvers.
+
+3. SYMPHONY now makes full use of the libraries available from COIN
+(www.coin-or.org) for cut generation, file I/O, and solver interface. For
+example, 
+
+    a. SYMPHONY is now capable of reading both MPS files (through the COIN MPS
+reader) and basic AMPL files (using the parser available from GLPK).
+
+    b. SYMPHONY now uses the COIN Open Solver Interface (OSI), allowing it to
+be used with almost any commonly available LP solver, including a number of
+open source alternatives. This makes SYMPHONY an end-to-end open source
+solution.
+
+    c. SYMPHONY can now use COIN's Cut Generator Library (CGL) to generate
+generic cutting planes.
+
+4. The API has been simplified SIGNIFICANTLY, with more default options,
+helper functions, and more automation of basic functions. The parallelism is
+now more hidden, especially for sequential users.
+
+5. There is automated support for user cuts generated and stored as explicit
+matrix rows. The user no longer has to derive a packed form and does not have
+to implement user_unpack_cuts() in order to use cuts expressed as explicit
+matrix rows.
+
+6. Improvements have been made to the mechanism for accessing and displaying
+solutions, including built-in support for column names, objective sense, and
+objective offset. 
+
+7. More sample codes are now available to aid in development, including
+solvers for vehicle routing, set partitioning (basic and advanced versions),
+bipartite matching, and the mixed postman problem.
+
+8. There is a white paper available that illustrates the use of SYMPHONY to
+build a simple matching solver.
+
+9. Restructuring of the makefile now allow the user to build the code from
+the directory where the application is installed instead of the SYMPHONY
+directory. This allows compiling multiple applications without editing make
+files. Also, executables can have custom names and are built in different
+directories for different LP solvers so the object files don't have to be
+cleaned to switch LP solvers.
+
+10. There are makefiles available for Windows that can be configured in a
+fashion similar to Unix makefiles and work with the MSVC++ 6 compiler.
+
+CHANGES TO THE USER INTERFACE
+=============================
+
+I'm sorry to say that there are quite a few changes to the user
+interface. Code written for previous versions of SYMPHONY will be broken, but
+not too badly. Here is a quick guide to the changes.
+
+1. Return codes for user functions have changed in order to avoid conflict
+with SYMBOLS defined in the many solvers SYMPHONY can now link with. Old
+return codes are appended with the prefix "USER_". Also, optional
+post-processing has been eliminated, so the old return codes "USER_NO_PP" and
+"USER_AND_PP" have been combined into a single return code "USER_SUCCESS" to
+indicate that the user function was executed successfully.
+
+2. The makefiles are set up a bit differently. The user makefile is now the
+driver. Some variables that used to be set in SYMPHONY-4.0/Makefile must now
+be set in the user's makefile. See the file SYMPHONY-4.0/USER/Makefile for an
+example of what the user's makefile is now supposed to look like.
+
+3. The mechanism for displaying a solution is now vastly improved.  SYMPHONY
+now passes the user the indices and values of the nonzero variables for the
+best solution found. The function user_display_solution() now has six
+arguments, as follows:
+
+int user_display_solution (void *user, double lpetol, int varnum,
+			   int *indices, double *values, double objval);
+
+user:    The pointer to the user data structure (as usual).
+lpetol:  The LP zero tolerance used.
+varnum:  The number of nonzeros in the solution.
+indices: The indices of the nonzeros.
+values:  The values of the nonzeros.
+objval:  The objective function value of the solution.
+
+The user can interpret the solution and print it out in a custom format or
+simply return "USER_DEFAULT", in which case the solution will be displayed by
+SYMPHONY as a column of indices and values.
+
+4. The functions user_readparams() and user_io() now have default
+implementations that simply read in an MPS whose file name is given on the
+command line (see the file SYMPHONY-4.0/USER/README-1.0 for a
+description). These functions no longer have to be modified by the user when
+using SYMPHONY as a generic MILP solver.
+
+5. Replaced user_set_base() and user_create_root() with a single function
+called user_initialize_root_node(), in which the user simply has to specify
+the list of base and extra variables. This is greatly simplified from previous
+versions.
+
+6. Changed the name of user_create_lp() function to user_create_subproblem()
+to more accurately reflect its actual function. In addition, the interface to
+the user has been simplified significantly. The user now has only to construct
+a description of the subproblem by specifying the constraint matrix in
+column-ordered format and the rim vectors, along with a list of which
+variables are required to be integer. The user is no longer responsible for
+allocating extra memory to allow for the addition of dynamically generated
+cuts and variables. The arrays allocated in user_create_subproblem() are owned
+by SYMPHONY after allocation and are freed as soon as the relaxation is loaded
+into the solver.
+
+7. Eliminated the user_get_upper_bounds(). The bounds are now set in either
+user_create_subproblem() and user_generate_column().
+
+8. Simplified the interface for user_generate_cuts_in_lp(). The user now gets
+access to the data structures for the current LP relaxation and has only to
+return a list of cuts. The cuts are unpacked and added by SYMPHONY. The new
+interface is as follows:
+
+int user_generate_cuts_in_lp (void *user, LPdata *lp_data, int varnum,
+			      var_desc **vars, double *x, int *new_row_num,
+			      cut_data ***cuts));
+
+******************************************************************************
+*                COMPILING SYMPHONY (UNIX Operating Systems)                 *
+******************************************************************************
+
+Here is a sketch outline of how to get started with SYMPHONY in Unix. These
+instructions will lead you through the steps required to compile SYMPHONY as a
+generic MILP solver that can then be customized by filling out the functions
+provided in the user interface files. For information on customizing SYMPHONY
+to obtain a custom solver, a quick start guide is provided below and more
+detailed information is available in the user's manual. Because SYMPHONY is
+intended to run over nonhomogeneous networks of workstations, installation is
+not fully automated, but requires the user to make minor edits to the
+makefile.  With this setup, compilation for multiple architectures and
+configurations can be performed in a single directory without reconfiguring or
+"cleaning". This is convenient on nonhomogeneous networks, but it means that
+you might need to edit the makefiles to get SYMPHONY to compile. For the
+casual user, this editing is limited to providing some path names.
+
+PREPARING FOR COMPILATION
+=========================
+
+1. Download the file SYMPHONY-4.0.tgz.
+
+2. Unpack the distribution with "tar -xzf SYMPHONY-4.0.tgz". This will create
+a subdirectory called SYMPHONY-4.0/ containing the distribution.
+
+3. Edit the the makefile (SYMPHONY-4.0/Makefile) to reflect your
+environment. This involves specifying the LP solver to be used and the paths
+to various libraries and include files. Only minor edits should be
+required. An explanation of what has to be set is contained in the comments in
+the makefile.
+
+4. To use many of the new capabilities of SYMPHONY, you must have installed
+the COIN libraries, available from www.coin-or.org. Specifically, you should
+install OSI, CGL, and the Coin utilities (in the COIN/Coin directory). If you
+want to use the COIN LP solver, you should also download CLP. These can be
+downloaded from www.coin-or.org. The path to the COIN libraries must be
+specified in SYMPHONY-4.0/Makefile.
+
+5. If you wish to read GMPL/AMPL files, you will have to install the Gnu
+Linear Programming Kit (GLPK), which contains a parser for GMPL/AMPL
+files. The path to the GLPK libraries must be specified in
+SYMPHONY-4.0/Makefile.
+
+COMPILING THE SEQUENTIAL VERSION
+================================
+
+1. Change to the SYMPHONY-4.0/USER directory and type "make". This will first
+make the SYMPHONY library (sequential version). After making the SYMPHONY
+library, make will compile the user customization library and link the
+executable. The name of the executable is specified in the file
+SYMPHONY-4.0/USER/Makefile and is "mip" by default. The executable is
+installed in the directory SYMPHONY-4.0/USER/bin.$(ARCH)/$(LP_SOLVER), where
+ARCH is the current architecture and LPSOLVER is the current LP solver, as
+specified in the makefile. The makefile can be modified to enable parallel
+execution of the code (see below).
+
+2. After the SYMPHONY library is compiled, you are free to type "make clean"
+and/or delete the directories SYMPHONY-4.0/obj.* and SYMPHONY-4.0/dep.* if you
+want to save disk space. You should only have to remake the SYMPHONY library
+if you change something in SYMPHONY's internal files. To clean the user files,
+type "make clean_user".
+
+3. To test SYMPHONY, a sample MPS file called sample.mps is included with the
+distribution. To specify the file name, use the "-F" command-line option,
+i.e., type "bin.$(ARCH)/$(LP_SOLVER)/mip -F sample.mps" in the SYMPHONY-4.0/USER
+directory. To obtain more MPS data files for further testing, download the
+MIPLIB library.
+
+4. That's it! Now you are ready to develop your own application by modifying
+the files in the SYMPHONY-4.0/USER directory and it's subdirectories.
+
+COMPILING FOR SHARED MEMORY
+===========================
+
+PLEASE NOTE THAT THE SHARED MEMORY PARALLEL VERSION HAS NOT BEEN TESTED IN
+VERSION 4.0 AND MAY BE BROKEN. PLEASE LET ME KNOW IF YOU WANT TO USE IT AND I
+WILL GET IT WORKING.
+
+1. To compile a shared memory version, obtain an OpenMP compliant compiler,
+such as Omni (free from http://phase.etl.go.jp/Omni). Other options are listed
+at http://www.openmp.org.
+
+2. Follow the instructions above for configuring the makefile. Set the
+variable CC to the compiler name in the makefile and compile as above. Note
+that if you have previously compiled the sequential version, then you should
+first type "make clean_all", as this version uses the same directories. With
+one thread allowed, it should run exactly the same as the sequential version
+so there is no need to compile both versions.
+
+3. Voila, you have a shared memory parallel solver! As above, test symphony,
+using the sample MPS file called sample.mps included with the distribution. To
+specify the file name, use the "-F" command-line option, i.e., type
+"bin.$(ARCH)/$(LP_SOLVER)/mip -F sample.mps" in the SYMPHONY-4.0/USER
+directory. To obtain more MPS data files for further testing, download the
+MIPLIB library.
+
+4. That's it! Now you are ready to develop your own application by modifying
+the files in the SYMPHONY-4.0/USER directory and it's subdirectories. See the
+user manual for help.
+
+COMPILING FOR DISTRIBUTED NETWORKS
+==================================
+
+PLEASE NOTE THAT THE DISTRIBUTED MEMORY PARALLEL VERSION HAS NOT BEEN TESTED
+INVERSION 4.0 AND MAY BE BROKEN. PLEASE LET ME KNOW IF YOU WANT TO USE IT AND
+I WILL GET IT WORKING.
+
+1. If you wish to compile a distributed version of the code, obtain and
+install PVM from http://www.csm.ornl.gov/pvm/.
+
+2. In the makefile, be sure to set the COMM_PROTOCOL variable to "PVM". Also,
+in SYMPHONY-4.0/USER/Makefile, you must change one or more of COMPILE_IN_TM,
+COMPILE_IN_LP, COMPILE_IN_CG, and COMPILE_IN_CP, to FALSE, or you will end up
+with the sequential version.  Various combinations of these variables will
+give you different configurations and different executables. See the manual
+for more information on setting them. Also, be sure to set the path variables
+in the makefile appropriately so that make can find the PVM library.
+
+3. As above, type "make" in the SYMPHONY-4.0/USER/ directory to make the
+distributed libraries. As in Step 1 of the sequential version, you may type
+"make clean" after making the library. It should not have to remade again
+unless you modify SYMPHONY's internal files.
+
+4. After the SYMPHONY libraries, user code will be compiled and required
+executables linked.
+
+5. Make sure there are links from your $PVM_ROOT/bin/$PVM_ARCH/ directory to
+each of the executables in your SYMPHONY-4.0/USER/bin.$(ARCH)/$(LP_SOLVER)
+directory. This is required by PVM.
+
+6. Start the PVM daemon by typing "pvm" on the command line and then typing
+"quit".
+
+7. As above, test SYMPHONY using the sample MPS file called sample.mps included
+with the distribution. To specify the file name, use the "-F" command-line
+option, i.e., type "bin.$(ARCH)/$(LP_SOLVER)/mip -F sample.mps" in the
+SYMPHONY-4.0/USER directory. To obtain more MPS data files for further
+testing, download the MIPLIB library.
+
+8. That's it! Now you are ready to develop your own application by modifying
+the files in the SYMPHONY-4.0/USER directory and it's subdirectories. See the
+user manual for help.
+
+*******************************************************************************
+*                 COMPILING SYMPHONY (Microsoft Windows)                      *
+*******************************************************************************
+
+Here is a sketch outline of how to compile SYMPHONY in Microsoft Windows. For
+information on developing your own applications, please see the quick start
+guide below or the detailed explanation in the user's manual. Direct support
+is provided for compilation under MS Visual Studio 6.0. Compilation for other
+compilers should also be possible. Note that the Windows version has some
+limitations. Detailed timing information is not currently provided.  Support
+is only provided for running in sequential mode at this time.
+
+First, download SYMPHONY-4.0.zip and unzip the archive. This will create a
+subdirectory called SYMPHONY-4.0\ containing all the source files. You now
+have two options. You can either compile on the command-line, using the MSVC++
+makefile called SYMPHONY-4.0\WIN32\user.mak or you can use the provided
+projects and workspaces. Compiling on the command-line is somewhat easier
+since it requires only editing the makefile and typing a single command.
+
+******** Using the NMAKE Utility ********
+
+1. Edit the file SYMPHONY-4.0\USER\WIN32\user.mak to reflect your
+environment. This involves specifying the LP solver to be used and various
+paths. Only minor edits should be required. An explanation of what has to be
+set is contained in the comments in the makefile.
+
+2. To use many of the new capabilities of SYMPHONY, you must have installed
+the COIN libraries, available from www.coin-or.org. Specifically, you should
+install OSI, CGL, and the Coin utilities (in the COIN/Coin directory). If you
+want to use the COIN LP solver, you should also download CLP. These can be
+downloaded from www.coin-or.org. The path to the COIN libraries must be
+specified in SYMPHONY-4.0\USER\WIN32\user.mak.
+
+3. If you wish to read GMPL/AMPL files, you will have to install the Gnu
+Linear Programming Kit (GLPK), which contains a parser for GMPL/AMPL
+files. The path to the GLPK libraries must be specified in
+SYMPHONY-4.0\USER\WIN32\user.mak.
+
+4. Once configuration is done, type "nmake /f user.mak" in the
+SYMPHONY-4.0\USER\WIN32 directory. The executable "symphony.exe" will be
+created in the SYMPHONY-4.0\USER\WIN32\Debug directory.
+
+5. To test the executable, type "symphony.exe -F ..\..\sample.mps" at a command
+prompt from the SYMPHONY-4.0\USER\WIN32\Debug directory.
+
+******** Using the MSVC++ Workspace ********
+
+1. In MS Visual C++ 6.0, open the workspace SYMPHONY-4.0\USER\WIN32\user.dsw.
+Note that there are two projects, one called "symphony" and one called "user".
+The symphony project compiles the source of the internal library. The user
+project compiles a separate library containing the user-defined functions that
+can be used to customize the solver.
+
+2. To use many of the new capabilities of SYMPHONY, you must have installed
+the COIN libraries. Specifically, you should install OSI, CGL, and the Coin
+utilities (in the COIN/Coin directory). If you want to use the COIN LP solver,
+you should also download CLP. These can be downloaded from www.coin-or.org.
+The default location for COIN is C:\COIN\.
+
+3. By default, SYMPHONY is set up to use the OSI CPLEX interface. To see this
+check the following settings:
+
+-- "__OSI_CPLEX__" is defined in the preprocessor definitions of both
+"symphony" and "user" projects (to see that, right-click on one of the
+projects, and then choose Settings --> C/C++ --> Preprocessor in the category
+drop-down menu).
+
+-- Paths to the include files of COIN utilities (Coin), OSI, OSI_CPLEX, and
+CPLEX are specified in the same settings window as for the preprocessor
+definitions. Note that the Coin, OSI, and OSI_CPLEX include directories are
+assumed to be in C:\COIN\Coin, C:\COIN\Osi, C:\COIN\Osi\OsiCpx and
+C:\ILOG\cplex81\include\ilcplex directories, respectively. If they are not,
+make sure that you have set the correct paths in both projects before
+compiling.
+
+-- The "symphony" project is dependent on the "user" project (see the
+dependencies in Project --> Dependencies) and it includes the necessary
+libraries: "user", "osiCpxLib", "osiLib", "coinLib" and "cplex81" (solver
+library).
+
+If you want to use the native CPLEX interface (without downloading COIN) or a
+solver other than CPLEX:
+
+-- If you want to use another OSI interface, change the preprocessor
+definition from "__OSI_CPLEX__" to "__OSI_XXX__", where "XXX" is replaced by
+the desired solver's acronym ("__OSI_CLP__", "__OSI_GLPK__", "__OSI_OSL__",
+etc.). Otherwise, change it to either "__CPLEX__" or "__OSL__" in both
+projects.
+
+-- Change the path definitions of the include files: for instance, if you want
+to use "__OSI_OSL__", define C:\COIN\OSi\OsiOsl and C:\Program
+Files\IbmOslV3Lib\osllib (assuming it is installed there) instead of the CPLEX
+path definitions. If you want to use the native OSL interface, delete all the
+path definitions (you are not required to have COIN or OSI), and just add the
+path definitions for the OSL include files.
+
+-- Add the appropriate libraries to the "symphony" project. For instance, if
+you want to use "__OSI_OSL__", then add the osiOslLib and oslmd6030 (OSL solver
+lib file) library files after deleting osiCpxLib and cplex81 libraries from
+the "symphony" project (you can do that by right-clicking on the "symphony"
+project and then --> Add files to project with "library files" selected as the
+file type). If you want to use the native OSL interface, then delete all the
+libraries (except the "user" library ) from the "symphony" project and just
+add the "oslmd6030" library file for it is the unique solver library file we
+need now.
+
+4. By default, SYMPHONY is also set up to use the COIN CGL library for
+generating cuts. To use CGL, the "symphony" project has the "ADD_CGL_CUTS"
+preprocessor definition, the path to C:\COIN\Cgl\ (be sure that this path
+directs SYMPHONY to the include directory of CGL) and a dependence on the
+"cgllib" library. If you also don't want to use the CGL library, simply delete
+the "ADD_CGL_CUTS" preprocessor definition, the CGL path definitions and the
+"cglLib" library from the "symphony" project.
+
+5. DO NOT CHANGE COMPILER DEFINES NOT RELATED TO THE LP SOLVER. Important note
+for OSL users: when using OSL in Windows, you must also add "OSLMSDLL" to the
+list of definitions.
+
+6. Note that there are a number of additional preprocessor definitions that
+control the functionality of SYMPHONY. These definitions are described in
+SYMPHONY-4.0/Makefile, a Unix-style makefile included with the
+distribution. To enable the functionality associated with a particular
+definition, simply add it to the list of definitions, as above.
+
+7. You must also be sure to have any .dll files required for your LP solver to
+be in your search path. Either move the required .dll to the directory
+containing symphony.exe or add the path to the "PATH" Windows environment
+variable.
+
+8. Once you have the proper settings for your LP solver, choose "Build
+symphony.exe" from the Build menu. This should successfully build the
+executable.
+
+9. To test the executable, right click on the symphony project, go to the
+"Debug" tab and set the program arguments to "-F sample.mps" Note that
+command-line switches are Unix-style.
+
+10. Now choose "Execute" from the build menu and the solver should solve the
+sample problem.
+
+Note that there is some functionality missing from the Windows version. Most
+prominently, the timing functions do not work. This functionality should be
+easy to add -- let me know if you are interested in doing it and I will give
+you all the help I can. In addition, the Windows version will only run in
+sequential mode for a variety of reasons. However, it should be relatively
+easy to get it running in parallel if you can get PVM working under
+Windows. Let me know if you are interested.
+
+*******************************************************************************
+*                 QUICK START DEVELOPMENT GUIDE (UNIX)                        *
+*******************************************************************************
+
+Developing a simple branch and bound solver that can read in instance data in
+a custom format is straightforward using the template provided in the
+SYMPHONY-4.0/USER/ directory. The simplest approach is to develop a sequential
+application, sharing a single user data structure among all the modules. Using
+this approach, an application can be developed by filling in only a few simple
+functions. Here are some steps to make the most common custom modifications.
+
+1. Decide what run-time parameters you might need and what data has to be
+stored to describe your instance. Edit the file
+SYMPHONY-4.0/USER/include/user.h, adding the appropriate fields to the
+user_parameter and user_problem structures to store the relevant values.
+
+2. Now edit the file SYMPHONY-4.0/USER/Master/user_master.c. Only two
+functions need to be filled out initially in order to read in your data files
+in a custom format. The function user_io() is where you can read in the
+instance data, if it is in something other than MPS format (a TSPLIB file, for
+example). Note that the name of the file to read the instance data from can be
+specified on the command line using the "-F" option by default. Also, you'll
+probably need to modify the user_initialize_root_node() function to set up the
+root node.
+
+3. Edit the file SYMPHONY-4.0/USER/LP/user_lp.c. The function
+user_create_subproblem() must be filled out. This is the most important
+function, as it sets up the initial LP relaxation in each search node.
+
+4. You may also want to add some problem-specific cutting planes by modifying
+the user_find_cuts() function.
+
+Now compile by typing "make" again and that's it! You should now have a
+working branch and bound solver. Next you can work on filling in more advanced
+functions and adding cutting planes. See the documentation for more
+information on this.
+
+*******************************************************************************
+*               QUICK START DEVELOPMENT GUIDE (Microsoft Windows)             *
+*******************************************************************************
+
+Developing a simple branch and bound solver that can read in instance data in
+a custom format is straightforward using the template provided in the
+SYMPHONY-4.0\USER\ directory. The simplest approach is to develop a sequential
+application, sharing a single user data structure among all the modules. Using
+this approach, an application can be developed by filling in only a few simple
+functions. Here are some steps to make the most common custom modifications.
+
+1. Decide what run-time parameters you might need and what data has to be
+stored to describe your instance. Edit the file
+SYMPHONY-4.0\USER\include\user.h, adding the appropriate fields to the
+user_parameter and user_problem structures to store the relevant values.
+
+2. Now edit the file SYMPHONY-4.0\USER\Master\user_master.c. Only two
+functions need to be filled out initially in order to read in your data files
+in a custom format. The function user_io() is where you can read in the
+instance data, if it is in something other than MPS format (a TSPLIB file, for
+example). Note that the name of the file to read the instance data from can be
+specified on the command line using the "-F" option by default. Also, you'll
+probably need to modify the user_initialize_root_node() function to set up the
+root node.
+
+3. Edit the file SYMPHONY-4.0\USER\LP\user_lp.c. The function
+user_create_subproblem() must be filled out. This is the most important
+function, as it sets up the initial LP relaxation in each search node.
+
+4. You may also want to add some problem-specific cutting planes by modifying
+the user_find_cuts() function.
+
+Now build again and you have a working branch and bound solver! Next you can
+work on filling in more advanced functions and adding cutting planes. See the
+documentation for more information on this.
+
+*******************************************************************************
+*                           SAMPLE APPLICATIONS                               *
+*******************************************************************************
+
+There are now a number of sample applications available as examples of how to
+do development with SYMPHONY. These include solvers for the matching problem,
+the set partitioning problem (simple and advanced versions), the vehicle
+routing and traveling salesman problems, and the mixed postman problem. These
+applications are distributed as separate packages and can be downloaded from
+www.branchandcut.org. There is a white paper that guides the user through the
+development of the matching solver.
+
+*******************************************************************************
+*                         CURRENT TESTING STATUS                              *
+*******************************************************************************
+
+SYMPHONY can now be used in a very large number of possible configurations and
+we simply aren't able to test them all. Below is a rough idea of the testing
+status of various configurations to date. If you need a certain configuration,
+I would be happy to help you get it running. Please let me know.
+
+LP INTERFACES
+=============
+
+Well tested: CPLEX, OSI_CPLEX, OSL, OSI_OSL, OSI_CLP 
+
+Well tested, but have some stability or other issues: OSI_GLPK
+
+Compiled, but not well-tested: OSI_SPX
+
+Not tested: The rest of the OSI interface
+
+CONFIGURATIONS
+==============
+
+SEQUENTIAL: Well tested.
+
+SHARED MEMORY: Not tested yet.
+
+DISTRIBUTED MEMORY: Not tested yet.
+
+APPLICATIONS
+============
+
+SYMPHONY (used as a generic MILP solver): Well tested, but lacks the bells and
+whistles to solve the more difficult MIPLIB problems.
+
+MATCH (matching): Tested, but not very extensively.
+
+MPP (mixed postman problem): Tested, but not very extensively.
+
+VRP (vehicle routing problem): Well tested.
+
+SPP (set partitioning problem): Tested, but not very extensively.
+
+SPP+CUTS (set partitioning problem with cutting planes): Tested, but not very 
+extensively.
+
+*******************************************************************************
+*                                 SUPPORT                                     *
+*******************************************************************************
+
+LIST SERVE
+
+There is a list serve for SYMPHONY users. To subscribe, send a message
+containing "subscribe symphony-users" to majordomo@branchandcut.org.
+
+AUTHORS
+
+SYMPHONY was jointly developed by Ted Ralphs (ted@lehigh.edu) and      Laci
+Ladanyi (ladanyi@us.ibm.com). Menal Guzelsoy (megb@lehigh.edu) helped with
+development, documentation, and debugging of SYMPHONY 4.0.
+
+BUG REPORTS
+
+Bug reports should be sent to symphony-bugs@branchandcut.org.
+

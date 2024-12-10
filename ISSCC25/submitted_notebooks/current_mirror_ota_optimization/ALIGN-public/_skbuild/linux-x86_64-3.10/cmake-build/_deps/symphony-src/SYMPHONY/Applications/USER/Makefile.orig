@@ -1,0 +1,107 @@
+##############################################################################
+##############################################################################
+#                                                                            #
+# This file is part of a demonstration application for use with the          #
+# SYMPHONY MILP Solver Framework.          This application is a solver for  #
+# the Vehicle Routing Problem and the Traveling Salesman Problem.            #
+#                                                                            #
+# (c) Copyright 2000-2005  Ted Ralphs. All Rights Reserved.                  #
+#                                                                            #
+# This application was developed by Ted Ralphs (ted@lehigh.edu)              #
+#                                                                            #
+# This software is licensed under the Eclipse Public License. Please see     #
+# accompanying file for terms.                                               #
+#                                                                            #
+##############################################################################
+##############################################################################
+
+##############################################################################
+# First, we have to define some variables that will be used
+##############################################################################
+
+##############################################################################
+# SYMPHONY's home directory
+##############################################################################
+
+SYMPHONYROOT = ../..
+
+##############################################################################
+# The home directory of the user files (must be an absolute path)
+##############################################################################
+
+USERROOT = .
+
+##############################################################################
+# The customized name of the master program (if desired)
+##############################################################################
+
+MASTERNAME = mip
+
+##############################################################################
+# These are only needed if parallel computation is used. Please see the
+# explanation of these variables in SYMPHONY's configuration file.
+##############################################################################
+
+COMPILE_IN_TM = TRUE
+COMPILE_IN_LP = TRUE
+COMPILE_IN_CG = TRUE
+COMPILE_IN_CP = TRUE
+
+##############################################################################
+# This section is for listing source file names
+##############################################################################
+
+USER_LP_SRC       = user_lp_branch.c user_lp.c 
+ifeq ($(COMPILE_IN_CG),TRUE)
+USER_LP_SRC      += user_cg.c
+endif
+
+USER_TM_SRC       =
+ifeq ($(COMPILE_IN_LP),TRUE)
+USER_TM_SRC      += $(USER_LP_SRC)
+endif
+ifeq ($(COMPILE_IN_CP),TRUE)
+USER_TM_SRC      += user_cp.c 
+endif
+
+USER_MASTER_SRC   = user_main.c user_master.c
+
+ifeq ($(COMPILE_IN_TM),TRUE)
+USER_MASTER_SRC  += $(USER_TM_SRC)
+endif
+
+USER_CG_SRC       = user_cg.c
+
+USER_CP_SRC       = user_cp.c
+
+USER_DG_SRC       = user_dg.c
+
+USER_SRCDIR       =
+USER_INCDIR       =
+
+##############################################################################
+# This is the flag for the SYMPHONY Makefile to determine whether
+# SYMPHONY is being compiled by itself or as part of a user-defined 
+# application. You shouldn't need to modify this variable. 
+##############################################################################
+
+USE_SYM_APPL = TRUE
+
+##############################################################################
+# If you want to build SYMPHONY in a directory outside the source tree, 
+# uncomment this and fill in the directory here. Setting these variables will 
+# cause object, library, and binary files associated with SYMPHONY and the 
+# user's application to be built and installed in the corresponding 
+# directories. This is helpful if the user doesn't have write access to the 
+# directory where SYMPHONY is installed.
+##############################################################################
+
+SYMBUILDDIR = $(SYMPHONYROOT)
+USERBUILDDIR = $(USERROOT)
+
+##############################################################################
+# Include the SYMPHONY makefile after all the source file names (and before
+# any used-defined targets!)
+##############################################################################
+
+include $(SYMPHONYROOT)/Makefile

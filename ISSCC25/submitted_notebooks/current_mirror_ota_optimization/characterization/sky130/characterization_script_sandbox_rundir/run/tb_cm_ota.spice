@@ -1,0 +1,99 @@
+** sch_path: /home/adair/Documents/CAD/xschem_library_adair/schematics/tb_cm_ota.sch
+**.subckt tb_cm_ota
+V1 net1 avss 1.8
+V2 avss GND 0
+C1 out GND 50f m=1
+V3 inn GND 0.9 AC 1
+V4 inp GND 0.9
+X1 net1 out inp inn net2 GND cm_ota w1_2=3 w3_4=6.8 w5_6=4.6 w7_8=10.5
+I2 GND net2 47.5u
+**** begin user architecture code
+
+** opencircuitdesign pdks isntsall
+//.lib /opt/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+
+
+
+
+.temp 27
+.ac dec 100 10 100G
+.print ac V(out)
+.measure ac unity_freq when vdb(out)=0
+//.measure ac gain_max MAX vdb(out)
+.measure ac pole1_freq when vp(out)=-45 cross=1
+.measure ac pole2_freq when vp(out)=-90 cross=1
+//.measure ac bandwidth when vdb(out)= '(gain_max - 3)' cross=1
+.control
+	//run
+	//save all
+	//ac dec 10 1 1e11
+	//settype decibel out
+	//setcurplottitle=Loopgain
+	//let frequency ac1.frequency
+.endc
+
+
+
+
+
+.lib /opt/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.temp 27
+.ac dec 100 1 100e15
+.print ac V(out)
+.measure ac gbw when vdb(out)=0
+.measure ac dc_gain find vdb(out) at=10
+.measure ac pole1_freq when 180*cph(out)/pi=-45 cross=1
+.measure ac pole2_freq when 180*cph(out)/pi cross=1
+//.measure ac bandwidth when vdb(out)= '(dc_gain - 3)' cross=1
+.control
+	// run //v1
+	// set hcopyscolor=1 //v1
+	plot vdb(out) vs frequency
+	plot 180*cph(out)/pi vs frequency
+
+	echo 'GBWP = ' gbw
+	echo 'DC Gain = ' dc_gain
+	echo 'pole1 freq = ' pole1_freq
+	echo 'pole2 freq = ' pole2_freq
+	echo '3dB BW = ' bandwidth
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  cm_ota.sym # of pins=6
+** sym_path: /home/adair/Documents/CAD/xschem_library_adair/schematics/cm_ota.sym
+** sch_path: /home/adair/Documents/CAD/xschem_library_adair/schematics/cm_ota.sch
+.subckt cm_ota avdd_1v8 out inp inn itail avss  w1_2=1 w3_4=1 w5_6=1 w7_8=1
+*.iopin inn
+*.iopin inp
+*.iopin avdd_1v8
+*.iopin out
+*.iopin itail
+*.iopin avss
+XM1 net1 inn net3 avss sky130_fd_pr__nfet_01v8 L=0.15 W=w1_2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+xM3 net1 net1 avdd_1v8 avdd_1v8 sky130_fd_pr__pfet_01v8 L=0.15 W=w3_4 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+XM2 net2 inp net3 avss sky130_fd_pr__nfet_01v8 L=0.15 W=w1_2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+xM4 net2 net2 avdd_1v8 avdd_1v8 sky130_fd_pr__pfet_01v8 L=0.15 W=w3_4 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+xM7 net4 net1 avdd_1v8 avdd_1v8 sky130_fd_pr__pfet_01v8 L=0.15 W=w7_8 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+XM5 net4 net4 avss avss sky130_fd_pr__nfet_01v8 L=0.15 W=w5_6 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+XM6 out net4 avss avss sky130_fd_pr__nfet_01v8 L=0.15 W=w5_6 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+xM8 out net2 avdd_1v8 avdd_1v8 sky130_fd_pr__pfet_01v8 L=0.15 W=w7_8 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+XM9 net3 itail avss avss sky130_fd_pr__nfet_01v8 L=0.15 W=w1_2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+XM10 itail itail avss avss sky130_fd_pr__nfet_01v8 L=0.15 W=w1_2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+.ends
+
+.GLOBAL GND
+.end

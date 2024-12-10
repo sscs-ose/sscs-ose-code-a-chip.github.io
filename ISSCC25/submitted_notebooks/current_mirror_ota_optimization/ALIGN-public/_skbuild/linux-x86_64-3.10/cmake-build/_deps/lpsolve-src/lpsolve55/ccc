@@ -1,0 +1,54 @@
+:
+src='../lp_MDO.c ../shared/commonlib.c ../shared/mmio.c ../shared/myblas.c ../ini.c ../fortify.c ../colamd/colamd.c ../lp_rlp.c ../lp_crash.c ../bfp/bfp_LUSOL/lp_LUSOL.c ../bfp/bfp_LUSOL/LUSOL/lusol.c ../lp_Hash.c ../lp_lib.c ../lp_wlp.c ../lp_matrix.c ../lp_mipbb.c ../lp_MPS.c ../lp_params.c ../lp_presolve.c ../lp_price.c ../lp_pricePSE.c ../lp_report.c ../lp_scale.c ../lp_simplex.c ../lp_SOS.c ../lp_utils.c ../yacc_read.c'
+c=cc
+
+MYTMP=`mktemp -d "${TMPDIR:-/tmp}"/lp_solve_XXXXXX`
+
+#determine platform (32/64 bit)
+>"$MYTMP"/platform.c
+echo '#include <stdlib.h>'>>"$MYTMP"/platform.c
+echo '#include <stdio.h>'>>"$MYTMP"/platform.c
+echo 'main(){printf("ux%d", (int) (sizeof(void *)*8));}'>>"$MYTMP"/platform.c
+$c "$MYTMP"/platform.c -o "$MYTMP"/platform
+PLATFORM=`"$MYTMP"/platform`
+rm "$MYTMP"/platform "$MYTMP"/platform.c >/dev/null 2>&1
+
+mkdir bin bin/$PLATFORM >/dev/null 2>&1
+
+#check if this system has the isnan function
+>"$MYTMP"/isnan.c
+echo '#include <stdio.h>'>>"$MYTMP"/isnan.c
+echo '#include <stdlib.h>'>>"$MYTMP"/isnan.c
+echo '#include <math.h>'>>"$MYTMP"/isnan.c
+echo 'main(){isnan(0.0);return 0;}'>>"$MYTMP"/isnan.c
+$c "$MYTMP"/isnan.c -o "$MYTMP"/isnan $math >/dev/null 2>&1
+if [ $? = 0 ]
+then NOISNAN=
+else NOISNAN=-DNOISNAN
+fi
+rm "$MYTMP"/isnan.c "$MYTMP"/isnan >/dev/null 2>&1
+
+rmdir "$MYTMP"
+
+def=
+so=
+if [ "$PLATFORM" = "SCO_UNIX" ]
+then def='-dy -K PIC -DNOLONGLONG'
+     dl=-lc
+else dl=-ldl
+     so=y
+fi
+
+opts='-O3'
+
+$c -s -c -I.. -I../shared -I../bfp -I../bfp/bfp_LUSOL -I../bfp/bfp_LUSOL/LUSOL -I../colamd $opts $def $NOISNAN -DYY_NEVER_INTERACTIVE -DPARSER_LP -DINVERSE_ACTIVE=INVERSE_LUSOL -DRoleIsExternalInvEngine $src
+ar rv bin/$PLATFORM/liblpsolve55.a `echo $src|sed s/[.]c/.o/g|sed 's/[^ ]*\///g'`
+ranlib bin/$PLATFORM/liblpsolve55.a
+
+if [ "$so" != "" ]
+then
+  $c -fpic -s -c -I.. -I../shared -I../bfp -I../bfp/bfp_LUSOL -I../bfp/bfp_LUSOL/LUSOL -I../colamd -I. $opts $NOISNAN -DYY_NEVER_INTERACTIVE -DPARSER_LP -DINVERSE_ACTIVE=INVERSE_LUSOL -DRoleIsExternalInvEngine $src
+  $c -shared -Wl,-Bsymbolic -Wl,-soname,liblpsolve55.so -o bin/$PLATFORM/liblpsolve55.so `echo $src|sed s/[.]c/.o/g|sed 's/[^ ]*\///g'` -lc -lm -ldl
+fi
+
+rm *.o 2>/dev/null

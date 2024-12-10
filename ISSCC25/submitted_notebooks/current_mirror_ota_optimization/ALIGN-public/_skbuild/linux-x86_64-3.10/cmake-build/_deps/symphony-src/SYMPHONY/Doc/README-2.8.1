@@ -1,0 +1,168 @@
+SYMPHONY Version 2.8.1 README
+
+Welcome to SYMPHONY. To use SYMPHONY, you must be a registered user.
+If you are not a registered user, please visit SYMPHONY's registration
+page at http://branchandcut.org/SYMPHONY/license.htm to receive an
+official copy of the distribution. All users should be familiar with
+and agree to the terms of the End User License Agreement that comes
+with the distribution. The distribution is for academic research use
+only. Commercial use is prohibited. All source code and documentation
+is Copyright 2000 by Ted Ralphs. This README may be distributed
+freely.
+
+DOCUMENTATION
+
+Full documentation comes with your distribution in the directory
+SYMPHONY-2.8.1/Doc and can also be downloaded at
+ftp://branchandcut.org/pub/reference/. There is a white paper
+(SYMPHONY.pdf) describing the basics of SYMPHONY and a user's guide
+(SYMPHONY-2.8-Manual.pdf), both of which should be read prior to
+developing an application.
+
+WHAT'S NEW
+
+1. The LP solver interface has been upgraded to accommodate CPLEX
+Version 7.0. There have also been minor fixes to the interface.
+
+2. A few small bugs were fixed.
+
+CHANGED FILES
+
+SYMPHONY-2.8.1/Master/master.c
+SYMPHONY-2.8.1/LP/lp_solver.c
+SYMPHONY-2.8.1/LP/lp_proccomm.c
+
+CHANGES TO THE USER INTERFACE
+
+None
+
+NOTE ON INSTALLATION
+
+Because SYMPHONY is inherently intended to be compiled and run on
+multiple architectures and in multiple configurations, I have chosen
+not to use the automatic configuration scripts provided by GNU. With
+the make files provided, compilation for multiple architectures and
+configurations can be done in a single directory without reconfiguring
+or "cleaning". This is very convenient, but it means that there is
+some hand configuring to do and you might need to know a little about
+your computing environment in order to make SYMPHONY compile. For the
+most part, this is limited to editing the make file and providing some
+path names. Also, for this reason, you may have to live with some
+complaints from the compiler because of missing function prototypes, etc.
+
+Note that if you choose not to install PVM, you will need to edit the
+make file and provide an environment variable which makes it possible
+for "make" to determine the current architecture. This environment
+variable also allows the path to the binaries for each architecture to
+be set appropriately. This should all be done automatically if PVM is
+installed correctly.
+
+GETTING STARTED
+
+1. Unpack the distribution with "tar -xzf SYMPHONY-2.8.1.tgz".
+
+2. Edit the various path variables in Makefile (SYMPHONY-2.8.1/Makefile)
+to match where you installed the source code and where the LP
+libraries and header files reside for each architecture on your
+network. Other architecture-dependent variables should also be set as
+required.
+
+COMPILING THE SEQUENTIAL VERSION
+
+1. Type "make" in the SYMPHONY root directory. This will first make
+the SYMPHONY library (sequential version). After this step is
+completed, you are free to type "make clean" and/or delete the
+directories $ROOT/obj.* and $ROOT/dep.* if you want to save disk
+space. You should only have to remake the library if you change
+something in SYMPHONY's internal files.
+
+2. After making the libraries, SYMPHONY will compile the user code and 
+then make the executable for the sample application, a vehicle routing
+and traveling salesman problem solver. The name of the executable will
+be "master_tm_lp_cg_cp", indicating that all modules are contained in
+s single executable.
+
+3. To test the sample program, you can get some problem files from
+http://branchandcut.org/VRP/data/ or the TSPLIB
+(http://www.iwr.uni-heidelberg.de/iwr/comopt/software/TSPLIB95/). The
+file format is that specified for the TSPLIB. There is also one sample
+file included with the distribution. Make sure the executable
+directory is in your path and type "master_tm_lp_cg_cp -F sample.vrp
+-N 5", where sample.vrp is the sample problem file. The -N argument
+gives the number of routes, which must be specified in advance. TSP
+instances can also be solved, but in this case, the number of routes
+does not need to be specified.
+
+COMPILING FOR SHARED MEMORY
+
+1. Obtain an OpenMP compliant compiler, such as Omni (free from 
+http://pdplab.trc.rwcp.or.jp/Omni/). Other options are listed at 
+http://www.openmp.org.
+
+2. Set the variable CC to the compiler name in the make file and
+compile as above.
+
+3. Voila, you have a shared memory parallel solver.
+
+4. Note that if you have previously compiled the sequential version,
+then you should first type "make clean_all", as this version uses the
+same directories. With one thread allowed, it should run exactly the
+same as the sequential version so there is no need to have both.
+
+COMPILING FOR DISTRIBUTED NETWORKS
+
+1. If you wish to compile a distributed version of the 
+code, obtain and install PVM from http://www.ccs.ornl.gov/pvm/.
+Installing it is self-explanatory.
+
+2. In the Makefile, be sure to set the COMM_PROTOCOL to "PVM". Also,
+change one or more of COMPILE_IN_TM, COMPILE_IN_LP, COMPILE_IN_CG, and
+COMPILE_IN_CP, to FALSE, or you will end up with the sequential
+version. Various combinations of these variables will give you
+different configurations and different executables. See the manual for
+more information on setting them. Also, be sure to set the path
+variables in the make file appropriately so that make can find the PVM
+library.
+
+3. Type "make" in the SYMPHONY root directory to make the
+distributed libraries. As in Step 1 of the sequential version, you may
+type "make clean" after making the library. It should not have to
+remade again unless you modify SYMPHONY's internal files.
+
+4. After the libraries, all executables requested will be made.
+
+5. Make sure there are links from your $PVM_ROOT/bin/$PVM_ARCH/
+directory to each of the executables in your SYMPHONY User/bin.$REV
+directory. This is required by PVM.
+
+6. Start the PVM daemon by typing "pvm" on the command line and then
+typing "quit".
+
+7. To test the sample program, you can get some problem files from
+http://branchandcut.org/VRP/data/ or the TSPLIB
+(http://www.iwr.uni-heidelberg.de/iwr/comopt/software/TSPLIB95/). The
+file format is that specified for the TSPLIB. There is also one sample
+file included with the distribution. Make sure the executable
+directory is in your path and type "master -F sample.vrp
+-N 5", where sample.vrp is the sample problem file. The -N argument
+gives the number of routes, which must be specified in advance. TSP
+instances can also be solved, but in this case, the number of routes
+does not need to be specified. The actual executable name may not be
+"master" if COMPILE_IN_TM is set to TRUE.
+
+8. That's it! Now you are ready to develop your own application. See
+the white paper and user manual for help.
+
+LIST SERVE
+
+There is a list serve for SYMPHONY users. To subscribe, send a message
+containing "subscribe symphony-users" to majordomo@branchandcut.org.
+
+AUTHORS
+
+SYMPHONY was jointly developed by Ted Ralphs (ted@lehigh.edu) and     
+Laci Ladanyi (ladanyi@watson.ibm.com).
+
+BUG REPORTS
+
+Bug reports should be sent to symphony-bugs@branchandcut.org.

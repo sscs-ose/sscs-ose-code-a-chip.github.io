@@ -1,0 +1,225 @@
+##############################################################################
+##############################################################################
+#                                                                            #
+# This file is part of a demonstration application for use with the          #
+# SYMPHONY MILP Solver Framework.          This application is a solver for  #
+# Capacitated Network Routing Problems.                                      #
+#                                                                            #
+# (c) Copyright 2000-2005  Ted Ralphs. All Rights Reserved.                  #
+#                                                                            #
+# This application was developed by Ted Ralphs (ted@lehigh.edu)              #
+#                                                                            #
+# This software is licensed under the Eclipse Public License. Please see     #
+# accompanying file for terms.                                               #
+#                                                                            #
+##############################################################################
+##############################################################################
+
+##############################################################################
+# First, we have to define some variables that will be used
+##############################################################################
+
+##############################################################################
+# SYMPHONY's home directory
+##############################################################################
+
+SYMPHONYROOT = ../..
+
+##############################################################################
+# The home directory of the user files (must be an absolute path)
+##############################################################################
+
+USERROOT = .
+
+##############################################################################
+# The customized name of the master program (if desired)
+##############################################################################
+
+MASTERNAME = cnrp
+
+##############################################################################
+# These are only needed if parallel computation is used. Please see the
+# explanation of these variables in SYMPHONY's configuration file.
+##############################################################################
+
+COMPILE_IN_TM = TRUE
+COMPILE_IN_LP = TRUE
+COMPILE_IN_CG = TRUE
+COMPILE_IN_CP = TRUE
+
+##############################################################################
+# Other variables to be set by the user
+##############################################################################
+
+##############################################################################
+#Whether to solve problem as a multi-criteria (fixed vs. variable cost)
+#or single-criteria problem
+##############################################################################
+
+MULTI_CRITERIA = FALSE
+
+##############################################################################
+#Whether to use the model with two oppositely oriented copies of each 
+#fixed-chrage variable (one for each direction) or just a single undirected 
+#copy. 
+##############################################################################
+
+DIRECTED_X_VARS = TRUE
+
+##############################################################################
+#Whether to add the flow variables (these are needed to model the variable costs)
+##############################################################################
+
+ADD_FLOW_VARS = TRUE
+
+##############################################################################
+#Whether to add capacity cuts to the model 
+##############################################################################
+
+ADD_CAP_CUTS = FALSE
+
+##############################################################################
+#Whether to add "X" cuts to the model 
+##############################################################################
+
+ADD_X_CUTS = FALSE
+
+##############################################################################
+#Whether to save the global cut pool between iterations when using warm 
+#starting 
+##############################################################################
+
+SAVE_CUT_POOL = TRUE
+
+ifeq ($(MULTI_CRITERIA),TRUE)
+USER_BB_DEFINES += -DMULTI_CRITERIA
+endif
+
+ifeq ($(ADD_FLOW_VARS),TRUE)
+USER_BB_DEFINES += -DADD_FLOW_VARS
+ifeq ($(ADD_CAP_CUTS),TRUE)
+USER_BB_DEFINES += -DADD_CAP_CUTS
+endif
+endif
+
+ifeq ($(DIRECTED_X_VARS),TRUE)
+USER_BB_DEFINES += -DDIRECTED_X_VARS
+ifeq ($(ADD_X_CUTS),TRUE)
+USER_BB_DEFINES += -DADD_X_CUTS
+endif
+endif
+
+ifeq ($(SAVE_CUT_POOL),TRUE)
+USER_BB_DEFINES += -DSAVE_CUT_POOL
+endif
+
+##############################################################################
+# This section is for listing CNRP source file names
+##############################################################################
+
+MACROS_SRC        = cnrp_macros.c
+COST_SRC          = compute_cost.c
+NET_SRC           = network.c
+DG_FUNC_SRC       = cnrp_dg_functions.c
+
+USER_MASTER_SRC   = cnrp_main.c cnrp_master.c cnrp_io.c
+USER_MASTER_SRC  += cnrp_master_functions.c small_graph.c
+
+USER_MASTER_SRC  += $(COST_SRC)
+ifeq ($(COMPILE_IN_TM),TRUE)
+USER_MASTER_SRC  += $(USER_TM_SRC)
+ifeq ($(COMPILE_IN_LP),FALSE)
+USER_MASTER_SRC  += $(MACROS_SRC) $(DG_FUNC_SRC)
+endif
+else
+USER_MASTER_SRC  += $(MACROS_SRC) $(DG_FUNC_SRC)
+endif
+
+ifeq ($(COMPILE_IN_LP),TRUE)
+USER_TM_SRC       = $(USER_LP_SRC) 
+endif
+ifeq ($(COMPILE_IN_CP),TRUE)
+USER_TM_SRC      += cnrp_cp.c 
+endif
+
+USER_LP_SRC       = cnrp_lp_branch.c cnrp_lp.c 
+USER_LP_SRC      += $(MACROS_SRC) $(NET_SRC) $(DG_FUNC_SRC)
+ifeq ($(COMPILE_IN_CG),TRUE)
+USER_LP_SRC      += cnrp_cg.c biconnected.c shrink.c
+endif
+
+USER_CG_SRC       = cnrp_cg.c biconnected.c 
+USER_CG_SRC      += compute_cost.c shrink.c $(DG_FUNC_SRC)
+USER_CG_SRC      += $(MACROS_SRC) $(NET_SRC)
+
+USER_CP_SRC       = cnrp_cp.c $(MACROS_SRC)
+
+USER_DG_SRC       = cnrp_dg.c cnrp_dg_network.c $(MACROS_SRC)
+
+USER_SRCDIR       =
+USER_INCDIR       =
+
+##############################################################################
+# This section is for CONCORDE
+##############################################################################
+
+##############################################################################
+# This solver can use separation routines from CONCORDE, the
+# TSP solver of Applegate, Bixby, Chvatal, and Cook. To enable this option:
+# 1. set the variables DO_CONCORDE_CUTS to TRUE. 
+# 2. Download the source code for CONCORDE and the qsopt LP solver from 
+#    http://www.tsp.gatech.edu.
+# 3. Put qsopt.a and qsopt.h in ~/lib (make the directory if it doesn't exist).
+# 4. Put a copy of qsopt.h in ~/include (make this directory if it doesn't 
+#    exist).
+#.5. Rename qsopt.a libqsopt.a (so it is detected as a library).
+# 6. Build concorde with qsopt as the LP solver (configure --with-qsopt=~/lib).
+# 7. Move the resulting library concorde.a to ~/lib and rename it 
+#    libconcorde.a (or create a soft link).
+# 8. Put a copy of concorde.h in ~/include (or create a soft link).
+# 9. Make the CNRP application as usual.
+##############################################################################
+
+DO_CONCORDE_CUTS = FALSE
+
+ifeq ($(DO_CONCORDE_CUTS),TRUE)
+USER_BB_DEFINES += -DDO_TSP_CUTS
+USERLIBS = -lconcorde -lqsopt
+USERLIBPATHS  = ${HOME}/lib
+USER_INCDIR += -I${HOME}/include 
+
+ifeq ($(COMPILE_IN_CG),TRUE)
+USER_LP_SRC      += tsp.c # $(TSP_SRC)
+endif
+
+USER_CG_SRC      += tsp.c # $(TSP_SRC)
+
+endif
+
+##############################################################################
+# This is the flag for the SYMPHONY Makefile to determine whether
+# SYMPHONY is being compiled by itself or as part of a user-defined 
+# application. You shouldn't need to modify this variable. 
+##############################################################################
+
+USE_SYM_APPL = TRUE
+
+##############################################################################
+# If you want to build SYMPHONY in a directory outside the source tree, 
+# uncomment this and fill in the directory here. Setting these variables will 
+# cause object, library, and binary files associated with SYMPHONY and the 
+# user's application to be built and installed in the corresponding 
+# directories. This is helpful if the user doesn't have write access to the 
+# directory where SYMPHONY is installed.
+##############################################################################
+
+SYMBUILDDIR = $(SYMPHONYROOT)
+USERBUILDDIR = $(USERROOT)
+
+##############################################################################
+# Include the SYMPHONY makefile after all the source file names (and before
+# any used-defined targets!)
+##############################################################################
+
+include $(SYMPHONYROOT)/Makefile
+
