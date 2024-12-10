@@ -11,6 +11,8 @@ This manuscript is under review for DAC 2025 and any potential conflict of inter
 
 The top level notebook to be run for the submission is **current_mirror_ota_optimization.ipynb**
 
+**The working directory for running this notebook must match the directory where the notebook file is located.**
+
 The flow shown in current_mirror_ota_optimization.ipynb comprises of the following:
 1. Install Python Libraries
 2. Generate Lookup Tables (LUTs) for C/ID
