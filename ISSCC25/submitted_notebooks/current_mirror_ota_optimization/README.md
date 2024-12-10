@@ -1,15 +1,26 @@
 # Current Mirror OTA Synthesis, Optimization, and Design
 ## Code A Chip Challenge 2025
 
-This repository contains the code, jupyter notebook, and support scripts for a N-Input 8 transistor beta multiplier OTA. 
+This repository contains the code, jupyter notebook, and support scripts for the design and fully automated synthesis of an N-Input 8 transistor beta multiplier OTA.
 
-This submission contains python code to optimize a current mirror OTA for power consumption from a given specification using the C/ID analog design methodology. 
+The optimization is done to minimize power consumption of the current mirror OTA from a given stability, gain, and bandwidth specification using the C/ID analog design methodology. 
 
 A detailed analysis for the analytical optimization can be found in the PDF file AnalyticalOptimization-OTA.pdf. 
 
-This manuscript is unde review for DAC 2025 and any potential conflict of interests in the review process should be stated upon review of this submission.
+This manuscript is under review for DAC 2025 and any potential conflict of interests in the review process should be stated upon review of this submission.
 
 The top level notebook to be run for the submission is **current_mirror_ota_optimization.ipynb**
+
+The flow shown in current_mirror_ota_optimization.ipynb comprises of the following:
+1. Install Python Libraries
+2. Generate Lookup Tables (LUTs) for C/ID
+3. Derive Objective Function and Solution Space for OTA
+4. Choose Design Point Based on Optimization and PVT Convergence
+5. Size Transistors Using Current Density Lookups
+6. Generate SPICE and ALIGN Netlists
+7. Run ALIGN Layout Generator with Netlists
+8. Extract Layout Using Magic VLSI
+9. Run and Compare Ideal and Post Layout Simulations 
 
 # Getting Started
 
