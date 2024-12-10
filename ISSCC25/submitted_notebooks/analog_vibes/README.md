@@ -114,3 +114,5 @@ def  low_voltage_cmirror(
     A low voltage N type current mirror
     """
 ```
+### LVS, DRC Clean Layout
+![GDS_IMG](./scripts/GDS_IMG.png)
