@@ -3,11 +3,13 @@
 
 This repository contains the code, jupyter notebook, and support scripts for a N-Input 8 transistor beta multiplier OTA. 
 
-This submission contains python code to optimize a current mirror OTA using the C/ID analog design methodology. A detailed
-analysis for the analytical optimization can be found in the PDF file AnalyticalOptimization-OTA.pdf. This manuscript is under
-review for DAC 2025 and any potential conflict of interests in the review process should be stated upon review of this submission.
+This submission contains python code to optimize a current mirror OTA for power consumption from a given specification using the C/ID analog design methodology. 
 
-The top level notebook to be run for the submission is current_mirror_ota_optimization.ipynb
+A detailed analysis for the analytical optimization can be found in the PDF file AnalyticalOptimization-OTA.pdf. 
+
+This manuscript is unde review for DAC 2025 and any potential conflict of interests in the review process should be stated upon review of this submission.
+
+The top level notebook to be run for the submission is **current_mirror_ota_optimization.ipynb**
 
 # Getting Started
 
