@@ -8,11 +8,39 @@ review for DAC 2025 and any potential conflict of interests in the review proces
 
 The top level notebook to be run for the submission is current_mirror_ota_optimization.ipynb
 
-## Getting Started
+# Getting Started
+
+## Tools Needed to Run 
 This submission requires the following tools to be installed
-  - magic VLSI (open source layout editor) to be installed with the executable command magic accesible from a users $PATH environment variable
+  - python3.X all required python libraries are installed within cells of the notebook
+  - magic VLSI (open source layout editor) to be installed with the executable command "magic" accessible from a users $PATH environment variable
   - ngspice (open source SPICE simulator) to be installed with the executable command "ngspice" accessible from a users $PATH environment
-  - Skywater130 open source PDK installed to $PDK_ROOT variable. This PDK is available at https://github.com/RTimothyEdwards/open_pdks with instructions for installation included.
+  - Skywater130 open source PDK installed to $PDK_ROOT variable. This PDK is available at https://github.com/RTimothyEdwards/open_pdks with installation instructions
+  - ALIGN layout generator available at https://github.com/ALIGN-analoglayout/ALIGN-public with installation instructions. The executable command "schematic2layout.py" must be accessible from a users $PATH environmental variable
+  		- This script also contains a cell to install this, although it takes about 45 minutes to run the cell
+
+The following commands can be used to install magic and ngspice using Ubuntu
+
+```
+sudo apt update
+sudo apt install ngspice
+git clone https://github.com/RTimothyEdwards/magic.git
+cd magic
+./configure
+make
+sudo make install
+```
+
+The Skywater130 PDK can be installed with 
+```
+git clone https://github.com/RTimothyEdwards/open_pdks
+cd open_pdks
+./configure --enable-sky130-pdk --enable-sram-sky130
+make
+sudo make install
+make veryclean
+```
+
 
 ## Repository File Structure
 ```
