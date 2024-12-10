@@ -1,0 +1,175 @@
+**.subckt cid_characterization
+xmp npdrain npdrain psource psource sky130_fd_pr__pfet_01v8 L=length_p W=width_p nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+I0 GND psource 1m
+xmn npdrain npdrain GND GND sky130_fd_pr__nfet_01v8 L=length_n W=width_n nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1 m=1
+**** begin user architecture code
+
+
+
+* geometry parameters
+.param width_p = 1
+.param width_n = 1
+.param length_p = _LENGTH // in micrometers
+.param length_n = _LENGTH // in micrometers
+.param l = _LENGTH
+.param w = 1
+
+* sweep parameters
+* .param start = 1u
+* .param stop = 1m
+* .param points_per_decade 25
+
+.temp _TEMPERATURE
+
+.lib /opt/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice _CORNER
+.control
+
+let start = 1n
+let stop = 1m
+let points_per_decade = 20
+
+let stop_start_ratio = stop/start
+let num_decades = log10(stop_start_ratio)
+
+echo Stop/Start Ratio $&stop_start_ratio
+echo Characterizing $&num_decades decades from $&start to $&stop
+echo Simulating $&points_per_decade points per decade
+echo
+
+let i_start = start
+let i_end = i_start*10
+let i_step = i_end/points_per_decade
+let i_end = i_end - i_step
+
+
+* let length_n_counter = length_n
+* let length_p_counter = length_p
+
+set pl = 0.15
+set nl = 0.15
+
+* Iterate for 10 different transistor lengths
+set lengths = 10
+let i = 0
+let num_files = 2
+let file_count = 0
+let length_increment = 0.15
+
+
+set appendwrite
+
+echo 'isweep  gm  i_id  id  i_cgg  cgg  i_cgs  cgs  i_cgd  cgd  i_cds  cds  i_css  css  i_cdd  cdd  i_gds  gds  i_vth  vth  i_vdsat  vdsat  i_vgs  vgs  i_vds  vds  i_rds  rds  i_wt  wt  i_ft  ft  i_kgm  kgm  W  L  pdk' > nfet_cid_characterization.csv
+echo 'isweep  gm  i_id  id  i_cgg  cgg  i_cgs  cgs  i_cgd  cgd  i_cds  cds  i_css  css  i_cdd  cdd  i_gds  gds  i_vth  vth  i_vdsat  vdsat  i_vgs  vgs  i_vds  vds  i_rds  rds  i_wt  wt  i_ft  ft  i_kgm  kgm  W  L  pdk' > pfet_cid_characterization.csv
+
+
+while i < num_decades
+
+	set filetype=ascii
+	set hcopydevtype=svg
+	set format = cross
+	save @m.xmn.msky130_fd_pr__nfet_01v8[gm]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[id]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[cgg]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[cgs]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[cgd]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[cds]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[css]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[cdd]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[gds]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[vth]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[vdsat]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[vgs]
+	save @m.xmn.msky130_fd_pr__nfet_01v8[vds]
+
+	save @m.xmp.msky130_fd_pr__pfet_01v8[gm]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[id]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[cgg]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[cgs]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[cgd]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[cds]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[css]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[cdd]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[gds]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[vth]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[vdsat]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[vgs]
+	save @m.xmp.msky130_fd_pr__pfet_01v8[vds]
+
+	let step_size = (stop/start)
+	echo Simulating rom $&i_start to $&i_end with step size of $&i_step
+	dc I0 $&i_start $&i_end $&i_step
+
+	* Note let is for vectors and set is for scalars
+
+	let n_gm = @m.xmn.msky130_fd_pr__nfet_01v8[gm]
+	let n_id = @m.xmn.msky130_fd_pr__nfet_01v8[id]
+	let n_cgg = @m.xmn.msky130_fd_pr__nfet_01v8[cgg]
+	let n_cgs = @m.xmn.msky130_fd_pr__nfet_01v8[cgs]
+	let n_cgd = @m.xmn.msky130_fd_pr__nfet_01v8[cgd]
+	let n_cds = @m.xmn.msky130_fd_pr__nfet_01v8[cds]
+	let n_css = @m.xmn.msky130_fd_pr__nfet_01v8[css]
+	let n_cdd = @m.xmn.msky130_fd_pr__nfet_01v8[cdd]
+	let n_gds = @m.xmn.msky130_fd_pr__nfet_01v8[gds]
+	let n_vth = @m.xmn.msky130_fd_pr__nfet_01v8[vth]
+	let n_vdsat = @m.xmn.msky130_fd_pr__nfet_01v8[vdsat]
+	let n_vgs = @m.xmn.msky130_fd_pr__nfet_01v8[vgs]
+	let n_vds = @m.xmn.msky130_fd_pr__nfet_01v8[vds]
+
+	let p_gm = @m.xmp.msky130_fd_pr__pfet_01v8[gm]
+	let p_id = @m.xmp.msky130_fd_pr__pfet_01v8[id]
+	let p_cgg = @m.xmp.msky130_fd_pr__pfet_01v8[cgg]
+	let p_cgs = @m.xmp.msky130_fd_pr__pfet_01v8[cgs]
+	let p_cgd = @m.xmp.msky130_fd_pr__pfet_01v8[cgd]
+	let p_cds = @m.xmp.msky130_fd_pr__pfet_01v8[cds]
+	let p_css = @m.xmp.msky130_fd_pr__pfet_01v8[css]
+	let p_cdd = @m.xmp.msky130_fd_pr__pfet_01v8[cdd]
+	let p_gds = @m.xmp.msky130_fd_pr__pfet_01v8[gds]
+	let p_vth = @m.xmp.msky130_fd_pr__pfet_01v8[vth]
+	let p_vdsat = @m.xmp.msky130_fd_pr__pfet_01v8[vdsat]
+	let p_vgs = @m.xmp.msky130_fd_pr__pfet_01v8[vgs]
+	let p_vds = @m.xmp.msky130_fd_pr__pfet_01v8[vds]
+
+	let n_rds = 1/n_gds
+	let n_wt = n_gm/n_cgg
+	let n_ft = n_wt/(2*pi)
+	let n_gm_id = n_gm/n_id
+
+	let p_rds = 1/p_gds
+	let p_wt = p_gm/p_cgg
+	let p_ft = p_wt/(2*pi)
+	let p_gm_id = p_gm/p_id
+
+
+	* write writes the outputs with information - use wrdata instead
+	* write nfet_cid_characterization.txt n_gm n_id n_cgg n_cgs n_cgd n_cds n_css n_cdd n_gds n_vth n_vdsat n_vgs n_vds n_rds n_wt n_ft n_gm_id
+	* write pfet_cid_characterization.txt p_gm p_id p_cgg p_cgs p_cgd p_cds p_css p_cdd p_gds p_vth p_vdsat p_vgs p_vds p_rds p_wt p_ft p_gm_id
+
+	wrdata nfet_cid_characterization.csv n_gm n_id n_cgg n_cgs n_cgd n_cds n_css n_cdd n_gds n_vth n_vdsat n_vgs n_vds n_rds n_wt n_ft n_gm_id
+	wrdata pfet_cid_characterization.csv p_gm p_id p_cgg p_cgs p_cgd p_cds p_css p_cdd p_gds p_vth p_vdsat p_vgs p_vds p_rds p_wt p_ft p_gm_id
+
+	* print n_gm n_id n_cgg n_cgs n_cgd n_cds n_css n_cdd n_gds n_vth n_vdsat n_vgs n_vds n_rds n_wt n_ft n_gm_id >> nfet_cid_characterization.csv
+	* alterparam length_p = pl
+	* alterparam length_n = nl
+	let i_start = i_start*10
+	let i_end = i_start*10
+	let i_step = i_end/points_per_decade
+	let i_end = i_end - i_step
+	let i = i + 1
+end
+
+* plot ft_n vs gm_id_n ylog
+
+
+.endc
+
+
+.save all
+
+
+
+**** end user architecture code
+**.ends
+.GLOBAL GND
+.end
