@@ -29,6 +29,8 @@ The flow shown in current_mirror_ota_optimization.ipynb comprises of the followi
 ## Tools Needed to Run 
 This submission requires the following tools to be installed
   - python3.X all required python libraries are installed within cells of the notebook
+  - python-dev libraries, This is python developer package this needs to be installed with sudo privilege and cannot be run inside the notebook
+  		- can be installed with command **sudo apt-get install python-dev for Ubuntu** or **sudo yum install python-devel for Redhat/Centos/Rocky**
   - magic VLSI (open source layout editor) to be installed with the executable command "magic" accessible from a users $PATH environment variable
   - ngspice (open source SPICE simulator) to be installed with the executable command "ngspice" accessible from a users $PATH environment
   - Skywater130 open source PDK installed to $PDK_ROOT variable. This PDK is available at https://github.com/RTimothyEdwards/open_pdks with installation instructions
