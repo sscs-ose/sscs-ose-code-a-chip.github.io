@@ -37,16 +37,24 @@ This submission requires the following tools to be installed
   - ALIGN layout generator available at https://github.com/ALIGN-analoglayout/ALIGN-public with installation instructions. The executable command "schematic2layout.py" must be accessible from a users $PATH environmental variable
   		- This script also contains a cell to install this, although it takes about 45 minutes to run the cell
 
+**These tools can also be installed within the notebook itself. The notebook is self checking for the PDK and tools.**
+
 The following commands can be used to install magic, ngspice, and ALIGN using Ubuntu
 
 ```
 sudo apt update
+
+#install ngspice
 sudo apt install ngspice
+
+#install magic
 git clone https://github.com/RTimothyEdwards/magic.git
 cd magic
 ./configure
 make
 sudo make install
+
+#install ALIGN
 git clone https://github.com/ALIGN-analoglayout/ALIGN-public
 pip install -v ./ALIGN-public
 ```
@@ -55,7 +63,7 @@ The Skywater130 PDK can be installed with
 ```
 git clone https://github.com/RTimothyEdwards/open_pdks
 cd open_pdks
-./configure --enable-sky130-pdk --enable-sram-sky130
+./configure --enable-sky130-pdk
 make
 sudo make install
 make veryclean
