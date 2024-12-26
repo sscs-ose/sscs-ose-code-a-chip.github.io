@@ -5,8 +5,7 @@
 | Name        | Affiliation                                                     | Notebook Title                                                          |  
 | ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | Alec S. Adair |	University of Utah (USA) | Automated Current Mirror OTA Design and Optimization: From Specification to Layout	|
-| Nguyen Phuong Linh |	Hanoi University of Science and Technology/
-Institute Polytechnique de Paris 	(Vietnam/France) | Software/Hardware co-design for a SRAM-based Spiking Neuron Network	|
+| Nguyen Phuong Linh |	Hanoi University of Science and Technology/Institute Polytechnique de Paris 	(Vietnam/France) | Software/Hardware co-design for a SRAM-based Spiking Neuron Network	|
 | Eva Deltor |	Institute of Microelectronics of Barcelona (IMB-CNM-CSIC) - UAB	(Spain) | Automating Analog Layouts: A Proof of Concept with GLayout for Streamlined Design Process  |
 | Nicolas Abgar Tavares Guimarães | USP (Brazil) | Coherent Noise Removal Filter for Particle Physics Applications: MARTIn chip |
 | Timothy Jabez Newman | Independent (UK) | Open-Source Implementation of IEEE P2427 Defect Coverage Standard |
