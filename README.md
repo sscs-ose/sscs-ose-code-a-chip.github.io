@@ -1,4 +1,4 @@
-## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'25](https://www.isscc.org/information-for-students)
+## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'26](https://www.isscc.org/information-for-students)
 
 
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
