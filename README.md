@@ -1,22 +1,35 @@
-## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [VLSI'25](https://www.isscc.org/information-for-students)
-
+## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [VLSI'25](https://www.vlsisymposium.org)
 
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows,
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to IEEE SSCS conferences and interact with the leading-edge chip design community, and
- 3. <span style='color: skyblue;'>Broaden educational value and accessibility within the open-source chip design community, fostering a more inclusive environment for dissemination, learning, and innovation.</span>
+ 3. Broaden *educational value* and accessibility within the open-source chip design community, fostering a more inclusive environment for dissemination, learning, and innovation.
 
 ## Program Rules
-- The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to VLSI from June 8-12, 2025, to receive the award and participate in networking events.  
-- Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. Generating a final layout of your circuit is encouraged but not required.
-    - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
-    - Submissions of previous winners: [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
-    - <span style='color: skyblue;'>❗️Starting from the VLSI 2025 grant, the submission categories and criteria for selecting finalists will be expanded to include creative educational purposes of chip design. This can include:
-  - innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
-  - exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).</span>
-- Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
-- Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
 
+We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines.
+
+### Eligibility
+
+- The program is open to anyone (no restrictions).
+- IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required.
+- Teaming is encouraged, but each team must identify a single leader who can travel to **VLSI Symposium (Kyoto, Japan)**, June 08-12, 2025, to receive the award and participate in networking events. Therefore, at least one awardee must attend the conference in person to qualify for reimbursement.
+
+### Submission Guidelines
+
+- Applicants must submit an **open-source 📒 Jupyter notebook** detailing either one of the following categories, using **open-source** tools:
+  1) *innovative circuit design* (Code-a-Chip)
+  2) *creative approach for education* (Code-for-Chip)
+- The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner.
+  - Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
+- Generating a final layout of your circuit is encouraged but not required.
+- The creative approach of educational purposes of chip design may include and not limited to:
+  - ex.1: innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
+  - ex.2: exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).
+- Examples:
+  - [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
+- Winners of previous awards:
+  - [ISSCC'25](ISSCC25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md), [VLSI'23](VLSI23/README.md)
 
 ## Evaluation
 - A jury will evaluate the submissions and select up to 10 winners.
@@ -33,7 +46,7 @@
 - Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
 - The winners are expected to attend the conference to be recognized for their awards and to present a poster.
 - Reimbursement will be provided after the conference when air and accommodation receipts are sent to the conference Treasurer.
-
+- Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf).
 
 ## Program Schedule
 - March 18, 2025, 8:00 AM Pacific Time: [Zoom meeting link TBD]()
