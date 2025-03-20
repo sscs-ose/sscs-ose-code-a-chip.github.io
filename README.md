@@ -36,7 +36,6 @@
 
 
 ## Program Schedule
-- March 18, 2025, 8:00 AM Pacific Time: [Zoom meeting link TBD]()
 - April 23, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - April 30, 2025: Announcement of [winners](VLSI25/README.md)
 - April 24-27, 2025: Register for the conference, and obtain a letter for visa application (if needed)
