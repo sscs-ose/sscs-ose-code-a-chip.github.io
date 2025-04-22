@@ -1,6 +1,6 @@
 
-# RAMPA
-This Repo is an attempt to automate the design of Analog Circuits especially Ring Amplifiers
+# Wrøngm
+This Repo is an attempt to automate the design of Analog Circuits especially Dynamic amplifiers
 
 ## Team
 
