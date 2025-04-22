@@ -11,7 +11,7 @@ This Repo is an attempt to automate the design of Analog Circuits especially Dyn
 | Praveen Kumar Venkatacahala (Team Lead) | PhD, Oregon State University | Yes | Yes |
  
 ## Setup.exe
-**Pramod pls take care of this%%
+**Pramod pls take care of this. Just mention all the dependencies judges need to take care of and guidlines**
 Clone the repo and make sure to pull to get latest scripts
 ```bash
 git clone https://www.github.com/chennakeshavadasa/RAMPA.git
