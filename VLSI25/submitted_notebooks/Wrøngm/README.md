@@ -4,14 +4,14 @@ This Repo is an attempt to automate the design of Analog Circuits especially Rin
 
 ## Team
 
-| Name                                   | Qualification               | Picture |
-|----------------------------------------|-----------------------------|---------|
-| **Nithin P**                              | B.Tech, VTU                      | <img src="https://github.com/user-attachments/assets/292dcd57-e922-40ee-8b57-f5bcda3dde8d" width="500"/> |
-| **Pramoda S R**                            | B.Tech, VTU                      | <img src="https://github.com/user-attachments/assets/7f1d7b66-a973-4801-8d71-f11b9de2b5cc" width="500"/> |
-| **Praveen Kumar Venkatacahala** (Team Lead) | PhD, Oregon State Univeristy| <img src="https://github.com/user-attachments/assets/a962b25e-bf48-480d-ac54-b0bf3303f9c7" width="500"/> |
+| Name | Qualification | IEEE Member | SSCS Member |
+|:--|:--|:--:|:--:|
+| Nithin P | B.Tech, VTU | No | No |
+| Pramoda S R | B.Tech, VTU | No | No |
+| Praveen Kumar Venkatacahala (Team Lead) | PhD, Oregon State University | Yes | Yes |
  
 ## Setup.exe
-
+**Pramod pls take care of this%%
 Clone the repo and make sure to pull to get latest scripts
 ```bash
 git clone https://www.github.com/chennakeshavadasa/RAMPA.git
