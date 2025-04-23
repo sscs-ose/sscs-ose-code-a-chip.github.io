@@ -9,6 +9,90 @@ This Repo is an attempt to automate the design of Analog Circuits especially Dyn
 | Nithin P | B.Tech, VTU | No | No |
 | Pramoda S R | B.Tech, VTU | No | No |
 | Praveen Kumar Venkatacahala (Team Lead) | PhD, Oregon State University | Yes | Yes |
+
+- This work is Licensed under **Apache 2.0**
+
+
+<h2>Introduction</h2>
+
+<p>
+Dynamic amplifiers such as <b>Ring Amplifiers</b>, <b>Inverter-Based Amplifiers</b>, and <b>Zero-Crossing Detector Amplifiers</b> have emerged as popular alternatives to small-signal settling-based amplifiers.
+</p>
+
+
+<p>
+Unlike conventional OTAs (Operational Transconductance Amplifiers), where settling occurs in the small-signal and Islew domain<b></b>, dynamic amplifiers demonstrate <b>multiple stages of settling</b>, including:
+</p>
+
+<ul>
+  <li><b>RC Settling</b></li>
+  <li><b>Large Signal Settling</b></li>
+  <li><b>Small Signal Settling</b></li>
+</ul>
+
+<p>
+These mechanisms make dynamic amplifiers well-suited for high-performance, fast-settling analog circuits.
+</p>
+
+
+<!-- Figures 1, 2, and 3 side by side with individual captions -->
+<div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
+    <div style="text-align: center;">
+        <!-- Make sure the correct file path for Inverter-Based Amplifier is used -->
+        <img src="https://i.ibb.co/S4TT2hg0/Fig1.jpg" width="280" alt="Inverter-Based Amplifier">
+        <div><b>Figure 1:</b> Inverter-Based Amplifier [2]</div>
+    </div>
+    <div style="text-align: center;">
+        <!-- Use the correct image path for the Ring Amplifier -->
+        <img src="https://i.ibb.co/6Rn5zDvL/Fig2.png" width="370" alt="Ring Amplifier">
+        <div><b>Figure 2:</b> Ring Amplifier [2]</div>
+    </div>
+    <div style="text-align: center;">
+        <!-- Use the provided path for Zero-Crossing Detector Amplifier -->
+        <img src="https://i.ibb.co/qM53KSN4/Fig3.png" width="370" alt="Zero-Crossing Detector Amplifier">
+        <div><b>Figure 3:</b> Zero-Crossing Detector Amplifier [3]</div>
+    </div>
+</div>
+
+---
+
+  <h3> Error Behavior</h3>
+<p>
+The dynamic behavior of amplifiers can be better understood by analyzing the <b>dynamic error over time</b>. Traditional OTAs exhibit a <b>single-pole dynamic error response</b>, resulting in a uniform exponential decay slope.
+</p>
+
+<p style="text-align: center;">
+    <!-- Make sure the path to the image is correct -->
+    <img src="https://i.ibb.co/Bpt8gvF/Fig4.png" width="45%" alt="Dynamic Error in Traditional OTA">
+</p>
+
+<p style="text-align: center;">
+    <b>Figure 4:</b> Dynamic Error in Traditional OTA (Single Pole Response)
+</p>
+
+<p>
+In contrast, <b>dynamic amplifiers</b> exhibit a mix of <b>non-linear (fast)</b> and <b>linear (slow)</b> settling phases. This results in a two-phase error decay:
+</p>
+
+<ul>
+  <li><b>Fast decay</b> during the non-linear (large signal) settling phase</li>
+  <li><b>Slow decay</b> during the linear (small signal) settling phase</li>
+</ul>
+
+<p>
+This behavior allows dynamic amplifiers to reachfinal valuey quickly, followed bysmall signal stageg for precise settling.
+</p>
+
+<p style="text-align: center;">
+  <img src="https://i.ibb.co/d0rP5pr0/Fig5.png" width="45%">
+</p>
+
+<p style="text-align: center;">
+  <b>Figure 5:</b> Dynamic Error in Dynamic Amplifier (Two-Phase Settling Behavior)
+</p>
+
+<hr>
+
  
 ## Setup.exe
 **Pramod pls take care of this. Just mention all the dependencies judges need to take care of and guidlines**
