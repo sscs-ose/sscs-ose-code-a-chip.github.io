@@ -173,7 +173,161 @@ Finally:
 This multi-phase settling behavior highlights the **non-linear nature** of dynamic amplifiers and explains why small-signal models alone are insufficient to fully describe their performance.
 
 -->
- 
+
+ ## Design of an Amplifier using Traditional $g_m/I_D$ Method
+
+Amplifier design is typically done using the ($g_m/I_D$) based methodology. This approach provides an intuitive framework:
+
+- In **strong inversion**, for a given overdrive voltage ($V_{ov}$), you can determine the transconductance ($g_m$).
+- In **weak inversion**, you obtain a specific $g_m$ for a given drain current ($I_D$).
+
+This methodology is especially useful since the design is based on **look-up tables**, making the process more streamlined and systematic.
+
+---
+
+### Application to Traditional Amplifiers
+
+This design technique is well-suited for traditional **transconductance amplifier** design, where the **settling behavior is analyzed in the small-signal domain**.
+
+---
+
+### Application to Dynamic Amplifiers
+
+So far, even **dynamic amplifiers** have been designed using the same ($g_m/I_D$) methodology to achieve a target **Bandwidth (BW)** which is, again, **small-signal in nature**.
+
+However, there's a significant limitation:
+
+- The **settling behavior** of dynamic amplifiers is **not strictly small signal**.
+- We merely *hope* to get the best **$R_{on}$** for the **$g_m/I_D$** value chosen—originally selected for its small-signal bandwidth.
+- There’s a level of uncertainty: we **hope** that the **non-linear settling behavior** contributes positively.
+- But in reality, we **don't know** how much of the settling is being handled by the non-linear phase or **how effective** it is. This requires transient simulation iterations to fine tune the width and $R_{on}$
+
+In short, we are **just hoping for the best**, without a clear understanding or control over the non-linear settling dynamics.
+
+## $R_{on}/g_m$ - Based Design Methodology
+
+In dynamic amplifiers, the settling behavior is influenced by both **non-linear** and **linear** settling phases. Each of these contributes significantly to the overall settling performance and must be accounted for during the design process.
+
+---
+
+### Non-Linear Settling Phase
+
+- This is typically modeled as an **RC-type settling**, where an **impulse current** charges the load capacitor.
+- The current during this phase is dictated by the **on-resistance** ($R_{on}$) of the transistor.
+- This phase is critical for fast initial movement toward the final output voltage.
+
+### Linear (Small-Signal) Settling Phase
+
+- Once the output is closer to its final value, **small-signal settling** takes over.
+- The behavior in this phase is governed by the **transconductance** ($g_m$).
+- It determines the final fine settling and bandwidth of the amplifier.
+
+---
+
+### Design Motivation
+
+The classic **$g_m/I_D$-based methodology** is powerful, but it comes with limitations:
+- It does **not account for the signal swing requirements**.
+- It does **not provide direct information about DC bias ranges**.
+- It’s primarily tuned for small-signal operation and overlooks large-signal contributions.
+- **$R_{on}/g_m$** based methodology should provide information regarding the voltage step that needs to be provided.
+- **$R_{on}/g_m$** should provide additional information about Non-linear settling
+
+To overcome this, we propose using the **$R_{on}/g_m$** ratio as a design-driven metric.
+
+---
+
+## $R_{on}/g_m$ - Based Design Methodology
+
+In dynamic amplifiers, the settling behavior is influenced by both *non-linear* and *linear* settling phases. Each of these contributes significantly to the overall settling performance and must be accounted for during the design process.
+
+---
+
+### Non-Linear Settling Phase
+
+- This is typically modeled as an *RC-type settling, where an **impulse current* charges the load capacitor.
+- The current during this phase is dictated by the *on-resistance* ($R_{on}$) of the transistor.
+- This phase is critical for fast initial movement toward the final output voltage.
+
+### Linear (Small-Signal) Settling Phase
+
+- Once the output is closer to its final value, *small-signal settling* takes over.
+- The behavior in this phase is governed by the *transconductance* ($g_m$).
+- It determines the final fine settling and bandwidth of the amplifier.
+
+---
+
+### Design Motivation
+
+The classic *$g_m/I_D$-based methodology* is powerful, but it comes with limitations:
+- It does *not account for the signal swing requirements*.
+- It does *not provide direct information about DC bias ranges*.
+- It’s primarily tuned for small-signal operation and overlooks large-signal contributions.
+- *$R_{on}/g_m$* based methodology should provide information regarding the voltage step that needs to be provided.
+- *$R_{on}/g_m$* should provide additional information about RC based settling by including Ron as a design parameter which should reduce the number of iterations.
+
+To overcome this, we propose using the *$R_{on}/g_m$* ratio as a design-driven metric.
+
+---
+
+### $R_{on}/g_m$-Based Design Flow
+
+- For a given *$R_{on}/g_m$*, we can quantify both:
+  - The *large-signal settling speed* (via $R_{on}$),
+  - And the *small-signal bandwidth* (via $g_m$).
+  - Make a *unit cell* independent of C<sub>load</sub> design, but based on *voltage swing requirements*.
+
+- A unit cell with fixed $I_D/W$ (i.e., fixed $g_m/I_D$) defines a base performance point.
+
+- The required *$R_{on}$ across corners* for a given C<sub>load</sub> defines a *scaling multiplier* (width M).
+
+- Scaling the unit cell by M gives:
+  - $R_{on} \rightarrow R_{unit}/M$
+  - $g_m \rightarrow g_{m,unit} \times M$
+  - $I_D \rightarrow I_{D,unit} \times M$
+
+- The *replica path* uses:
+  - $R_{unit}$, $I_{unit}$, $W_{unit}$
+  - Provides *replica tuning flexibility* through $I_{unit}$
+  - *$g_m$ tuning* can be achieved by adjusting $I_{unit}$ and $W_{unit}$ across corners, without changing the main path width $W \times M$
+
+---
+
+### Key Insights
+
+- You introduce *$R_{on}$ as a key design knob*, rather than focusing only on $g_m/I_D$.
+
+- Enables *gm and voltage step tuning across corners* even after $R_{on}$ is fixed.
+
+- Traditional *$g_m/I_D$-only design* ignores large-signal *$R_{on}$ based settling*.
+
+- Poor $R_{on}$ choice can lead to *slow large-signal settling*, even with good $g_m$.
+
+- You can have the same $g_m$ in three corners, even in *subthreshold* with fixed $I_D$,  
+  ▸ but *$R_{on}$ may be much worse* in the slow corner — affecting settling.
+
+- In this flow, you should *pick $R_{on}$ first*.
+
+- You can *adjust $g_m$ later* using *replica bias* for the same $R_{on}$ and width.
+
+- With *$R_{on}/g_m$ flow*, you:
+  - Pick $R_{on}$ to ensure fast large-signal settling.
+  - Then estimate how much settling time remains for small-signal (gm-based) behavior.
+<!--
+- When showing *$g_m/I_D$ simulation results*, you can explain:
+  - For fixed $g_m/I_D$, *slow-corner settling degrades* due to high $R_{on}$,
+  - Which isn’t obvious until after simulation in traditional flow.
+-->
+- With $R_{on}/g_m$, you *assess both $R_{on}$ and $g_m/I_D$ pre-simulation* — enabling *early verification* of settling behavior.
+
+---
+
+<!--
+### Algorithm Overview
+
+> The ratio of *$R_{on}/g_m$, for a given transistor width ($W$), can be used to determine the **range of gate voltages* for PMOS and NMOS devices across different process corners (TT, SS, FF).
+-->
+
 ## Setup.exe
 **Pramod pls take care of this. Just mention all the dependencies judges need to take care of and guidlines**
 Clone the repo and make sure to pull to get latest scripts
