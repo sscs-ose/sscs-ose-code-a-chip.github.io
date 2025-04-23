@@ -8,7 +8,7 @@ This Repo is an attempt to automate the design of Analog Circuits especially Dyn
 |:--|:--|:--:|:--:|
 | Nithin P | B.Tech, VTU | No | No |
 | Pramoda S R | B.Tech, VTU | No | No |
-| Praveen Venkatacahala | PhD, Oregon State University | Yes | Yes |
+| Praveen Venkatachala | PhD, Oregon State University | Yes | Yes |
 
 - This work is Licensed under **Apache 2.0**
 
