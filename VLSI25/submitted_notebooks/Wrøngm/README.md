@@ -12,8 +12,6 @@ This Repo is an attempt to automate the design of Analog Circuits especially Dyn
 
 - This work is Licensed under **Apache 2.0**
 
-
-<!-- 
 ## Setup.exe
 Install the requirements
 ```bash
@@ -86,19 +84,3 @@ result = minimize(objective_function, x0, method='L-BFGS-B', bounds=bounds)
 print("Closest Matching Row:\n", closest_row[[...]])
 ```
 - Final output prints the **best-fit device configuration** based on the user's design goals.
-
-
-<<<<<<< HEAD
-=======
-### 5. **Result Summary**
-
-The script prints the chosen transistor dimensions and gm/ID values in SI units:
-
-```python
-print(f"Input Pair: Width = {format_si(W_input, unit='m')}, Length = {format_si(L_input, unit='m')}")
-print(f"gm/id of Input Pair: gm/id = {gm_id_ip_pair}")
-print(f"PMOS Current Mirror: gm/id = {gm_id_P:.2f} (Choose Length ≥ 2µm)")
-print(f"NMOS Tail Transistor: gm/id = {gm_id_N:.2f} (Choose Length ≥ 2µm)")
-```
--->
->>>>>>> 362b76c0958df253727812b1a761a5d93d2080d0
