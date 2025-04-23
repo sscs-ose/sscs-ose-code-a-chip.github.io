@@ -14,20 +14,6 @@ This Repo is an attempt to automate the design of Analog Circuits especially Dyn
 
 
 ## Setup.exe
-**Pramod pls take care of this. Just mention all the dependencies judges need to take care of and guidlines**
-Clone the repo and make sure to pull to get latest scripts
-```bash
-git clone https://www.github.com/chennakeshavadasa/RAMPA.git
-cd RAMPA
-git pull origin main
-```
-
-Create virtual environment for better isolation
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
 Install the requirements
 ```bash
 pip install -r requirements.txt
@@ -43,93 +29,61 @@ This project processes differential amplifier simulation data to help select opt
 
 ## Key Steps
 
-### 1. **Data Parsing and Preprocessing**
-
-Simulation files contain measurements for different transistor widths across various lengths. The parser:
-
-- Detects width headers and appends them to each corresponding row.
-- Filters out alternate redundant values.
-- Outputs clean, numeric DataFrames for each file.
-
+### 1. **Data Acquisition & Unzipping**
 ```python
-def get_data(file_path: str) -> pd.DataFrame:
+gmid_file_id = '1Gd_mxW6A0DBHGzFmbQJ1NT2dvuKrFsCy'
+gdown.download(f'https://drive.google.com/uc?id={gmid_file_id}', output_zip, quiet=False)
+```
+- Downloads a ZIP file from Google Drive containing pre-characterized transistor data for **gm/id design methodology**.
+- The data is then unzipped into a local folder (`./gmid_Data`).
+
+---
+
+### 2. **Data Extraction & Processing**
+```python
+def get_data(data: list, key: str) -> pd.DataFrame:
     ...
-    for line in file:
-        entry = line.strip().split()
-        if len(entry) == 24:
-            current_width = float(entry[1])
-            entry = entry[2:]
-        entry.insert(0, current_width)
-        filtered_entry = [val for i, val in enumerate(entry) if i < 3 or i % 2 == 0]
-        new_data.append(filtered_entry)
-
-    return pd.DataFrame(new_data, columns=columns).astype(float)
 ```
+- Parses raw data files for different transistor types (e.g., `LV_NMOS`, `HV_PMOS`).
+- Constructs a DataFrame containing device characteristics like `gm`, `id`, `Vth`, `gds`, `Cgg`, `Cgs`, `Cgd`.
 
-All parsed files are merged and exported to a single CSV:
-
-```python
-df = pd.concat(dfs, ignore_index=True)
-df = df[cols]
-df.to_csv('Combined_Data.csv', index=False)
-```
+Additional derived metrics include:
+- **gm/id**: Transconductance to current ratio (used for analog design).
+- **gm/gds**: Transconductance to output conductance (amplifier gain).
+- **ft**: Unity-gain frequency.
 
 ---
 
-### 2. **Filtering Data Based on Design Constraints**
-
-To find viable transistor operating points:
-
-- Limit gate voltage (`V(V1)`) to a specific design window.
-- Ensure the source voltage (`V(S)`) is above 0.1V to keep the tail MOS in saturation.
-- From each length group, select the row with the highest `V(D1)` for optimal output swing.
-
+### 3. **Visualization with Plotly**
 ```python
-filtered_df = df[(df["V(V1)"] >= V1_min) & (df["V(V1)"] <= V1_max)]
-valid_data = filtered_df[filtered_df["V(S)"] >= 0.1]
-
-best_per_length = (
-    valid_data.groupby("Length", group_keys=False)
-    .apply(lambda x: x.loc[x["V(D1)"].idxmax()])
-)
+plot_interactive(df, 'Vgs', 'gm/id', ...)
 ```
+- Uses **Plotly** to plot various device performance metrics, making it easy to visually select the right device operating point.
+- Interactive graphs cover:
+  - `gm/id` vs `Vgs` and `Vov`
+  - `gm/gds` vs `gm/id`
+  - `id/W` vs `gm/id`
+  - Frequency (`ft`) vs `gm/id`
+  - Capacitance ratios: `Cgd/Cgg`, `Cgs/Cgg`
 
 ---
 
-### 3. **Selecting the Best Transistor Sizing**
-
-Among the filtered candidates, the best one is chosen by minimizing the absolute difference between the target and actual gm:
-
+### 4. **Parameter Optimization**
 ```python
-best_per_length["gm_diff"] = abs(best_per_length["gm"] - Gm1)
-best_final_row = best_per_length.loc[best_per_length["gm_diff"].idxmin()].copy()
+result = minimize(objective_function, x0, method='L-BFGS-B', bounds=bounds)
 ```
+- Performs constrained optimization to find device settings that meet target values:
+  - Target `gm/id = 15`
+  - Target `gm/gds ≥ 120`
+- Uses a **weighted error function** to prioritize `gm/gds` (since gain is more critical in analog design).
+- Finds the closest actual datapoint to the optimized values and reports that.
 
 ---
 
-### 4. **Computing gm/ID Ratios**
-
-The gm/ID ratio is a critical figure of merit for analog design, indicating efficiency of transconductance generation.
-
-- **Input Pair**: Calculated from selected operating point.
-- **PMOS Mirror**: Fixed value assumed from designer’s strategy.
-- **NMOS Tail**: Derived from the selected `V(S)`.
-
+###  **Output: Design Recommendation**
 ```python
-gm_id_ip_pair = best_final_row["gm"] / best_final_row["IDS"]
-gm_id_P = 5  # Assumed for PMOS
-gm_id_N = 2 / best_final_row["V(S)"]
+print("Closest Matching Row:\n", closest_row[[...]])
 ```
+- Final output prints the **best-fit device configuration** based on the user's design goals.
 
----
 
-### 5. **Result Summary**
-
-The script prints the chosen transistor dimensions and gm/ID values in SI units:
-
-```python
-print(f"Input Pair: Width = {format_si(W_input, unit='m')}, Length = {format_si(L_input, unit='m')}")
-print(f"gm/id of Input Pair: gm/id = {gm_id_ip_pair}")
-print(f"PMOS Current Mirror: gm/id = {gm_id_P:.2f} (Choose Length ≥ 2µm)")
-print(f"NMOS Tail Transistor: gm/id = {gm_id_N:.2f} (Choose Length ≥ 2µm)")
-```
