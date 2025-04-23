@@ -93,6 +93,86 @@ This behavior allows dynamic amplifiers to reachfinal valuey quickly, followed b
 
 <hr>
 
+## Understanding Dynamic Amplifiers
+
+Let us consider two widely known types of dynamic amplifier:
+
+1. **Inverter-Based Amplifier**  
+
+### Inverter-Based Amplifier (IBA)
+
+<p style="text-align: center;">
+    <img src="https://i.ibb.co/S4TT2hg0/Fig1.jpg" alt="IBA Schematic" width="450"/>
+</p>
+
+<p style="text-align: center;"><strong>Figure 6:</strong> Schematic of the Inverter-Based Amplifier (IBA).</p>
+
+Figure 6. shows the transient characterisitics of the IBA, which illustrate the small-signal transconductance gm.  
+For large signal positive step inputs, the amplifier exhibits a **non-linear, signal-dependent large-signal Gm**.
+
+Initially, the load capacitor is charged with a **high current** (a function of the large-signal Gm), followed by a **small-signal current** as the signal settles.  
+This initial **non-linear settling behavior** significantly improves the speed of the IBA.
+
+In general dynamic amplifiers such as IBA and RAMP(Ring Amplifier) have a large signal and small signal settling with fast RC phase or fast gmC phase.
+<p style="text-align: center;">
+    <img src="https://i.ibb.co/zHGKxKKC/Fig7.png" alt="IBA Transient Response" width="450"/>
+</p>
+
+<p style="text-align: center;"><strong>Figure 7:</strong> Transient Response of the Inverter-Based Amplifier.</p>
+
+<!--
+### Ring Amplifiers
+Figure 7 illustrates the schematic of the RAMP.
+
+<p style="text-align: center;">
+    <img src="https://i.ibb.co/vxSTsvtx/Fig8.png" alt="Ring Amplifier Schematic" width="500"/>
+</p>
+
+<p style="text-align: center;"><strong>Figure 7:</strong> Schematic of the Ring Amplifier (RAMP). </p>
+
+
+- When a large step input is applied to the Ring Amplifier, the output undergoes different phases of settling:
+
+---
+
+#### 1. RC Settling Phase
+
+During this phase:
+
+- The **input of the third stage** experiences a **rail-to-rail swing**.
+- This swing leads to a **large Vov** for the **third-stage PMOS**, causing an **impulse current** to be pushed into the load capacitor.
+- In this region, **VGS** is relatively constant, while **VDS** is changing.
+- The output current is primarily determined by the **Ron** of the PMOS transistor.
+
+---
+
+#### 2. Large-Signal Settling Phase
+
+In this phase:
+
+- As the feedback from the output reaches the gate(VGP) potential of the PMOS, **VGS** begins to change.
+- Meanwhile, **VDS** has nearly settled to its final value.
+- The output current now becomes a function of the **large-signal transconductance Gm** of the amplifier.
+
+---
+
+#### 3. Small-Signal Settling Phase
+
+Finally:
+
+- As the output voltage Vout approaches its final value Vout_final, the amplifier transitions into **small-signal operation**.
+- This final phase completes the remaining portion of the settling behavior with small signal linearity.
+
+---
+
+<p style="text-align: center;">
+    <img src="https://i.ibb.co/990HCnSz/Fig9.png" alt="Ring Amplifier Schematic" width="500"/>
+</p>
+<p style="text-align: center;"><strong>Figure 8:</strong> RAMP transient response[2].</p>
+
+This multi-phase settling behavior highlights the **non-linear nature** of dynamic amplifiers and explains why small-signal models alone are insufficient to fully describe their performance.
+
+-->
  
 ## Setup.exe
 **Pramod pls take care of this. Just mention all the dependencies judges need to take care of and guidlines**
