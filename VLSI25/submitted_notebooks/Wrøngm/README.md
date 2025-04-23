@@ -327,6 +327,56 @@ To overcome this, we propose using the *$R_{on}/g_m$* ratio as a design-driven m
 
 > The ratio of *$R_{on}/g_m$, for a given transistor width ($W$), can be used to determine the **range of gate voltages* for PMOS and NMOS devices across different process corners (TT, SS, FF).
 -->
+# Design of Inverter-Based Amplifier using Traditional ($g_m/I_D$) Methodology
+
+Let's compare the performance of an inverter-based amplifier (IBA), which is inherently a dynamic amplifier, designed using traditional $g_m/I_D$ and $R_{on}/g_m$ based methodologies.
+
+<p align="center">
+    <img src="https://i.ibb.co/Ygn3yHw/INV-OTA.jpg" alt="IBA Schematic" width="450"/>
+</p>
+<p align="center"><strong>Figure 8:</strong> Inverter-Based Amplifier Schematics.</p>
+
+---
+
+### Specifications / Design Goals
+
+- $T_{settle} \approx 250$ ns (Approx. 20 MHz bandwidth for small-signal settling)
+- $C_{total} \approx 1$ pF
+- Determine ranges of $V_{GP}$, $V_{GN}$ for which the structure enters the small-signal settling domain
+
+---
+
+### Design of IBA using Traditional ($g_m/I_D$) Methodology
+
+- For a 20 MHz bandwidth, the structure should provide:  
+  $$
+  G_m = 2\pi \cdot 20\,\text{MHz} \cdot C = 2\pi \cdot 20 \times 10^6 \cdot 1 \times 10^{-12} \approx 126\,\mu S
+  $$
+
+- Assume NMOS and PMOS contribute equally:  
+  $$
+  g_{mn} = g_{mp} = \frac{G_m}{2} \approx 64\,\mu S
+  $$
+
+- Let quiescent current $I_q = 1\,\mu A$ (assumed), used to generate $V_{DZN}$ and $V_{DZP}$
+
+  Then:  
+  $$
+  g_{mn,dz} = g_{mp,dz} = 16\,\mu S
+  $$  
+  $$
+  \frac{g_{mn,dz}}{I_q} = \frac{g_{mp,dz}}{I_q} = 16\,\frac{S}{A}
+  $$
+
+- This "deadzone" $G_m$ is then multiplied (using transistor multiplier circuits) to achieve the required $G_m$
+
+> With the use of multipliers, we aim for an improved $R_{on}$, since $R_{on}$ reduces as the multiplication factor increases.
+
+---
+
+- Using our `gmid_IHP130` model to extract device sizes:
+  - Assume $g_m/g_{ds} = 100$ (another assumption)
+  - Use the model to estimate appropriate $(W/L)$ ratios
 
 ## Setup.exe
 **Pramod pls take care of this. Just mention all the dependencies judges need to take care of and guidlines**
