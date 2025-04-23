@@ -13,6 +13,9 @@ This Repo is an attempt to automate the design of Analog Circuits especially Dyn
 - This work is Licensed under **Apache 2.0**
 
 ## Setup.exe
+
+The Project was built in python version `3.11.9` and is reccomended.
+
 Install the requirements
 ```bash
 pip install -r requirements.txt
