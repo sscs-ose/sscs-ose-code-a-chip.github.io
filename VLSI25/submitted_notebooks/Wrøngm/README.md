@@ -13,6 +13,7 @@ This Repo is an attempt to automate the design of Analog Circuits especially Dyn
 - This work is Licensed under **Apache 2.0**
 
 
+<!-- 
 ## Setup.exe
 **Pramod pls take care of this. Just mention all the dependencies judges need to take care of and guidlines**
 Clone the repo and make sure to pull to get latest scripts
@@ -133,3 +134,4 @@ print(f"gm/id of Input Pair: gm/id = {gm_id_ip_pair}")
 print(f"PMOS Current Mirror: gm/id = {gm_id_P:.2f} (Choose Length ≥ 2µm)")
 print(f"NMOS Tail Transistor: gm/id = {gm_id_N:.2f} (Choose Length ≥ 2µm)")
 ```
+-->
