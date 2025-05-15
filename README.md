@@ -37,9 +37,14 @@
 
 ## Program Schedule
 - April 23, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
-- April 30, 2025: Announcement of [winners](VLSI25/README.md)
+- April 30, 2025: Announcement of winners
 - May 2-5, 2025: Register for the conference, and obtain a letter for visa application (if needed)
 - June 8-12, 2025: Attend the conference
+
+## Announcement of winners
+We would like to thank all the participants. After evaluating the submitted notebooks, the winners are:
+1) Nealson Li (Georgia Tech)
+2) Utkarsh Sharma (UCLA)
 
 ## [FAQ](FAQ.md)
 
