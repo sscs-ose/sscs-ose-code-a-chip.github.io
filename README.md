@@ -51,3 +51,4 @@
 - Mehdi Saligane (mehdi@umich.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
 - You can join [Code-a-Chip](https://matrix.to/#/#chipathon-2025:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
+  - Visit [element.fossi-chat.org](https://element.fossi-chat.org/), create an account, then join the room "Code-a-Chip"
