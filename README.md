@@ -26,7 +26,7 @@
 ## Program Logistics
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
     - Fork the source repo https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io to your local repo.
-    - Create a new directory `VLSI25/submitted_notebooks/<my_project_name>` in your local repo.
+    - Create a new directory `ISSCC26/submitted_notebooks/<my_project_name>` in your local repo.
     - Add your Jupyter notebook to the directory.
     - Create a pull request from your local repo to the source repo.
 - Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
@@ -41,7 +41,7 @@
 - February 15-19, 2026: Attend the conference
 
 
-**The International Solid-State Circuits Conference (ISSCC) 2025 Code-a-Chip Travel Grant Award** is created to:
+**The International Solid-State Circuits Conference (ISSCC) 2026 Code-a-Chip Travel Grant Award** is created to:
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and 
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
 
