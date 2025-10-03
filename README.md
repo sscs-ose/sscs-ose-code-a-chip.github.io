@@ -35,9 +35,8 @@
 
 
 ## Program Schedule
-- November 27, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
-- December 11, 2025: Announcement of winners
-- December 11-, 2025: Register for the conference, and obtain a letter for visa application (if needed)
+- October 31, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- TBD: Announcement of winners
 - February 15-19, 2026: Attend the conference
 
 
@@ -48,7 +47,8 @@
 ## [FAQ](FAQ.md)
 
 ## Contact
-- Mehdi Saligane (mehdi@umich.edu)
+- Akira Tsuchiya (a_tsuchiya@ieee.org)
+- Mehdi Saligane (mehdi_saligane@brown.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
 - You can join [Code-a-Chip](https://matrix.to/#/#chipathon-2025:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
   - Visit [element.fossi-chat.org](https://element.fossi-chat.org/), create an account, then join the room "Code-a-Chip"
