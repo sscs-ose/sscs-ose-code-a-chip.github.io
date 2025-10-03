@@ -6,7 +6,7 @@
  3. <span style='color: skyblue;'>Broaden educational value and accessibility within the open-source chip design community, fostering a more inclusive environment for dissemination, learning, and innovation.</span>
 
 ## Program Rules
-- The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to VLSI from June 8-12, 2025, to receive the award and participate in networking events.  
+- The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to ISSCC from Feb. 15-19, 2026, to receive the award and participate in networking events.  
 - Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. Generating a final layout of your circuit is encouraged but not required.
     - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
     - Submissions of previous winners: [VLSI'25](VLSI25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
@@ -35,9 +35,8 @@
 
 
 ## Program Schedule
-- November 27, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
-- December 11, 2025: Announcement of winners
-- December 11-, 2025: Register for the conference, and obtain a letter for visa application (if needed)
+- October 31, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- TBD: Announcement of winners
 - February 15-19, 2026: Attend the conference
 
 
@@ -50,4 +49,4 @@
 ## Contact
 - Mehdi Saligane (mehdi@umich.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
-- You can join the [open-source slack channel](https://join.slack.com/t/open-source-silicon/shared_invite/zt-2ca94ggrm-sutw7tGOdewscWMXcmnQfw) to discuss your submissions or ask about tools issues etc. Channel name: #ieee-sscs-cac
+- You can join the room *Code-a-Chip* in [fossi-chat.org](https://fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
