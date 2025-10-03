@@ -6,13 +6,13 @@
  3. <span style='color: skyblue;'>Broaden educational value and accessibility within the open-source chip design community, fostering a more inclusive environment for dissemination, learning, and innovation.</span>
 
 ## Program Rules
-- The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to VLSI from June 8-12, 2025, to receive the award and participate in networking events.  
+- The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to ISSCC from Feb. 15-19, 2026, to receive the award and participate in networking events.  
 - Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. Generating a final layout of your circuit is encouraged but not required.
     - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
     - Submissions of previous winners: [VLSI'25](VLSI25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
     - <span style='color: skyblue;'>❗️Starting from the VLSI 2025 grant, the submission categories and criteria for selecting finalists will be expanded to include creative educational purposes of chip design. This can include:
-  - innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
-  - exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).</span>
+      - innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
+      - exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).</span>
 - Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
 - Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
 
@@ -35,9 +35,8 @@
 
 
 ## Program Schedule
-- November 27, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
-- December 11, 2025: Announcement of winners
-- December 11-, 2025: Register for the conference, and obtain a letter for visa application (if needed)
+- October 31, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- TBD: Announcement of winners
 - February 15-19, 2026: Attend the conference
 
 
@@ -46,8 +45,11 @@
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
 
 ## [FAQ](FAQ.md)
+- On Google Colab, OpenLane may fail to generate layout. If you encounter this issue, you can generate layout on local environment and put the screenshot on jupyter notebook
 
 ## Contact
-- Mehdi Saligane (mehdi@umich.edu)
+- Akira Tsuchiya (a_tsuchiya@ieee.org)
+- Mehdi Saligane (mehdi_saligane@brown.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
-- You can join the [open-source slack channel](https://join.slack.com/t/open-source-silicon/shared_invite/zt-2ca94ggrm-sutw7tGOdewscWMXcmnQfw) to discuss your submissions or ask about tools issues etc. Channel name: #ieee-sscs-cac
+- You can join [Code-a-Chip](https://matrix.to/#/#chipathon-2025:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
+  - Visit [element.fossi-chat.org](https://element.fossi-chat.org/), create an account, then join the room "Code-a-Chip"
