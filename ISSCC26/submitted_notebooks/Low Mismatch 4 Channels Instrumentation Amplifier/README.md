@@ -269,6 +269,16 @@ Following amplification, a second chopper switch stage (also CSa) demodulates th
 In summary, this example implementation of a 4-channel chopper amplifier system combines conventional chopper-stabilization (CSa) with dynamic signal path-switching (CSb and CSc) across three phases to achieve low-noise, high-accuracy biopotential signal amplification suitable for EEG applications.
 
 ---
+# Teams
+| No. | Name                        | Institutional Email              | Institution |
+|-----|-----------------------------|----------------------------------|--------------|
+| 1   | Aleta Edna Jessalyn         | aleta.edna01@gmail.com           | ITB          |
+| 2   | Angelina Wahyuni Tambunan   | angelinatambunan2005@gmail.com   | ITB          |
+| 3   | Keisya Andretta Basoeki     | andrettakeisya@gmail.com         | ITB          |
+| 4   | Abdillah Aziz               | abdillahaziz129@gmail.com        | ITB          |
+| 5   | Infall Syafalni             | infall@ieee.org                  | ITB          |
+
+---
 ### **Reference**
 
 [1] Tao Tang, Jeong Hoan Park, Lian Zhang, Kian Ann Ng, and Jerald Yoo. “Group Chopping: An 8-Channel, 0.04% Gain Mismatch, 2.1 uW 0.017 mm2 Instrumentation Amplifier for Bio-potential Recording". IEEE Journal of Solid-State Circuits, vol. 16, no. 3, pp. 1061–1071, Jun. 2022, doi: 10.1109/TBCAS.2022.3166513
