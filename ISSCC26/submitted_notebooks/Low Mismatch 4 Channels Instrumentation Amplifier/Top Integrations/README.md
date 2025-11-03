@@ -4,6 +4,10 @@ The top-level integration connects the EEG front-end signal path through three s
 
 **NOTE** : You can run full integration analog circuit netlist (CS-INA-CS-LPF, complementary clk) + digital circuit netlist (Frequency divider) by accessing the .spice from the **Top Integration .spice Folder**. Both result, using PULSE as alternative from digital and using PWL from csv provided from the digital (OpenLane) netlist give the same gain result & waveforms.
 
+For the layout implementation, two GDS versions are provided:
+- A full analog layout, generated using the gLayout framework in a Jupyter Notebook environment, and
+- A fully integrated layout, combining the analog front-end with the digital block designed in OpenLane, merged and finalized using KLayout.
+
 ## Schematic Design of 3 Chopper Switches Integration
 
 <p align="center">
@@ -47,3 +51,9 @@ The top-level integration connects the EEG front-end signal path through three s
   <img src="../Images/FullSchem_Tb3.jpg" alt="LPF_EXT_REV" width="700"/>
 </p>
 <h4 align="center" style="font-size:16px;">Figure 8. Simulation Prefrontal Cortex Probes (Input and Output)</h4>
+
+## Layout
+<p align="center">
+  <img src="../Images/Full_Layout.jpg" alt="LPF_EXT_REV" width="700"/>
+</p>
+<h4 align="center" style="font-size:16px;">Figure 9. Integrated Layout</h4>
