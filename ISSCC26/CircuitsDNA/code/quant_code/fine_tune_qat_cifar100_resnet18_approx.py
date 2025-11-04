@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""在近似 LUT 乘法器下对 QAT ResNet-20 进行微调，以恢复精度。"""
+"""Fine-tune CIFAR ResNet-18 with an approximate LUT multiplier to recover accuracy."""
 
 import json
 import os
@@ -12,29 +12,29 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from resnet20_lut import (
-    QResNet20CIFARLUT,
-    ResNet20LUTCfg,
-    build_lut_resnet20,
+from resnet18_lut import (
+    QResNet18CIFARLUT,
+    ResNet18LUTCfg,
+    build_lut_resnet18,
     resolve_lut_table,
 )
 
 
 @dataclass
-class Cfg(ResNet20LUTCfg):
-    qat_ckpt: str = '/home/junyi/projects/Quant/runs_qat/resnet20/resnet20_cifar100_qat_int8.pt' # 强制覆盖初始 QAT 权重路径
-    epochs: int = 200
+class Cfg(ResNet18LUTCfg):
+    qat_ckpt: str = '/home/junyi/projects/Quant/runs_qat/resnet18/resnet18_cifar100_qat_int8.pt'
+    epochs: int = 60
     lr: float = 5e-4
     weight_decay: float = 1e-4
     momentum: float = 0.9
     nesterov: bool = True
     log_interval: int = 100
     eta_min: float = 1e-5
-    output_dir: str = '/home/junyi/projects/Quant/runs_qat/resnet20'
+    output_dir: str = '/home/junyi/projects/Quant/runs_qat/resnet18'
     save_path: str | None = None
     resume_path: str | None = None
     history_path: str | None = None
-    lut_table_path: str | None = 'lut/truth_table_0.5.csv'  # 强制使用近似 LUT 表
+    lut_table_path: str | None = '/home/junyi/projects/Quant/code/lut/truth_table_0.5.csv'
 
 
 def get_loaders(cfg: Cfg) -> tuple[DataLoader, DataLoader]:
@@ -68,7 +68,7 @@ def infer_lut_tag(lut_path: str | None) -> str:
     return candidate or 'custom'
 
 
-def train_one_epoch(model: QResNet20CIFARLUT, loader: DataLoader, optimizer: torch.optim.Optimizer,
+def train_one_epoch(model: QResNet18CIFARLUT, loader: DataLoader, optimizer: torch.optim.Optimizer,
                     device: str, log_interval: int) -> tuple[float, float]:
     model.train()
     total = 0
@@ -91,7 +91,7 @@ def train_one_epoch(model: QResNet20CIFARLUT, loader: DataLoader, optimizer: tor
 
 
 @torch.no_grad()
-def evaluate(model: QResNet20CIFARLUT, loader: DataLoader, device: str) -> tuple[float, float]:
+def evaluate(model: QResNet18CIFARLUT, loader: DataLoader, device: str) -> tuple[float, float]:
     model.eval()
     total = 0
     correct = 0
@@ -107,17 +107,16 @@ def evaluate(model: QResNet20CIFARLUT, loader: DataLoader, device: str) -> tuple
     return loss_sum / max(total, 1), correct / max(total, 1)
 
 
-def build_model(cfg: Cfg) -> QResNet20CIFARLUT:
-    model: QResNet20CIFARLUT
+def build_model(cfg: Cfg) -> QResNet18CIFARLUT:
     if cfg.qat_ckpt and os.path.isfile(cfg.qat_ckpt):
-        model = build_lut_resnet20(cfg)
+        model = build_lut_resnet18(cfg)
     elif cfg.resume_path:
-        print('[Warn] 未找到初始 QAT 权重，将仅从 resume_path 加载。')
-        model = QResNet20CIFARLUT(num_classes=cfg.num_classes, cfg=cfg)
+        print('[Warn] Initial QAT checkpoint not found, falling back to resume only.')
+        model = QResNet18CIFARLUT(num_classes=cfg.num_classes, cfg=cfg)
     else:
-        raise FileNotFoundError('缺少初始 QAT 权重，请检查 cfg.qat_ckpt 或提供 resume_path')
+        raise FileNotFoundError('Missing initial QAT weights; set cfg.qat_ckpt or provide resume_path')
     if cfg.resume_path and os.path.isfile(cfg.resume_path):
-        print(f'[Info] resume from {cfg.resume_path}')
+        print(f'[Info] Resume from {cfg.resume_path}')
         state = torch.load(cfg.resume_path, map_location='cpu')
         model.load_state_dict(state, strict=False)
     return model
@@ -131,19 +130,14 @@ def main() -> None:
     if cfg.lut_table_path is not None:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         resolve_lut_table(cfg, base_dir)
-        print(f'[Info] 加载 LUT 真值表: {cfg.lut_table_path}')
+        print(f'[Info] Loaded LUT table: {cfg.lut_table_path}')
 
     lut_tag = infer_lut_tag(cfg.lut_table_path)
     if cfg.save_path is None:
-        cfg.save_path = os.path.join(cfg.output_dir, f'resnet20_cifar100_qat_int8_lut_{lut_tag}_ft.pt')
+        cfg.save_path = os.path.join(cfg.output_dir, f'resnet18_cifar100_qat_int8_lut_{lut_tag}_ft.pt')
     if cfg.history_path is None:
-        cfg.history_path = os.path.join(cfg.output_dir, f'history_ft_resnet20_lut_{lut_tag}.json')
-    print(f'[Info] 输出命名标签: {lut_tag}')
-
-    print('[Info] 准备数据集...')
+        cfg.history_path = os.path.join(cfg.output_dir, f'history_ft_resnet18_lut_{lut_tag}.json')
     train_loader, test_loader = get_loaders(cfg)
-
-    print('[Info] 构建模型...')
     model = build_model(cfg).to(device)
 
     optimizer = torch.optim.SGD(
@@ -155,7 +149,12 @@ def main() -> None:
     )
 
     best_acc = 0.0
-    history: list[dict[str, float]] = []
+    history: dict[str, list[float]] = {
+        'train_loss': [],
+        'train_acc': [],
+        'test_loss': [],
+        'test_acc': [],
+    }
 
     for epoch in range(1, cfg.epochs + 1):
         t0 = time.time()
@@ -163,14 +162,10 @@ def main() -> None:
         test_loss, test_acc = evaluate(model, test_loader, device)
         scheduler.step()
         elapsed = time.time() - t0
-        history.append({
-            'epoch': epoch,
-            'train_loss': train_loss,
-            'train_acc': train_acc,
-            'test_loss': test_loss,
-            'test_acc': test_acc,
-            'lr': optimizer.param_groups[0]['lr'],
-        })
+        history['train_loss'].append(train_loss)
+        history['train_acc'].append(train_acc)
+        history['test_loss'].append(test_loss)
+        history['test_acc'].append(test_acc)
         print(f"[Epoch {epoch:03d}] {elapsed:.1f}s | train {train_loss:.4f}/{train_acc*100:.2f}% | "
               f"test {test_loss:.4f}/{test_acc*100:.2f}% | lr={optimizer.param_groups[0]['lr']:.2e}")
 
@@ -178,14 +173,14 @@ def main() -> None:
             best_acc = test_acc
             os.makedirs(os.path.dirname(cfg.save_path), exist_ok=True)
             torch.save(model.state_dict(), cfg.save_path)
-            print(f'[Info] 保存新最佳模型 -> {cfg.save_path} (acc={best_acc*100:.2f}%)')
+            print(f'[Info] Saved new best model -> {cfg.save_path} (acc={best_acc*100:.2f}%)')
 
-    print(f'[Done] 最佳测试准确率: {best_acc*100:.2f}%')
+    print(f'[Done] Best test accuracy: {best_acc*100:.2f}%')
 
     os.makedirs(os.path.dirname(cfg.history_path), exist_ok=True)
     with open(cfg.history_path, 'w') as f:
         json.dump(history, f)
-    print(f'[Info] 训练曲线已写入 {cfg.history_path}')
+    print(f'[Info] Training history saved to {cfg.history_path}')
 
 
 if __name__ == '__main__':

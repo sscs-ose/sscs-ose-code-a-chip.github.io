@@ -7,14 +7,14 @@ from sym_quant import QuantConv2d
 
 
 class Int8LUTMultiplier(nn.Module):
-    """查表版的 int8×int8 乘法，可替换为近似真值表。"""
+    """Lookup-table implementation of int8×int8 multiplication, allows approximate tables."""
 
     def __init__(self, table: torch.Tensor | None = None):
         super().__init__()
         if table is None:
             table = self._build_exact_table()
         if table.shape != (256, 256):
-            raise ValueError("LUT 大小必须为 256x256")
+            raise ValueError("LUT shape must be 256x256")
         if table.dtype != torch.int16:
             table = table.to(torch.int16)
         self.register_buffer("table", table, persistent=False)
@@ -26,19 +26,19 @@ class Int8LUTMultiplier(nn.Module):
 
     def set_table(self, table: torch.Tensor) -> None:
         if table.shape != (256, 256):
-            raise ValueError("新的 LUT 大小必须为 256x256")
+            raise ValueError("New LUT must have shape 256x256")
         self.table = table.to(torch.int16)
 
     def lookup_scalar(self, a: torch.Tensor, b: torch.Tensor | int) -> torch.Tensor:
-        torch._assert(a.dtype in (torch.int8, torch.int16), "输入必须是 int8/int16")
+        torch._assert(a.dtype in (torch.int8, torch.int16), "input must be int8/int16")
         if isinstance(b, torch.Tensor):
-            torch._assert(b.numel() == 1, "标量乘数必须是长度为 1 的张量")
+            torch._assert(b.numel() == 1, "scalar multiplier must contain exactly one element")
             b_val = int(b.item())
         else:
             b_val = int(b)
         idx_b = b_val + 128
         if idx_b < 0 or idx_b >= 256:
-            raise ValueError("乘数超出 int8 范围")
+            raise ValueError("multiplier out of int8 range")
         column = self.table[:, idx_b]
         a_idx = (a.to(torch.int16) + 128).to(torch.long)
         prod = column.gather(0, a_idx.view(-1))
@@ -46,7 +46,7 @@ class Int8LUTMultiplier(nn.Module):
 
 
 class LUTQuantConv2d(QuantConv2d):
-    """在卷积乘法阶段使用 int8 LUT 的量化卷积。"""
+    """Quantized Conv2d that performs int8 multiplications via an LUT."""
 
     def __init__(
         self,
@@ -56,14 +56,14 @@ class LUTQuantConv2d(QuantConv2d):
         mini_channels: int = 0,
         **kwargs,
     ):
-        # ``mini_*`` 控制查表批量以折衷显存与速度，留到子类逻辑中使用。
+
         self.mini_batch_size = int(max(mini_batch_size, 0))
         self.mini_channels = int(max(mini_channels, 0))
         super().__init__(*args, **kwargs)
         if self.nbits_weight != 8:
-            raise ValueError("当前实现仅支持 8-bit 权重量化")
+            raise ValueError("Only 8-bit weight quantization is supported")
         if self.nbits_act is not None and self.nbits_act != 8:
-            raise ValueError("当前实现仅支持 8-bit 激活量化")
+            raise ValueError("Only 8-bit activation quantization is supported")
         self.multiplier = Int8LUTMultiplier(lut_table)
 
     def forward(self, x: torch.Tensor, *, collect: bool = False):
@@ -75,18 +75,18 @@ class LUTQuantConv2d(QuantConv2d):
         w_float = super()._quantize_weight()
 
         if collect:
-            # 校准阶段：保持浮点前向，让量化器收集统计量
+            # Calibration phase: keep float forward so quantizers can collect statistics.
             y = self._forward_fallback(x_processed, w_float, bias)
         else:
-            # 正常推理/训练阶段：要求量化 scale 已经就绪
+            # Inference/training phase: scales must be ready.
             self._assert_scale_ready()
 
             x_int, act_scale = self._quantize_activation_to_int(x_processed)
             w_int, w_scales = self._quantize_weight_to_int(w_float)
             if x_int is None or w_int is None or w_scales is None:
-                raise RuntimeError("LUTQuantConv2d: 量化后仍缺少必要的整型表示")
+                raise RuntimeError("LUTQuantConv2d: missing integer representations after quantization")
 
-            # LUT 给出真实推理数值，surrogate conv 提供梯度 (STE 思路)
+            # LUT provides inference values, surrogate conv supplies gradients (STE idea).
             y_lut = self._conv2d_lut(x_int, w_int, act_scale, w_scales, bias)
             y_surrogate = F.conv2d(x_processed, w_float, bias, self.stride, self.padding, self.dilation, self.groups)
             y = y_lut + (y_surrogate - y_surrogate.detach())
@@ -100,11 +100,11 @@ class LUTQuantConv2d(QuantConv2d):
 
     def _assert_scale_ready(self) -> None:
         if not self.quantize_input or self.act_in_quant is None:
-            raise RuntimeError("LUTQuantConv2d: 输入量化器未启用")
+            raise RuntimeError("LUTQuantConv2d: input quantizer is disabled")
         if self.act_in_quant.scale is None:
-            raise RuntimeError("LUTQuantConv2d: 激活动态范围未校准")
+            raise RuntimeError("LUTQuantConv2d: activation scale is not calibrated")
         if not self._weight_scale_ready():
-            raise RuntimeError("LUTQuantConv2d: 权重量化 scale 不完整")
+            raise RuntimeError("LUTQuantConv2d: weight scale not ready")
 
     def _weight_scale_ready(self) -> bool:
         if self.weight_scale_mode == 'per_tensor':
@@ -122,17 +122,16 @@ class LUTQuantConv2d(QuantConv2d):
     @staticmethod
     def _ensure_scalar(scale, device) -> float:
         if scale is None:
-            raise ValueError("scale 不应为 None")
+            raise ValueError("scale must not be None")
         if torch.is_tensor(scale):
             return float(scale.detach().to(device=device).item())
         return float(scale)
 
-    def _quantize_activation_to_int(self, x_q: torch.Tensor):
+    def _quantize_activation_to_int(self, x_q: torch.Tensor): # The pseudo-quantized value remains as a float. It is generated into an accurate int8 code value through division by "scale" and rounding.
         if self.act_in_quant is None or self.act_in_quant.scale is None:
             return None, None
         scale_val = self._ensure_scalar(self.act_in_quant.scale, x_q.device)
         qmin, qmax = self._q_bounds(self.nbits_act)
-        # 伪量化值仍为 float，通过 /scale + round 生成准确的 int8 码值
         x_int = torch.round(x_q / scale_val).clamp(qmin, qmax).to(torch.int16)
         return x_int, scale_val
 
@@ -143,7 +142,7 @@ class LUTQuantConv2d(QuantConv2d):
                 return None, None
             target = self.weight if w_float is None else w_float
             scale_val = self._ensure_scalar(self.w_quant.scale, target.device)
-            # per-tensor 情况下所有通道共享一个 scale。
+            # In the per-tensor case, all channels share the same scale.
             w_int = torch.round(target / scale_val).clamp(qmin, qmax).to(torch.int16)
             return w_int, torch.tensor([scale_val], device=target.device, dtype=torch.float32)
         if self.w_quants is None:
@@ -174,7 +173,7 @@ class LUTQuantConv2d(QuantConv2d):
         dilation = _pair(self.dilation)
         kH, kW = w_int.shape[2], w_int.shape[3]
 
-        # unfold + reshape 得到每个滑动窗口，后续用矢量化索引一次性查表。
+        # Unfold + reshape to expose each sliding window for vectorized LUT lookup.
         x_cols = F.unfold(x_int.to(torch.float32), (kH, kW), dilation=dilation, padding=padding, stride=stride)
         x_cols = x_cols.to(torch.int16)
         N, _, L = x_cols.shape
@@ -187,12 +186,12 @@ class LUTQuantConv2d(QuantConv2d):
         x_cols = x_cols.view(N, groups, kernel_elems, L)
         w_flat = w_int.view(groups, cout_per_group, kernel_elems)
 
-        # 预计算缩放：与量化输入/权重的乘积保持一致。
+        # Pre-compute combined scales for input/weight products.
         scales = weight_scales.to(dtype=torch.float32, device=x_int.device)
         if scales.numel() == 1:
             scales = scales.expand(C_out)
         else:
-            torch._assert(scales.numel() == C_out, "权重 scale 形状不匹配")
+            torch._assert(scales.numel() == C_out, "weight scale shape mismatch")
         scales = scales * float(act_scale)
 
         table = self.multiplier.table.to(device=x_int.device, dtype=torch.int16)
@@ -203,7 +202,7 @@ class LUTQuantConv2d(QuantConv2d):
         mini_batch = self.mini_batch_size or N
         mini_channel = self.mini_channels or cout_per_group
 
-        # 双层 chunk 处理可以控制显存峰值：batch -> group -> channel。
+        # Two-level chunking (batch -> group -> channel) controls peak memory usage.
         for b_start in range(0, N, mini_batch):
             b_end = min(b_start + mini_batch, N)
             x_batch = x_idx[b_start:b_end]  # [B, groups, K, L]
@@ -215,14 +214,14 @@ class LUTQuantConv2d(QuantConv2d):
                     c_end = min(c_start + mini_channel, cout_per_group)
                     w_chunk = w_group[c_start:c_end]  # [Cchunk, K]
 
-                    # 通过广播构造 table 索引，避免 Python 层枚举。
+                    # Build table indices via broadcasting, avoiding Python loops.
                     x_sel = x_block.unsqueeze(1)  # [B,1,K,L]
                     x_sel = x_sel.expand(-1, w_chunk.size(0), -1, -1)
                     w_sel = w_chunk.unsqueeze(0).unsqueeze(-1)  # [1,Cchunk,K,1]
                     w_sel = w_sel.expand(b_end - b_start, -1, -1, L)
 
-                    prod = table[x_sel, w_sel].to(torch.int32)  # [B,Cchunk,K,L]
-                    acc = prod.sum(dim=2)  # 累加 kernel 维度 → [B,Cchunk,L]
+                    prod = table[x_sel, w_sel].to(torch.int32)  # [B, Cchunk, K, L]
+                    acc = prod.sum(dim=2)  # Reduce the kernel dimension → [B, Cchunk, L]
 
                     scale_chunk = scales[channel_base + c_start: channel_base + c_end]
                     output[b_start:b_end, channel_base + c_start: channel_base + c_end] = (

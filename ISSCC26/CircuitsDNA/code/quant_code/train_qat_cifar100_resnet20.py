@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# network resnet18
+# network resnet20
 
 import os, json
 import torch
@@ -9,9 +9,11 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from sym_quant import QuantConv2d
+from sym_quant import QuantConv2d, QuantLinear  
 
-
+# -----------------------------
+# Config
+# -----------------------------
 class Cfg:
     data_root = '/home/junyi/projects/datasets'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -23,21 +25,19 @@ class Cfg:
 
     warmup_epochs = 2
     calib_steps   = 20
-    epochs_qat    = 200
+    epochs_qat    = 200      
     # optimizer (SGD)
-    lr_qat     = 0.1
+    lr_qat     = 0.1         # SGD learning rate
     momentum   = 0.9
     weight_decay = 5e-4
     nesterov   = True
 
     # scheduler (Cosine)
-    eta_min    = 1e-4
+    eta_min    = 1e-4        # Minimum LR for cosine annealing
 
-    # 二次校准（可选）
     recalib       = False
     recalib_ratio = 0.7
 
-    # 量化参数
     nbits_w = 8
     nbits_a = 8
     per_channel = False
@@ -45,15 +45,18 @@ class Cfg:
     quantize_output = False
 
     # init
-    fp32_ckpt = '/home/junyi/projects/Quant/runs_fp32/resnet18_cifar100_fp32.pt'
+    fp32_ckpt = '/home/junyi/projects/Quant/runs_fp32/resnet20_cifar100_fp32.pt'
 
     # io
-    out_dir = '/home/junyi/projects/Quant/runs_qat/resnet18'
-    ckpt = 'resnet18_cifar100_qat_int8.pt'
-    hist = 'history_qat_resnet18.json'
+    out_dir = '/home/junyi/projects/Quant/runs_qat/resnet20'
+    ckpt = 'resnet20_cifar100_qat_int8.pt'
+    hist = 'history_qat_resnet20.json'
 
 
 
+# -----------------------------
+# Data: CIFAR-100
+# -----------------------------
 def get_loaders_cifar100(cfg: Cfg):
     mean = [0.5071, 0.4865, 0.4409]
     std  = [0.2673, 0.2564, 0.2762]
@@ -78,7 +81,10 @@ def get_loaders_cifar100(cfg: Cfg):
     return train_loader, test_loader
 
 
-# Quant ResNet-18 (CIFAR版)
+# -----------------------------
+# Quant ResNet-20 (CIFAR variant)
+# Only the main convs are quantized; the downsample 1x1 stays float (can be quantized if needed)
+# -----------------------------
 def qconv3x3(ic, oc, s=1, cfg: Cfg=None, bias=False):
     return QuantConv2d(
         ic, oc, 3, stride=s, padding=1, bias=bias,
@@ -87,10 +93,16 @@ def qconv3x3(ic, oc, s=1, cfg: Cfg=None, bias=False):
         quantize_input=cfg.quantize_input, quantize_output=cfg.quantize_output
     )
 
+def qlinear(in_features, out_features, cfg: Cfg=None, bias=True):
+    return QuantLinear(
+        in_features, out_features, bias=bias,
+        nbits_weight=cfg.nbits_w, nbits_act=cfg.nbits_a,
+        quantize_input=cfg.quantize_input, quantize_output=cfg.quantize_output,
+        approx_w='round', approx_a='round'
+    )
 
 class QBasicBlock(nn.Module):
     expansion = 1
-
     def __init__(self, in_planes, planes, stride=1, cfg: Cfg=None):
         super().__init__()
         self.conv1 = qconv3x3(in_planes, planes, stride, cfg, bias=False)
@@ -110,20 +122,17 @@ class QBasicBlock(nn.Module):
         residual = x if self.down is None else self.down(x)
         return F.relu(out + residual, inplace=True)
 
-
-class QResNet18CIFAR(nn.Module):
+class QResNet20CIFAR(nn.Module):
     def __init__(self, num_classes=100, cfg: Cfg=None):
         super().__init__()
         self.cfg = cfg
-        self.conv1 = qconv3x3(3, 64, 1, cfg, bias=False)
-        self.bn1 = nn.BatchNorm2d(64)
-    # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)  # 参照 EncodingNet，但我们保留高分辨率 stride=1 流程
-        self.layer1 = self._make_layer(64, 64, 2, 1, cfg)
-        self.layer2 = self._make_layer(64, 128, 2, 2, cfg)
-        self.layer3 = self._make_layer(128,256, 2, 2, cfg)
-        self.layer4 = self._make_layer(256,512, 2, 2, cfg)
+        self.conv1 = qconv3x3(3, 16, 1, cfg, bias=False)
+        self.bn1 = nn.BatchNorm2d(16)
+        self.layer1 = self._make_layer(16, 16, 3, 1, cfg)
+        self.layer2 = self._make_layer(16, 32, 3, 2, cfg)
+        self.layer3 = self._make_layer(32, 64, 3, 2, cfg)
         self.pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = qlinear(64, num_classes, cfg)
 
     def _make_layer(self, in_planes, planes, blocks, stride, cfg):
         layers = [QBasicBlock(in_planes, planes, stride, cfg)]
@@ -133,34 +142,30 @@ class QResNet18CIFAR(nn.Module):
 
     def forward(self, x, *, collect=False):
         out = F.relu(self.bn1(self.conv1(x, collect=collect)), inplace=True)
-        # out = self.maxpool(out)  # CIFAR 保持 32x32 特征，不做早期下采样
-        for blk in self.layer1:
-            out = blk(out, collect=collect)
-        for blk in self.layer2:
-            out = blk(out, collect=collect)
-        for blk in self.layer3:
-            out = blk(out, collect=collect)
-        for blk in self.layer4:
-            out = blk(out, collect=collect)
+        for blk in self.layer1: out = blk(out, collect=collect)
+        for blk in self.layer2: out = blk(out, collect=collect)
+        for blk in self.layer3: out = blk(out, collect=collect)
         out = self.pool(out).view(out.size(0), -1)
-        return self.fc(out)
+        return self.fc(out, collect=collect)
 
 
+# -----------------------------
+# Helpers: train / eval / calib / switches
+# -----------------------------
 def train_one_epoch(model, loader, opt, device):
     model.train()
     tot, cor, loss_sum = 0, 0, 0.0
     for x, y in loader:
         x, y = x.to(device), y.to(device)
         opt.zero_grad()
-        logits = model(x)
+        logits = model(x)                 # Training/eval do not pass collect
         loss = F.cross_entropy(logits, y)
         loss.backward()
         opt.step()
         loss_sum += loss.item() * x.size(0)
         cor += (logits.argmax(1) == y).sum().item()
         tot += x.size(0)
-    return loss_sum / tot, cor / tot
-
+    return loss_sum/tot, cor/tot
 
 @torch.no_grad()
 def evaluate(model, loader, device):
@@ -168,21 +173,17 @@ def evaluate(model, loader, device):
     tot, cor, loss_sum = 0, 0, 0.0
     for x, y in loader:
         x, y = x.to(device), y.to(device)
-        logits = model(x)
+        logits = model(x)                 # No collect flag during eval
         loss = F.cross_entropy(logits, y)
         loss_sum += loss.item() * x.size(0)
         cor += (logits.argmax(1) == y).sum().item()
         tot += x.size(0)
-    return loss_sum / tot, cor / tot
-
+    return loss_sum/tot, cor/tot
 
 def set_activation_quant_enabled(model, in_enabled: bool, out_enabled: bool):
     for m in model.modules():
-        if hasattr(m, 'quantize_input'):
-            m.quantize_input = bool(in_enabled)
-        if hasattr(m, 'quantize_output'):
-            m.quantize_output = bool(out_enabled)
-
+        if hasattr(m, 'quantize_input'):  m.quantize_input  = bool(in_enabled)
+        if hasattr(m, 'quantize_output'): m.quantize_output = bool(out_enabled)
 
 @torch.no_grad()
 def calibrate_activations(model, loader, device, max_steps: int):
@@ -190,42 +191,44 @@ def calibrate_activations(model, loader, device, max_steps: int):
     steps = 0
     for x, _ in loader:
         x = x.to(device)
-        _ = model(x, collect=True)
+        _ = model(x, collect=True)  # Collect activations only in this phase
         steps += 1
         if steps >= max_steps:
             break
     for m in model.modules():
-        if hasattr(m, 'act_update'):
-            m.act_update()
-        if hasattr(m, 'reset_collector'):
-            m.reset_collector()
+        if hasattr(m, 'act_update'): m.act_update()
+        if hasattr(m, 'reset_collector'): m.reset_collector()
 
 
 @torch.no_grad()
 def calibrate_weights(model: nn.Module):
     """
-    This function runs a one-shot calibration for weights/biases, writing MSE-optimal scales into each QuantConv2d so that subsequent forwards quantize with fixed scales (no per-forward re-search).
+    This function runs a one-shot calibration for weights/biases, writing MSE-optimal scales into each quantized module so that subsequent forwards quantize with fixed scales (no per-forward re-search).
     """
     num_layers = 0
     for m in model.modules():
+        # Only calibrate QuantConv2d in this helper; extend as needed for other layers
         if hasattr(m, 'Wupdate') and callable(getattr(m, 'Wupdate')):
             m.Wupdate()
             num_layers += 1
         elif hasattr(m, 'Qupdate') and callable(getattr(m, 'Qupdate')):
+            # Backward compatibility: Qupdate('weight') mirrors Wupdate()
             try:
                 m.Qupdate('weight')
                 num_layers += 1
             except TypeError:
                 pass
-    print(f'[Calib-W] calibrated {num_layers} quant conv layer(s).')
+    print(f'[Calib-W] calibrated {num_layers} quant layer(s).')
 
 
-
+# -----------------------------
+# Main
+# -----------------------------
 def main():
     cfg = Cfg()
     os.makedirs(cfg.out_dir, exist_ok=True)
     train_loader, test_loader = get_loaders_cifar100(cfg)
-    model = QResNet18CIFAR(num_classes=cfg.num_classes, cfg=cfg).to(cfg.device)
+    model = QResNet20CIFAR(num_classes=cfg.num_classes, cfg=cfg).to(cfg.device)
 
     if cfg.fp32_ckpt and os.path.isfile(cfg.fp32_ckpt):
         sd = torch.load(cfg.fp32_ckpt, map_location='cpu')
@@ -258,19 +261,18 @@ def main():
     print(f'[Calib-1] collecting {cfg.calib_steps} mini-batches...')
     calibrate_activations(model, train_loader, cfg.device, cfg.calib_steps)
 
+
     total_qat = cfg.epochs_qat
     re_ep = int(total_qat * cfg.recalib_ratio) if cfg.recalib else -1
 
     for ep in range(1, total_qat + 1):
         tr_loss, tr_acc = train_one_epoch(model, train_loader, optimizer, cfg.device)
         te_loss, te_acc = evaluate(model, test_loader, cfg.device)
-        history["train_loss"].append(tr_loss)
-        history["train_acc"].append(tr_acc)
-        history["test_loss"].append(te_loss)
-        history["test_acc"].append(te_acc)
+        history["train_loss"].append(tr_loss); history["train_acc"].append(tr_acc)
+        history["test_loss"].append(te_loss);  history["test_acc"].append(te_acc)
         cur_lr = optimizer.param_groups[0]['lr']
         print(f'[QAT {ep:03d}] lr {cur_lr:.2e} | train {tr_loss:.4f}/{tr_acc*100:.2f}% | test {te_loss:.4f}/{te_acc*100:.2f}%')
-        scheduler.step()
+        scheduler.step()  # step
 
         if cfg.recalib and ep == re_ep:
             print(f'[Calib-2 @ QAT {ep}] collecting {cfg.calib_steps} mini-batches...')

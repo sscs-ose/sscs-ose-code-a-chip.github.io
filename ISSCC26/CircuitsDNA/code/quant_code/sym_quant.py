@@ -506,3 +506,164 @@ class QuantConv2d(nn.Module):
                               if (self.act_out_quant is not None and self.act_out_quant.scale is not None) else None),
             'nbits_act': self.nbits_act
         }
+
+
+class QuantLinear(nn.Module):
+    """Quantized Linear layer built with the same quantizer blocks as QuantConv2d."""
+
+    _FLOAT_MODULE = nn.Linear
+
+    def __init__(self,
+                 in_features: int,
+                 out_features: int,
+                 bias: bool = True,
+                 *,
+                 nbits_weight: int = 8,
+                 nbits_act: int | None = 8,
+                 weight_scale_mode: str = 'per_tensor',
+                 quantize_input: bool = True,
+                 quantize_output: bool = False,
+                 approx_w: str = 'round',
+                 approx_a: str = 'round',
+                 weight_fix_scale: float | torch.Tensor | None = None,
+                 bias_fix_scale:   float | torch.Tensor | None = None,
+                 device=None, dtype=None):
+        super().__init__()
+        factory_kwargs = {'device': device, 'dtype': dtype}
+
+        self.in_features = in_features
+        self.out_features = out_features
+        self.weight = nn.Parameter(torch.empty(out_features, in_features, **factory_kwargs))
+        self.bias = nn.Parameter(torch.zeros(out_features, **factory_kwargs)) if bias else None
+
+        nn.init.kaiming_uniform_(self.weight, a=5 ** 0.5)
+        if self.bias is not None:
+            bound = 1.0 / (in_features ** 0.5)
+            nn.init.uniform_(self.bias, -bound, bound)
+
+        if weight_scale_mode != 'per_tensor':
+            raise ValueError("QuantLinear only supports per-tensor weight quantization")
+        self.weight_scale_mode = 'per_tensor'
+        self.nbits_weight = nbits_weight
+        self.nbits_act = nbits_act
+        self.approx_w = approx_w
+        self.approx_a = approx_a
+        self.quantize_input = quantize_input and (nbits_act is not None)
+        self.quantize_output = quantize_output and (nbits_act is not None)
+
+        self.w_quant = Uniform_Quantizer_with_Collecter(
+            nbits=nbits_weight, mode='value', name='linear.weight', approx=self.approx_w, verbose=False,
+            fix_scale=weight_fix_scale
+        )
+        self.b_quant = (Uniform_Quantizer_with_Collecter(
+            nbits=nbits_weight, mode='value', name='linear.bias', approx=self.approx_w, verbose=False,
+            fix_scale=bias_fix_scale
+        ) if bias else None)
+
+        self.act_in_quant = (Uniform_Quantizer_with_Collecter(
+            nbits=nbits_act, mode='value', name='linear.act_in', approx=self.approx_a, verbose=False
+        ) if self.quantize_input else None)
+
+        self.act_out_quant = (Uniform_Quantizer_with_Collecter(
+            nbits=nbits_act, mode='value', name='linear.act_out', approx=self.approx_a, verbose=False
+        ) if self.quantize_output else None)
+
+    def _quantize_weight(self):
+        return self.w_quant(self.weight)
+
+    def _quantize_bias(self):
+        if self.bias is None:
+            return None
+        return self.b_quant(self.bias) if self.b_quant is not None else self.bias
+
+    def forward(self, x: torch.Tensor, *, collect: bool = False):
+        if self.act_in_quant is not None:
+            x = self.act_in_quant(x, collect=collect)
+
+        Wq = self._quantize_weight()
+        bq = self._quantize_bias()
+
+        y = F.linear(x, Wq, bq)
+
+        if self.act_out_quant is not None:
+            y = self.act_out_quant(y, collect=collect)
+
+        return y
+
+    @torch.no_grad()
+    def act_collect(self, x: torch.Tensor, *, on_input: bool = True, on_output: bool = False):
+        xt = x
+        if on_input and self.act_in_quant is not None:
+            _ = self.act_in_quant(xt, collect=True)
+
+        Wq = self._quantize_weight()
+        bq = self._quantize_bias()
+        y = F.linear(xt, Wq, bq)
+
+        if on_output and self.act_out_quant is not None:
+            _ = self.act_out_quant(y, collect=True)
+        return y
+
+    @torch.no_grad()
+    def Wupdate(self):
+        if self.w_quant is not None:
+            self.w_quant.collector = self.weight.detach()
+            self.w_quant.update()
+
+        if self.bias is not None and self.b_quant is not None:
+            self.b_quant.collector = self.bias.detach()
+            self.b_quant.update()
+
+    @torch.no_grad()
+    def Qupdate(self, mode: str = 'both'):
+        if mode in ['both', 'activation']:
+            if self.act_in_quant is not None:
+                self.act_in_quant.update()
+            if self.act_out_quant is not None:
+                self.act_out_quant.update()
+        if mode in ['both', 'weight']:
+            self.Wupdate()
+
+    def act_update(self):
+        return self.Qupdate(mode='activation')
+
+    def reset_collector(self):
+        if self.act_in_quant is not None:
+            self.act_in_quant.reset_collector()
+        if self.act_out_quant is not None:
+            self.act_out_quant.reset_collector()
+
+    def set_weight_fix_scale(self, s: float | torch.Tensor, *, for_bias: bool = False):
+        if for_bias:
+            if self.bias is None:
+                return
+            if self.b_quant is not None:
+                self.b_quant.fix_scale = s
+            return
+
+        self.w_quant.fix_scale = s
+
+    def clear_weight_fix_scale(self, *, for_bias: bool = False):
+        if for_bias:
+            if self.b_quant is not None:
+                self.b_quant.fix_scale = None
+            return
+
+        self.w_quant.fix_scale = None
+
+    def export_weight_qparams(self):
+        state = {'w_scale': None, 'b_scale': None, 'nbits_weight': self.nbits_weight, 'mode': self.weight_scale_mode}
+        if hasattr(self.w_quant, 'scale') and self.w_quant.scale is not None:
+            state['w_scale'] = self.w_quant.scale.detach().clone()
+        if self.bias is not None and self.b_quant is not None and self.b_quant.scale is not None:
+            state['b_scale'] = self.b_quant.scale.detach().clone()
+        return state
+
+    def export_act_qparams(self):
+        return {
+            'act_in_scale': (self.act_in_quant.scale.detach().clone()
+                             if (self.act_in_quant is not None and self.act_in_quant.scale is not None) else None),
+            'act_out_scale': (self.act_out_quant.scale.detach().clone()
+                              if (self.act_out_quant is not None and self.act_out_quant.scale is not None) else None),
+            'nbits_act': self.nbits_act
+        }

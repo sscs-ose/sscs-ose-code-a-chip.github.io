@@ -17,7 +17,8 @@ from resnet20_lut import ResNet20LUTCfg, build_lut_resnet20, resolve_lut_table
 @dataclass
 class Cfg(ResNet20LUTCfg):
     test_subset: int | None = None
-    lut_table_path: str | None = 'lut/truth_table_0.5.csv'
+    lut_table_path: str | None = '/home/junyi/projects/Quant/code/lut/truth_table_0.5.csv'
+    qat_ckpt: str = '/home/junyi/projects/Quant/runs_qat/resnet20/resnet20_cifar100_qat_int8_lut_0.5_ft.pt'
     # lut_table_path: str | None = None
 
 
@@ -77,15 +78,16 @@ def main():
     if cfg.lut_table_path is not None:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         resolve_lut_table(cfg, base_dir)
-        print(f'[Info] 加载 LUT 真值表: {cfg.lut_table_path}')
+        print(f'[Info] Loaded LUT truth table: {cfg.lut_table_path}')
 
-    print('[Info] 构建 LUT ResNet-20 并加载 QAT 权重...')
+    print('[Info] Building LUT ResNet-20 and loading QAT checkpoint...')
+    print(f'[Info] Using checkpoint at: {cfg.qat_ckpt}')
     model = build_lut_resnet20(cfg).to(device)
 
-    print('[Info] 准备 CIFAR-100 测试集...')
+    print('[Info] Preparing CIFAR-100 test set...')
     test_loader = get_test_loader(cfg)
 
-    print('[Info] 开始评估...')
+    print('[Info] Starting evaluation...')
     loss, acc, elapsed = evaluate(model, test_loader, device)
     samples = len(test_loader.dataset)
     print(f'[Result] test_loss={loss:.4f}, test_acc={acc*100:.2f}%, time={elapsed:.2f}s, throughput={samples/elapsed:.1f} samples/s')
