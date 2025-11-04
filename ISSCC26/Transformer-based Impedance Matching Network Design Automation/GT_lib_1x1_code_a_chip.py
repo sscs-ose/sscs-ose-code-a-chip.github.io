@@ -353,17 +353,16 @@ def CreateFqWt(fc, halfbw, rho):
     return [fq,wt]
 
     
-def fun_munal(params,freqs,weights,area_penalty,z1,z2,cap1,cap2,fmax,wcross=1,wil=1, layout_file=None):
+def fun_manual(params,freqs,weights,area_penalty,z1,z2,cap1,cap2,fmax,wcross=1,wil=1, layout_file=None):
     (ra, rb, wida, widb, gapa, gapb, opena, openb, dist, ratio) = map(float, params)
     na = 1
     nb = 1
    # ntwk = rf.Network('/rdf/shared/design_automation/GUI_DATA_Test/Inverse_1to1_Same/SPData/0.s4p')
-    file_path = layout_file if layout_file else '/rdf/shared/design_automation/GUI_DATA_Test/test/SPData/0.s4p'
+    file_path = layout_file if layout_file else './0.s4p'
     ntwk = rf.Network(file_path)
     freq = rf.Frequency(1, fmax, fmax, 'ghz')
     ntwk.renumber([0,1,2,3],[0,1,3,2])
     ntwk = rf.cascade_list([CreateDiffShuntCap(freq,cap1*1e-15),ntwk,CreateDiffShuntCap(freq,cap2*1e-15)])
-    ntwk.write_touchstone('fun_PRINT_sim.s4p', return_string=False)
     ntwk.se2gmm(p=2)
     res_err = 0
     s_general = []
