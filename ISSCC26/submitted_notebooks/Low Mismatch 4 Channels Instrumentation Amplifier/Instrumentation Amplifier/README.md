@@ -1,5 +1,5 @@
 # Instrumentation Amplifier
-The design of the fully differential operational amplifier was carried out using the gm/Id approach to determine the optimal transistor dimensions for the desired performance parameters.
+The design of the fully differential operational amplifier was carried out using the gm/Id approach to determine the optimal transistor dimensions for the desired performance parameters. Nmos and pmos primitives from gLayout are used in the design.
 ## Schematic Design
 
 <p align="center">
