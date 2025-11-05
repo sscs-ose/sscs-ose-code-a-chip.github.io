@@ -46,16 +46,3 @@ For the low-pass filter (LPF) design, the MIMCAP B version was used. This compon
 Note* : Capacitors have the size of 1u x 1u (m = 3)
 
 </div>
-
-## Layout
-<p align="center">
-  <img src="../Images/LPF_Layout.jpg" alt="TB_LPF4" width="400"/>
-</p>
-<h4 align="center" style="font-size:16px;">Figure 6. LPF Layout</h4>
-
-## Post-PEX Simulation
-<p align="center">
-  <img src="../Images/LPF_Post-Pex.jpg" alt="TB_LPF4" width="400"/>
-</p>
-<h4 align="center" style="font-size:16px;">Figure 6. Post-PEX Simulation</h4>
-
