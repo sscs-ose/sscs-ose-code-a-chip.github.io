@@ -59,15 +59,4 @@ The chopper switch network was also made using the nmos and pmos primitive from 
 | Off Leakage Current | +/- 4 | pA
 | Clock divider (to _Clk and Clk) delay | 0.000101512 | s
 
-## Layout
-<p align="center">
-  <img src="../Images/CS_Layout.jpg" alt="SwitchTb" width="800"/>
-</p>
-<h4 align="center" style="font-size:16px;">Figure 9. Chopper Switch Layout</h4>
 
-## Post-PEX
-<p align="center">
-  <img src="../Images/CS_Post-Pex.jpg" alt="SwitchTb" width="800"/>
-</p>
-<h4 align="center" style="font-size:16px;">Figure 10. Chopper Switch Post-Pex</h4>
-</div>
