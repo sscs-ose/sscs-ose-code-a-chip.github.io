@@ -4,7 +4,7 @@ The layout design of analog integrated circuits remains one of the most demandin
 
 In this context, an intermediate approach is proposed that combines designer interaction with a semi-automatic layout generation flow, implemented in Python on top of the open-source GLayout framework. This type of work can be used to train AI models. The methodology reduces layout design time through structured configuration inputs, such as matrices that define transistor placement, along with dictionaries that describe device parameters. The methodology is validated through a current reference generator design, implemented in the GF180 PDK, demonstrating the adaptability of the methodology. This work implements the complete flow through the open-source container [IIC-OSIC-TOOLS](https://github.com/Jianxun/iic-osic-tools-project-template), which integrates all the necessary tools for each design step, ensuring consistency across design stages and enabling advanced analyses.
 
-![Flow](figures/AutoDesignFlow.png)
+![Flow](figures/AutoDesignFlow.jpg)
 
 # Submitted Notebook
 
