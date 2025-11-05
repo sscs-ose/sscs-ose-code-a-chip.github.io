@@ -52,8 +52,3 @@ For the layout implementation, two GDS versions are provided:
 </p>
 <h4 align="center" style="font-size:16px;">Figure 8. Simulation Prefrontal Cortex Probes (Input and Output)</h4>
 
-## Layout
-<p align="center">
-  <img src="../Images/Full_Layout.jpg" alt="LPF_EXT_REV" width="700"/>
-</p>
-<h4 align="center" style="font-size:16px;">Figure 9. Integrated Layout</h4>
