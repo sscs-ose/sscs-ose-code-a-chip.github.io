@@ -8,6 +8,7 @@ For the layout implementation, two GDS versions are provided:
 - A full analog layout, generated using the gLayout framework in a Jupyter Notebook environment, and
 - A fully integrated layout, combining the analog front-end with the digital block designed in OpenLane, merged and finalized using KLayout.
 
+Analog and digital ESD from [SSCS-Chipathon-2025 analog tracks participants](https://github.com/sscs-ose/sscs-chipathon-2025/tree/main/resources/Integration/Chipathon2025_pads) are used.
 ## Schematic Design of 3 Chopper Switches Integration
 
 <p align="center">
