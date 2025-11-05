@@ -1,5 +1,5 @@
 # Chopper Switch
-The chopper switch network was also realized using the inverter primitive from gLayout to control the switching transistors.
+The chopper switch network was also made using the nmos and pmos primitive from gLayout to control the switching transistors.
 ## Schematic Design
 
 <p align="center">
