@@ -40,15 +40,3 @@ The design of the fully differential operational amplifier was carried out using
 | Input range (INA) | <=350 | uV |
 
 </div>
-
-## Layout
-<p align="center">
-  <img src="../Images/INA_Layout.jpg" alt="TSB_INA3" width="1000"/>
-</p>
-<h4 align="center" style="font-size:16px;">Figure 5. INA Layout</h4>
-
-## Post-PEX Simulation
-<p align="center">
-  <img src="../Images/INA_Post-Pex.jpg" alt="TSB_INA3" width="1000"/>
-</p>
-<h4 align="center" style="font-size:16px;">Figure 6. Post-PEX Simulation</h4>
