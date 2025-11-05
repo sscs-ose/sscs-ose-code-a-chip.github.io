@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <cstdint>
 
 enum class GateName { AND, NAND, OR, XOR, XNOR, INV, CONST0, CONST1 };
 
