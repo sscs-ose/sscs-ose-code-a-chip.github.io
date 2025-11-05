@@ -1,178 +1,147 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ===========================================
-# Config
-# ===========================================
-TOOLS_ROOT="${HOME}/tools"
-BIN_DIR="${TOOLS_ROOT}/bin"
-YOSYS_SRC_DIR="${TOOLS_ROOT}/yosys_src"
-YOSYS_PREFIX="${TOOLS_ROOT}/yosys_install"
-GTKWAVE_SRC_DIR="${TOOLS_ROOT}/gtkwave_src"
+echo "=========================================="
+echo "   EDA Tool Installation Script (Ubuntu)  "
+echo "=========================================="
 
-JOBS="${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null || echo 4)}"
+# -------- Utils --------
+NPROC="$(command -v nproc >/dev/null 2>&1 && nproc || echo 2)"
+PREFIX="/usr/local"
+CUDD_PREFIX="/opt/cudd"
+CUDD_LOCAL_TGZ="$(realpath ./src/cudd-3.0.0.tar.gz)"
+CUDD_SRC_DIR="/tmp/cudd-3.0.0"
 
-# ===========================================
-# Helpers
-# ===========================================
-msg() { printf "\033[1;32m[INFO]\033[0m %s\n" "$*"; }
-warn(){ printf "\033[1;33m[WARN]\033[0m %s\n" "$*"; }
-err() { printf "\033[1;31m[ERR ]\033[0m %s\n" "$*" >&2; }
+# ------------------------------
+# Global setup
+# ------------------------------
+echo "[INFO] Updating system packages..."
+sudo apt-get update -y
+sudo apt-get install -y \
+  git wget curl build-essential cmake g++ gcc make bison flex autoconf gperf \
+  libreadline-dev libffi-dev libboost-system-dev libboost-filesystem-dev libboost-python-dev \
+  python3 tcl-dev tk-dev libx11-dev libxft-dev libxext-dev libedit-dev pkg-config libfl-dev \
+  libgmp-dev libmpfr-dev libmpc-dev zlib1g-dev \
+  libeigen3-dev \
+  gtkwave
 
-ensure_in_path() {
-  local p="$1"
-  case ":$PATH:" in *":$p:"*) : ;; *) export PATH="$p:$PATH";; esac
-  grep -qs "export PATH=\"$p" "${HOME}/.bashrc" || echo "export PATH=\"$p:\$PATH\"" >> "${HOME}/.bashrc"
-}
+# ------------------------------
+# Clean old build trees
+# ------------------------------
+cd /tmp
+rm -rf iverilog yosys OpenSTA "${CUDD_SRC_DIR}"
 
-need_cmd() { command -v "$1" >/dev/null 2>&1 || return 1; }
-
-# ===========================================
-# Optional --clean to remove previous source builds
-# ===========================================
-if [[ "${1:-}" == "--clean" ]]; then
-  msg "Cleaning previous source trees..."
-  rm -rf "${YOSYS_SRC_DIR}" "${YOSYS_PREFIX}" "${GTKWAVE_SRC_DIR}"
-  msg "Clean done."
-  exit 0
-fi
-
-mkdir -p "${TOOLS_ROOT}" "${BIN_DIR}"
-
-# ===========================================
-# OS detect
-# ===========================================
-OS_ID="unknown"
-if [[ -f /etc/os-release ]]; then
-  # shellcheck source=/dev/null
-  . /etc/os-release
-  OS_ID="${ID:-unknown}"
-fi
-
-# ===========================================
-# Install prerequisites (Ubuntu/Debian)
-# ===========================================
-apt_install_prereqs() {
-  msg "Installing build prerequisites via APT..."
-  sudo apt-get update
-  sudo apt-get install -y --no-install-recommends \
-    build-essential clang lld gcc g++ \
-    bison flex libfl-dev \
-    libreadline-dev gawk tcl-dev libffi-dev git \
-    graphviz xdot pkg-config python3 python3-dev \
-    libboost-system-dev libboost-python-dev libboost-filesystem-dev \
-    zlib1g-dev ca-certificates \
-    autoconf automake libtool \
-    gtkwave || true
-}
-
-case "$OS_ID" in
-  ubuntu|debian) apt_install_prereqs ;;
-  *) warn "Non-Debian OS detected: ${OS_ID}. Please ensure deps are installed manually." ;;
-esac
-
-# ===========================================
-# Install OpenSTA via APT (skip if already installed)
-# ===========================================
-install_opensta_via_apt() {
-  if need_cmd sta; then
-    msg "OpenSTA already present at: $(command -v sta). Skipping apt install."
-    return
-  fi
-  msg "Installing OpenSTA via APT (package: opensta)..."
-  if sudo apt-get install -y --no-install-recommends opensta; then
-    if need_cmd sta; then
-      msg "OpenSTA installed: $(command -v sta)"
-    else
-      warn "OpenSTA package installed but 'sta' not found in PATH. You may need to open a new shell or check /usr/bin/sta."
-    fi
-  else
-    warn "APT does not provide 'opensta' on this system or installation failed. You can build from source if needed."
-  fi
-}
-
-install_opensta_via_apt
-
-# ===========================================
-# Build Yosys (from source, with submodules) — skip if installed
-# ===========================================
-build_yosys() {
-  if need_cmd yosys; then
-    msg "yosys already present at: $(command -v yosys). Skipping build."
-    return
-  fi
-  msg "Building Yosys from source..."
-  if [[ ! -d "${YOSYS_SRC_DIR}" ]]; then
-    git clone --recurse-submodules https://github.com/YosysHQ/yosys.git "${YOSYS_SRC_DIR}"
-  else
-    (cd "${YOSYS_SRC_DIR}" && git pull --ff-only && git submodule update --init --recursive)
-  fi
-  (
-    cd "${YOSYS_SRC_DIR}"
-    make clean || true
-
-    if need_cmd clang; then
-      msg "Configuring Yosys with clang"
-      make config-clang
-    else
-      msg "Configuring Yosys with gcc"
-      make config-gcc
-    fi
-
-    make -j"${JOBS}"
-    make install PREFIX="${YOSYS_PREFIX}"
-  )
-  ensure_in_path "${YOSYS_PREFIX}/bin"
-}
-
-build_yosys
-
-# ===========================================
-# (Optional) Build GTKWave from source if not present — skip if installed
-# ===========================================
-build_gtkwave_from_source_if_needed() {
-  if need_cmd gtkwave; then
-    msg "gtkwave found at: $(command -v gtkwave). Skipping build."
-    return
-  fi
-  msg "Building GTKWave from source..."
-  if [[ ! -d "${GTKWAVE_SRC_DIR}" ]]; then
-    git clone https://github.com/gtkwave/gtkwave.git "${GTKWAVE_SRC_DIR}"
-  else
-    (cd "${GTKWAVE_SRC_DIR}" && git pull --ff-only || true)
-  fi
-  (
-    cd "${GTKWAVE_SRC_DIR}"
-    ./configure --prefix="${TOOLS_ROOT}/gtkwave_install" || true
-    make -j"${JOBS}"
-    make install
-  )
-  ensure_in_path "${TOOLS_ROOT}/gtkwave_install/bin"
-}
-
-build_gtkwave_from_source_if_needed
-
-# ===========================================
-# Final report
-# ===========================================
-echo "======================================"
-msg "Installation complete (Yosys + GTKWave + OpenSTA check)."
-
-if need_cmd yosys; then
-  yosys -V || true
+# ------------------------------
+# Install CUDD 3.0.0 (from local ./src)
+# ------------------------------
+if [ -f "${CUDD_PREFIX}/include/cudd/cudd.h" ]; then
+  echo "[INFO] CUDD already present at ${CUDD_PREFIX}, skipping build."
 else
-  err "yosys not found in PATH"
+  if [ ! -f "${CUDD_LOCAL_TGZ}" ]; then
+    echo "[ERR] Cannot find ./src/cudd-3.0.0.tar.gz"
+    echo "Please make sure the tarball exists under ./src/ next to this script."
+    exit 1
+  fi
+
+  echo "[INFO] Using local CUDD tarball: ${CUDD_LOCAL_TGZ}"
+  tar xvfz "${CUDD_LOCAL_TGZ}" -C /tmp
+
+  cd "${CUDD_SRC_DIR}"
+  ./configure --prefix="${CUDD_PREFIX}"
+  make -j"${NPROC}"
+  sudo make install
+
+  echo "${CUDD_PREFIX}/lib" | sudo tee /etc/ld.so.conf.d/cudd.conf >/dev/null
+  sudo ldconfig
+
+  cd /tmp
+  echo "[OK] CUDD installed to ${CUDD_PREFIX}."
 fi
 
-if need_cmd gtkwave; then
-  gtkwave --version 2>/dev/null || true
-else
-  err "gtkwave not found in PATH"
+# ------------------------------
+# Install OpenSTA (with CUDD)
+# ------------------------------
+echo "[INFO] Cloning and building OpenSTA..."
+git clone https://github.com/The-OpenROAD-Project/OpenSTA.git
+cd OpenSTA
+mkdir -p build && cd build
+
+cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DCUDD_DIR="${CUDD_PREFIX}" ..
+make -j"${NPROC}"
+sudo make install
+cd ../..
+echo "[OK] OpenSTA installed successfully."
+
+# ------------------------------
+# Install Icarus Verilog
+# ------------------------------
+echo "[INFO] Cloning and building Icarus Verilog..."
+git clone https://github.com/steveicarus/iverilog.git
+cd iverilog
+sh autoconf.sh
+./configure --prefix="${PREFIX}"
+make -j"${NPROC}"
+sudo make install
+cd ..
+echo "[OK] Icarus Verilog installed successfully."
+
+# ------------------------------
+# Install Yosys
+# ------------------------------
+echo "[INFO] Cloning and building Yosys..."
+git clone --recursive https://github.com/YosysHQ/yosys.git
+cd yosys
+git submodule update --init --recursive
+make -j"${NPROC}" PREFIX="${PREFIX}"
+sudo make install PREFIX="${PREFIX}"
+cd ..
+echo "[OK] Yosys installed successfully."
+
+# ------------------------------
+# Add to bash environment
+# ------------------------------
+echo "[INFO] Updating ~/.bashrc ..."
+
+if ! grep -qE '(^|:)/usr/local/bin($|:)' <<< "${PATH}"; then
+  if ! grep -q '/usr/local/bin' ~/.bashrc; then
+    echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
+    echo "[OK] Added /usr/local/bin to PATH."
+  fi
 fi
 
-if need_cmd sta; then
-  sta -version || true
-else
-  warn "OpenSTA (sta) not found in PATH. If 'opensta' package was unavailable, consider building from source."
+if ! grep -q "alias opensta=" ~/.bashrc; then
+  echo "alias opensta='sta'" >> ~/.bashrc
+  echo "[OK] Added alias: opensta -> sta"
 fi
-echo "======================================"
+
+if ! grep -q "${CUDD_PREFIX}/bin" ~/.bashrc; then
+  echo "export PATH=\$PATH:${CUDD_PREFIX}/bin" >> ~/.bashrc
+  echo "[OK] Added ${CUDD_PREFIX}/bin to PATH."
+fi
+
+if ! grep -q "LD_LIBRARY_PATH" ~/.bashrc; then
+  echo "export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH:-}:${CUDD_PREFIX}/lib" >> ~/.bashrc
+  echo "[OK] Added ${CUDD_PREFIX}/lib to LD_LIBRARY_PATH."
+fi
+
+# ------------------------------
+# Refresh current shell (best effort)
+# ------------------------------
+set +e
+source ~/.bashrc 2>/dev/null || true
+set -e
+
+# ------------------------------
+# Summary
+# ------------------------------
+echo
+echo "=========================================="
+echo "Installation Complete!"
+echo "=========================================="
+echo "  • Icarus Verilog : $(command -v iverilog || echo 'not found in PATH (open a new shell)')"
+echo "  • GTKWave        : $(command -v gtkwave  || echo 'not found in PATH (open a new shell)')"
+echo "  • Yosys          : $(command -v yosys    || echo 'not found in PATH (open a new shell)')"
+echo "  • OpenSTA        : $(command -v sta      || echo 'not found in PATH (open a new shell)')"
+echo
+echo "You can now run: yosys, iverilog, gtkwave, opensta"
+echo "=========================================="
