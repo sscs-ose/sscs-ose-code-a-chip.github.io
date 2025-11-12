@@ -72,7 +72,7 @@ def convert_gate(gate, left, args, uid):
             f"  gf180mcu_fd_sc_mcu9t5v0__xnor2_1 {inst} (\n"
             f"    .A1({args[0]}),\n"
             f"    .A2({args[1]}),\n"
-            f"    .Z({left})\n"
+            f"    .ZN({left})\n"
             f"  );"
         )
     else:
