@@ -1,0 +1,57 @@
+.title KiCad schematic
+
+* --- Built-in OpAmp model from KiCad (self-contained) ---
+* Simple generic model for a single-pole OpAmp
+* Parameters are pole frequency, gain, offset, output resistance.
+* The output is limited to the supply voltage.
+* Author Holger Vogt, Public Domain
+.subckt kicad_builtin_opamp in+ in- vcc vee out params: POLE=20 GAIN=20k VOFF=10m ROUT=10
+* add offset voltage
+  Voff in+ inoff dc {VOFF}
+* gain stage with RC pole
+  G10 0 int inoff in- 100u
+  R1 int 0 {GAIN/100u}
+  C1 int 0 {1/(6.28*(GAIN/100u)*POLE)}
+* output decoupling, output resistance
+  Eout 2 0 int 0 1
+  Rout 2 out {ROUT}
+* output limited to vee, vcc
+  Elow lee 0 vee 0 1
+  Ehigh lcc 0 vcc 0 1
+  Dlow lee int Dlimit
+  Dhigh int lcc Dlimit
+  .model Dlimit D N=0.01
+.ends kicad_builtin_opamp
+* --- End of embedded OpAmp model ---
+
+.model __Q1 VDMOS PCHAN
++           vto=1.5
++           kp=0.68
+.model __Q2 VDMOS NCHAN
++           vto=1.5
++           kp=1.36
+VJ4 /5V Net-_J4-Pin_2_ DC 5 
+R4 /5V /CAN- 50k
+R5 /CAN- Net-_J4-Pin_2_ 50k
+R1 /CAN+ /CAN- 60
+MQ1 /CAN+ /TX /1V8 __Q1
+VJ2 /1V8 GND DC 1.8 
+R2 /5V /CAN+ 50k
+R3 /CAN+ Net-_J4-Pin_2_ 50k
+MQ2 /CAN- Net-_J3-Pin_1_ GND __Q2
+VJ1 /TX GND PULSE( 1.8 0 0 0.01m 0.01m 1m 2m 100 ) 
+VJ3 Net-_J3-Pin_1_ GND PULSE( 0 1.8 0 0.01m 0.01m 1m 2m 100 ) 
+R10 Net-_U2-+_ /RX 15k
+R6 GND Net-_U2--_ 10k
+R11 /CAN- Net-_U2-+_ 10k
+R8 /CAN+ Net-_U2--_ 10k
+XU2 Net-_U2-+_ Net-_U2--_ /1V8 GND /RX kicad_builtin_opamp POLE=30 GAIN=100k VOFF=10u ROUT=10
+
+* --- Simulation control ---
+.control
+set width=400
+tran 0.5m 10m
+print v(/CAN+) v(/CAN-) v(/TX) v(/RX) > output.txt
+.endc
+
+.end
