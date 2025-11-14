@@ -1,0 +1,39 @@
+* GF180 Clock Divider Testbench
+* ---------------------------------------------
+
+* --- Include GF180 primitive design models ---
+.include "/foss/pdks/gf180mcuC/libs.tech/ngspice/design.ngspice"
+.lib     "/foss/pdks/gf180mcuC/libs.tech/ngspice/sm141064.ngspice" typical
+.lib     "/foss/pdks/gf180mcuC/libs.tech/ngspice/sm141064.ngspice" res_typical
+.lib     "/foss/pdks/gf180mcuC/libs.tech/ngspice/sm141064.ngspice" moscap_typical
+.lib     "/foss/pdks/gf180mcuC/libs.tech/ngspice/sm141064.ngspice" diode_typical
+
+* --- Include the GF180 standard cell library
+.include "/foss/pdks/gf180mcuC/libs.ref/gf180mcu_fd_sc_mcu7t5v0/spice/gf180mcu_fd_sc_mcu7t5v0.spice"
+
+* --- Include DUT netlist (from OpenLane output)
+.include "/foss/designs/clockdiv.lef.spice"
+
+* --- Instantiate the DUT
+Xdut VDD VSS clk outclkdiv1 outclkdiv2 outclkdiv4 rst_n clockdiv
+
+* --- Power Supplies
+VDD VDD 0 5.0
+VSS VSS 0 0
+
+* --- Reset
+VRESET rst_n 0 PWL(0n 0  20n 0  20.1n 5  1u 5)
+
+* --- Clock Input
+VCLK clk 0 PULSE(0 5 0 1n 1n 125u 250u)
+
+.control
+set filetype=ascii
+tran 1m 0.4
+set wr_singlescale
+set wr_vecnames
+set wr_csv
+wrdata clk_outs.csv v(outclkdiv1) v(outclkdiv2) v(outclkdiv4)
+plot v(clk) v(rst_n)+5 v(outclkdiv1)+10 v(outclkdiv2)+15 v(outclkdiv4)+20
+.endc
+.end
