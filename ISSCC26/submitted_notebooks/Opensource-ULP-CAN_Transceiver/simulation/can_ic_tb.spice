@@ -1,0 +1,87 @@
+** sch_path: /foss/designs/can_ic_v3/jupyter/xschem/can_ic/can_ic_tb.sch
+**.subckt can_ic_tb
+V1 net6 GND 1.8
+R1 CAN+ CAN- 60 m=1
+V3 net1 net2 5
+R2 net1 CAN+ 50k m=1
+R3 CAN+ net2 50k m=1
+V4 net3 net2 5
+R4 net3 CAN- 50k m=1
+R5 CAN- net2 50k m=1
+V2 net4 GND PULSE(0 1.8 0 0.01m 0.01m 1m 2m)
+R6 VCC net6 10 m=1
+R7 TX net4 10 m=1
+R8 net5 RX 10 m=1
+C1 RX GND 100p m=1
+C2 TX GND 1p m=1
+C4 CAN+ GND 5p m=1
+x1 VCC TX CAN+ CAN- GND net5 net7 can_ic
+**** begin user architecture code
+.lib /foss/pdks/sky130A/libs.tech/combined/sky130.lib.spice ss
+
+
+.temp 125
+
+.option gmin=1e-7
+.option abstol=1e-7
+.option reltol=0.01
+.option itl4=200
+
+.control
+
+tran 0.1m 2m
+
+write
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  can_ic.sym # of pins=7
+** sym_path: /foss/designs/can_ic_v3/jupyter/xschem/can_ic/can_ic.sym
+** sch_path: /foss/designs/can_ic_v3/jupyter/xschem/can_ic/can_ic.sch
+.subckt can_ic DRIVER_VCC TX CAN+ CAN- DRIVER_VSS RX RS
+*.iopin DRIVER_VCC
+*.iopin DRIVER_VSS
+*.ipin TX
+*.opin CAN+
+*.opin CAN-
+*.iopin RS
+*.opin RX
+XM4 CAN- inv_tx DRIVER_VSS DRIVER_VSS sky130_fd_pr__nfet_01v8 L=0.15 W=12 nf=1 ad=3.48 as=3.48 pd=24.58 ps=24.58
++ nrd=0.0241666666666667 nrs=0.0241666666666667 sa=0 sb=0 sd=0 mult=20 m=20
+XM5 CAN+ TX DRIVER_VCC DRIVER_VCC sky130_fd_pr__pfet_01v8 L=0.15 W=30 nf=1 ad=8.7 as=8.7 pd=60.58 ps=60.58 nrd=0.00966666666666667
++ nrs=0.00966666666666667 sa=0 sb=0 sd=0 mult=20 m=20
+XM1 inv_tx TX DRIVER_VSS DRIVER_VSS sky130_fd_pr__nfet_01v8 L=0.8 W=1 nf=1 ad=0.29 as=0.29 pd=2.58 ps=2.58 nrd=0.29 nrs=0.29 sa=0
++ sb=0 sd=0 mult=4 m=4
+XM2 net1 net2 DRIVER_VCC DRIVER_VCC sky130_fd_pr__pfet_01v8 L=1 W=2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2
+XM3 net2 net2 DRIVER_VCC DRIVER_VCC sky130_fd_pr__pfet_01v8 L=1 W=2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2
+XM6 net1 net1 DRIVER_VSS DRIVER_VSS sky130_fd_pr__nfet_01v8 L=1 W=2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2
+XM7 net8 net1 RS DRIVER_VSS sky130_fd_pr__nfet_01v8 L=1 W=2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2
+XM8 net3 net2 DRIVER_VCC DRIVER_VCC sky130_fd_pr__pfet_01v8 L=1 W=2 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=2 m=2
+XM9 net4 net6 net3 DRIVER_VCC sky130_fd_pr__pfet_01v8 L=0.5 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=4 m=4
+XM10 net5 net7 net3 DRIVER_VCC sky130_fd_pr__pfet_01v8 L=0.5 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=4 m=4
+XM11 net4 net4 DRIVER_VSS DRIVER_VSS sky130_fd_pr__nfet_01v8 L=0.8 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=4 m=4
+XM12 net5 net4 DRIVER_VSS DRIVER_VSS sky130_fd_pr__nfet_01v8 L=0.8 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=4 m=4
+XM13 RX net5 DRIVER_VSS DRIVER_VSS sky130_fd_pr__nfet_01v8 L=0.8 W=4 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=4 m=4
+XR7 inv_tx DRIVER_VCC DRIVER_VCC sky130_fd_pr__res_high_po_1p41 L=40 mult=1 m=1
+XR5 net7 CAN- DRIVER_VCC sky130_fd_pr__res_high_po_1p41 L=42 mult=1 m=1
+XR1 CAN+ net6 DRIVER_VCC sky130_fd_pr__res_high_po_1p41 L=42 mult=1 m=1
+XR3 DRIVER_VCC RX DRIVER_VCC sky130_fd_pr__res_high_po_1p41 L=42 mult=1 m=1
+XR4 RX net7 DRIVER_VCC sky130_fd_pr__res_high_po_1p41 L=64 mult=1 m=1
+XR2 DRIVER_VCC TX DRIVER_VCC sky130_fd_pr__res_high_po_1p41 L=42 mult=1 m=1
+.ends
+
+.GLOBAL GND
+.end
