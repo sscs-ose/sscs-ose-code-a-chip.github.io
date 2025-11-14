@@ -1,0 +1,24 @@
+.include clockdiv.spice
+
+* Power rails
+VDD VDD 0 5
+VSS VSS 0 0
+
+* Clock: 100 MHz
+VCLK clk 0 PULSE(0 5 0 100p 100p 5n 10n)
+
+* Reset: low 20 ns then high
+VRST rst_n 0 PULSE(0 5 20n 100p 100p 1u 1e9)
+
+* Instantiate DUT
+XDUT VDD VSS clk outclkdiv1 outclkdiv2 outclkdiv4 rst_n clockdiv
+
+* Transient simulation
+.tran 0.1n 200n
+
+.control
+run
+plot v(clk) v(outclkdiv1) v(outclkdiv2) v(outclkdiv4)
+.endc
+
+.end
