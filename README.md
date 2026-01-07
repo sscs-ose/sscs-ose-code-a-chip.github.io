@@ -1,5 +1,17 @@
 ## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'26](https://www.isscc.org/)
 
+**List of Accepted Notebooks:**
+
+| Name        | Affiliation                                                     | Notebook Title                                                          |  
+| ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Yizhou Xu, Chenhao Chu, Hua Wang |	ETH Zürich (Switzerland) | A T-Coil Peaked Wireline Driver Example	|
+| Adham M. Elhelly |	No Affiliation | Automated Design and Optimization of Current-Mode Logic Chains / Dividers	|
+| Ruichen Qi,Junyi Luo | Brown University (USA) | CircuitsDNA: Evolutionary Synthesis of Approximate Hardware acceleration |
+| Xinting Jiang, Minxing Chu | Brown University (USA) | LLMForge: Joint HW/SW Optimization of Edge-Scale Transformer Architecture |
+| Aleta Edna Jessalyn, Angelina Wahyuni Tambunan, Keisya Andretta Basoeki, Abdillah Aziz, Infall Syafalni | ITB (Indonesia) | Low Mismatch 4 Channels Instrumentation Amplifier for Electroencephalography (EEG) Measurement |
+
+***Note: Many thanks everyone for your participation! We recommend to resubmit your Notebooks to the next code-a-chip Notebook competition with revisions. We plan to send you a feedback from our reviewers. Stay tuned!***
+
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows,
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to IEEE SSCS conferences and interact with the leading-edge chip design community, and
