@@ -1,14 +1,4 @@
-## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'26](https://www.isscc.org/)
-
-**List of Accepted Notebooks:**
-
-| Name        | Affiliation                                                     | Notebook Title                                                          |  
-| ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Yizhou Xu, Chenhao Chu, Hua Wang |	ETH Zürich (Switzerland) | A T-Coil Peaked Wireline Driver Example	|
-| Adham M. Elhelly |	No Affiliation | Automated Design and Optimization of Current-Mode Logic Chains / Dividers	|
-| Ruichen Qi,Junyi Luo | Brown University (USA) | CircuitsDNA: Evolutionary Synthesis of Approximate Hardware acceleration |
-| Xinting Jiang, Minxing Chu | Brown University (USA) | LLMForge: Joint HW/SW Optimization of Edge-Scale Transformer Architecture |
-| Aleta Edna Jessalyn, Angelina Wahyuni Tambunan, Keisya Andretta Basoeki, Abdillah Aziz, Infall Syafalni | ITB (Indonesia) | Low Mismatch 4 Channels Instrumentation Amplifier for Electroencephalography (EEG) Measurement |
+## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [VLSI'26](https://www.vlsisymposium.org/)
 
 ***Note: Many thanks everyone for your participation! We recommend to resubmit your Notebooks to the next code-a-chip Notebook competition with revisions. We plan to send you a feedback from our reviewers. Stay tuned!***
 
@@ -21,7 +11,7 @@
 - The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to ISSCC from Feb. 15-19, 2026, to receive the award and participate in networking events.  
 - Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. Generating a final layout of your circuit is encouraged but not required.
     - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
-    - Submissions of previous winners: [VLSI'25](VLSI25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
+    - Submissions of previous winners: [ISSCC'26](ISSCC26/README.md), [VLSI'25](VLSI25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
     - <span style='color: skyblue;'>❗️Starting from the VLSI 2025 grant, the submission categories and criteria for selecting finalists will be expanded to include creative educational purposes of chip design. This can include:
       - innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
       - exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).</span>
@@ -38,7 +28,7 @@
 ## Program Logistics
 - The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
     - Fork the source repo https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io to your local repo.
-    - Create a new directory `ISSCC26/submitted_notebooks/<my_project_name>` in your local repo.
+    - Create a new directory `VLSI26/submitted_notebooks/<my_project_name>` in your local repo.
     - Add your Jupyter notebook to the directory.
     - Create a pull request from your local repo to the source repo.
 - Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
@@ -47,12 +37,12 @@
 
 
 ## Program Schedule
-- ~~October 31~~, November 4, 2025, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- March 31, 2026, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
 - TBD: Announcement of winners
-- February 15-19, 2026: Attend the conference
+- June 14-18, 2026: Attend the conference
 
 
-**The International Solid-State Circuits Conference (ISSCC) 2026 Code-a-Chip Travel Grant Award** is created to:
+**The Symposium on VLSI Technology and Circuits (VLSI) 2026 Code-a-Chip Travel Grant Award** is created to:
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and 
  2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
 
@@ -63,5 +53,5 @@
 - Akira Tsuchiya (a_tsuchiya@ieee.org)
 - Mehdi Saligane (mehdi_saligane@brown.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
-- You can join [Code-a-Chip](https://matrix.to/#/#chipathon-2025:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
+- You can join [Code-a-Chip](https://matrix.to/#/#Code-a-Chip:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
   - Visit [element.fossi-chat.org](https://element.fossi-chat.org/), create an account, then join the room "Code-a-Chip"
