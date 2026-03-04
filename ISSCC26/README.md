@@ -6,7 +6,7 @@
 | ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | Yizhou Xu, Chenhao Chu, Hua Wang |	ETH Zürich (Switzerland) | AI-assisted Ultra-broadband Passive-active Co-design Workflow: A T-Coil Peaked Wireline Driver Example	|
 | Adham M. Elhelly |	AnalogDevices (Egypt) | Automated Design and Optimization of Current-Mode Logic Chains / Dividers	|
-| Ruichen Qi,Junyi Luo | Brown University (USA) | CircuitsDNA: Evolutionary Synthesis of Approximate Hardware acceleration |
+| Ruichen Qi, Junyi Luo | Brown University (USA) | CircuitsDNA: Evolutionary Synthesis of Approximate Hardware acceleration |
 | Xinting Jiang, Minxing Chu | Brown University (USA) | LLMForge: Joint HW/SW Optimization of Edge-Scale Transformer Architecture |
 | Aleta Edna Jessalyn, Angelina Wahyuni Tambunan, Keisya Andretta Basoeki, Abdillah Aziz, Infall Syafalni | ITB (Indonesia) | Low Mismatch 4 Channels Instrumentation Amplifier for Electroencephalography (EEG) Measurement |
 
