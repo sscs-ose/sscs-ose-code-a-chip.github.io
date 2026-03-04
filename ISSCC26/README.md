@@ -4,7 +4,7 @@
 
 | Name        | Affiliation                                                     | Notebook Title                                                          |  
 | ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Yizhou Xu, Chenhao Chu, Hua Wang |	ETH Zürich (Switzerland) | A T-Coil Peaked Wireline Driver Example	|
+| Yizhou Xu, Chenhao Chu, Hua Wang |	ETH Zürich (Switzerland) | AI-assisted Ultra-broadband Passive-active Co-design Workflow: A T-Coil Peaked Wireline Driver Example	|
 | Adham M. Elhelly |	AnalogDevices (Egypt) | Automated Design and Optimization of Current-Mode Logic Chains / Dividers	|
 | Ruichen Qi,Junyi Luo | Brown University (USA) | CircuitsDNA: Evolutionary Synthesis of Approximate Hardware acceleration |
 | Xinting Jiang, Minxing Chu | Brown University (USA) | LLMForge: Joint HW/SW Optimization of Edge-Scale Transformer Architecture |
