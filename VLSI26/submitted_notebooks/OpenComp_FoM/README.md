@@ -7,7 +7,7 @@ Mahprez Team submission for IEEE SSCS TC-OSE Code-a-Chip (VLSI 2026)
 | No. | Name | Role | Email |
 |---|---|---|---|
 | 1 | William Anthony | Team Lead | willomooi@gmail.com |
-| 2 | Benedictus Kenneth Setiadi | Team Member | 13224003@mahasiswa.itb.ac.id |
+| 2 | Benedictus Kenneth Setiadi | Team Member | bkentsetiadi@gmail.com |
 
 ## Project Summary
 
@@ -57,17 +57,13 @@ The flow also reports Pareto fronts to avoid over-trusting a single scalar score
 
 The StrongARM topology is used as one of the reference dynamic comparator architectures in this notebook. During reset, internal nodes are precharged; during evaluation, tail current and regenerative positive feedback amplify the differential input and resolve a digital-level decision.
 
-Suggested figure placement in this folder:
-
-- figures/strongarm_example.png (schematic image)
-
-If you already have the schematic image, add it and uncomment this markdown in the notebook/README:
-
 ![StrongARM Comparator Example](figures/strongarm_example.png)
 
 ### B. Double-Tail Dynamic Comparator (Reference Topology)
 
 The double-tail architecture separates input and latch stages, which can improve operation at lower supply and reduce kickback/noise tradeoffs depending on sizing and loading.
+
+![Double-Tail Dynamic Comparator Example](figures/doubletail_example.png)
 
 ## 4. Notebook Workflow
 
@@ -133,5 +129,3 @@ This project is intended for Apache License 2.0. Add a LICENSE file in this fold
 2. P. E. Allen and D. R. Holberg, CMOS Analog Circuit Design, Oxford University Press, 3rd ed.
 3. B. Goll and H. Zimmermann, "A Comparator With Reduced Delay Time in 65-nm CMOS for Supply Voltages Down to 0.65 V," IEEE Transactions on Circuits and Systems II.
 4. A. M. Abo and P. R. Gray, "A 1.5-V, 10-bit, 14.3-MS/s CMOS Pipeline Analog-to-Digital Converter," IEEE Journal of Solid-State Circuits.
-
-Note: update the reference list to exactly match the papers and circuits you cite in your final notebook narrative and figures.
