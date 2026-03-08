@@ -1,52 +1,137 @@
-# OpenComp-FoM++ (VLSI'26 Code-a-Chip Submission)
+# OpenComp-FoM++
 
-OpenComp-FoM++ is a reproducible notebook workflow to compare **StrongARM** and **Double-Tail** dynamic comparators in SKY130 using:
-- unified score optimization,
-- full Pareto-front analysis,
-- PVT + Monte Carlo robustness ranking,
-- educational regeneration-dynamics animation.
+Mahprez Team submission for IEEE SSCS TC-OSE Code-a-Chip (VLSI 2026)
 
 ## Team
-- Team Lead: William Anthony
-- Member: Benedictus Kenneth Setiadi
 
-## Project Files
-- `OpenComp_FoM_PlusPlus.ipynb` — main submission notebook.
-- `artifacts/` — generated outputs after running the notebook:
-  - `sweep_pvt.csv`
-  - `sweep_mc.csv`
-  - `ranking.csv`
-  - `pareto.csv`
-  - `summary.json`
-  - `plots/pareto_fronts.png`
-  - `plots/regeneration_dynamics.gif`
+| No. | Name | Role | Email |
+|---|---|---|---|
+| 1 | William Anthony | Team Lead | willomooi@gmail.com |
+| 2 | Benedictus Kenneth Setiadi | Team Member | 13224003@mahasiswa.itb.ac.id |
 
-## Quick Start (Recommended)
-1. Open `OpenComp_FoM_PlusPlus.ipynb` in Jupyter or VS Code Notebook.
+## Project Summary
+
+OpenComp-FoM++ is a reproducible notebook-driven design exploration for dynamic comparators in SKY130.
+It compares two topologies:
+
+- StrongARM latch comparator
+- Double-tail dynamic comparator
+
+The notebook evaluates tradeoffs among delay, decision energy, and input-referred noise, then ranks design points using PVT and Monte Carlo robustness.
+
+## 1. Functionality and Target Specifications
+
+This project targets early-stage comparator architecture and sizing selection for mixed-signal front-ends (for example, SAR ADC or sensing interfaces). The goal is not only to find one optimal point, but to map the design space and provide a reusable spec-to-sizing method.
+
+### Table 1. Target Specification (Notebook Baseline)
+
+| Parameter | Target | Notes |
+|---|---:|---|
+| Topologies compared | 2 | StrongARM and Double-Tail |
+| Process corner set | 3 corners | TT, SS, FF |
+| Supply range in sweep | 1.62 V to 1.98 V | Included in PVT corners |
+| Delay target | < 120 ps | Notebook baseline target |
+| Energy target | < 12 fJ per decision | Notebook baseline target |
+| Input-referred noise target | < 2.0 mV sigma | Notebook baseline target |
+| Monte Carlo samples | 80 per shortlisted point | Can be increased |
+
+## 2. Unified Scoring and FoM
+
+Each candidate is scored with normalized metrics so lower is better:
+
+$$
+S = w_1 \cdot t_{delay,norm} + w_2 \cdot E_{norm} + w_3 \cdot \sigma_{V_{in,eq},norm}
+$$
+
+Default weights in the notebook:
+
+- $w_1 = 0.40$ (delay)
+- $w_2 = 0.35$ (energy)
+- $w_3 = 0.25$ (noise)
+
+The flow also reports Pareto fronts to avoid over-trusting a single scalar score.
+
+## 3. Example Circuit
+
+### A. StrongARM Latch Comparator (Reference Topology)
+
+The StrongARM topology is used as one of the reference dynamic comparator architectures in this notebook. During reset, internal nodes are precharged; during evaluation, tail current and regenerative positive feedback amplify the differential input and resolve a digital-level decision.
+
+Suggested figure placement in this folder:
+
+- figures/strongarm_example.png (schematic image)
+
+If you already have the schematic image, add it and uncomment this markdown in the notebook/README:
+
+![StrongARM Comparator Example](figures/strongarm_example.png)
+
+### B. Double-Tail Dynamic Comparator (Reference Topology)
+
+The double-tail architecture separates input and latch stages, which can improve operation at lower supply and reduce kickback/noise tradeoffs depending on sizing and loading.
+
+## 4. Notebook Workflow
+
+1. Environment setup (Colab-compatible tool bootstrap)
+2. Parameterized design space generation
+3. PVT sweep for both topologies
+4. Monte Carlo robustness analysis on shortlisted candidates
+5. Unified-score ranking + Pareto extraction
+6. Educational regeneration dynamics animation
+7. Spec-to-sizing recommendation
+8. Artifact export for reproducibility
+
+## 5. How to Run
+
+### Quick Start
+
+1. Open OpenComp_FoM_PlusPlus.ipynb.
 2. Run all cells from top to bottom.
-3. Keep `DEMO_MODE = True` for an immediate reproducible run.
-4. Check `artifacts/` for generated tables and plots.
+3. Keep DEMO_MODE = True for a fully reproducible run without external SPICE models.
+4. Check artifacts outputs after run completion.
 
-## Python Environment
-Install dependencies:
+### Python Dependencies
 
 ```bash
 pip install numpy pandas matplotlib seaborn tqdm pillow
 ```
 
-## Running with Real ngspice (Optional)
-By default, the notebook runs in demo/surrogate mode.
+### Optional Real-SPICE Mode
 
-To use transistor-level simulation:
-1. Install ngspice and make sure it is in your `PATH`.
-2. Set `DEMO_MODE = False` in the configuration cell.
-3. Update `generate_netlist(...)` model includes and comparator instantiations.
-4. Update `parse_measure_output(...)` to match your `.measure` output format.
+To switch from surrogate metrics to transistor-level runs:
 
-## Reproducibility Notes
-- Random seed is fixed (`np.random.seed(42)`).
-- PVT corners and Monte Carlo run count are declared in one config cell.
-- All major outputs are exported as CSV/JSON/PNG/GIF.
+1. Install ngspice and ensure it is visible in PATH.
+2. Set DEMO_MODE = False.
+3. Update generate_netlist(...) with validated model includes and instantiated comparator subcircuits.
+4. Update parse_measure_output(...) according to your .measure formatting.
 
-## License
-This project is intended for Apache License 2.0. Add a `LICENSE` file in this folder before PR submission.
+## 6. Generated Artifacts
+
+After execution, the notebook exports:
+
+- artifacts/sweep_pvt.csv
+- artifacts/sweep_mc.csv
+- artifacts/ranking.csv
+- artifacts/pareto.csv
+- artifacts/summary.json
+- artifacts/plots/pareto_fronts.png
+- artifacts/plots/regeneration_dynamics.gif
+
+## 7. Reproducibility Checklist
+
+- Restart kernel and Run All completes without manual edits.
+- PVT corner definitions and MC run count are fixed in one config cell.
+- Random seed is fixed for deterministic surrogate flow.
+- All reported plots and tables are generated from script cells, not manual edits.
+
+## 8. License
+
+This project is intended for Apache License 2.0. Add a LICENSE file in this folder before final PR submission.
+
+## 9. References (Journal and Design Background)
+
+1. B. Razavi, Design of Analog CMOS Integrated Circuits, McGraw-Hill, 2001.
+2. P. E. Allen and D. R. Holberg, CMOS Analog Circuit Design, Oxford University Press, 3rd ed.
+3. B. Goll and H. Zimmermann, "A Comparator With Reduced Delay Time in 65-nm CMOS for Supply Voltages Down to 0.65 V," IEEE Transactions on Circuits and Systems II.
+4. A. M. Abo and P. R. Gray, "A 1.5-V, 10-bit, 14.3-MS/s CMOS Pipeline Analog-to-Digital Converter," IEEE Journal of Solid-State Circuits.
+
+Note: update the reference list to exactly match the papers and circuits you cite in your final notebook narrative and figures.
