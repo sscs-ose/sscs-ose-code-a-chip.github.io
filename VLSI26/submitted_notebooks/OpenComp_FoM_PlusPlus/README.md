@@ -1,4 +1,4 @@
-# OpenComp-FoM++
+# OpenComp_FoM
 
 Mahprez Team submission for IEEE SSCS TC-OSE Code-a-Chip (VLSI 2026)
 
@@ -11,7 +11,7 @@ Mahprez Team submission for IEEE SSCS TC-OSE Code-a-Chip (VLSI 2026)
 
 ## Project Summary
 
-OpenComp-FoM++ is a reproducible notebook-driven design exploration for dynamic comparators in SKY130.
+OpenComp_FoM is a reproducible notebook-driven design exploration for dynamic comparators in SKY130.
 It compares two topologies:
 
 - StrongARM latch comparator
