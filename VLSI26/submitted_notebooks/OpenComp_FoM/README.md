@@ -57,13 +57,13 @@ The flow also reports Pareto fronts to avoid over-trusting a single scalar score
 
 The StrongARM topology is used as one of the reference dynamic comparator architectures in this notebook. During reset, internal nodes are precharged; during evaluation, tail current and regenerative positive feedback amplify the differential input and resolve a digital-level decision.
 
-![StrongARM Comparator Example](figures/strongarm_example.png)
+![StrongARM Comparator Example](figures/strongarm.jpg)
 
 ### B. Double-Tail Dynamic Comparator (Reference Topology)
 
 The double-tail architecture separates input and latch stages, which can improve operation at lower supply and reduce kickback/noise tradeoffs depending on sizing and loading.
 
-![Double-Tail Dynamic Comparator Example](figures/doubletail_example.png)
+![Double-Tail Dynamic Comparator Example](figures/double-tail-dynamic-comparator.jpg)
 
 ## 4. Notebook Workflow
 
