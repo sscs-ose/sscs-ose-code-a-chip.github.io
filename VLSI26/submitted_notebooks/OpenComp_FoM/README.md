@@ -80,10 +80,17 @@ The double-tail architecture separates input and latch stages, which can improve
 
 ### Quick Start
 
-1. Open OpenComp_FoM_PlusPlus.ipynb.
+1. Open OpenComp_FoM.ipynb.
 2. Run all cells from top to bottom.
 3. Keep DEMO_MODE = True for a fully reproducible run without external SPICE models.
 4. Check artifacts outputs after run completion.
+
+### Recommended Tool Versions
+
+- Python 3.10+ (tested with 3.11)
+- Jupyter Notebook 7.x or Google Colab runtime
+- ngspice 39+ (only needed when `DEMO_MODE = False`)
+- Python packages: numpy, pandas, matplotlib, seaborn, tqdm, pillow
 
 ### Python Dependencies
 
@@ -121,7 +128,7 @@ After execution, the notebook exports:
 
 ## 8. License
 
-This project is intended for Apache License 2.0. Add a LICENSE file in this folder before final PR submission.
+This project is released under Apache License 2.0. See the `LICENSE` file in this folder.
 
 ## 9. References (Journal and Design Background)
 
