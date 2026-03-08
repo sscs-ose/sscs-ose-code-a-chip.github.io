@@ -27,7 +27,7 @@ This notebook proposes **Physics-Informed Gaussian Process (PI-GP)** optimizatio
 - Real SKY130 PDK validation against `sky130_fd_pr__nfet_01v8` device models
 - BER estimation and bathtub curves for quantitative link margin validation
 - PVT corner robustness across 7 corners
-- Multi-scenario validation (HBM chiplet, NVLink-style, PCIe Gen6)
+- Multi-scenario validation (HBM chiplet, NVLink-style, UCIe long-reach)
 
 ## Key Results
 
