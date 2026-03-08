@@ -18,6 +18,8 @@ This notebook proposes **Physics-Informed Gaussian Process (PI-GP)** optimizatio
 
 4. **On-Chip Adaptive Equalization** — Trained PI-GP exported as a lightweight firmware lookup table (<4 KB SRAM) for real-time CTLE coefficient adaptation, bridging design-time optimization and silicon deployment.
 
+5. **Physical Design Flow** — Full layout → DRC → parasitic extraction (PEX) → post-layout simulation using Magic VLSI and SKY130 PDK, quantifying bandwidth degradation from real layout parasitics.
+
 ## Supporting Analysis
 
 - 4-algorithm benchmark (TPE, CMA-ES, Random, DE) with statistical robustness analysis
@@ -46,6 +48,7 @@ This notebook proposes **Physics-Informed Gaussian Process (PI-GP)** optimizatio
 | scikit-learn | Gaussian Process surrogate, cross-validation |
 | Matplotlib | Visualization |
 | ngspice 40+ | Transistor-level CTLE simulation (BSIM4) |
+| Magic VLSI 8.3+ | Layout, DRC, parasitic extraction |
 
 ## References
 
