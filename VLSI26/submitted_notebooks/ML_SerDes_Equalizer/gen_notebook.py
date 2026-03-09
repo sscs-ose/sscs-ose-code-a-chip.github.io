@@ -683,31 +683,27 @@ cells.append(code(
             return 0.0
         vals = tr[:, self.spb // 2]
         if self.pam4:
-            heights = []
-            bnds = [
-                (-4, -2), (-2, 0),
-                (0, 2), (2, 4)
+            # Adaptive: sort into 4 level groups
+            sc = np.sort(vals)
+            n4 = len(sc) // 4
+            if n4 < 5:
+                return 0.0
+            groups = [
+                sc[:n4], sc[n4:2*n4],
+                sc[2*n4:3*n4], sc[3*n4:]
             ]
+            heights = []
             for j in range(3):
-                lo = bnds[j]
-                hi = bnds[j + 1]
-                lo_ok = (vals > lo[0])
-                lo_ok2 = (vals < lo[1])
-                vb = vals[lo_ok & lo_ok2]
-                hi_ok = (vals > hi[0])
-                hi_ok2 = (vals < hi[1])
-                vt = vals[hi_ok & hi_ok2]
-                if len(vb) > 5 and len(vt) > 5:
-                    top = np.percentile(vt, 5)
-                    bot = np.percentile(vb, 95)
-                    heights.append(
-                        max(0, top - bot)
-                    )
-            if heights:
-                return min(heights)
-            return 0.0
-        hi = vals[vals > 0]
-        lo = vals[vals <= 0]
+                bot = np.percentile(
+                    groups[j], 95)
+                top = np.percentile(
+                    groups[j+1], 5)
+                heights.append(
+                    max(0, top - bot))
+            return min(heights) if heights \
+                else 0.0
+        hi = vals[vals > np.median(vals)]
+        lo = vals[vals <= np.median(vals)]
         if len(hi) < 5 or len(lo) < 5:
             return 0.0
         top = np.percentile(hi, 5)
@@ -2774,46 +2770,56 @@ defines timing margin."""
 ))
 
 cells.append(code(
-"""def bathtub_ber(eye, sigma_n=0.02):
-    \"\"\"Compute BER vs phase for PAM4.\"\"\"
+"""def bathtub_ber(eye, sigma_n=0.024):
+    \"\"\"BER vs phase via eye-height method.
+
+    At each phase, computes eye height (min gap
+    between adjacent PAM4 levels using percentiles)
+    and converts to BER via Q = EH / (2*sigma_n).
+    sigma_n represents receiver thermal noise.
+    \"\"\"
     tr = eye.traces()
     spb = eye.spb
     bers = np.ones(spb) * 0.5
 
     for ph in range(spb):
         vals = tr[:, ph]
-        eye_bers = []
-        thresholds = [-2.0, 0.0, 2.0]
+        if len(vals) < 20:
+            continue
 
-        for ei in range(3):
-            th = thresholds[ei]
-            lo_m = (vals > th - 2)
-            lo_m2 = (vals < th)
-            upper_m = (vals > th)
-            upper_m2 = (vals < th + 2)
-            lo_v = vals[lo_m & lo_m2]
-            hi_v = vals[upper_m & upper_m2]
-
-            if len(lo_v) < 3:
-                eye_bers.append(0.5)
+        if eye.pam4:
+            sc = np.sort(vals)
+            n4 = len(sc) // 4
+            if n4 < 5:
                 continue
-            if len(hi_v) < 3:
-                eye_bers.append(0.5)
+            groups = [
+                sc[:n4], sc[n4:2*n4],
+                sc[2*n4:3*n4], sc[3*n4:]
+            ]
+            min_eh = float('inf')
+            for j in range(3):
+                top_lo = np.percentile(
+                    groups[j], 95)
+                bot_hi = np.percentile(
+                    groups[j+1], 5)
+                min_eh = min(
+                    min_eh, bot_hi - top_lo)
+            eh = max(0, min_eh)
+            q = eh / (2 * sigma_n)
+            bers[ph] = 0.75 * erfc(
+                q / np.sqrt(2))
+        else:
+            med = np.median(vals)
+            hi = vals[vals > med]
+            lo = vals[vals <= med]
+            if len(hi) < 5 or len(lo) < 5:
                 continue
-
-            gap = np.mean(hi_v) - np.mean(lo_v)
-            sig = max(
-                np.std(hi_v),
-                np.std(lo_v),
-                sigma_n
-            )
-            q = gap / (2 * sig)
-            eb = 0.5 * erfc(
-                q / np.sqrt(2)
-            )
-            eye_bers.append(eb)
-
-        bers[ph] = np.mean(eye_bers) * 2 / 3
+            eh = max(0,
+                np.percentile(hi, 5)
+                - np.percentile(lo, 95))
+            q = eh / (2 * sigma_n)
+            bers[ph] = 0.5 * erfc(
+                q / np.sqrt(2))
 
     phase_ui = np.arange(spb) / spb
     return phase_ui, bers
