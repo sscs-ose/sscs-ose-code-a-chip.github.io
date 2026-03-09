@@ -247,10 +247,9 @@ for t, v in tools.items():
 # Cell 3: Imports
 # ═══════════════════════════════════════════════════════
 cells.append(code(
-"""import numpy as np
+"""%matplotlib inline
+import numpy as np
 from numpy.fft import fft, ifft, fftfreq
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import optuna
 from optuna.samplers import TPESampler
