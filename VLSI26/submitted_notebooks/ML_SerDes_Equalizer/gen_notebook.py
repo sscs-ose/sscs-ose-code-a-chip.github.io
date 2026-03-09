@@ -43,11 +43,12 @@ cells.append(md(
 
 [![Open In Colab](https://colab.research.google.com/\
 assets/colab-badge.svg)](https://colab.research.google\
-.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/\
-blob/main/VLSI26/submitted_notebooks/\
+.com/github/fidel-makatia/sscs-ose-code-a-chip.github.io/\
+blob/ml-serdes-equalizer/VLSI26/submitted_notebooks/\
 ML_SerDes_Equalizer/ML_SerDes_Equalizer.ipynb)
 
 **Author:** Fidel Makatia Omusilibwa
+**Email:** fidelmakatia@tamu.edu
 **Affiliation:** Texas A&M University
 **License:** Apache 2.0 | **Date:** March 2026
 
