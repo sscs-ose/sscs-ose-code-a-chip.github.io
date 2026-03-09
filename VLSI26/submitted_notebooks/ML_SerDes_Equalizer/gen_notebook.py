@@ -4447,11 +4447,11 @@ print('3 NMOS + Metal Routing -> DRC -> PEX '
 print('=' * 60)
 
 bp_pd = s_mf.best_params
-rs_v = bp_pd['rs']
-cs_v = bp_pd['cs'] * 1e15  # fF
-rd_v = bp_pd['rd']
-w_v = bp_pd['w'] * 1e6     # um
-ib_v = bp_pd['ib'] * 1e6   # uA
+rs_v = bp_pd['rs']       # ohm (int)
+cs_v = bp_pd['cs']       # fF (int)
+rd_v = bp_pd['rd']       # ohm (int)
+w_v = bp_pd['w']          # um (int)
+ib_v = bp_pd['ib']        # uA (int)
 
 print(f'\\nCTLE circuit (source-degenerated '
       f'differential pair):')
@@ -4726,23 +4726,36 @@ print('\\n── Step 2: Post-Layout AC Simulation ──')
 # Lumped parasitic allocation to circuit nodes
 # Based on device physics: Cdb at drain, Cds at
 # source-drain, etc.
+# Allocate PEX to nodes per device physics
+# Output node sees: Cdb + Cgd(Miller) + Rd routing
+# Source node sees: Cds + Cgs + Rs routing
+# Tail sees: Mt parasitics + tail routing
+# Both diff pair devices contribute to each node
 if not live_pex:
-    c_drain = (  # per side: Cdb + Cgd + routing
-        pex_ref['M1_Cdb'] + pex_ref['M1_Cgd']
-        + pex_ref['Route_drain_bus'] / 2
+    c_drain = (  # per side
+        pex_ref['M1_Cdb']
+        + pex_ref['M1_Cgd'] * 3  # Miller x3
+        + pex_ref['M1_Cgb']
+        + pex_ref['Route_drain_bus']
+        + pex_ref['Coupling_M1_M2'] / 2
     )
-    c_source = (  # per side: Cds + Cgs
-        pex_ref['M1_Cds'] + pex_ref['M1_Cgs']
-        + pex_ref['Route_M1s_tail'] / 2
+    c_source = (  # per side
+        pex_ref['M1_Cds']
+        + pex_ref['M1_Cgs']
+        + pex_ref['Route_M1s_tail']
     )
-    c_tail = (  # Mt total + routing
-        pex_ref['Mt_Cdb'] + pex_ref['Mt_Cds']
+    c_tail = (  # Mt device + routing
+        pex_ref['Mt_Cdb']
+        + pex_ref['Mt_Cds']
+        + pex_ref['Mt_Cgd']
+        + pex_ref['Mt_Cgs']
         + pex_ref['Route_tail_drop']
+        + pex_ref['Coupling_sub']
     )
 else:
-    c_drain = total_pex * 0.20
+    c_drain = total_pex * 0.25
     c_source = total_pex * 0.22
-    c_tail = total_pex * 0.30
+    c_tail = total_pex * 0.35
 
 print(f'  Lumped PEX at drain (per side): '
       f'{c_drain*1e15:.2f} fF')
@@ -5033,11 +5046,22 @@ ax.grid(True, alpha=0.3, axis='x')
 
 # Plot 3: Layout area breakdown
 ax = axes[2]
-m1_area = 0.77 * (w_v + 0.88)
-mt_area = 1.08 * 20.88
-rs_area = rs_v * 0.001 * 0.42
-cs_area = cs_v * 0.001
-routing = 25 * 0.5 * 2  # 2 routing strips
+# SKY130 area estimates (um^2)
+# nfet_01v8 with guard ring: ~(nf*0.48+4) x (W+4)
+nf = 4
+m1_w = nf * 0.48 + 4  # ~5.9 um
+m1_h = w_v + 4         # W + guard
+m1_area = m1_w * m1_h
+mt_w = nf * 0.48 + 4
+mt_h = 20 + 4  # W=20um + guard
+mt_area = mt_w * mt_h
+# Poly resistor: ~48 ohm/sq, W=0.35um
+rs_sq = rs_v / 48  # squares
+rs_area = rs_sq * 0.35 * 0.35 + 2  # + contacts
+# MIM cap: ~2 fF/um^2 in SKY130
+cs_area = cs_v / 2.0  # um^2
+# Routing between devices
+routing = 25 * 0.5 * 2  # 2 metal strips
 total_area = (
     2 * m1_area + mt_area
     + 2 * rs_area + cs_area + routing
