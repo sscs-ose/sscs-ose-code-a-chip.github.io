@@ -47,7 +47,7 @@ assets/colab-badge.svg)](https://colab.research.google\
 blob/ml-serdes-equalizer/VLSI26/submitted_notebooks/\
 ML_SerDes_Equalizer/ML_SerDes_Equalizer.ipynb)
 
-**Author:** Fidel Makatia Omusilibwa
+**Author:** Fidel Makatia Omusilibwa, *IEEE Member, IEEE Solid-State Circuits Society Member*
 **Email:** fidelmakatia@tamu.edu
 **Affiliation:** Texas A&M University
 **License:** Apache 2.0 | **Date:** March 2026
@@ -312,6 +312,335 @@ device physics:
 **Key insight:** By encoding these physics into the GP
 input space, we achieve dramatically better sample
 efficiency."""
+))
+
+# ═══════════════════════════════════════════════════════
+# Cell 5a: CTLE Schematic Drawing
+# ═══════════════════════════════════════════════════════
+cells.append(md(
+"""## 2.1 CTLE Circuit Schematic & Layout
+
+The source-degenerated differential CTLE topology used
+throughout this work. All transistors are
+`sky130_fd_pr__nfet_01v8` (1.8 V, 150 nm L)."""
+))
+
+cells.append(code(
+"""# ── Draw CTLE Schematic with schemdraw ──
+try:
+    import schemdraw
+    import schemdraw.elements as elm
+except ImportError:
+    import subprocess, sys
+    subprocess.check_call(
+        [sys.executable, '-m', 'pip',
+         'install', '-q', 'schemdraw'])
+    import schemdraw
+    import schemdraw.elements as elm
+
+schemdraw.config(inches_per_unit=0.5)
+
+with schemdraw.Drawing(show=True) as d:
+    d.config(fontsize=11, font='sans-serif')
+
+    # ── VDD rail ──
+    vdd = d.add(elm.Line().right(10).at((0, 8)))
+    d.add(elm.Dot().at(vdd.start))
+    d.add(elm.Label().at(vdd.start).left()
+          .label('VDD (1.8 V)', loc='left'))
+
+    # ── Left load: Rd1 ──
+    rd1_top = (2.5, 8)
+    d.add(elm.Dot().at(rd1_top))
+    rd1 = d.add(elm.Resistor().down(2.5).at(rd1_top)
+                .label('$R_{d1}$', loc='left'))
+    outp = rd1.end
+    d.add(elm.Dot().at(outp))
+    d.add(elm.Label().at(outp).left()
+          .label('out+', loc='left'))
+
+    # ── Left load cap: Cl1 ──
+    d.add(elm.Capacitor().down(2).at(outp)
+          .label('$C_L$', loc='left'))
+    d.add(elm.Ground())
+
+    # ── Right load: Rd2 ──
+    rd2_top = (7.5, 8)
+    d.add(elm.Dot().at(rd2_top))
+    rd2 = d.add(elm.Resistor().down(2.5).at(rd2_top)
+                .label('$R_{d2}$', loc='right'))
+    outn = rd2.end
+    d.add(elm.Dot().at(outn))
+    d.add(elm.Label().at(outn).right()
+          .label('out−', loc='right'))
+
+    # ── Right load cap: Cl2 ──
+    d.add(elm.Capacitor().down(2).at(outn)
+          .label('$C_L$', loc='right'))
+    d.add(elm.Ground())
+
+    # ── M1 (left NMOS) ──
+    m1 = d.add(elm.MosfetN().at((2.5, 4.5))
+               .anchor('drain').flip()
+               .label('M1', loc='left'))
+    d.add(elm.Label().at(m1.gate).left()
+          .label('in+', loc='left'))
+
+    # ── M2 (right NMOS) ──
+    m2 = d.add(elm.MosfetN().at((7.5, 4.5))
+               .anchor('drain')
+               .label('M2', loc='right'))
+    d.add(elm.Label().at(m2.gate).right()
+          .label('in−', loc='right'))
+
+    # ── Source degeneration: Rs1 ──
+    rs1 = d.add(elm.Resistor().down(1.5)
+                .at(m1.source)
+                .label('$R_{s1}$', loc='left'))
+    s1_node = rs1.end
+    d.add(elm.Dot().at(s1_node))
+
+    # ── Source degeneration: Rs2 ──
+    rs2 = d.add(elm.Resistor().down(1.5)
+                .at(m2.source)
+                .label('$R_{s2}$', loc='right'))
+    s2_node = rs2.end
+    d.add(elm.Dot().at(s2_node))
+
+    # ── Cs (source coupling capacitor) ──
+    d.add(elm.Capacitor().at(s1_node).right()
+          .toy(s2_node)
+          .tox(s2_node[0])
+          .label('$C_s$', loc='top'))
+
+    # ── Tail wires to common tail node ──
+    tail_y = s1_node[1] - 1.0
+    tail_x = 5.0
+    d.add(elm.Line().at(s1_node).down()
+          .toy(tail_y))
+    d.add(elm.Line().right().tox(tail_x))
+    d.add(elm.Line().at(s2_node).down()
+          .toy(tail_y))
+    d.add(elm.Line().left().tox(tail_x))
+    tail_node = (tail_x, tail_y)
+    d.add(elm.Dot().at(tail_node))
+
+    # ── Tail current source (Mt) ──
+    it = d.add(elm.SourceI().down(2)
+               .at(tail_node)
+               .label('$I_{tail}$', loc='right'))
+    d.add(elm.Ground().at(it.end))
+
+    # ── Title ──
+    d.add(elm.Label().at((5, 9.2))
+          .label('Source-Degenerated Differential '
+                 'CTLE (SKY130 nfet_01v8)',
+                 loc='center'))
+
+plt.savefig('ctle_schematic.png', dpi=150,
+            bbox_inches='tight', facecolor='white')
+print('Schematic saved: ctle_schematic.png')"""
+))
+
+# ═══════════════════════════════════════════════════════
+# Cell 5b: CTLE Layout Drawing
+# ═══════════════════════════════════════════════════════
+cells.append(code(
+"""# ── Draw CTLE Layout Floorplan ──
+fig, ax = plt.subplots(1, 1, figsize=(12, 7))
+ax.set_xlim(-2, 52)
+ax.set_ylim(-2, 32)
+ax.set_aspect('equal')
+ax.set_facecolor('#f5f5f0')
+
+# Color scheme (SKY130 layers)
+c_diff   = '#3498db'   # diffusion (blue)
+c_poly   = '#e74c3c'   # polysilicon (red)
+c_met1   = '#2ecc71'   # metal1 (green)
+c_met2   = '#9b59b6'   # metal2 (purple)
+c_nwell  = '#f39c12'   # nwell / guard ring (orange)
+c_res    = '#e67e22'   # resistor (dark orange)
+c_cap    = '#1abc9c'   # MIM cap (teal)
+
+import matplotlib.patches as mpatches
+
+def draw_nmos(ax, x, y, w, label, nf=4):
+    \"\"\"Draw an NMOS device with fingers.\"\"\"
+    total_w = 8
+    h = 5
+    # Active region
+    ax.add_patch(mpatches.FancyBboxPatch(
+        (x, y), total_w, h, boxstyle='round,pad=0.2',
+        facecolor=c_diff, alpha=0.3,
+        edgecolor=c_diff, linewidth=1.5))
+    # Poly fingers
+    finger_sp = total_w / (nf + 1)
+    for i in range(1, nf + 1):
+        fx = x + i * finger_sp
+        ax.plot([fx, fx], [y - 0.5, y + h + 0.5],
+                color=c_poly, linewidth=2.5)
+    # Gate, Drain, Source labels
+    ax.text(x + total_w / 2, y + h + 1.3,
+            label, ha='center', va='center',
+            fontsize=10, fontweight='bold')
+    ax.text(x + total_w / 2, y + h / 2,
+            f'W={w}\\nL=150n\\nnf={nf}',
+            ha='center', va='center', fontsize=7,
+            color='#2c3e50')
+    # Guard ring
+    ax.add_patch(mpatches.FancyBboxPatch(
+        (x - 1, y - 1), total_w + 2, h + 2,
+        boxstyle='round,pad=0.3',
+        facecolor='none', edgecolor=c_nwell,
+        linewidth=2, linestyle='--'))
+
+# ── M1 (left diff pair) ──
+draw_nmos(ax, 2, 10, 'Wopt', 'M1 (diff)')
+# ── M2 (right diff pair) ──
+draw_nmos(ax, 22, 10, 'Wopt', 'M2 (diff)')
+# ── Mt (tail current) ──
+draw_nmos(ax, 12, 1, '20\\u03bcm', 'Mt (tail)', nf=4)
+
+# ── Rs1 (poly resistor, left) ──
+ax.add_patch(mpatches.FancyBboxPatch(
+    (2, 18), 8, 2, boxstyle='round,pad=0.2',
+    facecolor=c_res, alpha=0.4,
+    edgecolor=c_res, linewidth=1.5))
+ax.text(6, 19, '$R_{s1}$ (poly)',
+        ha='center', va='center', fontsize=8,
+        fontweight='bold')
+
+# ── Rs2 (poly resistor, right) ──
+ax.add_patch(mpatches.FancyBboxPatch(
+    (22, 18), 8, 2, boxstyle='round,pad=0.2',
+    facecolor=c_res, alpha=0.4,
+    edgecolor=c_res, linewidth=1.5))
+ax.text(26, 19, '$R_{s2}$ (poly)',
+        ha='center', va='center', fontsize=8,
+        fontweight='bold')
+
+# ── Cs (MIM cap, center) ──
+ax.add_patch(mpatches.FancyBboxPatch(
+    (12, 18), 8, 3, boxstyle='round,pad=0.3',
+    facecolor=c_cap, alpha=0.3,
+    edgecolor=c_cap, linewidth=1.5))
+ax.text(16, 19.5, '$C_s$ (MIM)',
+        ha='center', va='center', fontsize=9,
+        fontweight='bold')
+
+# ── Rd1 (load resistor, left) ──
+ax.add_patch(mpatches.FancyBboxPatch(
+    (2, 23), 8, 2, boxstyle='round,pad=0.2',
+    facecolor=c_res, alpha=0.4,
+    edgecolor=c_res, linewidth=1.5))
+ax.text(6, 24, '$R_{d1}$ (poly)',
+        ha='center', va='center', fontsize=8,
+        fontweight='bold')
+
+# ── Rd2 (load resistor, right) ──
+ax.add_patch(mpatches.FancyBboxPatch(
+    (22, 23), 8, 2, boxstyle='round,pad=0.2',
+    facecolor=c_res, alpha=0.4,
+    edgecolor=c_res, linewidth=1.5))
+ax.text(26, 24, '$R_{d2}$ (poly)',
+        ha='center', va='center', fontsize=8,
+        fontweight='bold')
+
+# ── Metal1 routing (green lines) ──
+# M1 drain -> Rd1
+ax.annotate('', xy=(6, 23), xytext=(6, 15.5),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met1, lw=2.5))
+# M2 drain -> Rd2
+ax.annotate('', xy=(26, 23), xytext=(26, 15.5),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met1, lw=2.5))
+# M1 source -> Rs1
+ax.annotate('', xy=(6, 18), xytext=(6, 15.5),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met1, lw=2.5))
+# M2 source -> Rs2
+ax.annotate('', xy=(26, 18), xytext=(26, 15.5),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met1, lw=2.5))
+# Rs1 -> Cs
+ax.annotate('', xy=(12, 19), xytext=(10, 19),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met1, lw=2.5))
+# Rs2 -> Cs
+ax.annotate('', xy=(20, 19), xytext=(22, 19),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met1, lw=2.5))
+# Tail routing (M1 src -> Mt drain, M2 src -> Mt drain)
+ax.plot([6, 6, 16, 16], [10, 8, 8, 6],
+        color=c_met1, linewidth=2.5, linestyle='-')
+ax.plot([26, 26, 16, 16], [10, 8, 8, 6],
+        color=c_met1, linewidth=2.5, linestyle='-')
+
+# ── VDD rail (met2) ──
+ax.add_patch(mpatches.FancyBboxPatch(
+    (0, 26), 32, 1.5, boxstyle='round,pad=0.1',
+    facecolor=c_met2, alpha=0.3,
+    edgecolor=c_met2, linewidth=2))
+ax.text(16, 26.75, 'VDD Rail (Metal2)',
+        ha='center', va='center', fontsize=9,
+        fontweight='bold', color='#6c3483')
+# Rd1 -> VDD
+ax.annotate('', xy=(6, 26), xytext=(6, 25),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met2, lw=2))
+# Rd2 -> VDD
+ax.annotate('', xy=(26, 26), xytext=(26, 25),
+            arrowprops=dict(arrowstyle='-',
+            color=c_met2, lw=2))
+
+# ── GND rail (met1) ──
+ax.add_patch(mpatches.FancyBboxPatch(
+    (0, -1.5), 32, 1.2, boxstyle='round,pad=0.1',
+    facecolor='#7f8c8d', alpha=0.3,
+    edgecolor='#7f8c8d', linewidth=2))
+ax.text(16, -0.9, 'GND Rail (Metal1)',
+        ha='center', va='center', fontsize=9,
+        fontweight='bold', color='#2c3e50')
+ax.plot([16, 16], [1, -0.3],
+        color='#7f8c8d', linewidth=2.5)
+
+# ── Legend ──
+from matplotlib.lines import Line2D
+legend_elems = [
+    mpatches.Patch(facecolor=c_diff, alpha=0.3,
+                   edgecolor=c_diff,
+                   label='Diffusion (active)'),
+    Line2D([0], [0], color=c_poly, lw=2.5,
+           label='Polysilicon (gate)'),
+    mpatches.Patch(facecolor=c_res, alpha=0.4,
+                   edgecolor=c_res,
+                   label='Poly resistor'),
+    mpatches.Patch(facecolor=c_cap, alpha=0.3,
+                   edgecolor=c_cap,
+                   label='MIM capacitor'),
+    Line2D([0], [0], color=c_met1, lw=2.5,
+           label='Metal1 routing'),
+    mpatches.Patch(facecolor=c_met2, alpha=0.3,
+                   edgecolor=c_met2,
+                   label='Metal2 (VDD)'),
+    mpatches.Patch(facecolor='none',
+                   edgecolor=c_nwell,
+                   linestyle='--', lw=2,
+                   label='Guard ring'),
+]
+ax.legend(handles=legend_elems, loc='upper right',
+          fontsize=7, framealpha=0.9)
+
+ax.set_title('CTLE Layout Floorplan '
+             '(SKY130, 3 NMOS + Routing)',
+             fontsize=13, fontweight='bold', pad=10)
+ax.axis('off')
+plt.tight_layout()
+plt.savefig('ctle_layout.png', dpi=150,
+            bbox_inches='tight', facecolor='white')
+plt.show()
+print('Layout floorplan saved: ctle_layout.png')"""
 ))
 
 # ═══════════════════════════════════════════════════════
