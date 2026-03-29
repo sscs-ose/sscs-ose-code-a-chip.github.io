@@ -1,7 +1,7 @@
 # Adaptive CMOS Inverter Optimization
 
 ## Author
-Your Name
+Varkala Shashidhar
 
 ## Overview
 This project presents a data-driven optimization of CMOS inverter design using open-source tools.
