@@ -7,13 +7,13 @@
 
 ## Team
 
-| Name | Email | Role |
-|------|-------|------|
-| Balachandran Harini | 127004035@sastra.ac.in | RTL Design, Synthesis, Physical Design |
-| Rajeswari N | 127004202@sastra.ac.in | Verification, Simulation |
-| Deepthi D | 127180016@sastra.ac.in | Notebook, Documentation |
+| Name | Email | 
+|------|-------|
+| Balachandran Harini | 127004035@sastra.ac.in |
+| Rajeswari N | 127004202@sastra.ac.in | 
+| Deepthi D | 127180016@sastra.ac.in |
 
-**Institution:** SASTRA Deemed University, Thanjavur, India — 3rd Year B.Tech
+**Institution:** SASTRA Deemed University, Thanjavur, India 
 
 **Mentors:**  
 Dr. Prabakar T N (prabakarece@sastra.edu)  
@@ -57,7 +57,7 @@ Three architectural innovations are combined:
 |------|---------|---------|
 | Cadence Genus | 21.14-s082_1 | Logic synthesis |
 | Cadence Innovus | 20.14 | Place and route |
-| GSMC 90nm PDK | — | Standard cell library |
+| GSMC 90nm GPDK | — | Standard cell library |
 | Python | 3.x | Notebook simulation |
 | Jupyter Notebook | — | Interactive presentation |
 
