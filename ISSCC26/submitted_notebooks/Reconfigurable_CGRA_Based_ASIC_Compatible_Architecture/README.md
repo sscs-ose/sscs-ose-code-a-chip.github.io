@@ -196,12 +196,6 @@ which demonstrated the VTU concept on a 3-tap FIR filter. The CGRA fabric genera
 
 ---
 
-## License
-
-This project is licensed under the **Apache 2.0 License** — see the LICENSE file for details.
-
----
-
 ## Acknowledgements
 
 We thank the IEEE Solid-State Circuits Society for the Code-a-Chip Open-Source Ecosystem initiative, SkyWater Technology and Google for the open-source SKY130 PDK, and the OpenROAD and OpenLane communities for their invaluable open-source EDA infrastructure.
