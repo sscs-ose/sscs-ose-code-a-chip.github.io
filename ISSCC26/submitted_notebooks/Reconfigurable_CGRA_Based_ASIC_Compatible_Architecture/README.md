@@ -54,6 +54,8 @@ Row3:    ADD     MUL     ADD     FF      ADD     FF
 Row4:    MUL     ADD     FF      ADD     FF      MUL
 Row5:    ADD     MUL     SUB     DIV     FF      FF
 ```
+<img width="992" height="845" alt="image" src="https://github.com/user-attachments/assets/826208fc-b340-40a5-bba8-7c42187b0b2a" />
+
 
 **Routing:** 6 horizontal channels (HC0–HC5) and 6 vertical channels (VC0–VC5), each carrying 16 tracks of 4-bit width (64-bit bus). 25 switch blocks and 80+ connection boxes provide programmable inter-tile connectivity.
 
