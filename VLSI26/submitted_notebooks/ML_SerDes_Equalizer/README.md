@@ -1,4 +1,4 @@
-# Physics-Informed Bayesian Optimization for Analog SerDes Equalizer Design
+# Physics-Informed Gaussian Process for CTLE Optimization
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/VLSI26/submitted_notebooks/ML_SerDes_Equalizer/ML_SerDes_Equalizer.ipynb)
 
@@ -16,10 +16,6 @@ This notebook proposes **Physics-Informed Gaussian Process (PI-GP)** optimizatio
 
 3. **Multi-Fidelity PI-GP Pipeline** — Fast PI-GP surrogate with UCB acquisition (Stage 1) generates candidates refined by accurate BSIM4 SPICE simulation (Stage 2), outperforming SPICE-only optimization.
 
-4. **On-Chip Adaptive Equalization** — Trained PI-GP exported as a lightweight firmware lookup table (<4 KB SRAM) for real-time CTLE coefficient adaptation, bridging design-time optimization and silicon deployment.
-
-5. **Physical Design Flow** — Full layout → DRC → parasitic extraction (PEX) → post-layout simulation using Magic VLSI and SKY130 PDK, quantifying bandwidth degradation from real layout parasitics.
-
 ## Supporting Analysis
 
 - 4-algorithm benchmark (TPE, CMA-ES, Random, DE) with statistical robustness analysis
@@ -36,7 +32,7 @@ This notebook proposes **Physics-Informed Gaussian Process (PI-GP)** optimizatio
 - Multi-fidelity pipeline outperforms SPICE-only with same compute budget
 - Eye diagrams go from **completely closed** to **wide open** after ML optimization
 - Coefficients generalize across PVT corners
-- PI-GP inference takes <100 μs per prediction — firmware-deployable for real-time adaptation
+- PI-GP inference takes <100 μs per prediction
 
 ## Tools Used (All Open-Source)
 
@@ -48,7 +44,6 @@ This notebook proposes **Physics-Informed Gaussian Process (PI-GP)** optimizatio
 | scikit-learn | Gaussian Process surrogate, cross-validation |
 | Matplotlib | Visualization |
 | ngspice 40+ | Transistor-level CTLE simulation (BSIM4) |
-| Magic VLSI 8.3+ | Layout, DRC, parasitic extraction |
 
 ## References
 
@@ -61,7 +56,7 @@ This notebook proposes **Physics-Informed Gaussian Process (PI-GP)** optimizatio
 ## Running the Notebook
 
 ```bash
-pip install optuna numpy scipy matplotlib scikit-learn cmaes
+pip install -r requirements.txt
 ```
 
 Or click the "Open in Colab" badge above (recommended).
