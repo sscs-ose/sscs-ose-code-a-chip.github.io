@@ -1,0 +1,32 @@
+* StrongARM comparator template for SKY130 (derived from LTspice topology)
+* Verify node mapping against LTSPICE/StrongARM Comparator.asc before tapeout-level claims.
+*
+* Ports: INP INN OUTP OUTN CLK VDD VSS
+.subckt strongarm_sky130 INP INN OUTP OUTN CLK VDD VSS \
++ LMIN=0.18u WIN=10u WLATCHN=5u WLATCHP=10u WRESETI=4u WRESETO=3u WTAIL=8u
+
+* Internal dynamic nodes
+.nodeset V(XP)=0 V(XN)=0 V(NTAIL)=0
+
+* Reset PMOS network
+M19 OUTP CLK VDD VDD sky130_fd_pr__pfet_01v8 L=LMIN W=WRESETO
+M18 XN   CLK VDD VDD sky130_fd_pr__pfet_01v8 L=LMIN W=WRESETI
+M22 OUTN CLK VDD VDD sky130_fd_pr__pfet_01v8 L=LMIN W=WRESETO
+M21 XP   CLK VDD VDD sky130_fd_pr__pfet_01v8 L=LMIN W=WRESETI
+
+* PMOS cross-coupled latch load
+M17 XN OUTN VDD VDD sky130_fd_pr__pfet_01v8 L=LMIN W=WLATCHP
+M20 XP OUTP VDD VDD sky130_fd_pr__pfet_01v8 L=LMIN W=WLATCHP
+
+* NMOS input pair
+M14 XP INP NTAIL VSS sky130_fd_pr__nfet_01v8 L=LMIN W=WIN
+M13 XN INN NTAIL VSS sky130_fd_pr__nfet_01v8 L=LMIN W=WIN
+
+* NMOS cross-coupled regeneration pair
+M15 XP OUTN VSS VSS sky130_fd_pr__nfet_01v8 L=LMIN W=WLATCHN
+M12 XN OUTP VSS VSS sky130_fd_pr__nfet_01v8 L=LMIN W=WLATCHN
+
+* Tail transistor
+M16 NTAIL CLK VSS VSS sky130_fd_pr__nfet_01v8 L=LMIN W=WTAIL
+
+.ends strongarm_sky130
