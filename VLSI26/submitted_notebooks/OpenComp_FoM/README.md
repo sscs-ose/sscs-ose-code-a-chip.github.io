@@ -115,9 +115,23 @@ After execution, the notebook exports:
 - artifacts/sweep_mc.csv
 - artifacts/ranking.csv
 - artifacts/pareto.csv
+- artifacts/claim_evidence_matrix.csv
 - artifacts/summary.json
 - artifacts/plots/pareto_fronts.png
 - artifacts/plots/regeneration_dynamics.gif
+
+### 6.1 What Each Artifact Entails
+
+| Artifact | What it contains | Why it matters |
+|---|---|---|
+| `sweep_pvt.csv` | Full topology/size sweep across TT/SS/FF corners | Establishes cross-corner behavior, not nominal-only claims |
+| `sweep_mc.csv` | Monte Carlo samples for shortlisted candidates | Quantifies variation sensitivity and robustness |
+| `ranking.csv` | Aggregated metrics plus normalized unified score | Supports objective candidate selection |
+| `pareto.csv` | Non-dominated design points | Shows tradeoff frontier between delay/energy/noise |
+| `claim_evidence_matrix.csv` | Claim-to-artifact traceability table | Improves reviewer trust and auditability |
+| `summary.json` | Run metadata, weights, target specs, selected best point | Captures reproducible run context |
+| `plots/pareto_fronts.png` | Visual Pareto tradeoff plots | Makes design tradeoffs interpretable |
+| `plots/regeneration_dynamics.gif` | Regeneration behavior animation | Adds educational insight into comparator operation |
 
 ## 7. Reproducibility Checklist
 
@@ -136,3 +150,13 @@ This project is released under Apache License 2.0. See the `LICENSE` file in thi
 2. P. E. Allen and D. R. Holberg, CMOS Analog Circuit Design, Oxford University Press, 3rd ed.
 3. B. Goll and H. Zimmermann, "A Comparator With Reduced Delay Time in 65-nm CMOS for Supply Voltages Down to 0.65 V," IEEE Transactions on Circuits and Systems II.
 4. A. M. Abo and P. R. Gray, "A 1.5-V, 10-bit, 14.3-MS/s CMOS Pipeline Analog-to-Digital Converter," IEEE Journal of Solid-State Circuits.
+
+## 10. Notebook Conclusion (Data-Driven Inference)
+
+Based on generated artifacts, the notebook supports the following conclusions:
+
+1. A two-topology comparison under identical constraints reveals non-trivial tradeoffs; no single architecture dominates every objective simultaneously.
+2. Unified-score ranking is useful for decision making, but Pareto-front analysis remains necessary to avoid overfitting to a single weighted objective.
+3. Robustness metrics from PVT and Monte Carlo materially influence candidate quality; points that look strong at nominal may degrade under variation.
+4. The exported artifact set provides an auditable path from raw sweep results to final recommendation, improving reproducibility and reviewability.
+5. The current quick-mode flow is suitable for method demonstration; full ngspice plus SKY130 model validation is the final step for strongest hardware-backed claims.
