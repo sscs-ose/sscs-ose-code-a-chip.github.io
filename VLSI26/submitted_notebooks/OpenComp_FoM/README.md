@@ -19,6 +19,18 @@ It compares two topologies:
 
 The notebook evaluates tradeoffs among delay, decision energy, and input-referred noise, then ranks design points using PVT and Monte Carlo robustness.
 
+This notebook should be understood as a revision and extension of comparator design-study style flows in the open-source ecosystem, including OpenFASOC documentation and related comparator tapeout examples.
+It does not claim a new comparator topology.
+Instead, it contributes a reproducible comparison framework that emphasizes:
+
+- shared design-space exploration across two established comparator topologies,
+- transparent FoM ranking and Pareto analysis,
+- robustness evaluation under PVT and Monte Carlo variation,
+- educational regeneration visualization,
+- traceable artifact export for review and reuse.
+
+In short, the novelty is in the notebook-driven methodology, reproducibility, and cross-topology exploration rather than inventing a new comparator cell.
+
 ## 1. Functionality and Target Specifications
 
 This project targets early-stage comparator architecture and sizing selection for mixed-signal front-ends (for example, SAR ADC or sensing interfaces). The goal is not only to find one optimal point, but to map the design space and provide a reusable spec-to-sizing method.
@@ -53,17 +65,17 @@ The flow also reports Pareto fronts to avoid over-trusting a single scalar score
 
 ## 3. Example Circuit
 
-### A. StrongARM Latch Comparator (Reference Topology)
+### A. SKY130 StrongARM Latch Comparator (Reference Topology)
 
 The StrongARM topology is used as one of the reference dynamic comparator architectures in this notebook. During reset, internal nodes are precharged; during evaluation, tail current and regenerative positive feedback amplify the differential input and resolve a digital-level decision.
 
-![StrongARM Comparator Example](figures/strongarm.jpg)
+![SKY130 StrongARM Latch Comparator Example](figures/strongarm.jpg)
 
-### B. Double-Tail Dynamic Comparator (Reference Topology)
+### B. SKY130 Double-Tail Dynamic Comparator (Reference Topology)
 
 The double-tail architecture separates input and latch stages, which can improve operation at lower supply and reduce kickback/noise tradeoffs depending on sizing and loading.
 
-![Double-Tail Dynamic Comparator Example](figures/double-tail-dynamic-comparator.jpg)
+![SKY130 Double-Tail Dynamic Comparator Example](figures/double-tail-dynamic-comparator.jpg)
 
 ## 4. Notebook Workflow
 
@@ -133,7 +145,7 @@ After execution, the notebook exports:
 | `plots/pareto_fronts.png` | Visual Pareto tradeoff plots | Makes design tradeoffs interpretable |
 | `plots/regeneration_dynamics.gif` | Regeneration behavior animation | Adds educational insight into comparator operation |
 
-## 7. Reproducibility Checklist
+## 7. Reproducibility
 
 - Restart kernel and Run All completes without manual edits.
 - PVT corner definitions and MC run count are fixed in one config cell.
@@ -146,10 +158,14 @@ This project is released under Apache License 2.0. See the `LICENSE` file in thi
 
 ## 9. References (Journal and Design Background)
 
+StrongARM and Double-Tail comparator example topologies/results in this project are documented and adapted from OpenFASoC tapeout resources below.
+
 1. B. Razavi, Design of Analog CMOS Integrated Circuits, McGraw-Hill, 2001.
 2. P. E. Allen and D. R. Holberg, CMOS Analog Circuit Design, Oxford University Press, 3rd ed.
 3. B. Goll and H. Zimmermann, "A Comparator With Reduced Delay Time in 65-nm CMOS for Supply Voltages Down to 0.65 V," IEEE Transactions on Circuits and Systems II.
 4. A. M. Abo and P. R. Gray, "A 1.5-V, 10-bit, 14.3-MS/s CMOS Pipeline Analog-to-Digital Converter," IEEE Journal of Solid-State Circuits.
+5. OpenFASoC Tapeouts Repository: https://github.com/idea-fasoc/openfasoc-tapeouts/tree/main
+6. OpenFASoC Tapeouts Documentation: https://openfasoc.readthedocs.io/en/latest/tapeouts.html
 
 ## 10. Notebook Conclusion (Data-Driven Inference)
 
