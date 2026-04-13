@@ -160,9 +160,9 @@ class CRSAR(Block):
         # computed "unsettled" comparator input for next comparison
         # settling error is differential (half in +, half in -)
         self._comp_pos_unsettled = self._comp_pos + \
-            (next_comp_pos - self._comp_pos) * (1 - (0.5 * self.settling_error_pct / 100))
+            (next_comp_pos - self._comp_pos) * (1 - (1 * self.settling_error_pct / 100))
         self._comp_neg_unsettled = self._comp_neg + \
-            (next_comp_neg - self._comp_neg) * (1 - (0.5 * self.settling_error_pct / 100))
+            (next_comp_neg - self._comp_neg) * (1 - (1 * self.settling_error_pct / 100))
 
         # update comparator input
         self._comp_pos = next_comp_pos
