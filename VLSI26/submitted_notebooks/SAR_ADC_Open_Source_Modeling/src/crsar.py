@@ -158,7 +158,6 @@ class CRSAR(Block):
             (2 * self._comp_out - 1) * self.weights[bit_idx] * (self.vref/2)
 
         # computed "unsettled" comparator input for next comparison
-        # settling error is differential (half in +, half in -)
         self._comp_pos_unsettled = self._comp_pos + \
             (next_comp_pos - self._comp_pos) * (1 - (1 * self.settling_error_pct / 100))
         self._comp_neg_unsettled = self._comp_neg + \
