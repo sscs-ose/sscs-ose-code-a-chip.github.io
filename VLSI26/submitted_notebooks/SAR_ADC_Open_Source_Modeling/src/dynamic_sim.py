@@ -18,6 +18,7 @@ parser.add_argument("-wa", type=str, required=False, default=None, help="Path to
 parser.add_argument("-we", type=str, required=False, default=None, help="Path to estimated conversion weights (assumed to be in npy file)")
 parser.add_argument("-se", type=float, required=False, default=0, help="CDAC Settling Error in %")
 parser.add_argument("-cn", type=float, required=False, default=0, help="RMS Value of Input-Referred Comparator Noise")
+parser.add_argument("-sc", type=float, required=False, default=0, help="Total Sampling Capacitance (set to 0 for no kT/C noise simulation")
 
 args = parser.parse_args()
 
@@ -27,9 +28,11 @@ N = args.N
 M = args.M
 se = args.se
 cn = args.cn
+total_sampling_cap = args.sc
 weights_actual = np.load(args.wa) if args.wa is not None else None
 weights_estimated = np.load(args.we) if args.we is not None else None
 ndecisions = len(weights_actual) if args.wa is not None else n
+
 
 f_clk = 20e6
 T_clk = 1.0 / f_clk
@@ -47,9 +50,10 @@ samp_enable = Source(lambda t: 1)
 voff = Source(lambda t: 0)
 crsar = CRSAR(n_bits=n, vref=1.0, T=T_clk, tau=0, 
               weights=weights_actual, estimated_weights=weights_estimated,
-             settling_error_pct=se, comp_noise_rms=cn)
+             settling_error_pct=se, comp_noise_rms=cn, 
+              total_sampling_cap=total_sampling_cap)
 sub = Adder('+-')
-scope = Scope(sampling_period=(T_clk)/(OVERSAMPLING_RATIO*ndecisions), labels=['vout', 'vindiff', 'done', 'dout'])
+scope = Scope(sampling_period=(T_clk)/(OVERSAMPLING_RATIO*(ndecisions+2)), labels=['vout', 'vindiff', 'done', 'dout'])
 
 # Connections between the blocks
 connections = [
