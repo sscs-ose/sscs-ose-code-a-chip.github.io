@@ -264,6 +264,8 @@ def _infer_task_type(task: str) -> str:
     low = task.lower()
     if "telescopic" in low:
         return "TelescopicOTA"
+    if "folded cascode" in low:
+        return "FoldedCascodeOTA"
     if "ota" in low or "operational transconductance" in low:
         return "OTA"
     if "current mirror" in low:
