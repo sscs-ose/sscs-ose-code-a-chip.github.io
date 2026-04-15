@@ -8,9 +8,9 @@ from pathsim.solvers import RKBS32
 import argparse
 from crsar import CRSARCtrlODC
 
-parser = argparse.ArgumentParser(description="FIXME")
+parser = argparse.ArgumentParser(description="Basic Demo of Offset Double Conversion Controller")
 
-parser.add_argument("-a", type=float, required=True, help="Analog Offset")
+parser.add_argument("-a", type=float, required=True, help="Differential Analog Offset in Volts")
 parser.add_argument("-o", type=str, required=True, help="Output file path")
 
 args = parser.parse_args()

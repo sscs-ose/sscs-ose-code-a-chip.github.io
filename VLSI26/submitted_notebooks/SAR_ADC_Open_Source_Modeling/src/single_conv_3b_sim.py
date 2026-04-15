@@ -9,7 +9,7 @@ from pathsim.solvers import RKBS32
 from crsar import CRSAR
 import argparse
 
-parser = argparse.ArgumentParser(description="Accept n and output file path")
+parser = argparse.ArgumentParser(description="Basic demo simulation showing 3-bit SAR conversion behavior with static input")
 
 parser.add_argument("-o", type=str, required=True, help="Output file path")
 parser.add_argument("-se", type=float, required=False, default=0, help="CDAC Settling Error in %")

@@ -35,13 +35,13 @@ def _load_scalar(val):
         return float(np.load(val))
     return float(val)
 
-parser = argparse.ArgumentParser(description="FIXME")
+parser = argparse.ArgumentParser(description="Trains ADC Weights/ODC Offset Voltage from static data file using ODC LMS Update Equations")
 
 parser.add_argument("-c", type=str, required=True, help="Config file path")
 parser.add_argument("-d", type=str, required=True, help="Path to data file")
-parser.add_argument("-o", type=str, required=True, help="Path to output PNG file")
-parser.add_argument("-mw", type=float, required=False, default=1e-4, help="FIXME")
-parser.add_argument("-mo", type=float, required=False, default=1e-3, help="FIXME")
+parser.add_argument("-o", type=str, required=True, help="Path to output NPZ file")
+parser.add_argument("-mw", type=float, required=False, default=1e-4, help="Learning rate for weights")
+parser.add_argument("-mo", type=float, required=False, default=1e-3, help="Learning rate for ODC offset")
 parser.add_argument("-nb", type=int, required=False, default=int(1e4), help="Number of LMS Blocks")
 
 args = parser.parse_args()

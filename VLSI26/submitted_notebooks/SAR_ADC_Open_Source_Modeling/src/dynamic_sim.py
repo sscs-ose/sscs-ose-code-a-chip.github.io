@@ -8,7 +8,7 @@ from pathsim.solvers import RKBS32
 from crsar import CRSAR
 import argparse
 
-parser = argparse.ArgumentParser(description="Accept n and output file path")
+parser = argparse.ArgumentParser(description="Parameterized Simulation of CRSAR with Sine Wave Input")
 
 parser.add_argument("-n", type=int, required=True, help="ADC resolution")
 parser.add_argument("-N", type=int, required=True, help="FFT Size")
