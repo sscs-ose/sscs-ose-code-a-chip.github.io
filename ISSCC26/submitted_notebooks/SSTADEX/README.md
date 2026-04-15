@@ -1,5 +1,6 @@
 # SSTADEX - Structured and Systematic Analog Design Exploration
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lild4d4/sscs-ose-code-a-chip.github.io/blob/main/ISSCC26/submitted_notebooks/SSTADEX/SSTADEX.ipynb)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 SSTADEX is a structured workflow for analog design exploration based on symbolic analysis, lookup-table-driven device characterization, reusable primitive abstractions, and hierarchical macromodel composition.
