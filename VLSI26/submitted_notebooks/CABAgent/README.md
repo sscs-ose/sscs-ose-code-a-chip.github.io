@@ -18,7 +18,7 @@ While it is possible to have a stand-alone notebook, we have decided to split up
 ├───.conda
 ├───.vscode
 ├───designs
-│   ├───OTA_5T
+│   ├───COMP
 │   |   └───SKY130
 |   │       ├───inputs
 |   │       ├───runs
@@ -49,7 +49,7 @@ While it is possible to have a stand-alone notebook, we have decided to split up
 │   |   ├───visualizing.py
 |   |   └───workspace.py
 │   ├───dconfigs
-│   |   ├───OTA_5T.yaml
+│   |   ├───COMP.yaml
 |   |   └───...
 │   └───design_pipeline.py
 ├───.env
