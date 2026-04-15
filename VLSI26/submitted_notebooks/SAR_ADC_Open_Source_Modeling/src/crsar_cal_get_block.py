@@ -53,7 +53,7 @@ actual_weights    = _load_array(_cfg["weights"]["actual"])
 # Digital offset parameters — actual offset drives the ODC analog injection
 actual_offset_lsb    = _load_scalar(_cfg["offset"]["actual"])
 estimated_offset_lsb = _load_scalar(_cfg["offset"]["estimated"])
-analog_offset_volts  = (vref / 2**n) * actual_offset_lsb
+analog_offset_volts  = (2*vref / 2**n) * actual_offset_lsb
 
 # simulation config
 N                      = _cfg["simulation"]["n_fft"]
@@ -153,6 +153,7 @@ dout_raw_offsetn = dataset[4]
 transitions = np.where(np.diff(samp_en) == 1)[0] + 1
 
 sampled_dict = {}
+sampled_dict["time"] = t[transitions][STARTUP_CYCLES:STARTUP_CYCLES+N]
 sampled_dict["dout_offsetp"] = dout_offsetp[transitions][STARTUP_CYCLES:STARTUP_CYCLES+N]
 sampled_dict["dout_offsetn"] = dout_offsetn[transitions][STARTUP_CYCLES:STARTUP_CYCLES+N]
 sampled_dict["dout_raw_offsetp"] = dout_raw_offsetp[transitions][STARTUP_CYCLES:STARTUP_CYCLES+N]

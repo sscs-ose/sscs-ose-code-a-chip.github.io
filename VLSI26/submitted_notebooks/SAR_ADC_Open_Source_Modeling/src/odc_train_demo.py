@@ -89,7 +89,7 @@ for i in range(NUM_ITERATIONS):
     dout_offsetp = estimate_conv_result(current_weights, raw_p_bits, n_bits)
     dout_offsetn = estimate_conv_result(current_weights, raw_n_bits, n_bits)
 
-    conv_error = dout_offsetp - dout_offsetn - current_digital_offset_lsb
+    conv_error = dout_offsetp - dout_offsetn - 2*current_digital_offset_lsb
 
     bit_error = raw_p_bits.astype('float') - raw_n_bits.astype('float')
     grad_w = np.mean(conv_error[:, None] * bit_error, axis=0)
