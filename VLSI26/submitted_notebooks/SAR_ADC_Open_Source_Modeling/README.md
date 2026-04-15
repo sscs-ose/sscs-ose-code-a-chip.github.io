@@ -4,7 +4,7 @@ Uses open-source dynamical system simulation package [PathSim](https://github.co
 
 The SAR ADC model includes common error sources including CDAC weight mismatch, kT/C sampling noise, comparator noise, and CDAC settling error. 
 
-Also, the notebook uses the SAR ADC model to simulate a published background calibration algorithm (offset double conversion - see [Liu/Huang/Chiu Publication](https://ieeexplore.ieee.org/document/5999734). 
+Also, the notebook uses the SAR ADC model to simulate a published background calibration algorithm (offset double conversion - see [Liu/Huang/Chiu Publication](https://ieeexplore.ieee.org/document/5999734)). 
 
 ## Instructions to Run Notebook
 
