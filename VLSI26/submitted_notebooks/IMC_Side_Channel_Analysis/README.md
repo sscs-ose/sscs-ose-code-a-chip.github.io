@@ -2,7 +2,7 @@
 ### IEEE SSCS Code-a-Chip — VLSI 2026 Submission
 
 **Authors:** Tanay Das, Udisha Singh  
-**Affiliation:** IIT Gandhinagar, AMD India  
+**Affiliation:** AMD India , IIT Gandhinagar
 **License:** Apache 2.0  
 
 ---
