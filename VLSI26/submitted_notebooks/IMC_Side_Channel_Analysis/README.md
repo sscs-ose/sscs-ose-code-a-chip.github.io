@@ -120,4 +120,5 @@ IEEE VLSI 2026
 
 ## 📬 Contact
 
-taanayd@gmail.com
+Tanay Das: taanayd@gmail.com
+Udisha Singh: udisha.singh@iitgn.ac.in
