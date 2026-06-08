@@ -19,11 +19,13 @@
 
 | Name | Affiliation | IEEE | SSCS | Contact |
 |:--|:--|:--:|:--:|:--|
-| **Nithin P** | B.Tech, VTU | Yes | Yes | [nithinpurushothama@gmail.com](mailto:nithinpurushothama@gmail.com) |
+| **Nithin P** | IIT Gandhinagar | Yes | Yes | [nithinpurushothama@gmail.com](mailto:nithinpurushothama@gmail.com) |
 | **Pramoda S R** | B.Tech, VTU | No | No | [pramoda9.2.2004@gmail.com](mailto:pramoda9.2.2004@gmail.com) |
-| **Praveen Kumar Venkatachala** | PhD, Oregon State University | Yes | Yes | [vpravin.8@gmail.com](mailto:vpravin.8@gmail.com) |
-| **Runpeng Gao** | PhD, Oregon State University | Yes | Yes | [rppgao@gmail.com](mailto:rppgao@gmail.com) |
 | **S Suyajnaa Jagannath Gowda** | B.Tech, VTU | No | No | [suyajnaa@gmail.com](mailto:suyajnaa@gmail.com) |
+| **Runpeng Gao** | PhD, Oregon State University | Yes | Yes | [rppgao@gmail.com](mailto:rppgao@gmail.com) |
+| **Praveen Kumar Venkatachala** | PhD, Oregon State University | Yes | Yes | [vpravin.8@gmail.com](mailto:vpravin.8@gmail.com) |
+| **Prof. Madhav K Pathak** | Asst Professor, Dept of Electrical Engineering, IIT Gandhinagar  | Yes | Yes | [madhav.pathak@iitgn.ac.in](mailto:madhav.pathak@iitgn.ac.in) |
+
 
 ---
 
