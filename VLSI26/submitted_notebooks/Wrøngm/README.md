@@ -15,7 +15,7 @@
 
 ---
 
-## 👥 Team
+## Team
 
 <table>
   <thead>
