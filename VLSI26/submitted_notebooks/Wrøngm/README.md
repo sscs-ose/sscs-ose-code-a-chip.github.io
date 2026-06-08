@@ -15,16 +15,63 @@
 
 ---
 
-## Team
+## 👥 Team
 
-| Name | Affiliation | IEEE | SSCS | Contact |
-|:--|:--|:--:|:--:|:--|
-| **Nithin P** | IIT Gandhinagar | Yes | Yes | [nithinpurushothama@gmail.com](mailto:nithinpurushothama@gmail.com) |
-| **Pramoda S R** | B.Tech, VTU | No | No | [pramoda9.2.2004@gmail.com](mailto:pramoda9.2.2004@gmail.com) |
-| **S Suyajnaa Jagannath Gowda** | B.Tech, VTU | No | No | [suyajnaa@gmail.com](mailto:suyajnaa@gmail.com) |
-| **Runpeng Gao** | PhD, Oregon State University | Yes | Yes | [rppgao@gmail.com](mailto:rppgao@gmail.com) |
-| **Praveen Kumar Venkatachala** | PhD, Oregon State University | Yes | Yes | [vpravin.8@gmail.com](mailto:vpravin.8@gmail.com) |
-| **Prof. Madhav K Pathak** | Asst Professor, Dept of Electrical Engineering, IIT Gandhinagar  | Yes | Yes | [madhav.pathak@iitgn.ac.in](mailto:madhav.pathak@iitgn.ac.in) |
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Affiliation</th>
+      <th align="center">IEEE</th>
+      <th align="center">SSCS</th>
+      <th>Contact</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Nithin P</strong></td>
+      <td>IIT Gandhinagar</td>
+      <td align="center">Yes</td>
+      <td align="center">Yes</td>
+      <td><a href="mailto:nithinpurushothama@gmail.com">nithinpurushothama@gmail.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>Pramoda S R</strong></td>
+      <td>B.Tech, VTU</td>
+      <td align="center">—</td>
+      <td align="center">—</td>
+      <td><a href="mailto:pramoda9.2.2004@gmail.com">pramoda9.2.2004@gmail.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>S Suyajnaa Jagannath Gowda</strong></td>
+      <td>B.Tech, VTU</td>
+      <td align="center">—</td>
+      <td align="center">—</td>
+      <td><a href="mailto:suyajnaa@gmail.com">suyajnaa@gmail.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>Runpeng Gao</strong></td>
+      <td>PhD, Oregon State University</td>
+      <td align="center">Yes</td>
+      <td align="center">Yes</td>
+      <td><a href="mailto:rppgao@gmail.com">rppgao@gmail.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>Praveen Kumar Venkatachala</strong></td>
+      <td>PhD, Oregon State University</td>
+      <td align="center">Yes</td>
+      <td align="center">Yes</td>
+      <td><a href="mailto:vpravin.8@gmail.com">vpravin.8@gmail.com</a></td>
+    </tr>
+    <tr style="background-color: #f0f0f0;">
+      <td><strong>🎓 Prof. Madhav K Pathak</strong></td>
+      <td>Asst. Professor, EE Dept, IIT Gandhinagar</td>
+      <td align="center">Yes</td>
+      <td align="center">Yes</td>
+      <td><a href="mailto:madhav.pathak@iitgn.ac.in">madhav.pathak@iitgn.ac.in</a></td>
+    </tr>
+  </tbody>
+</table>
 
 
 ---
