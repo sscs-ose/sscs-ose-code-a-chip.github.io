@@ -64,7 +64,7 @@
       <td><a href="mailto:vpravin.8@gmail.com">vpravin.8@gmail.com</a></td>
     </tr>
     <tr style="background-color: #f0f0f0;">
-      <td><strong>🎓 Prof. Madhav K Pathak</strong></td>
+      <td><strong>Prof. Madhav K Pathak</strong></td>
       <td>Asst. Professor, EE Dept, IIT Gandhinagar</td>
       <td align="center">Yes</td>
       <td align="center">Yes</td>
