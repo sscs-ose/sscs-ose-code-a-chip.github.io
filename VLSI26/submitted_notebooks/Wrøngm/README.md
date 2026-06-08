@@ -80,7 +80,7 @@
 
 ### Option 1 - Google Colab (Recommended)
 
-The Reviwers are highly recommended to use the Colab version of this work. This doesnt require any setup.
+The reviwers are highly recommended to use the Colab version of this work. This doesn't require any setup.
 
 ---
 **Google Colab Link**: https://colab.research.google.com/drive/1q6r7tg8RoyLBaMS3b7EONwkPCBzEM2c1?usp=sharing
