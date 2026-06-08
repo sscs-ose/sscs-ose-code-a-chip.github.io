@@ -196,7 +196,7 @@ A head-to-head comparison with the $g_m/I_D$ methodology confirms that the $R_{o
 <tr>
   <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">Design entry stage</td>
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;">Pre-simulation</td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">Pre-simulation<br><small><i>Partial - no large-signal info</i></small></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">Pre-simulation<br><small><i>Partial — no large-signal info</i></small></td>
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">Requires full transient simulation per iteration</td>
 </tr>
 
@@ -207,7 +207,7 @@ A head-to-head comparison with the $g_m/I_D$ methodology confirms that the $R_{o
   <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">Non-linear (large-signal / RC) settling characterized</td>
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/><br><small><i>Via $R_{on}$ in LUT; $\tau_{ls} = R_{on}C_L$</i></small></td>
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/><br><small><i>$R_{on}$ absent from $g_m/I_D$ framework</i></small></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/><br><small><i>Acknowledged as "not practical" [1]†</i></small></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/><br><small><i>Acknowledged as "not practical" [4]†</i></small></td>
 </tr>
 
 <tr>
@@ -275,7 +275,7 @@ A head-to-head comparison with the $g_m/I_D$ methodology confirms that the $R_{o
 <tr>
   <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">Subsumes $g_m/I_D$ methodology</td>
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/><br><small><i>$g_m/I_D$ readable from $g_m/I_D$ vs $R_{on}/g_m$ plot; reverse not possible</i></small></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">-</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">—</td>
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/></td>
 </tr>
 
@@ -316,52 +316,61 @@ A head-to-head comparison with the $g_m/I_D$ methodology confirms that the $R_{o
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/><br><small><i>New Spectre LUT per node</i></small></td>
   <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/><br><small><i>Full optimizer rerun needed; 180 nm fails power target by 13×**</i></small></td>
 </tr>
-
 <!-- ── VI ── -->
-<tr><td colspan="4" style="background:#000; color:#fff; font-weight:bold; font-size:8.5pt; letter-spacing:.06em; padding:3px 8px; max-width:none;">VI. &nbsp;DESIGN EXAMPLE RESULTS (IBA, T<sub>settle</sub> = 250 ns, UGB = 9.55 MHz, C<sub>L,eff</sub> = 667 fF, IHP SG13G2 130 nm)</td></tr>
+<tr><td colspan="4" style="background:#000; color:#fff; font-weight:bold; font-size:8.5pt; letter-spacing:.06em; padding:3px 8px; max-width:none;">VI. &nbsp;DESIGN EXAMPLE RESULTS (IBA, T<sub>settle</sub> = 250 ns, UGB = 9.55 MHz (60 Mrad/s), C<sub>L,eff</sub> = 667 fF, IHP SG13G2 130 nm)</td></tr>
 
 <tr>
-  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">$G_m$ target met (9.55 MHz BW)</td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/> $\approx 40\,\mu\text{S}$</td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/> $\approx 40\,\mu\text{S}$</td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/> 15-bit ENOB</td>
+  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd;">$G_m$ target met (UGB = 9.55 MHz)</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/> $\approx 40\,\mu\text{S}$</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/> $\approx 40\,\mu\text{S}$</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/> 15-bit ENOB</td>
 </tr>
 
 <tr>
-  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">$R_{on}$ known before transient simulation</td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/><br><small><i>8 kΩ unit; 2 kΩ after ×4 multiplier</i></small></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/><br><small><i>Post-simulation discovery only</i></small></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/></td>
+  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd;">$I_{peak}$ range</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/><br><small><i> 14 $\mu$A(positive edge), -13.86 $\mu$A(negative edge)</i></small></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/></td>
 </tr>
 
 <tr>
-  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">$V_{DZN}$ (NMOS deadzone) pre-simulation</td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/><br><small><i>FF: 0.614 V | TT: 0.658 V | SS: 0.700 V</i></small></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/></td>
+  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd;">$R_{on}$ known before transient simulation</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/><br><small><i>4 kΩ unit; 1 kΩ after ×4 multiplier</i></small></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/><br><small><i>Post-simulation discovery only</i></small></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/></td>
 </tr>
 
 <tr>
-  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">$V_{DZP}$ (PMOS deadzone) pre-simulation</td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/><br><small><i>FF: 1.070 V | TT: 1.010 V | SS: 0.959 V</i></small></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/></td>
-  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/></td>
+  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd;">$V_{DZN}$ (NMOS deadzone) pre-simulation</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/><br><small><i>FF: 0.355 V | TT: 0.390 V | SS: 0.425 V</i></small></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/></td>
 </tr>
 
 <tr>
-  <td style="text-align:left; padding:5px 7px; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;">Extra transient sims needed to obtain $V_{DZ}$ and $R_{on}$</td>
-  <td style="text-align:center; padding:5px 7px; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22" height="22"/> <b>Zero</b></td>
-  <td style="text-align:center; padding:5px 7px; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/><br><small><i>Multiple corner sweeps required</i></small></td>
-  <td style="text-align:center; padding:5px 7px; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; white-space:normal; max-width:0;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22" height="22"/><br><small><i>Full optimizer run per corner</i></small></td>
+  <td style="text-align:left; padding:5px 7px; border-bottom:0.5px solid #ddd;">$V_{DZP}$ (PMOS deadzone) pre-simulation</td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/><br><small><i>FF: 0.970 V | TT: 1.110 V | SS: 1.204 V</i></small></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/></td>
+  <td style="text-align:center; padding:5px 7px; border-bottom:0.5px solid #ddd;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/></td>
+</tr>
+
+<tr>
+  <td style="text-align:left; padding:5px 7px;">Extra transient sims needed to obtain $V_{DZ}$ and $R_{on}$</td>
+  <td style="text-align:center; padding:5px 7px; background:#fafafa;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/happy.svg" width="22"/> <b>Zero</b></td>
+  <td style="text-align:center; padding:5px 7px;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/><br><small><i>Multiple corner sweeps required</i></small></td>
+  <td style="text-align:center; padding:5px 7px;"><img src="https://raw.githubusercontent.com/chennakeshavadasa/gmid_IHP130/refs/heads/main/Plots_Images/Notebook_Figs/sad.svg" width="22"/><br><small><i>Full optimizer run per corner</i></small></td>
 </tr>
 
 </tbody>
 </table>
 
-<div style="font-size:8pt; line-height:1.7; border-top:0.75px solid #000; margin-top:5px; padding-top:4px; word-break:break-word; overflow-wrap:anywhere;">
+<div style="font-size:8pt; line-height:1.7; border-top:0.75px solid #000; margin-top:5px; padding-top:4px;">
+Pre-simulation $V_{bias}$ predictions were within <b>&plusmn;75 mV</b> of post-simulation values; $I_{peak}$ predicted within ~15%.
+</div>
+
 <p>† J. Conrad <i>et al.</i>: <i>"Unfortunately, Section II-B is not really practical for designing a RAMP… This makes a design-by-equation cumbersome and not realizable."</i> [TCAS-I 2020, Sec. II-C]</p>
 <p>‡ J. Conrad <i>et al.</i>: <i>"PVT variations are not encountered during the circuit optimization, because this would require many transient simulations to evaluate one iteration of the optimizer."</i> [TCAS-I 2020, Sec. V-E]</p>
-<p>§ Deadzone bias values read from the $V_{bias}$ vs. $\log(R_{on}/g_m)$ LUT plot at $R_{on}/g_m = 125 \times 10^6$, $I_{bias} = 1\,\mu$A.</p>
+<p>§ Deadzone bias values read from the $V_{bias}$ vs. $\log(R_{on}/g_m)$ LUT plot at $R_{on}/g_m = 50 \times 10^6$ (per device, post-multiplier), $I_{bias} = 0.5\,\mu$A (unit cell), $I_{bias} = 2\,\mu$A (Overall IBA).</p>
 <p>¶ J. Conrad <i>et al.</i>: <i>"the optimizer goal for the accuracy was readjusted ×4 smaller, i.e. 0.25 for the cost function."</i> [TCAS-I 2020, Sec. IV-B.3]</p>
 <p>** J. Conrad <i>et al.</i>, Table II: 180 nm power cost function = 12.99 (target: 1.0), failing the power constraint by 13×.</p>
 <p style="margin-top:6px;">
@@ -370,6 +379,8 @@ A head-to-head comparison with the $g_m/I_D$ methodology confirms that the $R_{o
 </p>
 </div>
 </div>
+
+---
 
 
 
