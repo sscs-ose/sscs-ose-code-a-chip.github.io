@@ -25,7 +25,6 @@
 | **Runpeng Gao** | PhD, Oregon State University | Yes | Yes | [rppgao@gmail.com](mailto:rppgao@gmail.com) |
 | **S Suyajnaa Jagannath Gowda** | B.Tech, VTU | No | No | [suyajnaa@gmail.com](mailto:suyajnaa@gmail.com) |
 
-Vpravin.8@gmail.com
 ---
 
 ## Running the Notebook
@@ -35,7 +34,7 @@ Vpravin.8@gmail.com
 The Reviwers are highly recommended to use the Colab version of this work. This doesnt require any setup.
 
 ---
-**Google Colab Link(Need to change before final submission)**: https://colab.research.google.com/drive/1q6r7tg8RoyLBaMS3b7EONwkPCBzEM2c1?usp=sharing
+**Google Colab Link**: https://colab.research.google.com/drive/1q6r7tg8RoyLBaMS3b7EONwkPCBzEM2c1?usp=sharing
 
 ---
 
