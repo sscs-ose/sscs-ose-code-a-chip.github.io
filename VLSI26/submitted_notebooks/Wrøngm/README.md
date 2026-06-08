@@ -124,7 +124,7 @@ If not using Colab, update `data_path` in **Cell 27** to point to your local CSV
 
 ## Abstract
 
-This work presents an $R_{on}/g_m$-based design methodology for inverter-based dynamic amplifiers (IBA), addressing a fundamental gap in existing approaches where the large-signal RC settling phase governed by the final-stage device on-resistance $R_{on}$ remains uncharacterised until post-simulation.
+This work presents an $R_{on}/g_m$-based design methodology for inverter-based dynamic amplifiers (IBAs), addressing a fundamental gap in existing approaches where the large-signal RC settling phase governed by the final-stage device on-resistance $R_{on}$ remains uncharacterised until post-simulation.
 
 Unlike the conventional $g_m/I_D$ methodology, which targets only the small-signal transconductance, the proposed approach simultaneously co-designs both settling phases through pre-characterised device look-up tables (LUTs) derived from parametric SPICE simulations in the IHP SG13G2 130 nm BiCMOS process. These LUTs capture $R_{on}/g_m$ as a function of device geometry, bias, and process corner, making worst-case corner behaviour and valid bias deadzone boundaries directly readable at the design entry stage without iterative simulation.
 
@@ -149,7 +149,7 @@ A head-to-head comparison with the $g_m/I_D$ methodology confirms that the $R_{o
    - 3.6 Step 5 - Simulation Configuration
    - 3.7 Step 6 - Run All 15 Simulations
 4. Design Plots for the Ron/gm Methodology
-   - 4.1 $V_{bias}$ vs log($R_{on}$/$G_m$)
+   - 4.1 $V_{bias}$ vs log($R_{on}$/$g_m$)
    - 4.2 $V_{bias}$ vs Width
    - 4.3 log($I_{peak}$) vs log($R_{on}/g_m$)
    - 4.4 $g_{m,bias}$ vs log($R_{on}/g_m$)
