@@ -381,10 +381,6 @@ Pre-simulation $V_{bias}$ predictions were within <b>&plusmn;75 mV</b> of post-s
 </div>
 
 ---
-
-
-
----
 ## References
 ---
 
