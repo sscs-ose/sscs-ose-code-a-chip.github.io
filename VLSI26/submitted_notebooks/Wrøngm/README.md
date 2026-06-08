@@ -381,8 +381,9 @@ Pre-simulation $V_{bias}$ predictions were within <b>&plusmn;75 mV</b> of post-s
 </div>
 
 ---
+
 ## References
----
+
 
 [1] B. Hershberg, S. Weaver, K. Sobue, S. Takeuchi, K. Hamashita and U. -K. Moon, "Ring amplifiers for switched-capacitor circuits," 2012 IEEE International Solid-State Circuits Conference, San Francisco, CA, USA, 2012, pp. 460-462, doi: [10.1109/ISSCC.2012.6177090](https://doi.org/10.1109/ISSCC.2012.6177090).
 
