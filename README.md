@@ -1,5 +1,14 @@
 ## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [VLSI'26](https://www.vlsisymposium.org/)
 
+**List of Award Winners**
+
+| Name                                                |  Affiliation                                                                     | Notebook Title                                                          |
+| ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Tanay Das, Udisha Singh                             | IIT Gandhinagar, AMD India                                                       | Power Side-Channel Vulnerability in Analog IMC Arrays                   |
+| Jinhai Hu, Jiageng Wang, Xinzhe Xie, Zhixuan Bao, Wang Ling Goh, Xiaoli Li, Xinrun Wang, Xun Xu, Zhuoyi Lin, Yuan Gao                 | Institute of Microelectronics, A\*STAR, Nanyang Technological University, Singapore University of Technology and Design, Singapore Management University, Institute for Infocomm Research, A\*STAR         | CABAgent: A Comprehensive Layout-Aware Analog Benchmark Generation Framework Driven by Self-Evolving LLM Agents for Analog Circuit Design Automation |
+| Nithin P, Pramoda S R, Praveen Kumar Venkatachala, Runpeng Gao, S Suyajnaa Jagannath Gowda | VTU, Oregon State University | Ron/gm Based Design Methodology for Dynamic Amplifiers |
+
+
 ***Note: Many thanks everyone for your participation! We recommend to resubmit your Notebooks to the next code-a-chip Notebook competition with revisions. We plan to send you a feedback from our reviewers. Stay tuned!***
 
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
