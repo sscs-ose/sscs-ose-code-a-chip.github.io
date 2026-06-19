@@ -6,7 +6,7 @@
 | ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | Tanay Das, Udisha Singh                             | IIT Gandhinagar, AMD India                                                       | Power Side-Channel Vulnerability in Analog IMC Arrays                   |
 | Jinhai Hu, Jiageng Wang, Xinzhe Xie, Zhixuan Bao, Wang Ling Goh, Xiaoli Li, Xinrun Wang, Xun Xu, Zhuoyi Lin, Yuan Gao                 | Institute of Microelectronics, A\*STAR, Nanyang Technological University, Singapore University of Technology and Design, Singapore Management University, Institute for Infocomm Research, A\*STAR         | CABAgent: A Comprehensive Layout-Aware Analog Benchmark Generation Framework Driven by Self-Evolving LLM Agents for Analog Circuit Design Automation |
-| Nithin P, Pramoda S R, Praveen Kumar Venkatachala, Runpeng Gao, S Suyajnaa Jagannath Gowda | VTU, Oregon State University | Ron/gm Based Design Methodology for Dynamic Amplifiers |
+| Nithin P, Pramoda S R, Praveen Kumar Venkatachala, Runpeng Gao, S Suyajnaa Jagannath Gowda, Madhav K. Pathak | VTU, Oregon State University, IIT Gandhinagar | Ron/gm Based Design Methodology for Dynamic Amplifiers |
 
 
 ***Note: Many thanks everyone for your participation! We recommend to resubmit your Notebooks to the next code-a-chip Notebook competition with revisions. We plan to send you a feedback from our reviewers. Stay tuned!***
@@ -60,6 +60,7 @@
 
 ## Contact
 - Akira Tsuchiya (a_tsuchiya@ieee.org)
+- Muhammed Luqman Jukaku (Contact@mljukaku.com)
 - Mehdi Saligane (mehdi_saligane@brown.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
 - You can join [Code-a-Chip](https://matrix.to/#/#Code-a-Chip:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
