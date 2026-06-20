@@ -1,0 +1,45 @@
+# Circuit-design configuration (OTA_TC)
+
+design:
+  name:       OTA_TC                          # canonical design folder name
+  circuit:    telescopic_ota                  # schematic name
+  pin_order:  VDD VSS VIN VIP VCN VCP VOUT IB
+  top_module: TELESCOPIC_OTA_0
+
+paths:
+  root: designs/OTA_TC/${PDK}     # convenience root for this design+PDK
+
+inputs:
+  netlist_file: ${paths.root}/inputs/ckt_netlist.spice
+  param_file:   ${paths.root}/inputs/ckt_param.spice
+  const_file:   ${paths.root}/inputs/constraints.json
+  tb_file:      ${paths.root}/inputs/testbench.spice
+
+align:
+  input_dir:  ${paths.root}/runs/align/0_netlist/
+  sky130_dir: Layout-ALIGN/pdks/SKY130_PDK/
+  output_dir: ${paths.root}/runs/align/
+  gds_file:   ${paths.root}/runs/align/TELESCOPIC_OTA_0.gds
+
+klayout:
+  sky130_lydrc: ${PDK_ROOT}/sky130A/libs.tech/klayout/drc/sky130A.lydrc
+  work_dir:     ${paths.root}/runs/klayout/
+
+magic:
+  sky130_magicrc:   ${CAD_ROOT}/magic/sys/sky130A.magicrc
+  ext_tcl_file:     src/cabgen/extract_mag.tcl
+  work_dir:         ${paths.root}/runs/magic/
+
+netgen:
+  layout_spice_file:     ${paths.root}/runs/magic/TELESCOPIC_OTA_0_lvs.spice
+  schematic_spice_file:  ${paths.root}/runs/netgen/telescopic_ota_netgen.spice
+  sky130_setup_tcl:      ${PDK_ROOT}/sky130A/libs.tech/netgen/sky130A_setup.tcl
+  work_dir:              ${paths.root}/runs/netgen/
+
+ngspice:
+  presim_file:  ${paths.root}/runs/ngspice/telescopic_ota_presim.spice
+  postsim_file: ${paths.root}/runs/ngspice/telescopic_ota_postsim.spice
+  work_dir:     ${paths.root}/runs/ngspice/
+
+results:
+  work_dir: ${paths.root}/results/

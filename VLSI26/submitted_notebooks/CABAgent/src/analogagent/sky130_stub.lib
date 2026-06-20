@@ -1,0 +1,19 @@
+* SKY130 Stub Models - topology and DC-convergence validation only
+* Level-1 MOSFET approximations. NOT for sign-off accuracy.
+
+.lib tt
+
+.model _sky130_nfet nmos level=1 kp=270e-6 vto=0.45 lambda=0.01 gamma=0.5 phi=0.9
+.model _sky130_pfet pmos level=1 kp=90e-6  vto=-0.45 lambda=0.015 gamma=0.5 phi=0.9
+
+.subckt sky130_fd_pr__nfet_01v8 d g s b
+.param L=0.15 W=0.42 nf=1
+M1 d g s b _sky130_nfet L=L W=W
+.ends sky130_fd_pr__nfet_01v8
+
+.subckt sky130_fd_pr__pfet_01v8 d g s b
+.param L=0.15 W=0.42 nf=1
+M1 d g s b _sky130_pfet L=L W=W
+.ends sky130_fd_pr__pfet_01v8
+
+.endl tt
