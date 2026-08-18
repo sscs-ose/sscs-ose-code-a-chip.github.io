@@ -1,6 +1,67 @@
-## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [VLSI Symposium'26](https://www.vlsisymposium.org/)
+## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [VLSI'26](https://www.vlsisymposium.org/)
 
-For details, check following documents:
-- [Code-a-Chip top page](../README.md)
-- [How to apply](../howtoapply.md)
-- [FAQ](../FAQ.md)
+**List of Award Winners**
+
+| Name                                                |  Affiliation                                                                     | Notebook Title                                                          |
+| ----------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Tanay Das, Udisha Singh                             | IIT Gandhinagar, AMD India                                                       | Power Side-Channel Vulnerability in Analog IMC Arrays                   |
+| Jinhai Hu, Jiageng Wang, Xinzhe Xie, Zhixuan Bao, Wang Ling Goh, Xiaoli Li, Xinrun Wang, Xun Xu, Zhuoyi Lin, Yuan Gao                 | Institute of Microelectronics, A\*STAR, Nanyang Technological University, Singapore University of Technology and Design, Singapore Management University, Institute for Infocomm Research, A\*STAR         | CABAgent: A Comprehensive Layout-Aware Analog Benchmark Generation Framework Driven by Self-Evolving LLM Agents for Analog Circuit Design Automation |
+| Nithin P, Pramoda S R, Praveen Kumar Venkatachala, Runpeng Gao, S Suyajnaa Jagannath Gowda, Madhav K. Pathak | VTU, Oregon State University, IIT Gandhinagar | Ron/gm Based Design Methodology for Dynamic Amplifiers |
+
+
+***Note: Many thanks everyone for your participation! We recommend to resubmit your Notebooks to the next code-a-chip Notebook competition with revisions. We plan to send you a feedback from our reviewers. Stay tuned!***
+
+**The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
+ 1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows,
+ 2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to IEEE SSCS conferences and interact with the leading-edge chip design community, and
+ 3. <span style='color: skyblue;'>Broaden educational value and accessibility within the open-source chip design community, fostering a more inclusive environment for dissemination, learning, and innovation.</span>
+
+## Program Rules
+- The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to ISSCC from Feb. 15-19, 2026, to receive the award and participate in networking events.  
+- Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. Generating a final layout of your circuit is encouraged but not required.
+    - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
+    - Submissions of previous winners: [ISSCC'26](ISSCC26/README.md), [VLSI'25](VLSI25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
+    - <span style='color: skyblue;'>❗️Starting from the VLSI 2025 grant, the submission categories and criteria for selecting finalists will be expanded to include creative educational purposes of chip design. This can include:
+      - innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
+      - exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).</span>
+- Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
+- Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
+
+
+## Evaluation
+- A jury will evaluate the submissions and select up to 10 winners.
+
+## Grant Amount
+- Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can be used to reimburse travel and a portion of your accommodations until the dollar amount is used up.
+
+## Program Logistics
+- The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
+    - Fork the source repo https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io to your local repo.
+    - Create a new directory `VLSI26/submitted_notebooks/<my_project_name>` in your local repo.
+    - Add your Jupyter notebook to the directory.
+    - Create a pull request from your local repo to the source repo.
+- Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
+- The winners are expected to attend the conference to be recognized for their awards and to present a poster.
+- Reimbursement will be provided after the conference when air and accommodation receipts are sent to the conference Treasurer.
+
+
+## Program Schedule
+- ~~March 31~~ **April 15 (extended)**, 2026, 11:59 AM Pacific Time: Notebook submission deadline (GitHub pull request)
+- TBD: Announcement of winners
+- June 14-18, 2026: Attend the conference
+
+
+**The Symposium on VLSI Technology and Circuits (VLSI) 2026 Code-a-Chip Travel Grant Award** is created to:
+ 1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and 
+ 2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
+
+## [FAQ](FAQ.md)
+- On Google Colab, OpenLane may fail to generate layout. If you encounter this issue, you can generate layout on local environment and put the screenshot on jupyter notebook
+
+## Contact
+- Akira Tsuchiya (a_tsuchiya@ieee.org)
+- Muhammed Luqman Jukaku (Contact@mljukaku.com)
+- Mehdi Saligane (mehdi_saligane@brown.edu)
+- Boris Murmann (bmurmann@hawaii.edu)
+- You can join [Code-a-Chip](https://matrix.to/#/#Code-a-Chip:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
+  - Visit [element.fossi-chat.org](https://element.fossi-chat.org/), create an account, then join the room "Code-a-Chip"
