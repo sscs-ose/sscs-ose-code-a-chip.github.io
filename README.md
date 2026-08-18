@@ -1,37 +1,59 @@
-## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards at [ISSCC'27](https://www.isscc.org/)
+## IEEE SSCS Open-Source Ecosystem “Code-a-Chip” Travel Grant Awards for [ISSCC 2027](https://www.isscc.org/)
 
 **The IEEE SSCS Code-a-Chip Travel Grant Award** was created to:
  1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows,
- 2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to IEEE SSCS conferences and interact with the leading-edge chip design community, and
+ 2. Enable emerging designers and experienced open-source contributors to attend IEEE SSCS conferences, engage with the chip-design community, and build professional networks,
  3. <span style='color: skyblue;'>Broaden educational value and accessibility within the open-source chip design community, fostering a more inclusive environment for dissemination, learning, and innovation.</span>
 
 ## Program Rules
-- The program is open to anyone (no restrictions). We run continuously the Code-a-Chip (CAC) competition for ISSCC and VLSI conferences with clear deadlines. IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required. Teaming is encouraged, but each team must identify a single leader who can travel to ISSCC from Feb. 15-19, 2026, to receive the award and participate in networking events.  
-- Applicants must submit an **open-source Jupyter notebook** detailing an innovative circuit design using **open-source** tools. The objective is to disseminate the main ideas and design choices using **open-source tools and PDKs** in a **reproducible** manner. Generating a final layout of your circuit is encouraged but not required.
-    - Examples: [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
-    - Submissions of previous winners: [VLSI26](VLSI26/README.md), [ISSCC'26](ISSCC26/README.md), [VLSI'25](VLSI25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
-    - <span style='color: skyblue;'>❗️Starting from the VLSI 2025 grant, the submission categories and criteria for selecting finalists will be expanded to include creative educational purposes of chip design. This can include:
-      - innovative uses of Python packages for circuit visualization or generating animations to explain digital (e.g., D flip-flop) and analog (e.g., SAR ADCs) circuits,
-      - exploring open-source PDKs to explain Figure-of-Merit (FoM) of building blocks with SPICE simulation results that demonstrate the value of FoM (trend, foresight, etc).</span>
-- Each submission must contain a suitable **open-source license** (e.g., Apache 2.0).
-- Travel arrangements must comply with the [IEEE Travel and Expense Reimbursement Guidelines](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/travel-expense-reimbursement-guidelines.pdf) and awardees must attend the conference in person to qualify for reimbursement.
+- The program is open to anyone (no restrictions). IEEE Solid-State Circuits Society (SSCS) membership is encouraged but not required.
+- Code-a-Chip competitions are conducted for the ISSCC and VLSI Symposium conferences according to their respective submission deadlines.
+- Team submissions are encouraged; however, each team must designate one representative to receive the award and attend ISSCC 2027 in person.  
+-  Applicants must submit an openly licensed Jupyter notebook demonstrating an innovative circuit-design or educational project developed using open-source tools and, where applicable, open-source process design kits.
+-  The notebook should clearly communicate the project’s main ideas, design decisions, methodology, results, and reproducibility instructions. Generating a final circuit layout is encouraged but not required.
+-  Eligible submissions may include, but are not limited to:
+    -  Innovative circuit-design projects, such as inverters and temperature sensors.
+    -  Creative educational uses of Python packages for circuit visualization or animation, including explanations of digital circuits, such as D flip-flops, and analog circuits, such as successive-approximation-register analog-to-digital converters.
+    -  Exploration of open-source PDKs and SPICE simulations to demonstrate relevant figures of merit for circuit building blocks, including gain, bandwidth, power consumption, noise, linearity, or other appropriate performance metrics.
+- Applicants are encouraged to review submissions from previous Code-a-Chip award recipients for examples of successful projects.
+- Each submission must include an appropriate open-source license, such as the Apache License 2.0.
+- Award recipients must comply with the applicable IEEE travel and expense reimbursement policies and attend ISSCC 2027 in person to qualify for reimbursement.
 
+## Examples
+- Examples:  [inverter](https://developers.google.com/silicon/guides/digital-inverter-openlane), [temperature sensor](https://github.com/idea-fasoc/OpenFASOC/blob/main/docs/source/notebooks/temp-sense-gen/temp_sense_genCollab.ipynb)
+- Submissions of previous winners: [VLSI26](VLSI26/README.md), [ISSCC'26](ISSCC26/README.md), [VLSI'25](VLSI25/README.md), [ISSCC'24](ISSCC24/README.md), [ISSCC'23](ISSCC23/README.md), [VLSI'24](VLSI24/README.md) and [VLSI'23](VLSI23/README.md)
 
 ## Evaluation
-- A jury will evaluate the submissions and select up to 10 winners.
+- A jury of technical experts will evaluate all eligible submissions. Up to 10 applicants or teams may be selected to receive travel grants.
 
 ## Grant Amount
-- Travel grants of up to US$500 (for secondary students), up to US$2,500 (for undergraduate students), and between US$1,000-US$5,000 (for graduate students and all others) will be awarded. This award can be used to reimburse travel and a portion of your accommodations until the dollar amount is used up.
+- Travel grants will be awarded according to the applicant’s category:
+
+|Applicant category|Maximum grant amount|
+|----|----|
+|Secondary-school student|Up to US$500|
+|Undergraduate student|Up to US$2,500|
+|Graduate student or other eligible applicant|US$1,000–US$5,000|
+
+- Grants may be used to reimburse eligible airfare, ground transportation and accommodation expenses, subject to IEEE travel and expense policies. Reimbursement will be limited to documented eligible expenses and will not exceed the recipient’s approved grant amount.
+- Award recipients are responsible for retaining and submitting all required receipts and supporting documentation. Reimbursement will be processed after the conference upon receipt and approval of the required documentation.
 
 ## Program Logistics
-- The notebooks must be submitted through a [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) at the [SSCS Open-Source Ecosystem Code-a-Chip](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io) (OSE) GitHub portal.
-    - Fork the source repo https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io to your local repo.
-    - Create a new directory `ISSCC27/submitted_notebooks/<my_project_name>` in your local repo. **Please be sure that all files are under ISSCC27 directory. If you put/update files under other directories, it may cause problems when we merge your pull request.**
-    - Add your Jupyter notebook to the directory.
-    - Create a pull request from your local repo to the source repo.
-- Notebooks submissions must follow guidelines in the **[How to Apply](howtoapply.md)** section.
-- The winners are expected to attend the conference to be recognized for their awards and to present a poster.
-- Reimbursement will be provided after the conference when air and accommodation receipts are sent to the conference Treasurer.
+- Submissions must be made through a GitHub pull request to the IEEE SSCS Open-Source Ecosystem Code-a-Chip GitHub repository.
+1. Fork the official Code-a-Chip repository to your GitHub account:
+
+   [https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io]
+2. Create the following directory within your forked repository:
+
+   `ISSCC27/submitted_notebooks/<project_name>/`
+3. Place all files associated with your project inside this directory. Do not add, update, or modify files outside your project directory, as doing so may create conflicts when the pull request is reviewed and merged.
+4. Add your completed Jupyter notebook, open-source license, and any necessary supporting files to the project directory.
+5. Ensure that the notebook follows all requirements described in the “How to Apply” section.
+6. Submit a pull request from your forked repository to the official Code-a-Chip repository before the submission deadline.
+7. Monitor the pull request for questions or requested revisions from the program organizers.
+
+- Award recipients must attend ISSCC 2027 in person to receive recognition and present a poster describing their projects.
+- Reimbursement will be processed after the conference once the required travel and accommodation receipts and supporting documents have been submitted to and approved by the designated conference treasurer.
 
 
 ## Program Schedule
@@ -40,17 +62,39 @@
 - February 14-18, 2027: Attend the conference
 
 
-**International Solid-State Circuits Conference (ISSCC) 2027 Code-a-Chip Travel Grant Award** is created to:
- 1. Promote *reproducible* chip design using *open-source* tools and *notebook-driven* design flows and 
- 2. Enable up-and-coming *talents* as well as seasoned *open-source enthusiasts* to travel to the Conference and interact with the leading-edge chip design community. 
+## FAQ
+**Who may apply?**
+- The program is open to participants worldwide. IEEE SSCS membership is encouraged but not required. Individuals and teams may submit projects.
 
-## [FAQ](FAQ.md)
-- On Google Colab, OpenLane may fail to generate layout. If you encounter this issue, you can generate layout on local environment and put the screenshot on jupyter notebook
+**Can a team submit a project?**
+- Yes. Team submissions are encouraged. Each team must designate one representative who will receive the award and attend ISSCC 2027 in person.
+
+**Is a completed circuit layout required?**
+- No. A final circuit layout is encouraged but not required. The notebook should clearly present the project’s concept, methodology, design decisions, simulation or implementation results, and reproducibility instructions.
+
+**Must the submission use an open-source PDK?**
+- Applicants are encouraged to use open-source PDKs where appropriate. Educational projects involving circuit visualization, animation, simulation, or other open-source design activities may also be considered.
+
+**Is an open-source license required?**
+- Yes. Each submission must include an appropriate open-source license, such as the Apache License 2.0.
+
+**How should a project be submitted?**
+- Create a project directory under `ISSCC27/submitted_notebooks/` in a fork of the official repository. Add the notebook and all supporting files to that directory, and then submit a GitHub pull request before the deadline.
+
+**What should I do if OpenLane cannot generate a layout in Google Colab?**
+- Run the layout-generation flow in a compatible local environment. Include the resulting layout image, relevant output, and sufficient explanation in the submitted Jupyter notebook.
+
+**What expenses are eligible for reimbursement?**
+- Eligible expenses may include airfare, ground transportation and accommodation, subject to the approved grant amount and applicable IEEE travel and expense policies. Recipients must provide the required receipts and supporting documentation.
+
+**When will reimbursement be issued?**
+- Reimbursement will be processed after ISSCC 2027 once the recipient has attended the conference and submitted all required receipts and documentation for review and approval.
+
+**Must an award recipient attend ISSCC 2027?**
+- Yes. Award recipients must attend ISSCC 2027 in person and present a poster to qualify for recognition and reimbursement.
 
 ## Contact
 - Akira Tsuchiya (a_tsuchiya@ieee.org)
 - Muhammed Luqman Jukaku (Contact@mljukaku.com)
 - Mehdi Saligane (mehdi_saligane@brown.edu)
 - Boris Murmann (bmurmann@hawaii.edu)
-- You can join [Code-a-Chip](https://matrix.to/#/#Code-a-Chip:fossi-chat.org) in [fossi-chat.org](https://element.fossi-chat.org/) to discuss your submissions or ask about tools issues etc.
-  - Visit [element.fossi-chat.org](https://element.fossi-chat.org/), create an account, then join the room "Code-a-Chip"
