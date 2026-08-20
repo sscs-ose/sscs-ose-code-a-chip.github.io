@@ -1,0 +1,81 @@
+`timescale 1ns/1ps
+
+module tb_fir_fil;
+    reg clk;
+    reg reset;
+    reg [3:0] x;
+    reg [3:0] a, b, c;
+
+    wire [9:0] y;
+    wire v1, v2, v3, v4, v5;
+
+    fir_filter DUT (
+        .clk   (clk),
+        .reset (reset),
+        .x     (x),
+        .a     (a),
+        .b     (b),
+        .c     (c),
+        .y     (y),
+        .v1    (v1),
+        .v2    (v2),
+        .v3    (v3),
+        .v4    (v4),
+        .v5    (v5)
+    );
+    always #5 clk = ~clk;
+    task apply_x;
+        input [3:0] xv;
+        integer i;
+        begin
+            @(negedge clk);
+            x = xv;
+
+            // wait enough cycles for 3-tap FIR to settle
+            for (i = 0; i < 4; i = i + 1) begin
+                @(posedge clk);
+                $display(
+                    "T=%0t | x=%0d | y=%0d | VTU=%b%b%b%b%b",
+                    $time, x, y, v1, v2, v3, v4, v5
+                );
+            end
+            $display("----------------------------------");
+        end
+    endtask
+
+    // --------------------------------------------------
+    // Test sequence
+    // --------------------------------------------------
+    initial begin
+        // Init
+        clk   = 0;
+        reset = 1;
+        x     = 0;
+
+        // FIR coefficients
+        a = 4'd2;
+        b = 4'd1;
+        c = 4'd3;
+
+        // Hold reset for 2 clock cycles
+        repeat (2) @(posedge clk);
+        reset = 0;
+
+        $display("\n=== FIR FILTER TEST START ===");
+        $display("Coefficients: a=2, b=1, c=3");
+        $display("----------------------------------");
+
+        // -------- Test vectors --------
+        apply_x(4'd1);   // expect: 2,3,6
+        apply_x(4'd3);   // expect: 6,9,18
+        apply_x(4'd2);   // expect: 4,5,11
+        apply_x(4'd4);   // expect: 8,10,20
+        apply_x(4'd0);   // pipeline decay
+        apply_x(4'd5);   // expect: 10,15,30
+
+        $display("=== TEST COMPLETE ===");
+        $stop;
+    end
+
+endmodule
+
