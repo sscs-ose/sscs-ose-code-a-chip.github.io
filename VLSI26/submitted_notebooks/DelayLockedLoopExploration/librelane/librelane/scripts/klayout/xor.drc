@@ -1,0 +1,120 @@
+#!/usr/bin/env ruby
+# A general XOR script from: https://www.klayout.de/forum/discussion/100/xor-vs-diff-tool
+
+# This script uses KLayout's Ruby-based DRC language to implement a generic
+# XOR between two layouts. The names of the layouts are given in global variables
+# $a and $b.
+
+if !defined?(RBA)
+  require 'optparse'
+
+  options = {
+    :rpt_out => "/dev/null"
+  }
+  optparse = OptionParser.new do |opts|
+    opts.banner = "Usage: #{File.basename($0)} [options] <GDS A> <GDS B>"
+
+    opts.on("-o", "--output OUTPUT", "Klayout RDB (.xml) output file (required)") do |rdb_out|
+      options[:rdb_out] = rdb_out
+    end
+    opts.on("-i", "--ignore SEMICOLON_DELIMITED_LIST", "Ignore layer(s)") do |ignore|
+      options[:ignore] = ignore
+    end
+    opts.on("-t", "--top TOP_CELL", "Top cell name (required)") do |top_cell|
+      options[:top_cell] = top_cell
+    end
+    opts.on("-t", "--tile-size TILE_SIZE", "Tile size (in µm)") do |tile_size|
+      options[:tile_size] = tile_size.to_i
+    end
+    opts.on("-n", "--threads THREAD_COUNT", "Lower bound on the thread count used by this process (+ managing threads)") do |threads|
+      options[:threads] = threads.to_i
+    end
+  end
+  optparse.parse!
+
+  if [options[:rdb_out], options[:top_cell]].include?(nil)
+    puts optparse.help
+    exit 64
+  end
+
+  args = [
+    "klayout", "-b",
+    "-r", $0,
+    "-rd", "top_cell=#{options[:top_cell]}",
+    "-rd", "a=#{ARGV[0]}",
+    "-rd", "b=#{ARGV[1]}",
+    "-rd", "jobs=#{options[:threads]}",
+    "-rd", "rdb_out=#{File.absolute_path(options[:rdb_out])}",
+    "-rd", "ignore=#{options[:ignore]}",
+    "-rd", "tilesize=#{options[:tile_size]}",
+  ]
+  puts "Running: '#{args.join(" ")}'…"
+  exec *args
+
+end
+
+verbose
+
+# Run XOR
+if $jobs == ""
+  $jobs = "1"
+end
+$jobs = $jobs.to_i
+
+info "Using #{$jobs} threads…"
+threads($jobs)
+
+# Tiling
+if $tilesize == ""
+  $tilesize = "500"
+end
+$tilesize = $tilesize.to_i
+
+info "Using a tile size of (#{$tilesize} µm)²…"
+tiles($tilesize.um, $tilesize.um)
+
+# Set up inputs
+puts $a, $b
+a = source($a, $top_cell)
+b = source($b, $top_cell)
+
+# Set up output
+# target($gds_out, "XOR")
+report("XOR #{$a} vs. #{$b}", $rdb_out)
+
+def write_data(xor_data, layer_info)
+  xor_data.output(layer_info.to_s, "XOR data for layer #{layer_info.to_s}")
+end
+
+## Collect all common layers
+layers = {}
+[ a.layout, b.layout ].each do |ly|
+  ly.layer_indices.each do |li|
+    i = ly.get_info(li)
+    layers[i.to_s] = i
+  end
+end
+
+ignore_list = $ignore.split(";")
+
+## Perform per-layer XOR
+total_xor_differences = 0
+layers.sort.uniq.each do |layer_name, layer_data|
+  if ignore_list.include? layer_name
+    warn "--- Skipping #{layer_name}… ---"
+  else
+    info "--- Running XOR for layer #{layer_name} ---"
+
+    layer_info = layers[layer_name]
+    xor_data = (a.input(layer_name, layer_data) ^ b.input(layer_name, layer_data))
+    total_xor_differences += xor_data.data.size
+    info "XOR differences: #{xor_data.data.size}"
+
+    write_data xor_data, layer_info
+   end
+end
+
+info "---"
+info "Total XOR differences: #{total_xor_differences}"
+
+puts "%OL_METRIC_I design__xor_difference__count #{total_xor_differences}"
