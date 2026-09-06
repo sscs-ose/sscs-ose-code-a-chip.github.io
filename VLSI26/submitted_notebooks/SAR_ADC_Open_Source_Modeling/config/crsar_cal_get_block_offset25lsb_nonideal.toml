@@ -1,0 +1,30 @@
+[sar]
+vref    = 1.0       # V — reference voltage
+n       = 12        # bits
+f_clk   = 20.0e6    # Hz — clock frequency
+sar_tau = 50.0e-9   # s — SAR delay at beginning of simulation (wait for ODC controller to start up)
+
+[comparator]
+noise_rms = 0.0     # V RMS
+offset    = 0.0     # V
+
+[weights]
+# Weights may be specified as inline arrays (text) or as paths to .npy files (binary).
+# Binary example:  actual = "weights_actual.npy"
+actual    = "./config/weights_actual_15b_radix1_86.npy"
+estimated = "./config/weights_estimated_15b_radix1_86.npy"
+
+[offset]
+# Digital offset (LSB) — may be specified as an inline scalar or a path to a .npy file.
+actual    = 21.3   # actual injected offset used in simulation
+estimated = 25 # initial estimate used by calibration
+[simulation]
+n_fft                   = 4096  # number of FFT points
+m_freq                  = 11    # prime sampling input frequency bin
+startup_cycles          = 10
+scope_oversampling_ratio = 68
+output_path = "./data/cal_offset25lsb_nonideal.npz"
+
+[input]
+vincm = 0.5   # V — common-mode voltage
+vid   = 0.8   # V — differential amplitude
