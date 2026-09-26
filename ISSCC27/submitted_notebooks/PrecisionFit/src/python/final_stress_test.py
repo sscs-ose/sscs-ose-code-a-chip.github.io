@@ -104,7 +104,10 @@ def run(h=None, n_samples=4096, verify=True):
 
 
 if __name__ == "__main__":
-    df, rtl = run()
+    # n_samples=2048 matches the notebook's stress-test cell (section 10), so
+    # running this script standalone reproduces the committed
+    # results/pareto/stress_test.csv byte-for-byte.
+    df, rtl = run(n_samples=2048)
     all_exact = all(r["passed"] for res in rtl.values() if res for r in res.values())
     print(f"\nAll headline configs bit-exact against the golden model: {all_exact}")
     if not all_exact:

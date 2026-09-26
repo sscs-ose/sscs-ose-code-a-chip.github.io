@@ -70,7 +70,9 @@ def parse(tags=None) -> pd.DataFrame:
     for tag in tags:
         path = find_metrics(tag)
         metrics = _read_metrics(path)
-        row = dict(config=tag, source=path, power_note=POWER_NOTE)
+        # Store the run location relative to the repo root so the committed
+        # CSV stays machine-independent (no /home/<user>/ leak).
+        row = dict(config=tag, source=paths.rel(path), power_note=POWER_NOTE)
         for name, column in METRIC_COLUMNS.items():
             row[name] = metrics.get(column)
         row["available_columns"] = ",".join(list(metrics.keys())[:20])
@@ -93,7 +95,8 @@ if __name__ == "__main__":
     if not physical_flow_was_run():
         print("No LibreLane runs found under "
               f"{paths.rel(RUNS_DIR)} -- the optional physical flow "
-              "(PD_GUIDE.md) was not executed. Area in this submission is "
-              "reported as synthesized generic-cell count (relative metric).")
+              "(synth/ol_<design>.yaml) was not executed. Area in this "
+              "submission is reported as synthesized generic-cell count "
+              "(relative metric).")
     else:
         parse()

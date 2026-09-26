@@ -40,5 +40,5 @@ All three headline designs were placed and routed on SKY130A using LibreLane
 | best_uniform | 96,137 | +4.392 ns | 18,097 |
 | sensitivity_guided | 94,870 | +4.238 ns | 17,773 |
 
-Area ordering confirmed to match the generic-cell sweep. GDSII layouts are
-in `runs/` (not committed — see `.gitignore`).
+Area ordering confirmed to match the generic-cell sweep. The GDS-II layouts
+are committed under `results/gds/`.

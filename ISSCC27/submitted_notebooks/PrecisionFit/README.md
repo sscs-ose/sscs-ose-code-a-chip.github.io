@@ -124,7 +124,6 @@ documented in the notebook (section 5):
 precisionfit/
 ├── LICENSE                           Apache-2.0
 ├── README.md                         this file
-├── PD_GUIDE.md                       step-by-step LibreLane/SKY130 PD reference
 ├── env/install_tools.sh              environment setup + toolchain smoke test
 ├── precisionfit.ipynb                the deliverable — submission artifact
 ├── src/python/
@@ -163,6 +162,7 @@ precisionfit/
 ├── synth/
 │   ├── yosys_synth.tcl               generic-cell synthesis (used by the sweeps)
 │   ├── constraints.sdc               shared timing constraint — 14.6 ns (68.5 MHz)
+│   ├── openlane_config.json          legacy OpenLane 2 template (superseded by ol_*.yaml)
 │   ├── ol_conservative_uniform.yaml  LibreLane 3.x config — conservative_uniform
 │   ├── ol_best_uniform.yaml          LibreLane 3.x config — best_uniform
 │   ├── ol_sensitivity_guided.yaml    LibreLane 3.x config — sensitivity_guided
@@ -205,7 +205,8 @@ jupyter nbconvert --to notebook --execute --inplace precisionfit.ipynb
 ### Physical implementation (LibreLane 3.x + SKY130)
 
 Requires LibreLane 3.x in a Python venv, Docker, and the SKY130 PDK via
-`ciel`. See `PD_GUIDE.md` for the full step-by-step. Short form:
+`ciel`. The flow is fully specified by the three committed configs
+`synth/ol_<design>.yaml`. Short form:
 
 ```bash
 # install

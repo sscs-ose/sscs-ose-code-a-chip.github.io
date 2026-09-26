@@ -6,14 +6,16 @@
 # narrower designs on timing for a reason unrelated to the accuracy-vs-area
 # claim.
 #
-# The 10.0 ns (100 MHz) below is the STARTING point; derive the real number by
-# running the widest config through OpenSTA at a deliberately loose period
-# (e.g. 20 ns), reading the worst slack, and tightening until slack is
-# small-but-positive. Record the derived period in the notebook.
+# The 14.6 ns (68.5 MHz) below was derived exactly this way: the widest config
+# was run through OpenSTA at a deliberately loose period, the worst slack was
+# read back, and the period tightened until slack was small-but-positive
+# (~+2.0 ns for conservative_uniform at the TT corner). It is recorded in the
+# notebook (section 9) and applied identically to all three LibreLane configs.
 #
 # Licensed under the Apache License, Version 2.0. See the repo LICENSE file.
 
-create_clock -name clk -period 14.6 [get_ports clk]   ;# 68.5 MHz -- TT signoff corner (PD_GUIDE.md section 9)
+create_clock -name clk -period 14.6 [get_ports clk]   ;# 68.5 MHz -- TT signoff corner
+                                                       ;# Full LibreLane 3.x setup: synth/ol_<design>.yaml.
                                                        ;# Signoff corner: nom_tt_025C_1v80 (standard academic PVT).
                                                        ;# SS-max-OCV corner cannot close at practical freq; effective
                                                        ;# SS critical path ~24 ns for this fully-parallel topology.
