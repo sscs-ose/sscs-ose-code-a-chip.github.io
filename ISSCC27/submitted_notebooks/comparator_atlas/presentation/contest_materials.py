@@ -18,7 +18,7 @@ import layout_evidence as physical
 from comparator_atlas.spice import CORNERS
 from presentation.release_facts import load_facts, write_judge_guide
 from presentation.figure_style import contrast_ink
-from presentation.pvt45_results import RC_MODEL_LABEL, RC_MODEL_NOTICE
+from presentation.pvt45_results import RC_FIGURE_LABEL, RC_SCOPE_NOTE
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results" / "study"
@@ -49,7 +49,7 @@ def build() -> Path:
     page.add_patch(FancyBboxPatch((0, 0.895), 1, 0.105, boxstyle="square,pad=0",
                                  facecolor=ink, edgecolor=ink))
     figure.text(0.035, 0.955, "Comparator Atlas", fontsize=47, color="white", weight="bold")
-    figure.text(0.035, 0.918, "Calibration, decision deadlines and the limits of an archived RC model",
+    figure.text(0.035, 0.918, "Calibrated StrongARM decisions across PVT",
                 fontsize=23, color="#bceee4")
     figure.text(0.975, 0.975, "IEEE SSCS CODE-A-CHIP / ISSCC 2027", fontsize=13,
                 color="white", ha="right")
@@ -64,42 +64,35 @@ def build() -> Path:
         figure.text(x, y, "\n".join(lines), color=color, fontsize=size,
                     va="top", linespacing=1.35)
 
-    figure.text(0.035, 0.852, "1 | A reusable experiment", fontsize=26, color=ink, weight="bold")
+    figure.text(0.035, 0.852, "1 | Circuit and evaluation", fontsize=26, color=ink, weight="bold")
     paragraph(0.035, 0.814,
-              "A small calibrated offset is not enough. "
-              "A comparator can decide the wrong way, miss its deadline, "
-              "or change behavior after parasitic extraction.\n\n"
-              "This notebook makes the complete decision map, costs and "
-              "failure boundaries reproducible instead of showing only "
-              "one favorable nominal waveform.",
-              width=44, size=20)
-    figure.text(0.035, 0.625, "Circuit and design choices", fontsize=25, color=teal, weight="bold")
-    paragraph(0.035, 0.591,
-              "Established StrongARM topology; 27 transistor instances.\n"
-              "LVT main/auxiliary input path; standard-VT latch and switches.\n"
-              "Physical source-gated trim: sign plus four magnitude bits.\n"
-              "Nine declared candidates, followed by an explicit "
-              "lower-energy control. No universal best-design claim.",
-              width=44, size=19)
-    figure.text(0.035, 0.395, "Model applicability", fontsize=25, color=ink, weight="bold")
-    paragraph(0.035, 0.36,
-              "The pinned Magic/open_pdks RC export retains mutual coupling "
-              "while ground capacitance increases. Physical error size and "
-              "direction are unknown. C-only is not independent ground truth; "
-              "RC-versus-C differences are not pure resistance effects.",
+              "27-device SKY130 StrongARM; LVT inputs, SVT latch.\n"
+              "Source-gated trim: sign plus four magnitude bits.",
               width=54, size=16)
-    figure.text(0.035, 0.232, "Open the current submission in Colab", fontsize=17, color=teal,
-                weight="bold", url=facts["colab_url"])
-    figure.text(0.035, 0.207, facts["notebook"], fontsize=18, color=ink,
+    circuit_image = physical.circuit_guide_path()
+    waveform_image = OUTPUT / "postlayout_pvt45" / "figures" / "pvt45_worst_waveform.png"
+    circuit_ax = figure.add_axes([0.035, 0.459, 0.305, 0.318])
+    circuit_ax.imshow(plt.imread(circuit_image))
+    circuit_ax.axis("off")
+    paragraph(0.035, 0.447,
+              "Nine declared candidates; separate lower-energy control. "
+              "Local calibration, finite decision deadline, complementary "
+              "80% / 20% output rails. No universal best-design claim.",
+              width=60, size=14)
+    figure.text(0.035, 0.355, "4 | Retained SC / RC waveform", fontsize=22, color=ink, weight="bold")
+    waveform_ax = figure.add_axes([0.035, 0.178, 0.305, 0.16])
+    waveform_ax.imshow(plt.imread(waveform_image))
+    waveform_ax.axis("off")
+    paragraph(0.035, 0.161,
+              "FS / 1.62 V / -40 C / -3 mV. Nominal, code zero; "
+              "5 fF per output. The archived RC trace misses 1 ns "
+              "and reaches the required rails at 1.835 ns.",
+              width=60, size=14, color=muted)
+    figure.text(0.035, 0.091, facts["notebook"], fontsize=15, color=teal,
                 url=facts["notebook_url"])
-    paragraph(0.035, 0.171,
-              "Run all: archived evidence and waveform measurements. "
-              "DRC/LVS establish structural checks, not model fidelity. "
-              "Schematic results are unaffected by this extraction concern. "
-              "No corrected counts, energy or silicon PVT guarantee is inferred.",
-              width=47, size=16, color=muted)
+    figure.text(0.28, 0.091, "Colab", fontsize=15, color=teal, url=facts["colab_url"])
 
-    figure.text(0.36, 0.852, "2 | Schematic coverage is not free", fontsize=26, color=ink, weight="bold")
+    figure.text(0.36, 0.852, "2 | Calibrated schematic decisions at 1 ns", fontsize=26, color=ink, weight="bold")
     figure.text(0.36, 0.82, "Same local calibration; 1 ns; sampled |input| >= 1 mV; +4% branch-width stress",
                 fontsize=16, color=muted)
     cmap = plt.get_cmap("cividis")
@@ -137,7 +130,7 @@ def build() -> Path:
                 "Above: 45 PVT combinations; aggregate also includes four nominal stress controls. Percentages are grid coverage, not yield.",
                 fontsize=12, color=muted)
 
-    figure.text(0.36, 0.375, "3 | Structural checks and archived-deck outcomes", fontsize=26, color=ink, weight="bold")
+    figure.text(0.36, 0.375, "3 | Layout checks and nominal RC results", fontsize=26, color=ink, weight="bold")
     ax = figure.add_axes([0.36, 0.273, 0.61, 0.079])
     layers = physical.gds_polygons((layout["snapshot"] / "atlas.gds").read_bytes())
     colors = {(65, 20): "#6bb58e", (66, 20): "#dd7783", (68, 20): "#aeb3d5",
@@ -150,7 +143,7 @@ def build() -> Path:
     ax.set_aspect("equal")
     ax.axis("off")
     figure.text(0.36, 0.246,
-                f"Actual 27-device GDS | DRC 0 + LVS / negative controls | {extracted['bbox_um2']:.3f} um2",
+                f"27-device GDS | DRC 0 + LVS / negative controls | {extracted['bbox_um2']:.3f} um2",
                 fontsize=16, color=teal, weight="bold")
     figure.text(0.36, 0.213,
                 f"Archived 45-PVT RC: {full['rc_correct_1ns']}/180 at 1 ns"
@@ -170,7 +163,7 @@ def build() -> Path:
                 f"  |  Extracted RC: {full['mean_rc_energy_fj']:.1f} fJ",
                 fontsize=19, color=teal)
     figure.text(0.035, 0.061,
-                RC_MODEL_LABEL + ". Core energy excludes external drivers and calibration infrastructure.",
+                RC_FIGURE_LABEL + ". Core energy excludes external drivers and calibration infrastructure.",
                 fontsize=15, color=ink)
     figure.text(0.035, 0.038,
                 "Established circuitry: Razavi, 2015, DOI 10.1109/MSSC.2015.2418155; Li, Xu & Iizuka, 2022, DOI 10.1007/s10470-022-01992-6.",
@@ -189,29 +182,30 @@ def build() -> Path:
     plt.close(figure)
     abstract = (
         f"{facts['title']}\n{author['name']} - {author['affiliation']}\n\n"
-        "Comparator Atlas is an open-source, notebook-driven study of when a regenerative "
-        "comparator produces a correct decision before a deadline. It connects a declared "
-        "nine-candidate SKY130 design search, a lower-energy comparison, numerical refinement "
-        "and a real physical-layout flow. On the 49-condition schematic grid at 1 ns with "
+        "Offset calibration alone does not establish whether a regenerative comparator "
+        "reaches the required output rails before a decision deadline. This study characterizes "
+        "a SKY130 StrongARM comparator using a declared nine-candidate sizing comparison, "
+        "a separate lower-energy control, and a nominal 27-device layout. "
+        "On the 49-condition schematic grid at 1 ns with "
         "sampled absolute input at least 1 mV, the same local calibration policy gives "
         f"{schematic['baseline_correct_at_1mv']}/{schematic['points_at_1mv']} original versus "
         f"{schematic['selected_correct_at_1mv']}/{schematic['points_at_1mv']} selected correct points, "
         f"at {schematic['original_mean_core_energy_fj']:.2f} and "
-        f"{schematic['selected_mean_core_energy_fj']:.2f} fJ core energy. Actual GDS, DRC/LVS "
-        "negative controls and distributed RC extraction connect that schematic study to "
-        "a physical implementation. A separately declared full-grid study evaluates the "
+        f"{schematic['selected_mean_core_energy_fj']:.2f} fJ core energy. "
+        "The layout passes recorded DRC/LVS checks; deliberately incorrect-net, bulk, "
+        "width and device-flavor variants are rejected. A separately declared full-grid study evaluates the "
         "nominal, code-zero schematic and RC circuits over 45 PVT conditions "
         f"and four signed inputs each. All {full['points_per_mode']} RC samples meet the 2 ns primary "
         f"deadline; {full['rc_correct_1ns']} meet 1 ns, with the rest unresolved. The worst RC decision "
         f"is {full['worst_rc_delay_ns']:.3f} ns at FS/1.62 V/-40 C/-3 mV. Both modes use ngspice 47 "
         "with all 360 pointwise 10/5 ps comparisons confirmed. Mean full-grid core energy is "
         f"{full['mean_schematic_energy_fj']:.2f} fJ schematic versus {full['mean_rc_energy_fj']:.2f} fJ "
-        "RC for those archived decks, not a qualified physical parasitic-cost estimate. "
-        "The earlier failed 1 ns pilot remains recorded separately. Source-bound tables, "
-        "retained waveforms, vector figures and an interactive decision explorer support "
-        "inspection and reuse. Results are deterministic sampled simulations, not silicon "
-        "measurements, foundry yield or a continuous input-range guarantee; core energy "
-        "excludes external drivers and calibration infrastructure.\n\n" + RC_MODEL_NOTICE + "\n"
+        "RC for the archived decks. The earlier five-condition pilot retains its failed "
+        "original 1 ns gate and separate post-hoc 2 ns result. "
+        "The notebook reports correct, wrong-sign and unresolved decisions separately, "
+        "with source-linked tables and retained waveforms. Coverage is restricted to the "
+        "sampled grid, not foundry yield or a continuous input-range guarantee; core energy "
+        "excludes external drivers and calibration infrastructure.\n\nScope: " + RC_SCOPE_NOTE + "\n"
     )
     abstract_path = OUTPUT / "abstract.txt"
     abstract_path.write_text(abstract, encoding="utf-8")
@@ -221,6 +215,9 @@ def build() -> Path:
         "release_facts_source_sha256": sha256(ROOT / "presentation" / "release_facts.py"),
         "facts": facts,
         "data_evidence_sha256": facts["evidence_sha256"],
+        "illustration_sha256": {
+            str(path.relative_to(ROOT)): sha256(path) for path in (circuit_image, waveform_image)
+        },
         "validation_manifest_sha256": sha256(OUTPUT / "validation_manifest.json"),
         "stress_manifest_sha256": sha256(OUTPUT / "stress_manifest.json"),
         "layout_receipt_sha256": physical.RECEIPT_SHA256,

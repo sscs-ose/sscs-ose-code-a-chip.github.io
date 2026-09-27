@@ -344,7 +344,7 @@ def render_study(*, refresh_figures: set[str] | None = None) -> Path:
         target_band = entry_tools.summary(professional, minimum_mv=1)
         wide_band = entry_tools.summary(professional, minimum_mv=3)
         professional_section = f"""
-<section><h2>Energy-efficient control: compare engineering choices, not only a weak baseline</h2>
+<section><h2>Post-selection lower-energy control</h2>
 <p>This is an explicitly <strong>post-selection ablation</strong> of an existing lower-energy
 LVT candidate. It uses the same 49 conditions and input grid with separate numerical refinement;
 it does not replace the frozen original selection or create a newly blinded benchmark.</p>
@@ -369,10 +369,8 @@ The additional control has not inherited the original/selected circuits' input-i
     layout_geometry = physical.geometry_summary(layout)
     layout_costs = physical.matched_tt_comparison(layout)
     layout_section = f"""
-<section id="layout-evidence"><h2>07 / Layout and extracted-circuit results</h2>
-<p><strong>{html.escape(pvt45_results.RC_MODEL_LABEL)}.</strong>
-{html.escape(pvt45_results.RC_MODEL_NOTICE)}</p>
-<p>The same nominal 27-device design now has actual GDS, named-style DRC, independent LVS,
+<section id="layout-evidence"><h2>Layout geometry, structural checks and five-condition pilot</h2>
+<p>The nominal 27-device layout has recorded GDS, named-style DRC, independent LVS,
 wrong-net/bulk/width/SVT-LVT negative controls, and separate connectivity/C/RC exports.
 The original layout development used <strong>five code-zero conditions</strong>.
 The following expanded study covers 45 PVT conditions with the same nominal geometry.
@@ -380,9 +378,10 @@ Neither is a post-layout reproduction of the calibrated width-stress study.</p>
 {pictures["actual_layout.png"]}
 <div class="table-scroll">{layout_geometry.to_html(index=False, float_format=lambda value: f"{value:.4g}", border=0)}</div>
 <p class="muted">The compact predecessor failed M2 pad-notch spacing and was never simulated.
-Four real M2 bridges repair it without changing devices, pins or the other mask geometry.
+Four M2 bridges repair it without changing devices, pins or the other mask geometry.
 Archived-deck differences are measured against the prior <em>legal balanced layout</em>, not attributed to
 the bridges alone. Listed capacitance is a sum of emitted elements, not an effective impedance.</p>
+<p class="muted">Scope: {html.escape(pvt45_results.RC_SCOPE_NOTE)}</p>
 {pictures["layout_costs.png"]}
 <div class="table-scroll">{layout_costs.to_html(index=False, float_format=lambda value: f"{value:.4g}", border=0)}</div>
 <h3>Earlier five-condition layout pilot (ngspice 42)</h3>
@@ -396,16 +395,14 @@ This is post-hoc characterization, not a relaxed replacement for the original ta
 <p class="muted">Each mode in this earlier pilot has five conditions times four inputs:
 20 points, not 80 RC tests. Its original gated 45-condition extension did not run; 3.5 ns
 was not evaluated. These records remain separate from the new full-grid study below.</p>
-<p>Actual verification run:
+<p>Recorded verification run:
 <a href="{html.escape(layout["receipt"]["run"]["run_url"])}">compact-layout repair evidence</a>.
 The workflow's failure status reflects the preserved 1 ns performance gate,
 not a hidden DRC/LVS failure. Source replay instructions bind the original experimental commit.</p>
 </section>"""
     pvt_table = pvt45_results.comparison_table(full_pvt["frame"])
     pvt_section = f"""
-<section id="pvt45-evidence"><h2>08 / Full-grid archived-deck outcomes</h2>
-<p><strong>{html.escape(pvt45_results.RC_MODEL_LABEL)}.</strong>
-{html.escape(pvt45_results.RC_MODEL_NOTICE)}</p>
+<section id="pvt45-evidence"><h2>Nominal 45-PVT grid: 180 SC and 180 archived RC points</h2>
 <p>The repaired nominal, code-zero schematic and RC circuits were evaluated at
 five process corners, three supplies and three temperatures: <strong>45 conditions,
 four signed inputs each, 180 points per mode</strong>. The primary 2 ns deadline
@@ -427,6 +424,8 @@ The mean per-point overhead is 73.45%; the ratio of population means is 73.08%.<
 nominal dimensions, code zero, 5 fF output loads, 0.5 VDD common mode and a 10 ns clock
 with 50 ps edges. This is a finite sampled result, not a noise, mismatch-yield or
 continuous-input guarantee. It does not retroactively change the earlier 1 ns pilot.</p>
+<p class="muted">Scope: {html.escape(pvt45_results.RC_SCOPE_NOTE)}
+<a href="../../REPRODUCIBILITY.md#archived-rc-model-applicability">Extraction-model evidence and limitations</a>.</p>
 <p>Publication-size vector figures:
 <a href="postlayout_pvt45/figures/pvt45_timing.pdf">PVT timing</a>,
 <a href="postlayout_pvt45/figures/pvt45_comparison.pdf">paired comparison</a>,
@@ -434,20 +433,16 @@ continuous-input guarantee. It does not retroactively change the earlier 1 ns pi
 </section>"""
     html_body = f"""<!doctype html><html lang="en"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Comparator Atlas | When calibration is not enough</title>
+<title>Comparator Atlas | SKY130 StrongARM characterization</title>
 <style>
-:root{{color-scheme:light;--ink:#14213d;--teal:#099c90;--muted:#65758b}}
-*{{box-sizing:border-box}}body{{margin:0;background:#eef3f8;color:var(--ink);font:15px/1.65 system-ui,sans-serif}}
-header{{background:linear-gradient(125deg,#0f1d35,#1c3852);padding:54px max(5vw,24px);color:#fff}}
-header small{{color:#66ddc7;letter-spacing:.15em;font-weight:750}}h1{{font-size:clamp(38px,5vw,68px);line-height:1.06;margin:18px 0}}
-header p{{max-width:900px;color:#c9d7e8}}.tag{{display:inline-block;margin:6px 8px 4px 0;
-border:1px solid #63809b;border-radius:20px;padding:3px 12px;font-size:12px}}
-.cards{{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:28px;max-width:1250px}}
-.card{{background:#ffffff0c;border:1px solid #ffffff22;border-radius:12px;padding:18px}}
-.card strong{{display:block;font-size:30px;color:#6ae2cc}}main{{max-width:1400px;margin:auto;padding:24px}}
-section{{background:#fff;border:1px solid #dce5ef;border-radius:15px;margin:24px 0;padding:28px}}
+:root{{color-scheme:light;--ink:#222;--teal:#087f76;--muted:#525e6a}}
+*{{box-sizing:border-box}}body{{margin:0;background:#fff;color:var(--ink);font:15px/1.65 system-ui,sans-serif}}
+header{{max-width:1156px;margin:auto;padding:32px 28px 12px;border-bottom:2px solid #222}}
+header small{{font-weight:600}}h1{{font-size:clamp(30px,4vw,42px);line-height:1.15;margin:14px 0}}
+header p{{max-width:1000px}}main{{max-width:1156px;margin:auto;padding:0 28px 24px}}
+section{{margin:24px 0;padding:18px 0;border-bottom:1px solid #dce5ef}}
 h2{{margin:0 0 12px;font-size:25px}}h3{{margin-bottom:6px}}img{{width:100%;height:auto}}
-.muted{{color:var(--muted);font-size:13px}}.notice{{border-left:5px solid #e7a339}}
+.muted{{color:var(--muted);font-size:13px}}
 .table-scroll{{overflow:auto}}table{{border-collapse:collapse;width:100%;font-size:13px}}
 th,td{{padding:9px;text-align:right;border-bottom:1px solid #e2e8f0;white-space:nowrap}}th:first-child{{text-align:left}}
 code{{overflow-wrap:anywhere;font-size:12px}}a{{color:#087f76}}.controls{{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}}
@@ -475,25 +470,26 @@ label{{display:flex;align-items:center;gap:6px;font-size:13px}}select{{padding:8
 .waveform-metrics div{{background:#f2f6fa;border-radius:8px;padding:14px}}
 .waveform-metrics strong{{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}}
 #waveform-source{{font-size:11px;overflow-wrap:anywhere;color:var(--muted)}}#waveform-error{{color:#a32b3f;font-weight:700}}
-@media(max-width:700px){{main{{padding:10px}}section{{padding:18px}}.controls label{{width:100%}}}}
+@media(max-width:700px){{header{{padding:22px 18px 12px}}main{{padding:0 18px 18px}}section{{padding:14px 0}}.controls label{{width:100%}}}}
 @media(max-width:700px){{.waveform-controls,.waveform-metrics{{grid-template-columns:1fr}}}}
 @media print{{header{{padding:20px}}section{{break-inside:avoid}}.controls,#explorer-grid,#explorer-detail{{display:none}}}}
 </style>
-<header><small>REPRODUCIBLE ANALOG DESIGN / IEEE SSCS CODE-A-CHIP CANDIDATE</small>
-<h1>Comparator Atlas</h1><p style="font-size:23px;margin:0 0 8px">When calibration is not enough.</p>
+<header><small>IEEE SSCS Code-a-Chip / ISSCC 2027</small>
+<h1>Comparator Atlas</h1>
 <p><strong>{html.escape(author["name"])}</strong> &mdash; {html.escape(author["affiliation"])}</p>
-<p>A SKY130 comparator study from sizing and calibration to layout and parasitic extraction:
-compare decision accuracy, delay and energy under the same stated conditions.</p>
-<span class="tag">SKY130 / ngspice {html.escape(version.group(1))}</span>
-<span class="tag">Schematic and extracted results</span><span class="tag">Open-source notebook</span>
-<div class="cards">
-<div class="card"><strong>{100 * baseline_fraction:.1f}% &rarr; {100 * selected_fraction:.1f}%</strong>
-target-band grid coverage<br><small>same local calibration; 1 ns; |input| &ge; 1 mV</small></div>
-<div class="card"><strong>49 &times; {len(manifest["designs"])}</strong>declared operating cases<br><small>45-point PVT grid + four stress controls per design</small></div>
-<div class="card"><strong>{get_design(name).transistor_count}</strong>transistor instances<br><small>selected core with physical trim branches</small></div>
-<div class="card"><strong>{energy["relative_change_percent"]:+.1f}%</strong>mean core-energy change<br><small>{energy["matched_points"]} matched points; not total chip energy</small></div>
-</div></header><main>
-<section class="notice"><h2>Design tradeoffs</h2>
+<p>SKY130 StrongARM comparator: calibrated schematic characterization and archived
+nominal-layout simulations. Decision correctness, delay and core-rail energy are
+reported for explicit input, PVT and deadline conditions.</p>
+</header><main>
+<section><h2>Study design and aggregate schematic results</h2>
+<p>The schematic study uses ngspice {html.escape(version.group(1))} and
+49 &times; {len(manifest["designs"])} declared operating cases: 45 PVT combinations
+plus four nominal stress controls per design. The selected circuit contains
+{get_design(name).transistor_count} transistor instances, including physical trim branches.</p>
+<p>With the same local calibration, a 1 ns deadline and sampled |input| &ge; 1 mV,
+correct-point coverage changes from {100 * baseline_fraction:.1f}% to {100 * selected_fraction:.1f}%.
+Mean core-rail energy changes by {energy["relative_change_percent"]:+.1f}% over
+{energy["matched_points"]} matched points; this excludes external drivers and calibration infrastructure.</p>
 <div class="split"><div><p>Selected circuit: <code>{html.escape(name)}</code>.</p>
 <p>The transistor gate-area proxy is <span class="metric">{energy["gate_area_ratio"]:.2f}x</span> the original.
 Matched mean core-rail energy is <strong>{energy["baseline_fj"]:.2f} &rarr; {energy["selected_fj"]:.2f} fJ/cycle</strong>.
@@ -502,17 +498,17 @@ This is not a claim of lower area, lower system power, silicon yield or a new co
 A lower-energy candidate is included to show the accuracy-energy tradeoff.</p>
 <p>The PVT comparison is schematic-level. The physical-layout section separately reports
 nominal code-zero measurements and the remaining slow-corner limitation.</p></div></div></section>
-<section><h2>00 / Understand the actual electrical circuit</h2>{pictures["circuit_guide.png"]}
+<section><h2>27-device circuit topology and trim branches</h2>{pictures["circuit_guide.png"]}
 <p class="muted">The source-checked MOS schematic shows the cross-coupled core, a reset PFET
 repeated at the four listed nodes, and one trim bit repeated on both sides for k = 0–3.
 Filled dots are electrical junctions; unmarked crossings are unconnected. Matching node labels
 across panels denote the same net. All 27 instances, device flavors and body ties are retained.
 <a href="../presentation/circuit_guide.pdf">Vector PDF schematic</a>.</p></section>
-<section><h2>01 / Selection before full validation</h2>{pictures["search.png"]}
+<section><h2>Nine-candidate selection on three declared conditions</h2>{pictures["search.png"]}
 <p class="muted">Selection used TT/1.8 V/27 C, SS/1.62 V/-40 C and FF/1.95 V/125 C,
 six declared input values, and 2x energy / 4x gate-area-proxy budgets. The initial prototype informed the family.
 The recorded objective and candidate list were frozen before this campaign. No global optimum is asserted.</p></section>
-<section><h2>02 / The full PVT comparison</h2>{pictures["pvt.png"]}
+<section><h2>Schematic PVT comparison at controlled width stress</h2>{pictures["pvt.png"]}
 <p class="muted">The figure contains the regular 45-condition PVT grid at +4% branch-width stress.
 All plots and tables are deterministic test coverage, not error probability or manufacturing yield.
 The four additional nominal stress controls remain in the full table and explorer.</p>
@@ -522,7 +518,7 @@ The four additional nominal stress controls remain in the full table and explore
 not a blinded external benchmark. Unavailable calibration remains a failed coverage point; its energy is not invented.</p>
 <div class="table-scroll">{reserved.to_html(float_format=lambda value: f"{value:.4g}", border=0)}</div></section>
 {professional_section}
-<section><h2>03 / Inspect every decision yourself</h2>
+<section><h2>Stored decision map: circuit, calibration and deadline</h2>
 <p>These controls filter stored SPICE observations; they do not launch simulations.
 The input guardband changes the scoring band, not the underlying outcomes. Dimmed cells are outside that band.</p>
 <div class="controls">
@@ -539,10 +535,9 @@ The input guardband changes the scoring band, not the underlying outcomes. Dimme
 <span><i class="swatch" style="background:#d5dee9"></i>Zero input, unscored</span></div>
 <p id="explorer-stats" aria-live="polite"></p><div id="explorer-grid"></div>
 <p id="explorer-detail" role="status"></p></section>
-<section id="waveform-lab"><h2>03b / Why did this decision pass or fail?</h2>
-<p class="muted">RC examples show archived-deck outcomes; model physical fidelity is not yet qualified.
-See the model-applicability limitation in the layout section. Changing the deadline does not resolve it.</p>
-<p>Explore <strong>eight declared examples from actual retained waveforms</strong>.
+<section id="waveform-lab"><h2>Retained waveforms: wrong-sign, unresolved and correct decisions</h2>
+<p><strong>Eight declared examples from retained waveforms</strong> compare the complementary
+output rails against each recorded deadline.
 These are representative teaching cases, not the raw trace for every atlas cell and not a new validation set.
 Changing the deadline reads the same trace; it does not run SPICE or alter a circuit.</p>
 <div class="waveform-presets" role="group" aria-label="Guided waveform examples">
@@ -572,15 +567,16 @@ Changing the deadline reads the same trace; it does not run SPICE or alter a cir
 <p class="muted">Core energy is measured over the entire 10 ns cycle and does not shrink when the display deadline moves.
 Cursor voltages use the original waveform samples; latency is a sampled measurement, not an exact crossing.
 For layout examples, the original 1 ns pilot remains failed even when an individual trace resolves by 2 ns.</p>
+<p class="muted">Scope: {html.escape(pvt45_results.RC_SCOPE_NOTE)}</p>
 <details><summary>Source record</summary><p id="waveform-source"></p></details></section>
-<section><h2>04 / Timing and resolution are coupled</h2>{pictures["policies.png"]}{pictures["guardbands.png"]}
+<section><h2>Calibration deadline and scored input band</h2>{pictures["policies.png"]}{pictures["guardbands.png"]}
 <p class="muted">The hardware comparison uses the same local 3.5 ns calibration policy.
 The 1 ns policy is a separate ablation: it minimizes the finite-deadline decision interval rather than
 only its long-deadline offset. A failed calibration is explicitly unavailable, not silently replaced by code zero.</p></section>
-<section><h2>05 / A real weak-corner waveform</h2>{pictures["cold_waveforms.png"]}
+<section><h2>Retained cold-corner schematic waveform</h2>{pictures["cold_waveforms.png"]}
 <p class="muted">This condition was known to be weak in the first prototype and was included in selection.
 It illustrates mechanism; the reserved/full PVT tables, not this one waveform, support generalization within the declared grid.</p></section>
-<section><h2>06 / Stress the interface, not just the transistor model</h2>{pictures["operating.png"]}
+<section><h2>Input history, settling and interface perturbations</h2>{pictures["operating.png"]}
 <p class="muted">Five nominal/extreme PVT conditions, four inputs, and eight explicitly defined stresses per design.
 Codes are frozen before perturbing the interface. The history step changes the external input at 18 to 18.05 ns;
 evaluation starts at 22.025 ns. Pin error includes deterministic settling and kickback, not random noise.</p>
@@ -588,7 +584,7 @@ evaluation starts at 22.025 ns. Pin error includes deterministic settling and ki
 at most 1% core-energy difference and at most 20 ps resolved-latency difference. These checks are not production signoff.</p></section>
 {layout_section}
 {pvt_section}
-<section><h2>09 / Reproduction and references</h2>
+<section><h2>Reproduction, scope and references</h2>
 <p>Public entry: <code>Comparator_Atlas.ipynb</code>, with Python 3.10 review mode and Colab bootstrap.
 Optional Windows bootstrap:
 <code>node scripts\\setup.mjs</code>. Then run the CLI stages
@@ -636,7 +632,7 @@ and documentation. Original code is MIT licensed; model and tool licenses are re
         "waveform_ui_source_sha256": sha256(waveform_javascript_path),
         "full_pvt45_input_sha256": pvt45_results.REFERENCE_FILES,
         "full_pvt45_plot_source_sha256": sha256(Path(pvt45_results.__file__)),
-        "rc_model_applicability_notice": pvt45_results.RC_MODEL_NOTICE,
+        "rc_model_applicability_notice": pvt45_results.RC_SCOPE_NOTE,
         "artifact_sha256": {
             "report.html": sha256(path), "explorer_data.json": sha256(STUDY / "explorer_data.json"),
             **{str(Path("figures") / filename): sha256(figures / filename) for filename in pictures},

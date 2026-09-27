@@ -139,13 +139,13 @@ def test_rc_model_applicability_is_not_numerical_or_structural_qualification():
 
 
 def test_current_public_text_retains_the_rc_model_warning():
-    from presentation.pvt45_results import RC_MODEL_LABEL, RC_MODEL_NOTICE
+    from presentation.pvt45_results import RC_MODEL_LABEL, RC_SCOPE_NOTE
 
     root = Path(__file__).resolve().parents[1]
     for name in ("README.md", "REVIEWER_GUIDE.md", "REPRODUCIBILITY.md", "presentation/LAYOUT.md"):
         assert RC_MODEL_LABEL in (root / name).read_text(encoding="utf-8")
-    for name in ("results/study/report.html", "results/study/abstract.txt"):
-        assert RC_MODEL_NOTICE in (root / name).read_text(encoding="utf-8")
+    assert RC_SCOPE_NOTE in (root / "results/study/report.html").read_text(encoding="utf-8")
+    assert RC_SCOPE_NOTE in (root / "results/study/abstract.txt").read_text(encoding="utf-8")
     notebook = json.loads((root / NOTEBOOK).read_bytes())
     markdown = "\n".join("".join(cell["source"]) for cell in notebook["cells"]
                          if cell["cell_type"] == "markdown")
@@ -156,7 +156,7 @@ def test_current_public_text_retains_the_rc_model_warning():
 @pytest.mark.parametrize("separator", ["/", "\\"])
 def test_scoped_report_reuses_checked_figures_without_running_factories(monkeypatch, separator):
     from comparator_atlas import study_report
-    from presentation.pvt45_results import RC_MODEL_NOTICE
+    from presentation.pvt45_results import RC_SCOPE_NOTE
 
     captured = {}
     read_text = Path.read_text
@@ -181,9 +181,15 @@ def test_scoped_report_reuses_checked_figures_without_running_factories(monkeypa
     monkeypatch.setattr(study_report, "write_json", lambda path, value: captured.update({path.name: value}))
     monkeypatch.setattr(Path, "write_text", lambda path, text, **kwargs: captured.update({path.name: text}))
     study_report.render_study(refresh_figures=set())
-    assert RC_MODEL_NOTICE in captured["report.html"]
+    assert RC_SCOPE_NOTE in captured["report.html"]
     assert captured["report.html"].count('<img ') == 15
-    assert captured["presentation_manifest.json"]["rc_model_applicability_notice"] == RC_MODEL_NOTICE
+    assert captured["presentation_manifest.json"]["rc_model_applicability_notice"] == RC_SCOPE_NOTE
+    assert 'class="card"' not in captured["report.html"]
+    for slogan in ("When calibration is not enough", "Inspect every decision yourself",
+                   "A real weak-corner waveform", "not only a weak baseline"):
+        assert slogan not in captured["report.html"]
+    assert "12/20 correct points" in captured["report.html"]
+    assert "180/180 correct at 2 ns; 156/180 at 1 ns" in captured["report.html"]
 
 
 def test_scoped_report_rejects_changed_cached_figure(monkeypatch):

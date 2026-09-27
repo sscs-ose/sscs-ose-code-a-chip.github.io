@@ -84,7 +84,7 @@ def test_standalone_pvt_figures_disclose_unqualified_rc_model_without_changing_d
     ):
         fig = factory()
         try:
-            assert pvt.RC_MODEL_LABEL in [text.get_text() for text in fig.texts]
+            assert pvt.RC_FIGURE_LABEL in [text.get_text() for text in fig.texts]
             review_artists(fig, FigureProfile(height_in=height))
         finally:
             plt.close(fig)
@@ -92,3 +92,16 @@ def test_standalone_pvt_figures_disclose_unqualified_rc_model_without_changing_d
     table = pvt.comparison_table(frame).set_index("implementation")
     assert table.loc["Extracted RC", "correct_at_1ns"] == 156
     assert table.loc["Extracted RC", "correct_at_2ns"] == 180
+
+
+def test_concise_scope_preserves_model_limits_and_original_caption_content():
+    from presentation import pvt45_results as pvt
+
+    assert len(pvt.RC_SCOPE_NOTE.split()) <= 35
+    for phrase in ("archived simulation decks", "physical fidelity remains unqualified",
+                   "not isolated resistance effects or silicon predictions"):
+        assert phrase in pvt.RC_SCOPE_NOTE
+    for name in ("timing", "comparison", "worst_waveform"):
+        caption = (pvt.DATA / "figures" / f"pvt45_{name}_caption.txt").read_text(encoding="utf-8")
+        assert caption.endswith("Scope: " + pvt.RC_SCOPE_NOTE + "\n")
+        assert pvt.RC_MODEL_NOTICE not in caption
