@@ -35,7 +35,7 @@ def evidence():
             "candidate": "i10_m8_s2",
             "status": "PASS",
             "samples": 100,
-            "seed_start": 9001,
+            "seed_start": 11001,
             "error_yield_percent": 97.0,
             "branch_yield_percent": 96.0,
             "headroom_pass": True,
@@ -92,7 +92,7 @@ def test_pass_label_cannot_override_failed_validation(evidence, field, value):
 
 @pytest.mark.parametrize(
     "start,expected", [(2901, True), (2902, False), (3001, False),
-                       (3012, False), (3013, True), (9001, True)]
+                       (3012, False), (3013, True), (11001, True)]
 )
 def test_seed_independence_checks_both_inclusive_endpoints(
     evidence, start, expected
@@ -157,6 +157,30 @@ def test_missing_seed_metadata_cannot_claim_independence(evidence):
     del evidence[0]["samples_per_candidate"]
     with pytest.raises((qualification.QualificationError, KeyError)):
         qualification.analyze(*evidence)
+
+
+@pytest.mark.parametrize("recorded_ranges", [None, []])
+def test_seen_holdout_cannot_qualify_despite_disjoint_current_screen(
+    evidence, recorded_ranges
+):
+    sweep = evidence[0]
+    sweep["independent_validation"]["seed_start"] = 9001
+    if recorded_ranges is not None:
+        sweep["validation_excluded_seed_ranges"] = recorded_ranges
+    result = qualification.analyze(*evidence)
+    assert result["qualification_components"]["disjoint_validation_seeds"] is True
+    assert result["qualification_components"]["unseen_validation_seeds"] is False
+    assert result["qualified_for_release_review"] is False
+    assert result["validation_seed_conflicts"][0]["start"] == 9001
+
+
+def test_additional_examined_ranges_are_rechecked(evidence):
+    evidence[0]["validation_excluded_seed_ranges"] = [
+        {"start": 11050, "stop": 11149, "source_run_id": 123}
+    ]
+    result = qualification.analyze(*evidence)
+    assert result["qualification_components"]["unseen_validation_seeds"] is False
+    assert result["qualified_for_release_review"] is False
 
 
 @pytest.mark.parametrize(

@@ -18,6 +18,7 @@ from statistics import mean
 
 import mismatch_mc
 import run_sky130
+import seed_policy
 
 ROOT = Path(__file__).resolve().parent
 def run_sample(
@@ -104,7 +105,7 @@ def main() -> int:
     parser.add_argument("--samples-per-candidate", type=int, default=12)
     parser.add_argument("--seed-start", type=int, default=3001)
     parser.add_argument("--validation-samples", type=int, default=0)
-    parser.add_argument("--validation-seed-start", type=int, default=5001)
+    parser.add_argument("--validation-seed-start", type=int)
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--temps", default="-40:125:5")
     parser.add_argument(
@@ -120,6 +121,25 @@ def main() -> int:
         or args.jobs < 1
     ):
         print("MISMATCH SIZING SWEEP: FAIL: invalid sample/job count")
+        return 2
+
+    try:
+        seed_policy.seed_range(args.seed_start, args.samples_per_candidate)
+        if args.validation_samples >= 2:
+            if args.validation_seed_start is None:
+                raise ValueError("an explicit fresh validation seed start is required")
+            conflicts = seed_policy.validation_conflicts(
+                args.validation_seed_start,
+                args.validation_samples,
+                seed_policy.PREVIOUSLY_EXAMINED_SEED_RANGES,
+            )
+            if conflicts:
+                raise ValueError(
+                    "validation seeds overlap previously examined evidence: "
+                    f"{conflicts}"
+                )
+    except ValueError as exc:
+        print(f"MISMATCH SIZING SWEEP: FAIL: {exc}")
         return 2
 
     if (
@@ -143,13 +163,20 @@ def main() -> int:
         print("MISMATCH SIZING SWEEP: FAIL: ngspice not found")
         return 2
 
-    # Keep the screen compact but reach the geometry range implied by the
-    # baseline branch-mismatch distribution.  The current 1x mirror has a
-    # retained p95 max branch mismatch above 20%, so stopping at 4x linear
-    # scale is unlikely to test whether the 1% internal target is reachable.
+    # Extend the discovery range after independent validation showed that
+    # i1_m16_s1 still misses both 95% mismatch-yield targets.  Keep the
+    # previously explored points for continuity, but add larger mirror and
+    # sensor geometries so the next selection is evidence-driven rather than
+    # an untested extrapolation from the 16x candidate.
     iref_scales = (1.0, 10.0)
-    mirror_scales = (1.0, 4.0, 8.0, 16.0, 24.0)
-    sensor_scales = (1.0, 2.0)
+    # Refine the interval above the 16x candidate: independent validation
+    # reached 98% temperature-error yield but only 83% branch-mismatch yield.
+    # The 32x and 48x devices had no matching PDK model (run 36298147889).
+    # Exclude those known-invalid geometries and probe the intermediate areas.
+    mirror_scales = (
+        1.0, 4.0, 8.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0, 28.0, 30.0,
+    )
+    sensor_scales = (1.0, 2.0, 4.0)
     try:
         model = run_sky130.discover_model_lib()
         revision = run_sky130.pdk_revision(model)
@@ -157,19 +184,25 @@ def main() -> int:
             raise RuntimeError(
                 "exact SKY130 revision unavailable; set SKY130_PDK_REVISION"
             )
-        candidates = []
-        for iref_scale in iref_scales:
-            for mirror_scale in mirror_scales:
-                for sensor_scale in sensor_scales:
-                    tag = (
-                        f"i{iref_scale:g}_m{mirror_scale:g}"
-                        f"_s{sensor_scale:g}"
-                    )
-                    out = args.output_dir / tag
-                    seeds = [
-                        args.seed_start + idx
-                        for idx in range(args.samples_per_candidate)
-                    ]
+    except Exception as exc:
+        print(f"MISMATCH SIZING SWEEP: FAIL: {exc}", file=sys.stderr)
+        return 1
+
+    candidates = []
+    invalid_candidates = []
+    for iref_scale in iref_scales:
+        for mirror_scale in mirror_scales:
+            for sensor_scale in sensor_scales:
+                tag = (
+                    f"i{iref_scale:g}_m{mirror_scale:g}"
+                    f"_s{sensor_scale:g}"
+                )
+                out = args.output_dir / tag
+                seeds = [
+                    args.seed_start + idx
+                    for idx in range(args.samples_per_candidate)
+                ]
+                try:
                     with ThreadPoolExecutor(
                         max_workers=args.jobs
                     ) as pool:
@@ -196,6 +229,7 @@ def main() -> int:
                     candidates.append(
                         {
                             "candidate": tag,
+                            "simulation_status": "VALID",
                             "iref_scale": iref_scale,
                             "mirror_linear_scale": mirror_scale,
                             "mirror_area_scale": mirror_scale**2,
@@ -204,8 +238,28 @@ def main() -> int:
                             **candidate_metrics(result, files),
                         }
                     )
-    except Exception as exc:
-        print(f"MISMATCH SIZING SWEEP: FAIL: {exc}", file=sys.stderr)
+                except Exception as exc:
+                    invalid = {
+                        "candidate": tag,
+                        "simulation_status": "INVALID",
+                        "iref_scale": iref_scale,
+                        "mirror_linear_scale": mirror_scale,
+                        "mirror_area_scale": mirror_scale**2,
+                        "sensor_linear_scale": sensor_scale,
+                        "sensor_area_scale": sensor_scale**2,
+                        "failure_reason": str(exc),
+                    }
+                    invalid_candidates.append(invalid)
+                    print(
+                        f"MISMATCH SIZING SWEEP: INVALID {tag}: {exc}",
+                        file=sys.stderr,
+                    )
+
+    if not candidates:
+        print(
+            "MISMATCH SIZING SWEEP: FAIL: no candidate completed simulation",
+            file=sys.stderr,
+        )
         return 1
 
     ranked = sorted(
@@ -285,6 +339,9 @@ def main() -> int:
         ),
         "samples_per_candidate": args.samples_per_candidate,
         "seed_start": args.seed_start,
+        "validation_excluded_seed_ranges": list(
+            seed_policy.PREVIOUSLY_EXAMINED_SEED_RANGES
+        ),
         "parallel_jobs": args.jobs,
         "temperature_c": temps,
         "selection_policy": (
@@ -293,6 +350,8 @@ def main() -> int:
             "p95 branch mismatch, and worst power"
         ),
         "candidates": ranked,
+        "invalid_candidates": invalid_candidates,
+        "invalid_candidate_count": len(invalid_candidates),
         "recommended_for_independent_validation": best,
         "independent_validation": validation,
         "headroom_qualified_candidate_found": best is not None,

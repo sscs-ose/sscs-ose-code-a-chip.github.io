@@ -187,7 +187,7 @@ def test_sizing_candidate_qualification_requires_both_mismatch_and_dense_pass():
         "candidate": "i10_m8_s2",
         "status": "PASS",
         "samples": 100,
-        "seed_start": 9001,
+        "seed_start": 11001,
         "error_yield_percent": 97.0,
         "branch_yield_percent": 96.0,
         "headroom_pass": True,

@@ -97,6 +97,7 @@ def main():
         "full_pdk_evidence_audit.py",
         "pdk_calibration_analysis.py",
         "readout_budget.py",
+        "seed_policy.py",
     ]
     for name in required:
         hit = (ROOT / name).is_file()

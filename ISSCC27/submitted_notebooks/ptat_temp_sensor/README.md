@@ -159,6 +159,30 @@ The compact retained record is
 run 36259524511 and artifact digest
 `sha256:489e26dc01ed0dde54091e204d3162c47d472d969b48dd4b153a9bb59c2d3c84`.
 
+### September 27 sizing refinement
+
+[Workflow run 36298147889](https://github.com/3more102/ISSCC27_PTAT_Temperature_Sensor_v13/actions/runs/36298147889)
+selected `i10_m16_s4`. On seeds 9001–9100 its temperature-error yield was
+**98%**, but branch-mismatch yield was **83%**, below the unchanged **95%**
+target. These seeds had already been examined for an earlier sizing candidate;
+this adaptive follow-up is not a fresh independent confirmation. The original
+artifact is identified by
+`sha256:fa14ddb0561d7c14440eda1c737a090d6b16495d0acd3bec363cbd734c6d06c9`.
+
+The 32× and 48× mirror geometries failed with `could not find a valid modelname`,
+so they are excluded from the refined screen. Other failed candidates remain
+in the invalid-candidate report and cannot enter candidate selection.
+
+The sizing runner now requires an explicit validation seed range and rejects
+ranges examined in prior studies. CI reserves a separate 1000-seed block for
+each new workflow run using `seed_policy.workflow_validation_seed`; a retry
+of the same run reproduces the same samples. Qualification independently
+rechecks both current-screen overlap and previously examined ranges. Add newly
+examined ranges to `seed_policy.py` before using those results to refine another
+study, and use fresh seeds for manual adaptive runs. Release qualification still
+requires at least 100 samples with both yields at or above 95%, plus dense-corner,
+headroom, provenance, and readout checks.
+
 ## Physical implementation
 
 A layout is encouraged by the Code-a-Chip program but not required. The

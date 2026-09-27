@@ -13,6 +13,8 @@ import math
 import sys
 from pathlib import Path
 
+import seed_policy
+
 ROOT = Path(__file__).resolve().parent
 
 PROVENANCE_KEYS = (
@@ -197,6 +199,20 @@ def analyze(
         screen_start + screen_samples <= validation_start
         or validation_start + samples <= screen_start
     )
+    excluded_ranges = list(seed_policy.PREVIOUSLY_EXAMINED_SEED_RANGES)
+    recorded_ranges = sweep.get("validation_excluded_seed_ranges", [])
+    if not isinstance(recorded_ranges, list):
+        raise QualificationError("invalid examined seed-range evidence")
+    for recorded in recorded_ranges:
+        if recorded not in excluded_ranges:
+            excluded_ranges.append(recorded)
+    try:
+        historical_conflicts = seed_policy.validation_conflicts(
+            validation_start, samples, excluded_ranges
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise QualificationError("invalid examined seed-range evidence") from exc
+    unseen_validation_seeds = not historical_conflicts
     error_yield = number(
         "error yield", validation["error_yield_percent"], maximum=100.0
     )
@@ -221,6 +237,7 @@ def analyze(
         validation.get("status") == "PASS"
         and samples >= targets["mismatch_min_samples"]
         and independent_seeds
+        and unseen_validation_seeds
         and error_yield >= targets["mismatch_target_yield_percent"]
         and branch_yield >= targets["mismatch_target_yield_percent"]
     )
@@ -314,6 +331,7 @@ def analyze(
         "qualification_components": {
             "independent_mismatch_pass": mismatch_pass,
             "disjoint_validation_seeds": independent_seeds,
+            "unseen_validation_seeds": unseen_validation_seeds,
             "independent_headroom_pass": validation_headroom_pass,
             "dense_tt_ff_ss_pass": dense_pass,
             "readout_pass": readout_pass,
@@ -321,6 +339,8 @@ def analyze(
             "readout_provenance_match": readout_provenance == provenance,
         },
         "provenance": provenance,
+        "validation_excluded_seed_ranges": excluded_ranges,
+        "validation_seed_conflicts": historical_conflicts,
         "readout": {
             "status": readout.get("status"),
             "bits": readout_bits,
