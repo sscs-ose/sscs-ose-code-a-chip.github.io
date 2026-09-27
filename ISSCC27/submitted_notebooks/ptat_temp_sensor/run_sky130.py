@@ -86,14 +86,16 @@ def characterization_seed(
     *,
     sensor_linear_scale: float | None = None,
     mirror_linear_scale: float | None = None,
+    mirror_length_multiplier: float = 1.0,
     vdd_v: float | None = None,
     branch_current_a: float | None = None,
     reference_current_a: float | None = None,
 ) -> dict:
-    """Return the nominal seed with W and L scaled together.
+    """Return the nominal seed with explicit geometry overrides.
 
     Scaling W and L by the same factor preserves nominal W/L and the 8:1
-    sensor width ratio while increasing device area as scale**2. This is used
+    sensor width ratio while increasing device area as scale**2. An additional
+    mirror-length multiplier increases mirror L without changing its W. This is used
     only for explicit sizing studies unless design_requirements.json itself is
     changed after verification.
     """
@@ -109,6 +111,8 @@ def characterization_seed(
         raise ValueError("sensor linear scale must be a finite positive number")
     if not math_isfinite_positive(mirror_scale):
         raise ValueError("mirror linear scale must be a finite positive number")
+    if not math_isfinite_positive(mirror_length_multiplier):
+        raise ValueError("mirror length multiplier must be finite and positive")
     seed = copy.deepcopy(load_design()["nominal_characterization_seed"])
     overrides = {
         "vdd_v": vdd_v,
@@ -126,7 +130,7 @@ def characterization_seed(
     sensor["l_um"] *= sensor_scale
     sensor["w_small_um"] *= sensor_scale
     sensor["w_large_um"] *= sensor_scale
-    mirror["l_um"] *= mirror_scale
+    mirror["l_um"] *= mirror_scale * mirror_length_multiplier
     mirror["w_um"] *= mirror_scale
     return seed
 
@@ -211,6 +215,7 @@ def render(
     *,
     sensor_linear_scale: float | None = None,
     mirror_linear_scale: float | None = None,
+    mirror_length_multiplier: float = 1.0,
     vdd_v: float | None = None,
     branch_current_a: float | None = None,
     reference_current_a: float | None = None,
@@ -219,6 +224,7 @@ def render(
         device_linear_scale,
         sensor_linear_scale=sensor_linear_scale,
         mirror_linear_scale=mirror_linear_scale,
+        mirror_length_multiplier=mirror_length_multiplier,
         vdd_v=vdd_v,
         branch_current_a=branch_current_a,
         reference_current_a=reference_current_a,
@@ -301,6 +307,29 @@ def validate_csv(path: Path, temps: list[float], mode: str) -> None:
             )
 
 
+def capture_csv_export(netlist: str) -> tuple[str, str]:
+    """Export rows through stdout instead of repeated filesystem appends."""
+    headers = re.findall(r'(?m)^echo "([^"]+)" > results/.*$', netlist)
+    if len(headers) != 1:
+        raise RuntimeError("template must have one CSV header export")
+    netlist = re.sub(r'(?m)^echo "[^"]+" > results/.*$', "", netlist)
+    netlist, count = re.subn(
+        r"(?m)^  echo (\$t.*) >> results/.*$",
+        r"  echo PTAT_CSV \1", netlist,
+    )
+    if count != 1:
+        raise RuntimeError("template must have one CSV data-row export")
+    return netlist, headers[0]
+
+
+def write_captured_csv(path: Path, header: str, stdout: str,
+                       temps: list[float], mode: str) -> None:
+    rows = [line.removeprefix("PTAT_CSV ") for line in stdout.splitlines()
+            if line.startswith("PTAT_CSV ")]
+    path.write_text(header + "\n" + "\n".join(rows) + "\n", encoding="utf-8")
+    validate_csv(path, temps, mode)
+
+
 def run_one(
     mode: str,
     corner: str,
@@ -312,6 +341,7 @@ def run_one(
     *,
     sensor_linear_scale: float | None = None,
     mirror_linear_scale: float | None = None,
+    mirror_length_multiplier: float = 1.0,
     vdd_v: float | None = None,
     branch_current_a: float | None = None,
     reference_current_a: float | None = None,
@@ -332,7 +362,7 @@ def run_one(
     csv_path = output_dir/f"ptat_{mode}_{corner}.csv"
     output_rel = csv_path.relative_to(results_root).as_posix()
     net = netdir/f"ptat_{mode}_{corner}.spice"
-    net.write_text(
+    netlist, header = capture_csv_export(
         render(
             mode,
             corner,
@@ -342,12 +372,13 @@ def run_one(
             device_linear_scale=device_linear_scale,
             sensor_linear_scale=sensor_linear_scale,
             mirror_linear_scale=mirror_linear_scale,
+            mirror_length_multiplier=mirror_length_multiplier,
             vdd_v=vdd_v,
             branch_current_a=branch_current_a,
             reference_current_a=reference_current_a,
-        ),
-        encoding="utf-8",
+        )
     )
+    net.write_text(netlist, encoding="utf-8")
     ngspice_env, _ = prepare_ngspice_environment(output_dir)
     proc = subprocess.run(
         [ngspice, "-b", str(net)],
@@ -365,7 +396,7 @@ def run_one(
         raise RuntimeError(
             f"ngspice failed for {mode}/{corner}; see {logdir}"
         )
-    validate_csv(csv_path, temps, mode)
+    write_captured_csv(csv_path, header, proc.stdout, temps, mode)
     return csv_path
 
 
@@ -415,6 +446,10 @@ def main() -> int:
         ),
     )
     ap.add_argument(
+        "--mirror-length-multiplier", type=float, default=1.0,
+        help="Multiply mirror L after linear scaling; W is unchanged.",
+    )
+    ap.add_argument(
         "--output-dir",
         type=Path,
         default=ROOT/"results"/"dense_pdk",
@@ -425,6 +460,7 @@ def main() -> int:
             args.device_linear_scale,
             sensor_linear_scale=args.sensor_linear_scale,
             mirror_linear_scale=args.mirror_linear_scale,
+            mirror_length_multiplier=args.mirror_length_multiplier,
             vdd_v=args.vdd_v,
             branch_current_a=args.branch_current_a,
             reference_current_a=args.reference_current_a,
@@ -455,6 +491,7 @@ def main() -> int:
                             device_linear_scale=args.device_linear_scale,
                             sensor_linear_scale=args.sensor_linear_scale,
                             mirror_linear_scale=args.mirror_linear_scale,
+                            mirror_length_multiplier=args.mirror_length_multiplier,
                             vdd_v=args.vdd_v,
                             branch_current_a=args.branch_current_a,
                             reference_current_a=args.reference_current_a,
@@ -489,6 +526,7 @@ def main() -> int:
             else args.mirror_linear_scale
         ),
         "effective_geometry": seed_geometry(seed),
+        "mirror_length_multiplier": args.mirror_length_multiplier,
         "operating_point": {
             "vdd_v": seed["vdd_v"],
             "branch_current_a": seed["branch_current_a"],

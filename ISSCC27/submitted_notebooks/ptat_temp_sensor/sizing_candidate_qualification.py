@@ -179,6 +179,16 @@ def analyze(
         metadata["mirror_linear_scale"],
         selected["mirror_linear_scale"],
     )
+    close(
+        "mirror length multiplier",
+        metadata.get("mirror_length_multiplier", 1.0),
+        selected.get("mirror_length_multiplier", 1.0),
+    )
+    close(
+        "readout mirror length multiplier",
+        readout.get("geometry", {}).get("mirror_length_multiplier", 1.0),
+        metadata.get("mirror_length_multiplier", 1.0),
+    )
     provenance = require_matching_provenance(sweep, metadata)
     readout_provenance = require_readout_provenance(readout, metadata)
 
@@ -313,6 +323,9 @@ def analyze(
         "geometry": {
             "sensor_linear_scale": float(selected["sensor_linear_scale"]),
             "mirror_linear_scale": float(selected["mirror_linear_scale"]),
+            "mirror_length_multiplier": float(
+                selected.get("mirror_length_multiplier", 1.0)
+            ),
         },
         "operating_point": {
             "reference_current_a": expected_iref,

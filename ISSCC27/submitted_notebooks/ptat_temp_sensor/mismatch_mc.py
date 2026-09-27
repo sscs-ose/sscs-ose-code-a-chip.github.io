@@ -9,6 +9,7 @@ temperature sweep.
 The runner supports explicit calibration anchors and geometry scaling. Geometry
 scales multiply W and L together, preserving W/L and the 8x sensor width ratio
 while increasing device area for statistically stronger mismatch candidates.
+The optional mirror-length multiplier independently increases PMOS length.
 """
 from __future__ import annotations
 
@@ -133,10 +134,13 @@ def render(
     *,
     sensor_linear_scale: float = 1.0,
     mirror_linear_scale: float = 1.0,
+    mirror_length_multiplier: float = 1.0,
     vdd_v: float | None = None,
     reference_current_a: float | None = None,
 ) -> str:
-    if sensor_linear_scale <= 0.0 or mirror_linear_scale <= 0.0:
+    if not all(run_sky130.math_isfinite_positive(x) for x in (
+        sensor_linear_scale, mirror_linear_scale, mirror_length_multiplier,
+    )):
         raise ValueError("geometry linear scales must be positive")
 
     design = run_sky130.load_design()["nominal_characterization_seed"]
@@ -164,7 +168,9 @@ def render(
         "__LNS__": str(sensor["l_um"] * sensor_linear_scale),
         "__WNS1__": str(sensor["w_small_um"] * sensor_linear_scale),
         "__WNS2__": str(sensor["w_large_um"] * sensor_linear_scale),
-        "__LPM__": str(mirror["l_um"] * mirror_linear_scale),
+        "__LPM__": str(
+            mirror["l_um"] * mirror_linear_scale * mirror_length_multiplier
+        ),
         "__WPM__": str(mirror["w_um"] * mirror_linear_scale),
         "__TEMPS__": " ".join(f"{x:g}" for x in temps),
         "__OUTPUT_CSV__": output_rel,
@@ -189,6 +195,7 @@ def run_sample(
     *,
     sensor_linear_scale: float = 1.0,
     mirror_linear_scale: float = 1.0,
+    mirror_length_multiplier: float = 1.0,
     vdd_v: float | None = None,
     reference_current_a: float | None = None,
 ) -> Path:
@@ -209,19 +216,22 @@ def run_sample(
     csv_path = out / f"sample_{seed:05d}.csv"
     rel = csv_path.relative_to(results_root).as_posix()
     net = netdir / f"sample_{seed:05d}.spice"
-    net.write_text(
-        render(
+    netlist = render(
             seed,
             temps,
             rel,
             model_lib,
             sensor_linear_scale=sensor_linear_scale,
             mirror_linear_scale=mirror_linear_scale,
+            mirror_length_multiplier=mirror_length_multiplier,
             vdd_v=vdd_v,
             reference_current_a=reference_current_a,
-        ),
-        encoding="utf-8",
     )
+    # Capture rows from this process and write the CSV once. Repeated ngspice
+    # append/redirection operations can lose rows on virtual filesystems when
+    # several samples run concurrently. The raw log retains every captured row.
+    netlist, header = run_sky130.capture_csv_export(netlist)
+    net.write_text(netlist, encoding="utf-8")
 
     runtime_dir = out / "runtime" / f"sample_{seed:05d}"
     ngspice_env, _ = run_sky130.prepare_ngspice_environment(runtime_dir)
@@ -237,8 +247,9 @@ def run_sample(
         proc.stdout + "\n--- STDERR ---\n" + proc.stderr,
         encoding="utf-8",
     )
-    if proc.returncode != 0 or not csv_path.is_file():
+    if proc.returncode != 0:
         raise RuntimeError(f"sample {seed} failed; see {logdir}")
+    run_sky130.write_captured_csv(csv_path, header, proc.stdout, temps, "mirror")
     return csv_path
 
 
@@ -399,6 +410,10 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--mirror-length-multiplier", type=float, default=1.0,
+        help="Multiply mirror L after linear scaling; W is unchanged.",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=ROOT / "results" / "mismatch_mc",
@@ -422,6 +437,7 @@ def main() -> int:
     if (
         args.sensor_linear_scale <= 0.0
         or args.mirror_linear_scale <= 0.0
+        or not run_sky130.math_isfinite_positive(args.mirror_length_multiplier)
         or (args.vdd_v is not None and args.vdd_v <= 0.0)
         or (
             args.reference_current_a is not None
@@ -479,6 +495,7 @@ def main() -> int:
                     ngspice,
                     sensor_linear_scale=args.sensor_linear_scale,
                     mirror_linear_scale=args.mirror_linear_scale,
+                    mirror_length_multiplier=args.mirror_length_multiplier,
                     vdd_v=args.vdd_v,
                     reference_current_a=args.reference_current_a,
                 )
@@ -496,6 +513,7 @@ def main() -> int:
                         ngspice,
                         sensor_linear_scale=args.sensor_linear_scale,
                         mirror_linear_scale=args.mirror_linear_scale,
+                        mirror_length_multiplier=args.mirror_length_multiplier,
                         vdd_v=args.vdd_v,
                         reference_current_a=args.reference_current_a,
                     )
@@ -513,10 +531,13 @@ def main() -> int:
             "sensor_linear_scale": args.sensor_linear_scale,
             "sensor_area_scale": args.sensor_linear_scale ** 2,
             "mirror_linear_scale": args.mirror_linear_scale,
-            "mirror_area_scale": args.mirror_linear_scale ** 2,
+            "mirror_length_multiplier": args.mirror_length_multiplier,
+            "mirror_area_scale": (
+                args.mirror_linear_scale ** 2 * args.mirror_length_multiplier
+            ),
             "ratio_preservation": (
-                "W and L scaled together; nominal W/L and sensor width ratio "
-                "are preserved"
+                "Sensor W/L and 8:1 width ratio preserved; mirror W/L is "
+                "nominal W/L divided by mirror_length_multiplier"
             ),
         }
         nominal = run_sky130.load_design()["nominal_characterization_seed"]

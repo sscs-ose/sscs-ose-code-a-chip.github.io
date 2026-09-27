@@ -316,6 +316,7 @@ def analyze_directory(
         "geometry": {
             "sensor_linear_scale": metadata.get("sensor_linear_scale"),
             "mirror_linear_scale": metadata.get("mirror_linear_scale"),
+            "mirror_length_multiplier": metadata.get("mirror_length_multiplier", 1.0),
         },
         "per_dataset": per,
     }

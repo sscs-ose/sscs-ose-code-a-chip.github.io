@@ -9,8 +9,20 @@ PREVIOUSLY_EXAMINED_SEED_RANGES = (
     {"start": 3001, "stop": 3012, "source_run_id": 36298147889},
     {"start": 7001, "stop": 7100, "source_run_id": 36259524511},
     {"start": 9001, "stop": 9100, "source_run_id": 36298147889},
+    {"start": 1242001, "stop": 1242100, "source_run_id": 36312316888},
 )
 MAX_SEED = 2**31 - 1
+
+# These seeds belong to the frozen long-mirror evidence. Keep its historical
+# qualification reproducible, but exclude this block from every new sweep.
+FROZEN_VALIDATION_SEED_RANGES = (
+    {"start": 2000001, "stop": 2000100, "candidate": "i5_m16_l4_s8"},
+)
+
+
+def new_validation_exclusions() -> tuple[dict, ...]:
+    """Ranges unavailable for a new adaptive candidate validation."""
+    return PREVIOUSLY_EXAMINED_SEED_RANGES + FROZEN_VALIDATION_SEED_RANGES
 
 
 def seed_range(start: int, count: int) -> tuple[int, int]:

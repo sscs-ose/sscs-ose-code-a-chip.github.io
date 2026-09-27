@@ -98,6 +98,8 @@ def main():
         "pdk_calibration_analysis.py",
         "readout_budget.py",
         "seed_policy.py",
+        "long_mirror_candidate.json",
+        "long_mirror_evidence_audit.py",
     ]
     for name in required:
         hit = (ROOT / name).is_file()
@@ -123,6 +125,8 @@ def main():
         "--check",
     )
     ok &= run("behavioral readout audit", sys.executable, "readout_budget.py", "--check")
+    ok &= run("long-mirror candidate evidence audit", sys.executable,
+              "long_mirror_evidence_audit.py")
     print("SUBMISSION PREFLIGHT:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 

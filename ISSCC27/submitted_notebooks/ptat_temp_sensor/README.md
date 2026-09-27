@@ -183,6 +183,74 @@ study, and use fresh seeds for manual adaptive runs. Release qualification still
 requires at least 100 samples with both yields at or above 95%, plus dense-corner,
 headroom, provenance, and readout checks.
 
+### Frozen long-mirror candidate: September 27
+
+Candidate **`i5_m16_l4_s8`** is now **QUALIFIED_FOR_RELEASE_REVIEW** under the
+unchanged simulation contract. The frozen definition is in
+`long_mirror_candidate.json`; the release architecture remains the retained
+baseline until an explicit release decision.
+
+The candidate uses 1.8 V, an externally supplied 500 nA reference, 64 µm / 64 µm
+PMOS mirrors, and NMOS sensors with L = 4 µm and W = 8 µm / 64 µm. The five
+calibration anchors remain −40, −20, 0, 50, 125 °C. The larger devices and higher
+reference current are a deliberate area/power tradeoff.
+
+| Validation | Retained result |
+|---|---:|
+| Fresh local-mismatch seeds | 2000001–2000100 (100 samples) |
+| Error yield at ≤0.5 °C | 100/100; requirement ≥95% |
+| Branch-match yield at ≤1% | 100/100; requirement ≥95% |
+| Worst mismatch-sample analog error | 0.455012 °C |
+| Worst mismatch-sample branch mismatch | 0.958546% |
+| Worst deterministic TT/FF/SS analog error | 0.381358 °C |
+| Worst deterministic error after behavioral 12-bit quantization | 0.462754 °C |
+| Worst deterministic quantization RMS | 0.056277 °C |
+| Largest sampled core-plus-mirror power in the mismatch run | 2.728760 µW |
+
+These results use a 5 °C grid from −40 to 125 °C, ngspice 42 in HSA mode, and
+SKY130/open_pdks revision `12df12e2e74145e31c5a13de02f9a1e176b56e67`.
+The geometry was frozen after the 12-sample screen (seeds 3001–3012), before
+examining this validation block. The screen alone is not qualification; its
+summary correctly fails the 100-sample minimum. The validation seeds are now
+examined evidence and must not be reused to claim independent confirmation of
+any later design change.
+The sizing runner rejects new validation ranges overlapping this frozen block;
+replaying the archived evidence remains available through the audit below.
+
+The raw CSVs, simulator logs, generated netlists, and run metadata for all 118
+simulations are retained in `results/long_mirror_candidate/raw_evidence.tar.gz`,
+with SHA-256 hashes in `manifest.json`. Recompute the source metrics and final
+qualification without requiring a PDK installation:
+
+```bash
+python long_mirror_evidence_audit.py
+```
+
+To reproduce the frozen simulations with the pinned PDK installed (use a new
+output directory to preserve the retained evidence):
+
+```bash
+python mismatch_mc.py --samples 100 --seed-start 2000001 --jobs 4 \
+  --temps=-40:125:5 --sensor-linear-scale 8 --mirror-linear-scale 16 \
+  --mirror-length-multiplier 4 --vdd-v 1.8 --reference-current-a 5e-7 \
+  --output-dir results/long_mirror_reproduction/mismatch
+python run_sky130.py --mode both --corners tt ff ss --temps=-40:125:5 \
+  --sensor-linear-scale 8 --mirror-linear-scale 16 --mirror-length-multiplier 4 \
+  --vdd-v 1.8 --branch-current-a 5e-7 --reference-current-a 5e-7 \
+  --output-dir results/long_mirror_reproduction/dense
+python dense_characterization.py --input-dir results/long_mirror_reproduction/dense \
+  --output results/long_mirror_reproduction/dense_analysis.json
+python readout_budget.py --input-dir results/long_mirror_reproduction/dense \
+  --output results/long_mirror_reproduction/readout_analysis.json
+```
+
+Replaying these seeds checks reproducibility; it is not a new independent
+validation. Qualification is limited to pre-layout simulation: local mismatch
+was evaluated at TT, deterministic corners separately, and the quantized
+readout result above is for deterministic corners. No combined mismatch-plus-ADC
+yield, physical area, DRC/LVS/PEX, silicon, ADC power, or whole-chip power pass is
+claimed.
+
 ## Physical implementation
 
 A layout is encouraged by the Code-a-Chip program but not required. The

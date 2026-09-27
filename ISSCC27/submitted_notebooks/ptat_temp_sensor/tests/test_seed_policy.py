@@ -14,7 +14,8 @@ import seed_policy
 
 def test_successive_workflow_runs_reserve_disjoint_unseen_samples():
     previous = set()
-    for run in (241, 242, 243):
+    # Run 242 has now completed and is retained as examined evidence.
+    for run in (243, 244, 245):
         start = seed_policy.workflow_validation_seed(run)
         seeds = set(range(start, start + 100))
         assert not seeds & previous
@@ -42,7 +43,12 @@ def test_invalid_or_overflowing_workflow_seed_blocks_are_rejected(run, samples):
         seed_policy.workflow_validation_seed(run, samples)
 
 
-@pytest.mark.parametrize("seed_args", [[], ["--validation-seed-start", "9001"]])
+@pytest.mark.parametrize("seed_args", [
+    [], ["--validation-seed-start", "9001"],
+    ["--validation-seed-start", "1242001"],
+    ["--validation-seed-start", "2000001"],
+    ["--validation-seed-start", "2000100"],
+])
 def test_sweep_rejects_missing_or_seen_holdout_before_simulation(
     monkeypatch, capsys, seed_args
 ):
@@ -56,3 +62,13 @@ def test_sweep_rejects_missing_or_seen_holdout_before_simulation(
     monkeypatch.setattr(mismatch_sizing_sweep.shutil, "which", unexpected_simulator_lookup)
     assert mismatch_sizing_sweep.main() == 2
     assert "MISMATCH SIZING SWEEP: FAIL:" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("start,conflict", [
+    (1999901, False), (1999902, True), (2000001, True),
+    (2000100, True), (2000101, False),
+])
+def test_frozen_candidate_holdout_is_unavailable_to_new_studies(start, conflict):
+    assert bool(seed_policy.validation_conflicts(
+        start, 100, seed_policy.new_validation_exclusions()
+    )) is conflict

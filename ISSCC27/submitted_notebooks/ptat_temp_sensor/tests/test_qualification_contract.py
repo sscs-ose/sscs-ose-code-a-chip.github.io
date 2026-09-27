@@ -183,6 +183,19 @@ def test_additional_examined_ranges_are_rechecked(evidence):
     assert result["qualified_for_release_review"] is False
 
 
+def test_long_mirror_cannot_qualify_with_short_mirror_corner_evidence(evidence):
+    evidence[0]["recommended_for_independent_validation"]["mirror_length_multiplier"] = 4
+    with pytest.raises(qualification.QualificationError, match="mirror length"):
+        qualification.analyze(*evidence)
+    evidence[2]["mirror_length_multiplier"] = 4
+    with pytest.raises(qualification.QualificationError, match="readout mirror length"):
+        qualification.analyze(*evidence)
+    evidence[3]["geometry"] = {"mirror_length_multiplier": 4}
+    result = qualification.analyze(*evidence)
+    assert result["qualified_for_release_review"] is True
+    assert result["geometry"]["mirror_length_multiplier"] == 4
+
+
 @pytest.mark.parametrize(
     "field,value",
     [

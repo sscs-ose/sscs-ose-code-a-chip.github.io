@@ -131,7 +131,7 @@ def main() -> int:
             conflicts = seed_policy.validation_conflicts(
                 args.validation_seed_start,
                 args.validation_samples,
-                seed_policy.PREVIOUSLY_EXAMINED_SEED_RANGES,
+                seed_policy.new_validation_exclusions(),
             )
             if conflicts:
                 raise ValueError(
@@ -340,7 +340,7 @@ def main() -> int:
         "samples_per_candidate": args.samples_per_candidate,
         "seed_start": args.seed_start,
         "validation_excluded_seed_ranges": list(
-            seed_policy.PREVIOUSLY_EXAMINED_SEED_RANGES
+            seed_policy.new_validation_exclusions()
         ),
         "parallel_jobs": args.jobs,
         "temperature_c": temps,
