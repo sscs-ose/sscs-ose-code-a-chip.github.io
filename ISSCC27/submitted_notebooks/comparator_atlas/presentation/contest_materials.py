@@ -174,7 +174,7 @@ def build() -> Path:
                 fontsize=12, color=muted)
 
     pdf, preview = OUTPUT / "Comparator_Atlas_Poster.pdf", OUTPUT / "poster_preview.png"
-    figure.savefig(pdf, metadata={
+    figure.savefig(pdf, dpi=600, metadata={
         "Title": facts["title"], "Subject": "Code-a-Chip schematic-to-layout characterization",
         "Author": author["name"], "CreationDate": None, "ModDate": None,
     })
