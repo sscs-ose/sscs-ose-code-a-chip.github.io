@@ -22,6 +22,7 @@ from presentation.pvt45_results import RC_FIGURE_LABEL, RC_SCOPE_NOTE
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results" / "study"
+PRESENTATION_TITLE = "Comparator Atlas: SKY130 StrongARM characterization"
 
 
 def sha256(path: Path) -> str:
@@ -175,13 +176,13 @@ def build() -> Path:
 
     pdf, preview = OUTPUT / "Comparator_Atlas_Poster.pdf", OUTPUT / "poster_preview.png"
     figure.savefig(pdf, dpi=600, metadata={
-        "Title": facts["title"], "Subject": "Code-a-Chip schematic-to-layout characterization",
+        "Title": PRESENTATION_TITLE, "Subject": "Code-a-Chip schematic-to-layout characterization",
         "Author": author["name"], "CreationDate": None, "ModDate": None,
     })
     figure.savefig(preview, dpi=100)
     plt.close(figure)
     abstract = (
-        f"{facts['title']}\n{author['name']} - {author['affiliation']}\n\n"
+        f"{PRESENTATION_TITLE}\n{author['name']} - {author['affiliation']}\n\n"
         "Offset calibration alone does not establish whether a regenerative comparator "
         "reaches the required output rails before a decision deadline. This study characterizes "
         "a SKY130 StrongARM comparator using a declared nine-candidate sizing comparison, "

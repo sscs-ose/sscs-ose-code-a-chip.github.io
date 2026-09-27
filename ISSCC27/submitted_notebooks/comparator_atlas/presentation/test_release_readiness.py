@@ -139,6 +139,7 @@ def test_rc_model_applicability_is_not_numerical_or_structural_qualification():
 
 
 def test_current_public_text_retains_the_rc_model_warning():
+    from presentation.contest_materials import PRESENTATION_TITLE
     from presentation.pvt45_results import RC_MODEL_LABEL, RC_SCOPE_NOTE
 
     root = Path(__file__).resolve().parents[1]
@@ -146,6 +147,10 @@ def test_current_public_text_retains_the_rc_model_warning():
         assert RC_MODEL_LABEL in (root / name).read_text(encoding="utf-8")
     assert RC_SCOPE_NOTE in (root / "results/study/report.html").read_text(encoding="utf-8")
     assert RC_SCOPE_NOTE in (root / "results/study/abstract.txt").read_text(encoding="utf-8")
+    assert (root / "results/study/abstract.txt").read_text(encoding="utf-8").splitlines()[0] == PRESENTATION_TITLE
+    assert b"/Title (" + PRESENTATION_TITLE.encode("ascii") + b")" in (
+        root / "results/study/Comparator_Atlas_Poster.pdf"
+    ).read_bytes()
     notebook = json.loads((root / NOTEBOOK).read_bytes())
     markdown = "\n".join("".join(cell["source"]) for cell in notebook["cells"]
                          if cell["cell_type"] == "markdown")
