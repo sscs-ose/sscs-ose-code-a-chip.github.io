@@ -1,5 +1,15 @@
 # Layout and extracted-circuit results
 
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+The pinned Magic/open_pdks pipeline retains mutual capacitances while grounded
+capacitance increases. Physical error size and direction are unknown; no exact
+duplication factor or corrected counts or energy are inferred. C-only is not
+independent ground truth; RC-versus-C performance differences cannot be attributed
+solely to resistance. DRC/LVS establish structural checks, not parasitic-model
+fidelity. Schematic results are unaffected by this extraction concern.
+This limitation applies to both studies and all archived comparisons below;
+see [the source evidence](../REPRODUCIBILITY.md#archived-rc-model-applicability).
+
 The selected 27-transistor comparator is implemented with nominally matched
 devices and code zero. The physical experiment uses five PVT conditions,
 four signed inputs (-10, -3, +3, +10 mV), 5 fF output loads and a 10 ns clock
@@ -51,7 +61,7 @@ physical run rather than claimed as newly executed.
 
 ## Layout comparison
 
-At matched TT +/-3 mV points, compact routing improves mean RC delay from
+At matched TT +/-3 mV points, the archived compact RC decks record a mean-delay change from
 0.84288 to 0.64511 ns and core energy from 520.84 to 425.36 fJ, relative to
 the prior legal balanced layout. Bounding-box area changes from 3297.024
 to 2207.088 um2. The matched schematic consumes 244.05 fJ.

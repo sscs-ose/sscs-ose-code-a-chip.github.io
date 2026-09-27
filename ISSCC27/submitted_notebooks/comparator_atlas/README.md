@@ -21,6 +21,10 @@ lower-energy control, and a physical implementation of the selected
 
 ## Results
 
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+These RC results are outcomes of the archived 27-device simulation decks; extracted-model physical fidelity is not yet qualified. In the pinned Magic/open_pdks pipeline, mutual capacitances are retained while grounded capacitance increases. The physical error magnitude and direction are unknown; no exact duplication factor or corrected counts or energy are inferred. C-only is not independent ground truth, and RC-versus-C performance differences cannot be attributed solely to resistance. DRC/LVS establish their recorded structural checks, not parasitic-model fidelity. Schematic results are unaffected by this extraction concern. Recorded numerical agreement and simulation coverage do not establish silicon PVT performance.
+See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
+
 The schematic comparison uses the same local calibration policy, a 1 ns
 deadline and sampled absolute inputs of at least 1 mV:
 

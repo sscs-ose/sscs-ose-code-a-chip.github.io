@@ -34,6 +34,19 @@ REFERENCE_FILES = {
 }
 EXAMPLE_INDEX_SHA256 = "0860bdc0258e002abc0d633a12f1a1050122a7177bffb49091036f872b6390aa"
 
+RC_MODEL_LABEL = "Archived RC-deck outcomes; model physical fidelity not yet qualified"
+RC_MODEL_NOTICE = (
+    "These RC results are outcomes of the archived 27-device simulation decks; "
+    "extracted-model physical fidelity is not yet qualified. In the pinned Magic/open_pdks "
+    "pipeline, mutual capacitances are retained while grounded capacitance increases. "
+    "The physical error magnitude and direction are unknown; no exact duplication factor "
+    "or corrected counts or energy are inferred. C-only is not independent ground truth, "
+    "and RC-versus-C performance differences cannot be attributed solely to resistance. "
+    "DRC/LVS establish their recorded structural checks, not parasitic-model fidelity. "
+    "Schematic results are unaffected by this extraction concern. Recorded numerical "
+    "agreement and simulation coverage do not establish silicon PVT performance."
+)
+
 
 def validate_grid(frame: pd.DataFrame) -> None:
     required = {
@@ -342,6 +355,7 @@ def worst_case_figure(data: dict):
         ax.set_yticks([0, 0.4, 0.8, 1.2, 1.6])
         figure.legend(ncol=4, frameon=False, loc="upper center",
                       bbox_to_anchor=(0.54, 0.995), columnspacing=1.2, handlelength=1.8)
+        figure.text(0.5, 0.02, RC_MODEL_LABEL, ha="center", va="bottom", fontsize=profile.font_pt)
     return figure
 
 
@@ -469,6 +483,7 @@ def timing_figure(frame: pd.DataFrame):
             colorbar.solids.set_rasterized(False)
         fig.text(3.42 / profile.width_in, 0.055 / profile.height_in,
                  "Supply voltage (V)", ha="center", va="bottom", fontsize=profile.font_pt)
+        fig.text(0.5, 0.97, RC_MODEL_LABEL, ha="center", va="top", fontsize=profile.font_pt)
     return fig
 
 
@@ -521,4 +536,5 @@ def tradeoff_figure(frame: pd.DataFrame):
         handles.append(Line2D([], [], color="#555555", linestyle="--", linewidth=0.8, label="Parity"))
         fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.53, 0.02),
                    ncol=6, frameon=False, handletextpad=0.45, columnspacing=1.15)
+        fig.text(0.5, 0.98, RC_MODEL_LABEL, ha="center", va="top", fontsize=profile.font_pt)
     return fig

@@ -43,6 +43,10 @@ def load_facts() -> dict:
         "colab_url": COLAB_URL,
         "source_tree_url": TREE_URL,
         "pull_request_url": PR_URL,
+        "rc_model_applicability": {
+            **metadata["rc_model_applicability"],
+            "notice": pvt45_results.RC_MODEL_NOTICE,
+        },
         "schematic": {
             "condition_count": 49,
             "primary_deadline_ns": 1.0,
@@ -111,6 +115,7 @@ def load_facts() -> dict:
             "old_five_condition_1ns_gate_reinterpreted": False,
         },
         "limits": [
+            pvt45_results.RC_MODEL_NOTICE,
             "The calibrated schematic 49-condition study, original ngspice-42 five-condition pilot, "
             "and subsequent ngspice-47 full-grid study are separate experiments.",
             "The original ngspice-42 pilot has twenty RC points, not eighty independent RC tests; "
@@ -164,6 +169,10 @@ lower-energy control, and a physical implementation of the selected
 27-transistor circuit.
 
 ## Results
+
+**{pvt45_results.RC_MODEL_LABEL}.**
+{facts["rc_model_applicability"]["notice"]}
+See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
 The schematic comparison uses the same local calibration policy, a 1 ns
 deadline and sampled absolute inputs of at least 1 mV:
@@ -255,6 +264,10 @@ def write_judge_guide(facts: dict) -> Path:
 [Setup and data](REPRODUCIBILITY.md)
 
 ## Suggested reading order
+
+**{pvt45_results.RC_MODEL_LABEL}.**
+{facts["rc_model_applicability"]["notice"]}
+See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
 1. **Question and circuit.** Read the abstract and 27-transistor circuit guide.
    The work asks when a calibrated regenerative comparator reaches a correct

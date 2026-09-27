@@ -261,7 +261,7 @@ def paired_energy(frame: pd.DataFrame, selected_name: str) -> dict:
     }
 
 
-def render_study() -> Path:
+def render_study(*, refresh_figures: set[str] | None = None) -> Path:
     import layout_evidence as physical
     from presentation import pvt45_results, waveform_lab
 
@@ -306,11 +306,25 @@ def render_study() -> Path:
     }
     if professional is not None:
         factories["efficient_control.png"] = lambda: entry_tools.tradeoff_figure(professional)
+    previous_artifacts = {}
+    if refresh_figures is not None:
+        if refresh_figures - factories.keys():
+            raise ValueError("Requested report figure is not a declared factory")
+        previous_artifacts = {
+            name.replace("\\", "/"): digest
+            for name, digest in json.loads(
+                (STUDY / "presentation_manifest.json").read_text())["artifact_sha256"].items()
+        }
     pictures = {}
     for filename, factory in factories.items():
-        figure = factory()
-        figure.savefig(figures / filename, dpi=150, bbox_inches="tight")
-        plt.close(figure)
+        if refresh_figures is None or filename in refresh_figures:
+            figure = factory()
+            figure.savefig(figures / filename, dpi=150, bbox_inches="tight")
+            plt.close(figure)
+        else:
+            recorded = previous_artifacts[f"figures/{filename}"]
+            if sha256(figures / filename) != recorded:
+                raise ValueError(f"Cannot reuse changed report figure: {filename}")
         data = base64.b64encode((figures / filename).read_bytes()).decode("ascii")
         pictures[filename] = f'<img alt="{filename}" src="data:image/png;base64,{data}">'
     guide = physical.circuit_guide_path()
@@ -356,6 +370,8 @@ The additional control has not inherited the original/selected circuits' input-i
     layout_costs = physical.matched_tt_comparison(layout)
     layout_section = f"""
 <section id="layout-evidence"><h2>07 / Layout and extracted-circuit results</h2>
+<p><strong>{html.escape(pvt45_results.RC_MODEL_LABEL)}.</strong>
+{html.escape(pvt45_results.RC_MODEL_NOTICE)}</p>
 <p>The same nominal 27-device design now has actual GDS, named-style DRC, independent LVS,
 wrong-net/bulk/width/SVT-LVT negative controls, and separate connectivity/C/RC exports.
 The original layout development used <strong>five code-zero conditions</strong>.
@@ -365,7 +381,7 @@ Neither is a post-layout reproduction of the calibrated width-stress study.</p>
 <div class="table-scroll">{layout_geometry.to_html(index=False, float_format=lambda value: f"{value:.4g}", border=0)}</div>
 <p class="muted">The compact predecessor failed M2 pad-notch spacing and was never simulated.
 Four real M2 bridges repair it without changing devices, pins or the other mask geometry.
-Improvement is measured against the prior <em>legal balanced layout</em>, not attributed to
+Archived-deck differences are measured against the prior <em>legal balanced layout</em>, not attributed to
 the bridges alone. Listed capacitance is a sum of emitted elements, not an effective impedance.</p>
 {pictures["layout_costs.png"]}
 <div class="table-scroll">{layout_costs.to_html(index=False, float_format=lambda value: f"{value:.4g}", border=0)}</div>
@@ -387,12 +403,14 @@ not a hidden DRC/LVS failure. Source replay instructions bind the original exper
 </section>"""
     pvt_table = pvt45_results.comparison_table(full_pvt["frame"])
     pvt_section = f"""
-<section id="pvt45-evidence"><h2>08 / Full-grid post-layout verification</h2>
+<section id="pvt45-evidence"><h2>08 / Full-grid archived-deck outcomes</h2>
+<p><strong>{html.escape(pvt45_results.RC_MODEL_LABEL)}.</strong>
+{html.escape(pvt45_results.RC_MODEL_NOTICE)}</p>
 <p>The repaired nominal, code-zero schematic and RC circuits were evaluated at
 five process corners, three supplies and three temperatures: <strong>45 conditions,
 four signed inputs each, 180 points per mode</strong>. The primary 2 ns deadline
 was declared before this expanded study; 1 ns is reported alongside it.</p>
-<p><strong>Extracted RC: 180/180 correct at 2 ns; 156/180 at 1 ns.</strong>
+<p><strong>Archived RC decks: 180/180 correct at 2 ns; 156/180 at 1 ns.</strong>
 The other 24 points are late, with no wrong decisions. All point histories
 meet the same numerical criteria at 10 and 5 ps.</p>
 {pictures["pvt45_timing.png"]}
@@ -522,6 +540,8 @@ The input guardband changes the scoring band, not the underlying outcomes. Dimme
 <p id="explorer-stats" aria-live="polite"></p><div id="explorer-grid"></div>
 <p id="explorer-detail" role="status"></p></section>
 <section id="waveform-lab"><h2>03b / Why did this decision pass or fail?</h2>
+<p class="muted">RC examples show archived-deck outcomes; model physical fidelity is not yet qualified.
+See the model-applicability limitation in the layout section. Changing the deadline does not resolve it.</p>
 <p>Explore <strong>eight declared examples from actual retained waveforms</strong>.
 These are representative teaching cases, not the raw trace for every atlas cell and not a new validation set.
 Changing the deadline reads the same trace; it does not run SPICE or alter a circuit.</p>
@@ -616,6 +636,7 @@ and documentation. Original code is MIT licensed; model and tool licenses are re
         "waveform_ui_source_sha256": sha256(waveform_javascript_path),
         "full_pvt45_input_sha256": pvt45_results.REFERENCE_FILES,
         "full_pvt45_plot_source_sha256": sha256(Path(pvt45_results.__file__)),
+        "rc_model_applicability_notice": pvt45_results.RC_MODEL_NOTICE,
         "artifact_sha256": {
             "report.html": sha256(path), "explorer_data.json": sha256(STUDY / "explorer_data.json"),
             **{str(Path("figures") / filename): sha256(figures / filename) for filename in pictures},

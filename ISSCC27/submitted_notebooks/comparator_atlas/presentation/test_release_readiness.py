@@ -115,3 +115,82 @@ def test_published_fact_consumers_match_current_scoped_evidence():
         manifest = json.loads((root / relative).read_bytes())
         assert manifest["facts"] == facts
         assert manifest[source_key] == source_hash
+
+
+def test_rc_model_applicability_is_not_numerical_or_structural_qualification():
+    from presentation.pvt45_results import RC_MODEL_NOTICE
+
+    facts = load_facts()
+    scope = facts["rc_model_applicability"]
+    assert scope["physical_fidelity_qualified"] is False
+    assert scope["mutual_retained_and_ground_capacitance_increase_observed"] is True
+    assert scope["physical_error_magnitude_and_direction"] == "unknown"
+    assert scope["c_only_is_independent_ground_truth"] is False
+    assert scope["rc_versus_c_difference_is_pure_resistance"] is False
+    assert scope["drc_lvs_scope"] == "recorded_structural_checks_only"
+    assert scope["schematic_results_affected_by_this_extraction_concern"] is False
+    assert scope["historical_measurements_and_pass_fail_rewritten"] is False
+    assert scope["notice"] == RC_MODEL_NOTICE
+    assert RC_MODEL_NOTICE in facts["limits"]
+    assert facts["layout"]["original_1ns_pilot_qualified"] is False
+    assert facts["postlayout_pvt45"]["all_360_numerical_histories_qualified"] is True
+    assert facts["postlayout_pvt45"]["rc_correct_1ns"] == 156
+    assert facts["postlayout_pvt45"]["rc_correct_2ns"] == 180
+
+
+def test_current_public_text_retains_the_rc_model_warning():
+    from presentation.pvt45_results import RC_MODEL_LABEL, RC_MODEL_NOTICE
+
+    root = Path(__file__).resolve().parents[1]
+    for name in ("README.md", "REVIEWER_GUIDE.md", "REPRODUCIBILITY.md", "presentation/LAYOUT.md"):
+        assert RC_MODEL_LABEL in (root / name).read_text(encoding="utf-8")
+    for name in ("results/study/report.html", "results/study/abstract.txt"):
+        assert RC_MODEL_NOTICE in (root / name).read_text(encoding="utf-8")
+    notebook = json.loads((root / NOTEBOOK).read_bytes())
+    markdown = "\n".join("".join(cell["source"]) for cell in notebook["cells"]
+                         if cell["cell_type"] == "markdown")
+    assert RC_MODEL_LABEL in markdown
+    assert "C-only is not independent ground truth" in markdown
+
+
+@pytest.mark.parametrize("separator", ["/", "\\"])
+def test_scoped_report_reuses_checked_figures_without_running_factories(monkeypatch, separator):
+    from comparator_atlas import study_report
+    from presentation.pvt45_results import RC_MODEL_NOTICE
+
+    captured = {}
+    read_text = Path.read_text
+
+    def portable_manifest(path, *args, **kwargs):
+        text = read_text(path, *args, **kwargs)
+        if path == study_report.STUDY / "presentation_manifest.json":
+            manifest = json.loads(text)
+            manifest["artifact_sha256"] = {
+                name.replace("\\", "/").replace("/", separator): digest
+                for name, digest in manifest["artifact_sha256"].items()
+            }
+            return json.dumps(manifest)
+        return text
+
+    def forbid_regeneration(*args, **kwargs):
+        raise AssertionError("Unselected figure factory must not run")
+
+    monkeypatch.setattr(study_report, "cold_waveform_figure", forbid_regeneration)
+    monkeypatch.setattr(Path, "read_text", portable_manifest)
+    monkeypatch.setattr(study_report.shutil, "copyfile", lambda *args: None)
+    monkeypatch.setattr(study_report, "write_json", lambda path, value: captured.update({path.name: value}))
+    monkeypatch.setattr(Path, "write_text", lambda path, text, **kwargs: captured.update({path.name: text}))
+    study_report.render_study(refresh_figures=set())
+    assert RC_MODEL_NOTICE in captured["report.html"]
+    assert captured["report.html"].count('<img ') == 15
+    assert captured["presentation_manifest.json"]["rc_model_applicability_notice"] == RC_MODEL_NOTICE
+
+
+def test_scoped_report_rejects_changed_cached_figure(monkeypatch):
+    from comparator_atlas import study_report
+
+    original = study_report.sha256
+    monkeypatch.setattr(study_report, "sha256",
+                        lambda path: "changed" if Path(path).name == "search.png" else original(path))
+    with pytest.raises(ValueError, match="Cannot reuse changed report figure: search.png"):
+        study_report.render_study(refresh_figures=set())

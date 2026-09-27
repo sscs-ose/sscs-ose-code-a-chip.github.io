@@ -11,13 +11,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
-from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import FancyBboxPatch, Polygon
 
 import entry_tools as entry
 import layout_evidence as physical
 from comparator_atlas.spice import CORNERS
 from presentation.release_facts import load_facts, write_judge_guide
+from presentation.figure_style import contrast_ink
+from presentation.pvt45_results import RC_MODEL_LABEL, RC_MODEL_NOTICE
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results" / "study"
@@ -48,7 +49,7 @@ def build() -> Path:
     page.add_patch(FancyBboxPatch((0, 0.895), 1, 0.105, boxstyle="square,pad=0",
                                  facecolor=ink, edgecolor=ink))
     figure.text(0.035, 0.955, "Comparator Atlas", fontsize=47, color="white", weight="bold")
-    figure.text(0.035, 0.918, "From schematic calibration to real layout: know when a decision is trustworthy",
+    figure.text(0.035, 0.918, "Calibration, decision deadlines and the limits of an archived RC model",
                 fontsize=23, color="#bceee4")
     figure.text(0.975, 0.975, "IEEE SSCS CODE-A-CHIP / ISSCC 2027", fontsize=13,
                 color="white", ha="right")
@@ -80,26 +81,28 @@ def build() -> Path:
               "Nine declared candidates, followed by an explicit "
               "lower-energy control. No universal best-design claim.",
               width=44, size=19)
-    figure.text(0.035, 0.395, "Review it in three steps", fontsize=25, color=teal, weight="bold")
+    figure.text(0.035, 0.395, "Model applicability", fontsize=25, color=ink, weight="bold")
     paragraph(0.035, 0.36,
-              "1. Inspect the source-matched circuit guide.\n"
-              "2. Change the input band, deadline and calibration policy.\n"
-              "3. Compare actual GDS, DRC/LVS controls, extracted RC and saved waveforms.",
-              width=43, size=19)
+              "The pinned Magic/open_pdks RC export retains mutual coupling "
+              "while ground capacitance increases. Physical error size and "
+              "direction are unknown. C-only is not independent ground truth; "
+              "RC-versus-C differences are not pure resistance effects.",
+              width=54, size=16)
     figure.text(0.035, 0.232, "Open the current submission in Colab", fontsize=17, color=teal,
                 weight="bold", url=facts["colab_url"])
     figure.text(0.035, 0.207, facts["notebook"], fontsize=18, color=ink,
                 url=facts["notebook_url"])
     paragraph(0.035, 0.171,
-              "Run all: checked evidence, fresh tables and waveform measurements. "
-              "Live SPICE and the full campaign are explicit optional modes.\n"
-              "Source, license, references and CI are in official PR #195.",
+              "Run all: archived evidence and waveform measurements. "
+              "DRC/LVS establish structural checks, not model fidelity. "
+              "Schematic results are unaffected by this extraction concern. "
+              "No corrected counts, energy or silicon PVT guarantee is inferred.",
               width=47, size=16, color=muted)
 
     figure.text(0.36, 0.852, "2 | Schematic coverage is not free", fontsize=26, color=ink, weight="bold")
     figure.text(0.36, 0.82, "Same local calibration; 1 ns; sampled |input| >= 1 mV; +4% branch-width stress",
                 fontsize=16, color=muted)
-    cmap = LinearSegmentedColormap.from_list("contest_coverage", ["#de5364", "#e2b34d", "#18a190"])
+    cmap = plt.get_cmap("cividis")
     frame = evidence["frame"]
     scored = frame[(frame.policy == "local_boundary") & (frame.deadline_ns == 1)
                    & (frame.input_mv.abs() >= 1) & (frame.pair_skew == 0.04)].copy()
@@ -116,7 +119,8 @@ def build() -> Path:
             ax.imshow(table.values, cmap=cmap, vmin=0, vmax=1, aspect="auto")
             for y in range(3):
                 for x in range(3):
-                    ax.text(x, y, f"{100 * table.values[y, x]:.0f}", ha="center", va="center", fontsize=17)
+                    ax.text(x, y, f"{100 * table.values[y, x]:.0f}", ha="center", va="center",
+                            fontsize=17, color=contrast_ink(cmap(table.values[y, x])))
             ax.set_title(corner.upper(), fontsize=18, weight="bold")
             ax.set_xticks(range(3), ["1.62", "1.80", "1.95"], fontsize=13)
             ax.set_yticks(range(3), ["-40", "27", "125"] if column == 0 else ["", "", ""], fontsize=13)
@@ -133,7 +137,7 @@ def build() -> Path:
                 "Above: 45 PVT combinations; aggregate also includes four nominal stress controls. Percentages are grid coverage, not yield.",
                 fontsize=12, color=muted)
 
-    figure.text(0.36, 0.375, "3 | Real layout, extracted RC, explicit limits", fontsize=26, color=ink, weight="bold")
+    figure.text(0.36, 0.375, "3 | Structural checks and archived-deck outcomes", fontsize=26, color=ink, weight="bold")
     ax = figure.add_axes([0.36, 0.273, 0.61, 0.079])
     layers = physical.gds_polygons((layout["snapshot"] / "atlas.gds").read_bytes())
     colors = {(65, 20): "#6bb58e", (66, 20): "#dd7783", (68, 20): "#aeb3d5",
@@ -149,13 +153,15 @@ def build() -> Path:
                 f"Actual 27-device GDS | DRC 0 + LVS / negative controls | {extracted['bbox_um2']:.3f} um2",
                 fontsize=16, color=teal, weight="bold")
     figure.text(0.36, 0.213,
-                f"Full 45-PVT, code zero: RC {full['rc_correct_1ns']}/180 at 1 ns"
+                f"Archived 45-PVT RC: {full['rc_correct_1ns']}/180 at 1 ns"
                 f"  |  {full['rc_correct_2ns']}/180 at declared 2 ns",
                 fontsize=20, color=ink, weight="bold")
     paragraph(0.36, 0.184,
               f"Worst sampled RC decision: {full['worst_rc_delay_ns']:.3f} ns at FS / 1.62 V / -40 C / -3 mV. "
-              "Four signed inputs per condition; no continuous-input or statistical-yield guarantee.",
-              width=115, size=15, color=muted)
+              "Four signed inputs per condition; 24 unresolved at 1 ns. "
+              "Separate ngspice-42 pilot: 12/20 at failed original 1 ns; 20/20 at post-hoc 2 ns. "
+              "No continuous-input or statistical-yield guarantee.",
+              width=115, size=14, color=muted)
     figure.text(0.36, 0.126,
                 "Matched 180-point mean core energy, same ngspice-47 conditions:",
                 fontsize=17, color=ink, weight="bold")
@@ -164,7 +170,7 @@ def build() -> Path:
                 f"  |  Extracted RC: {full['mean_rc_energy_fj']:.1f} fJ",
                 fontsize=19, color=teal)
     figure.text(0.035, 0.061,
-                "Finite sampled evidence, not silicon or foundry signoff. Core energy excludes external drivers and calibration infrastructure.",
+                RC_MODEL_LABEL + ". Core energy excludes external drivers and calibration infrastructure.",
                 fontsize=15, color=ink)
     figure.text(0.035, 0.038,
                 "Established circuitry: Razavi, 2015, DOI 10.1109/MSSC.2015.2418155; Li, Xu & Iizuka, 2022, DOI 10.1007/s10470-022-01992-6.",
@@ -200,12 +206,12 @@ def build() -> Path:
         f"is {full['worst_rc_delay_ns']:.3f} ns at FS/1.62 V/-40 C/-3 mV. Both modes use ngspice 47 "
         "with all 360 pointwise 10/5 ps comparisons confirmed. Mean full-grid core energy is "
         f"{full['mean_schematic_energy_fj']:.2f} fJ schematic versus {full['mean_rc_energy_fj']:.2f} fJ "
-        "RC, exposing the parasitic cost rather than only reporting passing decisions. "
+        "RC for those archived decks, not a qualified physical parasitic-cost estimate. "
         "The earlier failed 1 ns pilot remains recorded separately. Source-bound tables, "
         "retained waveforms, vector figures and an interactive decision explorer support "
         "inspection and reuse. Results are deterministic sampled simulations, not silicon "
         "measurements, foundry yield or a continuous input-range guarantee; core energy "
-        "excludes external drivers and calibration infrastructure.\n"
+        "excludes external drivers and calibration infrastructure.\n\n" + RC_MODEL_NOTICE + "\n"
     )
     abstract_path = OUTPUT / "abstract.txt"
     abstract_path.write_text(abstract, encoding="utf-8")

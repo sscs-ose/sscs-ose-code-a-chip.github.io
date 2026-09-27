@@ -69,3 +69,26 @@ def test_review_rejects_labels_that_overlap_at_final_size():
     with pytest.raises(ValueError, match="overlap"):
         review_artists(fig, profile)
     plt.close(fig)
+
+
+def test_standalone_pvt_figures_disclose_unqualified_rc_model_without_changing_data():
+    from presentation import pvt45_results as pvt
+
+    data = pvt.load_results()
+    frame = data["frame"]
+    before = frame.copy(deep=True)
+    for factory, height in (
+        (lambda: pvt.timing_figure(frame), 1.95),
+        (lambda: pvt.tradeoff_figure(frame), 2.90),
+        (lambda: pvt.worst_case_figure(data), 2.55),
+    ):
+        fig = factory()
+        try:
+            assert pvt.RC_MODEL_LABEL in [text.get_text() for text in fig.texts]
+            review_artists(fig, FigureProfile(height_in=height))
+        finally:
+            plt.close(fig)
+    assert frame.equals(before)
+    table = pvt.comparison_table(frame).set_index("implementation")
+    assert table.loc["Extracted RC", "correct_at_1ns"] == 156
+    assert table.loc["Extracted RC", "correct_at_2ns"] == 180

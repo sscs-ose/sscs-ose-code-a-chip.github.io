@@ -43,7 +43,11 @@ def main() -> None:
         Schematic and extracted results are compared under explicitly stated
         conditions. A 45-condition nominal extracted-RC study reaches the
         declared 2 ns deadline at all 180 sampled inputs, with a measured
-        worst-case decision time of 1.835 ns.
+        worst-case decision time of 1.835 ns. These are archived RC-deck
+        outcomes; extracted-model physical fidelity is not yet qualified.
+        Schematic results are unaffected by this extraction concern.
+        See the model-applicability limitation in Section 8 and
+        [Reproducibility](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
         ## Getting started
 
@@ -427,6 +431,10 @@ def main() -> None:
         markdown("""
         ### Waveform lab: wrong, late, or correct?
 
+        RC examples illustrate archived-deck outcomes, not a qualified
+        physical model; see Section 8. Changing the display does not
+        resolve the extraction-model limitation.
+
         These controls show eight representative saved SPICE waveforms.
         Compare the complementary output rails with the selected deadline.
 
@@ -516,6 +524,18 @@ def main() -> None:
         markdown("""
         ## 8. Layout and post-layout results
 
+        **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+        In the pinned Magic/open_pdks pipeline, mutual capacitances are
+        retained while grounded capacitance increases. Physical error
+        magnitude and direction are unknown; no exact duplication factor,
+        corrected counts or energy, or conservative bound is inferred.
+        C-only is not independent ground truth, and RC-versus-C performance
+        differences cannot be attributed solely to resistance.
+        DRC/LVS establish their recorded structural checks, not parasitic-model
+        fidelity. Schematic results are unaffected by this extraction concern.
+        Numerical agreement does not establish silicon PVT performance.
+        This applies to both studies below; all archived outcomes are retained.
+
         The layout uses the same selected 27-device circuit with nominally
         matched main inputs and code zero. It does not reproduce the
         schematic width-skew experiment as intentional geometry.
@@ -523,7 +543,7 @@ def main() -> None:
         and actual mask geometry are checked before simulation.
 
         A first legal layout had positive-input failures after extraction.
-        Balanced routing repaired the capacitive environment; a compact
+        Balanced routing changed the archived-deck outcomes; a compact
         routing revision then required four real M2 bridges to eliminate
         narrow PFET body-pad notches. This final physical repair passes
         named-style DRC, independent LVS and deliberately wrong connection,
@@ -548,7 +568,7 @@ def main() -> None:
         markdown("""
         ### Earlier five-condition layout comparison
 
-        At matched TT +/-3 mV points, compact RC routing reduces mean
+        At matched TT +/-3 mV points, the archived compact RC decks reduce mean
         delay from 0.843 to 0.645 ns and core energy from 521 to 425 fJ
         relative to the prior legal balanced layout. The matched schematic
         uses 244 fJ. This compares complete layouts, not the isolated effect
@@ -577,7 +597,7 @@ def main() -> None:
         plt.close(figure)
         """),
         markdown("""
-        ### Full-grid post-layout verification
+        ### Full-grid archived-deck outcomes
 
         The same nominal 27-device layout is now evaluated over all five
         process corners, three supplies (1.62, 1.80, 1.95 V), and three
@@ -593,7 +613,7 @@ def main() -> None:
         earlier layout conditions are identified as previously observed;
         the other forty are new post-layout conditions, not a blinded test.
 
-        **RC is correct at 180/180 sampled points at 2 ns, and 156/180 at
+        **Archived RC decks are correct at 180/180 sampled points at 2 ns, and 156/180 at
         1 ns.** The 24 remaining 1 ns points are unresolved, not wrong-sign
         decisions. The slowest sample is FS / 1.62 V / -40 C / -3 mV at
         1.835 ns, rather than the SS corner seen in the earlier pilot.

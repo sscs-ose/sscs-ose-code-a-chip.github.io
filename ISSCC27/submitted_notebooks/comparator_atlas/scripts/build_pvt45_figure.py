@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 import matplotlib.pyplot as plt
 from presentation.figure_style import FigureProfile, export_figure
 from presentation.pvt45_results import (
-    DATA, REFERENCE_FILES, case_table, load_results, review_examples, timing_figure,
+    DATA, REFERENCE_FILES, RC_MODEL_NOTICE, case_table, load_results, review_examples, timing_figure,
     tradeoff_figure, worst_case_figure,
 )
 
@@ -43,7 +43,7 @@ def main() -> None:
         "over differential inputs -10, -3, +3 and +10 mV, rounded to 0.01 ns. "
         f"Black outlines mark the {marked_conditions} PVT conditions containing a missed 1 ns decision; "
         "all 180 samples meet the prospective 2 ns deadline. Each output has a 5 fF load; "
-        "the clock period is 10 ns with 50 ps edges."
+        "the clock period is 10 ns with 50 ps edges. " + RC_MODEL_NOTICE
     )
     caption_path = destination / "pvt45_timing_caption.txt"
     caption_path.write_text(caption + "\n", encoding="utf-8", newline="\n")
@@ -54,14 +54,16 @@ def main() -> None:
             "PVT/input points: (a) sampled decision time and (b) full-cycle core-VDD energy. "
             "Marker shape and color identify the process corner; dashed lines denote parity. "
             "The horizontal dotted line in (a) marks the 2 ns primary deadline. "
-            "Both modes use the same ngspice-47 model, stimulus and 5 ps retained timestep."
+            "Both modes use the same ngspice-47 model, stimulus and 5 ps retained timestep. "
+            + RC_MODEL_NOTICE
         ),
         "pvt45_worst_waveform": (
             "Matched schematic and extracted-RC output waveforms at the slowest sampled RC point "
             "(FS, 1.62 V, -40 deg C, -3 mV). Solid and dashed traces denote Q+ and Q-, respectively. "
             "Dotted horizontal lines mark 0.2 and 0.8 VDD; vertical lines mark 1 and 2 ns. "
             "The RC trace misses 1 ns but reaches its correct complementary rails at 1.835 ns. "
-            "The waveforms are original retained ngspice-47 data, not a fitted response."
+            "The waveforms are original retained ngspice-47 data, not a fitted response. "
+            + RC_MODEL_NOTICE
         ),
     }
     figures = {"pvt45_timing": review}
@@ -91,7 +93,8 @@ def main() -> None:
         "secondary_deadline_outline_count": marked_conditions,
         "primary_correct": result["rc_primary_correct"],
         "minimum_sampled_primary_headroom_ns": 2 - result["matched_statistics"]["observed_max_rc_delay_ns"],
-        "figure_scope": "Fixed sampled conditions, not a continuous-input or statistical-yield guarantee.",
+        "figure_scope": "Fixed sampled conditions, not a continuous-input or statistical-yield guarantee. "
+        + RC_MODEL_NOTICE,
         "new_physical_simulations": 0,
         "public_upload_performed": False,
         "source_artifact_sha256": REFERENCE_FILES,

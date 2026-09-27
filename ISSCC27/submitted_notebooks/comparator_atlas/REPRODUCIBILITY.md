@@ -48,6 +48,44 @@ ngspice 47; a different simulator version is not assumed numerically identical.
 
 ## Experiment scopes
 
+### Archived RC model applicability
+
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+This limitation applies to both the original five-condition ngspice-42 pilot
+and the subsequent separately declared 45-condition ngspice-47 study.
+Their reported measurements, numerical comparisons and historical pass/fail
+records remain unchanged; they describe the decks actually executed.
+
+The recorded extraction used Magic 8.3.684 at
+`4f53bb3091d1e4a9b2009a58f157a8a4331d4c84` and open_pdks at
+`aa3fc215a80d32437b8cca1cb3fdee819d18c4c9`
+([recorded sources](layout_compact_repair/evidence/attempt1/sources.tsv)).
+The [export commands](layout_nominal27/layout.tcl) enable coupling for C-only
+and distributed RC. The archived
+[C-only](layout_compact_repair/evidence/attempt1/atlas.c.spice) and
+[RC](layout_compact_repair/evidence/attempt1/atlas.rc.spice) outputs retain
+mutual capacitances while grounded capacitance increases; they are not
+ground-only exports. The existing
+[parasitic accounting](layout_compact_repair/evidence/attempt1/parasitic-analysis.json)
+records these native values. The full-grid study reuses this same RC netlist,
+whose SHA-256 is
+`8f76622f875c815303157682cfa841fcb54829d586cb31d858f4c81bc9755f92`.
+
+Physical fidelity has not been qualified by an independent parasitic reference
+or a complete common-node capacitance-equivalence check. The physical error
+magnitude and direction are unknown: no exact duplication factor, corrected
+counts or energy, or conservative performance bound is inferred.
+C-only is not independent ground truth, and RC-versus-C performance differences
+cannot be attributed solely to resistance. DRC/LVS establish their recorded
+structural checks, not parasitic-model fidelity. Schematic results are unaffected
+by this extraction concern. Timestep agreement, source hashes and clean-start
+same-deck reproduction do not establish silicon PVT performance.
+
+Historical receipts and frozen reproduction sources preserve their original
+wording and status; this current limitation governs interpretation of their
+RC outcomes, including the saved waveform teaching examples and comparisons
+between legal layouts. No model correction or new simulation is included.
+
 | Experiment | Conditions and controls | Reporting |
 | --- | --- | --- |
 | Schematic design comparison | 45 PVT combinations at controlled main-pair width stress, plus four nominal controls; 49 conditions per design | Same calibration policy, input band and deadline for circuit comparisons |
