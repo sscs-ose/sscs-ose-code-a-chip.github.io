@@ -1,4 +1,4 @@
-"""Generate the single public notebook, including the official Colab badge."""
+"""Generate the single public notebook, including the submitted-version Colab badge."""
 
 from pathlib import Path
 import textwrap
@@ -26,10 +26,10 @@ def main() -> None:
         **IEEE SSCS Code-a-Chip — ISSCC 2027**  
         License: MIT · Tools: SKY130, ngspice, Magic, Netgen and Python
 
-        [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb)
+        [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb)
 
-        [Run the submitted version in Colab](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb)
-        before the official main-branch badge is available.
+        The badge opens the submitted fork.
+        [Official-main Colab link (available only after merge)](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb).
 
         ## Abstract
 

@@ -37,7 +37,10 @@ counterpart, and late extracted RC decisions are all visible. These examples
 are not every raw trace in the atlas and add no new validation coverage.
 Moving the display deadline does not rerun SPICE or reduce full-cycle energy.
 
-Download `results/study/report.html` for offline interaction. Run all notebook
+Download the [interactive report](results/study/report.html) and open the
+HTML file locally; GitHub's file viewer does not execute its JavaScript.
+View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
+or its [preview image](results/study/poster_preview.png). Run all notebook
 cells to regenerate the analysis from the included data; full simulations
 are separate optional modes. Detailed commands, versions and limitations are
 collected in [Reproducibility](REPRODUCIBILITY.md).
