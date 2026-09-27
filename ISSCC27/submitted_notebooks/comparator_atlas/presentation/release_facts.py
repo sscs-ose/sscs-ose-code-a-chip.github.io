@@ -156,6 +156,13 @@ IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
 [Run in Colab]({facts["colab_url"]}) |
 [Reproduction instructions](REPRODUCIBILITY.md)
 
+Download the [interactive report](results/study/report.html) and open the
+HTML file locally; GitHub's file viewer does not execute its JavaScript.
+The Waveform Lab provides eight recorded
+examples with a deadline cursor and complementary-rail thresholds.
+View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
+or its [preview image](results/study/poster_preview.png).
+
 ## Overview
 
 Offset calibration alone does not ensure that a comparator finishes its
@@ -221,13 +228,6 @@ The Colab link uses the submitted fork before upstream merge.
 The project requires no commercial EDA license or paid API key.
 Local CPU execution is supported; Colab's free tier has resource limits.
 
-Download the [interactive report](results/study/report.html) and open the
-HTML file locally; GitHub's file viewer does not execute its JavaScript.
-The Waveform Lab provides eight recorded
-examples with a deadline cursor and complementary-rail thresholds.
-View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
-or its [preview image](results/study/poster_preview.png).
-
 ## Files
 
 - `Comparator_Atlas.ipynb` — circuit, methods, plots and discussion.
@@ -266,6 +266,11 @@ def write_judge_guide(facts: dict) -> Path:
 [Run in Colab]({facts["colab_url"]}) |
 [Setup and data](REPRODUCIBILITY.md)
 
+Download the [interactive report](results/study/report.html) and open the
+HTML file locally; GitHub's file viewer does not execute its JavaScript.
+View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
+or its [preview image](results/study/poster_preview.png).
+
 ## Suggested reading order
 
 **{pvt45_results.RC_MODEL_LABEL}.**
@@ -297,10 +302,7 @@ counterpart, and late extracted RC decisions are all visible. These examples
 are not every raw trace in the atlas and add no new validation coverage.
 Moving the display deadline does not rerun SPICE or reduce full-cycle energy.
 
-Download the [interactive report](results/study/report.html) and open the
-HTML file locally; GitHub's file viewer does not execute its JavaScript.
-View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
-or its [preview image](results/study/poster_preview.png). Run all notebook
+Run all notebook
 cells to regenerate the analysis from the included data; full simulations
 are separate optional modes. Detailed commands, versions and limitations are
 collected in [Reproducibility](REPRODUCIBILITY.md).

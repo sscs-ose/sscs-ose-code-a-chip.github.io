@@ -7,6 +7,13 @@ IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
 [Run in Colab](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb) |
 [Reproduction instructions](REPRODUCIBILITY.md)
 
+Download the [interactive report](results/study/report.html) and open the
+HTML file locally; GitHub's file viewer does not execute its JavaScript.
+The Waveform Lab provides eight recorded
+examples with a deadline cursor and complementary-rail thresholds.
+View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
+or its [preview image](results/study/poster_preview.png).
+
 ## Overview
 
 Offset calibration alone does not ensure that a comparator finishes its
@@ -75,13 +82,6 @@ Fresh SPICE examples and the full campaign are optional notebook modes.
 The Colab link uses the submitted fork before upstream merge.
 The project requires no commercial EDA license or paid API key.
 Local CPU execution is supported; Colab's free tier has resource limits.
-
-Download the [interactive report](results/study/report.html) and open the
-HTML file locally; GitHub's file viewer does not execute its JavaScript.
-The Waveform Lab provides eight recorded
-examples with a deadline cursor and complementary-rail thresholds.
-View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
-or its [preview image](results/study/poster_preview.png).
 
 ## Files
 

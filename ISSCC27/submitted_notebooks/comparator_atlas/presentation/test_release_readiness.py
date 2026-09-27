@@ -48,13 +48,18 @@ def test_reviewer_navigation_links_resolve_to_local_artifacts():
     root = Path(__file__).resolve().parents[1]
     for name in ("README.md", "REVIEWER_GUIDE.md"):
         text = (root / name).read_text(encoding="utf-8")
-        assert "GitHub's file viewer does not execute its JavaScript" in text
+        first_section = text.index("\n## ")
+        warning = "GitHub's file viewer does not execute its JavaScript"
+        assert text.count(warning) == 1
+        assert text.index(warning) < first_section
         for label, target in (
             ("interactive report", "results/study/report.html"),
             ("poster PDF", "results/study/Comparator_Atlas_Poster.pdf"),
             ("preview image", "results/study/poster_preview.png"),
         ):
-            assert f"[{label}]({target})" in text
+            link = f"[{label}]({target})"
+            assert text.count(link) == 1
+            assert text.index(link) < first_section
             assert (root / target).is_file()
 
 

@@ -6,6 +6,11 @@
 [Run in Colab](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb) |
 [Setup and data](REPRODUCIBILITY.md)
 
+Download the [interactive report](results/study/report.html) and open the
+HTML file locally; GitHub's file viewer does not execute its JavaScript.
+View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
+or its [preview image](results/study/poster_preview.png).
+
 ## Suggested reading order
 
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
@@ -37,10 +42,7 @@ counterpart, and late extracted RC decisions are all visible. These examples
 are not every raw trace in the atlas and add no new validation coverage.
 Moving the display deadline does not rerun SPICE or reduce full-cycle energy.
 
-Download the [interactive report](results/study/report.html) and open the
-HTML file locally; GitHub's file viewer does not execute its JavaScript.
-View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
-or its [preview image](results/study/poster_preview.png). Run all notebook
+Run all notebook
 cells to regenerate the analysis from the included data; full simulations
 are separate optional modes. Detailed commands, versions and limitations are
 collected in [Reproducibility](REPRODUCIBILITY.md).
