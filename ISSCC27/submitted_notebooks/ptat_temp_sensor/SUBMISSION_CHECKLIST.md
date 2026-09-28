@@ -6,7 +6,7 @@ https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-award
 Official Code-a-Chip repository:
 https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io
 
-Verified on 2026-09-26.
+Verified on 2026-09-28.
 
 ## Submission package
 
@@ -26,12 +26,17 @@ Verified on 2026-09-26.
 - [x] Two-point target miss is disclosed rather than hidden.
 - [x] Submission preflight and unit tests run in GitHub Actions.
 - [x] New dense-grid transistor simulation completed and retained: 5 °C TT/FF/SS grid, worst five-point PWL error 0.472 °C, target PASS.
-- [x] Real PDK local-mismatch Monte Carlo completed and retained: 100 seeds; current five-point release design FAILS internal statistical targets (66% error yield, 4% branch-mismatch yield).
-- [x] Retrospective two-fold calibration robustness study retained: both 50-seed folds independently select the same six-point schedule; opposite-fold error yield is 49/50 (98%) in each direction. This is not promoted as an independent Monte-Carlo confirmation and does not erase the branch-mismatch failure.
+- [x] Real PDK local-mismatch Monte Carlo completed and retained: the original baseline 100-seed design fails the internal statistical targets (66% error yield, 4% branch-mismatch yield); the negative result is preserved as historical evidence.
+- [x] Retrospective two-fold calibration robustness study retained: both 50-seed folds independently select the same six-point schedule; opposite-fold error yield is 49/50 (98%) in each direction. This remains historical evidence and is not treated as the final independent qualification.
+- [x] Frozen candidate `i5_m16_l4_s8` retained with disjoint 100-seed validation (2000001–2000100): 100% temperature-error yield at ≤0.5 °C and 100% branch-mismatch yield at ≤1%.
+- [x] Frozen candidate passes dense TT/FF/SS verification: worst five-point PWL error 0.381358 °C and worst deterministic mirror mismatch 0.395267%.
+- [x] Frozen candidate passes the behavioral 12-bit / 1.8-V / gain-10 readout check: worst quantized sampled error 0.462754 °C.
+- [x] `results/long_mirror_candidate/qualification.json` reports `QUALIFIED_FOR_RELEASE_REVIEW`; release architecture remains unchanged pending an explicit review decision.
 - [ ] Layout/DRC/LVS/PEX: optional for Code-a-Chip and not currently claimed.
-- [ ] Create/fetch the user fork of `sscs-ose/sscs-ose-code-a-chip.github.io`.
-- [ ] Copy/update only this project directory in the competition fork; do not copy this repository's `.github/` workflows into the upstream competition PR.
-- [ ] Open the final pull request to the official Code-a-Chip repository and monitor reviewer feedback.
+- [x] User fork of `sscs-ose/sscs-ose-code-a-chip.github.io` created and used for the submission branch.
+- [x] PR changes are limited to `ISSCC27/submitted_notebooks/ptat_temp_sensor/`; no upstream `.github/` workflow files are modified.
+- [x] Final pull request opened to the official Code-a-Chip repository: PR #197.
+- [ ] Upstream notebook/lint workflows require maintainer approval before jobs execute; monitor CI and reviewer feedback after approval.
 
 ## Deadline discrepancy
 
