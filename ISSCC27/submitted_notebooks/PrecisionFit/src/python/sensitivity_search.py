@@ -20,12 +20,11 @@ from tqdm import tqdm
 
 import paths
 from reference import FILTER_A_SPEC, design_filter, make_test_signals
-from sensitivity import (compute_sensitivities_response, compute_sensitivities,
+from sensitivity import (compute_sensitivities_response,
                          allocate_bits_by_sensitivity, unique_coeff_indices)
 from search import evaluate_nonuniform_config
 from rtlgen import generate_rtl_nonuniform
 from synth_yosys import synthesize
-from verify_rtl import verify_config, print_results
 
 # swept ranges (mirroring uniform_sweep's ranges so the two frontiers are
 # comparable): total bits per tap varies between MIN and MAX across the taps,

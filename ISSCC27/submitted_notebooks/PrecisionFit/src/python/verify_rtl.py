@@ -213,7 +213,6 @@ if __name__ == "__main__":
     results_wrap = verify_config(h, cfg_wrap, rtl_wrap, "fir_test_baseline_wrap",
                                  sigs_wrap, latency_cycles=LATENCY_CYCLES)
     # Confirm the wrap path is actually exercised (at least one wrap must occur)
-    from fixedpoint import run_model
     wrap_exercised = False
     for sig in sigs_wrap.values():
         m = run_model(sig, h, cfg_wrap)
@@ -222,7 +221,8 @@ if __name__ == "__main__":
             wrap_exercised = True
             break
     if not wrap_exercised:
-        print("  wrap_mode: SKIP (no overflow on these signals -- widen output or use louder signal)")
+        print("  wrap_mode: SKIP (no overflow on these signals "
+              "-- widen output or use louder signal)")
     else:
         ok_wrap = print_results(results_wrap)
         ok = ok and ok_wrap

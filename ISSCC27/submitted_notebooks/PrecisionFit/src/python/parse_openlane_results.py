@@ -8,7 +8,6 @@ they were not, the notebook says so explicitly (guide section 6/7 item 9)
 instead of leaving a silent gap.
 """
 import glob
-from pathlib import Path
 
 import pandas as pd
 

@@ -37,18 +37,16 @@ Usage:
 """
 import argparse
 import shutil
+import os
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
 
-import numpy as np
-
 import paths
 from reference import FILTER_A_SPEC, design_filter
 from fixedpoint import FixedPointConfig
-from rtlgen import generate_rtl, generate_rtl_nonuniform
 from build_comparison import headline_configs
 
 FORMAL_DIR = paths.ROOT / "formal"
@@ -79,22 +77,28 @@ PROOF_TASKS = [
     ("stream_pdr", True,  "prove", "abc pdr",      True,  False),
 ]
 
-import os
 PDR_TIMEOUT = int(os.environ.get("SBY_PDR_TIMEOUT", "240"))
 BMC_TIMEOUT = int(os.environ.get("SBY_BMC_TIMEOUT", "600"))
 
 MUTANTS = {
     "requant_trunc": ("fir_symmetric.v.j2",
-                      "wire signed [{{ shifted_width - 1 }}:0] shifted = rounded[{{ acc_bits }}:{{ shift }}];",
-                      "wire signed [{{ shifted_width - 1 }}:0] shifted = rounded[{{ acc_bits }}:{{ shift + 1 }}];",
+                      "wire signed [{{ shifted_width - 1 }}:0] shifted ="
+                      " rounded[{{ acc_bits }}:{{ shift }}];",
+                      "wire signed [{{ shifted_width - 1 }}:0] shifted ="
+                      " rounded[{{ acc_bits }}:{{ shift + 1 }}];",
                       "requantizer shift off by one"),
     "no_rounding_const": ("fir_symmetric.v.j2",
-                          "localparam signed [ACC_WIDTH:0] ROUND_CONST = {{ acc_bits + 1 }}'sh{{ round_const_hex }};",
+                          "localparam signed [ACC_WIDTH:0] ROUND_CONST ="
+                          " {{ acc_bits + 1 }}'sh{{ round_const_hex }};",
                           "localparam signed [ACC_WIDTH:0] ROUND_CONST = {{ acc_bits + 1 }}'sh0;",
                           "rounding constant removed"),
     "fold_to_add": ("fir_symmetric.v.j2",
-                    "wire signed [{{ fold_width - 1 }}:0] fold{{ i }} =\n        {sr[{{ i }}][IN_WIDTH-1], sr[{{ i }}]} + {sr[{{ n_taps - 1 - i }}][IN_WIDTH-1], sr[{{ n_taps - 1 - i }}]};",
-                    "wire signed [{{ fold_width - 1 }}:0] fold{{ i }} =\n        {sr[{{ i }}][IN_WIDTH-1, sr[{{ i }}]} + {sr[{{ n_taps - 1 - i }}][IN_WIDTH-1], sr[{{ n_taps - 1 - i }}]};",
+                    "wire signed [{{ fold_width - 1 }}:0] fold{{ i }} =\n"
+                    "        {sr[{{ i }}][IN_WIDTH-1], sr[{{ i }}]} +"
+                    " {sr[{{ n_taps - 1 - i }}][IN_WIDTH-1], sr[{{ n_taps - 1 - i }}]};",
+                    "wire signed [{{ fold_width - 1 }}:0] fold{{ i }} =\n"
+                    "        {sr[{{ i }}][IN_WIDTH-1, sr[{{ i }}]} +"
+                    " {sr[{{ n_taps - 1 - i }}][IN_WIDTH-1], sr[{{ n_taps - 1 - i }}]};",
                     "symmetric pre-adder: one operand's sign bit dropped"),
     "acc_mult_error": ("fir_symmetric.v.j2",
                        "prod_center = sr[{{ center_index }}] * C{{ n_pairs }};",
@@ -214,9 +218,9 @@ def prove_config(rtl_path: Path, module_name: str, workdir: Path,
         if verbose:
             tail = ""
             if not ok:
-                fail_lines = [l for l in logtxt.splitlines()
-                              if "failed assertion" in l or "ERROR" in l
-                              or "TIMEOUT" in l]
+                fail_lines = [ln for ln in logtxt.splitlines()
+                              if "failed assertion" in ln or "ERROR" in ln
+                              or "TIMEOUT" in ln]
                 tail = "  (" + ("; ".join(fail_lines[-2:]) or "see log") + ")"
             print(f"  [{module_name} / {task_name}] {'PASS' if ok else 'FAIL'}"
                   f"{tail} ({elapsed:.1f}s)", flush=True)

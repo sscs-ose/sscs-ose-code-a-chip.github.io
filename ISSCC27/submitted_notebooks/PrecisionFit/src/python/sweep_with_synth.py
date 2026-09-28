@@ -9,8 +9,6 @@ Also gives the guide's section 4.2 sanity check a home: synthesize a few
 configs of very different widths first and confirm cell count moves in a
 sensible direction *before* trusting the metric across the whole sweep.
 """
-import sys
-
 import pandas as pd
 from tqdm import tqdm
 

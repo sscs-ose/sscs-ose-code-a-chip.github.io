@@ -20,12 +20,10 @@ import pandas as pd
 
 import paths
 from reference import (FILTER_A_SPEC, design_filter, float_reference,
-                       make_test_signals, verify_spec)
+                       make_test_signals)
 from fixedpoint import (FixedPointConfig, quantize_coeffs, quantize_coeffs_per_tap,
-                        fixed_to_float, fir_fixed_point_fast, run_model)
+                        fixed_to_float, run_model)
 from metrics import error_stats, freq_response_error
-from rtlgen import generate_rtl
-from verify_rtl import verify_config
 
 ERROR_BUDGET = dict(
     max_rms_error=1e-3,       # output RMS error budget vs. float reference

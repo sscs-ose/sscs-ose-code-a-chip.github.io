@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 
 import paths
-from reference import FILTER_A_SPEC, design_filter, make_test_signals
+from reference import FILTER_A_SPEC, design_filter
 from search import make_cfg
 from rtlgen import generate_rtl, generate_rtl_nonuniform
 

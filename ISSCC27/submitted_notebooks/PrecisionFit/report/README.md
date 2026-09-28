@@ -42,15 +42,3 @@ All three headline designs were placed and routed on SKY130A using LibreLane
 
 Area ordering confirmed to match the generic-cell sweep. The GDS-II layouts
 are committed under `results/gds/`.
-
-## Interactive 3D GDS viewer
-
-The three committed GDS-II files can be inspected in 3D directly from the
-notebook (section 9, "Interactive 3D layout viewer"). The viewer parses the
-hierarchical GDS with `gdstk` and renders it with `pythreejs`/WebGL using GPU
-instancing — one instanced geometry per (unique cell, layer) pair and one
-draw transform per placement — so the ~1 M unique triangles stay interactive
-in the browser. Layer visibility for met1–met5/li1 is toggled per checkbox,
-and layers are stacked with an exaggerated (illustrative) height profile so
-the metal stack stays readable when tilted. Nothing is written to disk: the
-viewer is display-only and does not modify the GDS.

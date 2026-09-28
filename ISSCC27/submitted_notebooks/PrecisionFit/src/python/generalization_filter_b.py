@@ -10,7 +10,6 @@ developing the method on Filter A).
 This is the check that the *procedure* generalizes, not just the bit-width
 numbers we happened to land on for Filter A.
 """
-import json
 import sys
 
 import matplotlib
@@ -26,11 +25,11 @@ import paths
 from reference import (FILTER_B_SPEC, design_filter, make_test_signals,
                        verify_spec)
 from sensitivity import (compute_sensitivities_response,
-                         allocate_bits_by_sensitivity, unique_coeff_indices)
+                         unique_coeff_indices)
 from search import uniform_sweep, make_cfg
 from sweep_with_synth import synthesize_uniform_passing
 from sensitivity_search import sensitivity_guided_sweep, synthesize_passing
-from rtlgen import generate_rtl, generate_rtl_nonuniform
+from rtlgen import generate_rtl_nonuniform
 from verify_rtl import verify_config, print_results
 from build_comparison import select_conservative_uniform
 

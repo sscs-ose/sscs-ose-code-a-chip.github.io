@@ -70,8 +70,7 @@ class FixedPointConfig:
     coeff_frac_bits: int      # coefficient fractional bits (uniform mode)
     input_int_bits: int       # input sample integer bits (incl. sign)
     input_frac_bits: int      # input sample fractional bits
-    acc_guard_bits: int       # extra headroom bits on the accumulator beyond
-                              # the theoretical max growth
+    acc_guard_bits: int       # extra headroom bits beyond the theoretical max growth
     output_int_bits: int
     output_frac_bits: int
     rounding: str = "round"       # 'round' or 'trunc', applied at output requantization
@@ -340,7 +339,6 @@ def fir_fixed_point_fast(x_float: np.ndarray, h_float: np.ndarray,
                                       cfg.input_total_bits, mode="round"),
                        cfg.input_total_bits)
 
-    n = len(x_fixed)
     acc_bits = cfg.acc_total_bits(n_taps)
     acc_lo = -(2 ** (acc_bits - 1))
     acc_hi = (2 ** (acc_bits - 1)) - 1
@@ -418,7 +416,6 @@ def fir_fixed_point_per_tap_fast(x_float: np.ndarray, h_float: np.ndarray,
                                       cfg.input_total_bits, mode="round"),
                        cfg.input_total_bits)
 
-    n = len(x_fixed)
     acc_bits = cfg.acc_total_bits_for_frac(F, n_taps)
     acc_lo = -(2 ** (acc_bits - 1))
     acc_hi = (2 ** (acc_bits - 1)) - 1

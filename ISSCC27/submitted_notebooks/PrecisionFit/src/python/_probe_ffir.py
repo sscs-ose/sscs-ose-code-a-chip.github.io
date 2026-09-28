@@ -6,13 +6,17 @@ direct transcription of  y[n] = sum_i h[i] * x[n-i]  (order/grouping/width are
 proof-friendliness knobs, not verification holes: addition reassociation and
 width extension cannot change a value).
 """
-import sys, shutil, re, time, tempfile
+import re
+import shutil
+import sys
+import tempfile
+import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # src/python
-import paths
-from build_comparison import headline_configs
-import formal_verify as fv
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # noqa: E402  (src/python)
+import paths  # noqa: E402
+from build_comparison import headline_configs  # noqa: E402
+import formal_verify as fv  # noqa: E402
 
 BODIES = {
     # A: straight MAC (current template formulation) -- the known-hard one

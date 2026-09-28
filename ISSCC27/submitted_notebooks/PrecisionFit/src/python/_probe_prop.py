@@ -5,18 +5,21 @@ prints the deepest step reached.
 
 Usage:  python3 src/python/_probe_prop.py <stream|live> <none|L2|L3|P4a|P4b|P4s|P2P3>
 """
-import sys, shutil, tempfile, time
+import shutil
+import sys
+import tempfile
+import time
 import re
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # src/python
-import paths
-from build_comparison import headline_configs
-import formal_verify as fv
-import jinja2
-import rtlgen as _rg
-from reference import FILTER_A_SPEC, design_filter
-from fixedpoint import FixedPointConfig
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # noqa: E402  (src/python)
+import paths  # noqa: E402
+from build_comparison import headline_configs  # noqa: E402
+import formal_verify as fv  # noqa: E402
+import jinja2  # noqa: E402
+import rtlgen as _rg  # noqa: E402
+from reference import FILTER_A_SPEC, design_filter  # noqa: E402
+from fixedpoint import FixedPointConfig  # noqa: E402
 
 # property-name prefix -> (solo line to disable, replacement)
 NEUTRALIZE = {
@@ -67,8 +70,10 @@ def render_variant(which: str, out: Path) -> Path:
         # variant: P4s_a restated at the REGISTER boundary (guard corrected to
         # in_valid@(k-2): acc_reg@k = MAC(sr@(k-1)) freezes iff sr@(k-1)
         # == sr@(k-2) iff no load at edge k-2).
-        old = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && !$past(in_valid)) begin\n"
-               "                P4s_a: assert (acc_sum == $past(acc_sum));   // taps frozen ...\n"
+        old = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1]"
+               " && !$past(in_valid)) begin\n"
+               "                P4s_a: assert (acc_sum == $past(acc_sum));"
+               "   // taps frozen ...\n"
                "            end")
         new = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && f_rst_hist[2] &&\n"
                "                !$past(in_valid, 2)) begin\n"
@@ -82,8 +87,10 @@ def render_variant(which: str, out: Path) -> Path:
         # the combinational acc_sum freeze trivially derivable, but the
         # cross-frame combinational equality forces expensive congruence
         # reasoning). P4s_b (output freeze) stays.
-        old = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && !$past(in_valid)) begin\n"
-               "                P4s_a: assert (acc_sum == $past(acc_sum));   // taps frozen ...\n"
+        old = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1]"
+               " && !$past(in_valid)) begin\n"
+               "                P4s_a: assert (acc_sum == $past(acc_sum));"
+               "   // taps frozen ...\n"
                "            end\n")
         assert old in text, "P4s_a block not found"
         text = text.replace(old, "")
@@ -97,7 +104,8 @@ def render_variant(which: str, out: Path) -> Path:
         # combinational congruence reasoning.
         old = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && f_rst_hist[2] &&\n"
                "                !$past(in_valid, 3)) begin\n"
-               "                P4s_b: assert (out_data == $past(out_data)); // ... so is the output\n"
+               "                P4s_b: assert (out_data == $past(out_data));"
+               " // ... so is the output\n"
                "            end")
         new = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && f_rst_hist[2] &&\n"
                "                !$past(in_valid, 3)) begin\n"
@@ -114,14 +122,17 @@ def render_variant(which: str, out: Path) -> Path:
             "f_acc_q1", "f_acc_q2"))
         old3 = "f_acc_q1     <= acc_reg;"
         assert old3 in text, "f_acc_q1 pipeline line not found"
-        text = text.replace(old3, old3 + "\n        f_acc_q2     <= f_acc_q1;  // [probe-q5] second spec stage")
+        text = text.replace(old3, old3 + "\n"
+                            "        f_acc_q2     <= f_acc_q1;"
+                            "  // [probe-q5] second spec stage")
 
     if which == "Q7":
         # variant: register-level acc freeze with BOTH no-load edges in the
         # guard (acc_reg@k == acc_reg@(k-2) spans two production edges).
         old = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && f_rst_hist[2] &&\n"
                "                !$past(in_valid, 3)) begin\n"
-               "                P4s_b: assert (out_data == $past(out_data)); // ... so is the output\n"
+               "                P4s_b: assert (out_data == $past(out_data));"
+               " // ... so is the output\n"
                "            end")
         new = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && f_rst_hist[2] &&\n"
                "                !$past(in_valid, 2) && !$past(in_valid, 3)) begin\n"
@@ -138,7 +149,8 @@ def render_variant(which: str, out: Path) -> Path:
         # equality avoids the cross-frame combinational miter.
         old = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && f_rst_hist[2] &&\n"
                "                !$past(in_valid, 3)) begin\n"
-               "                P4s_b: assert (out_data == $past(out_data)); // ... so is the output\n"
+               "                P4s_b: assert (out_data == $past(out_data));"
+               " // ... so is the output\n"
                "            end")
         new = ("            if (rst_n && f_rst_hist[0] && f_rst_hist[1] && f_rst_hist[2] &&\n"
                "                !$past(in_valid, 3)) begin\n"
@@ -194,7 +206,6 @@ def render_variant(which: str, out: Path) -> Path:
         buf = [line]
         depth = line.count("(") - line.count(")")
         # depth computed from after 'assert' onward; recompute properly:
-        pre = line[:j]
         rest = line[j:]
         depth = rest.count("(") - rest.count(")")
         while depth > 0:
@@ -250,10 +261,10 @@ def main():
     ok, log = fv._run_sby(sby, wd, timeout=timeout)
     print(f"[{env_name} / keep={which}] ok={ok} deepest_step={deepest_step(log)} "
           f"({time.time()-t0:.1f}s)", flush=True)
-    tail = [l for l in log.splitlines()
-            if "failed assertion" in l or "TIMEOUT" in l or "DONE" in l]
-    for l in tail[-3:]:
-        print("   " + l.split("] ", 1)[-1], flush=True)
+    tail = [ln for ln in log.splitlines()
+            if "failed assertion" in ln or "TIMEOUT" in ln or "DONE" in ln]
+    for ln in tail[-3:]:
+        print("   " + ln.split("] ", 1)[-1], flush=True)
 
 
 if __name__ == "__main__":

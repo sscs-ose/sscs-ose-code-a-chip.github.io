@@ -106,7 +106,7 @@ def main():
         old_sim = sim_visible_lines(old)
         new_sim = sim_visible_lines(p.read_text())
         if old_sim != new_sim:
-            added = [l for l in new_sim if l not in old_sim]
+            added = [ln for ln in new_sim if ln not in old_sim]
             bad.append((name, f"sim-visible drift, first added line: {added[:1]}"))
     if bad:
         for name, why in bad:
