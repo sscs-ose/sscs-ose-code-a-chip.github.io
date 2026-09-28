@@ -44,6 +44,41 @@ def test_current_colab_link_is_to_the_live_submission_branch():
     assert "Official-main Colab link (available only after merge)" in introduction
 
 
+def test_notebook_abstract_reports_both_full_grid_deadlines(monkeypatch):
+    from scripts import build_entry_notebook
+
+    root = Path(__file__).resolve().parents[1]
+    notebook = json.loads((root / NOTEBOOK).read_bytes())
+    introduction = "".join(notebook["cells"][0]["source"])
+    abstract = " ".join(
+        introduction.split("## Abstract", 1)[1].split("## Getting started", 1)[0].split()
+    )
+    facts = load_facts()
+    full = facts["postlayout_pvt45"]
+    assert full["nominal_geometry"] is True
+    assert full["trim_code"] == 0
+    expected = (
+        f"In the {full['conditions']}-condition nominal, code-zero study, archived RC "
+        f"decks give {full['rc_correct_1ns']}/{full['points_per_mode']} correct "
+        f"decisions at {full['parallel_deadline_ns']} ns "
+        f"({full['rc_unresolved_1ns']} unresolved) and "
+        f"{full['rc_correct_2ns']}/{full['points_per_mode']} at the prospectively "
+        f"declared {full['primary_deadline_ns']} ns deadline; the worst sampled "
+        f"decision time is {full['worst_rc_delay_ns']:.3f} ns."
+    )
+    assert expected in abstract
+    assert "extracted-model physical fidelity is not yet qualified." in abstract
+    assert "Schematic results are unaffected by this extraction concern." in abstract
+    generated = []
+    monkeypatch.setattr(
+        build_entry_notebook.nbf, "write",
+        lambda document, destination: generated.append(document),
+    )
+    build_entry_notebook.main()
+    assert len(generated) == 1
+    assert generated[0].cells[0].source == introduction
+
+
 def test_reviewer_navigation_links_resolve_to_local_artifacts():
     root = Path(__file__).resolve().parents[1]
     for name in ("README.md", "REVIEWER_GUIDE.md"):

@@ -105,6 +105,98 @@ qualify at 10/5 ps under the same numerical criteria. The five pilot
 conditions were previously observed, while forty are new post-layout
 conditions; this is not a blinded external test. No 3.5 ns result is claimed.
 
+## Full-grid failure distribution
+
+Notebook Section 8 includes a 15-row marginal table locating the original
+24 RC decisions unresolved at 1 ns. Reproduce it from the public 360-row
+finest-result CSV, without any waveform remeasurement or new simulation:
+
+```text
+python -B -m scripts.audit_pvt_failures --format markdown
+python -B -m scripts.audit_pvt_failures
+```
+
+Run these commands from the entry directory with the existing reviewer
+dependencies. The [audit](scripts/audit_pvt_failures.py) reuses the published
+grid/rail validators and verifies pinned source artifacts, exactly 180
+distinct points per mode, unique point/attempt/run identities, and the fixed
+SC/RC outcomes at both deadlines. Missing/duplicate records, inconsistent
+labels or incomplete numerical qualification fail rather than shrinking
+denominators. JSON output includes all marginal counts and the 24 affected
+point/run identities; the [tests](tests/test_pvt_failure_audit.py) also verify
+the notebook's displayed table against the actual CSV.
+
+Each factor independently partitions the same 180 RC points: each corner
+has 36, each supply/temperature 60, and each signed input 45. The four
+partitions overlap and cannot be summed or used as independent observations.
+All 24 unresolved records occur at 1.62 V in SS or FS, with all three
+temperatures and all four input levels represented. This is a descriptive
+association in the archived decks, not a statistical-significance, causal,
+continuous-input or silicon claim. RC remains 156 correct / 24 unresolved /
+0 wrong at 1 ns and 180 correct at the prospectively declared 2 ns; SC is
+180 correct at both. The earlier pilot's post-hoc 2 ns result stays separate.
+Record-level classification is not full 720-raw-trace remeasurement, and the
+RC model's physical fidelity remains unqualified.
+
+## Independent public-waveform check
+
+From the entry directory, run the standalone standard-library checker:
+
+```text
+python -I -S -B scripts/check_public_waveforms.py
+```
+
+This command reads the ten published NPZ traces in
+`results/study/postlayout_pvt45/representative-traces/` and prints a JSON report
+to stdout; it does not install packages, start a simulator, or rewrite files.
+Unlike the notebook's existing replay through `comparator_atlas.spice.measure`,
+the [checker](scripts/check_public_waveforms.py) separately implements NPZ/NPY
+reading, scalar interpolation, decision classification, latency and energy
+integration without importing that producer or NumPy. **Independent refers to
+the reader and arithmetic implementation, not the experiment or personnel.**
+
+The fixed contract is unchanged: evaluation starts at 22.025 ns; both outputs
+must satisfy complementary inclusive 80%/20% supply rails at 1 ns or 2 ns after
+that instant. An opposite resolved sign is wrong, while missing complementary
+rails are unresolved. Reset checks both output and internal-node pairs against
+90% of supply 100 ps before evaluation. Latency is the first sampled valid
+point after the last invalid sample before the deadline, with interpolated
+evaluation/deadline endpoints; it is not an interpolated threshold-crossing
+estimate. Full-cycle core energy is the negative supply voltage times the
+trapezoidal integral of supply current over **20-30 ns**, with interpolated
+cycle endpoints, regardless of the decision deadline.
+
+The checker pins the public index and comparison-table SHA-256 values,
+checks all 60 indexed artifacts, and binds each waveform to its original
+metadata, collector record and unique published table row. It compares all
+eight measurement fields at both deadlines against the collector and table.
+Labels, reset state and unresolved null latency must match exactly; numeric
+comparisons use the existing replay tolerance of `1e-11` relative and `1e-11`
+absolute in each reported unit solely for arithmetic roundoff. This does not
+change the separate simulation-convergence limits of 1% energy and 20 ps.
+The JSON includes input/checker hashes, all 20 observations and numeric absolute
+differences against both references. Missing, modified, malformed or relabeled
+evidence returns a nonzero exit status rather than a partial PASS.
+
+These are **ten existing representative/teaching selections**, not random
+samples or a held-out validation set; selection may be post-hoc. The expected
+subset has eight correct and two unresolved decisions at 1 ns, and ten correct
+at 2 ns. These counts are **not** the full-grid 156/180 and 180/180 results.
+No additional simulations, full 720-trace replay, or new statistical coverage
+are claimed. The RC decks' physical fidelity remains unqualified. Hashes detect
+changes relative to the checked-in pins, not coordinated replacement of the
+checker and data; agreement checks measurement arithmetic, not physical truth.
+The reader deliberately accepts only the published NPY 1.0, C-order,
+little-endian float64 nine-column format and bounded file sizes.
+
+Synthetic hand-calculated cases and missing-trace, tamper, identity and CLI
+failure tests are in [test_public_waveforms.py](tests/test_public_waveforms.py).
+With the existing reviewer dependencies installed:
+
+```text
+python -B -m pytest -q tests/test_public_waveforms.py
+```
+
 ## Numerical measurements
 
 A decision requires complementary 80%/20% output rails and the correct input

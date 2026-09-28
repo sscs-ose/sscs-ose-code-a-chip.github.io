@@ -41,9 +41,10 @@ def main() -> None:
         selected design into actual layout and parasitic extraction. Interactive
         waveforms connect circuit behavior to decision time and core energy.
         Schematic and extracted results are compared under explicitly stated
-        conditions. A 45-condition nominal extracted-RC study reaches the
-        declared 2 ns deadline at all 180 sampled inputs, with a measured
-        worst-case decision time of 1.835 ns. These are archived RC-deck
+        conditions. In the 45-condition nominal, code-zero study, archived RC
+        decks give 156/180 correct decisions at 1 ns (24 unresolved) and
+        180/180 at the prospectively declared 2 ns deadline; the worst sampled
+        decision time is 1.835 ns. These are archived RC-deck
         outcomes; extracted-model physical fidelity is not yet qualified.
         Schematic results are unaffected by this extraction concern.
         See the model-applicability limitation in Section 8 and
@@ -619,6 +620,40 @@ def main() -> None:
         1.835 ns, rather than the SS corner seen in the earlier pilot.
         These finite-grid results do not establish statistical yield or
         behavior between the listed input values.
+
+        **Where the 24 unresolved points occur.** The table below counts the
+        published finest-row records, not just the ten representative traces.
+        Each factor is a separate marginal partition of the same 180 RC points;
+        do not add counts across factors or treat them as independent samples.
+
+        | Factor | Level | RC correct at 1 ns | RC unresolved at 1 ns | RC correct at 2 ns |
+        | --- | --- | ---: | ---: | ---: |
+        | Corner | TT | 36/36 | 0/36 | 36/36 |
+        | Corner | SS | 24/36 | 12/36 | 36/36 |
+        | Corner | FF | 36/36 | 0/36 | 36/36 |
+        | Corner | SF | 36/36 | 0/36 | 36/36 |
+        | Corner | FS | 24/36 | 12/36 | 36/36 |
+        | Supply (V) | 1.62 | 36/60 | 24/60 | 60/60 |
+        | Supply (V) | 1.8 | 60/60 | 0/60 | 60/60 |
+        | Supply (V) | 1.95 | 60/60 | 0/60 | 60/60 |
+        | Temperature (C) | -40 | 52/60 | 8/60 | 60/60 |
+        | Temperature (C) | 27 | 52/60 | 8/60 | 60/60 |
+        | Temperature (C) | 125 | 52/60 | 8/60 | 60/60 |
+        | Input (mV) | -10 | 39/45 | 6/45 | 45/45 |
+        | Input (mV) | -3 | 39/45 | 6/45 | 45/45 |
+        | Input (mV) | +3 | 39/45 | 6/45 | 45/45 |
+        | Input (mV) | +10 | 39/45 | 6/45 | 45/45 |
+
+        All 24 unresolved records are at 1.62 V in SS or FS; all three
+        temperatures and all four signed inputs are represented. No RC point
+        is wrong at either deadline; schematic is correct at 180/180 at both.
+        This is a descriptive record-level audit, not a raw-waveform replay or evidence of physical causality.
+        Archived RC-model physical fidelity remains unqualified.
+
+        Reproduce this table from the [360-row CSV](results/study/postlayout_pvt45/measurements.csv)
+        with `python -B -m scripts.audit_pvt_failures --format markdown`
+        from the entry directory. JSON output also lists the 24 unresolved
+        point/run identities; [audit details](REPRODUCIBILITY.md#full-grid-failure-distribution).
         """),
         code("""
         from presentation import pvt45_results as pvt
