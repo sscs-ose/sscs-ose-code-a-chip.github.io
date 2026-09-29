@@ -700,13 +700,24 @@ def main() -> None:
         markdown("""
         ## 9. Discussion and limitations
 
-        Calibration improves the switching boundary, while device choice
-        and loading affect whether regeneration finishes in time. The
-        lower-energy control and extracted-layout comparison show why
-        accuracy, delay and energy should be evaluated together.
+        Under the same local calibration policy, the selected circuit
+        increases 1 ns correct decisions from 310/392 to 372/392 across
+        the 49 listed schematic conditions, while mean core energy rises
+        from 143.01 to 251.53 fJ/cycle. The post-selection lower-energy
+        control reaches 351/392 at 156.65 fJ/cycle. Neither design
+        dominates both measured correctness and core energy.
+
+        The separate nominal, code-zero layout study records 156/180
+        correct RC decisions at 1 ns and 180/180 at its declared 2 ns
+        deadline. These are results of the archived extraction decks,
+        whose physical fidelity remains unqualified; they are not
+        silicon predictions or an isolated measure of resistance.
 
         - Results are deterministic SKY130 simulations. Width perturbations
           are controlled stress, not a foundry mismatch distribution or yield.
+        - Candidate selection was a finite design comparison; the
+          post-selection control and previously observed PVT conditions
+          do not form a blinded external validation set.
         - The 49-condition calibrated schematic study, earlier five-condition
           layout experiment and full 45-condition nominal code-zero study
           have separate conditions and recorded tool identities.

@@ -29,8 +29,13 @@ lower-energy control, and a physical implementation of the selected
 ## Results
 
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
-These RC results are outcomes of the archived 27-device simulation decks; extracted-model physical fidelity is not yet qualified. In the pinned Magic/open_pdks pipeline, mutual capacitances are retained while grounded capacitance increases. The physical error magnitude and direction are unknown; no exact duplication factor or corrected counts or energy are inferred. C-only is not independent ground truth, and RC-versus-C performance differences cannot be attributed solely to resistance. DRC/LVS establish their recorded structural checks, not parasitic-model fidelity. Schematic results are unaffected by this extraction concern. Recorded numerical agreement and simulation coverage do not establish silicon PVT performance.
-See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
+The pinned Magic/open_pdks extraction retains mutual capacitances while
+grounded capacitance increases. Neither the magnitude nor direction of any
+physical error is established; the C-only deck is not an independent
+reference, and RC-versus-C differences do not isolate resistance. DRC/LVS
+and timestep agreement check structure and numerical consistency, not
+parasitic fidelity or silicon PVT performance. The schematic comparisons
+are unaffected. See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
 The schematic comparison uses the same local calibration policy, a 1 ns
 deadline and sampled absolute inputs of at least 1 mV:
@@ -67,6 +72,9 @@ pilot's result.
 
 Each cell is the maximum over four signed inputs. Black outlines mark
 conditions with a missed 1 ns sample. [Vector PDF](results/study/postlayout_pvt45/figures/pvt45_timing.pdf).
+The [independent public-waveform check](REPRODUCIBILITY.md#independent-public-waveform-check)
+remeasures ten saved post-layout traces at both deadlines; those selected
+examples do not replace the full-grid record audit.
 
 ## Run
 
