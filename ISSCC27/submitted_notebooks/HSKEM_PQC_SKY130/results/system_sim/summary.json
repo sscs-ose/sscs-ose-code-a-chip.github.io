@@ -1,0 +1,58 @@
+{
+  "testbench": "sim/tb/tb_trustedge_spi.sv (HSKEM tree), Icarus Verilog 14 (OSS CAD Suite 2026-09-28)",
+  "reference": "ModelSim 10.5b run of 2026-09-05 (sim/tb_trustedge_spi.log): Decaps 81457 cycles, FPGA configuration",
+  "configs": {
+    "fpga": {
+      "decaps_cycles": 81457,
+      "decaps_keccak_permutations": 26,
+      "tb_result": "ALL PASS (baseline + D1/D2 internal restore + HSM-4E auth + HSM-4F legacy lock)",
+      "log_sha256": "2118f53b0db5eb660e6e881638700f62c8e7948b3b7c16a9c0110a93f49cbbad",
+      "shared_secret_fingerprints": [
+        "27033e5e"
+      ]
+    },
+    "keccak_only": {
+      "decaps_cycles": 85201,
+      "decaps_keccak_permutations": 26,
+      "tb_result": "FAIL (7 errors)",
+      "log_sha256": "52b0cf5940480d4b224f302fcd7ae64ebb877c3b861642f5f24e44624e6c53e8",
+      "shared_secret_fingerprints": [
+        "27033e5e"
+      ]
+    },
+    "sram_only": {
+      "decaps_cycles": 95793,
+      "decaps_keccak_permutations": 26,
+      "tb_result": "ALL PASS (baseline + D1/D2 internal restore + HSM-4E auth + HSM-4F legacy lock)",
+      "log_sha256": "c4d4cee8c74520205205dcfd77b64c97bc90a8ef7fb0dd25fb2f9f157a4349ad",
+      "shared_secret_fingerprints": [
+        "27033e5e"
+      ]
+    },
+    "asic": {
+      "decaps_cycles": 99537,
+      "decaps_keccak_permutations": 26,
+      "tb_result": "ALL PASS (baseline + D1/D2 internal restore + HSM-4E auth + HSM-4F legacy lock)",
+      "log_sha256": "115ade257029bbcb40d07e1e6b4d6aefbdb5b894890c97f82b618f72b80a4074",
+      "shared_secret_fingerprints": [
+        "27033e5e"
+      ]
+    }
+  },
+  "decomposition": {
+    "keccak_serial_delta": 3744,
+    "keccak_serial_model": 3744,
+    "single_port_sram_delta": 14336,
+    "single_port_sram_model": 14336,
+    "both_delta": 18080,
+    "additive": true
+  },
+  "note_keccak_only": "keccak_only is not a configuration the testbench's hard-coded cycle oracle supports: its 7 FAIL lines are cycle-count equality checks only; every digest and permutation count matches, and each measured count equals the FPGA oracle plus 144 cycles per Keccak permutation (KeyGen 35171+36*144=40355, Encaps 55692+20*144=58572, Encrypt 50449+7*144=51457).",
+  "published_copy_check": {
+    "rtl": "hskem_rtl/ (placeholder provisioning credential, recomputed testbench tags)",
+    "config": "fpga",
+    "tb_result": "ALL PASS (baseline + D1/D2 internal restore + HSM-4E auth + HSM-4F legacy lock)",
+    "decaps_cycles": 81457,
+    "log_sha256": "2118f53b0db5eb660e6e881638700f62c8e7948b3b7c16a9c0110a93f49cbbad"
+  }
+}

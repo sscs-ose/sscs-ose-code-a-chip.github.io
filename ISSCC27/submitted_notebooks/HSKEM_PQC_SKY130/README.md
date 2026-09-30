@@ -1,0 +1,92 @@
+# HSKEM_PQC_SKY130 — IEEE SSCS Code-a-Chip, ISSCC 2027
+
+**Measuring the Design Decisions of an Open-Source Post-Quantum HSM Chip: ML-KEM-512 NTT and Keccak from Python Golden Model to SKY130 Layout**
+
+- **Author:** Nguyen Tan Dat — University of Science, VNU-HCM (HCMUS) · nguyentandat08052007@gmail.com
+- **License:** Apache-2.0 (see `LICENSE` and `NOTICE`)
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tandat08052007/sscs-ose-code-a-chip.github.io/blob/isscc27-hskem-pqc-sky130/ISSCC27/submitted_notebooks/HSKEM_PQC_SKY130/HSKEM_PQC_SKY130.ipynb)
+
+## Overview
+
+HSKEM is a post-quantum hardware security module that I designed, prototyped on a DE25-Nano FPGA board
+and implemented as a SKY130 digital core with open-source tools. This submission examines the two
+datapaths at the heart of ML-KEM-512 — the number-theoretic transform and the Keccak-f[1600]
+permutation — and measures, from RTL to routed layout and up to the complete chip, what each
+architectural decision made for the ASIC actually costs in area, latency, energy and security.
+
+The entry point is `HSKEM_PQC_SKY130.ipynb`, which runs locally or in Google Colab. Every table and
+figure in the notebook is computed from the files in this folder, and the quantitative statements in its
+text are guarded by assertions against the data, so the prose cannot silently drift from the results.
+
+## Reviewer quick start
+
+1. Open the notebook in Colab with the badge above and choose *Runtime → Run all*. The first cell
+   fetches this folder and the YosysHQ OSS CAD Suite; nothing else needs to be installed.
+2. In Colab the notebook re-runs the golden-model checks, the NIST ACVP vectors, the RTL simulations,
+   the SKY130 synthesis, the design iteration, a gate-level simulation of a routed netlist and the
+   leakage assessment. The expected run time of each section is listed in the notebook's Setup section,
+   and the last cell prints the measured total.
+3. Place-and-route and the full-system simulation take longer than a default run should; their
+   committed results are read from `results/`. Both can be repeated from the notebook, also in Colab,
+   by setting `RUN_PNR_COLAB = True` (Section 6, 30–45 minutes) or `RUN_SYSTEM_SIM = True` (Section 7,
+   about five minutes).
+
+## Contents
+
+| Path | Content |
+|---|---|
+| `golden/mlkem_ref.py` | Independent FIPS 203 NTT and FIPS 202 Keccak-f model, checked against schoolbook multiplication, `kyber-py` and `hashlib` |
+| `golden/mlkem_full.py`, `golden/acvp/` | Complete ML-KEM-512 built on the golden NTT and validated against the official NIST ACVP-Server vectors (25 key generations, 25 encapsulations, 10 decapsulations); provenance in `acvp/SOURCE.txt` |
+| `golden/gen_vectors.py` | Test-vector generator for the RTL testbenches |
+| `golden/leakage.py` | Fixed-versus-random TVLA on simulated register-transition traces, with a negative control |
+| `rtl/` | NTT engine, Barrett reducer, Keccak-f[1600] core and SRAM behavioural models, copied from the HSKEM tree by `scripts/sync_rtl.sh`; the parameterized NTT redesign (`kyber_ntt_engine_opt.sv`) and the Keccak lane wrapper for physical design |
+| `hskem_rtl/` | The complete HSKEM RTL and full-system testbench used in Section 7, copied by `scripts/sync_full_rtl.sh`; one documented change (`PUBLICATION_PATCH.diff`) replaces a demo-board test credential with a public placeholder and recomputes the testbench's two provisioning tags accordingly |
+| `formal/` | SAT-based proof that the Barrett reducer computes a mod q for all 2^24 inputs, with variants and a negative control |
+| `figures/` | Method overview and block diagrams of HSKEM and of the NTT datapath |
+| `tb/` | Icarus Verilog testbenches (bit-exact comparison, latency and constant-time checks, zeroize, leakage traces) and the read-only decapsulation cycle profiler |
+| `flow/` | OpenROAD-flow-scripts design configuration, timing constraints and OpenSTA scripts for SKY130 HD; `flow/macros/` holds the OpenRAM views of the chip's NTT coefficient SRAM |
+| `board/` | Measurement scripts for the DE25-Nano and ESP32: UART console, repeated two-role ML-KEM flow, repeated HSM-invariant scenario |
+| `scripts/` | Simulation, Colab synthesis, place-and-route, gate-level simulation and power, corner analysis, system-level profiling, metric collection and notebook generation |
+| `third_party/` | SKY130 HD functional cell models (Apache-2.0), so that routed netlists can be simulated without downloading the PDK |
+| `results/` | Simulation logs, controller traces, synthesis and post-route metrics with routed netlists of the compared design points, per-block chip statistics, system-level profiles, TVLA data, and FPGA measurements with SHA-256 checksums |
+
+## Reproducing the physical design
+
+Section 6 was produced on Linux with a local build of OpenROAD-flow-scripts at commit `6101364b`
+(OpenROAD `f5522624`). With such an installation, one design point is regenerated by
+
+```
+ORFS_ROOT=/path/to/OpenROAD-flow-scripts bash scripts/run_orfs.sh ntt_opt_pipe_w12 20
+python3 scripts/collect_metrics.py
+```
+
+`scripts/run_chunk.sh` lists every design point that was run; `scripts/sta_corners.sh` repeats the corner
+analysis on the routed results.
+
+Without an ORFS installation, the exact build used here is available as a relocatable archive
+(`orfs-6101364b-sky130hd.tar.xz`, about 130 MB, attached to the release
+[`hskem-orfs-6101364b`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-orfs-6101364b) of the author's fork and produced by `scripts/make_orfs_bundle.sh`). It runs on a stock Ubuntu 22.04 machine,
+including Colab (`RUN_PNR_COLAB = True` in Section 6 of the notebook), and in a clean Ubuntu 22.04
+container, with twelve threads and with two, it reproduced every final metric of the committed layout of
+the pipelined NTT (`results/asic/bundle_reproduction.json`).
+
+The routed GDS files of the block-level design points compared in the notebook are attached to the
+release [`hskem-block-layouts`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-block-layouts)
+of the author's fork, with their SHA-256 sums. The full-chip layout itself is not published: its logic contains the demonstration board's
+provisioning test credential (see `hskem_rtl/PUBLICATION_PATCH.diff`). Its signoff results, the SHA-256 of
+the GDS and a cell-level placement map without connectivity are provided in `results/fullchip/`, and a
+downscaled render that shows the floorplan but resolves no cell or wire in `figures/fullchip_layout.jpg`.
+
+## Tool versions
+
+The committed results were produced with Icarus Verilog 12.0; the YosysHQ OSS CAD Suite 2026-09-28
+(Icarus Verilog 14-devel, Yosys with the `slang` front end); OpenROAD-flow-scripts commit `6101364b`
+(OpenROAD `f5522624`, with its OpenSTA); KLayout 0.30.7; and Python 3 with NumPy, pandas, Matplotlib
+and `kyber-py` 1.2.0. The FPGA bitstream used for the hardware cross-check was
+built with Quartus Prime Pro 26.1; it is the only non-open-source tool involved.
+
+## Scope
+
+This is pre-silicon design and verification work. The design has not been fabricated, and no claim of
+FIPS validation is made.
