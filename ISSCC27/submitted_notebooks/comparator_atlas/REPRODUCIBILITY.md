@@ -84,7 +84,65 @@ same-deck reproduction do not establish silicon PVT performance.
 Historical receipts and frozen reproduction sources preserve their original
 wording and status; this current limitation governs interpretation of their
 RC outcomes, including the saved waveform teaching examples and comparisons
-between legal layouts. No model correction or new simulation is included.
+between legal layouts. No model correction was made. The separate,
+subsequently run sensitivity check below does not replace any archived result.
+
+### Bounded RC sensitivity check
+
+The [plan](results/study/rc_sensitivity/plan.json) and
+[per-pair measurements](results/study/rc_sensitivity/summary.json)
+document a subsequent exploratory rerun of two **already published**
+points: TT / 1.8 V / 27 C / -10 mV (`c01-rc-m10`) and the slowest archived
+RC point, FS / 1.62 V / -40 C / -3 mV (`c37-rc-m03`). The unchanged
+5 ps baselines reproduce their archived energy and 1/2 ns decisions.
+Each point was run at 10 and 5 ps under seven settings: original; C only
+times 0.8 or 1.2; R only times 0.8 or 1.2; and both times 0.8 or 1.2.
+Only the original `atlas` subcircuit's 319 C and 675 R cards were scaled.
+The 27 MOS, 5 fF external output loads, clocks, thresholds and model files
+were held fixed. All 28 new transient records succeeded; the 14 timestep
+pairs met the existing 1% energy / 20 ps latency / same-decision rule.
+
+| RC point, 5 ps | Original 2 ns | C x 0.8 | C x 1.2 | R x 0.8 | R x 1.2 | Both x 0.8 | Both x 1.2 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TT -10 mV | correct | correct | correct | correct | correct | correct | correct |
+| FS -3 mV | correct | correct | **unresolved** | correct | correct | correct | **unresolved** |
+
+At 1 ns the TT point is correct in all seven settings; the FS point is
+unresolved in all seven. The original FS decision time is 1.835032 ns;
+the FS C x 1.2 run records energy but **no** valid 2 ns decision time.
+These synchronized +/-20% whole-subcircuit card factors are chosen
+illustrations, **not** a characterized PDK uncertainty interval or a
+physically qualified PEX alternative. In particular, this is not a
+rerun of all 45 PVT conditions or a revision of the archived nominal
+180/180 result.
+
+The [runner](reproduction/pvt45/run_rc_sensitivity.py) checks the unchanged
+public source/netlist and ngspice-47/model pins, then creates an empty
+short-path output directory and keeps each executed deck, log, waveform,
+measurement and numerical comparison. Its raw outputs remain local; the
+published JSON contains only the path-free plan and qualified measurements,
+not a redistributed model tree. From the entry root, with the same pinned
+Windows tools and caller-supplied read-only models described in
+[the clean-start reproduction](reproduction/pvt45/pvt45_reproduce/README.md):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:OMP_NUM_THREADS = '1'
+$env:OPENBLAS_NUM_THREADS = '1'
+$env:MKL_NUM_THREADS = '1'
+& $Python -B .\reproduction\pvt45\run_rc_sensitivity.py `
+  --entry .\reproduction\pvt45 --models $Models `
+  --ngspice $Ngspice --out $env:ATLAS_FRESH_SENS_OUT
+```
+
+Use a **new, nonexistent, short** `$env:ATLAS_FRESH_SENS_OUT` path; this
+optional 28-transient experiment is not started by the notebook default.
+The separate [GDS geometry audit and conditional layer-coefficient
+components](results/study/gds_geometry/README.md) provide public inputs,
+a path-free script and source hashes. Restoring GDS ports and matching
+exported polygons do not make its imported RC graph interchangeable with
+the archived MAG graph. No complete whole-net R/C estimate or qualified
+external PEX reference has been established.
 
 | Experiment | Conditions and controls | Reporting |
 | --- | --- | --- |

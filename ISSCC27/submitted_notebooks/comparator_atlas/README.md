@@ -68,6 +68,24 @@ The earlier five-condition ngspice-42 layout pilot remains a separate record:
 The full-grid 2 ns criterion was declared separately rather than rewriting that
 pilot's result.
 
+An [exploratory RC-card sensitivity check](REPRODUCIBILITY.md#bounded-rc-sensitivity-check)
+reran two previously published RC points with seven *hypothetical* R/C
+settings each, at both 10 and 5 ps (28 new transients; 14 numerical pairs
+passed). The original slowest FS point is correct at 2 ns, but becomes
+unresolved when its 319 internal capacitor cards are all scaled by 1.2,
+either alone or with its 675 resistor cards scaled by 1.2. The TT sample
+remains correct at both deadlines in all seven settings. These factors are
+not a measured process-error range; two selected points cannot establish
+the perturbed full-grid pass rate or the physical accuracy of the RC model.
+[Plan](results/study/rc_sensitivity/plan.json) and
+[per-pair measurements](results/study/rc_sensitivity/summary.json) are
+provided with an explicit [rerun script](reproduction/pvt45/run_rc_sensitivity.py).
+An independently documented [GDS geometry and layer-coefficient spot check](results/study/gds_geometry/README.md)
+reconstructs selected conductor dimensions and **only isolated sheet/plate
+components**. It does not qualify the full-net RC extraction: although all
+15 GDS ports can be restored, imported RC segmentation and capacitor values
+still differ from the archived MAG extraction.
+
 ![Full post-layout PVT timing](results/study/postlayout_pvt45/figures/pvt45_timing.png)
 
 Each cell is the maximum over four signed inputs. Black outlines mark

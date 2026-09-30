@@ -713,6 +713,15 @@ def main() -> None:
         whose physical fidelity remains unqualified; they are not
         silicon predictions or an isolated measure of resistance.
 
+        A subsequent [two-point RC-card sensitivity check](REPRODUCIBILITY.md#bounded-rc-sensitivity-check)
+        reran 28 transients with hypothetical R/C scaling. At the slowest
+        archived FS point, C x 1.2 makes the 2 ns decision unresolved.
+        This is neither a measured process-error bound nor a new full-grid
+        pass rate. A separate [GDS geometry check](results/study/gds_geometry/README.md)
+        restores the interface and measures selected conductor dimensions;
+        imported RC still differs from the MAG extraction. Its isolated
+        sheet/plate components are not whole-net parasitic estimates.
+
         - Results are deterministic SKY130 simulations. Width perturbations
           are controlled stress, not a foundry mismatch distribution or yield.
         - Candidate selection was a finite design comparison; the
