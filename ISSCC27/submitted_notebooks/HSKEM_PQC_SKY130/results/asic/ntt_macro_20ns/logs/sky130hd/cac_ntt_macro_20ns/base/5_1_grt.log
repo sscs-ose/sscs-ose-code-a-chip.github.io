@@ -4,7 +4,6 @@ This program is licensed under the BSD-3 license. See the LICENSE file for detai
 Components of this program may be licensed under more restrictive licenses which must be honored.
 [INFO ORD-0030] Using 12 thread(s).
 read_liberty /opt/eda/orfs-6101364b/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
-Took 5 seconds: read_liberty /opt/eda/orfs-6101364b/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 read_liberty /mnt/d/TKVM_ATTT_2026_test/codeachip/flow/macros/sky130_sram_1rw_16x256_wpr8_TT_1p8V_25C.lib
 read_db /root/cac_runs/ntt_macro_20ns/results/sky130hd/cac_ntt_macro_20ns/base/4_cts.odb
 read_sdc /root/cac_runs/ntt_macro_20ns/results/sky130hd/cac_ntt_macro_20ns/base/4_cts.sdc
@@ -119,8 +118,8 @@ Number of nets:           4594
 #macroValidViaAp       = 0
 #macroNoAp             = 0
 [INFO DRT-0166] Complete pin access.
-[INFO DRT-0267] cpu time = 00:03:44, elapsed time = 00:01:15, memory = 160.60 (MB), peak = 159.59 (MB)
-Took 77 seconds: pin_access
+[INFO DRT-0267] cpu time = 00:03:47, elapsed time = 00:00:40, memory = 160.55 (MB), peak = 159.54 (MB)
+Took 41 seconds: pin_access
 global_route -congestion_report_file /root/cac_runs/ntt_macro_20ns/reports/sky130hd/cac_ntt_macro_20ns/base/congestion.rpt -congestion_iterations 30 -congestion_report_iter_step 5 -verbose
 [INFO GRT-0020] Min routing layer: met1
 [INFO GRT-0021] Max routing layer: met5
@@ -190,8 +189,7 @@ Total           136072         15492           11.39%             0 /  0 /  0
 
 [INFO GRT-0018] Total wirelength: 164985 um
 [INFO GRT-0014] Routed nets: 4504
-[INFO GRT-0303] Global routing runtime = 00:00:12
-Took 14 seconds: global_route -congestion_report_file /root/cac_runs/ntt_macro_20ns/reports/sky130hd/cac_ntt_macro_20ns/base/congestion.rpt -congestion_iterations 30 -congestion_report_iter_step 5 -verbose
+[INFO GRT-0303] Global routing runtime = 00:00:03
 estimate_parasitics -global_routing
 Perform buffer insertion and gate resizing...
 repair_design -verbose
@@ -754,8 +752,8 @@ Iteration |   Area    | Resized | Buffers | Nets repaired | Remaining
 [INFO RSZ-0034] Found 9 slew violations.
 [INFO RSZ-0036] Found 2 capacitance violations.
 [INFO RSZ-0038] Inserted 8 buffers in 11 nets.
-[INFO RSZ-0504] Runtime: 14.13s
-Took 15 seconds: repair_design -verbose
+[INFO RSZ-0504] Runtime: 4.81s
+Took 5 seconds: repair_design -verbose
 global_route -start_incremental
 detailed_placement
 [INFO DPL-0006] Core area: 288635.57 um^2
@@ -776,7 +774,7 @@ Iteration | Violations |    Cells |    Sites
 ---------------------------------------------
         0 |          0 |         0 |         0
 Negotiation phase 1 converged at iteration 0.
-[INFO DPL-0500] Runtime: 0.54s
+[INFO DPL-0500] Runtime: 0.10s
 Placement Analysis
 ---------------------------------
 total displacement        339.5 u
@@ -882,10 +880,10 @@ repair_timing -setup_margin 0 -hold_margin 0 -repair_tns 100 -verbose
 [INFO RSZ-0043] Swapped pins on 131 instances.
 [INFO RSZ-0049] Cloned 1 instances.
 [WARNING RSZ-0062] Unable to repair all setup violations.
-[INFO RSZ-0505] Runtime: 408.12s
+[INFO RSZ-0505] Runtime: 85.52s
 [INFO RSZ-0033] No hold violations found.
-[INFO RSZ-0506] Runtime: 0.06s
-Took 432 seconds: repair_timing -setup_margin 0 -hold_margin 0 -repair_tns 100 -verbose
+[INFO RSZ-0506] Runtime: 0.04s
+Took 90 seconds: repair_timing -setup_margin 0 -hold_margin 0 -repair_tns 100 -verbose
 global_route -start_incremental
 detailed_placement
 [INFO DPL-0006] Core area: 288635.57 um^2
@@ -906,7 +904,7 @@ Iteration | Violations |    Cells |    Sites
 ---------------------------------------------
         0 |          0 |         0 |         0
 Negotiation phase 1 converged at iteration 0.
-[INFO DPL-0500] Runtime: 0.06s
+[INFO DPL-0500] Runtime: 0.04s
 Placement Analysis
 ---------------------------------
 total displacement        328.5 u
@@ -943,7 +941,7 @@ Iteration | Violations |    Cells |    Sites
 ---------------------------------------------
         0 |          0 |         0 |         0
 Negotiation phase 1 converged at iteration 0.
-[INFO DPL-0500] Runtime: 0.05s
+[INFO DPL-0500] Runtime: 0.03s
 [INFO GRT-0015] Inserted 1 diodes.
 [INFO GRT-0012] Found 0 antenna violations.
 [INFO ANT-0002] Found 0 net violations.
@@ -961,9 +959,39 @@ Design area 140939 um^2 49% utilization.
 [INFO FLW-0009] Clock clk slack -1.838
 write_sdc -no_timestamp /root/cac_runs/ntt_macro_20ns/results/sky130hd/cac_ntt_macro_20ns/base/updated_clks.sdc
 [INFO FLW-0011] Path endpoint path count 458
+source /mnt/d/TKVM_ATTT_2026_test/codeachip/flow/post_grt_macro_pins.tcl
+CAC_MACRO_PIN_ECO: upsized 5 address-pin buffers to sky130_fd_sc_hd__buf_8
+[INFO DPL-0006] Core area: 288635.57 um^2
+[INFO DPL-0007] Movable instances area: 35363.92 um^2
+[INFO DPL-0008] Fixed instances area within core: 105631.26 um^2
+[INFO DPL-0009] Utilization: 48.8%
+[INFO DPL-0005] Diamond search max displacement: +/- 500 sites horizontally, +/- 100 rows vertically.
+[INFO DPL-1102] Legalizing using negotiation legalizer.
+[INFO DPL-1103] Negotiation base search window: +/-20 sites horizontally, +/-5 rows vertically 
+	Automatic search window extension enabled.
+	Search window extendable up to the max displacement cap of +/-500 sites, +/-100 rows near walls.
+[INFO DPL-1104] NegotiationLegalizer DRC penalty: 5.
+[INFO DPL-0392] Negotiation cell height distribution (2 unique row-count(s)):
+[INFO DPL-0393]   height 1 row(s): 6262 cells
+[INFO DPL-0393]   height 80 row(s): 1 cells
+          |      Total |  Illegal |  Illegal
+Iteration | Violations |    Cells |    Sites
+---------------------------------------------
+        0 |          0 |         0 |         0
+Negotiation phase 1 converged at iteration 0.
+[INFO DPL-0500] Runtime: 0.03s
+Placement Analysis
+---------------------------------
+total displacement          1.4 u
+average displacement        0.0 u
+max displacement            0.9 u
+original HPWL           94813.2 u
+legalized HPWL          94811.4 u
+delta HPWL                    0 %
+
 write_db /root/cac_runs/ntt_macro_20ns/results/sky130hd/cac_ntt_macro_20ns/base/5_1_grt.odb
 write_sdc -no_timestamp /root/cac_runs/ntt_macro_20ns/results/sky130hd/cac_ntt_macro_20ns/base/5_1_grt.sdc
-Elapsed time: 8:49.27[h:]min:sec. CPU time: user 551.12 sys 23.92 (108%). Peak memory: 363128KB.
+Elapsed time: 2:19.17[h:]min:sec. CPU time: user 531.46 sys 31.69 (404%). Peak memory: 363628KB.
 Log                       Ext     Elapsed/s Peak Memory/MB sha1sum result [0:20)
-5_1_grt                   .odb          529            354 99893331adffd6094926
+5_1_grt                   .odb          139            355 746161cdff63805d642a
 5_1_grt                   .sdc                             ee7d33e068a23a61264e

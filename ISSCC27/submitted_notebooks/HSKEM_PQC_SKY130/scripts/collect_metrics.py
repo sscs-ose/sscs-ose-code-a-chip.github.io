@@ -34,6 +34,8 @@ def sim_cycles() -> dict:
         if log.exists():
             m = re.search(r"cycles_fwd=(\d+) cycles_inv=(\d+)", log.read_text())
             cyc[key] = {"op": "NTT forward", "cycles": int(m[1]), "cycles_inv": int(m[2])}
+    if "ntt_opt_pipe_w12" in cyc:     # same controller, macro store
+        cyc["ntt_opt_pipe_macro"] = dict(cyc["ntt_opt_pipe_w12"])
     return cyc
 
 
@@ -71,7 +73,7 @@ def main() -> None:
     rows = []
     for run in sorted(p for p in ASIC.iterdir() if p.is_dir()):
         # exact names only: suffixed experiment dirs (e.g. *_ant10) are reviewed separately
-        m = re.fullmatch(r"(ntt_dp|ntt_sp|ntt_macro|keccak_r1|keccak_s7|ntt_opt_b1_w12|ntt_opt_pipe_w12)_(\d+(?:p\d+)?)ns",
+        m = re.fullmatch(r"(ntt_dp|ntt_sp|ntt_macro|keccak_r1|keccak_s7|ntt_opt_b1_w12|ntt_opt_pipe_w12|ntt_opt_pipe_macro)_(\d+(?:p\d+)?)ns",
                          run.name)
         if not m:
             continue

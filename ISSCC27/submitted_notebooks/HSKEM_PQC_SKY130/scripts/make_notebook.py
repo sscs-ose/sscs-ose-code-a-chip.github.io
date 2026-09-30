@@ -12,13 +12,20 @@ import nbformat as nbf
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 cells = []
+section = "Setup"        # the section each code cell belongs to, for the run-time report
+code_sections = []
 
 
 def md(s: str) -> None:
+    global section
+    first = s.strip("\n").splitlines()[0]
+    if first.startswith("## "):
+        section = first[3:].split(":")[0]
     cells.append(nbf.v4.new_markdown_cell(s.strip("\n")))
 
 
 def code(s: str) -> None:
+    code_sections.append(section)
     cells.append(nbf.v4.new_code_cell(s.strip("\n")))
 
 
@@ -48,8 +55,9 @@ permutation — and asks a single question:
 
 To answer it, the notebook (1) builds an independent Python golden model, checks it against three
 unrelated oracles and extends it to a complete ML-KEM-512 that passes the official NIST ACVP vectors;
-(2) shows the RTL to be bit-exact against that model and its latency to be data-independent, and proves
-its modular reducer correct for every input; (3) synthesizes four architecture points for SKY130 in Colab
+(2) shows the RTL to be bit-exact against that model, with data-independent latency, runs the NIST
+key-generation vectors through the complete co-processor RTL, and proves its modular reducer correct for
+every input; (3) synthesizes four architecture points for SKY130 in Colab
 and takes them through place-and-route, a clock sweep and a three-corner timing analysis; (4) closes the
 loop with a measured design iteration of the NTT, verified on the routed netlists; (5) weighs every
 block-level result against a cycle profile of the complete chip; (6) cross-checks the same RTL on the FPGA
@@ -69,28 +77,32 @@ md(r"""
 
 The cell below runs both locally, from inside the submission folder, and on Google Colab. On Colab it
 fetches this folder and downloads the [YosysHQ OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build),
-which provides Yosys with the `slang` SystemVerilog front end and Icarus Verilog (about 700 MB).
+a download of about 700 MB that provides Yosys, with the `slang` SystemVerilog front end, and Icarus
+Verilog.
 
 Every design and verification result in this notebook is produced with open-source tools. The single
 exception is Section 8, which reports measurements taken on the FPGA prototype: that bitstream was built
 with the vendor's Quartus software and serves only as a hardware cross-check.
 
-**Expected run time in Colab** (from a rehearsal of the Colab path on a clean copy of this folder; the
-last cell of the notebook prints the measured total):
+**Run time in Colab.** A complete `Run all` takes about half an hour on a free Colab instance; the last
+cell of the notebook reports the measured time of every section.
 
-| Part | What runs | Time |
-|---|---|---|
-| Setup | clone, OSS CAD Suite download | 2–4 min |
-| Sections 2–4 | golden model, ACVP, controller trace, RTL simulation | about 1 min |
-| Section 5 | SKY130 synthesis of four architecture points | 3–5 min |
-| Section 6b | design iteration: simulation, synthesis, gate-level simulation of a routed netlist | 6–12 min |
-| Sections 7 and 9 | result summaries, leakage simulation (400 traces) | 1–2 min |
-| **Total** | | **about 15–25 min** |
+| Part | What runs |
+|:---|:---|
+| Setup | clone of this folder, OSS CAD Suite download |
+| Sections 2–4 | golden model, ACVP, controller trace, RTL simulation |
+| Section 5 | SKY130 synthesis of four architecture points |
+| Section 6b | design iteration: simulation, synthesis, gate-level simulation of a routed netlist |
+| Sections 7 and 9 | result summaries, leakage simulation (400 traces) |
+
+In a local rehearsal of the Colab path, Section 6b accounted for about 60 % of the computing time and
+Section 5 for about a quarter; everything else takes seconds.
 
 Place-and-route with OpenROAD-flow-scripts (ORFS) takes between twenty minutes and three and a half hours per
 design point on a desktop machine, far longer than a Colab session is meant to run. Its results are therefore
 provided in `results/asic/`, together with the exact scripts that produced them (`scripts/run_orfs.sh`,
-`flow/config.mk`); setting `RUN_PNR = True` on a Linux machine with ORFS regenerates them.
+`flow/config.mk`); setting `RUN_PNR = True` on a Linux machine with ORFS regenerates them. Throughout the
+notebook, *committed* results are those stored in this folder.
 """)
 
 code(r"""
@@ -140,14 +152,17 @@ from IPython.display import Image, SVG, display, Markdown
 sys.path.insert(0, str(ROOT / "scripts"))
 import plotstyle as ps          # validated palette, recessive axes, thin marks
 ps.apply()
+import nbdisplay as nbd         # table alignment and the per-section run timer
+nbd.install()
 # readable names, and one fixed colour per design point (colour follows the entity)
 LABEL = {"ntt_dp": "NTT, dual-port store", "ntt_sp": "NTT, single-port store",
          "keccak_r1": "Keccak, one round per clock", "keccak_s7": "Keccak, row-serialized",
          "ntt_opt_b1_w12": "NTT iteration: 12-bit store", "ntt_opt_pipe_w12": "NTT iteration: + pipeline",
-         "ntt_macro": "NTT, OpenRAM macro store"}
+         "ntt_macro": "NTT, OpenRAM macro store", "ntt_opt_pipe_macro": "NTT iteration: + pipeline, OpenRAM macro store"}
 COLOR = {"ntt_dp": ps.SERIES[0], "ntt_sp": ps.SERIES[1], "keccak_r1": ps.SERIES[0],
          "keccak_s7": ps.SERIES[1], "ntt_opt_b1_w12": ps.SERIES[2], "ntt_opt_pipe_w12": ps.SERIES[2],
-         "ntt_macro": ps.SERIES[1]}
+         "ntt_macro": ps.SERIES[1], "ntt_opt_pipe_macro": ps.SERIES[2]}
+nbd.VALUES.update(LABEL)        # tables show these names instead of the run identifiers
 sys.path.insert(0, str(ROOT / "golden"))
 import mlkem_ref as ref
 def sh(cmd):
@@ -158,8 +173,10 @@ def sh(cmd):
 md(r"""
 ## At a glance
 
-The notebook asks three questions of every design decision, and each step except the FPGA bitstream
-uses open-source tools. The table below the figure collects the headline results; it is read from the
+The figure summarizes the method. Every design decision is examined through three questions — is the
+design correct, what does the decision cost, and does the result hold up on real hardware — and every
+step except the FPGA bitstream uses open-source tools. The table below the figure collects the headline
+results; it is read from the
 committed result files each time this cell runs, and the section named in each row reproduces or explains
 the entry. A reader short of time can read this section and the findings in Section 10.
 """)
@@ -174,7 +191,9 @@ n_coef = sum(int(c) for c in re.findall(r"coeffs_checked=(\d+)", sim_logs))
 n_kec = sum(int(v) for v in re.findall(r"KECCAK_RESULT serial=\d vectors=(\d+)", sim_logs))
 assert n_err == 0 and set(re.findall(r"timing_variations=(\d+)", sim_logs)) == {"0"}
 proofs = json.loads((R_/"formal/summary.json").read_text())["results"]
-dse = pd.read_csv(R_/"dse_metrics.csv").set_index(["variant", "clk_target_ns"])
+acvp_rtl = json.loads((R_/"acvp_rtl/keygen_asic.json").read_text())
+assert all(json.loads((R_/f"acvp_rtl/keygen_{c}.json").read_text())["passed"] == 25 for c in ("fpga", "asic"))
+dse =pd.read_csv(R_/"dse_metrics.csv").set_index(["variant", "clk_target_ns"])
 o, n = dse.loc[("ntt_sp", 20.0)], dse.loc[("ntt_opt_pipe_w12", 20.0)]
 gls = {r: json.loads((R_/"gls_power"/r/"summary.json").read_text()) for r in ["ntt_sp_20ns", "ntt_opt_b1_w12_20ns", "ntt_opt_pipe_w12_20ns"]}
 e_uj = {r: g["energy_per_forward_ntt_nj"] / 1e3 for r, g in gls.items()}
@@ -187,6 +206,8 @@ chip = json.loads((R_/"fullchip/summary.json").read_text()); cm = chip["orfs_met
 rows = [
     ("Is it correct?", "RTL against the golden model",
      f"{n_err} mismatches over {n_coef:,} NTT coefficients and {n_kec} Keccak permutations, constant latency", "§4"),
+    ("", "Complete RTL against NIST ACVP keyGen",
+     f"{acvp_rtl['passed']}/{acvp_rtl['cases']} cases byte-exact (ek, dkPKE, z), FPGA and ASIC configurations", "§4"),
     ("", "Barrett reducer, all 2²⁴ inputs",
      f"{sum(v.startswith('PROVEN') for v in proofs.values())} variants proven; the negative control fails as it must", "§4"),
     ("What does it cost?", "NTT redesign after place-and-route",
@@ -211,9 +232,8 @@ rows = [
      f"largest t-statistic {tv['plain']['max_abs_t']:.1f} unmasked, {tv['masked']['max_abs_t']:.1f} with first-order "
      f"masking (leakage threshold 4.5)", "§9"),
 ]
-display(Markdown("| Question | Result | Value | Section |\n|---|---|---|---|\n" +
-                 "\n".join(f"| {q} | {r} | {v.replace('-', '−') if v.startswith('area ') else v} | {s} |"
-                           for q, r, v, s in rows)))
+nbd.show(pd.DataFrame([(q, r, v.replace('-', '−') if v.startswith('area ') else v, s) for q, r, v, s in rows],
+                      columns=["Question", "Result", "Value", "Section"]))
 """)
 
 # ------------------------------------------------------------- 1. context
@@ -238,8 +258,8 @@ Both blocks were written so that the *same RTL* serves the FPGA and the ASIC, wi
 architectural switch in each:
 
 | Block | FPGA choice | ASIC choice | Why the ASIC differs |
-|---|---|---|---|
-| NTT coefficient store | true dual-port RAM (one M20K) | single-port SRAM (`te_sram_1rw`) | The OpenRAM macros available for the chip are single-port. |
+|:---|:---|:---|:---|
+| NTT coefficient store | true dual-port RAM (one M20K) | single-port SRAM | The OpenRAM macros available for the chip are single-port. |
 | Keccak round | one full round per clock | row-serialized round (seven clocks) | I expected the 1600-bit round logic to be costly in standard cells. |
 
 The rest of the notebook measures what each of these two decisions actually cost.
@@ -325,7 +345,7 @@ through a small finite-state machine. The single-port variant needs two addition
 operands and both results must pass through one SRAM port in turn:
 
 | State | Dual-port | Single-port |
-|---|---|---|
+|:---|:---|:---|
 | FETCH | read $a_j$, $a_{j+len}$ | read $a_j$ |
 | CAPTURE | latch both | latch $a_j$, read $a_{j+len}$ |
 | CAPTURE_B | — | latch $a_{j+len}$ |
@@ -420,6 +440,8 @@ for layer, (L, g) in enumerate(f.groupby("len", sort=False)):
 ax.set_xlim(0, 896); ax.set_ylim(0, 275); ax.grid(False)
 ax.set_xlabel("butterfly number (128 per layer, 7 layers)"); ax.set_ylabel("coefficient index")
 ax.legend(loc="lower left", bbox_to_anchor=(0, 1.02), ncols=2, markerscale=5, frameon=False)
+fig.suptitle("The two coefficients read by every butterfly of a forward NTT; their distance halves in each layer",
+             x=0.01, ha="left", y=0.99, fontsize=11.5, fontweight="bold")
 ps.finish(fig); plt.show()
 """)
 
@@ -520,7 +542,41 @@ ax.annotate("2q: a second subtraction\nwould be needed beyond here", (2 * 3329, 
 ax.set_xlim(0, 2 * 3329 + 60); ax.set_ylim(0, hist.max() / 1e3 * 1.1)
 ax.set_xlabel("remainder before correction, a − ⌊a·M / 2²⁴⌋·q"); ax.set_ylabel("inputs [thousands]")
 ax.legend(ncols=2, loc="lower left", bbox_to_anchor=(0, 1.0))
+fig.suptitle("All 2²⁴ reducer inputs: no remainder reaches 2q, so one subtraction of q always suffices",
+             x=0.01, ha="left", y=1.0, fontsize=11.5, fontweight="bold")
 ps.finish(fig); plt.show()
+""")
+
+md(r"""
+### The complete co-processor against the NIST vectors
+
+The checks above establish the golden model against NIST and the blocks against the golden model. The
+complete HSKEM RTL can also be confronted with the NIST vectors directly. Its SPI interface accepts a
+deterministic key-generation seed $d\,\|\,z$ for test purposes, so `scripts/acvp_rtl_keygen.py` feeds the
+co-processor the seeds of all 25 ACVP key-generation test cases, with $k = 2$ as FIPS 203 prescribes for
+ML-KEM-512, and compares the key material the RTL leaves in its memories with the NIST answers, byte for
+byte: $\mathrm{ek}_\mathrm{PKE} = \mathrm{ByteEncode}_{12}(\hat t)\,\|\,\rho$ (800 bytes),
+$\mathrm{dk}_\mathrm{PKE} = \mathrm{ByteEncode}_{12}(\hat s)$ (768 bytes) and $z$. Since
+$\mathrm{dk} = \mathrm{dk}_\mathrm{PKE}\,\|\,\mathrm{ek}\,\|\,H(\mathrm{ek})\,\|\,z$, only $H(\mathrm{ek})$, a hash of
+the compared ek, is not compared directly. The check runs in both configurations of the RTL: the FPGA configuration, and the ASIC configuration
+with the single-port store and the row-serialized Keccak. As a negative control, case 0 is repeated with
+$k = 3$, which must not reproduce the NIST key. Encapsulation and decapsulation vectors cannot be applied
+the same way: by design, the co-processor accepts no externally supplied encapsulation or decapsulation
+key, so those paths are checked by the full-system testbench of Section 7, against values computed by
+an independent software model.
+""")
+
+code(r"""
+RUN_ACVP_RTL = IN_COLAB   # about one minute per configuration
+if RUN_ACVP_RTL:
+    for cfg in ("fpga", "asic"):
+        print(sh(f"python3 scripts/acvp_rtl_keygen.py {cfg}").strip().splitlines()[-1])
+for cfg in ("fpga", "asic"):
+    r = json.loads((ROOT/f"results/acvp_rtl/keygen_{cfg}.json").read_text())
+    diff = sum(c[k] for c in r["details"] for k in c if k.endswith("bytes_diff"))
+    print(f"{cfg}: {r['passed']} of {r['cases']} ACVP keyGen cases byte-exact (ekPKE, dkPKE, z; {diff} differing bytes); "
+          f"negative control k = 3: {r['negative_control']['ekpke_t_bytes_diff_vs_case_0']} of 768 bytes of t differ")
+    assert r["passed"] == r["cases"] == 25 and diff == 0 and r["negative_control"]["ekpke_t_bytes_diff_vs_case_0"] > 0
 """)
 
 # ------------------------------------------------------------- 5. synthesis DSE
@@ -594,8 +650,7 @@ md(r"""
 
 Each design point was taken through the complete ORFS flow [8] for the SKY130 HD library [10] — floorplanning,
 placement, clock-tree synthesis, and global and detailed routing — using `scripts/run_orfs.sh`. The
-figures below are read from each run's `6_report.json`, from `5_2_route.json` (the final routing pass)
-and from `6_finish.rpt`.
+figures below are read from the reports that ORFS writes at the end of each run.
 
 **Which fmax?** The design-level worst negative slack includes the I/O budget assumed in the SDC, 20% of
 the clock period on each side. For the Keccak wrapper this makes the combinational
@@ -635,7 +690,7 @@ metric with the committed one.
 code(r"""
 bundle = json.loads((ROOT/"results/asic/bundle_reproduction.json").read_text())
 for chk in bundle["checks"]:
-    print(f"{chk['committed']:<24} {chk['label']}: {chk['identical']} of {chk['metrics_compared']} final metrics identical")
+    print(f"{nbd.label(chk['committed']):<34} {chk['label']}: {chk['identical']} of {chk['metrics_compared']} final metrics identical")
 assert all(chk["identical"] == chk["metrics_compared"] for chk in bundle["checks"])
 
 RUN_PNR_COLAB = False     # True: about 130 MB download and 30-45 minutes on a free Colab instance
@@ -661,9 +716,9 @@ fig, axes = plt.subplots(1, 4, figsize=(13, 4))
 for ax, r in zip(axes, runs):
     pm.draw(ax, r, LABEL[r.rsplit("_", 1)[0]], extent=extent)
 fig.legend([Patch(color=c) for _, c in pm.CLASSES], [n for n, _ in pm.CLASSES], ncols=3,
-           loc="lower left", bbox_to_anchor=(0.01, 0.93), frameon=False)
+           loc="upper center", bbox_to_anchor=(0.5, 0.0), frameon=False)
 fig.suptitle("Placed standard cells by class, drawn to a common scale (physical-only cells omitted)",
-             x=0.01, ha="left", y=1.04, fontsize=12, fontweight="bold")
+             x=0.01, ha="left", y=1.02, fontsize=12, fontweight="bold")
 fig.tight_layout(); plt.show()""")
 
 md(r"""
@@ -704,7 +759,7 @@ code(r"""
 fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
 for ax, fam, op in [(axes[0], "ntt", "one forward NTT"), (axes[1], "keccak", "one Keccak-f[1600]")]:
     # final iteration only; the macro-store point is compared separately (its area is mostly the macro)
-    d = pnr[pnr.variant.str.startswith(fam) & ~pnr.variant.isin(["ntt_opt_b1_w12", "ntt_macro"])]
+    d = pnr[pnr.variant.str.startswith(fam) & ~pnr.variant.isin(["ntt_opt_b1_w12", "ntt_macro", "ntt_opt_pipe_macro"])]
     for v, g in d.groupby("variant", sort=False):
         main = g[g.clk_target_ns == 20]            # the common comparison point carries the label
         rest = g[g.clk_target_ns != 20]
@@ -717,9 +772,10 @@ for ax, fam, op in [(axes[0], "ntt", "one forward NTT"), (axes[1], "keccak", "on
             ax.annotate(f"{r.fmax_mhz:.1f} MHz", (r.cell_area_um2 / 1e6, r.latency_us_at_fmax),
                         xytext=(9, -3), textcoords="offset points", fontsize=9, color=ps.INK_2)
     ax.scatter([], [], s=60, facecolors=ps.SURFACE, edgecolors=ps.MUTED, linewidths=1.8,
-               label="other clock targets (hollow)")   # neutral legend entry for every family colour
+               label="other targets (7–30 ns)")   # neutral legend entry for every family colour
     ax.set_xlabel("standard-cell area [mm²]"); ax.set_ylabel(f"latency of {op} [µs]")
-    ax.set_title("NTT" if fam == "ntt" else "Keccak-f[1600]", pad=34)
+    ax.set_title(("NTT" if fam == "ntt" else "Keccak-f[1600]") + ": filled points at the common 20 ns target",
+                 pad=34, fontsize=10.5)
     ax.set_ylim(0, d.latency_us_at_fmax.max() * 1.2)
     ax.set_xlim(0, d.cell_area_um2.max() / 1e6 * 1.25)     # zero-based: small area gaps must look small
     ax.legend(ncols=2, loc="lower left", bbox_to_anchor=(0, 1.0), handletextpad=0.3, columnspacing=1.2)
@@ -767,7 +823,7 @@ md(r"""
 
 The block-level NTT points above build their 4096-bit coefficient store from flip-flops, so that both
 memory variants are compared on equal terms. On the chip, however, the store is the single-port OpenRAM
-macro `sky130_sram_1rw_16x256_wpr8`. The design point `ntt_macro` takes the same single-port engine
+macro `sky130_sram_1rw_16x256_wpr8`. An additional design point takes the same single-port engine
 through the same flow with that macro, using the chip's own macro views (`flow/macros/`,
 `rtl/sram_macro_16x256.sv`). The controller is unchanged, so its cycle count is the single-port one.
 OpenRAM's timing views come from analytical models, and its power views proved non-physical on the chip,
@@ -809,6 +865,11 @@ assert store["SRAM macro [mm²]"].iloc[1] < store["standard cells [mm²]"].iloc[
 assert abs(mc.fmax_mhz.iloc[1] / mc.fmax_mhz.iloc[0] - 1) < 0.05
 assert abs(int(mc.loc["ntt_macro", "flops"]) - int(blk_ntt)) <= 2
 assert store["max-slew violations"].iloc[0] == 0 < store["max-slew violations"].iloc[1]
+# the slews quoted in the text: after the post-route step, eight address pins just beyond the 0.04 ns limit
+rpt = next((ROOT/"results/asic/ntt_macro_20ns/reports").rglob("6_finish.rpt")).read_text()
+sl = sorted(float(x) for x in re.findall(r"u_macro/addr0\[\d\]\s+0\.04\s+([0-9.]+)\s+-[0-9.]+ \(VIOLATED\)", rpt))
+assert len(sl) == 8 and all(0.05 <= x <= 0.07 for x in sl), sl
+assert "CAC_MACRO_PIN_ECO: upsized 5" in next((ROOT/"results/asic/ntt_macro_20ns/logs").rglob("5_1_grt.log")).read_text()
 """)
 
 md(r"""
@@ -817,9 +878,14 @@ the block needs about a third less area than its flip-flop counterpart; the macr
 4096 flip-flops with their write and read multiplexers. Its register count also matches the NTT engine
 on the chip within a flip-flop or two, which ties the block-level experiment to the integrated design.
 The clock rate barely changes, because the critical path is still the subtract–multiply–reduce stage,
-not the macro. One caveat comes from the macro model: OpenRAM's Liberty view limits the input transition
-at the macro pins to 40 ps, which the address drivers exceed, so the macro-store layout reports max-slew
-violations that the flip-flop layouts do not. Together with the single-port constraint of Section 3,
+not the macro. One caveat concerns the macro's address pins. The repair that follows global routing splits
+the long wires to these pins with minimum-size buffers, whose transitions of up to 0.35 ns far exceeded
+the macro's limit, and excluding that cell from the library did not change the choice in this OpenROAD
+build. A small engineering-change step, run by the flow as a hook after global routing
+(`flow/post_grt_macro_pins.tcl`), therefore upsizes exactly those buffers and re-routes the affected nets.
+Eight of the nine address pins still show transitions of 0.05 to 0.07 ns, just beyond the 0.04 ns end of
+the macro's characterization table, a limit that the 8- and 12-times buffers now driving them do not
+meet; the flip-flop layouts have no such constraint. Together with the single-port constraint of Section 3,
 this is the trade-off behind the chip's choice: a markedly smaller store in exchange for two extra
 cycles per butterfly and a macro whose electrical views need care.
 """)
@@ -838,10 +904,11 @@ cor = pd.read_csv(ROOT/"results/sta_corners/summary.csv")
 tt = cor[cor.corner == "tt_025C_1v80"].set_index("design")
 tt_ref = pnr.assign(design=pnr.variant + "_" + pnr.clk_target_ns.map("{:g}".format) + "ns").set_index("design")
 assert (abs(tt.reg2reg_setup_slack_ns - tt_ref.loc[tt.index, "reg2reg_slack_ns"]) < 0.01).all(), "STA setup differs from ORFS"
-display(cor.pivot(index="design", columns="corner", values="reg2reg_fmax_mhz").round(1)
-        .rename(columns=lambda c: f"fmax {c} [MHz]"))
-display(cor.pivot(index="design", columns="corner", values="reg2reg_hold_slack_ns")
-        .rename(columns=lambda c: f"hold slack {c} [ns]"))
+CORNER_ORDER = ["ss_100C_1v60", "tt_025C_1v80", "ff_n40C_1v95"]
+display(cor.pivot(index="design", columns="corner", values="reg2reg_fmax_mhz")[CORNER_ORDER].round(1)
+        .rename_axis("reg→reg fmax [MHz]"))
+display(cor.pivot(index="design", columns="corner", values="reg2reg_hold_slack_ns")[CORNER_ORDER]
+        .rename_axis("reg→reg hold slack [ns]"))
 # guards for the statements made in the text below
 fx_c = cor.pivot(index="design", columns="corner", values="reg2reg_fmax_mhz")
 hold_ff = cor[cor.corner.str.startswith("ff")].set_index("design").hold_wns_ns
@@ -852,7 +919,7 @@ assert (cor[cor.design.str.startswith("keccak")].reg2reg_hold_slack_ns > 0).all(
 
 md(r"""
 At the slow corner every block runs at roughly half its typical-corner frequency, so a product clock
-would have to be derived from the `ss` column; the redesigned NTT of Section 6b, which is included in the
+would have to be derived from the slow-corner column; the redesigned NTT of Section 6b, which is included in the
 table, behaves the same way. At the fast corner every NTT layout shows a small hold violation, between 2
 and 14 ps, because ORFS repaired hold only at the typical corner; a hold margin removes it, as shown
 next. The Keccak cores meet hold at every corner.
@@ -893,7 +960,7 @@ md(r"""
 The margin removes the violation at every corner in all five layouts. The cell count changes by at most
 six, the standard-cell area by less than two hundredths of a percent and the clock rate by less than half
 a percent; every repaired netlist still passes gate-level simulation. The
-comparisons in the rest of this notebook use the committed layouts, which were routed with ORFS defaults;
+comparisons in the rest of this notebook use the original layouts, routed with the default ORFS settings;
 since the repair changes no figure beyond the second decimal, none of those comparisons is affected.
 """)
 
@@ -909,6 +976,11 @@ parasitics. Energy per permutation is power × cycles × clock period at the com
 """)
 
 code(r"""
+def energy_spread(run):
+    # energy of the committed input and of four further random inputs (seeds 1-4, results/gls_power/<run>_seed*)
+    e = [next(v for k, v in json.loads((ROOT/"results/gls_power"/d/"summary.json").read_text()).items()
+              if k.startswith("energy_per")) for d in [run] + [f"{run}_seed{i}" for i in (1, 2, 3, 4)]]
+    return 100 * (max(e) - min(e)) / np.mean(e)
 ke = {v: json.loads((ROOT/"results/gls_power"/f"{v}_20ns"/"summary.json").read_text()) for v in ["keccak_r1", "keccak_s7"]}
 ke = pd.DataFrame(ke).T
 assert ke.gls_pass.all(), "a routed Keccak netlist failed gate-level simulation"
@@ -922,7 +994,9 @@ tab = pd.DataFrame({
     "power [mW]": ke.total_power_w.astype(float) * 1e3,
     "energy / permutation [nJ]": ke.energy_per_permutation_nj.astype(float),
     "clock tree + flip-flops [% of power]": [100 * (kgrp[v]["Clock"] + kgrp[v]["Sequential"]) for v in ke.index],
+    "energy spread, 5 inputs [%]": [energy_spread(f"{v}_20ns") for v in ke.index],
 }).rename(index=LABEL)
+assert (tab["energy spread, 5 inputs [%]"] < 0.5).all(), "the energy now depends noticeably on the input"
 e_ratio = ke.loc["keccak_s7", "energy_per_permutation_nj"] / ke.loc["keccak_r1", "energy_per_permutation_nj"]
 p_ratio = ke.loc["keccak_s7", "total_power_w"] / ke.loc["keccak_r1", "total_power_w"]
 print(f"row-serialized / one round per clock: power x{p_ratio:.2f}, energy per permutation x{e_ratio:.1f}")
@@ -932,7 +1006,8 @@ tab.round(2)
 """)
 
 md(r"""
-Both routed Keccak blocks compute the permutation bit-exactly. Row-serialization lowers the power drawn
+Both routed Keccak blocks compute the permutation bit-exactly, and four further random states change
+the energy per permutation by less than half a percent. Row-serialization lowers the power drawn
 per cycle by less than a fifth, but it needs almost seven times as many cycles, so each permutation costs
 about five and a half times more energy. The reason is visible in the power groups: the clock tree and
 the 1600-bit state registers, which are clocked in every cycle whether a round is being computed or not,
@@ -951,7 +1026,7 @@ multiplier and the reducer (Section 6), and the coefficient store keeps four bit
 evaluated on its own:
 
 | Parameter | Effect |
-|---|---|
+|:---|:---|
 | `BARRETT_1C` | single-subtraction Barrett reducer (`rtl/barrett_reduce_1c.v`), proven equivalent |
 | `PIPE_MUL` | a register between the multiplier and the reducer; one extra cycle per butterfly |
 | `COEFF_W = 12` | a 12-bit coefficient store, lossless because $q < 2^{12}$ |
@@ -1090,11 +1165,14 @@ grp_pw = {g: float(s) / 100 for g, s in re.findall(r"^(Sequential|Clock)\s.*?([\
           (ROOT/"results/gls_power/ntt_sp_20ns/power.log").read_text(), re.M)}
 print("original single-port NTT, share of power:", {g: f"{s:.0%}" for g, s in grp_pw.items()})
 assert 0.45 < grp_pw["Sequential"] < 0.55 and 0.35 < grp_pw["Clock"] < 0.45
-gp[["gls_pass", "cycles_fwd", "power [mW]", "energy / forward NTT [µJ]"]].round(3)
+gp["energy spread, 5 inputs [%]"] = [energy_spread(r) for r in ["ntt_sp_20ns", "ntt_opt_b1_w12_20ns", "ntt_opt_pipe_w12_20ns"]]
+assert (gp["energy spread, 5 inputs [%]"] < 0.2).all(), "the energy now depends noticeably on the input"
+gp[["gls_pass", "cycles_fwd", "power [mW]", "energy / forward NTT [µJ]", "energy spread, 5 inputs [%]"]].round(3)
 """)
 
 md(r"""
-All three routed netlists compute the transform bit-exactly. At the common clock, half of the original
+All three routed netlists compute the transform bit-exactly, and repeating the energy measurement for
+four further random polynomials changes it by less than 0.2 %. At the common clock, half of the original
 block's power is spent in its flip-flops and a further two fifths in the clock tree that feeds them — the
 price of building a 4096-bit memory from standard cells. Removing a quarter of that storage lowers the
 energy of a transform by about a fifth. The pipeline register costs energy rather than saving it: its
@@ -1103,11 +1181,52 @@ than the original but is not the most frugal one. Which of the two to choose is 
 decision that these numbers now make explicit.
 """)
 
+md(r"""
+### The iteration with the chip's own store
+
+The iteration above was measured with the flip-flop store used throughout the block-level comparison.
+To confirm that its benefit carries over to the chip, the pipelined iteration was also taken through the
+flow with the chip's OpenRAM macro as its store (`rtl/sram_macro_16x256_opt.sv`), exactly like the
+macro-store point of Section 6, including the post-route step on the macro's address pins.
+""")
+
+code(r"""
+om = pnr[pnr.variant.isin(["ntt_macro", "ntt_opt_pipe_macro"])].copy()
+om["design"] = om.variant.map(LABEL) + ", " + om.clk_target_ns.map("{:g} ns".format)
+om["total area [mm²]"] = [sum(total_area(f"{v}_{c:g}ns")) / 1e6 for v, c in zip(om.variant, om.clk_target_ns)]
+om["area × time, total [mm²·µs]"] = om["total area [mm²]"] * om.latency_us_at_fmax
+omt = om.set_index("design")[["cell_area_um2", "total area [mm²]", "flops", "fmax_mhz", "cycles",
+                               "latency_us_at_fmax", "area × time, total [mm²·µs]", "drc_errors", "antenna_violating_nets"]]
+display(omt.round(3))
+a0 = om[(om.variant == "ntt_macro") & (om.clk_target_ns == 20)].iloc[0]
+a1 = om[(om.variant == "ntt_opt_pipe_macro") & (om.clk_target_ns == 20)].iloc[0]
+a2 = om[(om.variant == "ntt_opt_pipe_macro") & (om.clk_target_ns == 12)].iloc[0]
+print(f"pipelined iteration vs original, both with the macro at 20 ns: fmax {a0.fmax_mhz:.1f} -> {a1.fmax_mhz:.1f} MHz, "
+      f"latency {a0.latency_us_at_fmax:.0f} -> {a1.latency_us_at_fmax:.0f} us, standard cells {a1.cell_area_um2 / a0.cell_area_um2 - 1:+.0%}")
+# guards for the statements made in the text below
+assert (om.drc_errors == 0).all() and (om.antenna_violating_nets == 0).all()
+assert 1.6 < a1.fmax_mhz / a0.fmax_mhz < 1.8 and 0.8 < a1.cell_area_um2 / a0.cell_area_um2 < 0.9
+assert a1.latency_us_at_fmax < 0.75 * a0.latency_us_at_fmax and a2.fmax_mhz > 1e3 / 12
+sl = {r: slew_violations(r) for r in ("ntt_opt_pipe_macro_20ns", "ntt_opt_pipe_macro_12ns")}
+rpt = next((ROOT/"results/asic/ntt_opt_pipe_macro_20ns/reports").rglob("6_finish.rpt")).read_text()
+pin = [float(x) for x in re.findall(r"u_macro/addr0\[\d\]\s+0\.04\s+([0-9.]+)\s", rpt)]
+assert max(pin) <= 0.07 and re.search(r"\s1\.50\s+1\.52\s+-0\.02 \(VIOLATED\)", rpt)
+""")
+
+md(r"""
+With the macro store the pipelined iteration behaves as it does with flip-flops: it clocks about
+seven tenths faster than the original engine with the same macro, finishes a forward transform in about
+two thirds of the time and needs about a sixth less standard-cell area, and at a 12 ns target it closes
+timing near 89 MHz. Both layouts are free of DRC and antenna violations. Their macro address pins show
+the same marginal transitions of at most 0.07 ns as the original macro point, and in the 20 ns layout
+one internal net exceeds the standard cells' 1.5 ns transition limit by 0.02 ns.
+""")
+
 # ------------------------------------------------------------- 7. full chip
 md(r"""
 ## 7. The full HSKEM core on SKY130
 
-The blocks above are integrated in `trustedge_asic_core` together with the SPI front end, the HSM
+On the chip, the blocks above are integrated into a single digital core together with the SPI front end, the HSM
 policy logic, SHA-256/HMAC, AES-256, the PUF root and vault services, and 18 OpenRAM [9] SRAM macros
 drawn from eight distinct masters. This ASIC build uses the **row-serialized Keccak** and the **single-port
 NTT store** examined above.
@@ -1152,6 +1271,53 @@ plt.show()
 """)
 
 md(r"""
+**The whole chip at three corners.** `scripts/sta_corners_fullchip.sh` repeats the corner analysis of
+Section 6 for the routed chip, with its extracted parasitics. One restriction applies: OpenRAM
+characterizes the SRAM macros at the typical corner only, so their typical views are used at every
+corner, and only the flip-flop-to-flip-flop paths can be judged at the slow and fast corners. Only the
+summary of this analysis is published, since the layout database is not.
+""")
+
+code(r"""
+fs = json.loads((ROOT/"results/fullchip/sta_corners.json").read_text())
+CN = ["ss_100C_1v60", "tt_025C_1v80", "ff_n40C_1v95"]
+fct = pd.DataFrame({c: {"reg→reg fmax [MHz]": fs["corners"][c]["reg2reg_fmax_mhz"],
+                        "reg→reg hold slack [ns]": fs["corners"][c]["reg2reg_hold_slack_ns"],
+                        "design setup WNS [ns]": fs["corners"][c]["setup_wns"],
+                        "design hold WNS [ns]": fs["corners"][c]["hold_wns"],
+                        "hold-violating endpoints": int(fs["corners"][c]["hold_violating_endpoints"])} for c in CN}).T
+# paths through the macros use typical-corner views at every corner: the design-level slow-corner figures
+# mix corners and are not shown
+fct = fct.astype(object)
+fct.loc["ss_100C_1v60", ["design setup WNS [ns]", "design hold WNS [ns]", "hold-violating endpoints"]] = "not meaningful (macro views: tt only)"
+display(fct.rename_axis("corner"))
+for c in ("tt_025C_1v80", "ff_n40C_1v95"):
+    for v in fs["corners"][c]["hold_violators"]:
+        print(f"{c}: {v['path']}, hold slack {1e3 * v['slack_ns']:.0f} ps")
+# guards for the statements made in the text below
+clk = fs["clock_period_ns"]
+assert all(fs["corners"][c]["reg2reg_fmax_mhz"] > 1e3 / clk and fs["corners"][c]["reg2reg_hold_slack_ns"] > 0 for c in CN)
+assert fs["corners"]["ss_100C_1v60"]["reg2reg_fmax_mhz"] > 2e3 / clk
+tt_, ff_ = fs["corners"]["tt_025C_1v80"], fs["corners"]["ff_n40C_1v95"]
+assert tt_["setup_wns"] > 4.5 and tt_["hold_violating_endpoints"] == 2 and tt_["hold_wns"] >= -0.05
+assert ff_["setup_wns"] > 0 and ff_["hold_violating_endpoints"] == 1 and ff_["hold_wns"] >= -0.005
+assert abs(m["finish__timing__hold__ws"] - 0.119) < 0.001
+""")
+
+md(r"""
+Every flip-flop-to-flip-flop path of the chip meets the 40 ns clock at all three corners, with
+positive hold slack; even at the slow corner these paths would support more than twice the 25 MHz
+clock. At the typical corner the
+whole design meets setup with about 5 ns to spare, and two endpoints miss hold by at most 40 ps: one
+path starts at an input port, so its slack depends on the external delay assumed in the constraints,
+and the other ends at a PUF capture register. ORFS's own final report of the same layout gives a worst
+hold slack of +0.119 ns at the typical corner; the difference between the two analyses was not traced.
+At the fast corner a single register-to-register path misses hold by 1 ps. The hold margin that
+cleaned the NTT layouts in Section 6 is the natural remedy for these few paths, applied in a new run of
+the chip.
+""")
+
+md(r"""
 The GDS of the same chip, rendered with KLayout and downscaled to about 2.5 µm per pixel: enough to show
 the floorplan, with the SRAM macros along the left and right edges, but far too coarse to resolve any
 individual cell or wire. The layout database itself is not published, because its logic contains the
@@ -1190,6 +1356,9 @@ for ax, col, title in [(axes[0], "flop_area_um2", "flip-flop area [mm²]"), (axe
     ax.barh(range(len(rows_)), vals, height=0.6, color=[hl.get(r, ps.MUTED) for r in rows_], edgecolor=ps.SURFACE)
     ax.set_title(title); ax.grid(axis="y", visible=False); ax.set_xlim(0, vals.max() * 1.15)
 axes[0].set_yticks(range(len(rows_)), rows_)
+fig.legend([Patch(color=c) for c in hl.values()] + [Patch(color=ps.MUTED)],
+           ["Keccak sponge (studied here)", "NTT engine (studied here)", "other blocks"], ncols=3,
+           loc="lower left", bbox_to_anchor=(0.01, 0.98), frameon=False)
 ps.finish(fig); plt.show()
 tot_ff = blk.flop_area_um2.sum()
 print(f"NTT engine: {blk.loc['NTT engine (shared)', 'flops']:.0f} flip-flops "
@@ -1214,8 +1383,8 @@ md(r"""
 ### What the two ASIC decisions cost at system level
 
 Block-level numbers can mislead: a block that is nine times slower matters little if the system rarely
-waits for it. The full-system testbench of the HSKEM tree (`tb_trustedge_spi`) measures the internal busy
-interval of decapsulation directly, which the 16-bit hardware counter cannot report.
+waits for it. The full-system testbench of HSKEM, which drives the co-processor through its SPI interface exactly
+as the ESP32 host does, measures the internal busy interval of decapsulation directly, which the 16-bit hardware counter cannot report.
 `scripts/run_system_sim.sh` runs it with Icarus Verilog in four configurations: the FPGA configuration,
 each ASIC decision on its own, and both together. The FPGA-configuration result reproduces an earlier
 ModelSim run of the same testbench exactly.
@@ -1277,9 +1446,8 @@ not reveal whether a ciphertext was valid.
 
 ### Where decapsulation spends its cycles
 
-The decomposition above is inferred from differences between configurations. To measure it directly,
-`tb/decaps_profiler.sv` is compiled as a second top-level module next to the testbench
-(`CAC_PROFILE=1 scripts/run_system_sim.sh <config>`). It only reads signals through hierarchical
+The decomposition above is inferred from differences between configurations. To measure it directly, a
+small monitor module, `tb/decaps_profiler.sv`, is simulated alongside the testbench. It only reads signals through hierarchical
 references, so neither the published RTL nor the testbench changes, and it counts, cycle by cycle, whether
 the shared NTT engine, the Keccak sponge and the permutation inside it are busy during a decapsulation.
 """)
@@ -1345,7 +1513,8 @@ md(r"""
 
 The same NTT and Keccak RTL, in its FPGA configuration (a dual-port M20K store and one Keccak round per
 clock), runs inside HSKEM on the DE25-Nano at 50 MHz under the control of an ESP32 host over SPI. The
-bitstream is the released live-observer build, whose SHA-256 is recorded in `results/fpga/`. I executed
+bitstream is the released demonstration build, which also contains a read-only signal observer for live
+waveforms; its SHA-256 is recorded in `results/fpga/`. I executed
 the complete two-role ML-KEM flow — key generation, public-key transfer, encapsulation, ciphertext
 transfer, and an independent decapsulation that must reproduce the same shared secret — 100 times in
 succession, logging the FPGA's own cycle counters alongside the latency measured by the ESP32
@@ -1395,6 +1564,17 @@ ntt_fpga = fr["kyber_ntt_engine (u_shared_ntt)"]
 assert 100 < float(ntt_fpga["alms_needed"].split()[0]) < 1000
 assert (ntt_fpga["m20k"], ntt_fpga["dsp"], ntt_fpga["block_memory_bits"]) == ("1", "2", "3072")
 assert core_ms / e2e_ms < 0.01, "the core no longer accounts for well under one percent"
+
+# effective throughput of the host link: payload bytes moved per run (public key and ciphertext,
+# each exported and imported once) over the end-to-end time, read from the raw log of every run
+raw = (ROOT/"results/fpga/c3_repeat_raw.log").read_text()
+moved = [sum(int(x) for x in re.findall(r"C3_(?:PUBLIC_KEY|CIPHERTEXT)_(?:EXPORT|IMPORT): PASS chunks=\d+ bytes=(\d+)", run))
+         for run in raw.split("### run ")[1:]]
+assert len(moved) == len(b) and set(moved) == {3136}
+tput = 3136 / (b.esp32_latency_us / 1e6)
+print(f"payload over the host link: 3,136 bytes per run; effective throughput median {tput.median():.0f} B/s "
+      f"(range {tput.min():.1f}-{tput.max():.1f}); end-to-end spread {b.esp32_latency_us.max() - b.esp32_latency_us.min():.0f} us")
+assert 300 < tput.median() < 450 and b.esp32_latency_us.max() - b.esp32_latency_us.min() < 1000
 """)
 
 md(r"""
@@ -1421,8 +1601,11 @@ md(r"""
 **Where the time goes.** On this prototype the cryptography is not the bottleneck. The four FPGA phases
 together take a few milliseconds, whereas the host observes several seconds, because the ESP32 transfers
 the 800-byte public key and the 768-byte ciphertext over a deliberately slow bit-banged SPI link with a
-nominal SCK of about 10 kHz, chosen for robustness during demonstrations. (The actual SCK frequency has
-not yet been measured with a logic analyzer.) The next meaningful speed-up must therefore come from the
+nominal SCK of about 10 kHz, chosen for robustness during demonstrations. Measured end to end, the link
+moves the 3,136 payload bytes of a run (public key and ciphertext, each exported and imported) at an
+effective rate of about 0.36 kB/s, framing, responses and host-side processing included, with a
+run-to-run spread of well under a millisecond. The clock frequency itself has not been measured, which
+would take a logic analyzer. The next meaningful speed-up must therefore come from the
 interface — a hardware SPI port, or keeping both roles on chip — rather than from a faster NTT.
 
 **FPGA versus SKY130.** On the FPGA the NTT occupies a few hundred ALMs, one M20K block and two DSP
@@ -1479,15 +1662,16 @@ series.append(("negative control: random vs random", np.load(ROOT/"results/leaka
 ylim = max(np.abs(s[1]).max() for s in series) * 1.08
 fig, axes = plt.subplots(3, 1, figsize=(11, 6.6), sharey=True)
 for ax, (title, t, colour) in zip(axes, series):
-    ax.axhspan(-4.5, 4.5, color="#f0efec", zorder=0, lw=0)            # the "no detectable leakage" band
+    ax.axhspan(-4.5, 4.5, color=ps.MUTED, alpha=0.28, zorder=0, lw=0)  # the "no detectable leakage" band
     ax.plot(t, lw=0.7, color=colour, zorder=2)
-    ps.reference_line(ax, 4.5); ps.reference_line(ax, -4.5)
+    for y in (4.5, -4.5):                           # thresholds stay visible above the trace
+        ax.axhline(y, color=ps.INK_2, lw=0.9, ls=(0, (4, 3)), zorder=3)
     ax.set_ylim(-ylim, ylim); ax.set_xlim(0, len(t)); ax.set_ylabel("Welch t"); ps.thousands(ax)
     over = int((np.abs(t) > 4.5).sum())
     ax.set_title(f"{title}  —  peak |t| = {np.abs(t).max():.1f}, {over:,} of {len(t):,} cycles above the threshold",
                  fontsize=10.5)
 axes[-1].set_xlabel("clock cycle (masked traces span the two share transforms)")
-fig.suptitle("Fixed-versus-random TVLA on the NTT; the grey band marks |t| ≤ 4.5 (no detectable leakage)",
+fig.suptitle("Fixed-versus-random TVLA on the NTT: the shaded band between the dashed lines is |t| ≤ 4.5 (no detectable leakage)",
              x=0.01, ha="left", fontsize=12, fontweight="bold")
 fig.tight_layout(); plt.show()
 S = pd.DataFrame(summ).T[["traces", "runs_per_trace", "max_abs_t", "cycles_over_4p5",
@@ -1555,7 +1739,8 @@ F
 md(r"""
 * **Correctness is established independently of the RTL.** The golden model agrees with a schoolbook
   product, with `kyber-py` and with `hashlib`, and as a complete ML-KEM-512 it reproduces every official
-  NIST ACVP vector. The RTL matches the golden model on every coefficient and visits the butterflies in
+  NIST ACVP vector; the complete co-processor RTL reproduces all 25 NIST key-generation vectors byte for
+  byte. The RTL matches the golden model on every coefficient and visits the butterflies in
   FIPS 203 order, its cycle counts equal the analytical model exactly, the on-chip self-test constant
   equals the golden fingerprint, the modular reducer is proven correct for all of its inputs, and every
   routed netlist simulated at gate level reproduces the golden results.
@@ -1633,19 +1818,24 @@ approach one butterfly per clock.
 md(r"""
 ## 11. Limitations and reproducibility
 
-**Limitations.** This work is pre-silicon: nothing has been fabricated, and nothing is FIPS-validated.
+**Limitations.** This work is pre-silicon: nothing has been fabricated. The golden model passes every
+official NIST ACVP vector for ML-KEM-512 and the complete RTL reproduces all 25 key-generation vectors
+byte for byte, but the design holds no CAVP or CMVP certificate, which only an accredited laboratory can
+issue.
 The full-chip DRC ran the BEOL and off-grid rules of the standard deck with FEOL checks disabled, and the
 top-level LVS abstracts the SRAMs, which are verified separately at transistor level. Full-chip power is
 omitted because the SRAM power model produced non-physical values; block-level power is derived from
-gate-level switching activity for the NTT and Keccak blocks, at the typical corner and for one random
-input. Timing closure was performed at the typical corner: the slow corner roughly halves every block's
+gate-level switching activity for the NTT and Keccak blocks at the typical corner; five random inputs per
+block agree to within half a percent. Timing closure was performed at the typical corner: the slow corner roughly halves every block's
 frequency, and the NTT layouts show hold violations of up to 14 ps at the fast corner, which a hold
-margin removes in every NTT layout at negligible cost (Section 6). The architectural
+margin removes in every NTT layout at negligible cost (Section 6). At chip level, the SRAM macros
+have typical-corner views only, so only the flip-flop paths are checked at every corner, and a handful
+of paths miss hold by at most 40 ps (Section 7). The architectural
 comparisons use a common 20 ns clock target, and the post-route clock sweep covers 7 to 30 ns for
 selected blocks only. Apart from the macro-store point of Section 6, the block-level experiments use
 flip-flop memories, whereas the full chip uses OpenRAM macros; the macro point is compared on area and
-timing only, and its layout reports max-slew violations at the macro pins that stem from the macro's
-Liberty view. Every block-level layout, including all clock-sweep points, is free of DRC and antenna
+timing only, and its layout keeps marginal max-slew violations at the macro's address pins, 0.05 to
+0.07 ns against the 0.04 ns end of the macro's characterization table (Section 6). Every block-level layout, including all clock-sweep points, is free of DRC and antenna
 violations. The leakage assessment is a register-transition model, not a power measurement. The PUF and
 entropy sources are ring oscillators on the FPGA; on the ASIC they are service interfaces rather than
 on-silicon sources. The FPGA measurements come from a single board.
@@ -1653,8 +1843,8 @@ on-silicon sources. The FPGA measurements come from a single board.
 **Reproducing the results.** Sections 2 to 5, 6b and 9 run in Colab, including the gate-level simulation
 of a routed netlist. Place-and-route (Section 6) is regenerated by setting `RUN_PNR = True` on Linux with
 OpenROAD-flow-scripts at commit `6101364b`, or, without any installation, with the relocatable archive of
-that exact build (`RUN_PNR_COLAB = True`, also in Colab), which reproduced the committed layout of the
-pipelined NTT metric for metric in a clean Ubuntu 22.04 container, with twelve threads and with two. The corner analysis is rerun with
+that exact build (`RUN_PNR_COLAB = True`, also in Colab), which reproduced every final metric of three
+committed layouts in a clean Ubuntu 22.04 container (Section 6). The corner analysis is rerun with
 `scripts/sta_corners.sh`, and the activity-based power of the routed blocks with
 `scripts/run_gls_power.sh` and `scripts/run_gls_power_keccak.sh`, both of which read the parasitics of a
 local ORFS run. The system-level simulation of Section 7 runs from the published RTL in `hskem_rtl/`
@@ -1699,9 +1889,19 @@ code in this folder was written for this project.
 """)
 
 code(r"""
-print(f"notebook finished in {(time.time() - T_START) / 60:.1f} min ({'Colab' if IN_COLAB else 'local'} run)")
+# the timer starts with the third code cell; earlier cells (clone, tool download) count in the total only
+SECTIONS = __SECTIONS__
+total = (time.time() - T_START) / 60
+if len(nbd.DURATIONS) == len(SECTIONS):          # a single top-to-bottom run
+    t = pd.Series(nbd.DURATIONS, index=SECTIONS).groupby(level=0, sort=False).sum() / 60
+    t["Setup and untimed cells"] = total - t.sum()
+    nbd.show(t.round(1).rename("minutes").rename_axis("Section").reset_index())
+display(Markdown(f"**Notebook finished in {total:.1f} min** ({'Colab' if IN_COLAB else 'local'} run)."))
 """)
 
+# the final cell reports time per section for the code cells after the timer is installed
+timed = code_sections[2:-1]
+cells[-1].source = cells[-1].source.replace("__SECTIONS__", repr(timed))
 nb = nbf.v4.new_notebook()
 nb["cells"] = cells
 nb["metadata"] = {"kernelspec": {"name": "python3", "display_name": "Python 3", "language": "python"},

@@ -17879,15 +17879,15 @@ module kyber_ntt_engine (busy,
     .X(net1277));
  sky130_fd_sc_hd__buf_4 wire1279 (.A(net44),
     .X(net1278));
- sky130_fd_sc_hd__clkbuf_1 wire1594 (.A(net1255),
+ sky130_fd_sc_hd__buf_8 wire1594 (.A(net1255),
     .X(net1593));
- sky130_fd_sc_hd__clkbuf_1 wire1595 (.A(net1256),
+ sky130_fd_sc_hd__buf_8 wire1595 (.A(net1256),
     .X(net1594));
- sky130_fd_sc_hd__clkbuf_1 wire1596 (.A(net1257),
+ sky130_fd_sc_hd__buf_8 wire1596 (.A(net1257),
     .X(net1595));
- sky130_fd_sc_hd__clkbuf_1 wire1597 (.A(net1258),
+ sky130_fd_sc_hd__buf_8 wire1597 (.A(net1258),
     .X(net1596));
- sky130_fd_sc_hd__clkbuf_1 wire1598 (.A(net1259),
+ sky130_fd_sc_hd__buf_8 wire1598 (.A(net1259),
     .X(net1597));
  sky130_fd_sc_hd__dlymetal6s2s_1 wire1599 (.A(\ram_single_wdata[6] ),
     .X(net1598));

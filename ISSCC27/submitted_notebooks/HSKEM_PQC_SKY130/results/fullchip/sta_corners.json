@@ -1,0 +1,50 @@
+{
+  "clock_period_ns": 40.0,
+  "macro_views": "OpenRAM TT_1p8V_25C at every corner (no other corner characterized)",
+  "corners": {
+    "ss_100C_1v60": {
+      "setup_wns": -10.912,
+      "hold_wns": -1.048,
+      "setup_violating_endpoints": 571.0,
+      "hold_violating_endpoints": 450.0,
+      "reg2reg_setup_slack_ns": 21.71,
+      "reg2reg_fmax_mhz": 54.67,
+      "reg2reg_hold_slack_ns": 1.04
+    },
+    "tt_025C_1v80": {
+      "setup_wns": 4.994,
+      "hold_wns": -0.042,
+      "setup_violating_endpoints": 0.0,
+      "hold_violating_endpoints": 2.0,
+      "reg2reg_setup_slack_ns": 29.58,
+      "reg2reg_fmax_mhz": 95.97,
+      "reg2reg_hold_slack_ns": 0.51,
+      "hold_violators": [
+        {
+          "path": "input port (external delay assumed by the SDC) to an HSM response register",
+          "slack_ns": -0.04
+        },
+        {
+          "path": "register to a PUF raw-capture register",
+          "slack_ns": -0.02
+        }
+      ]
+    },
+    "ff_n40C_1v95": {
+      "setup_wns": 10.576,
+      "hold_wns": -0.001,
+      "setup_violating_endpoints": 0.0,
+      "hold_violating_endpoints": 1.0,
+      "reg2reg_setup_slack_ns": 33.13,
+      "reg2reg_fmax_mhz": 145.56,
+      "reg2reg_hold_slack_ns": 0.29,
+      "hold_violators": [
+        {
+          "path": "register to register inside the SPI frame buffer",
+          "slack_ns": -0.001
+        }
+      ]
+    }
+  },
+  "note": "Flip-flop-to-flip-flop paths are analysed at all three corners; paths through the SRAM macros use their typical-corner views everywhere, so the slow- and fast-corner results for those paths are not meaningful. ORFS's own final report of the same layout gives a worst hold slack of +0.119 ns at the typical corner; the difference to this OpenSTA run was not traced."
+}

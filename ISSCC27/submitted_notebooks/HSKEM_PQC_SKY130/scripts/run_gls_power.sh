@@ -14,7 +14,8 @@ ORFS="${ORFS_ROOT:-/opt/eda/orfs-6101364b}"
 PDK="${SKY130_HD:-$(ls -d /opt/eda/pdks-openram/ciel/sky130/versions/*/sky130A/libs.ref/sky130_fd_sc_hd | head -1)}"
 [ -z "${CAC_NO_LOCAL_IV:-}" ] && [ -d "$HOME/eda/iverilog12/bin" ] && export PATH="$HOME/eda/iverilog12/bin:$PATH"
 B="${CAC_WORK:-$HOME/cac_runs}/$RUN/results/sky130hd/cac_$RUN/base"
-OUT="$ROOT/results/gls_power/$RUN"; mkdir -p "$OUT"
+# CAC_VEC_SEED / CAC_POWER_TAG: another random input, recorded in a separate folder (defaults reproduce the committed run)
+OUT="$ROOT/results/gls_power/$RUN${CAC_POWER_TAG:-}"; mkdir -p "$OUT"
 TOP=$(grep -m1 -oE "^module [A-Za-z0-9_]+" "$B/6_final.v" | cut -d' ' -f2)
 CLK_NS=$(grep -m1 -oE "create_clock.*-period [0-9.]+" "$B/6_final.sdc" | grep -oE "[0-9.]+$")
 HALF=$(python3 -c "print($CLK_NS/2)")
@@ -23,7 +24,7 @@ if [ "${SKIP_GLS:-0}" = 1 ] && [ -f "$OUT/ntt_fwd.vcd.gz" ]; then
   gunzip -kf "$OUT/ntt_fwd.vcd.gz"          # reuse the recorded activity; only redo the power step
 else
 VEC="$OUT/vectors"; mkdir -p "$VEC"
-(cd "$ROOT/golden" && python3 gen_vectors.py --out "$VEC" --ntt 1 --keccak 1 > /dev/null)
+(cd "$ROOT/golden" && python3 gen_vectors.py --seed "${CAC_VEC_SEED:-2027}" --out "$VEC" --ntt 1 --keccak 1 > /dev/null)
 DEFS=(-DFUNCTIONAL -DUNIT_DELAY=#1 -DCLK_HALF=$HALF -DVCD_VEC=4 "-DVCD_OUT=\"$OUT/ntt_fwd.vcd\"")
 if [ "$TOP" != kyber_ntt_engine ]; then     # netlists of other tops keep the port list; alias the module name
   sed "s/^module $TOP /module kyber_ntt_engine /" "$B/6_final.v" > "$OUT/netlist.v"

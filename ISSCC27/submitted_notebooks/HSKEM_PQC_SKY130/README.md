@@ -25,8 +25,8 @@ text are guarded by assertions against the data, so the prose cannot silently dr
    fetches this folder and the YosysHQ OSS CAD Suite; nothing else needs to be installed.
 2. In Colab the notebook re-runs the golden-model checks, the NIST ACVP vectors, the RTL simulations,
    the SKY130 synthesis, the design iteration, a gate-level simulation of a routed netlist and the
-   leakage assessment. The expected run time of each section is listed in the notebook's Setup section,
-   and the last cell prints the measured total.
+   leakage assessment. A complete run took about 30 minutes on a free Colab instance; the last cell
+   reports the measured time of every section.
 3. Place-and-route and the full-system simulation take longer than a default run should; their
    committed results are read from `results/`. Both can be repeated from the notebook, also in Colab,
    by setting `RUN_PNR_COLAB = True` (Section 6, 30–45 minutes) or `RUN_SYSTEM_SIM = True` (Section 7,

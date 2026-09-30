@@ -8,5 +8,5 @@ read_sdc $::env(SDC)
 read_spef $::env(SPEF)
 set_propagated_clock [all_clocks]
 read_vcd -scope $::env(SCOPE) $::env(VCD)
-report_power
+report_power -digits 5   ; # five digits: input-to-input differences are below 0.5 %
 exit

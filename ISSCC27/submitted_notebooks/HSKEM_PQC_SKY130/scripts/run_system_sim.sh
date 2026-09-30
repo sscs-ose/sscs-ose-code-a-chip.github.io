@@ -37,13 +37,15 @@ F=(rtl/math/barrett_reduce.v rtl/spi/crc16_ccitt.v rtl/spi/trustedge_frame.v rtl
    rtl/mlkem512/mlkem512_partial_kem_selftests.sv rtl/ota/ota_gate.v rtl/hsm/sha256_compress.sv
    rtl/hsm/hmac_sha256_fixed.sv rtl/hsm/aes256_encrypt_block.sv rtl/hsm/sdm_chipid_client.sv
    rtl/hsm/sdm_crypto_axi_ram.sv rtl/hsm/hsm_shell.sv asic/rtl/sram_models.sv
-   rtl/spi/spi_command_bridge.v rtl/trustedge_top.v sim/tb/tb_trustedge_spi.sv)
+   rtl/spi/spi_command_bridge.v rtl/trustedge_top.v "${CAC_TB:-sim/tb/tb_trustedge_spi.sv}")
 # CAC_PROFILE=1 adds tb/decaps_profiler.sv as a second top level (read-only hierarchical probes)
 PROF=(); [ "${CAC_PROFILE:-0}" = 1 ] && PROF=(-s decaps_profiler "$ROOT/tb/decaps_profiler.sv")
 cd "$SRC"
 V="tb_${CFG}${OUTTAG}.vvp"; L="tb_trustedge_spi_${CFG}${OUTTAG}.log"
+# CAC_TB / CAC_EXTRA_DEFS / CAC_RUN_DIR: a derived testbench, e.g. scripts/acvp_rtl_keygen.py
+[ -n "${CAC_EXTRA_DEFS:-}" ] && DEFS+=(${CAC_EXTRA_DEFS})
 iverilog -g2012 -I rtl/kyber "${DEFS[@]}" -s tb_trustedge_spi -o "$OUT/$V" "${F[@]}" "${PROF[@]}" 2>&1 | tail -20
 [ "${COMPILE_ONLY:-0}" = 1 ] && exit 0
-( cd "$OUT" && time vvp -n "$V" > "$L" 2>&1 ) || true
+( cd "${CAC_RUN_DIR:-$OUT}" && time vvp -n "$OUT/$V" > "$OUT/$L" 2>&1 ) || true
 rm -f "$OUT/$V"
-grep -E "U1 Decaps|FAIL|errors|PASS runtime_mlkem|TB_TRUSTEDGE_SPI_RESULT|PROFILE" "$OUT/$L" | head -20
+grep -E "U1 Decaps|FAIL|errors|PASS runtime_mlkem|TB_TRUSTEDGE_SPI_RESULT|PROFILE|ACVP_KEYGEN_RESULT" "$OUT/$L" | head -20
