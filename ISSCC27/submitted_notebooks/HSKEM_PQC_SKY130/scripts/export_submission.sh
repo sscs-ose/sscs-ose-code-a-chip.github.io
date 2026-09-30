@@ -14,7 +14,7 @@ rsync -a --delete --delete-excluded \
   --exclude '*.gds' --exclude '*.vvp' --exclude '__pycache__/' \
   --exclude 'results/synth/*/netlist.v' --exclude 'results/synth/*/yosys.log' \
   --exclude 'results/leakage*/leak_traces.txt' --exclude 'results/leakage*/leak_in.hex' \
-  --exclude 'BOARD_SESSION_PLAN.md' --exclude 'HEAVY_RUNS_PLAN.md' --exclude 'REVIEW_CRITERIA.md' --exclude 'PR_DESCRIPTION_DRAFT.md' --exclude 'board/*.log' --exclude 'board/*.csv' \
+  --exclude 'BOARD_SESSION_PLAN.md' --exclude 'HEAVY_RUNS_PLAN.md' --exclude 'REVIEW_CRITERIA.md' --exclude 'PR_DESCRIPTION_DRAFT.md' --exclude 'BOARD_KEY_ROTATION_PLAN.md' --exclude 'board/*.log' --exclude 'board/*.csv' \
   --exclude 'board/__pycache__/' --exclude '*_ant10/' --exclude '*_superseded/' --exclude '*_udocker/' --exclude '*_bundle*/' --exclude '*_hm[0-9]*/' \
   --exclude 'results/asic/*/images/' --exclude 'results/asic/*/layout.png' \
   --exclude 'results/fullchip/fullchip_layout.png' --exclude '*.vcd' --exclude '*.vcd.gz' \

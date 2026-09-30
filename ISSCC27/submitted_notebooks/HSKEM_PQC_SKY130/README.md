@@ -68,8 +68,9 @@ Without an ORFS installation, the exact build used here is available as a reloca
 (`orfs-6101364b-sky130hd.tar.xz`, about 130 MB, attached to the release
 [`hskem-orfs-6101364b`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-orfs-6101364b) of the author's fork and produced by `scripts/make_orfs_bundle.sh`). It runs on a stock Ubuntu 22.04 machine,
 including Colab (`RUN_PNR_COLAB = True` in Section 6 of the notebook), and in a clean Ubuntu 22.04
-container, with twelve threads and with two, it reproduced every final metric of the committed layout of
-the pipelined NTT (`results/asic/bundle_reproduction.json`).
+container it reproduced every final metric of three committed layouts: the pipelined NTT (with twelve
+threads and with two), the single-port NTT and the one-round-per-clock Keccak core
+(`results/asic/bundle_reproduction.json`).
 
 The routed GDS files of the block-level design points compared in the notebook are attached to the
 release [`hskem-block-layouts`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-block-layouts)

@@ -625,8 +625,9 @@ md(r"""
 produced these results — the same binaries, not a rebuild — together with the libraries it needs into a
 single archive that runs on a stock Ubuntu 22.04 machine such as a Colab instance; the build carries no
 CPU-specific instructions. Before publication the archive was tested in a pristine Ubuntu 22.04
-container, with twelve threads and with the two of a free Colab instance; both times it reproduced every
-final metric of the committed layout of the pipelined NTT. Setting `RUN_PNR_COLAB = True`
+container on three committed design points — the pipelined NTT (with twelve threads and with the two of a
+free Colab instance), the single-port NTT and the one-round-per-clock Keccak core — and every run reproduced
+all final metrics of the committed layout. Setting `RUN_PNR_COLAB = True`
 downloads the archive from the release of the author's fork, repeats that run and compares every final
 metric with the committed one.
 """)
@@ -634,7 +635,7 @@ metric with the committed one.
 code(r"""
 bundle = json.loads((ROOT/"results/asic/bundle_reproduction.json").read_text())
 for chk in bundle["checks"]:
-    print(f"{chk['label']}: {chk['identical']} of {chk['metrics_compared']} final metrics identical")
+    print(f"{chk['committed']:<24} {chk['label']}: {chk['identical']} of {chk['metrics_compared']} final metrics identical")
 assert all(chk["identical"] == chk["metrics_compared"] for chk in bundle["checks"])
 
 RUN_PNR_COLAB = False     # True: about 130 MB download and 30-45 minutes on a free Colab instance
@@ -853,34 +854,47 @@ md(r"""
 At the slow corner every block runs at roughly half its typical-corner frequency, so a product clock
 would have to be derived from the `ss` column; the redesigned NTT of Section 6b, which is included in the
 table, behaves the same way. At the fast corner every NTT layout shows a small hold violation, between 2
-and 14 ps, because ORFS repaired hold only at the typical corner; hold repair against the fast corner, or
-with a hold margin, is the standard remedy. The Keccak cores meet hold at every corner.
+and 14 ps, because ORFS repaired hold only at the typical corner; a hold margin removes it, as shown
+next. The Keccak cores meet hold at every corner.
 
-**Removing the fast-corner hold violation.** For the final design (the pipelined NTT at 20 ns) a single
-endpoint violates hold at the fast corner, and it has about 140 ps of hold slack at the typical corner.
-The layout was therefore re-run with `HOLD_SLACK_MARGIN = 0.17` ns, which makes the typical-corner repair
+**Removing the fast-corner hold violation.** Where the violating endpoint was traced (four of the five
+layouts), it is a single flip-flop, the controller's `done` flag, with 130 to 140 ps of hold slack at the
+typical corner. Every NTT layout was therefore re-run with `HOLD_SLACK_MARGIN = 0.17` ns, which makes the typical-corner repair
 leave at least that much slack (an earlier attempt with 0.05 ns changed nothing, because every path
-already exceeded that margin). `scripts/collect_hold_check.py` records the outcome.
+already exceeded that margin). Each repaired netlist was analysed again at the three corners and
+simulated at gate level against the golden vectors; `scripts/collect_hold_check.py` records the outcome.
 """)
 
 code(r"""
-hc = json.loads((ROOT/"results/asic/hold_margin_check.json").read_text())["runs"]
-hct = pd.DataFrame(hc).T
-cols = ["stdcell_count", "stdcell_area_um2", "fmax_mhz"] + [f"hold_wns_ns_{c}" for c in ("ss_100C_1v60", "tt_025C_1v80", "ff_n40C_1v95")] + ["gls_pass"]
-display(hct[cols])
-h0, h1 = hc["committed"], hc["hold margin 0.17 ns"]
-d_cells, d_area = h1["stdcell_count"] - h0["stdcell_count"], h1["stdcell_area_um2"] / h0["stdcell_area_um2"] - 1
-print(f"cost of the repair: {d_cells} cells, {d_area:+.3%} standard-cell area, fmax {h0['fmax_mhz']:.2f} -> {h1['fmax_mhz']:.2f} MHz")
+hc = json.loads((ROOT/"results/asic/hold_margin_check.json").read_text())["layouts"]
+CN = ("ss_100C_1v60", "tt_025C_1v80", "ff_n40C_1v95")
+rows = {}
+for base, v in hc.items():
+    h0, h1 = v["committed"], v["hold margin 0.17 ns"]
+    rows[base] = {"ff hold before [ps]": 1e3 * h0["hold_wns_ns_ff_n40C_1v95"],
+                  "ff hold after [ps]": 1e3 * h1["hold_wns_ns_ff_n40C_1v95"],
+                  "worst hold after, any corner [ps]": 1e3 * min(h1[f"hold_wns_ns_{c}"] for c in CN),
+                  "cell change": h1["stdcell_count"] - h0["stdcell_count"],
+                  "area change [%]": 100 * (h1["stdcell_area_um2"] / h0["stdcell_area_um2"] - 1),
+                  "fmax before [MHz]": h0["fmax_mhz"], "fmax after [MHz]": h1["fmax_mhz"],
+                  "GLS after": "pass" if h1["gls_pass"] else "FAIL"}
+hct = pd.DataFrame(rows).T.infer_objects()
+display(hct.round({c: 0 for c in hct.columns[:3]} | {"area change [%]": 3,
+                   "fmax before [MHz]": 2, "fmax after [MHz]": 2}))
 # guards for the statements made in the text
-assert h0["hold_wns_ns_ff_n40C_1v95"] < 0 <= min(h1[f"hold_wns_ns_{c}"] for c in ("ss_100C_1v60", "tt_025C_1v80", "ff_n40C_1v95"))
-assert d_cells <= 5 and d_area < 0.001 and h1["fmax_mhz"] > 0.997 * h0["fmax_mhz"] and h1["gls_pass"]
+assert len(hc) == 5, "every NTT layout of the corner table should have been re-run"
+assert (hct["ff hold before [ps]"] < 0).all() and (hct["worst hold after, any corner [ps]"] >= 0).all()
+assert (hct["cell change"].abs() <= 6).all() and (hct["area change [%]"].abs() < 0.02).all()
+assert (hct["fmax after [MHz]"] / hct["fmax before [MHz]"]).between(0.995, 1.005).all()
+assert (hct["GLS after"] == "pass").all()
 """)
 
 md(r"""
-The margin removes the violation at every corner for the price of three extra cells, a change in
-standard-cell area of about one hundredth of a percent and a clock-rate change of about a tenth of a
-percent, and the repaired netlist still passes gate-level simulation. The other layouts in this notebook are left as
-routed, so that their comparison is not disturbed; the same setting is the natural remedy for them.
+The margin removes the violation at every corner in all five layouts. The cell count changes by at most
+six, the standard-cell area by less than two hundredths of a percent and the clock rate by less than half
+a percent; every repaired netlist still passes gate-level simulation. The
+comparisons in the rest of this notebook use the committed layouts, which were routed with ORFS defaults;
+since the repair changes no figure beyond the second decimal, none of those comparisons is affected.
 """)
 
 md(r"""
@@ -1575,6 +1589,48 @@ md(r"""
 """)
 
 md(r"""
+### Context: published Kyber hardware
+
+HSKEM's NTT was designed for minimal area and a simple controller, not for speed, and the comparison
+below with two published, peer-reviewed designs makes that trade-off explicit. The published figures
+are copied from the cited papers; they refer to different platforms, clock rates and, for Sapphire, to
+the round-1 version of Kyber ($q = 7681$, a full 256-point NTT), so the table gives orders of magnitude
+rather than a ranking.
+""")
+
+code(r"""
+fp_c = cfg.loc["fpga", "decaps_cycles"]
+# the published figures are quoted from the cited papers; the HSKEM rows are read from this notebook's results
+ctx = pd.DataFrame([
+    {"design": "HSKEM, FPGA configuration (this work)", "platform": "Agilex 5 FPGA, 50 MHz",
+     "cycles / NTT": int(sim.loc["ntt_dp", "cycles_measured"]), "cycles / decapsulation": f"{int(fp_c):,}",
+     "resources": f"NTT engine: {fr['kyber_ntt_engine (u_shared_ntt)']['alms_needed'].split()[0]} ALMs, 1 M20K, 2 DSP"},
+    {"design": "HSKEM, NTT redesign (this work)", "platform": f"SKY130, {P.loc['ntt_opt_pipe_w12', 'fmax_mhz']:.1f} MHz",
+     "cycles / NTT": int(P.loc["ntt_opt_pipe_w12", "cycles"]), "cycles / decapsulation": "–",
+     "resources": f"NTT block: {P.loc['ntt_opt_pipe_w12', 'cell_area_um2'] / 1e6:.3f} mm² (flip-flop store)"},
+    {"design": "Xing and Li, TCHES 2021 [13]", "platform": "Artix-7 FPGA, 161 MHz",
+     "cycles / NTT": 448, "cycles / decapsulation": "6,668 (k = 2)",
+     "resources": "complete KEM: 7,412 LUTs, 2 DSP, 3 BRAM"},
+    {"design": "Sapphire, TCHES 2019 [14]", "platform": "TSMC 40 nm, 72 MHz",
+     "cycles / NTT": 1289, "cycles / decapsulation": "–",
+     "resources": "processor core: 0.28 mm² (Kyber round 1, q = 7681)"},
+]).set_index("design")
+ctx
+""")
+
+md(r"""
+In cycles per transform, the published designs are several times to an order of magnitude ahead,
+because they complete
+at least one butterfly per clock where HSKEM's single datapath needs five to seven. Sapphire is
+particularly instructive for this notebook: it too stores its coefficients in single-port SRAMs, but
+spreads them over several banks so that the two operands and the two results of a butterfly never
+compete for one port [14]. Combined with the cycle profile of Section 7, in which the NTT occupies half
+of a decapsulation, this identifies the next step for HSKEM: a banked single-port store would remove the
+two-cycle penalty that the chip's single-port macro costs today, and a deeper butterfly pipeline would
+approach one butterfly per clock.
+""")
+
+md(r"""
 ## 11. Limitations and reproducibility
 
 **Limitations.** This work is pre-silicon: nothing has been fabricated, and nothing is FIPS-validated.
@@ -1584,7 +1640,7 @@ omitted because the SRAM power model produced non-physical values; block-level p
 gate-level switching activity for the NTT and Keccak blocks, at the typical corner and for one random
 input. Timing closure was performed at the typical corner: the slow corner roughly halves every block's
 frequency, and the NTT layouts show hold violations of up to 14 ps at the fast corner, which a hold
-margin removes for the final design at negligible cost (Section 6). The architectural
+margin removes in every NTT layout at negligible cost (Section 6). The architectural
 comparisons use a common 20 ns clock target, and the post-route clock sweep covers 7 to 30 ns for
 selected blocks only. Apart from the macro-store point of Section 6, the block-level experiments use
 flip-flop memories, whereas the full chip uses OpenRAM macros; the macro point is compared on area and
@@ -1634,6 +1690,12 @@ code in this folder was written for this project.
 11. YosysHQ, Yosys and the OSS CAD Suite, https://github.com/YosysHQ/oss-cad-suite-build; the `slang`
     front end, https://github.com/povik/yosys-slang; Icarus Verilog, https://github.com/steveicarus/iverilog.
 12. G. Pope, `kyber-py`, https://github.com/GiacomoPope/kyber-py.
+13. Y. Xing, S. Li, "A compact hardware implementation of CCA-secure key exchange mechanism
+    CRYSTALS-KYBER on FPGA", *IACR Transactions on Cryptographic Hardware and Embedded Systems*,
+    2021(2), pp. 328–356.
+14. U. Banerjee, T. S. Ukyab, A. P. Chandrakasan, "Sapphire: a configurable crypto-processor for
+    post-quantum lattice-based protocols", *IACR Transactions on Cryptographic Hardware and Embedded
+    Systems*, 2019(4), pp. 17–61.
 """)
 
 code(r"""
