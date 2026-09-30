@@ -1,4 +1,4 @@
-// Physical-design binding of the Section 6b NTT iteration (kyber_ntt_engine_opt) to the
+// Physical-design binding of the Section 7 NTT redesign (kyber_ntt_engine_opt) to the
 // chip's OpenRAM macro, for the block-level "ntt_opt_pipe_macro" run. The iteration names its
 // store te_sram_1rw_model; this module gives that name the same macro binding that
 // rtl/sram_macro_16x256.sv gives te_sram_1rw (compile both files; the black box of the macro

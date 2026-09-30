@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import placement_map as pm  # noqa: E402
 import plotstyle as ps      # noqa: E402
 
-RUNS = [("ntt_sp_20ns", "NTT, original single-port"), ("ntt_opt_pipe_w12_20ns", "NTT, redesign (Section 6b)"),
+RUNS = [("ntt_sp_20ns", "NTT, original single-port"), ("ntt_opt_pipe_w12_20ns", "NTT, redesign (Section 7)"),
         ("keccak_r1_20ns", "Keccak, one round per clock"), ("keccak_s7_20ns", "Keccak, row-serialized")]
 
 
@@ -42,7 +42,7 @@ def blocks() -> None:
         ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
         for sp in ax.spines.values():
             sp.set_visible(False)
-        ax.set_title(f"{title}\n{x1 - x0:.0f} × {y1 - y0:.0f} µm", fontsize=10)
+        ps.title_with_detail(ax, title, f"die {x1 - x0:.0f} × {y1 - y0:.0f} µm")
     fig.tight_layout(rect=(0, 0, 1, 0.86))
     fig.suptitle("Routed blocks at the 20 ns target (KLayout, metal layers 1–5), drawn to a common scale",
                  x=0.01, y=0.99, ha="left", fontsize=12, fontweight="bold")

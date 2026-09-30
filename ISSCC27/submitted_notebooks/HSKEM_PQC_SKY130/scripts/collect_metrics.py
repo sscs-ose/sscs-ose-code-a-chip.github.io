@@ -28,7 +28,7 @@ def sim_cycles() -> dict:
         cyc[key] = {"op": "Keccak-f[1600]", "cycles": int(m[1])}
     # the macro-store NTT runs the same controller as the single-port model (one-cycle synchronous read)
     cyc["ntt_macro"] = dict(cyc["ntt_sp"])
-    # design-iteration variants (Section 6b), simulated by scripts/run_sim_opt.sh
+    # design-iteration variants (Section 7), simulated by scripts/run_sim_opt.sh
     for name, key in (("opt_b1_w12", "ntt_opt_b1_w12"), ("opt_pipe_w12", "ntt_opt_pipe_w12")):
         log = ROOT / "results" / "sim_opt" / f"{name}.log"
         if log.exists():

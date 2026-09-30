@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copy the complete HSKEM RTL needed by the full-system testbench into
-# hskem_rtl/, so that Section 7 can be reproduced from the submission alone.
+# hskem_rtl/, so that Section 8 can be reproduced from the submission alone.
 #
 # One deliberate change is applied to the published copy: the synthesis-time
 # provisioning test credential in hsm_shell.sv is replaced by a public

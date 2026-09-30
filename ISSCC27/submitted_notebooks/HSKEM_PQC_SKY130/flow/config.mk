@@ -27,7 +27,7 @@ else ifeq ($(CAC_VARIANT),ntt_macro)
   export VERILOG_FILES = $(CAC_ROOT)/rtl/kyber_pkg.sv $(CAC_ROOT)/rtl/barrett_reduce.v \
                          $(CAC_ROOT)/rtl/sram_macro_16x256.sv $(CAC_ROOT)/rtl/kyber_ntt_engine.sv
 else ifeq ($(CAC_VARIANT),ntt_opt_pipe_macro)
-  # the pipelined NTT iteration of Section 6b with the same OpenRAM macro as coefficient store
+  # the pipelined NTT redesign of Section 7 with the same OpenRAM macro as coefficient store
   export DESIGN_NAME = kyber_ntt_engine_opt
   export VERILOG_TOP_PARAMS = BARRETT_1C 1 PIPE_MUL 1 COEFF_W 12
   export VERILOG_FILES = $(CAC_ROOT)/rtl/kyber_pkg.sv $(CAC_ROOT)/rtl/barrett_reduce.v \
@@ -42,7 +42,7 @@ else ifeq ($(CAC_VARIANT),keccak_s7)
   export VERILOG_TOP_PARAMS = SERIAL_ROUND 1
   export VERILOG_FILES = $(CAC_ROOT)/rtl/keccak_f1600_iter.sv $(CAC_ROOT)/rtl/keccak_lane_wrapper.sv
 else ifneq ($(filter ntt_opt_b1_w12 ntt_opt_pipe_w12,$(CAC_VARIANT)),)
-  # design iteration of Section 6b (single-port store, see rtl/kyber_ntt_engine_opt.sv)
+  # NTT redesign of Section 7 (single-port store, see rtl/kyber_ntt_engine_opt.sv)
   export DESIGN_NAME = kyber_ntt_engine_opt
   ifeq ($(CAC_VARIANT),ntt_opt_b1_w12)
     export VERILOG_TOP_PARAMS = BARRETT_1C 1 PIPE_MUL 0 COEFF_W 12

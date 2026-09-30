@@ -87,6 +87,15 @@ def reference_line(ax, y: float, label: str | None = None, axis: str = "y") -> N
         ax.axvline(y, color=MUTED, lw=1, zorder=1)
 
 
+def title_with_detail(ax, title: str, detail: str, fontsize: float = 10) -> None:
+    """A bold, centred panel title with a detail line (e.g. a size) below it in a smaller, lighter face,
+    so that the two lines never read as one sentence wrapped onto a second line."""
+    ax.set_title(title, fontsize=fontsize, loc="center", pad=fontsize * 1.9)
+    ax.annotate(detail, (0.5, 1.0), xycoords="axes fraction", xytext=(0, fontsize * 0.5),
+                textcoords="offset points", ha="center", va="bottom", fontsize=fontsize - 1.5,
+                color=INK_2, fontweight="normal")
+
+
 def thousands(ax, axis: str = "x") -> None:
     """Round tick labels with a thousands separator (4,000 rather than 4000)."""
     fmt = mpl.ticker.StrMethodFormatter("{x:,.0f}")

@@ -61,7 +61,7 @@ def draw_chip(ax, path: pathlib.Path | None = None) -> None:
         ax.add_patch(Rectangle((r.x0, r.y0), r.x1 - r.x0, r.y1 - r.y0, facecolor="#e1e0d9",
                                edgecolor=ps.INK_2, lw=0.8, zorder=3))
         shape = r.master.replace("sky130_sram_1rw_", "").split("_")[0].replace("x", " × ")
-        ax.text((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, f"SRAM\n{shape}", ha="center", va="center",
+        ax.text((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, shape, ha="center", va="center",   # one line: bits × words
                 fontsize=6.5, color=ps.INK_2, zorder=4)
     ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fill=False, edgecolor=ps.AXIS, lw=1))
     ax.set_xlim(x0, x1); ax.set_ylim(y0, y1); ax.set_aspect("equal")
@@ -83,7 +83,7 @@ def draw(ax, run: str, title: str, extent: float | None = None) -> None:
     ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
     for s in ax.spines.values():
         s.set_visible(False)
-    ax.set_title(f"{title}\n{(x1 - x0):.0f} × {(y1 - y0):.0f} µm", fontsize=10, loc="center")
+    ps.title_with_detail(ax, title, f"die {(x1 - x0):.0f} × {(y1 - y0):.0f} µm")
 
 
 def compact(p: pathlib.Path) -> pathlib.Path:
