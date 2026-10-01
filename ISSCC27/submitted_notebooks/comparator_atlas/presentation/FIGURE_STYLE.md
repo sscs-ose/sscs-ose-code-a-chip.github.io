@@ -44,3 +44,24 @@ They perform no circuit simulation and do not publish anything.
 
 This is a figure-production convention for the competition, not an IEEE
 certification, a publication decision or a change to the experimental results.
+
+## Competition poster
+
+`contest_materials.py` uses an original 24 x 18 inch landscape, three-column
+layout rather than the manuscript-figure profile above. A white background,
+dark neutral type, one muted blue accent and gray rules separate the circuit,
+calibrated schematic specification decision and nominal archived-RC study.
+The main message and readable figures lead; the full maps remain in the
+Notebook and report. Poster text uses existing DejaVu Sans, with embedded
+PDF fonts and working Notebook/Colab links. The 2400 x 1800 preview is a
+screen companion, not the print master.
+
+The layout follows [MIT Communication Lab poster principles](https://mitcommlab.mit.edu/nse/commkit/poster/):
+one message, informative headings, figure-led panels, aligned narrative and
+a small-scale proof. No reference artwork, text, logo or template is copied;
+this is not an official IEEE poster format. The generator records actual
+text bounds, typography and input hashes in `poster_manifest.json`.
+Regression checks cover column bounds, overlap, dark-text contrast, PDF
+dimensions/fonts/links and the checked specification rows. Visual review
+also inspects reduced-page, grayscale, dense-section and footer proofs.
+Scientific scope and assistance acknowledgment remain visible.

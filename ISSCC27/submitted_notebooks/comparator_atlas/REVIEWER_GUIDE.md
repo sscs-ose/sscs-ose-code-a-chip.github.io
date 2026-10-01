@@ -14,73 +14,71 @@ or its [preview image](results/study/poster_preview.png).
 ## Suggested reading order
 
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+These RC results are outcomes of the archived 27-device simulation decks; extracted-model physical fidelity is not yet qualified. In the pinned Magic/open_pdks pipeline, mutual capacitances are retained while grounded capacitance increases. The physical error magnitude and direction are unknown; no exact duplication factor or corrected counts or energy are inferred. C-only is not independent ground truth, and RC-versus-C performance differences cannot be attributed solely to resistance. DRC/LVS establish their recorded structural checks, not parasitic-model fidelity. Schematic results are unaffected by this extraction concern. Recorded numerical agreement and simulation coverage do not establish silicon PVT performance.
+See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
-The RC numbers below come from the archived 27-device extraction, whose
-physical accuracy has not been independently established. In the pinned
-Magic/open_pdks flow, coupling capacitance remains while grounded capacitance
-increases. Neither the size nor the direction of any physical error is known.
-Do not treat the C-only netlist as ground truth or attribute RC-versus-C changes
-to resistance alone. DRC/LVS and numerical checks do not establish silicon
-performance. The schematic comparison is unaffected.
-[Extraction details](REPRODUCIBILITY.md#archived-rc-model-applicability).
+1. **Question and circuit.** Read the abstract and 27-transistor circuit guide.
+   The work asks when a calibrated regenerative comparator reaches a correct
+   decision before a finite deadline, and what physical costs are involved.
+2. **Choose a sampled schematic specification, then inspect its failures.**
+   Read the [strict specification map](results/study/specification_map/selection_map.png)
+   and [108 design rows / 36 specification cells](results/study/specification_map/summary.json).
+   With `local_boundary` calibration at all 49 controlled-width-stress
+   conditions, every included nonzero signed sample through 30 mV must be
+   correct; only then is the least mean full-cycle core energy selected.
+   At 1 ns, >= 1 mV gives NONE (no feasible compared design), >= 3 mV
+   chooses `lvt_balanced_4b` (294/294,
+   249.655 fJ mean), and >= 30 mV chooses
+   `lvt_base_3b` (98/98,
+   150.531 fJ mean).
+   These are post-hoc descriptions of three compared designs, not changed
+   training selection, continuous coverage or a global-best claim.
+   The [keyed transition matrices](results/study/specification_map/failure_transitions.png)
+   and wrong-sample location/code table precede the schematic widgets.
+   The selected design has the same 20 wrong samples at 1 ns and 2 ns,
+   all at signed +/-1 mV. Baseline and control gain wrong decisions as
+   unresolved samples settle: longer deadlines need not improve every
+   outcome class. All 1,176 matched pairs and grouped counts are in the JSON.
+   Locations and codes do not establish a physical failure cause.
+3. **Inspect actual layout evidence.** View the hash-checked GDS, DRC/LVS
+   negative controls and matched schematic/connectivity/C/RC results.
+   The full 45-condition nominal RC study gives
+   156/180 correct at 1 ns and
+   180/180 at its declared 2 ns
+   deadline. Its worst sample is 1.835 ns at
+   FS / 1.62 V / -40 C / -3 mV. The earlier five-condition pilot is retained
+   separately and is not retrospectively relabeled.
 
-1. **Start with the question and circuit:** the abstract and 27-transistor
-   guide show how offset calibration and finite decision time are evaluated.
-2. **Compare the schematic candidates:** under the same local calibration
-   policy, the original and selected designs make 310/392 and 372/392 correct
-   decisions at 1 ns for sampled absolute inputs of at least 1 mV. The
-   lower-energy control shows the energy trade-off; none is claimed to be
-   best for every specification.
-3. **Then inspect the layout:** the GDS, DRC/LVS negative controls and matched
-   schematic/connectivity/C/RC records are linked in the notebook. On the
-   45-condition nominal RC grid, 156/180 decisions meet 1 ns and 180/180 meet
-   the separately declared 2 ns deadline. The slowest takes 1.835 ns
-   (FS / 1.62 V / -40 C / -3 mV). The earlier five-condition pilot retains
-   its original 1 ns result.
+The adjacent specification table reports minimum observed decision margin
+and maximum sampled core energy for qualified winners. NONE stays null;
+the JSON retains every qualified design and all exact limiting ties.
+For selected >= 3 mV at 1 ns, the minimum sampled margin is
+154.517 ps and maximum sampled
+core energy is 363.217 fJ,
+over the same 294 samples.
+Mean energy still determines selection. These finite observations are not
+noise/jitter/PVT confidence bounds, timing signoff or a worst-cycle/system
+energy guarantee.
+
+The **Waveform lab** saves the untrimmed and calibrated 1 ns figures and
+reading tables before its interactive controls. Eight selected saved traces
+retain source identities and complementary output thresholds; moving the
+deadline rereads them, not SPICE or full-cycle energy. The examples add no
+new validation coverage.
 
 The [two-point RC sensitivity check](REPRODUCIBILITY.md#bounded-rc-sensitivity-check)
-shows why the slowest 2 ns result needs context: scaling its internal
-capacitor cards by a hypothetical 20% leaves the FS decision unresolved at
-that deadline. This is not a measured PDK uncertainty bound or a rerun of
-the full grid. The [GDS geometry audit](results/study/gds_geometry/README.md)
-matches selected conductor polygons to named nets and estimates isolated
-sheet and plate components. The imported GDS RC graph still differs from
-the archived MAG extraction; neither check certifies the full-net parasitics.
+leaves the slow FS point unresolved at 2 ns under a hypothetical 20%
+internal-capacitor increase. It is not a PDK uncertainty bound or full-grid
+rerun. The [GDS geometry audit](results/study/gds_geometry/README.md) links
+selected polygons to nets and estimates isolated sheet/plate components.
+The GDS-imported RC graph still differs from MAG; neither check qualifies
+the full-net parasitics. C-only is not independent ground truth, and
+RC-versus-C differences do not isolate resistance.
 
-The **Waveform lab** has eight selected saved traces linked to their source
-runs, including a wrong-sign decision, its calibrated counterpart and late
-RC decisions. Move the deadline cursor to inspect the complementary output
-thresholds. This only rereads recorded waveforms; it does not rerun SPICE,
-reduce full-cycle energy or add validation points.
+Run all notebook
+cells to regenerate the analysis from the included data; full simulations
+are separate optional modes. Detailed commands, versions and limitations are
+collected in [Reproducibility](REPRODUCIBILITY.md).
 
-For a design decision, read the
-[strict schematic specification map](results/study/specification_map/selection_map.png)
-and its [108 design rows / 36 specification cells](results/study/specification_map/summary.json).
-This uses `local_boundary` calibration at all 49 controlled-width-stress
-conditions, not the nominal 45-PVT RC grid. Only designs correct at **all**
-included nonzero signed sampled inputs qualify; then the lowest measured
-mean full-cycle core energy wins. At 1 ns, the >= 1 mV band has no feasible
-design, >= 3 mV chooses `lvt_balanced_4b`, and >= 30 mV chooses `lvt_base_3b`.
-It is post-hoc existing-data guidance, not continuous-input coverage or a
-worst-cycle/system energy budget. In the Notebook, the Waveform lab saves
-the untrimmed and calibrated 1 ns figures and reading tables before the
-interactive controls, so static readers can see the same lesson.
-
-Immediately before the schematic widgets, inspect the
-[1 ns to 2 ns transition matrices](results/study/specification_map/failure_transitions.png)
-and the 20 selected-design wrong-sample locations/codes. These are the same
-20 keyed samples at both deadlines, not merely equal totals. Baseline and
-control gain wrong decisions as some unresolved samples settle; longer
-deadlines do not guarantee monotonic outcome classes. Grouped counts and
-all 1,176 matched pairs are in the specification JSON.
-
-The adjacent specification table adds minimum observed decision margin and
-maximum sampled core energy for qualified winners; NONE stays null.
-The JSON retains every qualified design and all exact limiting ties.
-These finite samples do not establish failure causes, noise/jitter/PVT bounds,
-timing signoff or a worst-cycle/system energy guarantee. Mean energy still
-determines the winner.
-
-Run all notebook cells to regenerate the analysis from the included data.
-Fresh simulations are optional, separate modes; see
-[Reproducibility](REPRODUCIBILITY.md) for commands and versions.
+Original code: MIT. GitHub Copilot assisted implementation, experiment
+automation, figures and documentation; the author is responsible for the work.

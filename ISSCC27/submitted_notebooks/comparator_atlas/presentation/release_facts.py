@@ -8,7 +8,7 @@ from pathlib import Path
 
 import entry_tools as entry
 import layout_evidence as physical
-from presentation import pvt45_results
+from presentation import pvt45_results, specification_map
 
 ROOT = Path(__file__).resolve().parents[1]
 PREFIX = "ISSCC27/submitted_notebooks/comparator_atlas"
@@ -32,6 +32,21 @@ def load_facts() -> dict:
     rc_summary = physical.deadline_summary(layout).set_index(["mode", "deadline_ns"])
     costs = physical.matched_tt_comparison(layout).set_index("implementation")
     selected = schematic["selection"]["selected_design"]
+    sampled = specification_map.load_checked(schematic)
+    poster_choices = []
+    for minimum in (1.0, 3.0, 30.0):
+        choice = next(row for row in sampled["per_specification"]
+                      if row["minimum_abs_input_mv"] == minimum and row["deadline_ns"] == 1)
+        winner = next((row for row in sampled["per_design"]
+                       if row["minimum_abs_input_mv"] == minimum and row["deadline_ns"] == 1
+                       and row["design"] == choice["winner"]), None)
+        poster_choices.append({**choice, "correct": winner["correct"] if winner else None,
+                               "points": winner["points"] if winner else None})
+    wrong = sampled["failure_analysis"]["selected_wrong"]
+    signed_wrong_inputs = sorted({row["input_mv"] for row in wrong["samples"]})
+    if not wrong["same_sample_set"] or wrong["count_1ns"] != wrong["count_2ns"] \
+            or signed_wrong_inputs != [-1.0, 1.0]:
+        raise ValueError("The poster's paired wrong-sample lesson does not match the checked evidence")
     old = costs.loc["Previous balanced RC"]
     repaired = costs.loc["Repaired Distributed RC"]
     ideal = costs.loc["Schematic"]
@@ -61,6 +76,17 @@ def load_facts() -> dict:
             "selected_mean_core_energy_fj": float(narrow.loc[selected, "mean_core_energy_fj"]),
             "efficient_control_correct_at_1mv": int(narrow.loc["lvt_base_3b", "correct"]),
             "efficient_control_energy_fj": float(narrow.loc["lvt_base_3b", "mean_core_energy_fj"]),
+        },
+        "sampled_schematic": {
+            "policy": sampled["policy"], "conditions": sampled["conditions"],
+            "analysis": sampled["analysis"], "poster_choices": poster_choices,
+            "selected_wrong": {
+                "count_1ns": wrong["count_1ns"], "count_2ns": wrong["count_2ns"],
+                "same_sample_set": wrong["same_sample_set"],
+                "signed_inputs_mv": signed_wrong_inputs,
+            },
+            "summary_sha256": entry.digest(specification_map.FOLDER / "summary.json"),
+            "analysis_source_sha256": entry.digest(Path(specification_map.__file__)),
         },
         "layout": {
             "scope": "original_five_condition_pilot",
@@ -95,6 +121,8 @@ def load_facts() -> dict:
             "points_per_mode": 180,
             "primary_deadline_ns": 2,
             "parallel_deadline_ns": 1,
+            "schematic_correct_1ns": int(full_table.loc["Schematic", "correct_at_1ns"]),
+            "schematic_correct_2ns": int(full_table.loc["Schematic", "correct_at_2ns"]),
             "rc_correct_1ns": int(full_table.loc["Extracted RC", "correct_at_1ns"]),
             "rc_correct_2ns": int(full_table.loc["Extracted RC", "correct_at_2ns"]),
             "rc_unresolved_1ns": 24,
@@ -145,11 +173,10 @@ def load_facts() -> dict:
 
 
 def readme_text(facts: dict, design_table: str) -> str:
-    layout = facts["layout"]
     full = facts["postlayout_pvt45"]
     return f"""# Comparator Atlas: When Calibration Is Not Enough
 
-**Wei-Lun Hsu — National Tsing Hua University**  
+**Wei-Lun Hsu — National Tsing Hua University**\x20\x20
 IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
 
 [Notebook]({facts["notebook_url"]}) |
@@ -256,8 +283,9 @@ documentation; the author is responsible for the work.
 
 
 def write_judge_guide(facts: dict) -> Path:
-    schematic, layout = facts["schematic"], facts["layout"]
     full = facts["postlayout_pvt45"]
+    _, selected, control = facts["sampled_schematic"]["poster_choices"]
+    wrong = facts["sampled_schematic"]["selected_wrong"]
     text = f"""# Comparator Atlas - quick tour
 
 **Wei-Lun Hsu - National Tsing Hua University**
@@ -280,12 +308,26 @@ See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-appl
 1. **Question and circuit.** Read the abstract and 27-transistor circuit guide.
    The work asks when a calibrated regenerative comparator reaches a correct
    decision before a finite deadline, and what physical costs are involved.
-2. **Compare the complete schematic grid.** At 1 ns and sampled absolute
-   input at least 1 mV, the original and selected designs have
-   {schematic["baseline_correct_at_1mv"]}/{schematic["points_at_1mv"]} and
-   {schematic["selected_correct_at_1mv"]}/{schematic["points_at_1mv"]} correct
-   points with the same local policy. Compare the lower-energy control too;
-   no design is declared best for every specification.
+2. **Choose a sampled schematic specification, then inspect its failures.**
+   Read the [strict specification map](results/study/specification_map/selection_map.png)
+   and [108 design rows / 36 specification cells](results/study/specification_map/summary.json).
+   With `local_boundary` calibration at all 49 controlled-width-stress
+   conditions, every included nonzero signed sample through 30 mV must be
+   correct; only then is the least mean full-cycle core energy selected.
+   At 1 ns, >= 1 mV gives NONE (no feasible compared design), >= 3 mV
+   chooses `{selected["winner"]}` ({selected["correct"]}/{selected["points"]},
+   {selected["mean_core_energy_fj"]:.3f} fJ mean), and >= 30 mV chooses
+   `{control["winner"]}` ({control["correct"]}/{control["points"]},
+   {control["mean_core_energy_fj"]:.3f} fJ mean).
+   These are post-hoc descriptions of three compared designs, not changed
+   training selection, continuous coverage or a global-best claim.
+   The [keyed transition matrices](results/study/specification_map/failure_transitions.png)
+   and wrong-sample location/code table precede the schematic widgets.
+   The selected design has the same {wrong["count_1ns"]} wrong samples at 1 ns and 2 ns,
+   all at signed +/-1 mV. Baseline and control gain wrong decisions as
+   unresolved samples settle: longer deadlines need not improve every
+   outcome class. All 1,176 matched pairs and grouped counts are in the JSON.
+   Locations and codes do not establish a physical failure cause.
 3. **Inspect actual layout evidence.** View the hash-checked GDS, DRC/LVS
    negative controls and matched schematic/connectivity/C/RC results.
    The full 45-condition nominal RC study gives
@@ -295,20 +337,42 @@ See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-appl
    FS / 1.62 V / -40 C / -3 mV. The earlier five-condition pilot is retained
    separately and is not retrospectively relabeled.
 
-The **Waveform lab** makes the distinction concrete: eight representative
-saved examples have a movable deadline, complementary output thresholds and
-source run identities. A wrong-sign schematic decision, its calibrated
-counterpart, and late extracted RC decisions are all visible. These examples
-are not every raw trace in the atlas and add no new validation coverage.
-Moving the display deadline does not rerun SPICE or reduce full-cycle energy.
+The adjacent specification table reports minimum observed decision margin
+and maximum sampled core energy for qualified winners. NONE stays null;
+the JSON retains every qualified design and all exact limiting ties.
+For selected >= 3 mV at 1 ns, the minimum sampled margin is
+{selected["sampled_limits"]["minimum_decision_margin_ps"]:.3f} ps and maximum sampled
+core energy is {selected["sampled_limits"]["maximum_core_energy_fj"]:.3f} fJ,
+over the same {selected["points"]} samples.
+Mean energy still determines selection. These finite observations are not
+noise/jitter/PVT confidence bounds, timing signoff or a worst-cycle/system
+energy guarantee.
+
+The **Waveform lab** saves the untrimmed and calibrated 1 ns figures and
+reading tables before its interactive controls. Eight selected saved traces
+retain source identities and complementary output thresholds; moving the
+deadline rereads them, not SPICE or full-cycle energy. The examples add no
+new validation coverage.
+
+The [two-point RC sensitivity check](REPRODUCIBILITY.md#bounded-rc-sensitivity-check)
+leaves the slow FS point unresolved at 2 ns under a hypothetical 20%
+internal-capacitor increase. It is not a PDK uncertainty bound or full-grid
+rerun. The [GDS geometry audit](results/study/gds_geometry/README.md) links
+selected polygons to nets and estimates isolated sheet/plate components.
+The GDS-imported RC graph still differs from MAG; neither check qualifies
+the full-net parasitics. C-only is not independent ground truth, and
+RC-versus-C differences do not isolate resistance.
 
 Run all notebook
 cells to regenerate the analysis from the included data; full simulations
 are separate optional modes. Detailed commands, versions and limitations are
 collected in [Reproducibility](REPRODUCIBILITY.md).
+
+Original code: MIT. GitHub Copilot assisted implementation, experiment
+automation, figures and documentation; the author is responsible for the work.
 """
     destination = ROOT / "REVIEWER_GUIDE.md"
-    destination.write_text(text, encoding="utf-8")
+    destination.write_text(text, encoding="utf-8", newline="\n")
     manifest = {
         "status": "competition_guide_generated_from_checked_evidence",
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -318,7 +382,8 @@ collected in [Reproducibility](REPRODUCIBILITY.md).
         "public_upload_performed": False,
     }
     output = ROOT / "results" / "presentation" / "reviewer_guide_manifest.json"
-    output.write_text(json.dumps(manifest, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    output.write_text(json.dumps(manifest, indent=2, allow_nan=False) + "\n",
+                      encoding="utf-8", newline="\n")
     return destination
 
 
