@@ -1,5 +1,7 @@
 # PrecisionFit: Error-Budget-Driven FIR Filter Hardware Generator
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AarushLenka/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/PrecisionFit/precisionfit.ipynb)
+
 **Licensed under the Apache License, Version 2.0** — see [`LICENSE`](LICENSE).
 The generated RTL, result CSVs and figures are released under the same terms.
 
