@@ -26,6 +26,8 @@ lower-energy alternative and lays out the selected 27-transistor circuit.
 
 ## Results
 
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+
 **Read the RC results as simulations of the archived extraction, not measured
 silicon performance.** The pinned Magic/open_pdks flow retains coupling
 capacitance while grounded capacitance increases. The C-only netlist is not an

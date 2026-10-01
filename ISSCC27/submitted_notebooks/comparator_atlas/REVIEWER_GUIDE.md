@@ -13,6 +13,8 @@ or its [preview image](results/study/poster_preview.png).
 
 ## Suggested reading order
 
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+
 The RC numbers below come from the archived 27-device extraction, whose
 physical accuracy has not been independently established. In the pinned
 Magic/open_pdks flow, coupling capacitance remains while grounded capacitance
