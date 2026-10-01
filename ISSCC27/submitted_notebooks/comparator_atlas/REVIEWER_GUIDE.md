@@ -13,36 +13,44 @@ or its [preview image](results/study/poster_preview.png).
 
 ## Suggested reading order
 
-**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
-These RC results are outcomes of the archived 27-device simulation decks; extracted-model physical fidelity is not yet qualified. In the pinned Magic/open_pdks pipeline, mutual capacitances are retained while grounded capacitance increases. The physical error magnitude and direction are unknown; no exact duplication factor or corrected counts or energy are inferred. C-only is not independent ground truth, and RC-versus-C performance differences cannot be attributed solely to resistance. DRC/LVS establish their recorded structural checks, not parasitic-model fidelity. Schematic results are unaffected by this extraction concern. Recorded numerical agreement and simulation coverage do not establish silicon PVT performance.
-See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
+The RC numbers below come from the archived 27-device extraction, whose
+physical accuracy has not been independently established. In the pinned
+Magic/open_pdks flow, coupling capacitance remains while grounded capacitance
+increases. Neither the size nor the direction of any physical error is known.
+Do not treat the C-only netlist as ground truth or attribute RC-versus-C changes
+to resistance alone. DRC/LVS and numerical checks do not establish silicon
+performance. The schematic comparison is unaffected.
+[Extraction details](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
-1. **Question and circuit.** Read the abstract and 27-transistor circuit guide.
-   The work asks when a calibrated regenerative comparator reaches a correct
-   decision before a finite deadline, and what physical costs are involved.
-2. **Compare the complete schematic grid.** At 1 ns and sampled absolute
-   input at least 1 mV, the original and selected designs have
-   310/392 and
-   372/392 correct
-   points with the same local policy. Compare the lower-energy control too;
-   no design is declared best for every specification.
-3. **Inspect actual layout evidence.** View the hash-checked GDS, DRC/LVS
-   negative controls and matched schematic/connectivity/C/RC results.
-   The full 45-condition nominal RC study gives
-   156/180 correct at 1 ns and
-   180/180 at its declared 2 ns
-   deadline. Its worst sample is 1.835 ns at
-   FS / 1.62 V / -40 C / -3 mV. The earlier five-condition pilot is retained
-   separately and is not retrospectively relabeled.
+1. **Start with the question and circuit:** the abstract and 27-transistor
+   guide show how offset calibration and finite decision time are evaluated.
+2. **Compare the schematic candidates:** under the same local calibration
+   policy, the original and selected designs make 310/392 and 372/392 correct
+   decisions at 1 ns for sampled absolute inputs of at least 1 mV. The
+   lower-energy control shows the energy trade-off; none is claimed to be
+   best for every specification.
+3. **Then inspect the layout:** the GDS, DRC/LVS negative controls and matched
+   schematic/connectivity/C/RC records are linked in the notebook. On the
+   45-condition nominal RC grid, 156/180 decisions meet 1 ns and 180/180 meet
+   the separately declared 2 ns deadline. The slowest takes 1.835 ns
+   (FS / 1.62 V / -40 C / -3 mV). The earlier five-condition pilot retains
+   its original 1 ns result.
 
-The **Waveform lab** makes the distinction concrete: eight representative
-saved examples have a movable deadline, complementary output thresholds and
-source run identities. A wrong-sign schematic decision, its calibrated
-counterpart, and late extracted RC decisions are all visible. These examples
-are not every raw trace in the atlas and add no new validation coverage.
-Moving the display deadline does not rerun SPICE or reduce full-cycle energy.
+The [two-point RC sensitivity check](REPRODUCIBILITY.md#bounded-rc-sensitivity-check)
+shows why the slowest 2 ns result needs context: scaling its internal
+capacitor cards by a hypothetical 20% leaves the FS decision unresolved at
+that deadline. This is not a measured PDK uncertainty bound or a rerun of
+the full grid. The [GDS geometry audit](results/study/gds_geometry/README.md)
+matches selected conductor polygons to named nets and estimates isolated
+sheet and plate components. The imported GDS RC graph still differs from
+the archived MAG extraction; neither check certifies the full-net parasitics.
 
-Run all notebook
-cells to regenerate the analysis from the included data; full simulations
-are separate optional modes. Detailed commands, versions and limitations are
-collected in [Reproducibility](REPRODUCIBILITY.md).
+The **Waveform lab** has eight selected saved traces linked to their source
+runs, including a wrong-sign decision, its calibrated counterpart and late
+RC decisions. Move the deadline cursor to inspect the complementary output
+thresholds. This only rereads recorded waveforms; it does not rerun SPICE,
+reduce full-cycle energy or add validation points.
+
+Run all notebook cells to regenerate the analysis from the included data.
+Fresh simulations are optional, separate modes; see
+[Reproducibility](REPRODUCIBILITY.md) for commands and versions.

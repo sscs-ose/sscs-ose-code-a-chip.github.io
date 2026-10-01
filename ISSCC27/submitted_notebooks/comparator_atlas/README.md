@@ -5,6 +5,7 @@ IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
 
 [Notebook](https://github.com/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb) |
 [Run in Colab](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb) |
+[Quick tour](REVIEWER_GUIDE.md) |
 [Reproduction instructions](REPRODUCIBILITY.md)
 
 Download the [interactive report](results/study/report.html) and open the
@@ -16,26 +17,22 @@ or its [preview image](results/study/poster_preview.png).
 
 ## Overview
 
-Offset calibration alone does not ensure that a comparator finishes its
-decision in time. This notebook follows a SKY130 StrongARM comparator from
-device sizing and calibration through PVT evaluation, layout and parasitic
-extraction. Interactive waveforms explain the difference between a wrong
-decision and an unresolved one.
-
-The workflow includes a nine-candidate design comparison, an additional
-lower-energy control, and a physical implementation of the selected
-27-transistor circuit.
+Calibrating offset does not tell us whether the comparator will decide before
+the deadline. Here, a SKY130 StrongARM comparator is sized, calibrated and
+tested across PVT conditions, then laid out and simulated with extracted
+parasitics. The saved waveforms show which decisions are wrong and which simply
+have not settled in time. The study compares nine candidate designs, checks a
+lower-energy alternative and lays out the selected 27-transistor circuit.
 
 ## Results
 
-**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
-The pinned Magic/open_pdks extraction retains mutual capacitances while
-grounded capacitance increases. Neither the magnitude nor direction of any
-physical error is established; the C-only deck is not an independent
-reference, and RC-versus-C differences do not isolate resistance. DRC/LVS
-and timestep agreement check structure and numerical consistency, not
-parasitic fidelity or silicon PVT performance. The schematic comparisons
-are unaffected. See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
+**Read the RC results as simulations of the archived extraction, not measured
+silicon performance.** The pinned Magic/open_pdks flow retains coupling
+capacitance while grounded capacitance increases. The C-only netlist is not an
+independent reference, so the RC-versus-C difference cannot be assigned to
+resistance alone. Its physical error has not been established; DRC/LVS and
+timestep checks cannot settle that question. This does not affect the schematic
+comparison. [Extraction details and limits](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
 The schematic comparison uses the same local calibration policy, a 1 ns
 deadline and sampled absolute inputs of at least 1 mV:
@@ -68,23 +65,23 @@ The earlier five-condition ngspice-42 layout pilot remains a separate record:
 The full-grid 2 ns criterion was declared separately rather than rewriting that
 pilot's result.
 
-An [exploratory RC-card sensitivity check](REPRODUCIBILITY.md#bounded-rc-sensitivity-check)
-reran two previously published RC points with seven *hypothetical* R/C
-settings each, at both 10 and 5 ps (28 new transients; 14 numerical pairs
-passed). The original slowest FS point is correct at 2 ns, but becomes
-unresolved when its 319 internal capacitor cards are all scaled by 1.2,
-either alone or with its 675 resistor cards scaled by 1.2. The TT sample
-remains correct at both deadlines in all seven settings. These factors are
-not a measured process-error range; two selected points cannot establish
-the perturbed full-grid pass rate or the physical accuracy of the RC model.
-[Plan](results/study/rc_sensitivity/plan.json) and
-[per-pair measurements](results/study/rc_sensitivity/summary.json) are
-provided with an explicit [rerun script](reproduction/pvt45/run_rc_sensitivity.py).
-An independently documented [GDS geometry and layer-coefficient spot check](results/study/gds_geometry/README.md)
-reconstructs selected conductor dimensions and **only isolated sheet/plate
-components**. It does not qualify the full-net RC extraction: although all
-15 GDS ports can be restored, imported RC segmentation and capacitor values
-still differ from the archived MAG extraction.
+To see how close the slowest point is to the 2 ns deadline, we reran it and
+one TT point with seven *hypothetical* R/C settings each at 10 and 5 ps:
+[28 transients and 14 matching numerical pairs](REPRODUCIBILITY.md#bounded-rc-sensitivity-check).
+The TT point remains correct at both deadlines. The slowest FS point is
+correct at 2 ns in the original deck but unresolved if all 319 internal
+capacitor cards are scaled by 1.2, with or without also scaling its 675
+resistor cards by 1.2. The 20% change is a test setting, not a measured
+process-error range; these two points cannot determine the pass rate of
+the perturbed 45-condition grid. The [plan](results/study/rc_sensitivity/plan.json),
+[measurements](results/study/rc_sensitivity/summary.json) and
+[rerun script](reproduction/pvt45/run_rc_sensitivity.py) are included.
+
+A separate [GDS geometry check](results/study/gds_geometry/README.md) measures
+selected conductors and calculates isolated sheet-resistance and plate-area
+terms. It is not a full-net PEX reference: although all 15 GDS ports can be
+restored, imported RC segmentation and capacitor values still differ from
+the archived MAG extraction.
 
 ![Full post-layout PVT timing](results/study/postlayout_pvt45/figures/pvt45_timing.png)
 
