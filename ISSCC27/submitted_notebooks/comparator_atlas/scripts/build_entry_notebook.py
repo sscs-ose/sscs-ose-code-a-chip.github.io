@@ -52,7 +52,12 @@ def main() -> None:
 
         ## Getting started
 
-        Run all cells to verify the supplied data and regenerate the analysis.
+        Default execution verifies supplied data and remeasures saved waveforms;
+        it does not run new simulations. For static reading, open the
+        [reviewer guide](https://github.com/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/REVIEWER_GUIDE.md)
+        or [interactive report](https://github.com/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/results/study/report.html).
+        Download the report and open its HTML locally; GitHub's file viewer
+        does not execute its JavaScript.
         Set `RUN_LIVE_SPICE` for a small fresh simulation or
         `RUN_FULL_CAMPAIGN` for the complete schematic study.
         Tool versions, full commands and evidence locations are in
@@ -312,6 +317,33 @@ def main() -> None:
         The next tables show both average and worst-condition coverage.
         A design with a favorable average is not automatically acceptable
         if even one required condition fails.
+
+        ### Strict sampled specification guide (schematic only)
+
+        The saved map after the comparison requires **every included nonzero
+        signed input at all 49 controlled-width-stress conditions to be
+        correct**, using the existing `local_boundary` calibration. Among
+        the three compared designs that qualify, it chooses the least
+        measured **mean full-cycle core energy** over that sampled band.
+        If none qualifies, it reports **No feasible compared design**, with
+        no best-average fallback.
+
+        At 1 ns, sampled |input| >= 1 mV has no feasible design; >= 3 mV
+        selects `lvt_balanced_4b` (294/294), while >= 30 mV selects the
+        lower-energy `lvt_base_3b` (98/98). The 36 cells contain 28 with
+        no feasible design, five selecting `lvt_balanced_4b`, and three
+        selecting `lvt_base_3b`. Baseline is never chosen **only in this
+        compared calibrated sampled domain**.
+
+        This is descriptive, post-hoc analysis of existing schematic data,
+        not the nominal 45-PVT RC study or a new experiment. No interpolation,
+        continuous-input guarantee or energy budget is implied. Mean core
+        energy is not a maximum-cycle bound and excludes drivers and
+        calibration/system energy. Exact equal means retain all tied
+        designs in the JSON; display selection follows the declared order.
+        The [108 per-design and 36 per-specification records](results/study/specification_map/summary.json)
+        include provenance hashes. No calibration or original circuit
+        selection is changed.
         """),
         code("""
         print("Local policy; 1 ns; sampled |input| >= 1 mV")
@@ -322,6 +354,14 @@ def main() -> None:
         figure = entry.tradeoff_figure(evidence)
         display(figure)
         plt.close(figure)
+
+        from presentation import specification_map
+
+        specifications = specification_map.load_checked(evidence)
+        display(Image(filename=str(
+            specification_map.FOLDER / "selection_map.png"
+        )))
+        display(specification_map.example_table(specifications))
         """),
         code("""
         import ipywidgets as widgets
@@ -436,8 +476,14 @@ def main() -> None:
         physical model; see Section 8. Changing the display does not
         resolve the extraction-model limitation.
 
-        These controls show eight representative saved SPICE waveforms.
-        Compare the complementary output rails with the selected deadline.
+        The two saved figures and reading tables below compare the untrimmed
+        and calibrated schematic examples at **1.0 ns**, without widget
+        JavaScript. They reuse existing traces and the same measurement
+        contract: no new simulations or validation coverage.
+
+        The interactive controls follow these static examples and explore
+        all eight representative saved SPICE waveforms. Compare the
+        complementary output rails with the selected deadline.
 
         Start with the **code-zero -1 mV schematic example**: its outputs
         resolve to the wrong polarity. Switch to the same circuit and
@@ -469,6 +515,9 @@ def main() -> None:
             }]))
             plt.close(figure)
 
+
+        for static_example in ("schematic_untrimmed", "schematic_calibrated"):
+            inspect_waveform(static_example, 1.0)
 
         example_control = widgets.Dropdown(
             options=[

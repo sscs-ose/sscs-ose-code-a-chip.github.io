@@ -53,6 +53,19 @@ RC decisions. Move the deadline cursor to inspect the complementary output
 thresholds. This only rereads recorded waveforms; it does not rerun SPICE,
 reduce full-cycle energy or add validation points.
 
+For a design decision, read the
+[strict schematic specification map](results/study/specification_map/selection_map.png)
+and its [108 design rows / 36 specification cells](results/study/specification_map/summary.json).
+This uses `local_boundary` calibration at all 49 controlled-width-stress
+conditions, not the nominal 45-PVT RC grid. Only designs correct at **all**
+included nonzero signed sampled inputs qualify; then the lowest measured
+mean full-cycle core energy wins. At 1 ns, the >= 1 mV band has no feasible
+design, >= 3 mV chooses `lvt_balanced_4b`, and >= 30 mV chooses `lvt_base_3b`.
+It is post-hoc existing-data guidance, not continuous-input coverage or a
+worst-cycle/system energy budget. In the Notebook, the Waveform lab saves
+the untrimmed and calibrated 1 ns figures and reading tables before the
+interactive controls, so static readers can see the same lesson.
+
 Run all notebook cells to regenerate the analysis from the included data.
 Fresh simulations are optional, separate modes; see
 [Reproducibility](REPRODUCIBILITY.md) for commands and versions.

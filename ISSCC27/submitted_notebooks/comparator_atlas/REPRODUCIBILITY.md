@@ -377,6 +377,41 @@ run `bash layout_compact_repair/run.sh` from the prepared project directory.
 The flow preserves structural and simulation evidence and returns a failure
 status when its original 1 ns performance gate is not met.
 
+## Strict schematic specification map
+
+The [saved map](results/study/specification_map/selection_map.png) and
+[JSON records](results/study/specification_map/summary.json) are descriptive,
+post-hoc analysis of the existing `local_boundary` calibrated **schematic**
+study: three compared designs, all 49 controlled-width-stress conditions,
+and both signs of the recorded nonzero inputs. This is not the nominal
+45-PVT RC experiment.
+
+The six minimum absolute inputs (0.25, 0.5, 1, 3, 10, 30 mV) and six recorded
+deadlines (0.25, 0.35, 0.5, 0.75, 1, 2 ns) define 36 specification cells.
+A design qualifies only when every included point at every condition is
+correct. The winner minimizes measured mean full-cycle core energy across
+that sampled band, not worst-cycle energy or total system/calibration cost.
+No energy budget is imposed. No feasible design yields the explicit status
+`No feasible compared design` and JSON-null winner/energy, never a
+best-average substitute. Exact equal energy means are recorded as ties;
+display selection follows the declared compared-design order.
+
+The analysis calls `entry.load_evidence()` and `entry.summary()` without
+changing calibration or original training selection. It rejects missing,
+duplicate, unavailable and nonfinite observations. The JSON contains
+108 per-design rows, 36 per-specification rows, source/provenance SHA256s,
+and the saved figure hash. Recompute and compare all records read-only:
+
+```text
+python -B -m presentation.specification_map
+```
+
+`--write` regenerates only these two derived presentation artifacts; if
+used for publication, refresh their entry checksums afterward. No new
+SPICE, interpolation, continuous-input coverage, yield or physical-model
+qualification is involved. Baseline's zero winning cells apply only to
+this compared calibrated sampled domain.
+
 ## Checks
 
 ```text

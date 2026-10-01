@@ -49,6 +49,20 @@ These are finite-grid results: 45 PVT combinations at controlled width
 stress plus four nominal controls. The lower-energy candidate was evaluated
 after the original selection.
 
+The [strict sampled specification map](results/study/specification_map/selection_map.png)
+turns these **calibrated schematic, 49 controlled-width-stress conditions**
+into a design guide, not a claim that one circuit is always best. Every
+included signed sampled input must be correct before mean full-cycle core
+energy is compared. At 1 ns, |input| >= 1 mV has no feasible compared design;
+>= 3 mV selects `lvt_balanced_4b`, while >= 30 mV selects `lvt_base_3b`.
+This post-hoc, existing-data map is not the 45-PVT RC grid, a continuous-input
+guarantee or a worst-cycle/system energy bound.
+[Auditable records](results/study/specification_map/summary.json) and
+[recomputation instructions](REPRODUCIBILITY.md#strict-schematic-specification-map)
+are included. The Notebook also saves two waveform figures and reading
+tables before its widgets, so the wrong-versus-calibrated lesson is readable
+without widget JavaScript.
+
 The physical implementation passes the recorded DRC/LVS and negative controls.
 Its full nominal, code-zero study covers **45 PVT conditions and four signed
 inputs per condition**. Schematic and extracted RC were simulated under the

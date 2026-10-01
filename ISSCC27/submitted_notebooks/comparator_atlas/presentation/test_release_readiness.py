@@ -1,4 +1,5 @@
 import ast
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -96,6 +97,104 @@ def test_reviewer_navigation_links_resolve_to_local_artifacts():
             assert text.count(link) == 1
             assert text.index(link) < first_section
             assert (root / target).is_file()
+
+
+def test_static_review_sources_match_the_notebook_generator(monkeypatch):
+    from scripts import build_entry_notebook
+
+    root = Path(__file__).resolve().parents[1]
+    notebook = json.loads((root / NOTEBOOK).read_bytes())
+    generated = []
+    monkeypatch.setattr(
+        build_entry_notebook.nbf, "write",
+        lambda document, destination: generated.append(document),
+    )
+    build_entry_notebook.main()
+    for index in (0, 13, 14):
+        assert generated[0].cells[index].source == "".join(notebook["cells"][index]["source"])
+
+
+def test_getting_started_links_work_outside_the_repository():
+    root = Path(__file__).resolve().parents[1]
+    notebook = json.loads((root / NOTEBOOK).read_bytes())
+    introduction = "".join(notebook["cells"][0]["source"])
+    getting_started = introduction.split("## Getting started", 1)[1]
+    fork = COLAB_URL.replace("https://colab.research.google.com/github/", "https://github.com/")
+    entry_url = fork.rsplit("/", 1)[0]
+    for target in ("REVIEWER_GUIDE.md", "results/study/report.html"):
+        assert f"]({entry_url}/{target})" in getting_started
+    assert "Download the report and open its HTML locally" in getting_started
+    assert "remeasures saved waveforms" in getting_started
+    assert "does not run new simulations" in getting_started
+
+
+def test_static_waveform_examples_use_existing_one_ns_readings(monkeypatch):
+    import subprocess
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    from presentation import waveform_lab
+
+    root = Path(__file__).resolve().parents[1]
+    notebook = json.loads((root / NOTEBOOK).read_bytes())
+    source = "".join(notebook["cells"][14]["source"]).split("example_control =", 1)[0]
+    calls, displayed = [], []
+    original_figure = waveform_lab.figure
+
+    def capture(data, identifier, deadline_ns):
+        assert data["new_physical_simulations"] == 0
+        calls.append((identifier, deadline_ns))
+        return original_figure(data, identifier, deadline_ns)
+
+    def forbid_subprocess(*args, **kwargs):
+        pytest.fail("Static waveform examples must not start simulations or other subprocesses")
+
+    monkeypatch.setattr(waveform_lab, "figure", capture)
+    monkeypatch.setattr(subprocess, "run", forbid_subprocess)
+    namespace = {"plt": plt, "pd": pd, "display": lambda *items: displayed.extend(items)}
+    exec(compile(source, "<static-waveform-examples>", "exec"), namespace)
+    assert calls == [("schematic_untrimmed", 1.0), ("schematic_calibrated", 1.0)]
+    assert len(displayed) == 4
+    for offset, (identifier, deadline) in enumerate(calls):
+        _, retained = waveform_lab.inspect_sample(namespace["lab"], identifier, deadline)
+        assert displayed[2 * offset + 1].to_dict("records") == [{
+            "outcome": retained["outcome"],
+            "deadline_ns": 1.0,
+            "Q+_at_deadline_V": retained["qp_at_deadline_v"],
+            "Q-_at_deadline_V": retained["qn_at_deadline_v"],
+            "sampled_decision_time_ns": retained["decision_time_ns"],
+            "full_cycle_core_energy_fJ": retained["core_energy_fj"],
+        }]
+    assert [displayed[index].iloc[0]["outcome"] for index in (1, 3)] == ["wrong", "correct"]
+
+
+def test_saved_waveform_outputs_are_readable_without_widget_javascript():
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    from presentation import waveform_lab
+
+    root = Path(__file__).resolve().parents[1]
+    notebook = json.loads((root / NOTEBOOK).read_bytes())
+    outputs = notebook["cells"][14]["outputs"]
+    data = waveform_lab.load_lab()
+    assert len(outputs) >= 7
+    for index, identifier in enumerate(("schematic_untrimmed", "schematic_calibrated")):
+        image = outputs[2 * index]["data"]["image/png"]
+        encoded = "".join("".join(image).split())
+        assert base64.b64decode(encoded, validate=True).startswith(b"\x89PNG\r\n\x1a\n")
+        figure, reading = waveform_lab.figure(data, identifier, 1.0)
+        plt.close(figure)
+        columns = (
+            "outcome", "deadline_ns", "Q+_at_deadline_V", "Q-_at_deadline_V",
+            "sampled_decision_time_ns", "full_cycle_core_energy_fJ",
+        )
+        expected = pd.DataFrame([{key: reading[key] for key in columns}])
+        table = outputs[2 * index + 1]["data"]
+        assert "".join(table["text/html"]) == expected._repr_html_()
+        assert reading["outcome"] in "".join(table["text/plain"])
+    assert any(
+        "application/vnd.jupyter.widget-view+json" in output.get("data", {})
+        for output in outputs[4:]
+    )
 
 
 def test_completed_colab_checkout_is_reused_after_kernel_restart(tmp_path, monkeypatch):
