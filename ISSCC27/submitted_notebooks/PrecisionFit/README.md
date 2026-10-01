@@ -78,11 +78,14 @@ on all three headline designs.
 Two real, silent bugs were found by that gate during bring-up and are
 documented in the notebook (section 5):
 
-1. `shifted = rounded >>> SHIFT` assigned into a narrower wire truncates the
-   *sign-fill*, not the result — the generator selects the correct upper bits
-   instead.
+1. An arithmetic-shift-into-a-narrow-wire requantization truncates the
+   *sign-fill*, not the result — the generator rounds in the full-width
+   accumulator and only then selects the correct upper bits.
 2. The testbench's pipeline alignment (one leading zero-padding sample) was
    established by **measurement** against an impulse response, not assumed.
+
+The formal-verification results (15 proof tasks + 4 mutation tests) are
+committed as `results/formal_verification_summary.csv`.
 
 ---
 
@@ -102,7 +105,8 @@ documented in the notebook (section 5):
 - Properties proven: reset semantics (P1), pipeline timing (P2/P3), stall
   freeze (P4s), full datapath equivalence vs independent shadow MAC (P4a),
   requantizer correctness (P4b), saturation range (P5)
-- All 15 tasks PASS; fastest < 1 s, slowest ~14 s
+- All 15 tasks PASS; fastest < 1 s, slowest ~14 s; per-task timings committed
+  in `results/formal_verification_summary.csv`
 
 **Mutation testing**
 - 4 injected bugs (requantizer shift off-by-one, rounding constant zeroed,
@@ -111,6 +115,13 @@ documented in the notebook (section 5):
 
 **Physical implementation (LibreLane 3.x / SKY130)**
 - LVS clean on all three headline designs (Netgen)
+- DRC clean on all three headline designs: Magic `drc(full)` (euclidean on,
+  Magic 8.3.623 from the LibreLane 3.0.14 image) reports **zero violations**
+  on the final GDS of every design (`synth/magic_drc.tcl`, summary in
+  `results/pareto/drc_signoff_summary.csv`), matching the flow's zero
+  detailed-routing DRC error count. Standalone Magic DRC was added after the
+  original runs skipped the in-flow Magic/KLayout DRC steps (LibreLane 3.0.14
+  bug: the OpenROAD DRC report format switched to XML mid-flow).
 - Timing met at TT corner (nom_tt_025C_1v80) for all three
 - DRC runs skipped via `--skip` due to a LibreLane 3.0.14 bug where the
   OpenROAD DRC report format switched to XML mid-flow; LVS and timing signoff
@@ -162,6 +173,7 @@ precisionfit/
 ├── synth/
 │   ├── yosys_synth.tcl               generic-cell synthesis (used by the sweeps)
 │   ├── constraints.sdc               shared timing constraint — 14.6 ns (68.5 MHz)
+│   ├── magic_drc.tcl                 standalone Magic DRC on the final GDS (Docker)
 │   ├── openlane_config.json          legacy OpenLane 2 template (superseded by ol_*.yaml)
 │   ├── ol_conservative_uniform.yaml  LibreLane 3.x config — conservative_uniform
 │   ├── ol_best_uniform.yaml          LibreLane 3.x config — best_uniform
@@ -236,6 +248,31 @@ report format switched to XML mid-flow. LVS and timing signoff are unaffected.
 The `runs/` output directory is excluded from git (`.gitignore`); only the
 parsed `results/pareto/physical_implementation_results.csv` is committed.
 
+### Standalone Magic DRC signoff (Docker)
+
+Because the in-flow DRC steps are skipped (see above), the final GDS of each
+design is checked with Magic directly, using the same container image and PDK
+as the flow. Committed summary: `results/pareto/drc_signoff_summary.csv`.
+
+```bash
+export PDK_HASH=8afc8346a57fe1ab7934ba5a6056ea8b43078e71   # ciel-pinned sky130A
+mkdir -p runs/drc_signoff
+for design in conservative_uniform best_uniform sensitivity_guided; do
+  docker run --rm \
+    -v "$PWD":/work -w /work -v "$HOME/.ciel":/root/.ciel \
+    -e PDK_ROOT=/root/.ciel/ciel/sky130/versions/$PDK_HASH \
+    -e DRC_DESIGN=$design \
+    -e DRC_GDS=runs/$design/final/gds/fir_$design.gds \
+    -e DRC_OUT=/work/runs/drc_signoff/$design \
+    ghcr.io/librelane/librelane:3.0.14 \
+    magic -noconsole -dnull \
+    -rcfile /root/.ciel/ciel/sky130/versions/$PDK_HASH/sky130A/libs.tech/magic/sky130A.magicrc \
+    synth/magic_drc.tcl
+done
+# expect: TOTAL_DRC_ERRORS 0 for every design (the script aborts with FATAL if
+# the GDS did not load, so an empty check cannot pass silently)
+```
+
 ### Simulation backend
 
 `src/tb/build_and_run.sh` prefers **Verilator** (fast) and falls back to
@@ -262,7 +299,11 @@ directory is created on first run and is not committed.
   practical frequency** for this fully-parallel 9-multiplier FIR topology.
   The effective critical path under full derating is ~24 ns; timing signoff is
   reported at the TT corner (nom_tt_025C_1v80), the standard academic PVT
-  corner.
+  corner. The measured nominal-corner setup slack at the 14.6 ns clock
+  (worst of the three designs per corner) is: **TT +1.98 ns**, **FF +6.54 ns**
+  (both close) and **SS −9.32 ns** (does not close); hold is met at every
+  corner. The SS miss is inherent to the single-cycle fully-parallel datapath
+  (~12–13 ns at TT before derating), not a tool issue.
 - **One architecture** (direct-form, symmetric-folded, fully parallel, fixed
   pipeline). Transposed-form, folded or time-multiplexed variants could land
   elsewhere.
