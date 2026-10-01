@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Three-corner STA of the routed full HSKEM core (OpenSTA with the extracted SPEF).
+# Three-corner STA of the routed full HSKEM core (OpenROAD's STA on the routed database with the
+# extracted SPEF; flow/sta_corner.tcl explains why the database rather than 6_final.v is read).
 # The layout database is not published (see README), so this script needs the private
 # run directory; only the summary it writes, results/fullchip/sta_corners.json, is published.
 # The OpenRAM macros are characterized at the typical corner only, so their TT views are
 # used at every corner; the standard cells use their ss / tt / ff libraries.
-# usage: FULLCHIP_DIR=<ORFS results dir with 6_final.{v,sdc,spef}> MACRO_LIB_DIR=<dir of the
+# usage: FULLCHIP_DIR=<ORFS results dir with 6_final.{odb,sdc,spef}> MACRO_LIB_DIR=<dir of the
 #        eight *.physical.lib views> scripts/sta_corners_fullchip.sh
 # SPDX-License-Identifier: Apache-2.0
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ORFS="${ORFS_ROOT:-/opt/eda/orfs-6101364b}"; STA="$ORFS/tools/install/OpenROAD/bin/sta"
+ORFS="${ORFS_ROOT:-/opt/eda/orfs-6101364b}"; OPENROAD="$ORFS/tools/install/OpenROAD/bin/openroad"
 PDK="${SKY130_LIBS:-$(ls -d /opt/eda/pdks-openram/ciel/sky130/versions/*/sky130A/libs.ref/sky130_fd_sc_hd/lib | head -1)}"
 B="${FULLCHIP_DIR:?FULLCHIP_DIR}"; M="${MACRO_LIB_DIR:?MACRO_LIB_DIR}"
 LOGS="${FULLCHIP_STA_LOGS:-$HOME/fullchip_sta}"; mkdir -p "$LOGS"     # detailed logs stay private
@@ -17,8 +18,8 @@ MACROS=$(ls "$M"/*.physical.lib | tr '\n' ' ')
 [ "$(echo $MACROS | wc -w)" -eq 8 ] || { echo "expected eight macro views in $M"; exit 1; }
 CLK_NS=$(grep -m1 -oE "create_clock.*-period [0-9.]+" "$B/6_final.sdc" | grep -oE "[0-9.]+$")
 for corner in ss_100C_1v60 tt_025C_1v80 ff_n40C_1v95; do
-  LIB="$PDK/sky130_fd_sc_hd__$corner.lib" EXTRA_LIBS="$MACROS" NETLIST="$B/6_final.v" SDC="$B/6_final.sdc" \
-  SPEF="$B/6_final.spef" TOP=trustedge_asic_core "$STA" -no_splash -exit "$ROOT/flow/sta_corner.tcl" \
+  LIB="$PDK/sky130_fd_sc_hd__$corner.lib" EXTRA_LIBS="$MACROS" ODB="$B/6_final.odb" SDC="$B/6_final.sdc" \
+  SPEF="$B/6_final.spef" "$OPENROAD" -no_splash -exit "$ROOT/flow/sta_corner.tcl" \
     > "$LOGS/fullchip_$corner.log" 2>&1
   echo "$corner $(grep RESULT "$LOGS/fullchip_$corner.log" | tr '\n' ' ')"
 done

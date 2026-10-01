@@ -60,12 +60,15 @@ endif
 ifneq ($(filter ntt_macro ntt_opt_pipe_macro,$(CAC_VARIANT)),)
   export ADDITIONAL_LEFS = $(CAC_ROOT)/flow/macros/sky130_sram_1rw_16x256_wpr8.lef
   export ADDITIONAL_LIBS = $(CAC_ROOT)/flow/macros/sky130_sram_1rw_16x256_wpr8_TT_1p8V_25C.lib
-  CAC_SRAM_GDS ?= /opt/eda/openram-smoke/sky130_sram_1rw_16x256_wpr8_vdd_via_column_mux_candidate/sky130_sram_1rw_16x256_wpr8.gds
+  # OpenRAM layout with its sub-rule implant gaps closed (scripts/implant_fix.py; FEOL check in Appendix C)
+  CAC_SRAM_GDS ?= /opt/eda/openram-smoke/sky130_sram_1rw_16x256_wpr8_vdd_via_column_mux_candidate/sky130_sram_1rw_16x256_wpr8_implantfix.gds
   export ADDITIONAL_GDS = $(CAC_SRAM_GDS)
   export PRE_PDN_TCL = $(CAC_ROOT)/flow/pre_pdn_sram.tcl
   # the 473 um wide macro plus the default 40 um halo would not fit the 45 %-utilization core
   export MACRO_PLACE_HALO ?= 10 10
-  # upsize the minimum-size wire buffers that the post-route repair puts on the macro's address pins
+  # fixed macro position with room for drivers at both address-pin rows
+  export MACRO_PLACEMENT_TCL = $(CAC_ROOT)/flow/macro_place_ntt.tcl
+  # strong address-pin drivers placed at the macro halo, so the pins meet the macro's 0.04 ns slew limit
   export POST_GLOBAL_ROUTE_TCL = $(CAC_ROOT)/flow/post_grt_macro_pins.tcl
 endif
 

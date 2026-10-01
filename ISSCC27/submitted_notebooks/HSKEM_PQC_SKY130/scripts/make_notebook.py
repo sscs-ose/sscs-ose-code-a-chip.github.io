@@ -768,9 +768,9 @@ With the macro, the standard-cell area shrinks to less than a fifth, and even wi
 full the block needs about a third less area than its flip-flop counterpart; its register count matches
 the NTT engine on the chip within a flip-flop or two, which ties the block-level experiment to the
 integrated design. The clock rate barely changes, because the critical path is still the
-subtract–multiply–reduce stage. The macro's address pins keep marginal transition violations, 0.05 to
-0.07 ns against the 0.04 ns end of the macro's characterization table, after a post-route step that
-removed far larger ones (Appendix B.4). Together with the single-port constraint of Section 3, this is
+subtract–multiply–reduce stage. A fixed macro position and a post-route step that places strong drivers
+next to the macro's address pins bring their transitions to the 0.04 ns end of the macro's timing table;
+two of the eight pins remain above it by less than half a picosecond (Appendix B.4). Together with the single-port constraint of Section 3, this is
 the trade-off behind the chip's choice: a markedly smaller store in exchange for two extra cycles per
 butterfly.
 """)
@@ -998,19 +998,19 @@ print(f"pipelined iteration vs original, both with the macro at 20 ns: fmax {a0.
 assert (om.drc_errors == 0).all() and (om.antenna_violating_nets == 0).all()
 assert 1.6 < a1.fmax_mhz / a0.fmax_mhz < 1.8 and 0.8 < a1.cell_area_um2 / a0.cell_area_um2 < 0.9
 assert a1.latency_us_at_fmax < 0.75 * a0.latency_us_at_fmax and a2.fmax_mhz > 1e3 / 12
-sl = {r: slew_violations(r) for r in ("ntt_opt_pipe_macro_20ns", "ntt_opt_pipe_macro_12ns")}
-rpt = next((ROOT/"results/asic/ntt_opt_pipe_macro_20ns/reports").rglob("6_finish.rpt")).read_text()
-pin = [float(x) for x in re.findall(r"u_macro/addr0\[\d\]\s+0\.04\s+([0-9.]+)\s", rpt)]
-assert max(pin) <= 0.07 and re.search(r"\s1\.50\s+1\.52\s+-0\.02 \(VIOLATED\)", rpt)
+ps_ = json.loads((ROOT/"results/asic/macro_pin_slew.json").read_text())["runs"]
+assert ps_["ntt_opt_pipe_macro_20ns"]["pins_over_limit"] == 0 and slew_violations("ntt_opt_pipe_macro_20ns") == 0
+assert ps_["ntt_opt_pipe_macro_12ns"]["pins_over_limit"] == 2 and ps_["ntt_opt_pipe_macro_12ns"]["max_ns"] <= 0.045
+assert 86.5 < a2.fmax_mhz < 88
 """)
 
 md(r"""
 With the macro store the pipelined iteration behaves as it does with flip-flops: it clocks about
 seven tenths faster than the original engine with the same macro, finishes a forward transform in about
 two thirds of the time and needs about a sixth less standard-cell area, and at a 12 ns target it closes
-timing near 89 MHz. Both layouts are free of DRC and antenna violations. Their macro address pins show
-the same marginal transitions of at most 0.07 ns as the original macro point, and in the 20 ns layout
-one internal net exceeds the standard cells' 1.5 ns transition limit by 0.02 ns.
+timing near 87 MHz. Both layouts are free of DRC and antenna violations. In the 20 ns layout every
+macro address pin meets the macro's 0.04 ns transition limit and no other net violates a transition
+limit; at 12 ns two address pins exceed it by up to 4 ps.
 """)
 
 # --------------------------------------------- 8. full chip and system
@@ -1025,11 +1025,15 @@ macros drawn from eight distinct masters. This ASIC build uses the **row-seriali
 The layout was verified hierarchically. Each SRAM master has its own transistor-level LVS in Netgen, and
 the top level is compared with those masters abstracted to their pin frames. A repeat run and a negative
 control, in which one deliberately altered endpoint must be detected, guard the comparison flow itself.
-Appendix C adds a three-corner timing analysis of the whole chip and its rendered layout.
+The design-rule check covers the back-end, off-grid and front-end rules of the standard SKY130 deck; the
+front-end check and the one correction it called for, inside the OpenRAM macros, are described in
+Appendix C.3. Appendix C also adds a three-corner timing analysis of the whole chip and its rendered
+layout.
 """)
 
 code(r"""
 fc = json.loads((ROOT/"results/fullchip/summary.json").read_text())
+feol = json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())
 m, s = fc["orfs_metrics"], fc["signoff"]
 display(pd.Series({
     "die area [mm²]": m["finish__design__die__area"]/1e6,
@@ -1043,7 +1047,8 @@ display(pd.Series({
     "post-route fmax [MHz]": m["finish__timing__fmax"]/1e6,
     "LVS (primary / repeat)": f'{s["primary_compare"]} / {s["repeat_compare"]}',
     "LVS negative control detected": s["negative_control_detected"],
-    "DRC markers (BEOL+offgrid deck)": s["drc_markers"],
+    "DRC markers, BEOL + off-grid rules": s["drc_markers"],
+    "DRC markers, FEOL rules (Appendix C.3)": feol["after_implant_fix"]["markers_total"],
 }, name="HSKEM core"))
 print("claim boundary:", s["claim_boundary"])
 print("power:", fc["power"])
@@ -1527,16 +1532,16 @@ md(r"""
 * **Pre-silicon and uncertified.** Nothing has been fabricated. The golden model passes every official
   NIST ACVP vector for ML-KEM-512 and the complete RTL reproduces all 25 key-generation vectors, but the
   design holds no CAVP or CMVP certificate, which only an accredited laboratory can issue.
-* **Physical verification.** The full-chip DRC ran the BEOL and off-grid rules of the standard deck with
-  FEOL checks disabled, and the top-level LVS abstracts the SRAMs, which are verified separately at
-  transistor level. Every block-level layout, including all clock-sweep points, is free of DRC and
-  antenna violations; the two macro-store layouts keep marginal transition violations at the macro's
-  address pins (Appendix B.4).
+* **Physical verification.** The full-chip layout passes the complete standard DRC deck only after a
+  mask-preparation step that closes sub-rule implant gaps inside the OpenRAM macros (Appendix C.3); the
+  macros themselves are OpenRAM output, used as generated otherwise. The top-level LVS abstracts the
+  SRAMs, which are verified separately at transistor level. Two of the three macro-store layouts exceed
+  the macro's 0.04 ns address-pin transition limit on two pins, by at most 4 ps (Appendix B.4).
 * **Timing.** Closure was performed at the typical corner, and the slow corner roughly halves every
   block's frequency. A hold margin removes the small fast-corner hold violations of the NTT layouts at
-  negligible cost (Appendix B.5). At chip level the SRAM macros have typical-corner views only, so only
-  the flip-flop paths are checked at every corner, and a handful of paths miss hold by at most 40 ps
-  (Appendix C.1).
+  negligible cost (Appendix B.5). The SRAM macros' timing views come from OpenRAM's analytical delay
+  model at the typical corner only, so at chip level only the flip-flop paths are checked at every
+  corner; one of them misses hold at the fast corner by 1 ps (Appendix C.1).
 * **Power.** Full-chip power is omitted because the SRAM power model produced non-physical values;
   block-level energy comes from gate-level switching activity at the typical corner, and five random
   inputs per block agree to within half a percent.
@@ -1733,25 +1738,41 @@ ceiling that the pipelined design of Section 7 removes.
 md(r"""
 ### B.4 The macro's address pins
 
-After global routing, the flow's repair step splits the long wires to the macro's address pins with
-minimum-size buffers. In a run without further measures their output transitions reached 0.26 to
-0.35 ns on five pins, far beyond the 0.04 ns limit of the macro's Liberty view, and excluding that buffer
-from the library did not change the choice in this OpenROAD build. A small engineering-change step, run
-by the flow as a hook after global routing (`flow/post_grt_macro_pins.tcl`), therefore upsizes exactly
-those buffers and re-routes the affected nets, as the flow itself does after its own repairs. The
-remaining transitions of 0.05 to 0.07 ns lie just beyond the 0.04 ns end of the macro's characterization
-table, a limit that the 8- and 12-times buffers now driving the pins do not meet; the flip-flop layouts
-have no such constraint. The same step serves the macro-store redesign of Section 7, whose 20 ns layout
-additionally has one internal net that exceeds the standard cells' 1.5 ns transition limit by 0.02 ns.
+The macro's Liberty view limits the transition at its address pins to 0.04 ns. After global routing,
+the flow's repair step splits the long wires to these pins with minimum-size buffers, whose transitions
+reached 0.26 to 0.35 ns; excluding that buffer from the library did not change the choice in this
+OpenROAD build. Upsizing the buffers alone left 0.05 to 0.07 ns, for a geometric reason: the automatic
+placer put the macro against the bottom of the die, while six of its address pins sit on its bottom
+edge, so their drivers ended up 25 to 70 µm away. Two hooks of the flow remove the cause.
+`flow/macro_place_ntt.tcl` fixes the macro about 30 µm higher, in the same orientation, which leaves
+room on both pin rows. `flow/post_grt_macro_pins.tcl`, run after global routing, turns every
+address-pin driver into a 12-times buffer at the edge of the macro's placement halo, gives the cell
+that feeds it drive strength 4 or 8, and re-routes the affected nets incrementally, as the flow itself
+does after its own repairs. A 16-times buffer did worse, because its input loads the preceding stage too
+much. The table below gives the resulting transition at each pin.
+
+The limit itself deserves a remark. OpenRAM wrote these timing views with its analytical delay model,
+not from transistor-level simulation, and 0.04 ns is simply the last entry of the slew table it
+generated. The remaining excesses, below half a picosecond at 20 ns and up to 4 ps at 12 ns, are
+therefore an extrapolation of that table by a few percent rather than a measured failure; a SPICE
+characterization of the macro would settle the question.
 """)
 
 code(r"""
-# the transitions quoted in Section 6 and above: eight address pins just beyond the 0.04 ns limit
-rpt = next((ROOT/"results/asic/ntt_macro_20ns/reports").rglob("6_finish.rpt")).read_text()
-sl = sorted(float(x) for x in re.findall(r"u_macro/addr0\[\d\]\s+0\.04\s+([0-9.]+)\s+-[0-9.]+ \(VIOLATED\)", rpt))
-assert len(sl) == 8 and all(0.05 <= x <= 0.07 for x in sl), sl
-assert "CAC_MACRO_PIN_ECO: upsized 5" in next((ROOT/"results/asic/ntt_macro_20ns/logs").rglob("5_1_grt.log")).read_text()
-print("address-pin transitions after the post-route step [ns]:", sl)
+ps_ = json.loads((ROOT/"results/asic/macro_pin_slew.json").read_text())
+pin_t = pd.DataFrame({r: v["address_pin_transition_ns"] for r, v in ps_["runs"].items()})
+pin_t.columns = [{"ntt_macro_20ns": "original engine, 20 ns", "ntt_opt_pipe_macro_20ns": "redesign, 20 ns",
+                  "ntt_opt_pipe_macro_12ns": "redesign, 12 ns"}[c] for c in pin_t.columns]
+display(pin_t.rename_axis("address-pin transition [ns]"))
+# the statements made in Sections 6 and 7 and above
+over = {r: v["pins_over_limit"] for r, v in ps_["runs"].items()}
+assert over == {"ntt_macro_20ns": 2, "ntt_opt_pipe_macro_20ns": 0, "ntt_opt_pipe_macro_12ns": 2}, over
+assert ps_["runs"]["ntt_macro_20ns"]["max_ns"] - 0.04 < 0.0005
+assert ps_["runs"]["ntt_opt_pipe_macro_12ns"]["max_ns"] - 0.04 <= 0.0045
+for r in ps_["runs"]:
+    log = next((ROOT/"results/asic"/r/"logs").rglob("5_1_grt.log")).read_text()
+    assert "CAC_MACRO_PIN_ECO: placed 8 address-pin drivers (sky130_fd_sc_hd__buf_12)" in log, r
+    assert "macro_place_ntt.tcl" in next((ROOT/"results/asic"/r/"logs").rglob("2_2_floorplan_macro.log")).read_text()
 """)
 
 md(r"""
@@ -1850,11 +1871,11 @@ md(r"""
 
 ### C.1 The whole chip at three corners
 
-`scripts/sta_corners_fullchip.sh` repeats the corner analysis of Appendix B.5 for the routed chip, with
-its extracted parasitics. One restriction applies: OpenRAM characterizes the SRAM macros at the typical
-corner only, so their typical views are used at every corner, and only the flip-flop-to-flip-flop paths
-can be judged at the slow and fast corners. Only the summary of this analysis is published, since the
-layout database is not.
+`scripts/sta_corners_fullchip.sh` repeats the corner analysis of Appendix B.5 for the routed chip, on
+the routed database with its extracted parasitics. One restriction applies: OpenRAM provides timing
+views of the SRAM macros at the typical corner only, so these views are used at every corner, and only
+the flip-flop-to-flip-flop paths can be judged at the slow and fast corners. Only the summary of this
+analysis is published, since the layout database is not.
 """)
 
 code(r"""
@@ -1878,21 +1899,22 @@ clk = fs["clock_period_ns"]
 assert all(fs["corners"][c]["reg2reg_fmax_mhz"] > 1e3 / clk and fs["corners"][c]["reg2reg_hold_slack_ns"] > 0 for c in CN)
 assert fs["corners"]["ss_100C_1v60"]["reg2reg_fmax_mhz"] > 2e3 / clk
 tt_, ff_ = fs["corners"]["tt_025C_1v80"], fs["corners"]["ff_n40C_1v95"]
-assert tt_["setup_wns"] > 4.5 and tt_["hold_violating_endpoints"] == 2 and tt_["hold_wns"] >= -0.05
+assert tt_["setup_wns"] > 4.5 and tt_["hold_violating_endpoints"] == 0
+assert abs(tt_["hold_wns"] - m["finish__timing__hold__ws"]) < 0.001        # reproduces ORFS's own report
+assert abs(tt_["setup_wns"] - m["finish__timing__setup__ws"]) < 0.001
 assert ff_["setup_wns"] > 0 and ff_["hold_violating_endpoints"] == 1 and ff_["hold_wns"] >= -0.005
-assert abs(m["finish__timing__hold__ws"] - 0.119) < 0.001
 """)
 
 md(r"""
 Every flip-flop-to-flip-flop path of the chip meets the 40 ns clock at all three corners, with
 positive hold slack; even at the slow corner these paths would support more than twice the 25 MHz
-clock. At the typical corner the whole design meets setup with about 5 ns to spare, and two endpoints
-miss hold by at most 40 ps: one path starts at an input port, so its slack depends on the external delay
-assumed in the constraints, and the other ends at a PUF capture register. ORFS's own final report of the
-same layout gives a worst hold slack of +0.119 ns at the typical corner; the difference between the two
-analyses was not traced. At the fast corner a single register-to-register path misses hold by 1 ps. The
-hold margin that cleaned the NTT layouts (Appendix B.5) is the natural remedy for these few paths,
-applied in a new run of the chip.
+clock. At the typical corner the whole design meets setup with about 5 ns to spare and meets hold
+everywhere, and the analysis reproduces ORFS's own final report to the picosecond. That agreement needs
+the routed database: ORFS leaves the antenna diodes out of the exported netlist while the parasitics file
+still refers to them, so an analysis of the netlist alone loses the wiring of some 4,300 nets and, in an
+earlier draft of this notebook, reported two hold violations that do not exist. At the fast corner a
+single register-to-register path in the SPI frame buffer misses hold by 1 ps; the hold margin that
+cleaned the NTT layouts (Appendix B.5) is the natural remedy, applied in a new run of the chip.
 """)
 
 md(r"""
@@ -1906,6 +1928,43 @@ demonstration board's provisioning test credential; its SHA-256 is recorded in `
 
 code(r"""
 display(Image(str(ROOT/"figures/fullchip_layout.jpg"), width=640))
+""")
+
+md(r"""
+### C.3 Front-end design rules
+
+ORFS runs the SKY130 KLayout deck with its front-end (FEOL) section disabled, so the flow's own check
+covers the back-end and off-grid rules only. `scripts/feol_drc.sh` runs the FEOL section on its own. It
+leaves out a single rule, `vpp.5`, which first merges poly, local interconnect and the two lowest metals
+of the whole layout and did not finish within hours even on a small block; the rule can only fire on the
+vpp capacitor layer, and the script confirms that this layer is empty before it starts.
+
+On the chip, two rules fired, both on gaps between implant shapes narrower than the minimum spacing:
+n/psdm.1 (0.38 µm) and npc.2 (0.27 µm). The deck itself notes that such gaps "should be manually
+merged". Every marker lies inside the OpenRAM macros, where abutted bitcells and periphery cells leave
+these slivers; the standard-cell logic has none. `scripts/implant_fix.py` closes the gaps inside the
+macros, as mask preparation would, and refuses to write a result unless the implant on every diffusion
+and tap region is unchanged (so no transistor changes type), no implant leaves any poly, no poly resistor
+is touched, and no width or spacing violation remains on the three layers. Field poly between the
+bitcells that lies in a closed gap receives the implant of its neighbours. `scripts/verify_untouched.py`
+then confirms that every other layer and every cell outside the macros is identical, shape for shape.
+The corrected chip passes all FEOL rules, and so do all 25 block-level layouts, including the three
+macro-store points, whose flow now uses the corrected macro.
+""")
+
+code(r"""
+fd = json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())
+fb = json.loads((ROOT/"results/asic/feol_blocks.json").read_text())["layouts"]
+display(pd.DataFrame({"signed-off layout": fd["signed_off_gds"]["markers_by_rule"],
+                      "after the implant fix": fd["after_implant_fix"]["markers_by_rule"]}).fillna(0).astype(int)
+        .rename_axis("FEOL markers by rule"))
+print(f"block-level layouts checked: {len(fb)}, FEOL markers in total: {sum(v['feol_markers'] for v in fb.values())}")
+# guards for the statements made in the text above
+assert set(fd["signed_off_gds"]["markers_by_rule"]) == {"n/psdm.1", "npc.2"}
+assert fd["signed_off_gds"]["markers_by_location"] == {"OpenRAM macro": fd["signed_off_gds"]["markers_total"]}
+assert fd["after_implant_fix"]["markers_total"] == 0
+assert len(fb) == 25 and all(v["feol_markers"] == 0 and v["vpp_shapes"] == 0 for v in fb.values())
+assert {"ntt_macro_20ns", "ntt_opt_pipe_macro_20ns", "ntt_opt_pipe_macro_12ns"} <= set(fb)
 """)
 
 md(r"""
@@ -1970,8 +2029,10 @@ Linux machine with ORFS at commit `6101364b` regenerates them. The corner analys
 `scripts/run_gls_power.sh` and `scripts/run_gls_power_keccak.sh`, both of which read the parasitics of a
 local ORFS run. The system-level simulation of Section 8 runs from the published RTL with
 `scripts/run_system_sim.sh` (about six minutes per configuration; `CAC_PROFILE=1` adds the cycle
-profiler), and `RUN_SYSTEM_SIM = True` repeats it inside the notebook, also in Colab. Section 9 reports
-hardware measurements whose raw logs and hashes are in `results/fpga/`.
+profiler), and `RUN_SYSTEM_SIM = True` repeats it inside the notebook, also in Colab. The front-end
+design-rule check of Appendix C.3 runs with `scripts/feol_drc.sh` on any layout; `scripts/implant_fix.py`,
+`scripts/verify_untouched.py` and `scripts/feol_summary.py` reproduce the correction of the macros and
+its summary. Section 9 reports hardware measurements whose raw logs and hashes are in `results/fpga/`.
 
 Without any installation, `scripts/make_orfs_bundle.sh` packages the very ORFS build that produced these
 results — the same binaries, not a rebuild — together with the libraries it needs into a single archive

@@ -3,40 +3,31 @@
   "macro_views": "OpenRAM TT_1p8V_25C at every corner (no other corner characterized)",
   "corners": {
     "ss_100C_1v60": {
-      "setup_wns": -10.912,
-      "hold_wns": -1.048,
-      "setup_violating_endpoints": 571.0,
-      "hold_violating_endpoints": 450.0,
-      "reg2reg_setup_slack_ns": 21.71,
-      "reg2reg_fmax_mhz": 54.67,
-      "reg2reg_hold_slack_ns": 1.04
+      "setup_wns": -10.924,
+      "hold_wns": -0.984,
+      "setup_violating_endpoints": 570.0,
+      "hold_violating_endpoints": 417.0,
+      "reg2reg_setup_slack_ns": 21.4,
+      "reg2reg_fmax_mhz": 53.76,
+      "reg2reg_hold_slack_ns": 1.03
     },
     "tt_025C_1v80": {
-      "setup_wns": 4.994,
-      "hold_wns": -0.042,
+      "setup_wns": 4.893,
+      "hold_wns": 0.119,
       "setup_violating_endpoints": 0.0,
-      "hold_violating_endpoints": 2.0,
-      "reg2reg_setup_slack_ns": 29.58,
-      "reg2reg_fmax_mhz": 95.97,
+      "hold_violating_endpoints": 0.0,
+      "reg2reg_setup_slack_ns": 29.32,
+      "reg2reg_fmax_mhz": 93.63,
       "reg2reg_hold_slack_ns": 0.51,
-      "hold_violators": [
-        {
-          "path": "input port (external delay assumed by the SDC) to an HSM response register",
-          "slack_ns": -0.04
-        },
-        {
-          "path": "register to a PUF raw-capture register",
-          "slack_ns": -0.02
-        }
-      ]
+      "hold_violators": []
     },
     "ff_n40C_1v95": {
-      "setup_wns": 10.576,
+      "setup_wns": 10.495,
       "hold_wns": -0.001,
       "setup_violating_endpoints": 0.0,
       "hold_violating_endpoints": 1.0,
-      "reg2reg_setup_slack_ns": 33.13,
-      "reg2reg_fmax_mhz": 145.56,
+      "reg2reg_setup_slack_ns": 32.89,
+      "reg2reg_fmax_mhz": 140.65,
       "reg2reg_hold_slack_ns": 0.29,
       "hold_violators": [
         {
@@ -46,5 +37,6 @@
       ]
     }
   },
-  "note": "Flip-flop-to-flip-flop paths are analysed at all three corners; paths through the SRAM macros use their typical-corner views everywhere, so the slow- and fast-corner results for those paths are not meaningful. ORFS's own final report of the same layout gives a worst hold slack of +0.119 ns at the typical corner; the difference to this OpenSTA run was not traced."
+  "analysis": "OpenROAD's STA on the routed database with the extracted SPEF. The typical corner reproduces ORFS's own final report (setup WNS +4.893 ns, hold WNS +0.119 ns). An earlier analysis that read 6_final.v instead left about 4,300 nets without parasitics, because ORFS omits the antenna diodes from that netlist while the SPEF refers to them.",
+  "note": "Flip-flop-to-flip-flop paths are analysed at all three corners; paths through the SRAM macros use their typical-corner views everywhere, so the slow- and fast-corner results for those paths are not meaningful."
 }

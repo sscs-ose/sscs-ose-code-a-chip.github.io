@@ -65,7 +65,11 @@ module tb_ntt;
             for (i = 0; i < 256; i = i + 1) begin
                 @(negedge clk);
                 raddr = i + 1;
-                if (rdata !== (inv ? vinv[base + i] : vfwd[base + i])) begin
+`ifdef RD_SAMPLE_DELAY
+                // the OpenRAM model drives dout0 only DELAY after the falling edge
+                #(`RD_SAMPLE_DELAY);
+`endif
+                if (rdata !==(inv ? vinv[base + i] : vfwd[base + i])) begin
                     if (errors < 10)
                         $display("MISMATCH vec=%0d inv=%0d idx=%0d got=%0d exp=%0d",
                                  base / 256, inv, i, rdata,
