@@ -66,6 +66,21 @@ worst-cycle/system energy budget. In the Notebook, the Waveform lab saves
 the untrimmed and calibrated 1 ns figures and reading tables before the
 interactive controls, so static readers can see the same lesson.
 
+Immediately before the schematic widgets, inspect the
+[1 ns to 2 ns transition matrices](results/study/specification_map/failure_transitions.png)
+and the 20 selected-design wrong-sample locations/codes. These are the same
+20 keyed samples at both deadlines, not merely equal totals. Baseline and
+control gain wrong decisions as some unresolved samples settle; longer
+deadlines do not guarantee monotonic outcome classes. Grouped counts and
+all 1,176 matched pairs are in the specification JSON.
+
+The adjacent specification table adds minimum observed decision margin and
+maximum sampled core energy for qualified winners; NONE stays null.
+The JSON retains every qualified design and all exact limiting ties.
+These finite samples do not establish failure causes, noise/jitter/PVT bounds,
+timing signoff or a worst-cycle/system energy guarantee. Mean energy still
+determines the winner.
+
 Run all notebook cells to regenerate the analysis from the included data.
 Fresh simulations are optional, separate modes; see
 [Reproducibility](REPRODUCIBILITY.md) for commands and versions.

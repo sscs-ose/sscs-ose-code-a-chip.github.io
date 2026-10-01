@@ -263,7 +263,7 @@ def paired_energy(frame: pd.DataFrame, selected_name: str) -> dict:
 
 def render_study(*, refresh_figures: set[str] | None = None) -> Path:
     import layout_evidence as physical
-    from presentation import pvt45_results, waveform_lab
+    from presentation import pvt45_results, specification_map, waveform_lab
 
     frame, reports, manifest = load_validation()
     layout = physical.load_layout()
@@ -340,7 +340,13 @@ def render_study(*, refresh_figures: set[str] | None = None) -> Path:
     waveform_javascript = waveform_javascript_path.read_text(encoding="utf-8")
     waveform_payload = json.dumps(waveform_data, separators=(",", ":"), allow_nan=False).replace("<", "\\u003c")
     professional_section = ""
+    sampled_analysis = None
     if professional is not None:
+        sampled = specification_map.load_checked(professional)
+        sampled_analysis = {
+            "source_sha256": sha256(Path(specification_map.__file__)),
+            "summary_sha256": sha256(specification_map.FOLDER / "summary.json"),
+        }
         target_band = entry_tools.summary(professional, minimum_mv=1)
         wide_band = entry_tools.summary(professional, minimum_mv=3)
         professional_section = f"""
@@ -361,6 +367,26 @@ the mean. Neither circuit is asserted best for every energy, input-resolution or
 <p class="muted">A distinct probe represents an offline three-cycle simulation.
 Reference/input generation, drivers, control logic and storage are not included in core energy.
 The additional control has not inherited the original/selected circuits' input-interface stress results.</p>
+<h3>Matched failures and sampled specification limits</h3>
+<p>The following static tables use only the calibrated schematic 49-condition
+controlled-width-stress domain, not the nominal RC grid. Every included signed
+sample must be correct before mean full-cycle core energy ranks qualified designs.
+NONE means no feasible compared design and retains null metrics (shown as NaN),
+not a best-average substitute. The 36 choices remain 28 NONE / 5 selected / 3 control.</p>
+<div class="table-scroll">{specification_map.example_table(sampled).to_html(index=False, float_format=lambda value: f"{value:.4g}", border=0)}</div>
+<p>Margins are deadline minus recorded decision time; maxima are observed core
+energies over the same band. They are not noise/jitter/PVT confidence bounds,
+timing signoff, worst-cycle guarantees or total system/calibration cost.
+All exact limiting ties and source hashes are retained in
+<a href="specification_map/summary.json">the auditable JSON</a>.</p>
+<h4>Exactly matched 1 ns to 2 ns samples, |input| &ge; 1 mV</h4>
+<div class="table-scroll">{specification_map.failure_table(sampled).to_html(index=False, border=0)}</div>
+<p>Baseline's 60 unresolved samples become 29 correct, nine wrong and 22 unresolved;
+the control's nine become six correct and three wrong. Longer deadlines need not
+reduce wrong counts. Selected's 20 wrong samples are exactly the same keyed set
+at both deadlines, all at +/-1 mV. Locations and local calibration codes below
+are observations, not evidence of trim saturation, residual offset or noise.</p>
+<div class="table-scroll">{specification_map.selected_wrong_table(sampled).to_html(index=False, border=0)}</div>
 </section>"""
     version = re.search(r"\bngspice-(\S+)", manifest["provenance"]["ngspice_version"])
     if version is None:
@@ -633,6 +659,7 @@ and documentation. Original code is MIT licensed; model and tool licenses are re
         "full_pvt45_input_sha256": pvt45_results.REFERENCE_FILES,
         "full_pvt45_plot_source_sha256": sha256(Path(pvt45_results.__file__)),
         "rc_model_applicability_notice": pvt45_results.RC_SCOPE_NOTE,
+        "sampled_schematic_analysis": sampled_analysis,
         "artifact_sha256": {
             "report.html": sha256(path), "explorer_data.json": sha256(STUDY / "explorer_data.json"),
             **{str(Path("figures") / filename): sha256(figures / filename) for filename in pictures},

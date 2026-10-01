@@ -63,6 +63,17 @@ are included. The Notebook also saves two waveform figures and reading
 tables before its widgets, so the wrong-versus-calibrated lesson is readable
 without widget JavaScript.
 
+The [matched failure transitions](results/study/specification_map/failure_transitions.png)
+separate wrong from unresolved outcomes: baseline's 60 unresolved 1 ns
+samples become 29 correct, nine wrong and 22 unresolved at 2 ns. The selected
+design's 20 wrong samples are the same keyed set at both deadlines, all at
+signed +/-1 mV; the Notebook and JSON expose locations and calibration codes,
+not a physical-cause diagnosis. Qualified designs also retain minimum sampled
+decision margins and maximum sampled core energies with all limiting ties.
+For selected >= 3 mV at 1 ns: 154.52 ps minimum margin, 363.22 fJ sampled maximum.
+These are finite observations, not timing/noise signoff or a worst-cycle/system
+energy guarantee; mean-energy selection and the 36 map choices are unchanged.
+
 The physical implementation passes the recorded DRC/LVS and negative controls.
 Its full nominal, code-zero study covers **45 PVT conditions and four signed
 inputs per condition**. Schematic and extracted RC were simulated under the

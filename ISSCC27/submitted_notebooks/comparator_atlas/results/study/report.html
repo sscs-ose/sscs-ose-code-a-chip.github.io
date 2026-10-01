@@ -490,6 +490,293 @@ the mean. Neither circuit is asserted best for every energy, input-resolution or
 <p class="muted">A distinct probe represents an offline three-cycle simulation.
 Reference/input generation, drivers, control logic and storage are not included in core energy.
 The additional control has not inherited the original/selected circuits' input-interface stress results.</p>
+<h3>Matched failures and sampled specification limits</h3>
+<p>The following static tables use only the calibrated schematic 49-condition
+controlled-width-stress domain, not the nominal RC grid. Every included signed
+sample must be correct before mean full-cycle core energy ranks qualified designs.
+NONE means no feasible compared design and retains null metrics (shown as NaN),
+not a best-average substitute. The 36 choices remain 28 NONE / 5 selected / 3 control.</p>
+<div class="table-scroll"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>min_abs_input_mV</th>
+      <th>deadline_ns</th>
+      <th>choice</th>
+      <th>mean_core_energy_fJ</th>
+      <th>min_sampled_margin_ps</th>
+      <th>max_sampled_core_energy_fJ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>1</td>
+      <td>No feasible compared design</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1</td>
+      <td>lvt_balanced_4b</td>
+      <td>249.7</td>
+      <td>154.5</td>
+      <td>363.2</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>1</td>
+      <td>lvt_base_3b</td>
+      <td>150.5</td>
+      <td>118.7</td>
+      <td>212.4</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>2</td>
+      <td>lvt_base_3b</td>
+      <td>152.7</td>
+      <td>915.8</td>
+      <td>220.3</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>0.75</td>
+      <td>lvt_balanced_4b</td>
+      <td>247.6</td>
+      <td>74.52</td>
+      <td>355</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>0.5</td>
+      <td>No feasible compared design</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table></div>
+<p>Margins are deadline minus recorded decision time; maxima are observed core
+energies over the same band. They are not noise/jitter/PVT confidence bounds,
+timing signoff, worst-cycle guarantees or total system/calibration cost.
+All exact limiting ties and source hashes are retained in
+<a href="specification_map/summary.json">the auditable JSON</a>.</p>
+<h4>Exactly matched 1 ns to 2 ns samples, |input| &ge; 1 mV</h4>
+<div class="table-scroll"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>design</th>
+      <th>deadline_ns</th>
+      <th>correct</th>
+      <th>wrong</th>
+      <th>unresolved</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>baseline</td>
+      <td>1</td>
+      <td>310</td>
+      <td>22</td>
+      <td>60</td>
+    </tr>
+    <tr>
+      <td>baseline</td>
+      <td>2</td>
+      <td>339</td>
+      <td>31</td>
+      <td>22</td>
+    </tr>
+    <tr>
+      <td>lvt_balanced_4b</td>
+      <td>1</td>
+      <td>372</td>
+      <td>20</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>lvt_balanced_4b</td>
+      <td>2</td>
+      <td>372</td>
+      <td>20</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>lvt_base_3b</td>
+      <td>1</td>
+      <td>351</td>
+      <td>32</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <td>lvt_base_3b</td>
+      <td>2</td>
+      <td>357</td>
+      <td>35</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table></div>
+<p>Baseline's 60 unresolved samples become 29 correct, nine wrong and 22 unresolved;
+the control's nine become six correct and three wrong. Longer deadlines need not
+reduce wrong counts. Selected's 20 wrong samples are exactly the same keyed set
+at both deadlines, all at +/-1 mV. Locations and local calibration codes below
+are observations, not evidence of trim saturation, residual offset or noise.</p>
+<div class="table-scroll"><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>case_id</th>
+      <th>input_mv</th>
+      <th>trim_code</th>
+      <th>outcome_1ns</th>
+      <th>outcome_2ns</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FF | 1.80 V | -40 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-4.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>FF | 1.80 V | 125 C | skew +4%</td>
+      <td>1.0</td>
+      <td>-9.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>FF | 1.80 V | 27 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-6.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>FS | 1.62 V | -40 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-1.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>FS | 1.62 V | 27 C | skew +4%</td>
+      <td>1.0</td>
+      <td>-2.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>FS | 1.80 V | 125 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-3.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>FS | 1.95 V | 27 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-3.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SF | 1.62 V | -40 C | skew +4%</td>
+      <td>1.0</td>
+      <td>-3.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SF | 1.62 V | 125 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-6.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SF | 1.80 V | -40 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-4.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SF | 1.80 V | 27 C | skew +4%</td>
+      <td>1.0</td>
+      <td>-7.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SF | 1.95 V | 27 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-8.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SS | 1.62 V | -40 C | skew +4%</td>
+      <td>1.0</td>
+      <td>-2.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SS | 1.80 V | -40 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-2.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SS | 1.80 V | 125 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-3.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SS | 1.95 V | -40 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-3.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>SS | 1.95 V | 27 C | skew +4%</td>
+      <td>1.0</td>
+      <td>-4.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>TT | 1.62 V | 27 C | skew +4%</td>
+      <td>-1.0</td>
+      <td>-2.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>TT | 1.80 V | 27 C | skew +8%</td>
+      <td>1.0</td>
+      <td>-8.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+    <tr>
+      <td>TT | 1.80 V | 27 C | skew -8%</td>
+      <td>-1.0</td>
+      <td>8.0</td>
+      <td>wrong</td>
+      <td>wrong</td>
+    </tr>
+  </tbody>
+</table></div>
 </section>
 <section><h2>Stored decision map: circuit, calibration and deadline</h2>
 <p>These controls filter stored SPICE observations; they do not launch simulations.

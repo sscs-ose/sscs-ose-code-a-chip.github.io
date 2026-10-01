@@ -344,6 +344,32 @@ def main() -> None:
         The [108 per-design and 36 per-specification records](results/study/specification_map/summary.json)
         include provenance hashes. No calibration or original circuit
         selection is changed.
+
+        ### Where do the failures remain?
+
+        The static transition matrices match **the same sample keys**, not
+        differences of aggregate totals: design, condition and signed input.
+        At |input| >= 1 mV, baseline's 60 unresolved samples at 1 ns become
+        29 correct, nine wrong and 22 still unresolved at 2 ns. The lower-energy
+        control's nine unresolved samples become six correct and three wrong.
+        A longer deadline therefore need not reduce the wrong count.
+        The selected design's 20 wrong samples are **exactly the same set**
+        at both deadlines, all at signed +/-1 mV; their locations and local
+        calibration codes are listed below. This does not identify a physical
+        cause such as trim saturation, residual offset or noise.
+
+        The specification table also shows the **minimum observed decision
+        margin** (deadline minus recorded decision time) and **maximum sampled
+        full-cycle core energy**, only for strict-qualified winners. For
+        selected >= 3 mV at 1 ns these are 154.52 ps and 363.22 fJ; the limiting
+        timing sample is FS / 1.62 V / -40 C / +4% width stress / -3 mV.
+        All qualified designs and every exact tied limiting observation are in
+        the same [auditable JSON](results/study/specification_map/summary.json),
+        alongside grouped failures and all 1,176 keyed deadline pairs.
+        NONE retains null metrics. These finite recorded margins are not
+        noise/jitter/PVT confidence bounds or timing signoff; sampled maximum
+        core energy is not a worst-cycle guarantee or system-energy cap.
+        The original mean-energy ranking is unchanged.
         """),
         code("""
         print("Local policy; 1 ns; sampled |input| >= 1 mV")
@@ -362,6 +388,11 @@ def main() -> None:
             specification_map.FOLDER / "selection_map.png"
         )))
         display(specification_map.example_table(specifications))
+        display(Image(filename=str(
+            specification_map.FOLDER / "failure_transitions.png"
+        )))
+        display(specification_map.failure_table(specifications))
+        display(specification_map.selected_wrong_table(specifications))
         """),
         code("""
         import ipywidgets as widgets

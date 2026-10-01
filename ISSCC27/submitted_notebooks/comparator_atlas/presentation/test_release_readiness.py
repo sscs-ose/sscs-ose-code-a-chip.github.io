@@ -353,6 +353,18 @@ def test_scoped_report_reuses_checked_figures_without_running_factories(monkeypa
         assert slogan not in captured["report.html"]
     assert "12/20 correct points" in captured["report.html"]
     assert "180/180 correct at 2 ns; 156/180 at 1 ns" in captured["report.html"]
+    from presentation import specification_map
+    import entry_tools
+    sampled = specification_map.load_checked(entry_tools.load_evidence())
+    for table in (specification_map.failure_table(sampled),
+                  specification_map.selected_wrong_table(sampled)):
+        assert table.to_html(index=False, border=0) in captured["report.html"]
+        assert table.to_html(index=False, border=0) in (
+            study_report.STUDY / "report.html").read_text(encoding="utf-8")
+    assert captured["presentation_manifest.json"]["sampled_schematic_analysis"] == {
+        "source_sha256": entry_tools.digest(Path(specification_map.__file__)),
+        "summary_sha256": entry_tools.digest(specification_map.FOLDER / "summary.json"),
+    }
 
 
 def test_scoped_report_rejects_changed_cached_figure(monkeypatch):

@@ -406,11 +406,47 @@ and the saved figure hash. Recompute and compare all records read-only:
 python -B -m presentation.specification_map
 ```
 
-`--write` regenerates only these two derived presentation artifacts; if
+`--write` regenerates only the JSON, selection map and failure-transition
+PNG presentation artifacts; if
 used for publication, refresh their entry checksums afterward. No new
 SPICE, interpolation, continuous-input coverage, yield or physical-model
 qualification is involved. Baseline's zero winning cells apply only to
 this compared calibrated sampled domain.
+
+### Matched failures and sampled limits
+
+Schema 2 of the same JSON preserves the original 108 design rows and 36
+specifications (28 NONE / 5 selected / 3 control / 0 baseline). It adds:
+
+- `failure_analysis.grouped_counts`: all 10,584 calibrated nonzero
+  observations, grouped separately by design/deadline, signed input, corner,
+  voltage, temperature, width skew and complete condition. Each group
+  explicitly counts correct, wrong and unresolved.
+- `matched_samples`: 1,176 one-to-one design/condition/signed-input pairs at
+  1 and 2 ns for |input| >= 1 mV, with endpoint run IDs, outcomes, times,
+  energies, location and local calibration code. Missing/duplicate/unmatched
+  keys, unavailable policies and inconsistent metadata fail explicitly;
+  order is lexical keys, not CSV row position. Unresolved times remain null.
+- `transition_matrix`: all nine outcome transitions for each design,
+  including zeros. There is no monotonicity assumption. Selected wrong-sample
+  identities are compared as sets, then both endpoints of every sample wrong
+  at either deadline are retained. The archived data give the same 20 at both
+  deadlines, all at +/-1 mV. Locations/codes alone do not prove trim saturation,
+  residual offset, noise or any other physical cause.
+- `sampled_limits`: for each strictly qualified design and each winner,
+  minimum `(deadline_ns - decision_time_ns) * 1000` in ps and maximum
+  measured full-cycle core energy in fJ over the same included band. All
+  exact equal limiting values retain their complete observations in lexical
+  sample-key order. Unqualified designs and NONE winners have null limits;
+  no energy cap or alternative selection rule is introduced.
+
+Resolved nonzero observations require finite decision times; unresolved
+observations require missing times. A 4e-15 ns tolerance handles recorded
+seconds-to-nanoseconds roundoff at exact deadline endpoints, not a physical
+guardband; reported margins are not clamped or rounded in JSON. The observed
+limits are not confidence bounds over continuous PVT/noise/jitter, timing
+signoff, a worst-cycle guarantee, or total system/calibration costs. The
+same read-only command above recomputes every field and checks both PNG hashes.
 
 ## Checks
 
