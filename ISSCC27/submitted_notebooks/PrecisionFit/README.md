@@ -297,15 +297,18 @@ directory is created on first run and is not committed.
 - **The full sweep used generic-cell count as the area proxy** (Yosys `synth`
   + `abc -g cmos2`). Physical implementation was run only for the three Pareto-
   corner headline designs. The µm² ordering confirmed the generic-cell ordering.
-- **The SS-corner (max_ss_100C_1v60 with OCV derating) cannot close at a
-  practical frequency** for this fully-parallel 9-multiplier FIR topology.
-  The effective critical path under full derating is ~24 ns; timing signoff is
-  reported at the TT corner (nom_tt_025C_1v80), the standard academic PVT
-  corner. The measured nominal-corner setup slack at the 14.6 ns clock
-  (worst of the three designs per corner) is: **TT +1.98 ns**, **FF +6.54 ns**
-  (both close) and **SS −9.32 ns** (does not close); hold is met at every
-  corner. The SS miss is inherent to the single-cycle fully-parallel datapath
-  (~12–13 ns at TT before derating), not a tool issue.
+- **The SS corner (max_ss_100C_1v60 with OCV derating) cannot close at the
+  68.5 MHz target** for this fully-parallel 9-multiplier FIR topology. The
+  effective critical path under full derating is ~19.7 ns (best_uniform /
+  sensitivity_guided) to ~24.2 ns (conservative_uniform) at the
+  `max_ss_100C_1v60` corner (14.6 ns minus the measured −4.98 / −5.14 / −9.57 ns
+  slacks); timing signoff is reported at the TT corner (nom_tt_025C_1v80), the
+  standard academic PVT corner. The measured nominal-corner setup slack at the
+  14.6 ns clock (worst of the three designs per corner) is: **TT +1.98 ns**,
+  **FF +6.54 ns** (both close) and **SS −9.32 ns** (does not close at the
+  target — without derating, the designs still close up to ~42–52 MHz at SS);
+  hold is met at every corner. The SS miss is inherent to the single-cycle
+  fully-parallel datapath (~12–13 ns at TT before derating), not a tool issue.
 - **One architecture** (direct-form, symmetric-folded, fully parallel, fixed
   pipeline). Transposed-form, folded or time-multiplexed variants could land
   elsewhere.
