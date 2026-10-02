@@ -16,8 +16,13 @@ for the final layout merge, not for the metrics. The flow uses OpenRAM's GDS aft
 the macro (notebook, Appendix C.3).
 
 OpenRAM's timing views are produced by its analytical models, and its power views were found to be
-non-physical on the chip (see the notebook, Sections 6 and 12); the two macro-store points (`ntt_macro`
+non-physical on the chip (see the notebook, Section 8); the two macro-store points (`ntt_macro`
 and `ntt_opt_pipe_macro`) are therefore compared on area and timing only. Both place the macro with
 `flow/macro_place_ntt.tcl` and use the post-route step in `flow/post_grt_macro_pins.tcl` on its
-address pins (notebook, Appendix B.4). OpenRAM is
-BSD-3-Clause licensed; the macro was generated for this project.
+address pins (notebook, Appendix B.4).
+
+`spice/` holds OpenRAM's transistor netlists (gzip-compressed) of all eight macro types on the chip,
+16x256 included. `scripts/sram_energy_spice.sh` simulates them in ngspice to obtain the SRAM energy of
+a decapsulation (notebook, Section 8).
+
+OpenRAM is BSD-3-Clause licensed; the macros were generated for this project.

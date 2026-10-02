@@ -210,6 +210,10 @@ prof_ = {c: v["profile"] for c, v in json.loads((R_/"system_sim/decaps_profile.j
 c3 = pd.read_csv(R_/"fpga/c3_repeat.csv"); bank_ = pd.read_csv(R_/"fpga/bank_repeat.csv")
 tv = {k: json.loads((R_/d/"tvla_summary.json").read_text()) for k, d in [("plain", "leakage"), ("masked", "leakage_masked")]}
 chip = json.loads((R_/"fullchip/summary.json").read_text()); cm = chip["orfs_metrics"]
+pw_ = json.loads((R_/"fullchip/power.json").read_text())
+e_ = {k: v * pw_["window_cycles"] * pw_["clock_ns"] * 1e-6 for k, v in pw_["power_mw"].items()}   # uJ per decapsulation
+e_["sram"] = json.loads((R_/"fullchip/sram_energy.json").read_text())["sram_energy_per_decaps_uj"]
+e_tot = sum(e_.values())
 rows = [
     ("Is it correct?", "RTL against the golden model",
      f"{n_err} mismatches over {n_coef:,} NTT coefficients and {n_kec} Keccak permutations, constant latency", "§4"),
@@ -232,6 +236,9 @@ rows = [
     ("", "Full SKY130 core",
      f"{cm['finish__design__die__area'] / 1e6:.1f} mm² die, {cm['finish__design__instance__count__stdcell']:,} standard cells, "
      f"{cm['finish__design__instance__count__macros']} SRAM macros; LVS: {chip['signoff']['primary_compare'].lower()}", "§8"),
+    ("", "Energy per decapsulation (full chip, 25 MHz)",
+     f"{e_tot / 1e3:.2f} mJ: clock network and register clock pins {(e_['clock'] + e_['sequential']) / e_tot:.0%}, "
+     f"SRAM macros {e_['sram'] / e_tot:.0%}, combinational logic {e_['combinational'] / e_tot:.0%}", "§8"),
     ("Does it hold up?", "Same RTL on the DE25-Nano",
      f"{int(c3.result_pass.sum())}/{len(c3)} two-role ML-KEM runs and "
      f"{int((bank_.filter(like='bank_') == 'PASS').all(axis=1).sum())}/{len(bank_)} HSM-invariant runs pass", "§9"),
@@ -1010,12 +1017,12 @@ seven tenths faster than the original engine with the same macro, finishes a for
 two thirds of the time and needs about a sixth less standard-cell area, and at a 12 ns target it closes
 timing near 87 MHz. Both layouts are free of DRC and antenna violations. In the 20 ns layout every
 macro address pin meets the macro's 0.04 ns transition limit and no other net violates a transition
-limit; at 12 ns two address pins exceed it by up to 4 ps.
+limit; at 12 ns two address pins exceed it by about 4 ps.
 """)
 
 # --------------------------------------------- 8. full chip and system
 md(r"""
-## 8. The full chip, and where decapsulation spends its time
+## 8. The full chip, and where decapsulation spends its time and energy
 
 On the chip, the blocks above are integrated into a single digital core together with the SPI front end,
 the HSM policy logic, SHA-256/HMAC, AES-256, the PUF root and vault services, and 18 OpenRAM [9] SRAM
@@ -1051,7 +1058,6 @@ display(pd.Series({
     "DRC markers, FEOL rules (Appendix C.3)": feol["after_implant_fix"]["markers_total"],
 }, name="HSKEM core"))
 print("claim boundary:", s["claim_boundary"])
-print("power:", fc["power"])
 # the abstract quotes these two figures
 assert m["finish__design__instance__count__stdcell"] > 320_000 and m["finish__design__instance__count__macros"] == 18
 import placement_map as pm
@@ -1186,7 +1192,7 @@ the shared NTT engine, the Keccak sponge and the permutation inside it are busy 
 
 code(r"""
 # True re-runs the profiled full-system simulation of the FPGA and ASIC configurations with Icarus
-# Verilog (about five minutes, both in parallel; works in Colab); the two single-decision
+# Verilog (about six minutes, both in parallel; works in Colab); the two single-decision
 # configurations are then read from the committed logs
 RUN_SYSTEM_SIM = False
 if RUN_SYSTEM_SIM:
@@ -1239,6 +1245,84 @@ a faster permutation is therefore worth little; a faster NTT or a wider sponge i
 promising target.
 """)
 
+
+md(r"""
+### What a decapsulation costs in energy
+
+Sections 6 and 7 measured the energy of the Keccak and NTT blocks on their own; the profiled
+decapsulation also yields the energy of the whole chip. The logic is measured with a shadow of the routed
+netlist (`scripts/shadow_netlist.py`): every combinational cell of the layout is kept, its flip-flops
+follow the registers of the RTL simulation, and the resulting zero-delay activity of every net is
+annotated on the routed database together with its extracted parasitics. The clock network and the
+registers' clock pins come from OpenSTA's clock analysis, which needs no activity.
+
+The SRAM macros need a different route, because their Liberty power views are not physical.
+`scripts/sram_energy_spice.sh` simulates the complete transistor netlist of each macro in ngspice at the
+chip's clock, through idle cycles, writes, and reads of new and of repeated addresses, and integrates the
+supply current over every cycle; every simulated read returns the data written. Six of the eight macro
+types were simulated; the two largest 12-bit macros are interpolated, in their number of rows, from the
+two smaller ones. OpenRAM's netlists contain the transistors but no wiring, so two macros were simulated a
+second time from a flat extraction of their layout, which adds the capacitance of every net. The wiring
+*lowers* the energy of an access, to 0.67 and 0.78 of the schematic value, while it raises that of an
+idle cycle by about a third. For the 24 × 128 macro, the extracted netlist with its capacitors removed
+reproduces the schematic value to within 2 %, so the difference lies in the wiring itself and not in the
+transistors. The mean of the two factors scales every macro (`scripts/sram_energy_model.py`).
+""")
+
+code(r"""
+pw = json.loads((ROOT/"results/fullchip/power.json").read_text())
+se = json.loads((ROOT/"results/fullchip/sram_energy.json").read_text())
+cg = json.loads((ROOT/"results/fullchip/clock_gating_whatif.json").read_text())
+sa = json.loads((ROOT/"results/fullchip/sram_accesses.json").read_text())
+t_dec = pw["window_cycles"] * pw["clock_ns"] * 1e-9                      # seconds
+e = {k: v * 1e-3 * t_dec * 1e6 for k, v in pw["power_mw"].items()}         # uJ per decapsulation
+sram = se["sram_energy_per_decaps_uj"]
+gate = se["sram_energy_with_chip_select_gating_uj"]
+saved_lo = cg["saved_by_gating_idle_blocks_mw"] * 1e-3 * t_dec * 1e6
+saved_hi = cg["saved_upper_estimate_mw"] * 1e-3 * t_dec * 1e6
+logic = sum(e.values())
+energy = pd.DataFrame({
+    "as built [uJ]": [f'{e["clock"]:.0f}', f'{e["sequential"]:.0f}', f'{e["combinational"]:.0f}', f"{sram:.0f}"],
+    "with gating [uJ]": ["", f"{logic - saved_hi:.0f}-{logic - saved_lo:.0f} (clock and registers together)", "",
+                         f"{gate:.0f}"],
+}, index=["clock network", "registers (clock pins)", "combinational logic", "SRAM macros (18)"])
+display(energy)
+useful = sum(v["useful_accesses"] for v in sa["instances"].values())
+print(f"decapsulation: {pw['window_cycles']} cycles at {pw['clock_ns']:.0f} ns; logic {pw['logic_power_mw']:.1f} mW, "
+      f"{pw['pins_annotated_from_vcd']} pins annotated from the shadow; SRAM accesses {18 * sa['window_cycles']} "
+      f"as built, {useful} useful")
+# guards for the statements made in the text below
+assert 0.9 < (e["clock"] + e["sequential"]) / logic < 0.97                    # "about 95 % is clock"
+assert e["combinational"] / logic < 0.05
+assert 0.6 < pw["registers_never_toggling"] / pw["registers_compared"] < 0.7   # "two thirds"
+wf = sorted(round(f["access"], 2) for f in se["wiring_factor"]["per_macro"].values())
+assert wf == [0.67, 0.78]                                                      # wiring factors quoted in the text
+assert 0.33 < (logic + sram) * 1e-3 < 0.37                                    # "about 0.35 mJ"
+assert 0.22 < sram / (logic + sram) < 0.28                                     # "about a quarter"
+assert 0.8 < 1 - gate / sram < 0.9                                             # "more than four fifths"
+assert 0.37 < (sram - gate + saved_lo) / (logic + sram) < 0.43                # "roughly 40 to 55 %"
+assert 0.52 < (sram - gate + saved_hi) / (logic + sram) < 0.58
+assert cg["idle_flip_flops"] == 13400
+assert useful / (18 * sa["window_cycles"]) < 0.05                             # "fewer than one in twenty"
+assert cg["idle_blocks"] == ["g_qualification_puf_vault", "u_hsm_shell", "u_security_hmac", "u_c2_shake_drbg", "u_puf"]
+assert 0.2 < cg["saved_fraction"] and cg["saved_upper_fraction"] < 0.5
+""")
+
+md(r"""
+At 25 MHz a decapsulation costs about 0.35 mJ, and little of it pays for the computation itself. About
+95 % of the logic's energy goes into the clock network and the clock pins of the 28,000 registers,
+although two thirds of those registers never change during the operation and the combinational logic
+switches little. The SRAM macros add about a quarter of the total, for a similar reason: their chip
+selects are tied active, so all 18 macros perform an access in every cycle, whereas fewer than one access
+in twenty does useful work. Both are choices made in the integration rather than properties of ML-KEM,
+and both have standard remedies. Stopping the clock of the five blocks that stay idle throughout the
+decapsulation — the PUF vault and root service, the HSM shell, the HMAC and the DRBG, 13,400 registers in
+all — would save a quarter to a half of the clock and register energy, and driving each chip select from
+the block's own access requests would remove more than four fifths of the SRAM energy. Together the two
+measures would cut the energy of a decapsulation by roughly 40 to 55 %. These are projections from the
+measured activity, not changes made to the signed-off chip.
+""")
+
 # ------------------------------------------------------------ Part III
 md(r"""
 # Part III — Does it hold up?
@@ -1277,6 +1361,7 @@ FPGA's GPIO header through the jumper wires that carry the SPI link.*
 
 code(r"""
 fr = json.loads((ROOT/"results/fpga/fpga_resources.json").read_text())     # resources: Appendix D.1
+assert fr["device_total_alms"].startswith("39,")       # Section 1: "about 39,000 ALMs"
 b = pd.read_csv(ROOT/"results/fpga/c3_repeat.csv")
 F_CLK = 50e6
 assert b.result_pass.all(), "a two-role ML-KEM run failed"
@@ -1331,7 +1416,7 @@ md(r"""
 together take a few milliseconds, whereas the host observes several seconds, because the ESP32 moves the
 800-byte public key and the 768-byte ciphertext over a deliberately slow bit-banged SPI link. Measured end
 to end, the link carries the 3,136 payload bytes of a run at an effective rate of about 0.36 kB/s,
-framing, responses and host-side processing included, with a run-to-run spread of well under a
+framing, responses and host-side processing included, with a run-to-run spread of under a
 millisecond (Appendix D.2). The next meaningful speed-up must therefore come from the interface — a
 hardware SPI port, or keeping both roles on chip — rather than from a faster NTT.
 """)
@@ -1472,6 +1557,10 @@ md(r"""
   decapsulation, the byte-wide sponge interface for about an eighth and the permutation for less than
   one percent; in area the picture is reversed, with an NTT that occupies little logic and a Keccak
   sponge that is the second-largest register block of the chip.
+* **At chip level, the integration sets the energy.** A decapsulation costs about 0.35 mJ at 25 MHz,
+  most of it in the clock network, the registers' clock pins and SRAM macros that are selected in every
+  cycle; gating the clock of the idle blocks and the chip selects of the macros would save roughly 40 to
+  55 %.
 * **The measurements pay for themselves.** Two redundant reduction stages, four always-zero storage bits
   and a single-stage critical path led to an NTT that, after routing, is about a fifth smaller, clocks
   about two thirds faster, completes a transform about 30% sooner and roughly halves the area–time
@@ -1506,7 +1595,7 @@ ctx = pd.DataFrame([
      "resources": f"NTT block: {P.loc['ntt_opt_pipe_w12', 'cell_area_um2'] / 1e6:.3f} mm² (flip-flop store)"},
     {"design": "Xing and Li, TCHES 2021 [13]", "platform": "Artix-7 FPGA, 161 MHz",
      "cycles / NTT": 448, "cycles / decapsulation": "6,668 (k = 2)",
-     "resources": "complete KEM: 7,412 LUTs, 2 DSP, 3 BRAM"},
+     "resources": "complete KEM, server configuration: 7,412 LUTs, 2 DSP, 3 BRAM"},
     {"design": "Sapphire, TCHES 2019 [14]", "platform": "TSMC 40 nm, 72 MHz",
      "cycles / NTT": 1289, "cycles / decapsulation": "–",
      "resources": "processor core: 0.28 mm² (Kyber round 1, q = 7681)"},
@@ -1536,15 +1625,18 @@ md(r"""
   mask-preparation step that closes sub-rule implant gaps inside the OpenRAM macros (Appendix C.3); the
   macros themselves are OpenRAM output, used as generated otherwise. The top-level LVS abstracts the
   SRAMs, which are verified separately at transistor level. Two of the three macro-store layouts exceed
-  the macro's 0.04 ns address-pin transition limit on two pins, by at most 4 ps (Appendix B.4).
+  the macro's 0.04 ns address-pin transition limit on two pins, by about 4 ps at most (Appendix B.4).
 * **Timing.** Closure was performed at the typical corner, and the slow corner roughly halves every
   block's frequency. A hold margin removes the small fast-corner hold violations of the NTT layouts at
   negligible cost (Appendix B.5). The SRAM macros' timing views come from OpenRAM's analytical delay
   model at the typical corner only, so at chip level only the flip-flop paths are checked at every
   corner; one of them misses hold at the fast corner by 1 ps (Appendix C.1).
-* **Power.** Full-chip power is omitted because the SRAM power model produced non-physical values;
-  block-level energy comes from gate-level switching activity at the typical corner, and five random
-  inputs per block agree to within half a percent.
+* **Power.** All energy figures are for the typical corner. The chip's logic energy rests on zero-delay
+  activity, so glitches are not counted. The SRAM energy comes from transistor-level simulation of the
+  macros, scaled for wiring by two macros simulated from their extracted layout; the two scale factors
+  differ by about a sixth, which leaves the SRAM figure uncertain by roughly ±8 %, and two of the eight
+  macro types are interpolated rather than simulated. Block-level energy comes from gate-level switching
+  activity, and five random inputs per block agree to within half a percent.
 * **Scope of the comparison.** The architecture points share a common 20 ns target, with a clock sweep
   for selected blocks; apart from the two macro-store points, the block-level stores are built from
   flip-flops, whereas the chip uses OpenRAM macros.
@@ -1667,7 +1759,8 @@ the column `design fmax`.
 
 **Power.** OpenSTA's power figures in these reports are vectorless estimates based on default switching
 activity; they are omitted and play no part in the conclusions. Power derived from gate-level switching
-activity is reported for the Keccak blocks in Section 6 and for the NTT in Section 7.
+activity is reported for the Keccak blocks in Section 6, for the NTT in Section 7 and for the whole
+chip in Section 8.
 """)
 
 code(r"""
@@ -1741,7 +1834,8 @@ md(r"""
 The macro's Liberty view limits the transition at its address pins to 0.04 ns. After global routing,
 the flow's repair step splits the long wires to these pins with minimum-size buffers, whose transitions
 reached 0.26 to 0.35 ns; excluding that buffer from the library did not change the choice in this
-OpenROAD build. Upsizing the buffers alone left 0.05 to 0.07 ns, for a geometric reason: the automatic
+OpenROAD build. An intermediate attempt that only upsized the buffers left 0.05 to 0.07 ns, for a
+geometric reason: the automatic
 placer put the macro against the bottom of the die, while six of its address pins sit on its bottom
 edge, so their drivers ended up 25 to 70 µm away. Two hooks of the flow remove the cause.
 `flow/macro_place_ntt.tcl` fixes the macro about 30 µm higher, in the same orientation, which leaves
@@ -1753,7 +1847,7 @@ much. The table below gives the resulting transition at each pin.
 
 The limit itself deserves a remark. OpenRAM wrote these timing views with its analytical delay model,
 not from transistor-level simulation, and 0.04 ns is simply the last entry of the slew table it
-generated. The remaining excesses, below half a picosecond at 20 ns and up to 4 ps at 12 ns, are
+generated. The remaining excesses, below half a picosecond at 20 ns and about 4 ps at 12 ns, are
 therefore an extrapolation of that table by a few percent rather than a measured failure; a SPICE
 characterization of the macro would settle the question.
 """)
@@ -2021,15 +2115,18 @@ time; everything else takes seconds.
 md(r"""
 ### E.2 Place-and-route, locally or in Colab
 
-Place-and-route with OpenROAD-flow-scripts takes between twenty minutes and three and a half hours per
+Place-and-route with OpenROAD-flow-scripts takes between about eight minutes and three and a half hours per
 design point on a desktop machine. Its results are committed in `results/asic/`, together with the exact
 scripts that produced them (`scripts/run_orfs.sh`, `flow/config.mk`); setting `RUN_PNR = True` on a
 Linux machine with ORFS at commit `6101364b` regenerates them. The corner analysis is rerun with
 `scripts/sta_corners.sh`, and the activity-based power of the routed blocks with
 `scripts/run_gls_power.sh` and `scripts/run_gls_power_keccak.sh`, both of which read the parasitics of a
-local ORFS run. The system-level simulation of Section 8 runs from the published RTL with
-`scripts/run_system_sim.sh` (about six minutes per configuration; `CAC_PROFILE=1` adds the cycle
-profiler), and `RUN_SYSTEM_SIM = True` repeats it inside the notebook, also in Colab. The front-end
+local ORFS run. The logic energy of the chip in Section 8 is regenerated with
+`scripts/fullchip_power.sh`, which needs the chip's unpublished layout database, and its SRAM energy with
+`scripts/sram_energy_spice.sh` and `scripts/sram_energy_model.py` from the macros' OpenRAM netlists in
+`flow/macros/spice/`. The system-level simulation of Section 8 runs from the published RTL with `scripts/run_system_sim.sh` (about
+six minutes per configuration; `CAC_PROFILE=1` adds the cycle profiler), and `RUN_SYSTEM_SIM = True`
+repeats it inside the notebook, also in Colab. The front-end
 design-rule check of Appendix C.3 runs with `scripts/feol_drc.sh` on any layout; `scripts/implant_fix.py`,
 `scripts/verify_untouched.py` and `scripts/feol_summary.py` reproduce the correction of the macros and
 its summary. Section 9 reports hardware measurements whose raw logs and hashes are in `results/fpga/`.

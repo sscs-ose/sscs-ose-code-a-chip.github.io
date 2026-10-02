@@ -48,10 +48,10 @@ fi
 
 # OpenSTA reads no $dumpon/$dumpoff blocks: cut the file to the recorded window first
 python3 "$ROOT/scripts/vcd_window.py" "$OUT/ntt_fwd.vcd" "$OUT/ntt_fwd_window.vcd"
-# OpenSTA alone needs no LEF/technology data, unlike the openroad shell
-LIB="$ORFS/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib" NETLIST="$B/6_final.v" \
-SDC="$B/6_final.sdc" SPEF="$B/6_final.spef" TOP=$TOP VCD="$OUT/ntt_fwd_window.vcd" SCOPE="tb_ntt/dut" \
-  "$ORFS/tools/install/OpenROAD/bin/sta" -no_splash -exit "$ROOT/flow/power_vcd.tcl" > "$OUT/power.log" 2>&1 || true
+# the routed database carries the antenna diodes that the SPEF refers to (flow/power_vcd.tcl)
+LIB="$ORFS/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib" ODB="$B/6_final.odb" \
+SDC="$B/6_final.sdc" SPEF="$B/6_final.spef" VCD="$OUT/ntt_fwd_window.vcd" SCOPE="tb_ntt/dut" \
+  "$ORFS/tools/install/OpenROAD/bin/openroad" -no_splash -exit "$ROOT/flow/power_vcd.tcl" > "$OUT/power.log" 2>&1 || true
 rm -f "$OUT/ntt_fwd_window.vcd"; gzip -f "$OUT/ntt_fwd.vcd"
 python3 - "$OUT" "$CLK_NS" <<'PY'
 import json, re, sys, pathlib
