@@ -11,10 +11,15 @@
 set -euo pipefail
 GDS=${1:?gds}; RPT=${2:?report}
 ORFS="${ORFS_ROOT:-/opt/eda/orfs-6101364b}"
-DECK="$(mktemp --suffix=.lydrc)"; trap 'rm -f "$DECK" "$DECK.py"' EXIT
+DECK="$(mktemp --suffix=.lydrc)"; trap 'rm -f "$DECK" "$DECK.py" "$DECK.src"' EXIT
+SRC="$ORFS/flow/platforms/sky130hd/drc/sky130hd.lydrc"
+if [ ! -f "$SRC" ]; then      # no local ORFS (e.g. Colab): the same deck from ORFS at the pinned commit
+  curl -sfL "https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/6101364b2d7909dd797e1e3e7f80695401cfa4e4/flow/platforms/sky130hd/drc/sky130hd.lydrc" -o "$DECK.src"
+  SRC="$DECK.src"
+fi
 sed -e 's/^FEOL    = false/FEOL    = true/' -e 's/^BEOL    = true/BEOL    = false/' \
     -e 's/^OFFGRID = true/OFFGRID = false/' -e '/output("vpp\.5"/s/^/# (vpp.5 left out, see feol_drc.sh) /' \
-    "$ORFS/flow/platforms/sky130hd/drc/sky130hd.lydrc" > "$DECK"
+    "$SRC" > "$DECK"
 grep -q '^FEOL    = true' "$DECK" && grep -q '^# (vpp.5 left out' "$DECK" || { echo "deck edit failed"; exit 1; }
 cat > "$DECK.py" <<'PY'
 import pya

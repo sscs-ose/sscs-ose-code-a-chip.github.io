@@ -5,7 +5,8 @@ deck:  writes an ngspice deck that drives the macro for three idle cycles, three
        current over every clock cycle; the read data is sampled at the end of each read cycle.
        SRAM_ENERGY_ACCESSES=n changes the number of writes and reads (fewer shorten a slow flat-layout run);
        SRAM_ENERGY_READS=repeat reads the first address every time, as the chip's macros mostly do;
-       SRAM_ENERGY_SETTLE=n sets the number of idle cycles (a large macro needs more to finish powering up).
+       SRAM_ENERGY_SETTLE=n sets the number of idle cycles (a large macro needs more to finish powering up);
+       SRAM_ENERGY_RELTOL sets the transient's relative tolerance (default 1e-3).
 parse: turns the ngspice log into per-cycle energies (pJ) and checks that every read returned the data
        written.
 Netlist requirements (see scripts/sram_energy_spice.sh): the SKY130 models set scale=1u, so device sizes
@@ -24,6 +25,7 @@ VDD, T = 1.8, 40.0                           # V, clock period ns
 SETTLE = int(os.environ.get("SRAM_ENERGY_SETTLE", 3))   # idle cycles before the first write
 N_W = int(os.environ.get("SRAM_ENERGY_ACCESSES", 3))   # writes (= reads)
 REPEAT = os.environ.get("SRAM_ENERGY_READS") == "repeat"
+RELTOL = os.environ.get("SRAM_ENERGY_RELTOL", "1e-3")   # integration tolerance of the transient
 
 
 def pins(netlist, name):
@@ -84,7 +86,7 @@ def deck(netlist, name, out, pdk_lib):
         ts = (w0 + N_W + i + 1) * T + T / 2 - 1.0
         for b, x in enumerate(dout[:len(din) - 1]):
             L.append(f".meas tran r{i}b{b} FIND v({nd(x)}) AT={ts:.3f}n")
-    L += [".options klu method=gear reltol=1e-3", ".temp 25", f".tran 0.2n {n * T + T / 2}n UIC", ".save i(vvdd)", ".end"]
+    L += [f".options klu method=gear reltol={RELTOL}", ".temp 25", f".tran 0.2n {n * T + T / 2}n UIC", ".save i(vvdd)", ".end"]
     open(out, "w").write("\n".join(L) + "\n")
     json.dump({"settle": SETTLE, "writes": N_W, "data": [data[j] for j in rd], "data_bits": len(din) - 1,
                "reads": "repeat" if REPEAT else "distinct"}, open(out + ".json", "w"))

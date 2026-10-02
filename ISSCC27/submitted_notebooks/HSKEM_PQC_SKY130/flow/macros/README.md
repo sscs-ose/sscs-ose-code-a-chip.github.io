@@ -15,9 +15,10 @@ for the final layout merge, not for the metrics. The flow uses OpenRAM's GDS aft
 `scripts/implant_fix.py`, which closes the sub-rule implant gaps that the SKY130 FEOL rules flag inside
 the macro (notebook, Appendix C.3).
 
-OpenRAM's timing views are produced by its analytical models, and its power views were found to be
-non-physical on the chip (see the notebook, Section 8); the two macro-store points (`ntt_macro`
-and `ntt_opt_pipe_macro`) are therefore compared on area and timing only. Both place the macro with
+OpenRAM's timing views are produced by its analytical models, and its power view is not physical (it
+reports megawatts for this macro); the energy of the two macro-store points (`ntt_macro` and
+`ntt_opt_pipe_macro`) therefore prices the macro's cycles with the transistor-level energies of
+`results/fullchip/sram_energy.json` (`scripts/run_gls_power.sh`; notebook, Sections 6 and 8). Both place the macro with
 `flow/macro_place_ntt.tcl` and use the post-route step in `flow/post_grt_macro_pins.tcl` on its
 address pins (notebook, Appendix B.4).
 

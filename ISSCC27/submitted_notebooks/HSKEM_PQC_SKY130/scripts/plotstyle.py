@@ -109,3 +109,11 @@ def finish(fig=None, title: str | None = None, subtitle: str | None = None) -> N
     if subtitle:
         fig.text(0.01, 0.975, subtitle, ha="left", va="top", fontsize=9.5, color=INK_2)
     fig.tight_layout()
+
+
+def save_pdf(fig, name: str) -> None:
+    """Keep a vector copy of a figure in figures/pdf/ (no creation date, so reruns do not change it)."""
+    import pathlib
+    out = pathlib.Path(__file__).resolve().parents[1] / "figures" / "pdf"
+    out.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out / f"{name}.pdf", bbox_inches="tight", metadata={"CreationDate": None})

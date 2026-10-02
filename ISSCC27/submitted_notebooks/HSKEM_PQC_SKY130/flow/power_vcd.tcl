@@ -1,9 +1,10 @@
 # Activity-based power of a routed design from a gate-level VCD (OpenROAD/OpenSTA).
-# env: LIB SDC SPEF VCD SCOPE, and either ODB (routed database; run with `openroad`) or NETLIST + TOP
+# env: LIB SDC SPEF VCD SCOPE (optional LIB_MACRO), and either ODB (routed database; run with `openroad`) or NETLIST + TOP
 # (run with OpenSTA `sta`). Prefer ODB: 6_final.v lacks the antenna diodes that the SPEF refers to
 # (see flow/sta_corner.tcl).
 # SPDX-License-Identifier: Apache-2.0
 read_liberty $::env(LIB)
+if { [info exists ::env(LIB_MACRO)] } { read_liberty $::env(LIB_MACRO) }   ; # a macro-store block's SRAM
 if { [info exists ::env(ODB)] } {
   read_db $::env(ODB)
 } else {

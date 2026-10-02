@@ -1,20 +1,20 @@
 """Energy of the chip's SRAM macros over one decapsulation, from transistor-level simulation of the macros.
 
 The macros' Liberty power views come from OpenRAM's analytical model and are not physical (notebook, Section 8).
-Each macro was instead simulated whole in ngspice (scripts/sram_energy_spice.sh): idle cycles, three
+Each macro was instead simulated whole in ngspice (scripts/sram_energy_spice.sh): six idle cycles, three
 writes and three reads at the chip's 25 MHz clock, with the energy of every cycle integrated from the
 supply current (results/fullchip/sram_macro_spice.json). Per macro this gives
   E_read, E_write  mean of the three measured accesses (reads at new addresses);
   E_read_repeat    mean of three reads of one address, from a second run (the chip's macros mostly
                    read the same address again);
   E_idle           a deselected cycle (clock running, chip select inactive): the lower of the two idle
-                   cycles measured, since the first can still hold the end of the power-up transient.
+                   cycles measured (the one after the last read still holds the end of that read).
 Macros without a finished simulation are interpolated linearly in the number of rows from the macros of
 the same word width (the access energy depends mainly on the word width).
-The simulations use the schematic netlist, which has no wiring. Macros simulated again from a flat
-extraction of their layout (devices plus every net's capacitance; "flat_layout" in the results) give a
-wiring factor, flat over schematic, for the access energies and for the idle cycle; the mean factor of
-those macros scales every macro.
+The simulations use the schematic netlist, which has no wiring. A macro simulated again from a flat
+extraction of its layout (devices plus every net's capacitance; "flat_layout" in the results) gets its
+own wiring factor, flat over schematic, for the access energies and for the idle cycle; a macro without
+one would take the mean factor of the others.
 
 Every macro performs one access per cycle on the chip (chip select tied active), so the energy of a
 decapsulation is reads x E_read + writes x E_write per macro (results/fullchip/sram_accesses.json), the
@@ -62,7 +62,7 @@ def wiring_factors(spice: dict) -> dict:
         acc = lambda x: statistics.mean(x["read_pj"] + x["write_pj"])
         per[m] = {"access": acc(f) / acc(s), "idle": min(f["idle_pj"]) / min(s["idle_pj"])}
     mean = {k: statistics.mean(v[k] for v in per.values()) if per else 1.0 for k in ("access", "idle")}
-    return {"per_macro": per, "applied": mean}
+    return {"per_macro": per, "mean": mean}
 
 
 def main(spice_file: str, acc_file: str, out: str) -> None:
@@ -73,10 +73,12 @@ def main(spice_file: str, acc_file: str, out: str) -> None:
     masters = sorted({v["master"] for v in acc["instances"].values()})
     per = {m: dict(known[m]) if m in known else interpolate(m, known) for m in masters}
     wiring = wiring_factors(spice)
-    for e in per.values():
+    for m, e in per.items():
+        f = wiring["per_macro"].get(m, wiring["mean"])
+        e["wiring_factor"] = "own flat layout" if m in wiring["per_macro"] else "mean of the flat layouts"
         for k in ("read_pj", "read_repeat_pj", "write_pj"):
-            e[k] *= wiring["applied"]["access"]
-        e["idle_pj"] *= wiring["applied"]["idle"]
+            e[k] *= f["access"]
+        e["idle_pj"] *= f["idle"]
     tot = gated = 0.0
     inst = {}
     n = acc["window_cycles"]

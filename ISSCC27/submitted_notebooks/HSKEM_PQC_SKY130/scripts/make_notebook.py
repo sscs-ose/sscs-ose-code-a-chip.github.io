@@ -34,54 +34,60 @@ md(r"""
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tandat08052007/sscs-ose-code-a-chip.github.io/blob/isscc27-hskem-pqc-sky130/ISSCC27/submitted_notebooks/HSKEM_PQC_SKY130/HSKEM_PQC_SKY130.ipynb)
 
-- **Author:** Nguyen Tan Dat — University of Science, VNU-HCM (HCMUS), Faculty of Electronics and Telecommunications (IC Design)
-- **Contact:** nguyentandat08052007@gmail.com
-- **License:** Apache-2.0 (see `LICENSE` and `NOTICE`)
-- **Submission:** IEEE SSCS Open-Source Ecosystem *Code-a-Chip* travel grant, ISSCC 2027
+| Name | Affiliation | IEEE Member | SSCS Member | Email |
+|:---|:---|:---:|:---:|:---|
+| Nguyen Tan Dat | University of Science, VNU-HCM (HCMUS), Faculty of Electronics and Telecommunications | No | No | nguyentandat08052007@gmail.com |
+
+SPDX-License-Identifier: Apache-2.0
+
+IEEE SSCS Open-Source Ecosystem *Code-a-Chip* travel grant, ISSCC 2027 · License: Apache-2.0 (`LICENSE`,
+`NOTICE`) · Tools: Python, Yosys, Icarus Verilog, OpenROAD-flow-scripts, OpenSTA, KLayout, Magic, ngspice,
+OpenRAM; SKY130
 
 ---
 
 ### Abstract
 
-HSKEM is a post-quantum hardware security module that I designed, brought up on a Terasic DE25-Nano
-FPGA board (Altera Agilex 5), and then implemented with the open-source OpenROAD flow as a SKY130 digital
-core of more than 320,000 standard cells and 18 OpenRAM macros. This notebook takes the two datapaths at
-the heart of ML-KEM (FIPS 203) — the number-theoretic transform (NTT) and the Keccak-f[1600]
-permutation — and asks a single question:
+HSKEM is a post-quantum hardware security module (HSM) that I designed, brought up on a Terasic
+DE25-Nano FPGA board (Altera Agilex 5) and implemented with the open-source OpenROAD flow as a SKY130 core
+of more than 320,000 standard cells and 18 OpenRAM macros. This notebook takes the two datapaths at the
+heart of ML-KEM (FIPS 203), the number-theoretic transform (NTT) and the Keccak-f[1600] permutation, and
+asks:
 
-> **What did each architectural decision I made for the ASIC actually cost in area, latency, energy and
-> security, and can anyone re-derive those numbers with open tools?**
+> **What did each architectural decision I made for the ASIC actually cost in area, latency and energy,
+> what does the design still leak, and can anyone re-derive those numbers with open tools?**
 
-Three questions structure the answer. *Is it correct?* An independent Python golden model reproduces the
-official NIST vectors, and the RTL — from each block up to the complete co-processor — matches it bit
-for bit. *What does it cost?* Four architecture points are synthesized in Colab, placed and routed, and
-weighed against a cycle profile of the whole chip; the measurements then drive a verified redesign of the
-NTT. *Does it hold up?* The same RTL runs on the FPGA board, and a simulated leakage assessment shows
-what the design leaks and what masking costs.
+Part I establishes correctness, from an independent Python golden model and the official NIST vectors to
+gate-level simulation of the routed blocks. Part II prices the two decisions after synthesis, after
+place-and-route and across the whole chip, and turns the measurements into a verified redesign of the
+NTT. Part III repeats the flow on the FPGA board and models a power-analysis adversary. The block-level
+results can be regenerated from this folder; the chip-level ones are published as summaries and hashes,
+because the chip's layout database is not public, and the chip itself is pre-silicon. The numbers in the
+text are read from the committed results, and assertions stop the notebook if a claim and its data part
+company.
 
-**What is new.** The notebook treats every architectural decision of a real, fully integrated
-post-quantum chip as a measurement, carried from the golden model to the routed layout and the
-system-level cycle profile. It shows how far block-level figures of merit can mislead, turns the
-measurements into a redesign verified on its routed netlist, and publishes the exact place-and-route
-build in a form that runs in Colab. Tables and figures are computed from the committed results, and
-assertions check the numbers quoted in the text against them.
+**How to read it.** In ten minutes: *At a glance* below and the findings of Section 11. In half an hour:
+Parts I to III. `Run all` takes about half an hour on a free Colab instance; cells marked `RUN_…` repeat
+the long runs and are off by default.
 """)
 
 # ------------------------------------------------------------ 0. setup
 md(r"""
 ## 0. Setup
 
-The next cell runs both locally, from inside the submission folder, and on Google Colab, where it fetches
-this folder and the [YosysHQ OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build) — a download
-of about 700 MB that provides Yosys, with the `slang` SystemVerilog front end, and Icarus Verilog. A
-complete `Run all` takes about half an hour on a free Colab instance; the last cell reports the time of
-every section.
+The next cell runs locally from inside the submission folder or on Google Colab, where it fetches what
+the notebook needs. Every step uses open-source tools; the FPGA bitstream of Section 9, built with
+Quartus, serves only as a hardware cross-check.
 
-Every design and verification step uses open-source tools; the single exception is the FPGA bitstream of
-Section 9, built with the vendor's Quartus software as a hardware cross-check. Place-and-route takes far
-longer than a Colab session is meant to run, so its results are read from `results/asic/`. Throughout the
-notebook, *committed* results are those stored in this folder; Appendix E shows how to regenerate each of
-them, place-and-route included.
+| Fetched in Colab | Why |
+|:---|:---|
+| this folder (sparse clone of the author's fork) | sources, committed results, figures |
+| [YosysHQ OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build), about 700 MB | Yosys with `slang` and Icarus Verilog for Sections 3–7 |
+| `kyber-py` (pip) | an independent NTT for Section 2 |
+| one block GDS from the release, KLayout (pip) | the layout rendered in Appendix B.2 |
+
+Place-and-route takes longer than a Colab session allows, so its results are read from `results/asic/`;
+Appendix E shows how each committed result is regenerated.
 """)
 
 code(r"""
@@ -170,22 +176,12 @@ def sh(cmd):
 md(r"""
 ## At a glance
 
-The figure summarizes the method; its three rows are the three parts of this notebook. The table below
-it collects the headline results, read from the committed files each time the cell runs.
-
-**Three results worth your time.**
-
-1. **Correct from Python to layout.** The golden model reproduces every official NIST ACVP vector, the
-   complete co-processor RTL reproduces all 25 NIST key-generation vectors byte for byte, and the routed
-   netlists reproduce the golden results at gate level (Sections 2, 4 and 7).
-2. **Measurements that pay for themselves.** Three weaknesses exposed by measurement lead to a redesigned
-   NTT that, after place-and-route, clocks about two thirds faster and roughly halves the area–time
-   product; with the chip's own SRAM macro as its store it rises from 48 to 83 MHz (Section 7).
-3. **Block-level figures of merit can mislead.** The row-serialized Keccak is nine times slower as a
-   block yet adds under 5 % to a decapsulation, because the permutation runs for less than one percent
-   of it, while the NTT is busy for half of the time (Section 8).
-
-A reader with ten minutes can stop after the table below and the findings of Section 11.
+The figure summarizes the method, one row per part of the notebook, and the table beneath it collects
+the headline results from the committed files. Three of them carry the argument. The design is correct
+from the golden model to the routed layout (Sections 2, 4 and 7). The row-serialized Keccak core, nine
+times slower as a block, adds under 5 % to a decapsulation, because the system rarely waits for it
+(Section 8). And the measurements led to a redesigned NTT that, with the chip's own SRAM macro, clocks at
+83 instead of 48 MHz for about a seventh more energy per transform (Section 7).
 """)
 
 code(r"""
@@ -204,6 +200,7 @@ dse =pd.read_csv(R_/"dse_metrics.csv").set_index(["variant", "clk_target_ns"])
 o, n = dse.loc[("ntt_sp", 20.0)], dse.loc[("ntt_opt_pipe_w12", 20.0)]
 gls = {r: json.loads((R_/"gls_power"/r/"summary.json").read_text()) for r in ["ntt_sp_20ns", "ntt_opt_b1_w12_20ns", "ntt_opt_pipe_w12_20ns"]}
 e_uj = {r: g["energy_per_forward_ntt_nj"] / 1e3 for r, g in gls.items()}
+e_macro = json.loads((R_/"gls_power/ntt_macro_20ns/summary.json").read_text())["energy_per_forward_ntt_nj"] / 1e3
 kj = {v: json.loads((R_/"gls_power"/f"{v}_20ns"/"summary.json").read_text())["energy_per_permutation_nj"]
       for v in ["keccak_r1", "keccak_s7"]}
 prof_ = {c: v["profile"] for c, v in json.loads((R_/"system_sim/decaps_profile.json").read_text())["configs"].items()}
@@ -225,7 +222,8 @@ rows = [
      f"area {n.cell_area_um2 / o.cell_area_um2 - 1:+.0%}, fmax {o.fmax_mhz:.1f} → {n.fmax_mhz:.1f} MHz, "
      f"area × time {n.at_product / o.at_product - 1:+.0%}", "§7"),
     ("", "Energy per forward NTT (routed netlist)",
-     f"{e_uj['ntt_sp_20ns']:.2f} µJ → {e_uj['ntt_opt_b1_w12_20ns']:.2f} µJ with the 12-bit store", "§7"),
+     f"{e_uj['ntt_sp_20ns']:.2f} µJ → {e_uj['ntt_opt_b1_w12_20ns']:.2f} µJ with the 12-bit store, "
+     f"{e_macro:.2f} µJ with the chip's SRAM macro as the store", "§6–7"),
     ("", "Energy per Keccak permutation (routed netlists)",
      f"{kj['keccak_r1']:.1f} nJ one round per clock, {kj['keccak_s7']:.1f} nJ row-serialized", "§6"),
     ("", "Decapsulation, ASIC vs FPGA choices",
@@ -261,29 +259,23 @@ nbd.show(pd.DataFrame([(q, r, v.replace('-', '−') if v.startswith('area ') els
 md(r"""
 ## 1. Context: where these blocks sit in HSKEM
 
-HSKEM (developed under the working name TrustEdge-PQC) is a security co-processor. An ESP32 host issues
-commands over SPI; the co-processor keeps every secret on chip, runs ML-KEM-512 key generation,
-encapsulation and decapsulation, derives a device root key from a ring-oscillator PUF, and stores wrapped
-keys in an A/B vault that survives power loss. I first built and tested the system on a single DE25-Nano
-board (about 39,000 ALMs at 50 MHz) and then ported its digital core to SKY130 with
-OpenROAD-flow-scripts and OpenRAM.
+HSKEM (working name TrustEdge-PQC) is a security co-processor. An ESP32 host issues commands over SPI,
+while the co-processor keeps every secret on chip, runs ML-KEM-512 key generation, encapsulation and
+decapsulation, derives a device root key from a ring-oscillator physically unclonable function (PUF) and
+stores wrapped keys in an A/B vault that survives power loss. I built it on the DE25-Nano board, where it
+occupies about 39,000 adaptive logic modules (ALMs) at 50 MHz, and then ported its digital core to SKY130.
 
-Most of the arithmetic in ML-KEM falls into two categories:
-
-* **Polynomial arithmetic in $\mathbb{Z}_{3329}[X]/(X^{256}+1)$**, accelerated by the NTT: seven layers of
-  128 butterflies per transform, with several transforms in every encapsulation and decapsulation.
-* **Keccak-f[1600]** [2, 4], the permutation behind SHAKE and SHA-3, which expands the public matrix, samples
-  noise and hashes keys and ciphertexts.
-
-Both blocks were written so that the *same RTL* serves the FPGA and the ASIC, with a single
-architectural switch in each:
+Most of the arithmetic in ML-KEM is either polynomial arithmetic in $\mathbb{Z}_{3329}[X]/(X^{256}+1)$,
+accelerated by the NTT (seven layers of 128 butterflies per transform), or Keccak-f[1600] [2, 4], the
+permutation behind SHAKE and SHA-3, which expands the public matrix, samples noise and hashes keys and
+ciphertexts. The *same RTL* serves the FPGA and the ASIC, with one architectural switch in each block:
 
 | Block | FPGA choice | ASIC choice | Why the ASIC differs |
 |:---|:---|:---|:---|
-| NTT coefficient store | true dual-port RAM (one M20K) | single-port SRAM | The OpenRAM macros available for the chip are single-port. |
+| NTT coefficient store | true dual-port RAM (one M20K block) | single-port SRAM | The chip uses OpenRAM's single-port macros; dual-port or banked macros were not evaluated. |
 | Keccak round | one full round per clock | row-serialized round (seven clocks) | I expected the 1600-bit round logic to be costly in standard cells. |
 
-The rest of the notebook measures what each of these two decisions actually cost.
+The rest of the notebook measures what these two decisions actually cost.
 """)
 
 code(r"""
@@ -294,18 +286,17 @@ display(SVG(filename=str(ROOT/"figures/hskem_architecture.svg")))
 md(r"""
 # Part I — Is it correct?
 
-A cost is only worth measuring for a design that computes the right result. This part builds a
-reference that owes nothing to the RTL, derives the expected cycle counts from the architecture, and then
-holds the RTL against both — up to the official NIST vectors.
+A cost is only worth measuring for a design that computes the right result. This part checks the RTL
+against a reference that owes nothing to it, up to the official NIST vectors.
 """)
 
 # ----------------------------------------------------- 2. golden model
 md(r"""
 ## 2. An independent golden model
 
-The model in `golden/mlkem_ref.py` is written from the text of FIPS 203 and FIPS 202 alone [1, 2]. The twiddle
-factors, for example, are recomputed as $\zeta^{\mathrm{BitRev}_7(i)} \bmod q$ with $\zeta = 17$ rather
-than copied from the RTL. The model is checked against three oracles that share no code with it:
+The model in `golden/mlkem_ref.py` is written from the text of FIPS 203 and FIPS 202 alone [1, 2]; its
+twiddle factors, for example, are recomputed as $\zeta^{\mathrm{BitRev}_7(i)} \bmod q$ with $\zeta = 17$
+rather than copied from the RTL. Three oracles that share no code with it check the model:
 
 1. **Mathematics:** $\mathrm{NTT}^{-1}(\mathrm{NTT}(a) \circ \mathrm{NTT}(b))$ must equal the schoolbook negacyclic product $a\cdot b \bmod (X^{256}+1)$.
 2. **An independent implementation:** the NTT must agree with [`kyber-py`](https://github.com/GiacomoPope/kyber-py) [12].
@@ -320,14 +311,12 @@ print(ref.self_check(trials=50))
 md(r"""
 ### From blocks to the whole KEM: NIST ACVP vectors
 
-Building on the validated NTT and Keccak, `golden/mlkem_full.py` implements the complete ML-KEM-512
-scheme (FIPS 203, Algorithms 3–18): the encodings, `SampleNTT`, the centred binomial sampler, K-PKE, and
-the internal key-generation, encapsulation and decapsulation algorithms, including implicit rejection. It
-is checked against the **official NIST ACVP-Server vectors** for ML-KEM-512 [3], stored in `golden/acvp/`
-with their provenance in `SOURCE.txt`: 25 key generations, 25 encapsulations and 10 decapsulations, the
-latter including modified ciphertexts. Two negative controls confirm that the check is able to fail:
-flipping a single input bit must change the result, and a tampered ciphertext must decapsulate to the
-implicit-rejection key $J(z\,\|\,c)$ rather than to the genuine shared secret.
+On top of these blocks, `golden/mlkem_full.py` implements the complete ML-KEM-512 scheme, implicit
+rejection included, and is checked against the official vectors of NIST's Automated Cryptographic
+Validation Protocol (ACVP) [3], stored with their provenance in `golden/acvp/`: 25 key generations, 25
+encapsulations and 10 decapsulations, some with modified ciphertexts. Two negative controls show that the
+check is able to fail: flipping a single input bit must change the result, and a tampered ciphertext must
+decapsulate to the implicit-rejection key $J(z\,\|\,c)$ instead of the genuine shared secret.
 """)
 
 code(r"""
@@ -352,10 +341,10 @@ print("negative controls: PASS (flipped d -> different ek; tampered c -> J(z||c)
 md(r"""
 ## 3. RTL architecture and an analytical cycle model
 
-`rtl/kyber_ntt_engine.sv` processes one butterfly at a time using a single shared multiplier and a
-Barrett reducer [5] (`rtl/barrett_reduce.v`, with $M=\lfloor 2^{24}/q \rfloor = 5039$). Each butterfly steps
-through a small finite-state machine. The single-port variant needs two additional states, because both
-operands and both results must pass through one SRAM port in turn:
+`rtl/kyber_ntt_engine.sv` processes one butterfly at a time with a single multiplier and a Barrett
+reducer [5] (`rtl/barrett_reduce.v`, $M=\lfloor 2^{24}/q \rfloor = 5039$), stepping through a small
+state machine. The single-port variant needs two extra states, because both operands and both results
+must take turns on one SRAM port:
 
 | State | Dual-port | Single-port |
 |:---|:---|:---|
@@ -367,12 +356,11 @@ operands and both results must pass through one SRAM port in turn:
 | WRITE | write both | write $a_j$ |
 | WRITE_B | — | write $a_{j+len}$ |
 
-With 896 butterflies per transform and one start and one completion cycle, the forward NTT should
-therefore take $896 \times 5 + 2$ cycles in the dual-port variant and $896 \times 7 + 2$ in the
-single-port variant; the inverse transform adds a scaling pass by $128^{-1}$ of $256 \times 5$ cycles.
-`rtl/keccak_f1600_iter.sv` needs $24 + 1$ cycles per permutation when it computes one round per clock,
-and $24\times 7 + 1$ when each round is split into a θ-D phase, a θ/ρ/π phase and five χ/ι row phases.
-The next section compares these predictions with simulation.
+With 896 butterflies and one start and one completion cycle, a forward NTT should therefore take
+$896 \times 5 + 2$ cycles with the dual-port store and $896 \times 7 + 2$ with the single-port one; the
+inverse transform adds a scaling pass of $256 \times 5$ cycles. `rtl/keccak_f1600_iter.sv` needs $24 + 1$
+cycles per permutation with one round per clock, and $24\times 7 + 1$ when each round is split into a
+θ-D phase, a θ/ρ/π phase and five χ/ι row phases. The controller trace below tests these predictions.
 """)
 
 code(r"""
@@ -392,12 +380,10 @@ model
 md(r"""
 ### Watching the controller work
 
-`scripts/fsm_trace.sh` simulates one forward transform of each variant with Icarus Verilog, records the
-controller's signals in a VCD file and samples its state register at every clock edge. Two checks follow directly
-from the trace: the controller visits the 896 butterflies in exactly the order of FIPS 203, Algorithm 9,
-and the transform lasts exactly as many cycles as the model above predicts. The first butterflies show
-where the two extra cycles of the single-port variant come from: both operands, and later both results,
-must take turns on the one memory port.
+`scripts/fsm_trace.sh` simulates one forward transform of each NTT variant with Icarus Verilog and samples
+the controller's state at every clock edge. The trace confirms that the 896 butterflies follow the order
+of FIPS 203, Algorithm 9, and that the transform lasts exactly as many cycles as the model predicts; its
+first butterflies show where the single-port variant spends its two extra cycles.
 """)
 
 code(r"""
@@ -443,11 +429,9 @@ fig.tight_layout(); plt.show()
 md(r"""
 ## 4. RTL against the golden model and the NIST vectors
 
-`scripts/run_sim.sh` generates test vectors from the golden model — corner cases followed by random
-polynomials and Keccak states — and runs four testbenches. Each bench compares every output coefficient
-or state bit exactly, measures the latency, and flags any vector whose latency differs from the others,
-which serves as a constant-time check. The Keccak bench additionally verifies that `zeroize` clears the
-state. Raising `N` in the cell below runs more random vectors.
+`scripts/run_sim.sh` runs four testbenches on vectors from the golden model, corner cases followed by
+random inputs. Each compares every output exactly and flags any vector whose latency differs from the
+others, which doubles as a constant-time check; raising `N` runs more random vectors.
 """)
 
 code(r"""
@@ -480,17 +464,11 @@ sim
 md(r"""
 ### A formal proof for the modular reducer
 
-Simulation covers the vectors it is given; the Barrett reducer admits a stronger argument. Its input is
-24 bits wide, so the property $r = a \bmod q$ can be stated for **all** $2^{24}$ inputs and handed to a SAT
-solver. `formal/prove_barrett.sh` wraps `rtl/barrett_reduce.v` in a property harness
-(`formal/barrett_prop.v`) and asks Yosys' built-in solver for a counterexample.
-
-The proof also answers a design question. The RTL applies up to three conditional subtractions of $q$,
-but for this choice of $M = \lfloor 2^{24}/q \rfloor$ the quotient estimate is never more than one below
-the true quotient, so one subtraction should suffice. Variants with the third, and with both the second
-and third, subtractions removed are proven correct as well, while a negative control with no subtraction
-must fail — and does, with a concrete counterexample. An exhaustive NumPy evaluation of the same formula
-confirms every result independently.
+Simulation covers only the vectors it is given, but the Barrett reducer's 24-bit input allows a proof
+for all $2^{24}$ inputs, which `formal/prove_barrett.sh` obtains from Yosys' SAT solver. The proof also
+settles a design question. The RTL applies up to three conditional subtractions of $q$, yet for this $M$
+one suffices: the reducer is proven correct with three, two and one subtraction, while a negative control
+with none fails with a concrete counterexample.
 """)
 
 code(r"""
@@ -536,18 +514,13 @@ ps.finish(fig); plt.show()
 md(r"""
 ### The complete co-processor against the NIST vectors
 
-The checks above tie the golden model to NIST and the blocks to the golden model; the complete HSKEM RTL
-can also be confronted with the NIST vectors directly. Its SPI interface accepts a deterministic
-key-generation seed $d\,\|\,z$ for test purposes, so `scripts/acvp_rtl_keygen.py` feeds the co-processor
-the seeds of all 25 ACVP key-generation cases, with $k = 2$ as FIPS 203 prescribes for ML-KEM-512, and
-compares what the RTL leaves in its key memories with the NIST answers, byte for byte:
-$\mathrm{ek}_\mathrm{PKE} = \mathrm{ByteEncode}_{12}(\hat t)\,\|\,\rho$,
-$\mathrm{dk}_\mathrm{PKE} = \mathrm{ByteEncode}_{12}(\hat s)$ and $z$ — all of
-$\mathrm{dk} = \mathrm{dk}_\mathrm{PKE}\,\|\,\mathrm{ek}\,\|\,H(\mathrm{ek})\,\|\,z$ except $H(\mathrm{ek})$,
-a hash of the compared key. The check runs in the FPGA and in the ASIC configuration, and a negative
-control with $k = 3$ must not reproduce the NIST key. Encapsulation and decapsulation vectors cannot be
-applied this way, because the co-processor deliberately accepts no external key; those paths are checked
-by the full-system testbench of Section 8 against an independent software model.
+The complete RTL can face the NIST vectors directly, because its SPI interface accepts a deterministic
+key-generation seed for test purposes. `scripts/acvp_rtl_keygen.py` runs all 25 ACVP key-generation
+cases in the FPGA and the ASIC configuration and compares the key memories with the NIST answers byte
+for byte, covering every part of the decapsulation key except a hash of the already compared
+encapsulation key; a negative control with $k = 3$ must fail. Encapsulation and decapsulation cannot be
+driven this way, since the co-processor accepts no external key, so the full-system testbench of
+Section 8 checks them against an independent software model.
 """)
 
 code(r"""
@@ -567,25 +540,31 @@ for cfg in ("fpga", "asic"):
 md(r"""
 # Part II — What does each decision cost?
 
-With correctness established, the two architectural decisions can be priced: first by logic synthesis,
-which runs in Colab; then after place-and-route, where wires and the clock tree take their share; and
-finally at the level of the whole chip, where what matters is how often the system waits for each
-block. In between, Section 7 turns the measurements into a redesign of the NTT.
+With correctness established, the two decisions can be priced: first by logic synthesis, which runs in
+Colab, then after place-and-route, where wires and the clock tree take their share, and finally across
+the whole chip, where what matters is how often the system waits for each block. Between the second and
+third step, Section 7 turns the measurements into a redesign of the NTT. The figures of merit are defined
+once, here:
+
+| Quantity | Definition |
+|:---|:---|
+| fmax | $1/(T - \mathrm{slack}_{reg\to reg})$ of the routed block at the typical corner (Appendix B.1 explains why register-to-register) |
+| latency, area × time | cycles of one operation / fmax; standard-cell plus macro area × latency |
+| energy per operation | $P \cdot N_\mathrm{cycles} \cdot T$ at the 20 ns clock, with $P$ from OpenSTA: gate-level activity of one operation on the extracted parasitics |
+| SRAM energy | $V_\mathrm{DD}\int i_\mathrm{DD}\,dt$ over each clock cycle of a transistor-level simulation of the macro |
+| decapsulation | the first profiled decapsulation of the full-system testbench, from its second busy cycle; 25 MHz on the chip |
+
+All figures are for the typical corner (25 °C, 1.8 V) unless a column says otherwise.
 """)
 
 # -------------------------------------------------------- 5. synthesis
 md(r"""
-## 5. Logic synthesis in Colab
+## 5. Synthesis: the second port costs a third more area, serializing Keccak saves none
 
-`scripts/synth_sky130.sh` synthesizes each architecture point with Yosys and ABC [11] to the
-`sky130_fd_sc_hd` library at its typical corner (25 °C, 1.8 V). It reports the standard-cell area and
-ABC's post-mapping combinational delay, an estimate that ignores wires and the clock tree. In this
-experiment the coefficient memory is built from flip-flops, so that both NTT variants are compared on
-equal terms.
-
-Because the Keccak core has 1600-bit state ports, it is wrapped in `rtl/keccak_lane_wrapper.sv`, which
-loads and reads the state one 64-bit lane at a time. The wrapper is identical for both Keccak variants,
-so any difference between them is attributable to the core.
+`scripts/synth_sky130.sh` synthesizes each point with Yosys and ABC [11] to the `sky130_fd_sc_hd` library
+and reports its area and combinational delay, an estimate without wires or clock tree. The NTT store is
+built from flip-flops here, so that both memory variants compete on equal terms, and both Keccak cores
+sit in the same lane wrapper, so that any difference between them belongs to the core.
 """)
 
 code(r"""
@@ -602,11 +581,10 @@ syn
 """)
 
 md(r"""
-**Reading the synthesis table.** Both NTT variants store exactly 4096 coefficient bits in flip-flops;
-they differ in the second write port and the second read-multiplexer tree of the dual-port store. Both
-Keccak variants hold the same 1600-bit state inside the same wrapper. The row-serialized core saves the
-χ/ι logic for four of the five rows, but it adds a 320-bit θ-D register and a multi-way next-state
-selection on every state bit. Grouping the mapped cells by type shows where the area goes.
+**Reading the synthesis table.** The dual-port NTT adds a second write port and a second read-multiplexer
+tree to the same 4096 stored bits. The row-serialized Keccak computes χ/ι for one row instead of five but
+pays with a 320-bit θ-D register and a wider next-state selection, which leaves it about one percent
+larger. The cell groups below show where each design spends its area.
 """)
 
 code(r"""
@@ -634,20 +612,17 @@ ax.set_yticks([ypos[v] for v in rows], [LABEL[v] for v in rows])
 ax.set_xlabel("synthesized standard-cell area [mm²]")
 ax.set_xlim(0, left.max() * 1.18); ax.grid(axis="y", visible=False)
 ax.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1.0), handlelength=1.2)
-ps.finish(fig); plt.show()
+ps.finish(fig, title="Flip-flops dominate both NTT stores; serializing Keccak saves no area"); plt.show()
 grp.round(4)
 """)
 
 # -------------------------------------------------- 6. place-and-route
 md(r"""
-## 6. Place-and-route
+## 6. Place-and-route: the dual-port store loses its speed, the serialized Keccak its purpose
 
-Each design point was taken through the complete OpenROAD-flow-scripts (ORFS) flow [8] for the SKY130 HD
-library [10] — floorplanning, placement, clock-tree synthesis and routing — at a common 20 ns clock
-target. The table compares the four architecture points on their register-to-register fmax at the
-typical corner, which isolates each core from the I/O budget of its wrapper, and on the latency and
-area–time product that follow from it. Appendix B lists every routed run and explains these choices; it
-also holds the clock-target sweep, the process corners and the layouts themselves.
+Each design point was then taken through the complete OpenROAD-flow-scripts (ORFS) flow [8] for the
+SKY130 HD library [10] at a common 20 ns clock target; Appendix B holds every routed run, the clock sweep,
+the process corners and the layouts.
 """)
 
 code(r"""
@@ -685,61 +660,60 @@ fig.tight_layout(); plt.show()
 """)
 
 md(r"""
-The placement maps make the architectural differences visible. In the single-port NTT the coefficient
-flip-flops form one compact block with the arithmetic beside it; in the dual-port NTT the selection logic
-of the second write port is spread through the whole store, which is why the block is larger and its
-wires longer. In the one-round Keccak core the XOR network of θ and χ forms a distinct ring around the
-state.
+The routed numbers confirm the synthesis estimate and add a twist. The dual-port NTT is about a third
+larger, and its selection logic, spread through the whole store in the placement map, lengthens the wires
+enough to cost it a little speed. The two NTT variants therefore end up equal in area × time: the second
+port buys a shorter transform and nothing more. Row-serializing Keccak ends up about one percent smaller after routing,
+while its seven times as many cycles, at a clock about 30 % lower, make each permutation nine times
+slower.
 """)
 
 md(r"""
 ### Area–latency trade-off
 
-The figure places each design point by its standard-cell area and by the latency of one operation at
-its own post-route fmax; points further to the lower left are better. The area–time product (mm²·µs)
-condenses both into a single figure of merit that does not depend on how many copies of a block a
-designer would instantiate. A tighter clock target (Appendix B.3) lifts the Keccak cores by about a
-third and by more than half, but leaves both original NTT blocks below 50 MHz: their
-subtract–multiply–reduce path is a single combinational stage, the ceiling that the redesign of
-Section 7 removes.
+The figure places each design point by standard-cell area and by latency at its own fmax, lower left
+being better on both counts. A tighter clock target lifts the Keccak cores further, but both original NTT
+blocks stay below 50 MHz, because their subtract–multiply–reduce path is a single combinational stage
+(Appendix B.3); Section 7 removes that ceiling.
 """)
 
 code(r"""
 fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
-for ax, fam, op in [(axes[0], "ntt", "one forward NTT"), (axes[1], "keccak", "one Keccak-f[1600]")]:
-    # final iteration only; the macro-store point is compared separately (its area is mostly the macro)
-    d = pnr[pnr.variant.str.startswith(fam) & ~pnr.variant.isin(["ntt_opt_b1_w12", "ntt_macro", "ntt_opt_pipe_macro"])]
-    for v, g in d.groupby("variant", sort=False):
-        main = g[g.clk_target_ns == 20]            # the common comparison point carries the label
-        rest = g[g.clk_target_ns != 20]
-        ax.scatter(main.cell_area_um2 / 1e6, main.latency_us_at_fmax, label=LABEL[v],
-                   **{**ps.marker_kw(COLOR[v]), "zorder": 4})   # the labelled 20 ns point stays on top
-        if len(rest):
-            ax.scatter(rest.cell_area_um2 / 1e6, rest.latency_us_at_fmax, s=60, facecolors=ps.SURFACE,
-                       edgecolors=COLOR[v], linewidths=1.8, zorder=3)
-        for _, r in main.iterrows():                # one decimal: 49.8 MHz must not read as "50 MHz"
-            ax.annotate(f"{r.fmax_mhz:.1f} MHz", (r.cell_area_um2 / 1e6, r.latency_us_at_fmax),
-                        xytext=(9, -3), textcoords="offset points", fontsize=9, color=ps.INK_2)
-    ax.scatter([], [], s=60, facecolors=ps.SURFACE, edgecolors=ps.MUTED, linewidths=1.8,
-               label="other targets (7–30 ns)")   # neutral legend entry for every family colour
-    ax.set_xlabel("standard-cell area [mm²]"); ax.set_ylabel(f"latency of {op} [µs]")
-    ax.set_title(("NTT" if fam == "ntt" else "Keccak-f[1600]") + ": filled points at the common 20 ns target",
-                 pad=34, fontsize=10.5)
-    ax.set_ylim(0, d.latency_us_at_fmax.max() * 1.2)
-    ax.set_xlim(0, d.cell_area_um2.max() / 1e6 * 1.25)     # zero-based: small area gaps must look small
-    ax.legend(ncols=2, loc="lower left", bbox_to_anchor=(0, 1.0), handletextpad=0.3, columnspacing=1.2)
-ps.finish(fig); plt.show()
+P20 = pnr[pnr.clk_target_ns == 20].set_index("variant")
+SIDE = {"ntt_dp": 1, "ntt_sp": 1}          # labels to the right of these points, to the left of the others
+for ax, tag, pts, curves, op in [
+        (axes[0], "(a) NTT", ["ntt_dp", "ntt_sp", "ntt_opt_b1_w12", "ntt_opt_pipe_w12"], ["ntt_sp", "ntt_opt_pipe_w12"],
+         "one forward NTT"),
+        (axes[1], "(b) Keccak-f[1600]", ["keccak_r1", "keccak_s7"], ["keccak_r1", "keccak_s7"], "one permutation")]:
+    a, t = P20.cell_area_um2[pts] / 1e6, P20.latency_us_at_fmax[pts]
+    xmax, ymax = a.max() * 1.45, t.max() * 1.3
+    xs = np.linspace(xmax * 0.03, xmax, 400)
+    for v in curves:                       # every point on one dashed curve has the same area x time
+        at = a[v] * t[v]
+        ax.plot(xs, at / xs, color=ps.MUTED, lw=1, ls=(0, (4, 3)), zorder=1)
+        ax.annotate(f"area × time\n= {at:.3g} mm²·µs", (at / (0.93 * ymax), 0.93 * ymax), xytext=(9, 0),
+                    textcoords="offset points", ha="left", va="top", fontsize=8, color=ps.MUTED, zorder=2,
+                    bbox=dict(boxstyle="round,pad=0.2", fc=ps.SURFACE, ec="none", alpha=0.92))
+    for v in pts:
+        ax.scatter(a[v], t[v], **{**ps.marker_kw(COLOR[v]), "zorder": 4})
+        r = SIDE.get(v, -1)
+        ax.annotate(f"{LABEL[v]}\n{P20.fmax_mhz[v]:.1f} MHz", (a[v], t[v]), xytext=(10 * r, 0), textcoords="offset points",
+                    ha="left" if r > 0 else "right", va="center", fontsize=8.5, color=ps.INK, zorder=5,
+                    bbox=dict(boxstyle="round,pad=0.25", fc=ps.SURFACE, ec="none", alpha=0.92))
+    ax.set_xlim(0, xmax); ax.set_ylim(0, ymax)
+    ax.set_xlabel("standard-cell area [mm²]"); ax.set_ylabel(f"latency of {op} at its fmax [µs]")
+    ax.set_title(tag, loc="left", fontsize=10.5)
+ps.finish(fig, title="Routed blocks at 20 ns: points on one dashed curve have the same area × time, lower left is better")
+ps.save_pdf(fig, "area_latency"); plt.show()
 """)
 
 md(r"""
 ### The chip's actual store: an OpenRAM macro
 
-The block-level NTT points build their 4096-bit coefficient store from flip-flops, so that both memory
-variants are compared on equal terms. On the chip, however, the store is the single-port OpenRAM macro
-`sky130_sram_1rw_16x256_wpr8`, so the single-port engine was also taken through the flow with that macro
-and the chip's own macro views (`flow/macros/`). The controller is unchanged, so its cycle count is the
-single-port one. OpenRAM's timing views come from analytical models and its power views proved
-non-physical on the chip, so this point is compared on area and timing only.
+On the chip the store is the single-port OpenRAM macro `sky130_sram_1rw_16x256_wpr8`, so the single-port
+engine was also routed with that macro. Its cycle count is unchanged, and since OpenRAM's power view is
+not physical (it reports several megawatts), the macro's energy is priced with its transistor-level
+access energies (Appendix C.4) and added to that of the standard cells.
 """)
 
 code(r"""
@@ -756,7 +730,10 @@ store = pd.DataFrame({
     "DRC / antenna": (mc.drc_errors.astype(int).astype(str) + " / " + mc.antenna_violating_nets.astype(int).astype(str)).values,
     "max-slew violations": [slew_violations(f"{v}_20ns") for v in mc.index],
 }, index=["flip-flop store", "OpenRAM macro store"])
-display(store.round(3))
+gpm = {v: json.loads((ROOT/"results/gls_power"/f"{v}_20ns"/"summary.json").read_text()) for v in mc.index}
+store["energy / forward NTT [µJ]"] = [gpm[v]["energy_per_forward_ntt_nj"] / 1e3 for v in mc.index]
+store["of which the SRAM macro [µJ]"] = [gpm[v].get("macro_energy_nj", float("nan")) / 1e3 for v in mc.index]
+display(store.round(3).fillna("–"))
 blk_ntt = pd.read_csv(ROOT/"results/fullchip/blocks.csv").set_index("block").loc["u_shared_ntt", "flops"]
 print(f"flip-flops of the macro-store block: {int(mc.loc['ntt_macro', 'flops'])}; of the NTT engine on the chip: {int(blk_ntt)}")
 # guards for the statements made in the text below
@@ -768,28 +745,28 @@ assert store["SRAM macro [mm²]"].iloc[1] < store["standard cells [mm²]"].iloc[
 assert abs(mc.fmax_mhz.iloc[1] / mc.fmax_mhz.iloc[0] - 1) < 0.05
 assert abs(int(mc.loc["ntt_macro", "flops"]) - int(blk_ntt)) <= 2
 assert store["max-slew violations"].iloc[0] == 0 < store["max-slew violations"].iloc[1]
+assert all(gpm[v]["gls_pass"] for v in mc.index) and gpm["ntt_macro"]["cycles_fwd"] == gpm["ntt_sp"]["cycles_fwd"]
+e_ratio_m = store["energy / forward NTT [µJ]"].iloc[1] / store["energy / forward NTT [µJ]"].iloc[0]
+assert 0.15 < e_ratio_m < 0.25                                                   # "about a fifth"
+assert 0.6 < gpm["ntt_macro"]["macro_energy_nj"] / gpm["ntt_macro"]["energy_per_forward_ntt_nj"] < 0.8  # "most of it"
 """)
 
 md(r"""
 With the macro, the standard-cell area shrinks to less than a fifth, and even with the macro counted in
-full the block needs about a third less area than its flip-flop counterpart; its register count matches
-the NTT engine on the chip within a flip-flop or two, which ties the block-level experiment to the
-integrated design. The clock rate barely changes, because the critical path is still the
-subtract–multiply–reduce stage. A fixed macro position and a post-route step that places strong drivers
-next to the macro's address pins bring their transitions to the 0.04 ns end of the macro's timing table;
-two of the eight pins remain above it by less than half a picosecond (Appendix B.4). Together with the single-port constraint of Section 3, this is
-the trade-off behind the chip's choice: a markedly smaller store in exchange for two extra cycles per
-butterfly.
+full the block needs about a third less area than its flip-flop counterpart. A forward transform costs
+about a fifth of the energy, most of it now spent in the macro, because 4096 flip-flops no longer receive
+the clock in every cycle, while the clock rate barely changes. This is the trade-off behind the chip's
+choice: a much smaller and more frugal store for two extra cycles per butterfly. The block's register
+count matches the NTT engine of the integrated chip within a flip-flop or two, so the experiment
+describes the chip's own engine.
 """)
 
 md(r"""
 ### Energy per Keccak permutation
 
-`scripts/run_gls_power_keccak.sh` simulates both routed Keccak netlists with the SKY130 cell models
-through the lane wrapper (`tb/tb_keccak_lanes.sv`), checks every output lane against the golden model,
-and records the switching activity of exactly one permutation of a random state, which OpenSTA combines
-with the extracted parasitics. Energy per permutation is power × cycles × clock period at the common
-20 ns clock; Section 7 measures the NTT the same way.
+`scripts/run_gls_power_keccak.sh` simulates both routed Keccak netlists with the SKY130 cell models,
+checks every output lane against the golden model, and passes the switching activity of one permutation
+to OpenSTA with the extracted parasitics.
 """)
 
 code(r"""
@@ -818,24 +795,22 @@ tab.round(2)
 """)
 
 md(r"""
-Both routed Keccak blocks compute the permutation bit-exactly, and four further random states change
-the energy per permutation by less than half a percent. Row-serialization lowers the power drawn
-per cycle by less than a fifth, but it needs almost seven times as many cycles, so each permutation costs
-about five and a half times more energy. The reason is visible in the power groups: the clock tree and
-the 1600-bit state registers, which are clocked in every cycle whether a round is being computed or not,
-account for two thirds of the row-serialized block's power. Serializing the round logic therefore saves
-almost no area and costs energy in this design.
+Both routed blocks compute the permutation bit-exactly, and further random states change the energy by
+less than half a percent. Row-serialization lowers the power per cycle by less than a fifth but needs
+almost seven times as many cycles, so a permutation costs about five and a half times more energy. The
+reason is that the clock tree and the 1600-bit state, clocked in every cycle whether a round is computed
+or not, draw two thirds of the serialized block's power. Serializing the round thus saves almost no area and costs both
+time and energy.
 """)
 
 # --------------------------------------------------------- 7. redesign
 md(r"""
 ## 7. Closing the loop: a measured redesign of the NTT
 
-The measurements so far point to three concrete improvements for the ASIC NTT: the Barrett reducer
-carries two provably redundant subtraction stages (Section 4), the critical path runs through the
-multiplier and the reducer (Section 6), and the coefficient store keeps four bits that are always zero,
-which the FPGA synthesis already drops (Appendix D.1). `rtl/kyber_ntt_engine_opt.sv` implements all
-three behind parameters, so that each can be evaluated on its own:
+The results so far suggest three improvements. The proof of Section 4 shows two of the reducer's three
+subtractions to be redundant, place-and-route puts the critical path through the multiplier and the
+reducer, and the FPGA synthesis already drops four always-zero coefficient bits (Appendix D.1).
+`rtl/kyber_ntt_engine_opt.sv` implements all three behind parameters:
 
 | Parameter | Effect |
 |:---|:---|
@@ -843,8 +818,8 @@ three behind parameters, so that each can be evaluated on its own:
 | `PIPE_MUL` | a register between the multiplier and the reducer; one extra cycle per butterfly |
 | `COEFF_W = 12` | a 12-bit coefficient store, lossless because $q < 2^{12}$ |
 
-With all three disabled the variant is cycle-identical to the original single-port engine, which serves
-as the reference. Every variant is checked against the golden model exactly as in Section 4.
+With all three disabled the engine is cycle-identical to the original, and every variant is checked
+against the golden model. The redesign is an experiment beside the chip, which keeps the original engine.
 """)
 
 code(r"""
@@ -865,8 +840,8 @@ names = {"ntt_opt_ref": "reference (original)", "ntt_opt_b1": "+ 1-subtraction B
          "ntt_opt_b1_w12": "+ 12-bit store", "ntt_opt_pipe_w12": "+ pipeline register"}
 order = list(names)[::-1]
 fig, axes = plt.subplots(1, 2, figsize=(11, 2.9), sharey=True)
-for ax, col, unit, title in [(axes[0], "cell_area_um2", 1e6, "Synthesized area [mm²]"),
-                             (axes[1], "est_fwd_latency_us", 1, "Estimated forward-NTT latency [µs]")]:
+for ax, col, unit, title in [(axes[0], "cell_area_um2", 1e6, "(a) synthesized area [mm²]"),
+                             (axes[1], "est_fwd_latency_us", 1, "(b) estimated forward-NTT latency [µs]")]:
     vals = opt.loc[order, col].astype(float) / unit
     colours = [ps.SERIES[2] if v == "ntt_opt_pipe_w12" else ps.SERIES[0] for v in order]
     ax.barh(range(len(order)), vals, height=0.5, color=colours, edgecolor=ps.SURFACE, linewidth=2)
@@ -880,19 +855,16 @@ for ax, col, unit, title in [(axes[0], "cell_area_um2", 1e6, "Synthesized area [
                         va="center", fontsize=9, color=ps.INK_2)
     ax.set_title(title); ax.grid(axis="y", visible=False); ax.set_xlim(0, vals.max() * 1.35)
 axes[0].set_yticks(range(len(order)), [names[v] for v in order])
-ps.finish(fig); plt.show()
+ps.finish(fig, title="The 12-bit store saves area, the pipeline register saves time (synthesis estimate)"); plt.show()
 opt
 """)
 
 md(r"""
-At the synthesis level the picture is clear and partly unexpected. Removing the redundant subtractions
-barely changes the delay: the long path is the pair of multiplications inside the reducer, not the final
-corrections. Narrowing the store to 12 bits removes about a fifth of the block's area, since storage
-dominates it. The pipeline register nearly halves the combinational delay for one extra cycle per
-butterfly, which shortens the estimated transform latency by about a third.
-
-The two meaningful iterations were then taken through the same complete place-and-route flow as the
-original blocks, at the same 20 ns target, so that the comparison below is between routed layouts.
+Synthesis already sorts the three ideas. The single subtraction barely changes the delay, because the
+long path is the pair of multiplications inside the reducer; the 12-bit store removes about a fifth of
+the area, and the pipeline register nearly halves the combinational delay. The two variants that keep the
+useful ideas, the 12-bit store without and with the pipeline register, were therefore routed like the
+original blocks.
 """)
 
 code(r"""
@@ -918,25 +890,21 @@ tab.round(3)
 """)
 
 md(r"""
-Place-and-route confirms the synthesis estimates. The 12-bit store removes 1,028 flip-flops — the 1,024
-unused storage bits plus the four upper bits of the read register — and a fifth of the cell area, and the
-lighter layout now closes the original 50 MHz target that neither original NTT met. The pipeline register
-lifts the post-route frequency by about two thirds, which more than repays its extra cycle per butterfly:
-a forward transform finishes about 30% sooner, and the area–time product falls by almost half. Both
-iterations are free of DRC and antenna violations, and at a 12 ns target only the pipelined design
-closes timing (Appendix B.6).
+Place-and-route confirms the estimates. The 12-bit store removes 1,028 flip-flops and a fifth of the cell
+area, and the lighter layout just closes the 50 MHz target that the original missed by 0.1 ns. The
+pipeline register lifts the post-route frequency by about two thirds, which more than repays its extra
+cycle: a forward transform finishes about 30 % sooner, and the area–time product falls by almost half.
+Both iterations are free of DRC and antenna violations, and at 12 ns only the pipelined one closes timing
+(Appendix B.6).
 """)
 
 md(r"""
 ### Gate-level verification and measured-activity energy
 
-`scripts/run_gls_power.sh` simulates each routed netlist with the SKY130 cell models against the golden
-vectors, so the layout itself — not only the RTL — is shown to compute the transform bit-exactly. The same
-simulation records the switching activity of one forward NTT of a random polynomial, which OpenSTA
-combines with the extracted parasitics into power; energy per transform is power × cycles × clock period
-at the common 20 ns clock. The functional half of this check also runs in Colab, from a committed routed
-netlist and the SKY130 cell models shipped in `third_party/`; the power half needs the extracted
-parasitics and is read from the committed runs.
+A routed layout is only worth comparing if it still computes the right result, so
+`scripts/run_gls_power.sh` simulates each routed netlist against the golden vectors, and the same
+simulation yields the switching activity from which OpenSTA derives the energy. The functional half also
+runs in Colab, from a committed netlist and the cell models in `third_party/`.
 """)
 
 code(r"""
@@ -969,23 +937,18 @@ gp[["gls_pass", "cycles_fwd", "power [mW]", "energy / forward NTT [µJ]", "energ
 """)
 
 md(r"""
-All three routed netlists compute the transform bit-exactly, and repeating the energy measurement for
-four further random polynomials changes it by less than 0.2 %. At the common clock, half of the original
-block's power is spent in its flip-flops and a further two fifths in the clock tree that feeds them — the
-price of building a 4096-bit memory from standard cells. Removing a quarter of that storage lowers the
-energy of a transform by about a fifth. The pipeline register costs energy rather than saving it: its
-extra cycle per butterfly raises the energy per transform again, so the fastest variant remains cheaper
-than the original but is not the most frugal one. Which of the two to choose is a speed-versus-energy
-decision that these numbers now make explicit.
+The original engine and both iterations compute the transform bit-exactly at gate level, and further random inputs change the energy by less
+than 0.2 %. Nine tenths of the original block's power goes into its flip-flops and the clock tree that
+feeds them, so removing a quarter of the storage saves about a fifth of the energy. The pipeline register
+gives part of that back through its extra cycle, a speed-versus-energy choice that these numbers make
+explicit.
 """)
 
 md(r"""
 ### The iteration with the chip's own store
 
-The iteration above was measured with the flip-flop store used throughout the block-level comparison.
-To confirm that its benefit carries over to the chip, the pipelined iteration was also taken through the
-flow with the chip's OpenRAM macro as its store (`rtl/sram_macro_16x256_opt.sv`), exactly like the
-macro-store point of Section 6, including the post-route step on the macro's address pins.
+To see whether the benefit carries over to the chip, the pipelined iteration was also routed with the
+chip's macro as its store (`rtl/sram_macro_16x256_opt.sv`), like the macro-store point of Section 6.
 """)
 
 code(r"""
@@ -993,9 +956,14 @@ om = pnr[pnr.variant.isin(["ntt_macro", "ntt_opt_pipe_macro"])].copy()
 om["design"] = om.variant.map(LABEL) + ", " + om.clk_target_ns.map("{:g} ns".format)
 om["total area [mm²]"] = [sum(total_area(f"{v}_{c:g}ns")) / 1e6 for v, c in zip(om.variant, om.clk_target_ns)]
 om["area × time, total [mm²·µs]"] = om["total area [mm²]"] * om.latency_us_at_fmax
+gpo = {f"{v}_{c:g}ns": ROOT/"results/gls_power"/f"{v}_{c:g}ns"/"summary.json" for v, c in zip(om.variant, om.clk_target_ns)}
+gpo = {r: json.loads(f.read_text()) for r, f in gpo.items() if f.exists()}     # measured at 20 ns
+om["energy / forward NTT [µJ]"] = [gpo[r]["energy_per_forward_ntt_nj"] / 1e3 if r in gpo else float("nan")
+                                   for r in (f"{v}_{c:g}ns" for v, c in zip(om.variant, om.clk_target_ns))]
 omt = om.set_index("design")[["cell_area_um2", "total area [mm²]", "flops", "fmax_mhz", "cycles",
-                               "latency_us_at_fmax", "area × time, total [mm²·µs]", "drc_errors", "antenna_violating_nets"]]
-display(omt.round(3))
+                               "latency_us_at_fmax", "area × time, total [mm²·µs]", "energy / forward NTT [µJ]",
+                               "drc_errors", "antenna_violating_nets"]]
+display(omt.round(3).fillna("–"))       # energy: measured at 20 ns only
 a0 = om[(om.variant == "ntt_macro") & (om.clk_target_ns == 20)].iloc[0]
 a1 = om[(om.variant == "ntt_opt_pipe_macro") & (om.clk_target_ns == 20)].iloc[0]
 a2 = om[(om.variant == "ntt_opt_pipe_macro") & (om.clk_target_ns == 12)].iloc[0]
@@ -1009,33 +977,135 @@ ps_ = json.loads((ROOT/"results/asic/macro_pin_slew.json").read_text())["runs"]
 assert ps_["ntt_opt_pipe_macro_20ns"]["pins_over_limit"] == 0 and slew_violations("ntt_opt_pipe_macro_20ns") == 0
 assert ps_["ntt_opt_pipe_macro_12ns"]["pins_over_limit"] == 2 and ps_["ntt_opt_pipe_macro_12ns"]["max_ns"] <= 0.045
 assert 86.5 < a2.fmax_mhz < 88
+e_m0, e_m1 = (gpo[r]["energy_per_forward_ntt_nj"] for r in ("ntt_macro_20ns", "ntt_opt_pipe_macro_20ns"))
+assert gpo["ntt_opt_pipe_macro_20ns"]["gls_pass"] and 1.08 < e_m1 / e_m0 < 1.2           # "about a seventh more"
+assert abs(e_m1 / e_m0 - a1.cycles / a0.cycles) < 0.03                              # tracks the extra cycles
 """)
 
 md(r"""
-With the macro store the pipelined iteration behaves as it does with flip-flops: it clocks about
-seven tenths faster than the original engine with the same macro, finishes a forward transform in about
-two thirds of the time and needs about a sixth less standard-cell area, and at a 12 ns target it closes
-timing near 87 MHz. Both layouts are free of DRC and antenna violations. In the 20 ns layout every
-macro address pin meets the macro's 0.04 ns transition limit and no other net violates a transition
-limit; at 12 ns two address pins exceed it by about 4 ps.
+The speed carries over. With the macro store the pipelined iteration clocks about 70 % faster than the
+original engine with the same macro, finishes a forward transform in about two thirds of the time with a
+sixth less standard-cell area, and closes timing near 87 MHz at a 12 ns target. The energy does not: the
+macro keeps its width either way, so only the pipeline's extra cycle remains, and a transform costs about
+a seventh more energy than with the original engine.
+""")
+
+md(r"""
+The layout of this design point, rendered at three scales from its released GDS, shows what the numbers
+describe. The macro fills the lower half of the block (a), with the NTT logic above it; along the macro's
+bottom edge sit the address-pin drivers that Appendix B.4 moved to the edge of the placement halo (b);
+and at the scale of a few micrometres the logic resolves into individual standard cells, with their
+diffusion, poly gates and local interconnect (c).
+""")
+
+code(r"""
+display(Image(str(ROOT/"figures/layout_zoom.png")))   # scripts/layout_zoom_figure.py, from the released GDS
+""")
+
+md(r"""
+The figure below gathers the effect of the redesign. For each kind of store it sets the original engine
+(grey) beside its iterations on the four figures of merit, and the percentages give the change against
+the original with the same store. The gain in speed is common to both stores; the saving in energy belongs
+to the flip-flop store alone, because only there does the narrower store remove clocked registers.
+""")
+
+code(r"""
+GROUPS = [("flip-flop store", ["ntt_sp", "ntt_opt_b1_w12", "ntt_opt_pipe_w12"]),
+          ("chip's SRAM macro", ["ntt_macro", "ntt_opt_pipe_macro"])]
+NAMES = {"ntt_sp": "original", "ntt_opt_b1_w12": "12-bit store", "ntt_opt_pipe_w12": "12-bit store + pipeline",
+         "ntt_macro": "original", "ntt_opt_pipe_macro": "pipeline"}
+P20 = pnr[pnr.clk_target_ns == 20].set_index("variant")
+def _energy_uj(v):
+    return json.loads((ROOT/"results/gls_power"/f"{v}_20ns"/"summary.json").read_text())["energy_per_forward_ntt_nj"] / 1e3
+METRICS = [("total area [mm²]", lambda v: sum(total_area(f"{v}_20ns")) / 1e6),
+           ("fmax [MHz]", lambda v: P20.fmax_mhz[v]),
+           ("forward-NTT latency [µs]", lambda v: P20.latency_us_at_fmax[v]),
+           ("energy per forward NTT [µJ]", _energy_uj)]
+rows = [(g, v, vs[0]) for g, vs in GROUPS for v in vs]
+ypos = [0, 1, 2, 3.9, 4.9]
+fig, axes = plt.subplots(1, 4, figsize=(13, 3.7), sharey=True)
+for ax, tag, (name, f) in zip(axes, "abcd", METRICS):
+    vals = [f(v) for _, v, _ in rows]
+    for y, (g, v, ref_v), x in zip(ypos, rows, vals):
+        ax.barh(y, x, height=0.68, **ps.bar_kw(ps.MUTED if v == ref_v else COLOR[v]))
+        txt = f"{x:.3g}" + ("" if v == ref_v else f"  ({x / f(ref_v) - 1:+.0%})".replace("-", "−"))
+        ax.annotate(txt, (x, y), xytext=(4, 0), textcoords="offset points", va="center", fontsize=8.5, color=ps.INK)
+    ax.set_title(f"({tag}) {name}", loc="left", fontsize=10)
+    ax.set_xlim(0, max(vals) * 1.75); ax.grid(axis="y", visible=False)
+axes[0].set_yticks(ypos, [NAMES[v] for _, v, _ in rows]); axes[0].set_ylim(5.5, -1.3)
+for g, y in ((GROUPS[0][0], -0.85), (GROUPS[1][0], 3.05)):
+    axes[0].annotate(g, (0, y), xycoords=("axes fraction", "data"), xytext=(-4, 0), textcoords="offset points",
+                     ha="right", va="center", fontsize=9.5, fontweight="bold", color=ps.INK)
+ps.finish(fig, title="What the redesign buys, against the original engine with the same store (routed, 20 ns)")
+ps.save_pdf(fig, "redesign_effect"); plt.show()
+""")
+
+md(r"""
+### All six NTT layouts side by side
+
+Sections 6 and 7 produced six NTT layouts at 20 ns: two flip-flop stores, two flip-flop iterations, and
+the original and pipelined engine with the chip's macro. The figure plots total area against energy per
+transform, and in Colab or Jupyter its two menus select any other pair of metrics. Whatever the pair, no
+layout wins on every axis, which is why this notebook reports its decisions as trade-offs.
+""")
+
+code(r"""
+nt = pnr[(pnr.clk_target_ns == 20) & pnr.variant.str.startswith("ntt") & ~pnr.variant.str.contains("hm")].set_index("variant")
+def _energy(v):
+    f = ROOT/"results/gls_power"/f"{v}_20ns"/"summary.json"
+    return json.loads(f.read_text())["energy_per_forward_ntt_nj"] / 1e3 if f.exists() else np.nan
+explore = pd.DataFrame({
+    "total area [mm²]": [sum(total_area(f"{v}_20ns")) / 1e6 for v in nt.index],
+    "fmax [MHz]": nt.fmax_mhz.values,
+    "latency of a forward NTT [µs]": nt.latency_us_at_fmax.values,
+    "energy per forward NTT [µJ]": [_energy(v) for v in nt.index],
+    "flip-flops": nt.flops.astype(int).values,
+}, index=nt.index)
+explore["area × time [mm²·µs]"] = explore["total area [mm²]"] * explore["latency of a forward NTT [µs]"]
+
+def show_points(x="total area [mm²]", y="energy per forward NTT [µJ]"):
+    fig, ax = plt.subplots(figsize=(7.5, 4.2))
+    pts = explore.dropna(subset=[x, y]).sort_values(y)
+    for k, (v, r) in enumerate(pts.iterrows()):
+        ax.scatter(r[x], r[y], **ps.marker_kw(COLOR[v]))
+        close = k > 0 and abs(r[y] - pts[y].iloc[k - 1]) < 0.06 * pts[y].max()   # neighbours: label above
+        ax.annotate(LABEL[v], (r[x], r[y]), xytext=(8, 7 if close else -9), textcoords="offset points",
+                    fontsize=8.5, color=ps.INK_2)
+    ax.set_xlim(0, explore[x].max() * 1.6); ax.set_ylim(0, explore[y].max() * 1.15)
+    ax.set_xlabel(x); ax.set_ylabel(y)
+    missing = explore.index[explore[[x, y]].isna().any(axis=1)]
+    if len(missing):
+        ax.text(0.99, 0.02, "not measured: " + ", ".join(LABEL[v] for v in missing), transform=ax.transAxes,
+                ha="right", fontsize=7.5, color=ps.MUTED)
+    ps.finish(fig)
+    if (x, y) == ("total area [mm²]", "energy per forward NTT [µJ]"):
+        ps.save_pdf(fig, "ntt_layouts_area_energy")
+    plt.show()
+
+show_points()                          # the default pair, stored with the notebook so that it shows everywhere
+try:                                   # in Colab or Jupyter: menus for any other pair
+    import ipywidgets as widgets
+    widgets.interact(show_points,
+                     x=widgets.Dropdown(options=list(explore), value="fmax [MHz]", description="x axis"),
+                     y=widgets.Dropdown(options=list(explore), value="area × time [mm²·µs]", description="y axis"))
+except ImportError:
+    pass
+# guard for the statement in the text above: no layout is best on every figure of merit
+better_high = {"fmax [MHz]"}
+best = {m: (explore[m].idxmax() if m in better_high else explore[m].idxmin()) for m in explore}
+assert len(set(best.values())) > 1, best
 """)
 
 # --------------------------------------------- 8. full chip and system
 md(r"""
-## 8. The full chip, and where decapsulation spends its time and energy
+## 8. The full chip: where decapsulation spends its time and energy
 
-On the chip, the blocks above are integrated into a single digital core together with the SPI front end,
-the HSM policy logic, SHA-256/HMAC, AES-256, the PUF root and vault services, and 18 OpenRAM [9] SRAM
-macros drawn from eight distinct masters. This ASIC build uses the **row-serialized Keccak** and the
-**single-port NTT store** examined above.
-
-The layout was verified hierarchically. Each SRAM master has its own transistor-level LVS in Netgen, and
-the top level is compared with those masters abstracted to their pin frames. A repeat run and a negative
-control, in which one deliberately altered endpoint must be detected, guard the comparison flow itself.
-The design-rule check covers the back-end, off-grid and front-end rules of the standard SKY130 deck; the
-front-end check and the one correction it called for, inside the OpenRAM macros, are described in
-Appendix C.3. Appendix C also adds a three-corner timing analysis of the whole chip and its rendered
-layout.
+On the chip, the blocks above share one digital core with the SPI front end, the HSM policy logic,
+SHA-256/HMAC, AES-256, the PUF services and 18 OpenRAM [9] SRAM macros of eight distinct types, and the
+build uses the **row-serialized Keccak** and the **single-port NTT store**. The routed core passes
+layout-versus-schematic (LVS), with the SRAMs checked separately, and the complete SKY130 design-rule
+(DRC) deck once sub-minimum implant gaps inside the OpenRAM macros are closed (Appendix C). This section
+asks what the chip spends its area, time and energy on, and how much of that the two decisions explain.
 """)
 
 code(r"""
@@ -1074,12 +1144,11 @@ plt.show()
 """)
 
 md(r"""
-### Where the chip's area goes
+### Where the chip's registers and macros sit
 
-The flow flattens the design, and synthesis gives most combinational cells generic names, but every
-flip-flop and every SRAM macro keeps its hierarchical name. `scripts/fullchip_blocks.py` uses those names
-to attribute the registers and the macros of the routed chip to the HSKEM blocks; only the resulting
-counts are published (`results/fullchip/blocks.csv`). Combinational logic is not attributed.
+Every flip-flop and SRAM macro of the flattened layout keeps its hierarchical name, which
+`scripts/fullchip_blocks.py` uses to attribute them to the HSKEM blocks; combinational logic cannot be
+attributed this way.
 """)
 
 code(r"""
@@ -1096,7 +1165,7 @@ blk.index = [BLOCK.get(b, b) for b in blk.index]
 fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharey=True)
 rows_ = blk.sort_values("flop_area_um2").index
 hl = {"Keccak sponge (shared)": ps.SERIES[1], "NTT engine (shared)": ps.SERIES[0]}
-for ax, col, title in [(axes[0], "flop_area_um2", "flip-flop area [mm²]"), (axes[1], "sram_area_um2", "SRAM macro area [mm²]")]:
+for ax, col, title in [(axes[0], "flop_area_um2", "(a) flip-flop area [mm²]"), (axes[1], "sram_area_um2", "(b) SRAM macro area [mm²]")]:
     vals = blk.loc[rows_, col] / 1e6
     ax.barh(range(len(rows_)), vals, height=0.6, color=[hl.get(r, ps.MUTED) for r in rows_], edgecolor=ps.SURFACE)
     ax.set_title(title); ax.grid(axis="y", visible=False); ax.set_xlim(0, vals.max() * 1.15)
@@ -1116,24 +1185,19 @@ assert blk.flops.rank(ascending=False)["Keccak sponge (shared)"] == 2
 """)
 
 md(r"""
-At chip level the two blocks studied in this notebook differ sharply. The NTT engine keeps its
-coefficients in an SRAM macro, so its own registers are a negligible share of the chip; its store is one
-of eighteen macros. The Keccak sponge, which holds its 1600-bit states in flip-flops, is the
-second-largest register block of the whole chip. This is the area counterpart of the decapsulation
-profile measured below: the block that dominates the latency occupies little logic, while the larger of
-the two accounts for a modest share of the latency.
+The NTT keeps its coefficients in one of the eighteen macros and has few registers of its own, whereas
+the Keccak sponge, which holds its 1600-bit states in flip-flops, is the second-largest register block of
+the chip; in time, as the profile below shows, the order is reversed.
 """)
 
 md(r"""
 ### What the two ASIC decisions cost at system level
 
-Block-level numbers can mislead: a block that is nine times slower matters little if the system rarely
-waits for it. The full-system testbench of HSKEM, which drives the co-processor through its SPI interface
-exactly as the ESP32 host does, measures the internal busy interval of decapsulation directly, which the
-16-bit hardware counter cannot report. `scripts/run_system_sim.sh` runs it with Icarus Verilog in four
-configurations: the FPGA configuration, each ASIC decision on its own, and both together. The
-FPGA-configuration result reproduces an earlier ModelSim run of the same testbench exactly, and the RTL
-it simulates is published in `hskem_rtl/` with one documented change (Appendix E.3).
+A block that is nine times slower matters little if the system rarely waits for it. The full-system
+testbench drives the co-processor through its SPI interface exactly as the ESP32 host does and measures
+the busy interval of a decapsulation, which the board's 16-bit cycle counter (Section 9) cannot report.
+`scripts/run_system_sim.sh` runs it in four configurations: the FPGA one, each ASIC decision on its own,
+and both together; the FPGA result reproduces an earlier ModelSim run exactly.
 """)
 
 code(r"""
@@ -1160,11 +1224,11 @@ rows = [("FPGA configuration", 0, 0), ("row-serialized Keccak only", 0, dec["kec
         ("ASIC configuration (both)", dec["single_port_sram_delta"], dec["keccak_serial_delta"])][::-1]
 fig, ax = plt.subplots(figsize=(10, 2.9))
 for y, (name, ntt_extra, kec_extra) in enumerate(rows):
-    ax.barh(y, base, height=0.5, label="FPGA-configuration baseline" if y == 0 else None, **ps.bar_kw(ps.SERIES[0]))
+    ax.barh(y, base, height=0.5, label="FPGA-configuration baseline" if y == 0 else None, **ps.bar_kw(ps.MUTED))
     if ntt_extra:
-        ax.barh(y, ntt_extra, left=base, height=0.5, label="added by the single-port store" if y == 0 else None, **ps.bar_kw(ps.SERIES[1]))
+        ax.barh(y, ntt_extra, left=base, height=0.5, label="added by the single-port store" if y == 0 else None, **ps.bar_kw(ps.SERIES[0]))
     if kec_extra:
-        ax.barh(y, kec_extra, left=base + ntt_extra, height=0.5, label="added by row-serialized Keccak" if y == 0 else None, **ps.bar_kw(ps.SERIES[2]))
+        ax.barh(y, kec_extra, left=base + ntt_extra, height=0.5, label="added by row-serialized Keccak" if y == 0 else None, **ps.bar_kw(ps.SERIES[1]))
     total = base + ntt_extra + kec_extra
     ax.annotate(f"{total:,} cycles" + (f"  (+{total / base - 1:.1%})" if total > base else ""),
                 (total, y), xytext=(6, 0), textcoords="offset points", va="center", fontsize=9, color=ps.INK)
@@ -1172,22 +1236,20 @@ ax.set_yticks(range(len(rows)), [r[0] for r in rows]); ax.grid(axis="y", visible
 ax.set_xlim(0, (base + dec["both_delta"]) * 1.28); ax.set_xlabel("decapsulation busy time [clock cycles]")
 ps.thousands(ax)
 ax.legend(ncols=3, loc="lower left", bbox_to_anchor=(0, 1.0), handlelength=1.2)
-ps.finish(fig); plt.show()
+ps.finish(fig, title="The single-port store adds most of the ASIC's extra decapsulation time"); plt.show()
 """)
 
 md(r"""
-Both decisions add latency to decapsulation, and their effects add exactly, as the analytical model
-predicts. At system level the single-port coefficient store accounts for most of the difference, while
-the row-serialized Keccak — nine times slower as a block — adds only a few percent. Valid and implicitly
-rejected ciphertexts take the same number of cycles in every configuration, so decapsulation time does
-not reveal whether a ciphertext was valid.
+Both decisions lengthen a decapsulation, and their effects add exactly, as the cycle model predicts. The
+single-port store accounts for most of the difference between the FPGA and the ASIC configuration, while
+the row-serialized Keccak adds only a few percent. Valid and implicitly rejected ciphertexts take the same
+number of cycles in every configuration, so the decapsulation time does not reveal which one arrived.
 
 ### Where decapsulation spends its cycles
 
-The decomposition above is inferred from differences between configurations. To measure it directly, a
-small monitor module, `tb/decaps_profiler.sv`, is simulated alongside the testbench. It only reads signals through hierarchical
-references, so neither the published RTL nor the testbench changes, and it counts, cycle by cycle, whether
-the shared NTT engine, the Keccak sponge and the permutation inside it are busy during a decapsulation.
+A small monitor, `tb/decaps_profiler.sv`, measures the split directly. It reads signals through
+hierarchical references only, leaving the RTL and the testbench untouched, and counts cycle by cycle
+whether the NTT engine, the Keccak sponge and the permutation inside it are busy.
 """)
 
 code(r"""
@@ -1212,7 +1274,7 @@ assert 0.45 < fp.ntt_busy / fp.cycles < 0.55 and fp.perm_busy / fp.cycles < 0.01
 assert 15 < fp.sponge_busy / fp.perm_busy < 17.5 and 0.33 < fp.other / fp.cycles < 0.40
 
 parts = [("ntt_busy", "NTT engine", ps.SERIES[0]), ("perm_busy", "Keccak permutation", ps.SERIES[1]),
-         ("sponge_io", "sponge absorb / squeeze around it", ps.SERIES[2]), ("other", "everything else", ps.MUTED)]
+         ("sponge_io", "sponge absorb / squeeze around it", "#f4b393"), ("other", "everything else", ps.MUTED)]
 names = {"fpga": "FPGA configuration", "keccak_only": "row-serialized Keccak only",
          "sram_only": "single-port store only", "asic": "ASIC configuration (both)"}
 order = ["asic", "sram_only", "keccak_only", "fpga"]
@@ -1227,46 +1289,30 @@ for y, c in enumerate(order):
 ax.set_yticks(range(len(order)), [names[c] for c in order]); ax.grid(axis="y", visible=False)
 ax.set_xlim(0, pf.cycles.max() * 1.12); ax.set_xlabel("decapsulation busy time [clock cycles]"); ps.thousands(ax)
 ax.legend(ncols=4, loc="lower left", bbox_to_anchor=(0, 1.0), handlelength=1.2, fontsize=9)
-ps.finish(fig); plt.show()
+ps.finish(fig, title="The NTT is busy for about half of every decapsulation, the permutation for under 1 %"); plt.show()
 share = pf[[p[0] for p in parts]].div(pf.cycles, axis=0)
 share.columns = [p[1] for p in parts]
 share.rename(index=names).round(3)
 """)
 
 md(r"""
-The profile confirms the decomposition to the cycle and explains it. In the FPGA configuration the NTT
-engine is busy for half of the decapsulation, whereas the Keccak permutation itself runs for less than one
-percent of it. The sponge around the permutation, into and out of which data move one byte per
-handshake, is busy roughly sixteen times longer than the permutation, and more than a third of the time
-goes to the remaining work of the decapsulation datapath, during which neither block is active. Each ASIC
-decision changes only its own share — the single-port store lengthens the NTT portion, the
-row-serialized round the permutation — while everything else stays identical to the cycle. For this chip
-a faster permutation is therefore worth little; a faster NTT or a wider sponge interface is the more
-promising target.
+The profile confirms the decomposition to the cycle. In the FPGA configuration the NTT is busy for half of
+the decapsulation and the permutation for less than one percent. The sponge around the permutation, which
+moves data one byte per handshake, is busy about sixteen times longer, and more than a third of the time
+goes to the rest of the datapath, which the profiler does not attribute further. Each ASIC decision
+changes only its own share. For the chip, a faster permutation is therefore worth little, and a faster
+NTT or a wider sponge interface is the promising target.
 """)
 
 
 md(r"""
 ### What a decapsulation costs in energy
 
-Sections 6 and 7 measured the energy of the Keccak and NTT blocks on their own; the profiled
-decapsulation also yields the energy of the whole chip. The logic is measured with a shadow of the routed
-netlist (`scripts/shadow_netlist.py`): every combinational cell of the layout is kept, its flip-flops
-follow the registers of the RTL simulation, and the resulting zero-delay activity of every net is
-annotated on the routed database together with its extracted parasitics. The clock network and the
-registers' clock pins come from OpenSTA's clock analysis, which needs no activity.
-
-The SRAM macros need a different route, because their Liberty power views are not physical.
-`scripts/sram_energy_spice.sh` simulates the complete transistor netlist of each macro in ngspice at the
-chip's clock, through idle cycles, writes, and reads of new and of repeated addresses, and integrates the
-supply current over every cycle; every simulated read returns the data written. Six of the eight macro
-types were simulated; the two largest 12-bit macros are interpolated, in their number of rows, from the
-two smaller ones. OpenRAM's netlists contain the transistors but no wiring, so two macros were simulated a
-second time from a flat extraction of their layout, which adds the capacitance of every net. The wiring
-*lowers* the energy of an access, to 0.67 and 0.78 of the schematic value, while it raises that of an
-idle cycle by about a third. For the 24 × 128 macro, the extracted netlist with its capacitors removed
-reproduces the schematic value to within 2 %, so the difference lies in the wiring itself and not in the
-transistors. The mean of the two factors scales every macro (`scripts/sram_energy_model.py`).
+The profiled decapsulation also yields the energy of the whole chip. The logic's activity is replayed on
+a shadow of the routed netlist, whose combinational cells are those of the layout and whose flip-flops
+follow the RTL simulation, and annotated with the extracted parasitics; the clock network comes from
+OpenSTA's clock analysis. The SRAM macros are priced with their transistor-level energies (Appendix C.4)
+and the access counts of the decapsulation.
 """)
 
 code(r"""
@@ -1281,12 +1327,25 @@ gate = se["sram_energy_with_chip_select_gating_uj"]
 saved_lo = cg["saved_by_gating_idle_blocks_mw"] * 1e-3 * t_dec * 1e6
 saved_hi = cg["saved_upper_estimate_mw"] * 1e-3 * t_dec * 1e6
 logic = sum(e.values())
-energy = pd.DataFrame({
-    "as built [uJ]": [f'{e["clock"]:.0f}', f'{e["sequential"]:.0f}', f'{e["combinational"]:.0f}', f"{sram:.0f}"],
-    "with gating [uJ]": ["", f"{logic - saved_hi:.0f}-{logic - saved_lo:.0f} (clock and registers together)", "",
-                         f"{gate:.0f}"],
-}, index=["clock network", "registers (clock pins)", "combinational logic", "SRAM macros (18)"])
-display(energy)
+seg = ["clock network and register clock pins", "combinational logic", "SRAM macros (18)"]
+rows = {"as built": [e["clock"] + e["sequential"], e["combinational"], sram],
+        "both remedies,\nconservative": [e["clock"] + e["sequential"] - saved_lo, e["combinational"], gate],
+        "both remedies,\nupper estimate": [e["clock"] + e["sequential"] - saved_hi, e["combinational"], gate]}
+fig, ax = plt.subplots(figsize=(9.5, 2.9))
+for k, vals in enumerate(rows.values()):
+    left = 0.0
+    for j, v in enumerate(vals):
+        ax.barh(k, v, left=left, height=0.62, label=seg[j] if k == 0 else None,
+                **ps.bar_kw([ps.SERIES[0], ps.SERIES[2], "#c9c6bb"][j]))
+        left += v
+    ax.annotate(f"{left:.0f} µJ", (left, k), xytext=(5, 0), textcoords="offset points", va="center", fontsize=9)
+ax.set_yticks(range(len(rows)), list(rows)); ax.invert_yaxis()
+ax.set_xlim(0, 1.13 * (logic + sram)); ax.set_xlabel("energy per decapsulation at 25 MHz [µJ]")
+ax.legend(ncol=3, loc="lower left", bbox_to_anchor=(0, 1.0), frameon=False, fontsize=8.5)
+ps.finish(fig, title="Where the energy of a decapsulation goes, and what two standard remedies would save")
+fig.text(0.01, -0.04, "Lower bars are projections from the measured activity, not changes to the signed-off chip. "
+         "Typical corner; logic from zero-delay activity.", fontsize=8.5, color=ps.MUTED)
+ps.save_pdf(fig, "decaps_energy"); plt.show()
 useful = sum(v["useful_accesses"] for v in sa["instances"].values())
 print(f"decapsulation: {pw['window_cycles']} cycles at {pw['clock_ns']:.0f} ns; logic {pw['logic_power_mw']:.1f} mW, "
       f"{pw['pins_annotated_from_vcd']} pins annotated from the shadow; SRAM accesses {18 * sa['window_cycles']} "
@@ -1295,8 +1354,6 @@ print(f"decapsulation: {pw['window_cycles']} cycles at {pw['clock_ns']:.0f} ns; 
 assert 0.9 < (e["clock"] + e["sequential"]) / logic < 0.97                    # "about 95 % is clock"
 assert e["combinational"] / logic < 0.05
 assert 0.6 < pw["registers_never_toggling"] / pw["registers_compared"] < 0.7   # "two thirds"
-wf = sorted(round(f["access"], 2) for f in se["wiring_factor"]["per_macro"].values())
-assert wf == [0.67, 0.78]                                                      # wiring factors quoted in the text
 assert 0.33 < (logic + sram) * 1e-3 < 0.37                                    # "about 0.35 mJ"
 assert 0.22 < sram / (logic + sram) < 0.28                                     # "about a quarter"
 assert 0.8 < 1 - gate / sram < 0.9                                             # "more than four fifths"
@@ -1309,44 +1366,37 @@ assert 0.2 < cg["saved_fraction"] and cg["saved_upper_fraction"] < 0.5
 """)
 
 md(r"""
-At 25 MHz a decapsulation costs about 0.35 mJ, and little of it pays for the computation itself. About
-95 % of the logic's energy goes into the clock network and the clock pins of the 28,000 registers,
-although two thirds of those registers never change during the operation and the combinational logic
-switches little. The SRAM macros add about a quarter of the total, for a similar reason: their chip
-selects are tied active, so all 18 macros perform an access in every cycle, whereas fewer than one access
-in twenty does useful work. Both are choices made in the integration rather than properties of ML-KEM,
-and both have standard remedies. Stopping the clock of the five blocks that stay idle throughout the
-decapsulation — the PUF vault and root service, the HSM shell, the HMAC and the DRBG, 13,400 registers in
-all — would save a quarter to a half of the clock and register energy, and driving each chip select from
-the block's own access requests would remove more than four fifths of the SRAM energy. Together the two
-measures would cut the energy of a decapsulation by roughly 40 to 55 %. These are projections from the
-measured activity, not changes made to the signed-off chip.
+The top bar shows that a decapsulation costs about 0.35 mJ at 25 MHz, and that little of it pays for the
+computation. About 95 % of the logic's energy goes into the clock network and the clock pins of the
+28,000 registers, two thirds of which never change during the operation. The SRAM macros add about a
+quarter of the total, because their chip selects are tied active: all 18 access in every cycle, while
+fewer than one access in twenty does useful work. Both are choices of the integration, and the lower bars
+price their standard remedies: gating the clock of the five blocks that stay idle throughout (PUF vault,
+PUF root service, HSM shell, HMAC and the deterministic random-bit generator), and driving each chip
+select from the block's own requests, which removes more than four fifths of the SRAM energy. Together
+they would save roughly 40 to 55 %, a projection from the measured activity rather than a change made to
+the signed-off chip.
 """)
 
 # ------------------------------------------------------------ Part III
 md(r"""
 # Part III — Does it hold up?
 
-The last part asks whether the results survive outside the simulator's comfort zone: on real hardware,
-where the same RTL runs on the FPGA board, and against a side-channel adversary, whose view of the power
-trace is modelled here.
+The last part leaves the simulator in two directions: onto real hardware, where the same RTL runs on the
+FPGA board, and towards a side-channel adversary, whose view of the power trace is modelled here.
 """)
 
 # ------------------------------------------------------------- 9. FPGA
 md(r"""
 ## 9. The same RTL on the FPGA board
 
-In its FPGA configuration — a dual-port M20K store and one Keccak round per clock — the same NTT and
-Keccak RTL runs inside HSKEM on the DE25-Nano at 50 MHz, under the control of an ESP32 host over SPI. I
-executed the complete two-role ML-KEM flow — key generation, public-key transfer, encapsulation,
-ciphertext transfer, and an independent decapsulation that must reproduce the same shared secret — 100
-times in succession, logging the FPGA's own cycle counters alongside the latency measured by the ESP32
-(`board/repeat_c3.py`; the raw logs and the hash of the bitstream are in `results/fpga/`).
-
-The FPGA cycle counters are **16 bits wide and saturate at 65,535**, so decapsulation is reported as a
-lower bound rather than extrapolated. Key-generation and encapsulation counts vary by a few cycles from
-run to run, as expected: `SampleNTT` rejection-samples the **public** seed ρ, so the variation reveals
-nothing secret.
+The board runs the FPGA configuration of the RTL, with a dual-port M20K store and one Keccak round per
+clock; the two ASIC choices exist only in simulation and layout. On the DE25-Nano at 50 MHz, driven by an
+ESP32 host over SPI, I executed the complete two-role ML-KEM flow 100 times in succession: key
+generation, public-key transfer, encapsulation, ciphertext transfer and an independent decapsulation that
+must reproduce the same shared secret. The FPGA's 16-bit cycle counters saturate at 65,535, so
+decapsulation is reported as a lower bound; key generation and encapsulation vary by a few cycles, as
+expected, because `SampleNTT` rejection-samples the **public** seed ρ.
 """)
 
 code(r"""
@@ -1390,15 +1440,22 @@ tput = 3136 / (b.esp32_latency_us / 1e6)
 print(f"payload over the host link: 3,136 bytes per run; effective throughput median {tput.median():.0f} B/s "
       f"(range {tput.min():.1f}-{tput.max():.1f}); end-to-end spread {b.esp32_latency_us.max() - b.esp32_latency_us.min():.0f} us")
 assert 300 < tput.median() < 450 and b.esp32_latency_us.max() - b.esp32_latency_us.min() < 1000
+
+fig, ax = plt.subplots(figsize=(9.5, 1.9))
+bars = {"FPGA core, all four phases\n(lower bound)": core_ms, "one run at the ESP32,\nend to end": e2e_ms}
+for k, (name, v) in enumerate(bars.items()):
+    ax.barh(k, v, height=0.6, **ps.bar_kw([ps.INK_2, ps.MUTED][k]))   # neutral: not the NTT/Keccak colours
+    ax.annotate(f"{v/1e3:.1f} s" if v >= 1e3 else f"{v:.1f} ms", (v, k), xytext=(5, 0), textcoords="offset points", va="center", fontsize=9)
+ax.set_xscale("log"); ax.set_xlim(0.5, 6e4); ax.set_yticks(range(2), list(bars)); ax.invert_yaxis()
+ax.set_xlabel("time per two-role ML-KEM run [ms], logarithmic")
+ps.finish(fig, title="On the board, the cryptographic core takes well under one percent of a run"); plt.show()
 """)
 
 md(r"""
-**HSM security invariants.** The same board then exercised the HSM's frame protection 100 times in a
-banking scenario. Each run establishes a fresh ML-KEM session, whose shared key never leaves the FPGA, and
-submits one authenticated frame; it then confirms that a copy with the amount altered by a single unit is
-rejected (`AUTH_FAILED`), that a replay is rejected (`REPLAY_DETECTED`), and that after a zeroize any
-further frame is refused (`AUTH_REQUIRED`). This is a regression test of the intended behaviour on one
-board with fixed test patterns, not a security evaluation.
+**HSM security invariants.** The same board then ran the HSM's frame protection 100 times in a banking
+scenario. Each run opens a fresh ML-KEM session and checks that an authenticated frame is accepted, that
+a copy with the amount altered by one unit and a replay are rejected, and that after a zeroize every frame
+is refused. This is a regression test on one board, not a security evaluation.
 """)
 
 code(r"""
@@ -1412,43 +1469,45 @@ assert (bank[marks] == "PASS").all().all() and bank.duplicate_debit.sum() == 0
 """)
 
 md(r"""
-**Where the time goes.** On this prototype the cryptography is not the bottleneck. The four FPGA phases
-together take a few milliseconds, whereas the host observes several seconds, because the ESP32 moves the
-800-byte public key and the 768-byte ciphertext over a deliberately slow bit-banged SPI link. Measured end
-to end, the link carries the 3,136 payload bytes of a run at an effective rate of about 0.36 kB/s,
-framing, responses and host-side processing included, with a run-to-run spread of under a
-millisecond (Appendix D.2). The next meaningful speed-up must therefore come from the interface — a
-hardware SPI port, or keeping both roles on chip — rather than from a faster NTT.
+**Where the time goes.** The bar chart above shows that on this prototype the cryptography is not the
+bottleneck: the FPGA phases take a few milliseconds of a run that lasts about 8.6 seconds at the host,
+because the ESP32 moves the public key and the ciphertext over a deliberately slow bit-banged SPI link at
+about 0.36 kB/s (Appendix D.2). For the prototype the next speed-up must come from the interface; for
+the chip, it is the NTT.
 """)
 
 # --------------------------------------------------------- 10. leakage
 md(r"""
 ## 10. What is not yet protected: a simulated leakage assessment
 
-**Timing.** Section 4 showed that the latency of both blocks is identical for every input, so neither
-has a data-dependent timing channel, and Section 8 showed that decapsulation time does not reveal whether
-a ciphertext was valid.
+Timing is already settled: Sections 4 and 8 showed that neither block, nor a decapsulation as a whole,
+takes a data-dependent number of cycles. This section turns to power, the channel that an attacker with
+an oscilloscope would use.
 
-**Power.** To determine whether the datapath's switching activity depends on the data,
-`tb/tb_ntt_leak.sv` records, for every cycle of a forward NTT, the Hamming distance between consecutive
-values of the datapath registers — the standard register-transition power model. `golden/leakage.py`
-then performs a fixed-versus-random TVLA [6]: one fixed polynomial is compared with fresh random ones in a
-randomly interleaved sequence, with Gaussian noise added to model measurement noise. A value of
-$|t| > 4.5$ indicates detectable leakage. A **negative control** splits the random class into two halves;
-because both are drawn from the same distribution, it must *not* cross the threshold, or the leakage
-would originate in the test setup rather than in the design. This is a pre-silicon model rather than a
-measurement: it shows *where* data-dependent switching occurs, not how many physical traces an attack
-would require.
+**What is measured.** `tb/tb_ntt_leak.sv` simulates a forward NTT and records, for every clock cycle, how
+many bits of the datapath registers change. This Hamming distance is the standard register-transition
+stand-in for the power drawn in that cycle, and Gaussian noise of four bit flips (σ) is added to every
+sample to imitate a real measurement.
+
+**How it is tested.** `golden/leakage.py` applies the fixed-versus-random Test Vector Leakage Assessment
+(TVLA) [6]. One set of traces transforms a fixed secret polynomial, the other fresh random ones, and
+Welch's t-test compares the two sets cycle by cycle; a value of $|t| > 4.5$ means that the power in that
+cycle depends detectably on the data. To check the test itself, a **negative control** compares two
+halves of the random set, which come from the same distribution and must therefore stay below the
+threshold.
+
+**What it can show.** The model covers the registers of the engine's logic, not the switching inside an
+SRAM macro, so it locates data-dependent activity in the logic; it does not predict how many physical
+traces an attack would need.
 """)
 
 md(r"""
-**A first-order countermeasure.** Because the NTT is linear, it can be masked at the algorithm level
-without changing the hardware, as in earlier masked lattice implementations [7]. The secret polynomial
-$a$ is split into two arithmetic shares $(a - m,\ m)$ with a fresh uniform mask $m$, the engine
-transforms each share, and $\mathrm{NTT}(a) = \mathrm{NTT}(a - m) + \mathrm{NTT}(m)$. Each share on its
-own is uniformly distributed and independent of $a$. The same TVLA is then applied to the two
-consecutive transforms as one trace. The committed results use 2000 traces per experiment; the Colab
-default of 400 is faster and leads to the same conclusions.
+**A first-order countermeasure.** Because the NTT is linear, it can be protected at the algorithm level
+without any change to the hardware [7]. The secret $a$ is split into two shares, $a - m$ and a fresh
+uniform mask $m$; the engine transforms each share separately, and the two results add up to
+$\mathrm{NTT}(a)$. Each share on its own is uniformly random, so neither transform should reveal anything
+about $a$. The same TVLA treats the two transforms as one trace, with 2000 traces per experiment in the
+committed results and 400 in Colab.
 """)
 
 code(r"""
@@ -1464,15 +1523,15 @@ series.append(("negative control: random vs random", np.load(ROOT/"results/leaka
 
 ylim = max(np.abs(s[1]).max() for s in series) * 1.08
 fig, axes = plt.subplots(3, 1, figsize=(11, 6.6), sharey=True)
-for ax, (title, t, colour) in zip(axes, series):
+for ax, tag, (title, t, colour) in zip(axes, "abc", series):
     ax.axhspan(-4.5, 4.5, color=ps.MUTED, alpha=0.28, zorder=0, lw=0)  # the "no detectable leakage" band
     ax.plot(t, lw=0.7, color=colour, zorder=2)
     for y in (4.5, -4.5):                           # thresholds stay visible above the trace
         ax.axhline(y, color=ps.INK_2, lw=0.9, ls=(0, (4, 3)), zorder=3)
     ax.set_ylim(-ylim, ylim); ax.set_xlim(0, len(t)); ax.set_ylabel("Welch t"); ps.thousands(ax)
     over = int((np.abs(t) > 4.5).sum())
-    ax.set_title(f"{title}  —  peak |t| = {np.abs(t).max():.1f}, {over:,} of {len(t):,} cycles above the threshold",
-                 fontsize=10.5)
+    ax.set_title(f"({tag}) {title}  —  peak |t| = {np.abs(t).max():.1f}, {over:,} of {len(t):,} cycles above the threshold",
+                 fontsize=10.5, loc="left")
 axes[-1].set_xlabel("clock cycle (masked traces span the two share transforms)")
 fig.suptitle("Fixed-versus-random TVLA on the NTT: the shaded band between the dashed lines is |t| ≤ 4.5 (no detectable leakage)",
              x=0.01, ha="left", fontsize=12, fontweight="bold")
@@ -1482,23 +1541,36 @@ S = pd.DataFrame(summ).T[["traces", "runs_per_trace", "max_abs_t", "cycles_over_
 assert (S.control_cycles_over_4p5 == 0).all(), "negative control failed"
 assert S.loc["unmasked", "cycles_over_4p5"] > 0 and S.loc["first-order masked", "cycles_over_4p5"] == 0
 assert summ["first-order masked"]["cycles"] == 2 * summ["unmasked"]["cycles"]   # "twice the transform time"
+# the same assessment of the ASIC configuration (single-port store), 2000 traces, committed results only
+for name, d in [("unmasked, ASIC configuration", "leakage_asic"), ("first-order masked, ASIC configuration", "leakage_masked_asic")]:
+    f = ROOT/"results"/d/"tvla_summary.json"
+    if f.exists():
+        summ[name] = json.loads(f.read_text())
+S = pd.DataFrame(summ).T[["traces", "cycles", "max_abs_t", "cycles_over_4p5", "fraction_over_4p5",
+                          "control_max_abs_t", "control_cycles_over_4p5"]]
+assert (S.control_cycles_over_4p5 == 0).all(), "negative control failed"
+assert S.loc["unmasked, ASIC configuration", "cycles_over_4p5"] > 0                  # "leaks as well"
+assert S.loc["first-order masked, ASIC configuration", "cycles_over_4p5"] == 0       # "and masking removes it"
 S
 """)
 
 md(r"""
-Without masking, most cycles of the transform exceed the threshold by a wide margin. With first-order
-masking no cycle crosses it, and the peak $|t|$ stays at the level of the negative control, which is what
-a leak-free trace set produces. The price is twice the transform time. This establishes first-order
-resistance only within the register-transition model; higher-order attacks, glitches and physical power
-measurements lie outside its scope.
+The figure confirms both expectations. Without masking, most cycles of the transform exceed the
+threshold, many by a wide margin (a); with masking none does, and the peak $|t|$ stays at the level of
+the negative control (b, c). The protection costs twice the transform time, mask generation not included.
+The table repeats the assessment for the ASIC configuration, whose single-port store reorders the same
+arithmetic over seven cycles per butterfly: the unmasked engine leaks just as clearly, and masking again
+removes every crossing of the threshold.
+It establishes first-order resistance of the NTT stage within this model only: the rest of the
+decapsulation, higher-order attacks, glitches and physical measurements remain outside its scope.
 """)
 
 # -------------------------------------------------------- 11. findings
 md(r"""
 ## 11. Findings
 
-The next cell derives the ratios behind each finding from the post-route table and asserts the direction
-of every claim made in the text that follows, so that the prose cannot silently diverge from the data.
+The next cell derives the ratios behind each finding from the committed results and asserts every claim
+made in the text that follows, so that the prose cannot silently diverge from the data.
 """)
 
 code(r"""
@@ -1540,47 +1612,25 @@ F
 """)
 
 md(r"""
-* **Correct from Python to layout.** The golden model agrees with a schoolbook product, with `kyber-py`
-  and with `hashlib`, and reproduces every official NIST ACVP vector; the complete co-processor RTL
-  reproduces all 25 NIST key-generation vectors byte for byte. The RTL matches the golden model on every
-  coefficient with exactly the predicted cycle counts, the modular reducer is proven correct for all of
-  its inputs, and the routed netlists reproduce the golden results at gate level.
-* **The single-port NTT store costs nothing in area–time at block level, yet it is the main source of the
-  ASIC's slower decapsulation.** After routing, the dual-port store is both larger and slightly slower to
-  clock, so the two variants end within a few percent of each other in area × time; with the chip's
-  OpenRAM macro the block needs about a third less area at a nearly unchanged clock.
-* **Row-serializing Keccak is a block-level loss that barely matters.** It saves only a few percent of
-  area while making each permutation roughly nine times slower and five and a half times more
-  energy-hungry, yet it adds only a few percent to decapsulation; the one-round-per-clock core remains
-  the better default.
-* **Block-level figures of merit mislead unless they are weighed by use.** The NTT is busy for half of a
-  decapsulation, the byte-wide sponge interface for about an eighth and the permutation for less than
-  one percent; in area the picture is reversed, with an NTT that occupies little logic and a Keccak
-  sponge that is the second-largest register block of the chip.
-* **At chip level, the integration sets the energy.** A decapsulation costs about 0.35 mJ at 25 MHz,
-  most of it in the clock network, the registers' clock pins and SRAM macros that are selected in every
-  cycle; gating the clock of the idle blocks and the chip selects of the macros would save roughly 40 to
-  55 %.
-* **The measurements pay for themselves.** Two redundant reduction stages, four always-zero storage bits
-  and a single-stage critical path led to an NTT that, after routing, is about a fifth smaller, clocks
-  about two thirds faster, completes a transform about 30% sooner and roughly halves the area–time
-  product; with the chip's SRAM macro as its store, the redesign still clocks about seven tenths faster
-  than the original engine. The 12-bit store alone saves about a fifth of the energy per transform; the
-  pipeline register gives part of it back for its speed.
-* **The interface limits the prototype, and the NTT leaks.** On the FPGA board the cryptographic core
-  accounts for well under one percent of the end-to-end latency. Both blocks run in constant time, but
-  the unprotected NTT leaks under the register-transition model; algorithm-level first-order masking
-  removes that leakage at twice the transform time.
+Taken together, the measurements of Parts I to III support six findings.
+
+| Finding | Evidence | Section |
+|:---|:---|:---:|
+| **The design is correct from Python to layout.** | every NIST vector in the golden model; all 25 key-generation vectors on the complete RTL; a proof of the reducer; gate-level agreement of the routed blocks | 2, 4, 7 |
+| **The single-port store is the right store and the main cost.** | a second port buys a flip-flop store nothing in area × time; the chip's macro saves a third of the area and four fifths of the energy; yet the single port sets most of the ASIC's extra latency | 6, 8 |
+| **Row-serializing Keccak barely matters.** | about 1 % less area for a permutation nine times slower and 5.5 times costlier in energy, which still adds only a few percent to a decapsulation | 6, 8 |
+| **The integration sets the energy.** | about 0.35 mJ per decapsulation, mostly clocking and macros selected in every cycle; two standard remedies would save 40 to 55 % by projection | 8 |
+| **The measurements pay for themselves.** | a proof and two measurements gave an NTT about two thirds faster after routing; with flip-flops it halves area × time, with the chip's macro it costs a seventh more energy | 7 |
+| **The prototype is interface-bound, and the NTT leaks.** | the core takes well under 1 % of a run on the board; masking removes the modelled first-order leakage of the NTT at twice its time | 9, 10 |
 """)
 
 md(r"""
 ### Context: published Kyber hardware
 
-HSKEM's NTT was designed for minimal area and a simple controller, not for speed, and the comparison
-below with two published, peer-reviewed designs makes that trade-off explicit. The published figures
-are copied from the cited papers; they refer to different platforms, clock rates and, for Sapphire, to
-the round-1 version of Kyber ($q = 7681$, a full 256-point NTT), so the table gives orders of magnitude
-rather than a ranking.
+HSKEM's NTT was designed for a small datapath and a simple controller rather than for speed. The table
+compares it with the compact FPGA design of Xing and Li [13] and the Sapphire crypto-processor [14],
+whose figures refer to other platforms and, for Sapphire, to round-1 Kyber, so it gives orders of
+magnitude rather than a ranking.
 """)
 
 code(r"""
@@ -1604,91 +1654,118 @@ ctx
 """)
 
 md(r"""
-In cycles per transform, the published designs are several times to an order of magnitude ahead,
-because they complete at least one butterfly per clock where HSKEM's single datapath needs five to seven.
-Sapphire is particularly instructive for this notebook: it too stores its coefficients in single-port
-SRAMs, but spreads them over several banks so that the two operands and the two results of a butterfly
-never compete for one port [14]. Combined with the cycle profile of Section 8, in which the NTT occupies
-half of a decapsulation, this identifies the next step for HSKEM: a banked single-port store would remove
-the two-cycle penalty that the chip's single-port macro costs today, and a deeper butterfly pipeline
-would approach one butterfly per clock.
+The published designs need several to ten times fewer cycles per transform, because they complete at
+least one butterfly per clock. Sapphire is the instructive case: it too stores its coefficients in
+single-port SRAMs but spreads them over banks, so that the operands and results of a butterfly never
+compete for one port. For HSKEM, where the NTT occupies half of a decapsulation, a banked single-port
+store would remove the two-cycle penalty of today's macro, and a deeper pipeline would approach one
+butterfly per clock.
 """)
+
+md(r"""
+### Things that looked right and were not
+
+Several results here exist only because a first answer that looked right was checked by a second,
+independent route. In each case a tool reported success, or a plausible number, on incomplete input or
+with a model that did not apply. An open flow makes such errors easy to commit, and the lesson that
+transfers is to obtain every important number twice, by routes that share no shortcut.
+
+| What looked right | What was wrong | What exposed it |
+|:---|:---|:---|
+| Timing of the routed chip from its exported netlist, with two hold violations | ORFS leaves the antenna diodes out of the netlist while the parasitics refer to them, so about 4,300 nets lost their wiring | Re-timing the routed database, which reproduces ORFS's own report to the picosecond (Appendix C.1) |
+| The power view that OpenRAM writes for each SRAM macro | It reports several megawatts for a single macro | Transistor-level simulation of every macro type (Appendix C.4) |
+| Device sizes read from OpenRAM's SPICE netlists | Junction areas are written as `0.75u` but mean square microns, so they were read a million times too small | Checking the unit suffix of every device parameter before simulation (`scripts/sram_energy_spice.sh`) |
+| The expectation that wiring capacitance raises energy | The extracted layout draws *less* energy per access than the schematic | The same extracted netlist simulated with and without its capacitors (Appendix C.4) |
+| A clean design-rule report from the flow | Its front-end section was disabled; with it, implant gaps inside the OpenRAM macros produce 180,456 markers | Running the front-end rules on their own (Appendix C.3) |
+| Repaired transitions on the macro's address pins | The macro sat against the die edge, so the repair buffers ended up 25 to 70 µm from its pins | Measuring the transition at every address pin after routing (Appendix B.4) |
+""")
+
+code(r"""
+# evidence behind each row of the table above
+sta_fc = json.loads((ROOT/"results/fullchip/sta_corners.json").read_text())
+assert "4,300 nets" in sta_fc["analysis"]
+lib_w = json.loads((ROOT/"results/gls_power/ntt_macro_20ns/summary.json").read_text())["macro_liberty_power_w"]
+assert lib_w > 1e6                                                              # "several megawatts"
+wd_ = json.loads((ROOT/"results/fullchip/sram_wiring_diagnosis.json").read_text())
+assert wd_["without_wiring"]["read_pj"] > wd_["with_wiring"]["read_pj"]
+fe = json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())
+assert fe["signed_off_gds"]["markers_total"] == 180456 and set(fe["signed_off_gds"]["markers_by_location"]) == {"OpenRAM macro"}
+assert fe["after_implant_fix"]["markers_total"] == 0
+print(f"OpenRAM power view of the 16x256 macro: {lib_w / 1e6:.1f} MW; FEOL markers before/after the implant fix: "
+      f"{fe['signed_off_gds']['markers_total']:,} / {fe['after_implant_fix']['markers_total']}")
+""")
+
 
 # ---------------------------------- 12. limitations, reuse, references
 md(r"""
 ## 12. Limitations
 
-* **Pre-silicon and uncertified.** Nothing has been fabricated. The golden model passes every official
-  NIST ACVP vector for ML-KEM-512 and the complete RTL reproduces all 25 key-generation vectors, but the
-  design holds no CAVP or CMVP certificate, which only an accredited laboratory can issue.
-* **Physical verification.** The full-chip layout passes the complete standard DRC deck only after a
-  mask-preparation step that closes sub-rule implant gaps inside the OpenRAM macros (Appendix C.3); the
-  macros themselves are OpenRAM output, used as generated otherwise. The top-level LVS abstracts the
-  SRAMs, which are verified separately at transistor level. Two of the three macro-store layouts exceed
-  the macro's 0.04 ns address-pin transition limit on two pins, by about 4 ps at most (Appendix B.4).
-* **Timing.** Closure was performed at the typical corner, and the slow corner roughly halves every
-  block's frequency. A hold margin removes the small fast-corner hold violations of the NTT layouts at
-  negligible cost (Appendix B.5). The SRAM macros' timing views come from OpenRAM's analytical delay
-  model at the typical corner only, so at chip level only the flip-flop paths are checked at every
-  corner; one of them misses hold at the fast corner by 1 ps (Appendix C.1).
-* **Power.** All energy figures are for the typical corner. The chip's logic energy rests on zero-delay
-  activity, so glitches are not counted. The SRAM energy comes from transistor-level simulation of the
-  macros, scaled for wiring by two macros simulated from their extracted layout; the two scale factors
-  differ by about a sixth, which leaves the SRAM figure uncertain by roughly ±8 %, and two of the eight
-  macro types are interpolated rather than simulated. Block-level energy comes from gate-level switching
-  activity, and five random inputs per block agree to within half a percent.
-* **Scope of the comparison.** The architecture points share a common 20 ns target, with a clock sweep
-  for selected blocks; apart from the two macro-store points, the block-level stores are built from
-  flip-flops, whereas the chip uses OpenRAM macros.
-* **Security and hardware.** The leakage assessment is a register-transition model, not a power
-  measurement. The PUF and entropy sources are ring oscillators on the FPGA; on the ASIC they are service
-  interfaces rather than on-silicon sources. The FPGA measurements come from a single board.
+The findings hold within the following boundaries.
+
+* **Pre-silicon and uncertified.** Nothing has been fabricated, and the design holds no NIST algorithm (CAVP) or
+  module (CMVP) validation certificate, which only an accredited laboratory can obtain.
+* **Physical verification.** The chip passes the complete DRC deck only after the implant gaps inside the
+  OpenRAM macros are closed (Appendix C.3), and its LVS abstracts the SRAMs, which are verified separately.
+  Two of the three macro-store block layouts exceed the macro's 0.04 ns address-pin transition limit on two
+  pins, by about 4 ps at most (Appendix B.4).
+* **Timing.** Closure was performed at the typical corner; the slow corner roughly halves every block's
+  frequency, and the SRAM timing views exist for the typical corner only. The signed-off chip misses hold
+  by 1 ps on one path at the fast corner (Appendix C.1).
+* **Power.** All energies are for the typical corner, and the chip's logic energy rests on zero-delay
+  activity, so glitches are not counted. The SRAM energies come from transistor-level simulation of every
+  macro type; the wiring correction was measured on the macros whose extracted layouts could be simulated
+  and averaged for the others, and the access energy depends on the clock period (Appendix C.4).
+* **Scope.** Apart from the two macro-store points, the block-level stores are built from flip-flops,
+  and dual-port or banked SRAM macros were not evaluated.
+* **Security and hardware.** The leakage assessment is a register-transition model of the logic, not a
+  power measurement. The PUF and entropy sources are ring oscillators on the FPGA and service interfaces
+  on the ASIC, and the FPGA measurements come from a single board.
 
 **Reuse.** No existing notebook was reused. Apart from the third-party material listed in `NOTICE` (the
-SKY130 cell models and the NIST ACVP vectors) and the OpenRAM views of the chip's own SRAM macro, all
-code in this folder was written for this project.
+SKY130 cell models and the NIST ACVP vectors) and the OpenRAM views and netlists of the chip's own SRAM
+macros, all code in this folder was written for this project.
+
+**AI assistance.** Claude (Anthropic) assisted with debugging, with launching and monitoring the long
+simulation and place-and-route runs, and with repetitive bookkeeping; the design, the measurements and
+every claim are the author's responsibility.
 
 ### References
-1. NIST, FIPS 203, *Module-Lattice-Based Key-Encapsulation Mechanism Standard*, 2024.
+1. NIST, FIPS 203, *Module-Lattice-Based Key-Encapsulation Mechanism Standard*, 2024. doi:10.6028/NIST.FIPS.203.
 2. NIST, FIPS 202, *SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions*, 2015.
+   doi:10.6028/NIST.FIPS.202.
 3. NIST, ACVP-Server test vectors for ML-KEM, https://github.com/usnistgov/ACVP-Server.
 4. G. Bertoni, J. Daemen, M. Peeters, G. Van Assche, *The Keccak reference*, version 3.0, 2011.
 5. P. Barrett, "Implementing the Rivest Shamir and Adleman public key encryption algorithm on a standard
    digital signal processor", *Advances in Cryptology — CRYPTO '86*, Springer, 1987.
+   doi:10.1007/3-540-47721-7_24.
 6. G. Goodwill, B. Jun, J. Jaffe, P. Rohatgi, "A testing methodology for side-channel resistance
    validation", NIST Non-Invasive Attack Testing Workshop, 2011.
 7. O. Reparaz, S. Sinha Roy, F. Vercauteren, I. Verbauwhede, "A masked ring-LWE implementation",
-   *Cryptographic Hardware and Embedded Systems — CHES 2015*, Springer, 2015.
+   *Cryptographic Hardware and Embedded Systems — CHES 2015*, Springer, 2015. doi:10.1007/978-3-662-48324-4_34.
 8. T. Ajayi et al., "Toward an open-source digital flow: first learnings from the OpenROAD project",
-   *Design Automation Conference (DAC)*, 2019; OpenROAD-flow-scripts,
+   *Design Automation Conference (DAC)*, 2019, doi:10.1145/3316781.3326334; OpenROAD-flow-scripts,
    https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.
 9. M. R. Guthaus et al., "OpenRAM: an open-source memory compiler", *International Conference on
-   Computer-Aided Design (ICCAD)*, 2016.
+   Computer-Aided Design (ICCAD)*, 2016. doi:10.1145/2966986.2980098.
 10. SkyWater Technology and Google, SKY130 open-source PDK, https://github.com/google/skywater-pdk.
 11. YosysHQ, Yosys and the OSS CAD Suite, https://github.com/YosysHQ/oss-cad-suite-build; the `slang`
     front end, https://github.com/povik/yosys-slang; Icarus Verilog, https://github.com/steveicarus/iverilog.
 12. G. Pope, `kyber-py`, https://github.com/GiacomoPope/kyber-py.
 13. Y. Xing, S. Li, "A compact hardware implementation of CCA-secure key exchange mechanism
     CRYSTALS-KYBER on FPGA", *IACR Transactions on Cryptographic Hardware and Embedded Systems*,
-    2021(2), pp. 328–356.
+    2021(2), pp. 328–356. doi:10.46586/tches.v2021.i2.328-356.
 14. U. Banerjee, T. S. Ukyab, A. P. Chandrakasan, "Sapphire: a configurable crypto-processor for
     post-quantum lattice-based protocols", *IACR Transactions on Cryptographic Hardware and Embedded
-    Systems*, 2019(4), pp. 17–61.
+    Systems*, 2019(4), pp. 17–61. doi:10.46586/tches.v2019.i4.17-61.
 """)
 
 # ---------------------------------------------------------- appendices
 md(r"""
 # Appendices
 
-The appendices hold the supporting detail behind the main text. Every check and assertion in them still
-runs, and each subsection is referenced where its result is used.
-
-* **A. Verification details** — the on-chip self-test constant, the memory-access pattern of the NTT
-* **B. Place-and-route details** — every routed run, the critical path and layouts, the clock-target
-  sweep, the macro's address pins, process corners and the hold repair, the redesign at 12 ns
-* **C. Chip-level details** — three-corner timing of the whole chip, the rendered layout
-* **D. FPGA details** — resources and the FPGA store, the host link
-* **E. Reproducing every result** — run time, place-and-route locally or in Colab, the published RTL
+The appendices hold the supporting detail; every check and assertion in them still runs, and each is
+referenced where its result is used: **A** verification, **B** place-and-route, **C** the chip, **D** the
+FPGA, **E** reproduction.
 """)
 
 md(r"""
@@ -1696,12 +1773,9 @@ md(r"""
 
 ### A.1 The on-chip self-test constant
 
-The golden model also anchors the on-chip self-test. HSKEM's NTT self-test transforms the fixed
-polynomial $a_i = 7 + 13i$ and compares a fingerprint of the result — a CRC-16/CCITT-FALSE over the 256
-output coefficients followed by their 16-bit sum — with the constant `0xFC3B59FC` hard-coded in the RTL
-and firmware. The cell below recomputes that fingerprint from the golden model, using the standard
-library's `binascii.crc_hqx` for the CRC, and confirms that the constant corresponds to the FIPS 203
-transform.
+HSKEM's NTT self-test compares a fingerprint of the transform of $a_i = 7 + 13i$, a CRC-16/CCITT-FALSE of
+the 256 output coefficients followed by their 16-bit sum, with the constant `0xFC3B59FC` in the RTL and
+firmware; the cell below recomputes it from the golden model.
 """)
 
 code(r"""
@@ -1716,11 +1790,9 @@ assert digest == 0xFC3B59FC, "on-chip self-test constant does not match the FIPS
 md(r"""
 ### A.2 The memory-access pattern of the NTT
 
-The access pattern explains the architecture of Section 3. Each layer halves the distance between the two
-operands of a butterfly, from 128 coefficients in the first layer to 2 in the last, and every butterfly
-reads two coefficients and writes two back. A dual-port memory serves each pair of accesses in one cycle,
-whereas a single-port memory needs one cycle per access: exactly the two extra cycles per butterfly seen
-in the controller traces of Section 3. The figure is read from the same trace.
+Each layer halves the distance between the operands of a butterfly, from 128 coefficients to 2, and every
+butterfly reads two coefficients and writes two back: one cycle per pair on a dual-port memory, one per
+access on a single-port memory, as the controller trace of Section 3 shows.
 """)
 
 code(r"""
@@ -1747,20 +1819,11 @@ md(r"""
 
 ### B.1 Every routed run
 
-The table lists every routed design point, including the clock-sweep runs and the design iterations.
-Two choices shape its columns.
-
-**Which fmax?** The design-level worst negative slack includes the I/O budget assumed in the SDC, 20% of
-the clock period on each side. For the Keccak wrapper this makes the combinational
-`lane_idx → lane_rdata` read path the critical path, which says nothing about the permutation core. The
-cores are therefore compared on their worst **register-to-register** slack,
-$f_{max} = 1/(T - \mathrm{slack}_{reg\to reg})$, at the typical corner; the design-level value is kept in
-the column `design fmax`.
-
-**Power.** OpenSTA's power figures in these reports are vectorless estimates based on default switching
-activity; they are omitted and play no part in the conclusions. Power derived from gate-level switching
-activity is reported for the Keccak blocks in Section 6, for the NTT in Section 7 and for the whole
-chip in Section 8.
+The table lists every routed design point, including the clock sweep and the iterations. The blocks are
+compared on their worst **register-to-register** slack, because the design-level slack includes the I/O
+budget of the timing constraints, which for the Keccak wrapper makes a combinational read path of the
+wrapper critical; the design-level value is kept in `design fmax`. OpenSTA's vectorless power estimates
+are omitted.
 """)
 
 code(r"""
@@ -1772,10 +1835,9 @@ pnr[[c for c in cols if c in pnr]]
 md(r"""
 ### B.2 The critical path and the routed layouts
 
-OpenROAD's own rendering of the worst setup path of the single-port NTT shows where the time goes: the
-path (red) starts at a coefficient register, passes the modular subtraction that forms the operand of the
-inverse butterfly, then the multiplier and the Barrett reducer, and ends at the reduced-product
-register.
+The worst setup path of the single-port NTT (red) starts at a coefficient register, passes the modular
+subtraction of the inverse butterfly, the multiplier and the Barrett reducer, and ends at the
+reduced-product register.
 """)
 
 code(r"""
@@ -1783,9 +1845,8 @@ display(Image(str(ROOT/"results/asic/ntt_sp_20ns/worst_path.jpg"), width=520))
 """)
 
 md(r"""
-The routed layouts themselves, rendered from the final GDS files with KLayout (`scripts/render_gds.py`,
-composed by `scripts/make_layout_figures.py`), are shown below at a common scale, together with the NTT
-redesign of Section 7, which is visibly the smallest of the four.
+The routed layouts, rendered with KLayout at a common scale, show the NTT redesign of Section 7 as the
+smallest of the four.
 """)
 
 code(r"""
@@ -1793,11 +1854,66 @@ display(Image(str(ROOT/"figures/block_layouts.jpg")))
 """)
 
 md(r"""
+A picture of a layout is not the layout, so the next cell fetches one of the GDS files published with the
+release `hskem-block-layouts`, checks its SHA-256 against `results/asic/release_gds_sha256.txt` and
+renders the file itself with KLayout's Python module; `RUN_DRC_COLAB = True` also runs the front-end
+rules of Appendix C.3 on it.
+""")
+
+code(r"""
+import hashlib, gzip, urllib.request
+GDS_POINT = "ntt_opt_pipe_w12_20ns"          # any line of results/asic/release_gds_sha256.txt
+RUN_DRC_COLAB = False
+REL = "https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/download/hskem-block-layouts"
+want = dict(l.split()[::-1] for l in (ROOT/"results/asic/release_gds_sha256.txt").read_text().splitlines())
+gz = pathlib.Path(f"/tmp/{GDS_POINT}.gds.gz")
+try:
+    if not gz.exists():
+        urllib.request.urlretrieve(f"{REL}/{GDS_POINT}.gds.gz", gz)
+    digest = hashlib.sha256(gz.read_bytes()).hexdigest()
+    assert digest == want[f"{GDS_POINT}.gds.gz"], "the downloaded GDS differs from the published checksum"
+    gds = gz.with_suffix("")
+    gds.write_bytes(gzip.decompress(gz.read_bytes()))
+    print(f"{GDS_POINT}.gds.gz: {gz.stat().st_size / 1e6:.1f} MB, SHA-256 matches the committed list")
+    try:
+        import klayout.lay as kl
+    except ImportError:
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "klayout"], check=True)
+        import klayout.lay as kl
+    lv = kl.LayoutView()
+    lv.set_config("background-color", "#ffffff"); lv.set_config("grid-visible", "false")
+    lv.set_config("text-visible", "false")
+    lv.load_layout(str(gds), True); lv.max_hier()
+    METAL = {(68, 20): 0x2a78d6, (69, 20): 0xeda100, (70, 20): 0x4a3aa7, (71, 20): 0x898781, (72, 20): 0xc3c2b7}
+    it = lv.begin_layers()
+    while not it.at_end():                      # metal 1 to 5 only, as in the figure above
+        lp = it.current()
+        key = (lp.source_layer, lp.source_datatype)
+        if key not in METAL:
+            lp.visible = False
+        else:                                   # the palette of the three-scale layout figure of Section 7
+            lp.fill_color = lp.frame_color = METAL[key]; lp.dither_pattern = 2
+        lv.set_layer_properties(it, lp)
+        it.next()
+    lv.zoom_fit(); lv.save_image("/tmp/gds_render.png", 1000, 1000)
+    bb = lv.active_cellview().layout().top_cell().dbbox()
+    fig, ax = plt.subplots(figsize=(5.2, 5.2))
+    ax.imshow(plt.imread("/tmp/gds_render.png"), extent=(0, bb.width(), 0, bb.height()))
+    ax.set_xlabel("x [µm]"); ax.set_ylabel("y [µm]"); ax.grid(False)
+    ax.set_title(f"Released GDS of {GDS_POINT}, metal 1 (blue) to 5", loc="left", fontsize=9.5)
+    plt.show()
+    if RUN_DRC_COLAB:
+        if not have("klayout"):
+            subprocess.run("apt-get -qq install -y klayout > /dev/null", shell=True, check=True)
+        print(sh(f"bash scripts/feol_drc.sh {gds} /tmp/{GDS_POINT}_feol.lyrdb")[-300:])
+except OSError as e:                            # no network: the committed figure above still stands
+    print("could not fetch the release asset:", e)
+""")
+
+md(r"""
 ### B.3 Response to the clock target
 
-The comparison in Section 6 uses one common 20 ns target. The supplementary post-route runs at 7 to 30 ns
-show how far each block can be pushed. The tables list the reg→reg fmax at every target and the change in
-standard-cell area relative to the 20 ns layout.
+Runs at 7 to 30 ns show how far each block can be pushed (reg→reg fmax, and area relative to 20 ns).
 """)
 
 code(r"""
@@ -1806,7 +1922,17 @@ ar = pnr.pivot(index="variant", columns="clk_target_ns", values="cell_area_um2")
 darea = 100 * (ar.div(ar[20.0], axis=0) - 1)
 show = fx.round(1).astype(object).where(fx.notna(), "")
 show.columns = [f"{c:g} ns" for c in show.columns]
-display(show.rename(index=LABEL).rename_axis("reg→reg fmax [MHz] at target"))
+fig, ax = plt.subplots(figsize=(9.5, 3.8))
+for v in ["keccak_r1", "keccak_s7", "ntt_dp", "ntt_sp", "ntt_opt_pipe_w12"]:
+    line = fx.loc[v].dropna()
+    ax.plot(line.index, line.values, marker="o", ms=5, lw=1.8, color=COLOR[v], label=LABEL[v],
+            ls="-" if v.startswith("ntt") else (0, (5, 2)))
+ps.reference_line(ax, 50, "50 MHz")
+ax.legend(loc="upper right", fontsize=8.5, handlelength=3.6)
+ax.set_xlim(5, 31); ax.set_ylim(0, fx.max().max() * 1.12)
+ax.set_xlabel("clock target of the run [ns]  (tighter to the left)"); ax.set_ylabel("reg→reg fmax [MHz]")
+ps.finish(fig, title="Tighter targets lift the Keccak cores (dashed); the original NTT stays below 50 MHz")
+plt.show()
 show = darea.round(1).astype(object).where(darea.notna(), "")
 show.columns = [f"{c:g} ns" for c in show.columns]
 display(show.rename(index=LABEL).rename_axis("cell-area change vs 20 ns [%]"))
@@ -1819,37 +1945,21 @@ assert fx.loc["ntt_opt_pipe_w12", 12.0] > fx.loc["ntt_sp"].max() * 1.7
 """)
 
 md(r"""
-The two families respond differently. Tightening the target from 20 ns to 7 ns raises the
-reg→reg frequency of the Keccak cores by about a third (one round per clock) and by more than half
-(row-serialized), at a cost of at most 2% in cell area: at 20 ns the flow had no reason to
-optimize further once the constraint was met. The original NTT blocks, by contrast, stay below 50 MHz at
-every tighter target, because their subtract–multiply–reduce path is a single combinational stage that
-gate sizing and buffering barely shorten; relaxing them to 30 ns saves only 2–3% of area. This is the
-ceiling that the pipelined design of Section 7 removes.
+From 20 to 7 ns the Keccak cores gain about a third (one round per clock) and more than half
+(row-serialized) in frequency for at most 2 % more area, while the original NTT blocks stay below 50 MHz
+at every target, because sizing and buffering barely shorten their single-stage critical path.
 """)
 
 md(r"""
 ### B.4 The macro's address pins
 
-The macro's Liberty view limits the transition at its address pins to 0.04 ns. After global routing,
-the flow's repair step splits the long wires to these pins with minimum-size buffers, whose transitions
-reached 0.26 to 0.35 ns; excluding that buffer from the library did not change the choice in this
-OpenROAD build. An intermediate attempt that only upsized the buffers left 0.05 to 0.07 ns, for a
-geometric reason: the automatic
-placer put the macro against the bottom of the die, while six of its address pins sit on its bottom
-edge, so their drivers ended up 25 to 70 µm away. Two hooks of the flow remove the cause.
-`flow/macro_place_ntt.tcl` fixes the macro about 30 µm higher, in the same orientation, which leaves
-room on both pin rows. `flow/post_grt_macro_pins.tcl`, run after global routing, turns every
-address-pin driver into a 12-times buffer at the edge of the macro's placement halo, gives the cell
-that feeds it drive strength 4 or 8, and re-routes the affected nets incrementally, as the flow itself
-does after its own repairs. A 16-times buffer did worse, because its input loads the preceding stage too
-much. The table below gives the resulting transition at each pin.
-
-The limit itself deserves a remark. OpenRAM wrote these timing views with its analytical delay model,
-not from transistor-level simulation, and 0.04 ns is simply the last entry of the slew table it
-generated. The remaining excesses, below half a picosecond at 20 ns and about 4 ps at 12 ns, are
-therefore an extrapolation of that table by a few percent rather than a measured failure; a SPICE
-characterization of the macro would settle the question.
+The macro's Liberty view limits the transition at its address pins to 0.04 ns. The flow's repair left
+0.26 to 0.35 ns with minimum-size buffers, and larger buffers still 0.05 to 0.07 ns, because the placer
+had put the macro against the die edge, where six of its address pins sit, and their drivers ended up
+25 to 70 µm away. Two flow hooks fix the macro about 30 µm higher
+(`flow/macro_place_ntt.tcl`) and place a 12-times buffer at the edge of its halo for every address pin
+(`flow/post_grt_macro_pins.tcl`), as panel (b) of the layout figure in Section 7 shows. The remaining excesses, below half a picosecond at 20 ns and about 4 ps
+at 12 ns, extrapolate the last entry of OpenRAM's analytical slew table by a few percent.
 """)
 
 code(r"""
@@ -1872,10 +1982,8 @@ for r in ps_["runs"]:
 md(r"""
 ### B.5 Process corners and the hold margin
 
-ORFS closes timing at the typical corner. To see how much margin that leaves, `scripts/sta_corners.sh`
-re-times every routed design with OpenSTA and its extracted parasitics (SPEF) at the slow corner
-(`ss`, 100 °C, 1.60 V) and the fast corner (`ff`, −40 °C, 1.95 V), using the SKY130A standard-cell
-libraries. The typical-corner results reproduce the ORFS figures exactly, which validates the setup.
+`scripts/sta_corners.sh` re-times every routed block at the slow (`ss`, 100 °C, 1.60 V) and the fast
+corner (`ff`, −40 °C, 1.95 V); the typical corner reproduces the ORFS figures exactly.
 """)
 
 code(r"""
@@ -1884,10 +1992,28 @@ tt = cor[cor.corner == "tt_025C_1v80"].set_index("design")
 tt_ref = pnr.assign(design=pnr.variant + "_" + pnr.clk_target_ns.map("{:g}".format) + "ns").set_index("design")
 assert (abs(tt.reg2reg_setup_slack_ns - tt_ref.loc[tt.index, "reg2reg_slack_ns"]) < 0.01).all(), "STA setup differs from ORFS"
 CORNER_ORDER = ["ss_100C_1v60", "tt_025C_1v80", "ff_n40C_1v95"]
-display(cor.pivot(index="design", columns="corner", values="reg2reg_fmax_mhz")[CORNER_ORDER].round(1)
-        .rename_axis("reg→reg fmax [MHz]"))
-display(cor.pivot(index="design", columns="corner", values="reg2reg_hold_slack_ns")[CORNER_ORDER]
-        .rename_axis("reg→reg hold slack [ns]"))
+fmx = cor.pivot(index="design", columns="corner", values="reg2reg_fmax_mhz")[CORNER_ORDER]
+hold = cor.pivot(index="design", columns="corner", values="hold_wns_ns")[CORNER_ORDER] * 1e3      # ps
+rows = [nbd.label(d) for d in fmx.index]
+cols = ["slow\n100 °C, 1.60 V", "typical\n25 °C, 1.80 V", "fast\n−40 °C, 1.95 V"]
+fig, ax = plt.subplots(1, 2, figsize=(11, 0.45 * len(rows) + 1.6))
+for a, data, cmap, fmt, title in ((ax[0], fmx, "Blues", "{:.0f}", "(a) reg→reg fmax [MHz]"),
+                                  (ax[1], hold * 0, "Greys", "{:+.0f}", "(b) worst hold slack [ps]")):
+    a.imshow(data.values, cmap=cmap, aspect="auto", vmin=0, vmax=max(data.values.max(), 1), alpha=0.55)
+    a.grid(False)
+    for (r, c), v in np.ndenumerate((fmx if a is ax[0] else hold).values):
+        a.text(c, r, fmt.format(v), ha="center", va="center", fontsize=8,
+               color=ps.CRITICAL if (a is ax[1] and v < 0) else ps.INK)
+        if a is ax[1] and v < 0:
+            a.add_patch(plt.Rectangle((c - 0.48, r - 0.46), 0.96, 0.92, fc="#fbe9e9", ec=ps.CRITICAL, lw=1.2, zorder=0))
+    a.set_xticks(range(3), cols, fontsize=8); a.set_yticks(range(len(rows)), rows if a is ax[0] else [""] * len(rows), fontsize=8)
+    a.set_title(title, loc="left", fontsize=9); a.tick_params(length=0)
+    for sp in a.spines.values(): sp.set_visible(False)
+    a.set_xticks(np.arange(-0.5, 3), minor=True); a.set_yticks(np.arange(-0.5, len(rows)), minor=True)
+    a.grid(which="minor", color="white", lw=1.5); a.tick_params(which="minor", length=0)
+fig.text(0.5, -0.02, "Routed blocks at their own targets, OpenSTA with extracted parasitics; red: hold violated (before the hold margin)",
+         ha="center", fontsize=8, color=ps.MUTED)
+plt.tight_layout(); ps.save_pdf(fig, "corners"); plt.show()
 # guards for the statements made in the text below
 fx_c = cor.pivot(index="design", columns="corner", values="reg2reg_fmax_mhz")
 hold_ff = cor[cor.corner.str.startswith("ff")].set_index("design").hold_wns_ns
@@ -1897,19 +2023,9 @@ assert (cor[cor.design.str.startswith("keccak")].reg2reg_hold_slack_ns > 0).all(
 """)
 
 md(r"""
-At the slow corner every block runs at roughly half its typical-corner frequency, so a product clock
-would have to be derived from the slow-corner column; the redesigned NTT of Section 7, which is included
-in the table, behaves the same way. At the fast corner every NTT layout shows a small hold violation,
-between 2 and 14 ps, because ORFS repaired hold only at the typical corner; a hold margin removes it, as
-shown next. The Keccak cores meet hold at every corner.
-
-**Removing the fast-corner hold violation.** Where the violating endpoint was traced (four of the five
-layouts), it is a single flip-flop, the controller's `done` flag, with 130 to 140 ps of hold slack at the
-typical corner. Every NTT layout was therefore re-run with `HOLD_SLACK_MARGIN = 0.17` ns, which makes the
-typical-corner repair leave at least that much slack (an earlier attempt with 0.05 ns changed nothing,
-because every path already exceeded that margin). Each repaired netlist was analysed again at the three
-corners and simulated at gate level against the golden vectors; `scripts/collect_hold_check.py` records
-the outcome.
+At the slow corner every block runs at roughly half its typical-corner frequency. At the fast corner the
+five flip-flop-store NTT layouts miss hold by 2 to 14 ps, because ORFS repairs hold at the typical corner
+only, so they were re-run with `HOLD_SLACK_MARGIN = 0.17` ns, re-timed and re-simulated at gate level.
 """)
 
 code(r"""
@@ -1937,19 +2053,15 @@ assert (hct["GLS after"] == "pass").all()
 """)
 
 md(r"""
-The margin removes the violation at every corner in all five layouts. The cell count changes by at most
-six, the standard-cell area by less than two hundredths of a percent and the clock rate by less than half
-a percent; every repaired netlist still passes gate-level simulation. The
-comparisons in the rest of this notebook use the original layouts, routed with the default ORFS settings;
-since the repair changes no figure beyond the second decimal, none of those comparisons is affected.
+The margin removes every violation at negligible cost, and every repaired netlist passes gate-level
+simulation; the rest of the notebook uses the original layouts, which the repair changes only beyond the
+second decimal.
 """)
 
 md(r"""
 ### B.6 The redesign at a 12 ns target
 
-A tighter 12 ns target separates the two architectures further: the pipelined NTT closes timing there,
-while the original saturates just below 50 MHz however hard the flow is pushed, because only the extra
-register shortens its critical path appreciably.
+At 12 ns the pipelined NTT closes timing, while the original saturates just below 50 MHz.
 """)
 
 code(r"""
@@ -1963,13 +2075,15 @@ if len(t12) == 2:
 md(r"""
 ## C. Chip-level details
 
+The chip was verified hierarchically: each SRAM type has its own transistor-level LVS in Netgen, the top
+level is compared with the macros abstracted to their pin frames, and a deliberately altered endpoint
+must be detected. The DRC covers the back-end, off-grid and front-end rules of the standard SKY130 deck.
+
 ### C.1 The whole chip at three corners
 
-`scripts/sta_corners_fullchip.sh` repeats the corner analysis of Appendix B.5 for the routed chip, on
-the routed database with its extracted parasitics. One restriction applies: OpenRAM provides timing
-views of the SRAM macros at the typical corner only, so these views are used at every corner, and only
-the flip-flop-to-flip-flop paths can be judged at the slow and fast corners. Only the summary of this
-analysis is published, since the layout database is not.
+`scripts/sta_corners_fullchip.sh` repeats the corner analysis on the chip's routed database. OpenRAM's
+SRAM timing views exist for the typical corner only, so the slow and fast corners judge only the
+flip-flop-to-flip-flop paths.
 """)
 
 code(r"""
@@ -2000,24 +2114,19 @@ assert ff_["setup_wns"] > 0 and ff_["hold_violating_endpoints"] == 1 and ff_["ho
 """)
 
 md(r"""
-Every flip-flop-to-flip-flop path of the chip meets the 40 ns clock at all three corners, with
-positive hold slack; even at the slow corner these paths would support more than twice the 25 MHz
-clock. At the typical corner the whole design meets setup with about 5 ns to spare and meets hold
-everywhere, and the analysis reproduces ORFS's own final report to the picosecond. That agreement needs
-the routed database: ORFS leaves the antenna diodes out of the exported netlist while the parasitics file
-still refers to them, so an analysis of the netlist alone loses the wiring of some 4,300 nets and, in an
-earlier draft of this notebook, reported two hold violations that do not exist. At the fast corner a
-single register-to-register path in the SPI frame buffer misses hold by 1 ps; the hold margin that
-cleaned the NTT layouts (Appendix B.5) is the natural remedy, applied in a new run of the chip.
+Every flip-flop-to-flip-flop path meets the 40 ns clock at all three corners, with room for twice the
+clock rate even at the slow corner. At the typical corner the whole design meets setup and hold, and the
+analysis matches ORFS's own report to the picosecond once it starts from the routed database rather than
+the exported netlist (Section 11). At the fast corner one path in the SPI frame buffer misses hold by
+1 ps; the signed-off chip carries this miss, which the hold margin of Appendix B.5 would remove.
 """)
 
 md(r"""
 ### C.2 The rendered layout
 
-The GDS of the chip, rendered with KLayout and downscaled to about 2.5 µm per pixel: enough to show the
-floorplan, with the SRAM macros along the left and right edges, but far too coarse to resolve any
-individual cell or wire. The layout database itself is not published, because its logic contains the
-demonstration board's provisioning test credential; its SHA-256 is recorded in `results/fullchip/`.
+At about 2.5 µm per pixel, the rendering shows the floorplan, with the SRAM macros along the left and
+right edges, but no individual cell. The layout database itself is not published, because its logic
+contains the demonstration board's provisioning test credential; its SHA-256 is in `results/fullchip/`.
 """)
 
 code(r"""
@@ -2027,23 +2136,14 @@ display(Image(str(ROOT/"figures/fullchip_layout.jpg"), width=640))
 md(r"""
 ### C.3 Front-end design rules
 
-ORFS runs the SKY130 KLayout deck with its front-end (FEOL) section disabled, so the flow's own check
-covers the back-end and off-grid rules only. `scripts/feol_drc.sh` runs the FEOL section on its own. It
-leaves out a single rule, `vpp.5`, which first merges poly, local interconnect and the two lowest metals
-of the whole layout and did not finish within hours even on a small block; the rule can only fire on the
-vpp capacitor layer, and the script confirms that this layer is empty before it starts.
-
-On the chip, two rules fired, both on gaps between implant shapes narrower than the minimum spacing:
-n/psdm.1 (0.38 µm) and npc.2 (0.27 µm). The deck itself notes that such gaps "should be manually
-merged". Every marker lies inside the OpenRAM macros, where abutted bitcells and periphery cells leave
-these slivers; the standard-cell logic has none. `scripts/implant_fix.py` closes the gaps inside the
-macros, as mask preparation would, and refuses to write a result unless the implant on every diffusion
-and tap region is unchanged (so no transistor changes type), no implant leaves any poly, no poly resistor
-is touched, and no width or spacing violation remains on the three layers. Field poly between the
-bitcells that lies in a closed gap receives the implant of its neighbours. `scripts/verify_untouched.py`
-then confirms that every other layer and every cell outside the macros is identical, shape for shape.
-The corrected chip passes all FEOL rules, and so do all 25 block-level layouts, including the three
-macro-store points, whose flow now uses the corrected macro.
+ORFS runs the SKY130 KLayout deck with its front-end-of-line (FEOL) section disabled, so
+`scripts/feol_drc.sh` runs that section on its own, skipping only `vpp.5`, which never finished and can
+fire only on the capacitor layer that the script confirms to be empty. On the chip two implant-spacing
+rules fired, every marker inside the OpenRAM macros, where abutted cells leave slivers that the deck
+itself says should be merged by hand. `scripts/implant_fix.py` closes them as mask preparation would and
+refuses to write a result if any transistor or resistor would change, and `scripts/verify_untouched.py`
+confirms that everything outside the macros is identical, shape for shape. The corrected chip passes all
+FEOL rules, as do all 25 block-level layouts.
 """)
 
 code(r"""
@@ -2062,17 +2162,73 @@ assert {"ntt_macro_20ns", "ntt_opt_pipe_macro_20ns", "ntt_opt_pipe_macro_12ns"} 
 """)
 
 md(r"""
+### C.4 The energy of the SRAM macros
+
+`scripts/sram_energy_spice.sh` simulates the transistor netlist of each macro type in ngspice at 25 MHz,
+through idle cycles, writes and reads of random data, and repeated reads of one address, as most of the
+chip's accesses are; every simulated read returns the data written. Because OpenRAM's netlists contain no
+wiring, the four of the eight macro types whose layout could be simulated in reasonable time (12 × 256,
+16 × 256, 24 × 128 and 24 × 256, bits × words) were simulated again from a flat extraction, and the ratio of the
+two results scales their schematic energies; the other four take the mean ratio.
+
+The wiring *lowers* the energy of an access, to between 0.65 and 0.77 of the schematic value, while it
+raises that of an idle cycle by about a third. The read cycle below shows why: a current flows through
+the accessed row for as long as the wordline is on, the whole 20 ns low half of the clock, and settles at
+about 2.5 mA without the wiring but at 0.8 mA with it. Removing the capacitors from the extracted
+netlist restores the schematic energy within a few percent, so the wiring capacitance is the cause,
+although the circuit mechanism has not been isolated; and because the current lasts as long as the
+wordline phase, these energies hold for 25 MHz only.
+""")
+
+code(r"""
+sm = json.loads((ROOT/"results/fullchip/sram_macro_spice.json").read_text())
+se4 = json.loads((ROOT/"results/fullchip/sram_energy.json").read_text())
+wd = json.loads((ROOT/"results/fullchip/sram_wiring_diagnosis.json").read_text())
+macros = pd.DataFrame({m: {"read [pJ]": e["read_pj"], "repeated read [pJ]": e["read_repeat_pj"],
+                           "write [pJ]": e["write_pj"], "idle cycle [pJ]": e["idle_pj"],
+                           "wiring factor (access)": se4["wiring_factor"]["per_macro"].get(m, {}).get("access")}
+                       for m, e in se4["masters"].items()}).T
+macros.index = [re.sub(r"sky130_sram_1rw_(\d+)x(\d+).*", r"\1 bits × \2 words", m) for m in macros.index]
+nbd.show(macros.round(2).rename_axis("macro, after wiring"))
+wv = pd.read_csv(ROOT/"results/fullchip/sram_wiring_diagnosis_read_cycle.csv")
+fig, ax = plt.subplots(1, 2, figsize=(10, 3.2), sharex=True)
+for lab, ls_ in (("without wiring", "--"), ("with wiring", "-")):
+    w = wv[wv.netlist == lab]
+    ax[0].plot(w.t_ns, w.i_mA, ls=ls_, color=ps.SERIES[0] if lab == "with wiring" else ps.SERIES[1], label=lab)
+    ax[1].plot(w.t_ns, w.br3, ls=ls_, color=ps.SERIES[0] if lab == "with wiring" else ps.SERIES[1])
+for a in ax:
+    a.axvspan(20, 40, color=ps.MUTED, alpha=0.08, lw=0)
+    a.set_xlabel("time from the rising clock edge of the read [ns]")
+ax[0].set_ylim(0, 6); ax[0].set_ylabel("supply current [mA]")
+ax[1].set_ylabel("voltage [V]")
+ax[0].text(30, 5.2, "wordline on", ha="center", color=ps.MUTED, fontsize=8)
+ax[0].set_title("(a) supply current of one read", loc="left", fontsize=9)
+ax[1].set_title("(b) the bitline that should stay high", loc="left", fontsize=9)
+fig.legend(*ax[0].get_legend_handles_labels(), loc="upper center", ncol=2, frameon=False, fontsize=8,
+           bbox_to_anchor=(0.5, 1.06))
+fig.text(0.5, -0.04, "24 × 128 macro, flat layout extraction with and without its parasitic capacitors; typical corner, 25 MHz",
+         ha="center", fontsize=8, color=ps.MUTED)
+plt.tight_layout(); ps.save_pdf(fig, "sram_read_cycle"); plt.show()
+# guards for the statements made in the text above
+fac = sorted(f["access"] for f in se4["wiring_factor"]["per_macro"].values())
+assert [round(f, 2) for f in (fac[0], fac[-1])] == [0.65, 0.77] and len(fac) == 4   # "four of the eight types"
+assert fac[-1] < 1 and all(1.2 < f["idle"] < 1.45 for f in se4["wiring_factor"]["per_macro"].values())   # "lowers", "about a third"
+assert all(all(v["reads_correct"]) and all(v["read_repeat_correct"]) for v in sm["macros"].values())
+i_wo, i_w = (wd[k]["settled_current_wordline_on_ma"] for k in ("without_wiring", "with_wiring"))
+assert round(i_wo, 1) == 2.5 and round(i_w, 1) == 0.8 and wd["with_wiring"]["clock_high_phase_pj"] > wd["without_wiring"]["clock_high_phase_pj"]
+noc = sm["flat_layout_without_wiring_capacitance"]["macros"]["sky130_sram_1rw_24x128"]
+sch = sm["macros"]["sky130_sram_1rw_24x128"]
+assert abs(noc["read_pj"][0] / np.mean(sch["read_pj"]) - 1) < 0.05 and abs(noc["write_pj"][0] / np.mean(sch["write_pj"]) - 1) < 0.05
+""")
+
+md(r"""
 ## D. FPGA details
 
 ### D.1 Resources and the FPGA store
 
-On the FPGA the NTT occupies a few hundred ALMs, one M20K block and two DSP blocks, and Quartus stores
-only 12 bits per coefficient (3072 bits in total) because the upper four bits are provably zero in the
-integrated design. The original block-level SKY130 runs keep a 16-bit store, since the block's write port
-is 16 bits wide; the redesign of Section 7 applies the same narrowing to the ASIC store. The released
-bitstreams deliberately disable the stand-alone NTT self-test command, so on hardware the NTT is observed
-only as part of the complete flows of Section 9; its isolated cycle count comes from simulation
-(Section 4).
+On the FPGA the NTT occupies a few hundred ALMs, one M20K block and two DSP blocks, and Quartus stores only
+12 bits per coefficient because the upper four are provably zero. The released bitstreams disable the
+stand-alone NTT self-test, so on hardware the NTT is observed only within the flows of Section 9.
 """)
 
 code(r"""
@@ -2086,10 +2242,9 @@ assert (ntt_fpga["m20k"], ntt_fpga["dsp"], ntt_fpga["block_memory_bits"]) == ("1
 md(r"""
 ### D.2 The host link
 
-The ESP32 drives the SPI link by bit-banging, with a nominal SCK of about 10 kHz chosen for robustness
-during demonstrations. The actual clock frequency has not been measured, which would take a logic
-analyzer; the effective payload rate of Section 9 is computed from the logged end-to-end latency and the
-bytes that each run transfers, so it includes framing, responses and host-side processing.
+The ESP32 bit-bangs the SPI link at a nominal 10 kHz, chosen for robustness and not measured; the
+effective rate of Section 9 follows from the logged latency and the 3,136 payload bytes of a run, and the run-to-run
+spread stays under a millisecond.
 """)
 
 md(r"""
@@ -2097,48 +2252,19 @@ md(r"""
 
 ### E.1 Run time in Colab
 
-A complete `Run all` takes about half an hour on a free Colab instance, and the last cell reports the
-measured time of every section.
-
-| Part | What runs |
-|:---|:---|
-| Setup | clone of this folder, OSS CAD Suite download |
-| Sections 2–4 | golden model, ACVP, controller trace, RTL simulation, NIST vectors on the complete RTL |
-| Section 5 | SKY130 synthesis of four architecture points |
-| Section 7 | design iteration: simulation, synthesis, gate-level simulation of a routed netlist |
-| Sections 8 and 10 | result summaries, leakage simulation (400 traces) |
-
-In a local rehearsal of the Colab path, Sections 4, 5 and 7 account for nearly all of the computing
-time; everything else takes seconds.
+A complete `Run all` takes about half an hour on a free Colab instance, almost all of it in Sections 4,
+5 and 7, and the last cell reports the time of every section.
 """)
 
 md(r"""
 ### E.2 Place-and-route, locally or in Colab
 
-Place-and-route with OpenROAD-flow-scripts takes between about eight minutes and three and a half hours per
-design point on a desktop machine. Its results are committed in `results/asic/`, together with the exact
-scripts that produced them (`scripts/run_orfs.sh`, `flow/config.mk`); setting `RUN_PNR = True` on a
-Linux machine with ORFS at commit `6101364b` regenerates them. The corner analysis is rerun with
-`scripts/sta_corners.sh`, and the activity-based power of the routed blocks with
-`scripts/run_gls_power.sh` and `scripts/run_gls_power_keccak.sh`, both of which read the parasitics of a
-local ORFS run. The logic energy of the chip in Section 8 is regenerated with
-`scripts/fullchip_power.sh`, which needs the chip's unpublished layout database, and its SRAM energy with
-`scripts/sram_energy_spice.sh` and `scripts/sram_energy_model.py` from the macros' OpenRAM netlists in
-`flow/macros/spice/`. The system-level simulation of Section 8 runs from the published RTL with `scripts/run_system_sim.sh` (about
-six minutes per configuration; `CAC_PROFILE=1` adds the cycle profiler), and `RUN_SYSTEM_SIM = True`
-repeats it inside the notebook, also in Colab. The front-end
-design-rule check of Appendix C.3 runs with `scripts/feol_drc.sh` on any layout; `scripts/implant_fix.py`,
-`scripts/verify_untouched.py` and `scripts/feol_summary.py` reproduce the correction of the macros and
-its summary. Section 9 reports hardware measurements whose raw logs and hashes are in `results/fpga/`.
-
-Without any installation, `scripts/make_orfs_bundle.sh` packages the very ORFS build that produced these
-results — the same binaries, not a rebuild — together with the libraries it needs into a single archive
-that runs on a stock Ubuntu 22.04 machine such as a Colab instance; the build carries no CPU-specific
-instructions. Before publication the archive was tested in a pristine Ubuntu 22.04 container on three
-committed design points — the pipelined NTT (with twelve threads and with the two of a free Colab
-instance), the single-port NTT and the one-round-per-clock Keccak core — and every run reproduced all
-final metrics of the committed layout. Setting `RUN_PNR_COLAB = True` downloads the archive from the
-release of the author's fork, repeats that run and compares every final metric with the committed one.
+Place-and-route takes eight minutes to three and a half hours per design point on a desktop machine.
+`RUN_PNR = True` regenerates the committed results on Linux with ORFS at commit `6101364b`, and the README
+lists the commands behind every other result; only the chip-level ones need the unpublished layout
+database. Without ORFS, `RUN_PNR_COLAB = True` downloads an archive of the very ORFS build used here
+(`scripts/make_orfs_bundle.sh`), which reproduced every final metric of three design points in a pristine
+Ubuntu 22.04 container, repeats the pipelined-NTT run and compares the result with the committed one.
 """)
 
 code(r"""
@@ -2164,16 +2290,22 @@ if RUN_PNR_COLAB:
 md(r"""
 ### E.3 The published RTL
 
-The complete HSKEM RTL needed for the full-system testbench is published in `hskem_rtl/`. It differs from
-the source tree only where documented in `hskem_rtl/PUBLICATION_PATCH.diff`: a synthesis-time
-provisioning test credential that is still used by my demonstration board is replaced by a public
-placeholder, and the testbench's two precomputed provisioning tags are recomputed for that placeholder
-with the same HMAC-SHA-256 construction. The recomputation was validated by first reproducing the
-original tags from the original credential, and the published copy passes the complete testbench with
-the same measurements. The block RTL in `rtl/` is copied from the HSKEM source tree by
-`scripts/sync_rtl.sh`; `rtl/UPSTREAM_SHA256.txt` records the upstream hashes, and
-`rtl/PORTABILITY_PATCH.diff` documents the single change — an explicit `kyber_pkg::` scope — required
-by older Icarus Verilog releases.
+The RTL in `hskem_rtl/` differs from the source tree only as documented in `PUBLICATION_PATCH.diff`: a
+provisioning test credential still used by my board is replaced by a public placeholder, with the
+testbench's two provisioning tags recomputed and the measurements unchanged. `rtl/` is copied from the
+source tree by `scripts/sync_rtl.sh`, with upstream hashes and one documented portability change.
+""")
+
+md(r"""
+### E.4 Unit tests of the analysis scripts
+
+The scripts that turn simulation output into numbers are tested on small inputs with hand-computed
+results, in under a second, by the next cell.
+""")
+
+code(r"""
+out = sh("python3 -m pytest -q -p no:cacheprovider tests")
+assert " passed" in out and "failed" not in out and "error" not in out.lower()
 """)
 
 # ------------------------------------------------------------ run time
