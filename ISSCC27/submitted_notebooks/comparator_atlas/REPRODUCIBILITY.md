@@ -464,3 +464,22 @@ The current run is linked in the submission PR.
 Original code is MIT licensed. Model/tool licenses and references are listed
 in `THIRD_PARTY_NOTICES.txt` and the notebook. Verbatim upstream tool notices
 are in `third_party_licenses/`; tool binaries are obtained separately.
+# Adopted single-row-a1 area version
+
+The current layout/report/Notebook/poster explicitly select the exact frozen
+single-row-a1 candidate. [Versioned native assets, original control, all1440raw
+traces,720numerical receipts and offline audit](layout_single_row/v1/README.md)
+are public and hash-closed. All-material area2207.088->2074.254um2 (6.01852%less);
+pair/order/mirroring/y,27guardedMOS/15ports, WL/body/junctions/escapes preserved.
+The14native checks/one candidateDRCattempt precede full45; original-control native
+outputs were reused, not rerun. Publication performed no EDA/SPICE.
+
+Both layouts/modes are180correct at2ns;1nsRC retains24unresolved. The separate
+known-nonblind nominal codezero paired45 grid is not the49condition schematic
+calibrated study. Approximately1%energy changes are not robust globalPPA;
+numerical1%/20ps acceptance bands are not physical uncertainty bounds.
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+Original studies below remain preserved historical control evidence.
+The lossless twelve rawZIPpartitions add243,620,890bytes to source bootstrap.
+All400models refer to the existing public exactraw/canonicalGitmanifest;
+no duplicate model corpus, LFS, private-only raw dependency or installer is added.

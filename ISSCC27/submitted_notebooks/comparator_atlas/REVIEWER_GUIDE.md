@@ -17,6 +17,15 @@ or its [preview image](results/study/poster_preview.png).
 These RC results are outcomes of the archived 27-device simulation decks; extracted-model physical fidelity is not yet qualified. In the pinned Magic/open_pdks pipeline, mutual capacitances are retained while grounded capacitance increases. The physical error magnitude and direction are unknown; no exact duplication factor or corrected counts or energy are inferred. C-only is not independent ground truth, and RC-versus-C performance differences cannot be attributed solely to resistance. DRC/LVS establish their recorded structural checks, not parasitic-model fidelity. Schematic results are unaffected by this extraction concern. Recorded numerical agreement and simulation coverage do not establish silicon PVT performance.
 See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
+**Current layout: single-row-a1.** Actual all-material area2207.088->2074.254um2
+(6.01852%less), with unchanged27guardedMOS/15ports. The paired45-PVT qualification
+has1440new transients/720qualified pairs: both C/RC layouts180correct at2ns;
+C1ns168->170correct, RC1ns156correct/24unresolved unchanged. RC mean425.490->
+421.045fJ, worst1.835032->1.810632ns. Small changes are not robust globalPPA.
+Read the [current version and all raw/native records](layout_single_row/v1/README.md)
+before the explicitly historical studies below. The1%/20ps criteria are
+numerical acceptance bands, not physical uncertainty bounds.
+
 1. **Question and circuit.** Read the abstract and 27-transistor circuit guide.
    The work asks when a calibrated regenerative comparator reaches a correct
    decision before a finite deadline, and what physical costs are involved.

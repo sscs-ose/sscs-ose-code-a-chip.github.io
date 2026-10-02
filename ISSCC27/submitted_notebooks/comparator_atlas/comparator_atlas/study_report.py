@@ -263,15 +263,17 @@ def paired_energy(frame: pd.DataFrame, selected_name: str) -> dict:
 
 def render_study(*, refresh_figures: set[str] | None = None) -> Path:
     import layout_evidence as physical
+    import single_row_evidence as area
     from presentation import pvt45_results, specification_map, waveform_lab
 
     frame, reports, manifest = load_validation()
     layout = physical.load_layout()
     full_pvt = pvt45_results.load_results()
+    adopted = area.load()
     pvt45_results.review_examples(full_pvt)
     waveform_data = waveform_lab.load_lab()
     _, operating, stress = load_stress()
-    optimization = checked_manifest("optimization_manifest.json")
+    checked_manifest("optimization_manifest.json")
     selection = json.loads((STUDY / "selection.json").read_text())
     name = selection["selected_design"]
     author = json.loads((STUDY.parents[1] / "entry_metadata.json").read_text())["authors"][0]
@@ -303,6 +305,9 @@ def render_study(*, refresh_figures: set[str] | None = None) -> Path:
         "pvt45_timing.png": lambda: pvt45_results.timing_figure(full_pvt["frame"]),
         "pvt45_comparison.png": lambda: pvt45_results.tradeoff_figure(full_pvt["frame"]),
         "pvt45_worst_waveform.png": lambda: pvt45_results.worst_case_figure(full_pvt),
+        "single_row_layout.png": lambda: area.layout_figure(adopted),
+        "single_row_comparison.png": lambda: area.comparison_figure(adopted),
+        "single_row_worst.png": lambda: area.worst_figure(adopted),
     }
     if professional is not None:
         factories["efficient_control.png"] = lambda: entry_tools.tradeoff_figure(professional)
@@ -608,6 +613,35 @@ Codes are frozen before perturbing the interface. The history step changes the e
 evaluation starts at 22.025 ns. Pin error includes deterministic settling and kickback, not random noise.</p>
 <p class="muted">{html.escape(stress["numerical_scope"])} Refinement limits are identical outcomes,
 at most 1% core-energy difference and at most 20 ps resolved-latency difference. These checks are not production signoff.</p></section>
+<section id="single-row-a1"><h2>Adopted area version: single-row-a1</h2>
+<p><strong>All-material GDS bbox2207.088 ->2074.254um2 (6.01852%less).</strong>
+129.6x17.03 ->121.8x17.03um; all wells, body contacts, guards and shields included,
+TEXTonlyexcluded.27guardedMOS/15ports, device WL/flavors/junctions, pair order,
+mirroring/y and local escapes stay fixed; pitch4.8->4.5um and required horizontal
+routing endpoints follow placements. No matching-benefit or diffusion-sharing claim.</p>
+{pictures["single_row_layout.png"]}
+<p>Separate known-nonblind, nominal codezero full45:1440NEWtransients,720qualified
+10/5pspairs,180keys per layout/mode;2nsPRIMARY. Bothlayouts C/RC180correct at2ns.
+At1ns C168->170correct ONLY at SS1.62V-40C,+/-10mV; RC retains the SAME24unresolved
+keys (156correct). No wrong/newunresolved2ns or formerlycorrect1nspoint lost.</p>
+<div class="table-scroll">{area.table(adopted).to_html(index=False, border=0)}</div>
+{pictures["single_row_comparison.png"]}
+<p>RC mean425.490->421.045fJ (-1.0448%ratioofmeans), worstrecorded1.835032->1.810632ns;
+sampled2nsmargin164.968->189.368ps. Cmean356.712->353.340fJ (-0.9453%).
+All180energy/latency pairs decrease in EACHmode, but small~1%energy/1-25ps timing
+changes are not robust globalPPA.1%/20ps numerical criteria are acceptance bands,
+not uncertainty bounds. Maxactual10/5ps discrepancies:0.017538%energy/9.755pslatency.</p>
+{pictures["single_row_worst.png"]}
+<p>Candidate14native checks passed on one actual DRC attempt BEFOREfull45;
+original-control native proof was reused, not rerun. No publication EDA/SPICE.
+Fresh original-control RC matches the historical180-key grid outcomes at1/2ns;
+floating-precision differences were measured, not assumed. Historical traces are
+not credited as new executions. C-only has no historical population or independent truth.</p>
+<p><strong>{html.escape(area.NOTICE)}.</strong> Not calibrated49stress/noise/mismatch/trim,
+silicon, qualifiedPEX or signoff. Core excludes drivers/controller/calibration.
+<a href="../../layout_single_row/v1/README.md">All versioned native/raw records,
+720numerical receipts, keyed transitions, limiting keys, pins and offline remeasurement</a>.
+The original studies below remain preserved history, not candidate data.</p></section>
 {layout_section}
 {pvt_section}
 <section><h2>Reproduction, scope and references</h2>
@@ -658,6 +692,9 @@ and documentation. Original code is MIT licensed; model and tool licenses are re
         "waveform_ui_source_sha256": sha256(waveform_javascript_path),
         "full_pvt45_input_sha256": pvt45_results.REFERENCE_FILES,
         "full_pvt45_plot_source_sha256": sha256(Path(pvt45_results.__file__)),
+        "current_layout_version": area.VERSION,
+        "single_row_evidence_manifest_sha256": sha256(area.FOLDER / "evidence-sha256.json"),
+        "single_row_analysis_sha256": sha256(area.FOLDER / "analysis/full45-analysis.json"),
         "rc_model_applicability_notice": pvt45_results.RC_SCOPE_NOTE,
         "sampled_schematic_analysis": sampled_analysis,
         "artifact_sha256": {

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import entry_tools as entry
 import layout_evidence as physical
+import single_row_evidence as area
 from presentation import pvt45_results, specification_map
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,6 +51,7 @@ def load_facts() -> dict:
     old = costs.loc["Previous balanced RC"]
     repaired = costs.loc["Repaired Distributed RC"]
     ideal = costs.loc["Schematic"]
+    adopted = area.load()
     return {
         "authors": metadata["authors"],
         "title": metadata["title"],
@@ -58,6 +60,15 @@ def load_facts() -> dict:
         "colab_url": COLAB_URL,
         "source_tree_url": TREE_URL,
         "pull_request_url": PR_URL,
+        "area_optimization": {
+            "version": area.VERSION,
+            "control_area_um2": 2207.088,
+            "candidate_area_um2": 2074.254,
+            "reduction_percent": adopted["analysis"]["area_reduction_percent"],
+            "table": area.table(adopted).to_dict("records"),
+            "evidence_manifest_sha256": entry.digest(area.FOLDER / "evidence-sha256.json"),
+            "analysis": adopted["analysis"],
+        },
         "rc_model_applicability": {
             **metadata["rc_model_applicability"],
             "notice": pvt45_results.RC_MODEL_NOTICE,
@@ -183,6 +194,30 @@ IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
 [Run in Colab]({facts["colab_url"]}) |
 [Reproduction instructions](REPRODUCIBILITY.md)
 
+## Current area version: single-row-a1
+
+The frozen single-row candidate reduces the **all-material GDS bbox by6.01852%**:
+129.6 x17.03um =2207.088um2 ->121.8 x17.03um =2074.254um2.
+Wells, body ties, guards and shields are included; only TEXT is excluded.
+Pair order/mirroring/y,27guarded PCells/WL/flavors/junctions,15ports and local
+escapes are unchanged; pitch4.8->4.5um requires horizontal routing endpoints
+to follow placements.14native checks passed on one actual candidate DRC attempt.
+Original-control native proof was reused, not rerun.
+
+A separate known-nonblind nominal code-zero paired45-PVT experiment completed
+**1440new transients /720qualified10/5pspairs /180keys per mode/layout**.
+Both control/candidate C/RC are180/180correct at the fixed2ns primary deadline.
+At1ns C improves168->170correct (SS1.62V-40C,+/-10mV); RC remains156correct,
+24unresolved with identical keys. No formerly correct point is lost.
+RC mean core energy425.490->421.045fJ (-1.0448%ratio of means), worst recorded
+latency1.835032->1.810632ns. Small approximately1%energy and1-25ps timing
+changes are not robust globalPPA;1%/20ps numerical criteria are not uncertainty bounds.
+
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+[Exact versioned native/raw evidence and offline audit](layout_single_row/v1/README.md).
+Original control, its historical full45 study, schematic49 study and failure
+records remain separate and unchanged. No silicon, qualifiedPEX or signoff claim.
+
 Download the [interactive report](results/study/report.html) and open the
 HTML file locally; GitHub's file viewer does not execute its JavaScript.
 The Waveform Lab provides eight recorded
@@ -304,6 +339,15 @@ or its [preview image](results/study/poster_preview.png).
 **{pvt45_results.RC_MODEL_LABEL}.**
 {facts["rc_model_applicability"]["notice"]}
 See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
+
+**Current layout: single-row-a1.** Actual all-material area2207.088->2074.254um2
+(6.01852%less), with unchanged27guardedMOS/15ports. The paired45-PVT qualification
+has1440new transients/720qualified pairs: both C/RC layouts180correct at2ns;
+C1ns168->170correct, RC1ns156correct/24unresolved unchanged. RC mean425.490->
+421.045fJ, worst1.835032->1.810632ns. Small changes are not robust globalPPA.
+Read the [current version and all raw/native records](layout_single_row/v1/README.md)
+before the explicitly historical studies below. The1%/20ps criteria are
+numerical acceptance bands, not physical uncertainty bounds.
 
 1. **Question and circuit.** Read the abstract and 27-transistor circuit guide.
    The work asks when a calibrated regenerative comparator reaches a correct

@@ -71,7 +71,7 @@ def test_notebook_table_matches_csv_audit_and_canonical_markdown(frame, monkeypa
     table = audit.markdown_table(audit.audit(frame))
     cells = [
         "".join(c["source"]) for c in notebook["cells"]
-        if c["cell_type"] == "markdown" and "### Full-grid archived-deck outcomes" in "".join(c["source"])
+        if c["cell_type"] == "markdown" and "### Historical original-control full-grid archived-deck outcomes" in "".join(c["source"])
     ]
     assert len(cells) == 1 and table in cells[0]
     assert "Each factor is a separate marginal partition of the same 180 RC points" in cells[0]

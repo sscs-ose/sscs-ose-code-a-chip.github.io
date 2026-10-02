@@ -23,7 +23,8 @@ def main() -> None:
 
         **Wei-Lun Hsu — National Tsing Hua University**
 
-        **IEEE SSCS Code-a-Chip — ISSCC 2027**  
+        **IEEE SSCS Code-a-Chip — ISSCC 2027**
+
         License: MIT · Tools: SKY130, ngspice, Magic, Netgen and Python
 
         [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb)
@@ -41,7 +42,14 @@ def main() -> None:
         selected design into actual layout and parasitic extraction. Interactive
         waveforms connect circuit behavior to decision time and core energy.
         Schematic and extracted results are compared under explicitly stated
-        conditions. In the 45-condition nominal, code-zero study, archived RC
+        conditions. The adopted **single-row-a1 area version** reduces the
+        all-material GDS bbox from2207.088 to2074.254um2 (6.01852%).
+        Its paired45-PVT qualification completed1440new transients and720
+        numerical pairs: both layouts/modes give180/180correct at2ns.
+        Candidate RC retains156/180at1ns (24unresolved), with worst sampled
+        delay1.811ns. Small approximately1%core-energy changes do not
+        establish robust globalPPA. Original studies remain below.
+        In the original 45-condition nominal, code-zero study, archived RC
         decks give 156/180 correct decisions at 1 ns (24 unresolved) and
         180/180 at the prospectively declared 2 ns deadline; the worst sampled
         decision time is 1.835 ns. These are archived RC-deck
@@ -603,7 +611,74 @@ def main() -> None:
         display(entry.calibration_workload(evidence))
         """),
         markdown("""
-        ## 8. Layout and post-layout results
+        ## 8. Adopted single-row-a1 area version
+
+        The exact frozen guarded27-MOS/15-port candidate has a121.8x17.03um
+        all-material GDS bbox (2074.254um2), versus the original legal compact
+        control129.6x17.03um (2207.088um2): **6.01852%less area**.
+        Wells, body ties, guards and shields are included; only TEXT is excluded.
+        Pitch changes4.8->4.5um; pair order/mirroring/y, device WL/flavors,
+        junctions and local M1/M2 escapes remain unchanged. Only necessary
+        horizontal bus/output/shield endpoints and symmetric spines follow
+        placements. There is no diffusion sharing or matching-benefit claim.
+
+        **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+        The candidate passed14native checks on ONE actualDRCattempt in its
+        earlier spacing round; the unchanged original-control native proof was
+        reused, not rerun. Full45 and publication performed no new native runs.
+        The subsequent known-nonblind nominal code-zero grid used BOTH layouts,
+        C/RC,45PVT conditions, signed +/-3/10mV and10/5ps: **1440new transients,
+        720qualified pairs**,180points per mode/layout.2ns staysPRIMARY.
+        All2ns points are correct.1nsC improves168->170correct ONLY at
+        SS1.62V-40C+/-10mV; RC remains156correct/24unresolved with the SAME
+        unresolved keys. No previously correct point is lost.
+
+        All180matched energies and recorded2ns latencies decrease in EACH
+        mode, but ratio-of-mean energy changes are only-0.9453%C/-1.0448%RC.
+        The declared1%energy/20pslatency criteria are numerical acceptance
+        bands, **not uncertainty bounds**. No robust globalPPA/yield/silicon,
+        independentqualifiedPEX or signoff follows. Core energy excludes
+        drivers/controller/calibration. C-only is not independent ground truth.
+        This is NOT the49-condition calibrated stress/noise/mismatch/trim study.
+
+        [Versioned raw traces, native geometry, pins and audit recipe](layout_single_row/v1/README.md)
+        retain all1440decks/logs/waveforms,720numerical receipts and keyed
+        comparisons. Earlier studies below remain historical, not candidate data.
+        """),
+        code("""
+        import single_row_evidence as area
+
+        adopted = area.load()
+        display(area.table(adopted))
+        for factory in (area.layout_figure, area.comparison_figure):
+            figure = factory(adopted)
+            display(figure)
+            plt.close(figure)
+
+
+        def inspect_area_version(layout_version, extraction_mode):
+            rows = adopted["frame"]
+            display(rows[
+                (rows.layout == layout_version)
+                & (rows["mode"] == extraction_mode)
+            ].drop(columns=["execution"]))
+
+
+        area_controls = widgets.interactive(
+            inspect_area_version,
+            layout_version=widgets.Dropdown(
+                options=["candidate", "control"], value="candidate",
+                description="Area version",
+            ),
+            extraction_mode=widgets.Dropdown(
+                options=["rc", "c"], value="rc", description="Export",
+            ),
+        )
+        display(area_controls)
+        print(area.NOTICE)
+        """),
+        markdown("""
+        ### Original control: layout and post-layout results
 
         **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
         In the pinned Magic/open_pdks pipeline, mutual capacitances are
@@ -678,7 +753,7 @@ def main() -> None:
         plt.close(figure)
         """),
         markdown("""
-        ### Full-grid archived-deck outcomes
+        ### Historical original-control full-grid archived-deck outcomes
 
         The same nominal 27-device layout is now evaluated over all five
         process corners, three supplies (1.62, 1.80, 1.95 V), and three
@@ -852,6 +927,13 @@ def main() -> None:
     })
     nbf.validate(notebook)
     destination = ROOT / "Comparator_Atlas.ipynb"
+    if destination.exists():
+        previous = nbf.read(destination, as_version=4)
+        for index, cell in enumerate(cells):
+            prior_index = index if len(previous.cells) == len(cells) or index < 17 else index - 2
+            if 0 <= prior_index < len(previous.cells) and (
+                    len(previous.cells) == len(cells) or index not in (17, 18)):
+                cell.id = previous.cells[prior_index].id
     nbf.write(notebook, destination)
     print(f"Generated {destination.name}: {len(cells)} cells")
 

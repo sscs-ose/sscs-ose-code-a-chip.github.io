@@ -15,6 +15,31 @@ examples with a deadline cursor and complementary-rail thresholds.
 View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
 or its [preview image](results/study/poster_preview.png).
 
+## Current area version: single-row-a1
+
+The frozen single-row candidate reduces the **all-material GDS bbox by6.01852%**:
+129.6 x17.03um =2207.088um2 ->121.8 x17.03um =2074.254um2.
+Wells, body ties, guards and shields are included; only TEXT is excluded.
+Pair order/mirroring/y,27guarded PCells/WL/flavors/junctions,15ports and local
+escapes are unchanged; pitch4.8->4.5um requires horizontal routing endpoints
+to follow placements.14native checks passed on one actual candidate DRC attempt.
+Original-control native proof was reused, not rerun.
+
+A separate known-nonblind nominal code-zero paired45-PVT experiment completed
+**1440new transients /720qualified10/5pspairs /180keys per mode/layout**.
+Both control/candidate C/RC are180/180correct at the fixed2ns primary deadline.
+At1ns C improves168->170correct (SS1.62V-40C,+/-10mV); RC remains156correct,
+24unresolved with identical keys. No formerly correct point is lost.
+RC mean core energy425.490->421.045fJ (-1.0448%ratio of means), worst recorded
+latency1.835032->1.810632ns. Small approximately1%energy and1-25ps timing
+changes are not robust globalPPA;1%/20ps numerical criteria are not uncertainty bounds.
+
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+[Exact versioned native/raw evidence and offline audit](layout_single_row/v1/README.md).
+Original control, its historical full45 study, schematic49 study and failure
+records remain separate and unchanged. No silicon, qualifiedPEX or signoff claim.
+
+
 ## Overview
 
 Calibrating offset does not tell us whether the comparator will decide before

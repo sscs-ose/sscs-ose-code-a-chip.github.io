@@ -59,7 +59,7 @@ def test_notebook_abstract_reports_both_full_grid_deadlines(monkeypatch):
     assert full["nominal_geometry"] is True
     assert full["trim_code"] == 0
     expected = (
-        f"In the {full['conditions']}-condition nominal, code-zero study, archived RC "
+        f"In the original {full['conditions']}-condition nominal, code-zero study, archived RC "
         f"decks give {full['rc_correct_1ns']}/{full['points_per_mode']} correct "
         f"decisions at {full['parallel_deadline_ns']} ns "
         f"({full['rc_unresolved_1ns']} unresolved) and "
@@ -345,7 +345,7 @@ def test_scoped_report_reuses_checked_figures_without_running_factories(monkeypa
     monkeypatch.setattr(Path, "write_text", lambda path, text, **kwargs: captured.update({path.name: text}))
     study_report.render_study(refresh_figures=set())
     assert RC_SCOPE_NOTE in captured["report.html"]
-    assert captured["report.html"].count('<img ') == 15
+    assert captured["report.html"].count('<img ') == 18
     assert captured["presentation_manifest.json"]["rc_model_applicability_notice"] == RC_SCOPE_NOTE
     assert 'class="card"' not in captured["report.html"]
     for slogan in ("When calibration is not enough", "Inspect every decision yourself",
