@@ -14,11 +14,14 @@ DEF=""; SRAM=""; if [ "${LEAK_ASIC:-0}" = 1 ]; then OUT="${OUT}_asic"; DEF="-DTR
 ENGINE="$ROOT/rtl/kyber_ntt_engine.sv"; RED="$ROOT/rtl/barrett_reduce.v"
 if [ "${LEAK_PACKED:-0}" = 1 ]; then OUT="${OUT}_packed"; DEF="$DEF -DNTT_PACKED"
   ENGINE="$ROOT/rtl/kyber_ntt_engine_packed.sv"; RED="$ROOT/rtl/barrett_reduce_1c.v"; fi
+# LEAK_PACKED2=1: the two-lane packed engine (rtl/kyber_ntt_engine_packed2.sv), written with a _packed2 suffix
+if [ "${LEAK_PACKED2:-0}" = 1 ]; then OUT="${OUT}_packed2"; DEF="$DEF -DNTT_PACKED2"
+  ENGINE="$ROOT/rtl/kyber_ntt_engine_packed.sv $ROOT/rtl/kyber_ntt_engine_packed2.sv"; RED="$ROOT/rtl/barrett_reduce_1c.v"; fi
 mkdir -p "$OUT"
 cd "$ROOT/golden" && python3 leakage.py gen --out "$OUT" -n "$N" $MFLAG
 R="$ROOT/rtl"
 iverilog -g2012 $DEF -I "$OUT" -o "$OUT/leak.vvp" "$R/kyber_pkg.sv" "$RED" $SRAM \
-    "$ENGINE" "$ROOT/tb/tb_ntt_leak.sv"
+    $ENGINE "$ROOT/tb/tb_ntt_leak.sv"
 (cd "$OUT" && vvp -n leak.vvp | grep LEAK)
 cd "$ROOT/golden" && python3 leakage.py analyze --out "$OUT" --sigma "$SIGMA"
 rm -f "$OUT/leak.vvp"

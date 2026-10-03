@@ -14,3 +14,21 @@ for x in 0 1; do
   vvp -n "$OUT/$name.vvp" > "$OUT/$name.log"; rm -f "$OUT/$name.vvp"
   echo "$name $(grep -E 'NTT_RESULT' "$OUT/$name.log") $(grep -cx PASS "$OUT/$name.log")"
 done
+# the two-lane engine with two fused passes (CAC_PACKED2=1)
+if [ "${CAC_PACKED2:-0}" = 1 ]; then
+  for x in 0 1; do
+    name=packed2_x$x
+    iverilog -g2012 -I . -DNTT_PACKED2 -DXSTAGE=$x -o "$OUT/$name.vvp"         "$R/kyber_pkg.sv" "$R/barrett_reduce_1c.v" "$R/kyber_ntt_engine_packed.sv"         "$R/kyber_ntt_engine_packed2.sv" "$ROOT/tb/tb_ntt.sv"
+    vvp -n "$OUT/$name.vvp" > "$OUT/$name.log"; rm -f "$OUT/$name.vvp"
+    echo "$name $(grep -E 'NTT_RESULT' "$OUT/$name.log") $(grep -cx PASS "$OUT/$name.log")"
+  done
+  # stream mode: the inverse transform fed one pair every second cycle (tb/tb_ntt_stream.sv)
+  for x in 0 1; do
+    name=packed2_stream_x$x
+    iverilog -g2012 -I . -DXSTAGE=$x -o "$OUT/$name.vvp" \
+        "$R/kyber_pkg.sv" "$R/barrett_reduce_1c.v" "$R/kyber_ntt_engine_packed.sv" \
+        "$R/kyber_ntt_engine_packed2.sv" "$ROOT/tb/tb_ntt_stream.sv"
+    vvp -n "$OUT/$name.vvp" > "$OUT/$name.log"; rm -f "$OUT/$name.vvp"
+    echo "$name $(grep -E 'NTT_STREAM_RESULT' "$OUT/$name.log") $(grep -c NTT_STREAM_VIOLATION "$OUT/$name.log") violations $(grep -cx PASS "$OUT/$name.log")"
+  done
+fi

@@ -18,9 +18,11 @@ and implemented as a SKY130 digital core with open-source tools. This submission
 datapaths at the heart of ML-KEM-512 — the number-theoretic transform and the Keccak-f[1600]
 permutation — and measures, from RTL to routed layout and up to the complete chip, what each
 architectural decision made for the ASIC actually costs in area, latency, energy and security. From
-those measurements it derives two redesigns of the NTT; the second stores two coefficients in every word
-of an OpenRAM macro and, with three further changes that remove no check, makes a decapsulation of the
-whole co-processor 2.8 times faster in RTL simulation.
+those measurements it derives redesigns of the NTT and of the datapath around it: storing two
+coefficients in every word of an OpenRAM macro and then streaming data between a two-lane engine and the
+datapath, with changes that remove no check, cut a decapsulation of the whole co-processor from 99,537 to
+6,856 cycles in RTL simulation, within 3 % of a compact published design, and the FPGA board reproduces
+the count to the cycle.
 
 The entry point is `HSKEM_PQC_SKY130.ipynb`, which runs locally or in Google Colab. Every table and
 figure in the notebook is computed from the files in this folder, and the quantitative statements in its
@@ -37,8 +39,9 @@ text are guarded by assertions against the data, so the prose cannot silently dr
 3. Place-and-route and the full-system simulation take longer than a default run should; their
    committed results are read from `results/`. Both can be repeated from the notebook, also in Colab,
    by setting `RUN_PNR_COLAB = True` (Appendix E.2, 30–45 minutes), `RUN_SYSTEM_SIM = True` (Section 8,
-   about six minutes) or `RUN_PACKED_SYSTEM = True` (the eight redesigned systems of Section 8, about fifteen
-   minutes).
+   about six minutes), `RUN_PACKED_SYSTEM = True` (the eight redesigned systems of Section 8, about fifteen
+   minutes) or `RUN_STREAMED_SYSTEM = True` (the twelve builds of the streamed system, about a quarter of
+   an hour on twelve cores and correspondingly longer on Colab's two).
 4. The notebook is organized around three questions — Part I *Is it correct?*, Part II *What does it
    cost?*, Part III *Does it hold up?* — followed by findings and limitations; supporting detail is in
    Appendices A–E. A reader with ten minutes can read the "At a glance" section and the findings of

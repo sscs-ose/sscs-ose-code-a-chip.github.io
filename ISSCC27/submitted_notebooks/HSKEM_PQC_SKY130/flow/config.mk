@@ -33,9 +33,14 @@ else ifeq ($(CAC_VARIANT),ntt_opt_pipe_macro)
   export VERILOG_FILES = $(CAC_ROOT)/rtl/kyber_pkg.sv $(CAC_ROOT)/rtl/barrett_reduce.v \
                          $(CAC_ROOT)/rtl/barrett_reduce_1c.v $(CAC_ROOT)/rtl/sram_macro_16x256.sv \
                          $(CAC_ROOT)/rtl/sram_macro_16x256_opt.sv $(CAC_ROOT)/rtl/kyber_ntt_engine_opt.sv
-else ifneq ($(filter ntt_packed ntt_packed_x0,$(CAC_VARIANT)),)
-  # packed-pair, layer-fused NTT with the chip's 24x128 OpenRAM macro (rtl/kyber_ntt_engine_packed.sv)
-  export DESIGN_NAME = kyber_ntt_engine_packed
+else ifneq ($(filter ntt_packed ntt_packed_x0 ntt_packed2,$(CAC_VARIANT)),)
+  # packed-pair, layer-fused NTT with the chip's 24x128 OpenRAM macro (rtl/kyber_ntt_engine_packed.sv);
+  # ntt_packed2: the two-lane engine with two fused passes (rtl/kyber_ntt_engine_packed2.sv)
+  ifeq ($(CAC_VARIANT),ntt_packed2)
+    export DESIGN_NAME = kyber_ntt_engine_packed2
+  else
+    export DESIGN_NAME = kyber_ntt_engine_packed
+  endif
   export VERILOG_DEFINES = -D NTT_PAIR_SRAM_MACRO
   ifeq ($(CAC_VARIANT),ntt_packed_x0)
     export VERILOG_TOP_PARAMS = EXTRA_STAGE 0
@@ -44,6 +49,9 @@ else ifneq ($(filter ntt_packed ntt_packed_x0,$(CAC_VARIANT)),)
   endif
   export VERILOG_FILES = $(CAC_ROOT)/rtl/kyber_pkg.sv $(CAC_ROOT)/rtl/barrett_reduce_1c.v \
                          $(CAC_ROOT)/rtl/ntt_pair_sram_macro.sv $(CAC_ROOT)/rtl/kyber_ntt_engine_packed.sv
+  ifeq ($(CAC_VARIANT),ntt_packed2)
+    export VERILOG_FILES += $(CAC_ROOT)/rtl/kyber_ntt_engine_packed2.sv
+  endif
   export ADDITIONAL_LEFS = $(CAC_ROOT)/flow/macros/sky130_sram_1rw_24x128.lef
   export ADDITIONAL_LIBS = $(CAC_ROOT)/flow/macros/sky130_sram_1rw_24x128_TT_1p8V_25C.lib
   CAC_SRAM_GDS ?= /opt/eda/openram-smoke/sky130_sram_1rw_24x128_vdd_via_column_mux_candidate/sky130_sram_1rw_24x128_implantfix.gds
@@ -51,8 +59,14 @@ else ifneq ($(filter ntt_packed ntt_packed_x0,$(CAC_VARIANT)),)
   export PRE_PDN_TCL = $(CAC_ROOT)/flow/pre_pdn_sram.tcl
   # the 641 um wide macro needs a wide die; the logic sits above the macro
   export CORE_UTILIZATION =
-  export DIE_AREA = 0 0 760 470
-  export CORE_AREA = 10 10 750 460
+  ifeq ($(CAC_VARIANT),ntt_packed2)
+    # twice the banks and butterfly units: a taller die, the same macro position
+    export DIE_AREA = 0 0 760 620
+    export CORE_AREA = 10 10 750 610
+  else
+    export DIE_AREA = 0 0 760 470
+    export CORE_AREA = 10 10 750 460
+  endif
   export MACRO_PLACE_HALO ?= 10 10
   export MACRO_PLACEMENT_TCL = $(CAC_ROOT)/flow/macro_place_packed.tcl
   # the bank multiplexers drive wide fan-outs: repair slew and load with a 40 % margin

@@ -61,6 +61,7 @@ def numbers() -> dict:
     o, n = dse[("ntt_sp", 20.0)], dse[("ntt_opt_pipe_w12", 20.0)]
     m0, pk = dse[("ntt_macro", 20.0)], dse[("ntt_packed", 20.0)]
     steps = j("system_sim/packed_system.json")["steps"]
+    streamed = j("system_sim/streamed_system.json")["decaps_cycles"]
     prof = j("system_sim/decaps_profile.json")["configs"]["fpga"]["profile"]
     import pandas as pd
     c3 = pd.read_csv(R / "fpga/c3_repeat.csv")
@@ -69,7 +70,7 @@ def numbers() -> dict:
             "fmax": (float(o["fmax_mhz"]), float(n["fmax_mhz"])),
             "at": float(n["at_product"]) / float(o["at_product"]), "area": float(n["cell_area_um2"]) / float(o["cell_area_um2"]),
             "ntt_busy": prof["ntt_busy"] / prof["cycles"], "perm_busy": prof["perm_busy"] / prof["cycles"],
-            "c3": (int(c3.result_pass.sum()), len(c3)), "tv": tv, "steps": steps,
+            "c3": (int(c3.result_pass.sum()), len(c3)), "tv": tv, "steps": steps, "streamed": streamed,
             "pk_lat": (float(m0["latency_us_at_fmax"]), float(pk["latency_us_at_fmax"])),
             "acvp": j("acvp_rtl/keygen_asic.json"), "cells": j("fullchip/summary.json")["orfs_metrics"]}
 
@@ -141,11 +142,12 @@ def main(out: str = "figures/poster.pdf") -> None:
     image(nb_png("fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))"), x, 0.53, cw, 0.17)
     text(x, 0.525, f"A measured redesign of the NTT, after routing: fmax {N['fmax'][0]:.0f} → {N['fmax'][1]:.0f} MHz, "
                    f"area {N['area'] - 1:+.0%}, area × time {N['at'] - 1:+.0%}.", 22, width=cw)
-    image(nb_png("STEPS = [("), x, 0.33, cw, 0.15)
+    image(nb_png("STAIR = [("), x, 0.33, cw, 0.15)
     text(x, 0.325, f"A second redesign stores two coefficients in every SRAM word: a forward NTT takes "
                    f"{N['pk_lat'][1]:.0f} instead of {N['pk_lat'][0]:.0f} µs and {N['ntt_e']['ntt_packed_20ns']:.2f} instead of "
-                   f"{N['ntt_e']['ntt_macro_20ns']:.2f} µJ. With three changes that remove no check, a decapsulation takes "
-                   f"{N['steps']['D']:,} instead of {N['steps']['published']:,} cycles (RTL simulation).", 22, width=cw)
+                   f"{N['ntt_e']['ntt_macro_20ns']:.2f} µJ. Streaming data between a two-lane engine and the datapath, with "
+                   f"changes that remove no check, a decapsulation takes {N['streamed']['H']['sram_only']:,} instead of "
+                   f"{N['steps']['published']:,} cycles, as the board confirms.", 22, width=cw)
     ax = fig.add_axes([x + 0.01, 0.12, cw - 0.02, 0.13], zorder=2)
     e = N["e"]; tot = sum(e.values())
     parts = [("clock network and\nregister clock pins", e["clock"] + e["sequential"], ps.SERIES[0]),
@@ -172,7 +174,7 @@ def main(out: str = "figures/poster.pdf") -> None:
                    f"first-order masking (threshold 4.5).", 22, width=cw)
     lessons = ["Weigh a block by how often the system waits for it.",
                "Measure the integrated chip, not only its blocks.",
-               "Check the check: six results here first looked right and were not.",
+               "Check the check: nine results here first looked right and were not.",
                "Tie the prose to the data: assertions stop the notebook when they part."]
     text(x, 0.26, "What transfers", 32, "bold", accent)
     y = 0.225

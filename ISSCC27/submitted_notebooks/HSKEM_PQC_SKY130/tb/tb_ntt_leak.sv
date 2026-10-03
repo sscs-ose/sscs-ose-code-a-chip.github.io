@@ -15,7 +15,28 @@ module tb_ntt_leak;
 
     always #5 clk = ~clk;
 
-`ifdef NTT_PACKED
+`ifdef NTT_PACKED2
+    kyber_ntt_engine_packed2 #(.EXTRA_STAGE(1'b1)) dut (
+        .clk(clk), .rst_n(rst_n), .start(start), .inverse(1'b0),
+        .busy(busy), .done(done), .waddr(waddr), .wdata(wdata), .we(we),
+        .rdata(rdata), .raddr(8'd0),
+        .we_pair(1'b0), .wdata_odd(12'd0), .rdata_pair(), .stream(1'b0), .re(1'b0));
+
+    // Datapath registers of the two-lane engine: both register banks (64 x 12 bits), the two
+    // multiplier and reduction pipelines, the SRAM read word and the operation counter
+    localparam integer W = 768 + 2 * (12 + 24 + 12 + 12) + 24 + 5;
+    wire [767:0] bank_bits;
+    genvar gb, gs, gh;
+    generate for (gb = 0; gb < 2; gb = gb + 1) begin : g_b
+        for (gs = 0; gs < 16; gs = gs + 1) begin : g_s
+            for (gh = 0; gh < 2; gh = gh + 1) begin : g_h
+                assign bank_bits[((gb * 16 + gs) * 2 + gh) * 12 +: 12] = dut.bank[gb][gs][gh];
+            end
+        end
+    end endgenerate
+    wire [W-1:0] regs = {bank_bits, dut.s1_x[0], dut.s1_prod[0], dut.s2_x[0], dut.s2_r[0],
+                         dut.s1_x[1], dut.s1_prod[1], dut.s2_x[1], dut.s2_r[1], dut.sram_rdata, dut.op};
+`elsif NTT_PACKED
     kyber_ntt_engine_packed #(.EXTRA_STAGE(1'b1)) dut (
         .clk(clk), .rst_n(rst_n), .start(start), .inverse(1'b0),
         .busy(busy), .done(done), .waddr(waddr), .wdata(wdata), .we(we),

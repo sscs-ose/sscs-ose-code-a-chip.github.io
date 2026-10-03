@@ -31,6 +31,7 @@ else
 VEC="$OUT/vectors"; mkdir -p "$VEC"
 (cd "$ROOT/golden" && python3 gen_vectors.py --seed "${CAC_VEC_SEED:-2027}" --out "$VEC" --ntt 1 --keccak 1 > /dev/null)
 DEFS=(-DFUNCTIONAL -DUNIT_DELAY=#1 -DCLK_HALF=$HALF -DVCD_VEC=4 "-DVCD_OUT=\"$OUT/ntt_fwd.vcd\"")
+[ "$TOP" = kyber_ntt_engine_packed2 ] && DEFS+=(-DGLS_PAIR_PORTS)   # its pair and stream ports, tied off
 if [ "$TOP" != kyber_ntt_engine ]; then     # netlists of other tops keep the port list; alias the module name
   sed "s/^module $TOP /module kyber_ntt_engine /" "$B/6_final.v" > "$OUT/netlist.v"
 else

@@ -17,6 +17,9 @@ hierarchical references, exactly as the existing testbench oracles do; nothing l
 simulated chip through a new port.
 A negative control repeats case 0 with k = 3, which must not reproduce the NIST key.
 usage: python3 scripts/acvp_rtl_keygen.py [fpga|asic] [number of test cases, default all 25]
+With CAC_ACVP_DEFS set to defines of scripts/make_packed_system.py and CAC_ACVP_TAG naming that build,
+the vectors run through the system built with those defines, whose testbench carries the matching cycle
+model; the results are written as keygen_<config>_<tag>.json.
 SPDX-License-Identifier: Apache-2.0
 """
 from __future__ import annotations
@@ -34,6 +37,8 @@ CFG = sys.argv[1] if len(sys.argv) > 1 else "fpga"
 VEC = json.loads((ROOT / "golden/acvp/mlkem512_keygen.json").read_text())
 N = int(sys.argv[2]) if len(sys.argv) > 2 else len(VEC)
 OUT = ROOT / "results/acvp_rtl"
+DEFS = os.environ.get("CAC_ACVP_DEFS", "")              # a build of scripts/make_packed_system.py
+SUFFIX = f"_{os.environ['CAC_ACVP_TAG']}" if DEFS else ""
 
 DECL = """
 `ifdef CAC_ACVP_KEYGEN
@@ -113,16 +118,25 @@ def main() -> None:
         for t in vec:
             dk, ek = x(t["dk"]), x(t["ek"])
             assert dk[768:1568] == ek and dk[1600:1632] == x(t["z"]), t["tcId"]
-        tb_src = (ROOT / "hskem_rtl/sim/tb/tb_trustedge_spi.sv").read_text()
+        if DEFS:     # the testbench of the built system, with its cycle model
+            subprocess.run(["python3", str(ROOT / "scripts/make_packed_system.py"), str(ROOT / "hskem_rtl"),
+                            str(tmp / "built"), str(ROOT / "rtl"), str(tmp / "built.diff")], check=True,
+                           stdout=subprocess.DEVNULL)
+            tb_src = (tmp / "built/sim/tb/tb_trustedge_spi.sv").read_text()
+        else:
+            tb_src = (ROOT / "hskem_rtl/sim/tb/tb_trustedge_spi.sv").read_text()
         anchor_decl, anchor_loop = "    initial begin", "        // Test 1e1/1e2"
         assert tb_src.count(anchor_decl) == 1 and tb_src.count(anchor_loop) == 1
         tb = tb_src.replace(anchor_decl, DECL.replace("__N__", str(N)) + anchor_decl)
         tb = tb.replace(anchor_loop, LOOP.replace("__N__", str(N)) + anchor_loop)
         (tmp / "tb_acvp_keygen.sv").write_text(tb)
-        env = dict(os.environ, CAC_TB=str(tmp / "tb_acvp_keygen.sv"), CAC_EXTRA_DEFS="-DCAC_ACVP_KEYGEN",
-                   CAC_SIM_TAG="_acvp_keygen", CAC_RUN_DIR=str(tmp))
+        env = dict(os.environ, CAC_TB=str(tmp / "tb_acvp_keygen.sv"),
+                   CAC_EXTRA_DEFS=f"{DEFS} -DCAC_ACVP_KEYGEN".strip(),
+                   CAC_SIM_TAG=f"_acvp_keygen{SUFFIX}", CAC_RUN_DIR=str(tmp))
+        if DEFS:
+            env["CAC_PACKED_SYSTEM"] = "1"
         subprocess.run(["bash", str(ROOT / "scripts/run_system_sim.sh"), CFG], env=env, check=True)
-        log = (ROOT / f"results/system_sim/tb_trustedge_spi_{CFG}_acvp_keygen.log")
+        log = (ROOT / f"results/system_sim/tb_trustedge_spi_{CFG}_acvp_keygen{SUFFIX}.log")
         text = log.read_text()
     cases = [dict((k, int(v, 16) if k == "status" else int(v)) for k, v in re.findall(r"(\w+)=(\w+)", line)
                   if k != "ok") for line in text.splitlines() if line.startswith("ACVP_KEYGEN case=")]
@@ -130,12 +144,12 @@ def main() -> None:
     ctrl = re.search(r"ACVP_KEYGEN_CONTROL k=3 ekpke_t_bytes_diff=(\d+)", text)
     assert ctrl and int(ctrl[1]) > 0, "negative control reproduced the NIST key: the comparison is not effective"
     summary = {"source": "golden/acvp/mlkem512_keygen.json (NIST ACVP-Server, ML-KEM-512 keyGen)",
-               "config": CFG, "seed_k": 2, "cases": len(cases),
+               "config": CFG, "defines": DEFS.split(), "seed_k": 2, "cases": len(cases),
                "passed": int(res[1]) if res else 0,
                "negative_control": {"seed_k": 3, "ekpke_t_bytes_diff_vs_case_0": int(ctrl[1])},
                "details": cases}
-    (OUT / f"keygen_{CFG}.json").write_text(json.dumps(summary, indent=2) + "\n")
-    log.replace(OUT / f"keygen_{CFG}.log")
+    (OUT / f"keygen_{CFG}{SUFFIX}.json").write_text(json.dumps(summary, indent=2) + "\n")
+    log.replace(OUT / f"keygen_{CFG}{SUFFIX}.log")
     print(f"ACVP keyGen through the {CFG} RTL: {summary['passed']} of {N} test cases byte-exact")
 
 

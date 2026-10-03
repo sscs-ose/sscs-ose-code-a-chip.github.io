@@ -13,6 +13,10 @@ Hardware modelled cycle by cycle:
               by 128^-1 is folded into the last layer: the upper output uses a pre-scaled twiddle, the
               lower output costs one extra multiplier issue ("scale").
   * banks     two banks of 8 words (16 coefficients) used in ping-pong
+Two-lane variant (rtl/kyber_ntt_engine_packed2.sv, simulate(..., two_lane=True)): the two halves of a word
+are independent butterfly streams with the same twiddle, so two butterfly units issue both halves of one
+word butterfly per cycle; the layers are fused in two passes (forward {128,64,32} {16,8,4,2}, inverse
+{2,4,8,16} {32,64,128}), 512 port accesses per transform, banks of 16 words.
 The scheduler is greedy with a fixed priority (stores before loads, groups in order, butterflies in their
 canonical order). Every hazard is checked: one port access and one multiplier issue per cycle, operand
 readiness, bank reuse, and SRAM read-after-write across groups and passes.
@@ -28,6 +32,8 @@ import mlkem_ref as ref
 Q, Z, F_INV = ref.Q, ref.ZETAS, 3303          # 3303 = 128^-1 mod q (FIPS 203, Algorithm 10)
 FWD_PASSES = [[128, 64, 32], [16, 8], [4, 2]]
 INV_PASSES = [[2, 4], [8, 16], [32, 64, 128]]
+FWD_PASSES_2 = [[128, 64, 32], [16, 8, 4, 2]]
+INV_PASSES_2 = [[2, 4, 8, 16], [32, 64, 128]]
 BU_LATENCY = 2                                 # issue in t, result readable in t + 2
 N_BANKS = 2
 
@@ -67,8 +73,12 @@ def zeta_index(L, w, inverse):
     return (256 // L - 1 - blk) if inverse else (128 // L + blk)
 
 
-def simulate(f, inverse=False):
-    plan = group_plan(INV_PASSES if inverse else FWD_PASSES, inverse)
+def simulate(f, inverse=False, two_lane=False, latency=BU_LATENCY):
+    if two_lane:
+        plan = group_plan(INV_PASSES_2 if inverse else FWD_PASSES_2, inverse)
+    else:
+        plan = group_plan(INV_PASSES if inverse else FWD_PASSES, inverse)
+    lanes = 2 if two_lane else 1
     mem = [[f[2 * w], f[2 * w + 1]] for w in range(128)]
     stored_pass = [-1] * 128                        # pass that last stored each word (-1: the input)
     last_store = [-1] * 128
@@ -121,14 +131,16 @@ def simulate(f, inverse=False):
                 G["stored"].add(s); n_w += 1
                 if len(G["stored"]) == len(gp["words"]):
                     bank_free[G["bank"]] = t + 1; done += 1
-        if mul is not None:
+        for _lane in range(lanes if mul is not None else 0):
             G, gp = st[mul], plan[mul]
             k = G["issued"]
             kind, L, sa, sb, h, w = gp["ops"][k]
+            if not all(G["ready"].get(x, 10 ** 9) <= t for x in [(sa, h)] + ([(sb, h)] if sb is not None else [])):
+                break                                  # (never taken: both halves of a word move together)
             a = G["buf"][(sa, h)]
             if kind == "scale":
                 G["buf"][(sa, h)] = a * F_INV % Q
-                G["ready"][(sa, h)] = t + BU_LATENCY
+                G["ready"][(sa, h)] = t + latency
             else:
                 b = G["buf"][(sb, h)]
                 z = Z[zeta_index(L, w, inverse)]
@@ -140,7 +152,7 @@ def simulate(f, inverse=False):
                         z = z * F_INV % Q                 # pre-scaled twiddle of the last inverse layer
                     na, nb = (a + b) % Q, z * (b - a) % Q
                 G["buf"][(sa, h)], G["buf"][(sb, h)] = na, nb
-                G["ready"][(sa, h)] = G["ready"][(sb, h)] = t + BU_LATENCY
+                G["ready"][(sa, h)] = G["ready"][(sb, h)] = t + latency
             G["issued"] += 1; n_mul += 1
             for s, kk in gp["last_writer"].items():   # a slot is final once its last writer has completed
                 if kk == k:
@@ -148,6 +160,7 @@ def simulate(f, inverse=False):
                     G["store_order"].append(s)
             if G["issued"] == len(gp["ops"]):
                 g_comp += 1
+                break
         trace.append((port, mul))
         t += 1
         if t > 50000:
@@ -156,19 +169,20 @@ def simulate(f, inverse=False):
     return out, {"cycles": t, "reads": n_r, "writes": n_w, "multiplier_issues": n_mul, "trace": trace}
 
 
-def check(n=50, seed=2027):
+def check(n=50, seed=2027, **kw):
     rng = random.Random(seed)
     for _ in range(n):
         a = [rng.randrange(Q) for _ in range(256)]
-        fwd, sf = simulate(a)
+        fwd, sf = simulate(a, **kw)
         assert fwd == ref.ntt(a), "forward transform differs from the golden model"
-        inv, si = simulate(fwd, inverse=True)
+        inv, si = simulate(fwd, inverse=True, **kw)
         assert inv == a, "inverse transform differs from the golden model"
     return sf, si
 
 
 if __name__ == "__main__":
-    sf, si = check()
-    for name, s in (("forward", sf), ("inverse", si)):
-        print(f"{name}: {s['cycles']} cycles, {s['reads']} reads + {s['writes']} writes, "
-              f"{s['multiplier_issues']} multiplier issues ({s['multiplier_issues'] / s['cycles']:.0%} busy)")
+    for label, kw in (("one lane, three passes", {}), ("two lanes, two passes", {"two_lane": True})):
+        sf, si = check(**kw)
+        for name, s in (("forward", sf), ("inverse", si)):
+            print(f"{label}, {name}: {s['cycles']} cycles, {s['reads']} reads + {s['writes']} writes, "
+                  f"{s['multiplier_issues']} half-butterfly issues")

@@ -1,0 +1,27 @@
+step,milestone,define,change,decaps_one_round_keccak,decaps_serialized_keccak,record
+1,E,TRUSTEDGE_FAST_BASEMUL,second multiplier; Karatsuba in both pointwise-product units (five multiply states become two),33515,37259,development run
+2,E,TRUSTEDGE_FAST_FEED,hash feed loops without a wait state; u written straight into the engine,32526,34906,development run
+3,E,TRUSTEDGE_STREAM_OUT,ciphertext compressed and packed while the coefficients stream out,30223,32603,development run
+4,E,TRUSTEDGE_FOLD_READBACK,audit digests folded into the decode check; the separate read-back pass removed,28686,,development run
+5,E,TRUSTEDGE_PREFETCH,operands of the next product step addressed in advance (encryption and decryption),25375,28771,development run
+6,E,TRUSTEDGE_TIGHT_LOOPS,comparison at one byte per cycle; result writes overlapped with the next pair,23846,27242,development run
+7,E,TRUSTEDGE_FAST_CHECK,codec decode check addresses its next byte in advance,22822,26218,development run
+8,E,TRUSTEDGE_FAST_Y,noise loaded at two cycles per pair; transform results read at one cycle per coefficient,22058,25454,milestone build
+9,F,TRUSTEDGE_PACKED2,two-lane packed engine; three-plus-four layer fusion (568/569 cycles per transform),19229,22973,development run
+10,F,TRUSTEDGE_FAST_PRF,noise sampler emits a pair of coefficients per cycle,17965,21709,development run
+11,F,TRUSTEDGE_FUSED_CMP,FO comparison folded into the codec's decode check,17196,20940,development run
+12,F,TRUSTEDGE_FAST_READ,transform results read back at one coefficient per cycle,16557,20301,milestone build
+13,G,TRUSTEDGE_PIPE_CHECK,decode check as a byte stream with a three-stage comparison,14646,18390,development run
+14,G,TRUSTEDGE_PAIR_PORT,24-bit external port of the engine: whole pairs written and read,14134,17878,development run
+15,G,TRUSTEDGE_DEFER_J,J(z||c) moved into the re-encryption,13096,15222,development run
+16,G,TRUSTEDGE_PIPE_MAC,pipelined matrix-vector product at one pair and column per cycle,11557,13683,development run
+17,G,TRUSTEDGE_FAST_HASH,hash input at one byte per cycle,11557,12709,milestone build
+18,H,TRUSTEDGE_DEC_STREAM,decryption streams u and the message and pipelines its products,10149,12127,development run
+19,H,TRUSTEDGE_SEG_CHECK,codec check split into three segments hidden in product and transform windows,9505,11483,development run
+20,H,TRUSTEDGE_BG_PRF,e1 and e2 sampled in the background; J and the codec share the reference memory,8916,10462,development run
+21,H,TRUSTEDGE_STREAM_INV,products stream straight into the inverse transform's first pass,8190,9736,development run
+22,H,TRUSTEDGE_STREAM_FWD,forward transform takes its pairs straight into its first pass,7372,9454,development run
+23,H,TRUSTEDGE_PRF_TO_NTT,r0 goes from the sampler straight into the engine,7098,,development run
+24,H,TRUSTEDGE_STREAM_DEC_INV,decryption's inverse transform runs while its products are formed,6856,,development run
+25,H,TRUSTEDGE_PRF_FINE_HOLD,the sampler pauses only its squeeze and its memory writes,6856,,development run
+26,H,TRUSTEDGE_POLY_GUARD,each inverse transform waits only for the noise polynomial it adds,6856,9316,milestone build

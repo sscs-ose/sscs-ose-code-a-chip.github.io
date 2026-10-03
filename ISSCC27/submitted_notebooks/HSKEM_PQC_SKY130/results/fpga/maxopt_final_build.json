@@ -1,0 +1,65 @@
+{
+  "project": "fpga_maxopt (copy of the released Quartus project; codeachip_packed/scripts/make_packed_system.py edits)",
+  "defines": [
+    "PACKED_NTT",
+    "HASH_OVERLAP",
+    "STREAM_IO",
+    "PACKED2",
+    "FAST_BASEMUL",
+    "FAST_FEED",
+    "STREAM_OUT",
+    "FOLD_READBACK",
+    "PREFETCH",
+    "TIGHT_LOOPS",
+    "FAST_CHECK",
+    "FAST_Y",
+    "FAST_PRF",
+    "FUSED_CMP",
+    "FAST_READ",
+    "PIPE_CHECK",
+    "PAIR_PORT",
+    "DEFER_J",
+    "PIPE_MAC",
+    "FAST_HASH",
+    "DEC_STREAM",
+    "SEG_CHECK",
+    "BG_PRF",
+    "STREAM_INV",
+    "STREAM_FWD",
+    "PRF_TO_NTT",
+    "STREAM_DEC_INV",
+    "PRF_FINE_HOLD",
+    "POLY_GUARD"
+  ],
+  "device": "Agilex 5 A5EB013BB23BE4SR1 (DE25-Nano)",
+  "alms": "42,228 / 46,800 (90 %)",
+  "dsp_blocks": 28,
+  "ram_blocks": 35,
+  "clock1_50_setup_slack_ns": 0.677,
+  "clock1_50_hold_slack_ns": 0.037,
+  "fmax_mhz": 51.75,
+  "timing_model": "Slow fix4 0C (worst case)",
+  "sof_sha256": "2f78940facd3f0d5cc068d9645a10b3791518ae82589155d124f431b3ff8ba7a",
+  "sof_note": "contains the provisioning key; kept local, not published; loaded over JTAG (volatile), flash untouched",
+  "simulation": "tb_trustedge_spi ALL PASS in sram_only, fpga and asic configurations; decaps 6,856 cycles (asic, serial Keccak: 9,316)",
+  "board_run": "maxopt_final_c3_repeat.csv: 5/5 PASS, decaps 6,858 cycles (6,856 RTL + 2 C3 handshake), encaps 7,209-7,225, shared_secret_match PASS, raw_secret_export 0",
+  "entities_alms_needed": {
+    "kyber_ntt_engine_packed2 (u_shared_ntt)": {
+      "alms_needed": "1919.9",
+      "registers": 1158,
+      "m20k": 1,
+      "dsp": 4
+    },
+    "K-PKE encryption incl. sampler, products and codec (u_mlkem512_encaps_partial)": {
+      "alms_needed": "13072.7"
+    },
+    "decapsulation controller (u_mlkem512_decaps_partial)": {
+      "alms_needed": "2320.4"
+    },
+    "Keccak sponge (u_shared_mlkem_sponge)": {
+      "alms_needed": "3990.4"
+    }
+  },
+  "entities_source": "Fitter Resource Utilization by Entity, fpga_maxopt/quartus/output_files/DE25Nano_TrustEdge.fit.rpt",
+  "first_build_timing_note": "the first build of this define set missed timing (-2.257 ns): the KAT operand functions sat on the pipelined product's multiplier paths; S_MUL2 runs with a bound key only, so its operands now come from the key RAMs directly (no cycle change)"
+}

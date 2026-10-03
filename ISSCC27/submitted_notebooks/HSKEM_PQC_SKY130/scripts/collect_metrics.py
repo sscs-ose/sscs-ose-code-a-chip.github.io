@@ -37,7 +37,7 @@ def sim_cycles() -> dict:
     if "ntt_opt_pipe_w12" in cyc:     # same controller, macro store
         cyc["ntt_opt_pipe_macro"] = dict(cyc["ntt_opt_pipe_w12"])
     # packed-pair, layer-fused NTT (Section 7), simulated by scripts/run_sim_packed.sh (x1 = EXTRA_STAGE)
-    for name, key in (("packed_x1", "ntt_packed"), ("packed_x0", "ntt_packed_x0")):
+    for name, key in (("packed_x1", "ntt_packed"), ("packed_x0", "ntt_packed_x0"), ("packed2_x1", "ntt_packed2")):
         log = ROOT / "results" / "sim_packed" / f"{name}.log"
         if log.exists():
             m = re.search(r"cycles_fwd=(\d+) cycles_inv=(\d+)", log.read_text())
@@ -79,7 +79,7 @@ def main() -> None:
     rows = []
     for run in sorted(p for p in ASIC.iterdir() if p.is_dir()):
         # exact names only: suffixed experiment dirs (e.g. *_ant10) are reviewed separately
-        m = re.fullmatch(r"(ntt_dp|ntt_sp|ntt_macro|keccak_r1|keccak_s7|ntt_opt_b1_w12|ntt_opt_pipe_w12|ntt_opt_pipe_macro|ntt_packed)_(\d+(?:p\d+)?)ns",
+        m = re.fullmatch(r"(ntt_dp|ntt_sp|ntt_macro|keccak_r1|keccak_s7|ntt_opt_b1_w12|ntt_opt_pipe_w12|ntt_opt_pipe_macro|ntt_packed|ntt_packed2)_(\d+(?:p\d+)?)ns",
                          run.name)
         if not m:
             continue

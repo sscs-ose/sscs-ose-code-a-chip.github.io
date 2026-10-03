@@ -59,10 +59,11 @@ asks:
 
 Part I establishes correctness, from an independent Python golden model and the official NIST vectors to
 gate-level simulation of the routed blocks. Part II prices the two decisions after synthesis, after
-place-and-route and across the whole chip, and turns the measurements into two verified redesigns of the
-NTT; the second stores two coefficients in every SRAM word and, with three further changes that remove
-no check, makes a decapsulation 2.8 times faster in simulation of the whole co-processor, a result that the FPGA
-board reproduces to the cycle. Part III repeats the flow on the FPGA board and models a power-analysis adversary. The block-level
+place-and-route and across the whole chip, and turns the measurements into verified redesigns of the
+NTT and of the datapath around it. They store two coefficients in every SRAM word and then stream data
+between a two-lane engine and the datapath, without removing a single check. A decapsulation of the whole
+co-processor falls from 99,537 to 6,856 cycles in simulation (9,316 with the chip's serialized Keccak),
+within 3 % of a compact published design, and the FPGA board reproduces the count to the cycle. Part III repeats the flow on the FPGA board and models a power-analysis adversary. The block-level
 results can be regenerated from this folder; the chip-level ones are published as summaries and hashes,
 because the chip's layout database is not public, and the chip itself is pre-silicon. The numbers in the
 text are read from the committed results, and assertions stop the notebook if a claim and its data part
@@ -146,10 +147,12 @@ LABEL = {"ntt_dp": "NTT, dual-port store", "ntt_sp": "NTT, single-port store",
          "keccak_r1": "Keccak, one round per clock", "keccak_s7": "Keccak, row-serialized",
          "ntt_opt_b1_w12": "NTT iteration: 12-bit store", "ntt_opt_pipe_w12": "NTT iteration: + pipeline",
          "ntt_macro": "NTT, OpenRAM macro store", "ntt_opt_pipe_macro": "NTT iteration: + pipeline, OpenRAM macro store",
-         "ntt_packed": "NTT iteration: packed pairs, 24 × 128 macro"}
+         "ntt_packed": "NTT iteration: packed pairs, 24 × 128 macro",
+         "ntt_packed2": "NTT iteration: two lanes, 24 × 128 macro"}
 COLOR = {"ntt_dp": ps.SERIES[0], "ntt_sp": ps.SERIES[1], "keccak_r1": ps.SERIES[0],
          "keccak_s7": ps.SERIES[1], "ntt_opt_b1_w12": ps.SERIES[2], "ntt_opt_pipe_w12": ps.SERIES[2],
-         "ntt_macro": ps.SERIES[1], "ntt_opt_pipe_macro": ps.SERIES[2], "ntt_packed": ps.SERIES[6]}
+         "ntt_macro": ps.SERIES[1], "ntt_opt_pipe_macro": ps.SERIES[2], "ntt_packed": ps.SERIES[6],
+         "ntt_packed2": ps.SERIES[3]}
 nbd.VALUES.update(LABEL)        # tables show these names instead of the run identifiers
 sys.path.insert(0, str(ROOT / "golden"))
 import mlkem_ref as ref
@@ -188,6 +191,8 @@ times slower as a block, adds under 5 % to a decapsulation, because the system r
 48 MHz with the chip's own SRAM macro; the second stores two coefficients in every SRAM word, finishes a
 transform nine times sooner for a third of the energy and, with three further changes that remove no
 check, shortens a decapsulation of the whole co-processor from 99,537 to 36,110 cycles (Sections 7 and 8).
+Streaming data between a two-lane version of that engine and the datapath then brings it to 6,856 cycles,
+which the board reproduces to the cycle (Sections 8 and 9).
 """)
 
 code(r"""
@@ -211,6 +216,8 @@ pkd, mac0 = dse.loc[("ntt_packed", 20.0)], dse.loc[("ntt_macro", 20.0)]
 e_pk = json.loads((R_/"gls_power/ntt_packed_20ns/summary.json").read_text())["energy_per_forward_ntt_nj"] / 1e3
 a_m0, a_pk = (sum(total_area(r)) for r in ("ntt_macro_20ns", "ntt_packed_20ns"))
 psy_ = json.loads((R_/"system_sim/packed_system.json").read_text())["steps"]
+ssy_ = json.loads((R_/"system_sim/streamed_system.json").read_text())
+fbd_ = pd.read_csv(R_/"fpga/maxopt_final_c3_repeat.csv")
 kj = {v: json.loads((R_/"gls_power"/f"{v}_20ns"/"summary.json").read_text())["energy_per_permutation_nj"]
       for v in ["keccak_r1", "keccak_s7"]}
 prof_ = {c: v["profile"] for c, v in json.loads((R_/"system_sim/decaps_profile.json").read_text())["configs"].items()}
@@ -247,6 +254,11 @@ rows = [
     ("", "Decapsulation with the redesigns (RTL, whole co-processor)",
      f"{psy_['published']:,} → {psy_['D']:,} cycles ({psy_['published'] / psy_['D']:.1f}× faster), every check "
      f"and output unchanged, valid and rejected ciphertexts equally long; the board agrees to the cycle", "§8–9"),
+    ("", "Decapsulation, streamed system (RTL and board)",
+     f"{psy_['D']:,} → {ssy_['decaps_cycles']['H']['sram_only']:,} cycles "
+     f"({psy_['D'] / ssy_['decaps_cycles']['H']['sram_only']:.1f}× faster), "
+     f"{ssy_['decaps_cycles']['H']['asic']:,} with the serialized Keccak; board: {int(fbd_.decaps_cycles.iloc[0]):,} "
+     f"in {len(fbd_)}/{len(fbd_)} runs", "§8–9"),
     ("", "Full SKY130 core",
      f"{cm['finish__design__die__area'] / 1e6:.1f} mm² die, {cm['finish__design__instance__count__stdcell']:,} standard cells, "
      f"{cm['finish__design__instance__count__macros']} SRAM macros; LVS: {chip['signoff']['primary_compare'].lower()}", "§8"),
@@ -269,6 +281,8 @@ assert sysd["decomposition"]["keccak_serial_delta"] / int(sysd["configs"]["fpga"
 assert prof_["fpga"]["perm_busy"] / prof_["fpga"]["cycles"] < 0.01 and 0.45 < prof_["fpga"]["ntt_busy"] / prof_["fpga"]["cycles"] < 0.55
 assert 8.5 < mac0.latency_us_at_fmax / pkd.latency_us_at_fmax < 9.5 and 0.28 < e_pk / e_macro < 0.38   # "nine times", "a third"
 assert (psy_["published"], psy_["D"]) == (99537, 36110)
+assert all(ssy_["checks"].values()) and ssy_["decaps_cycles"]["H"]["sram_only"] == 6856
+assert fbd_.result_pass.all() and (fbd_.decaps_cycles == 6858).all()
 nbd.show(pd.DataFrame([(q, r, v.replace('-', '−') if v.startswith('area ') else v, s) for q, r, v, s in rows],
                       columns=["Question", "Result", "Value", "Section"]))
 """)
@@ -1149,6 +1163,64 @@ repeats the leakage assessment for it.
 """)
 
 md(r"""
+### A third iteration: two butterflies in every word
+
+The packed engine leaves one property of its memory word unused. The two coefficients in a word never
+meet in a butterfly, so nothing prevents them from being processed at the same time. The third iteration
+gives each half of the word its own butterfly unit, a two-lane datapath that still reads and writes one
+word per access, and fuses the layers as three plus four, so that two passes cover a transform. For the
+streamed system of Section 8 the engine also accepts its first pass as a stream of pairs and lets another
+block read the store while it runs; those ports stay idle in the measurements below, and
+`tb/tb_ntt_stream.sv` checks the stream mode on its own.
+""")
+
+code(r"""
+if IN_COLAB:
+    sh("CAC_PACKED2=1 bash scripts/run_sim_packed.sh")
+P2 = ["ntt_packed", "ntt_packed2"]
+pk2 = pnr[(pnr.clk_target_ns == 20) & pnr.variant.isin(P2)].set_index("variant").loc[P2]
+g2 = {v: json.loads((ROOT/"results/gls_power"/f"{v}_20ns"/"summary.json").read_text()) for v in P2}
+a2 = {v: total_area(f"{v}_20ns") for v in P2}
+acc2 = {v: sum(g2[v]["macro_accesses"][k] for k in ("writes", "reads_new_address", "reads_same_address")) for v in P2}
+ptab2 = pd.DataFrame({
+    "standard cells [mm²]": [a2[v][0] / 1e6 for v in P2],
+    "total area [mm²]": [sum(a2[v]) / 1e6 for v in P2],
+    "fmax [MHz]": pk2.fmax_mhz.values,
+    "cycles, forward / inverse NTT": [f"{int(a):,} / {int(b):,}" for a, b in zip(pk2.cycles, pk2.cycles_inv)],
+    "forward-NTT latency [µs]": pk2.latency_us_at_fmax.values,
+    "macro accesses per forward NTT": [acc2[v] for v in P2],
+    "energy per forward NTT [µJ]": [g2[v]["energy_per_forward_ntt_nj"] / 1e3 for v in P2],
+    "DRC / antenna / FEOL": [f"{int(pk2.drc_errors[v])} / {int(pk2.antenna_violating_nets[v])} / "
+                             f"{feol_[v + '_20ns']['feol_markers']}" for v in P2],
+}, index=[LABEL[v] for v in P2])
+ptab2["area × time, total [mm²·µs]"] = ptab2["total area [mm²]"] * ptab2["forward-NTT latency [µs]"]
+sp2 = {x: (ROOT/"results/sim_packed"/f"packed2{x}.log").read_text() for x in ("_x1", "_stream_x1")}
+display(ptab2.round(3))
+# guards for the statements made in the text below
+q1, q2 = ptab2.iloc[0], ptab2.iloc[1]
+assert all("errors=0" in l and "timing_variations=0" in l for l in sp2.values())
+assert re.search(r"cycles_fwd=568 cycles_inv=569", sp2["_x1"])
+assert g2["ntt_packed2"]["gls_pass"] and acc2["ntt_packed2"] == 513
+assert 1.45 < q1["forward-NTT latency [µs]"] / q2["forward-NTT latency [µs]"] < 1.6       # "half again as fast"
+assert 0.85 < q2["energy per forward NTT [µJ]"] / q1["energy per forward NTT [µJ]"] < 0.9  # "about an eighth less"
+assert 1.75 < q2["standard cells [mm²]"] / q1["standard cells [mm²]"] < 1.9               # "almost twice"
+assert 1.25 < q2["total area [mm²]"] / q1["total area [mm²]"] < 1.35                     # "by almost a third"
+assert 0.82 < q2["area × time, total [mm²·µs]"] / q1["area × time, total [mm²·µs]"] < 0.88  # "falls by about 15 %"
+assert ptab2["DRC / antenna / FEOL"].eq("0 / 0 / 0").all()
+""")
+
+md(r"""
+Two lanes make the transform half again as fast: 568 instead of 988 cycles, at a clock that the larger
+datapath lowers from 68 to 60 MHz. The macro is accessed 513 instead of 769 times, so a transform costs
+about an eighth less energy, while the logic's energy stays the same. The price is again area: the
+second butterfly and the larger register banks almost double the standard cells. Because the macro, the
+largest part of the block, stays the same, the block grows by almost a third and its area–time product
+still falls by about 15 %. Its full value appears at system level, where Section 8 shows that the
+transforms set the pace of a decapsulation once the datapath around them streams. The layout is again
+free of DRC, antenna and FEOL violations, and the routed netlist computes bit-exactly.
+""")
+
+md(r"""
 The figure below gathers the effect of the iterations. For each kind of store it sets the original
 engine (grey) beside its iterations on the four figures of merit, and the percentages give the change
 against the original with the same store. Every iteration is faster. The energy falls with the narrower
@@ -1157,9 +1229,10 @@ flip-flop store and, with the macro, only once the packed engine stops accessing
 
 code(r"""
 GROUPS = [("flip-flop store", ["ntt_sp", "ntt_opt_b1_w12", "ntt_opt_pipe_w12"]),
-          ("chip's SRAM macros", ["ntt_macro", "ntt_opt_pipe_macro", "ntt_packed"])]
+          ("chip's SRAM macros", ["ntt_macro", "ntt_opt_pipe_macro", "ntt_packed", "ntt_packed2"])]
 NAMES = {"ntt_sp": "original", "ntt_opt_b1_w12": "12-bit store", "ntt_opt_pipe_w12": "12-bit store + pipeline",
-         "ntt_macro": "original", "ntt_opt_pipe_macro": "pipeline", "ntt_packed": "packed pairs"}
+         "ntt_macro": "original", "ntt_opt_pipe_macro": "pipeline", "ntt_packed": "packed pairs",
+         "ntt_packed2": "two lanes"}
 P20 = pnr[pnr.clk_target_ns == 20].set_index("variant")
 def _energy_uj(v):
     return json.loads((ROOT/"results/gls_power"/f"{v}_20ns"/"summary.json").read_text())["energy_per_forward_ntt_nj"] / 1e3
@@ -1168,8 +1241,8 @@ METRICS = [("total area [mm²]", lambda v: sum(total_area(f"{v}_20ns")) / 1e6),
            ("forward-NTT latency [µs]", lambda v: P20.latency_us_at_fmax[v]),
            ("energy per forward NTT [µJ]", _energy_uj)]
 rows = [(g, v, vs[0]) for g, vs in GROUPS for v in vs]
-ypos = [0, 1, 2, 3.9, 4.9, 5.9]
-fig, axes = plt.subplots(1, 4, figsize=(13, 4.1), sharey=True)
+ypos = [0, 1, 2, 3.9, 4.9, 5.9, 6.9]
+fig, axes = plt.subplots(1, 4, figsize=(13, 4.5), sharey=True)
 for ax, tag, (name, f) in zip(axes, "abcd", METRICS):
     vals = [f(v) for _, v, _ in rows]
     for y, (g, v, ref_v), x in zip(ypos, rows, vals):
@@ -1178,7 +1251,7 @@ for ax, tag, (name, f) in zip(axes, "abcd", METRICS):
         ax.annotate(txt, (x, y), xytext=(4, 0), textcoords="offset points", va="center", fontsize=8.5, color=ps.INK)
     ax.set_title(f"({tag}) {name}", loc="left", fontsize=10)
     ax.set_xlim(0, max(vals) * 1.75); ax.grid(axis="y", visible=False)
-axes[0].set_yticks(ypos, [NAMES[v] for _, v, _ in rows]); axes[0].set_ylim(6.5, -1.3)
+axes[0].set_yticks(ypos, [NAMES[v] for _, v, _ in rows]); axes[0].set_ylim(7.5, -1.3)
 for g, y in ((GROUPS[0][0], -0.85), (GROUPS[1][0], 3.05)):
     axes[0].annotate(g, (0, y), xycoords=("axes fraction", "data"), xytext=(-4, 0), textcoords="offset points",
                      ha="right", va="center", fontsize=9.5, fontweight="bold", color=ps.INK)
@@ -1187,10 +1260,11 @@ ps.save_pdf(fig, "redesign_effect"); plt.show()
 """)
 
 md(r"""
-### All seven NTT layouts side by side
+### All eight NTT layouts side by side
 
-Sections 6 and 7 produced seven NTT layouts at 20 ns: two flip-flop stores, two flip-flop iterations, the
-original and pipelined engine with the chip's 16 × 256 macro, and the packed engine with a 24 × 128 one. The figure plots total area against energy per
+Sections 6 and 7 produced eight NTT layouts at 20 ns: two flip-flop stores, two flip-flop iterations, the
+original and pipelined engine with the chip's 16 × 256 macro, and the packed and two-lane engines with a
+24 × 128 one. The figure plots total area against energy per
 transform, and in Colab or Jupyter its two menus select any other pair of metrics. Whatever the pair, no
 layout wins on every axis, which is why this notebook reports its decisions as trade-offs.
 """)
@@ -1529,6 +1603,137 @@ which marks them as the next targets. These results come from RTL simulation of 
 Section 9 runs the final configuration on the board; the signed-off chip keeps the original engines.
 """)
 
+md(r"""
+### Making the datapath keep pace with the engine
+
+The profile of step D names the next targets, and the same method can follow them. Twenty-six further
+changes, again each behind a define of `scripts/make_packed_system.py`, again removing no check and changing
+no output, form four milestones; each removes the bottleneck that the profile of the previous one exposes.
+
+* **E: one element per cycle.** A second multiplier lets each pointwise product use Karatsuba's three
+  multiplications in two states. The ciphertext is compressed and packed while its coefficients stream out
+  of the engine, and every loop that fetched, waited and stored now prefetches its next operand.
+* **F: two lanes and data in pairs.** A two-lane version of the packed engine gives each half of a memory
+  word its own butterfly, which needs no extra port because the two halves never meet. It fuses the layers
+  as three plus four, so that a transform takes 568 instead of 988 cycles (Section 7). The noise sampler,
+  the read-back and the final comparison now move a pair of coefficients per cycle.
+* **G: pipelined checks and products.** The matrix–vector product becomes a pipeline that finishes one pair
+  and column per cycle, the codec's decode check becomes a byte stream, and J(z‖c) moves out of the
+  decryption into the re-encryption, where the sponge is otherwise idle.
+* **H: streaming between engine and datapath.** The engine gains a stream mode in which its first pass
+  takes pairs as they are produced. The products flow straight into the inverse transform and the sampled
+  noise straight into the forward one, and the decryption's last transform runs while its products are
+  formed. The noise polynomials that the encryption needs later are sampled in the background.
+
+Every milestone passes the full-system testbench in all three configurations, including the shared keys,
+the implicit rejection and the equal latency of valid and rejected ciphertexts, and every one lands exactly
+on the testbench's cycle model. Appendix A.3 lists all twenty-six changes in the order in which they were
+added.
+""")
+
+code(r"""
+# True re-runs the twelve builds (about a quarter of an hour on twelve cores, longer in Colab; works there too)
+RUN_STREAMED_SYSTEM = False
+if RUN_STREAMED_SYSTEM:
+    sh("bash scripts/run_streamed_system.sh")
+ssys = json.loads((ROOT/"results/system_sim/streamed_system.json").read_text())
+sc = ssys["configs"]
+assert all(ssys["checks"].values()), ssys["checks"]
+MS = ["E", "F", "G", "H"]
+dc = {m: ssys["decaps_cycles"][m] for m in MS}
+STAIR = [("chip configuration", cyc_["asic_sysR"], cyc_["asic_sysR"]), ("D", cyc_["sram_only_sysBCD"], None)] + \
+        [(m, dc[m]["sram_only"], dc[m]["asic"]) for m in MS]
+pbd_ = pd.read_csv(ROOT/"results/fpga/packed_c3_repeat.csv")
+fbd_ = pd.read_csv(ROOT/"results/fpga/maxopt_final_c3_repeat.csv")
+fig, ax = plt.subplots(figsize=(11, 4.2))
+xs = list(range(len(STAIR)))
+ax.plot(xs[1:], [s[1] for s in STAIR[1:]], marker="o", lw=1.8, color=ps.SERIES[0],
+        label="one-round Keccak (FPGA store or single-port SRAM)")
+ax.plot(xs[2:], [s[2] for s in STAIR[2:]], marker="s", lw=1.2, ls="--", color=ps.SERIES[1],
+        label="row-serialized Keccak, single-port SRAM")
+ax.plot([0], [STAIR[0][2]], marker="s", ls="none", color=ps.SERIES[1])
+ax.plot([1, len(STAIR) - 1], [int(pbd_.decaps_cycles.iloc[0]), int(fbd_.decaps_cycles.iloc[0])], marker="*", ms=13,
+        ls="none", color=ps.INK, label="measured on the FPGA board")
+for x, (name, a, b) in zip(xs, STAIR):
+    if x > 0:
+        ax.annotate(f"{a:,}", (x, a), xytext=(0, -15), textcoords="offset points", ha="center", fontsize=8.5,
+                    color=ps.SERIES[0])
+    if b is not None:
+        ax.annotate(f"{b:,}", (x, b), xytext=(0, 8), textcoords="offset points", ha="center", fontsize=8.5,
+                    color=ps.SERIES[1])
+ax.set_yscale("log"); ax.set_xticks(xs, [s[0] for s in STAIR])
+ax.set_ylabel("decapsulation [clock cycles]"); ax.set_ylim(4000, 170000)
+ax.legend(loc="upper right", fontsize=8.5)
+ps.finish(fig, title="From 99,537 to 6,856 cycles: each milestone removes the bottleneck the previous one exposed")
+ps.save_pdf(fig, "decaps_streamed"); plt.show()
+mtab = pd.DataFrame({m: {"decapsulation, one-round Keccak": dc[m]["sram_only"],
+                         "decapsulation, row-serialized Keccak": dc[m]["asic"],
+                         "runtime encryption": sc[f"sram_only_str{m}"]["runtime_encrypt_cycles"],
+                         "NTT busy [%]": round(100 * sc[f"sram_only_str{m}"]["profile"]["ntt_busy"] / dc[m]["sram_only"], 1),
+                         "sponge busy [%]": round(100 * sc[f"sram_only_str{m}"]["profile"]["sponge_busy"] / dc[m]["sram_only"], 1)}
+                     for m in MS}).T
+# guards for the statements made in the text below
+assert [dc[m]["sram_only"] for m in MS] == [22058, 16557, 11557, 6856]
+assert [dc[m]["asic"] for m in MS] == [25454, 20301, 12709, 9316]
+assert abs(cyc_["sram_only_sysBCD"] / dc["H"]["sram_only"] - 5.27) < 0.01
+assert abs(cyc_["asic_sysR"] / dc["H"]["asic"] - 10.7) < 0.05
+assert abs(cyc_["asic_sysR"] / dc["H"]["sram_only"] - 14.5) < 0.05
+mtab
+""")
+
+md(r"""
+The four milestones take a decapsulation from 36,110 to 22,058, 16,557, 11,557 and finally 6,856 cycles,
+5.3 times fewer than step D. With the chip's row-serialized Keccak the same RTL needs 9,316 cycles, 10.7
+times fewer than the signed-off chip; with the one-round core that step B restored, it needs 14.5 times
+fewer. The runtime encryption, which a decapsulation repeats to check the ciphertext, falls from 15,462 cycles at
+milestone E to 4,601.
+""")
+
+md(r"""
+### What now limits a decapsulation
+
+At step D the two engines that every operation shares, the NTT and the Keccak sponge, waited for the
+datapath most of the time. The streamed system reverses this, and the profile of its decapsulation shows
+what remains.
+""")
+
+code(r"""
+pD, pH, pHa = cs["sram_only_sysBCD"]["profile"], sc["sram_only_strH"]["profile"], sc["asic_strH"]["profile"]
+UT = [("D, one-round Keccak", pD), ("H, one-round Keccak", pH), ("H, row-serialized Keccak", pHa)]
+fig, ax = plt.subplots(figsize=(10, 3.0))
+for k, (name, p) in enumerate(UT):
+    ax.barh(k - 0.18, 100 * p["ntt_busy"] / p["cycles"], height=0.34, label="NTT engine busy" if k == 0 else None,
+            **ps.bar_kw(ps.SERIES[0]))
+    ax.barh(k + 0.18, 100 * p["sponge_busy"] / p["cycles"], height=0.34, label="Keccak sponge busy" if k == 0 else None,
+            **ps.bar_kw(ps.SERIES[1]))
+    ax.annotate(f"{p['cycles']:,} cycles", (103, k), va="center", fontsize=8.5, color=ps.INK)
+ax.set_yticks(range(len(UT)), [n for n, _ in UT]); ax.invert_yaxis(); ax.set_xlim(0, 122)
+ax.set_xticks(range(0, 101, 20))
+ax.set_xlabel("share of the decapsulation [%]")
+ax.legend(ncols=2, loc="lower left", bbox_to_anchor=(0, 1.0), fontsize=8.5)
+ps.finish(fig, title="The streamed system keeps both shared engines busy; with the serialized Keccak, the sponge sets the pace")
+ps.save_pdf(fig, "decaps_utilization"); plt.show()
+serial_then = int(cfg.loc["asic", "decaps_cycles"]) / int(cfg.loc["sram_only", "decaps_cycles"])
+serial_now = dc["H"]["asic"] / dc["H"]["sram_only"]
+print(f"the row-serialized Keccak lengthens a decapsulation by {serial_then - 1:.1%} in the original design "
+      f"and by {serial_now - 1:.1%} in the streamed system")
+# guards for the statements made in the text below
+assert 0.66 < pH["ntt_busy"] / pH["cycles"] < 0.68 and 0.65 < pH["sponge_busy"] / pH["cycles"] < 0.66
+assert pHa["sponge_busy"] / pHa["cycles"] > 0.995
+assert 0.035 < serial_then - 1 < 0.045 and 0.35 < serial_now - 1 < 0.37
+assert pD["ntt_busy"] / pD["cycles"] < 0.3
+""")
+
+md(r"""
+In the streamed system the NTT engine is busy for two thirds of a decapsulation and the sponge for almost as
+long, and its eight transforms alone account for about 4,550 cycles: the shared engines, not the datapath
+around them, now set the pace. With the row-serialized Keccak the sponge is busy in more than 99.5 % of all
+cycles. This turns a finding of Section 6 around. In the original design the serialized core lengthened a
+decapsulation by only 3.9 %, because the system rarely waited for it; once everything else keeps pace, the
+same choice costs 36 %. What a decision costs depends on everything around it, and for a next revision of
+the chip the one-round core is the better choice.
+""")
+
 
 md(r"""
 ### What a decapsulation costs in energy
@@ -1728,6 +1933,37 @@ assert pb.decaps_cycles.iloc[0] == sim_fcd["decaps_cycles_valid_and_rejected"] +
 assert pkb["fmax_clock1_50_mhz"] > 50 and 2.2 < alm[1] / alm[0] < 2.6
 """)
 
+md(r"""
+**The streamed system on the board.** The milestones of Section 8 went through the same procedure. An
+intermediate build, with J moved into the re-encryption, read 13,098 cycles; the final build of milestone H
+reads 6,858 cycles in each of five two-role runs, again the simulated 6,856 plus the two hand-over cycles.
+Encapsulation, which contains a complete encryption, falls from about 32,200 to about 7,200 cycles, and
+the final check of the received ciphertext from 5,380 to 908. The design grows by about 3,100 ALMs to 90 %
+of the device, the two-lane engine taking 1,920 of them and four DSP blocks, and closes timing at 50 MHz
+with 0.68 ns of slack, less than before. Its first compilation missed timing, because the combinational
+functions that supply the self-test's fixed operands sat on the new multiplier paths. The pipelined product
+only runs with a key loaded at runtime, so its operands now come straight from the key memories, which
+changes no cycle and no result.
+""")
+
+code(r"""
+fb = pd.read_csv(ROOT/"results/fpga/maxopt_final_c3_repeat.csv")
+ib = pd.read_csv(ROOT/"results/fpga/maxopt_c3_repeat.csv")
+fbj = json.loads((ROOT/"results/fpga/maxopt_final_build.json").read_text())
+display(fb[["run", "result_pass", "keygen_cycles", "encaps_cycles", "ciphertext_final_cycles", "decaps_cycles"]])
+alm_tot = int(fbj["alms"].split()[0].replace(",", ""))
+alm_ntt = float(fbj["entities_alms_needed"]["kyber_ntt_engine_packed2 (u_shared_ntt)"]["alms_needed"])
+print(f"bitstream {fbj['sof_sha256'][:16]}… (not published), Fmax {fbj['fmax_mhz']} MHz, "
+      f"setup slack {fbj['clock1_50_setup_slack_ns']} ns; {alm_tot:,} ALMs, two-lane NTT engine {alm_ntt:.0f} ALMs")
+# guards for the statements made in the text above
+assert fb.result_pass.all() and len(fb) == 5 and ib.result_pass.all() and len(ib) == 5
+assert (fb.decaps_cycles == dc["H"]["fpga"] + 2).all() and (ib.decaps_cycles == 13098).all()
+assert 32000 < pb.encaps_cycles.median() < 32400 and 7150 < fb.encaps_cycles.median() < 7250
+assert (pb.ciphertext_final_cycles == 5380).all() and (fb.ciphertext_final_cycles == 908).all()
+assert 3000 < alm_tot - int(fr["device_total_alms"].split()[0].replace(",", "")) < 3200
+assert fbj["fmax_mhz"] > 50 and abs(fbj["clock1_50_setup_slack_ns"] - 0.68) < 0.01
+""")
+
 # --------------------------------------------------------- 10. leakage
 md(r"""
 ## 10. What is not yet protected: a simulated leakage assessment
@@ -1795,7 +2031,8 @@ assert S.loc["unmasked", "cycles_over_4p5"] > 0 and S.loc["first-order masked", 
 assert summ["first-order masked"]["cycles"] == 2 * summ["unmasked"]["cycles"]   # "twice the transform time"
 # the same assessment of the ASIC configuration (single-port store), 2000 traces, committed results only
 for name, d in [("unmasked, ASIC configuration", "leakage_asic"), ("first-order masked, ASIC configuration", "leakage_masked_asic"),
-                ("unmasked, packed engine", "leakage_packed"), ("first-order masked, packed engine", "leakage_masked_packed")]:
+                ("unmasked, packed engine", "leakage_packed"), ("first-order masked, packed engine", "leakage_masked_packed"),
+                ("unmasked, two-lane engine", "leakage_packed2"), ("first-order masked, two-lane engine", "leakage_masked_packed2")]:
     f = ROOT/"results"/d/"tvla_summary.json"
     if f.exists():
         summ[name] = json.loads(f.read_text())
@@ -1805,6 +2042,7 @@ assert (S.control_cycles_over_4p5 == 0).all(), "negative control failed"
 assert S.loc["unmasked, ASIC configuration", "cycles_over_4p5"] > 0                  # "leaks as well"
 assert S.loc["first-order masked, ASIC configuration", "cycles_over_4p5"] == 0       # "and masking removes it"
 assert S.loc["unmasked, packed engine", "cycles_over_4p5"] > 0 and S.loc["first-order masked, packed engine", "cycles_over_4p5"] == 0
+assert S.loc["unmasked, two-lane engine", "cycles_over_4p5"] > 0 and S.loc["first-order masked, two-lane engine", "cycles_over_4p5"] == 0
 S
 """)
 
@@ -1812,10 +2050,12 @@ md(r"""
 The figure confirms both expectations. Without masking, most cycles of the transform exceed the
 threshold, many by a wide margin (a); with masking none does, and the peak $|t|$ stays at the level of
 the negative control (b, c). The protection costs twice the transform time, mask generation not included.
-The table repeats the assessment for the ASIC configuration, whose single-port store reorders the same
-arithmetic over seven cycles per butterfly, and for the packed engine of Section 7, whose register banks
-hold sixteen coefficients at a time: unmasked, both leak just as clearly, and masking again removes every
-crossing of the threshold.
+The table repeats the assessment for three more engines: the ASIC configuration, whose single-port store
+reorders the same arithmetic over seven cycles per butterfly; the packed engine of Section 7, whose register
+banks hold sixteen coefficients at a time; and the two-lane engine of the streamed system, which works on
+both halves of a word at once. Unmasked, all three leak just as clearly, and masking again removes every
+crossing of the threshold. The engine's stream mode only changes the order in which the first pass receives its
+pairs and was not assessed separately.
 It establishes first-order resistance of the NTT stage within this model only: the rest of the
 decapsulation, higher-order attacks, glitches and physical measurements remain outside its scope.
 """)
@@ -1873,16 +2113,17 @@ F
 """)
 
 md(r"""
-Taken together, the measurements of Parts I to III support seven findings.
+Taken together, the measurements of Parts I to III support eight findings.
 
 | Finding | Evidence | Section |
 |:---|:---|:---:|
-| **The design is correct from Python to layout.** | every NIST vector in the golden model; all 25 key-generation vectors on the complete RTL; a proof of the reducer; gate-level agreement of the routed blocks | 2, 4, 7 |
+| **The design is correct from Python to layout.** | every NIST vector in the golden model; all 25 key-generation vectors on the complete RTL, also in its streamed form; a proof of the reducer; gate-level agreement of the routed blocks | 2, 4, 7 |
 | **The single-port store is the right store and the main cost.** | a second port buys a flip-flop store nothing in area × time; the chip's macro saves a third of the area and four fifths of the energy; yet the single port sets most of the ASIC's extra latency | 6, 8 |
-| **Row-serializing Keccak barely matters.** | about 1 % less area for a permutation nine times slower and 5.5 times costlier in energy, which still adds only a few percent to a decapsulation | 6, 8 |
+| **Row-serializing Keccak barely matters, until the rest is fast.** | about 1 % less area for a permutation nine times slower and 5.5 times costlier in energy, which adds only 4 % to a decapsulation of the original design but 36 % to one of the streamed system | 6, 8 |
 | **The integration sets the energy.** | about 0.35 mJ per decapsulation, mostly clocking and macros selected in every cycle; two standard remedies would save 40 to 55 % by projection | 8 |
 | **The measurements pay for themselves.** | a proof and two measurements gave an NTT about two thirds faster after routing; with flip-flops it halves area × time, with the chip's macro it costs a seventh more energy | 7 |
 | **The single port need not cost time.** | two coefficients per word and fused layers cut the macro accesses of a transform from 6,274 to 768: nine times faster, a third of the energy, almost half more area; with the one-round Keccak, overlapped hashes and streamed loops a decapsulation takes 36,110 instead of 99,537 cycles, in RTL and on the board | 7, 8, 9 |
+| **The datapath can keep pace with the engine.** | twenty-six further changes that remove no check stream data between a two-lane engine and the datapath: 6,856 instead of 36,110 cycles, within 3 % of a compact published design, in RTL and on the board; the shared NTT and Keccak engines now set the pace | 8, 9 |
 | **The prototype is interface-bound, and the NTT leaks.** | the core takes well under 1 % of a run on the board; masking removes the modelled first-order leakage of the NTT at twice its time | 9, 10 |
 """)
 
@@ -1909,6 +2150,10 @@ ctx = pd.DataFrame([
      "cycles / NTT": int(P.loc["ntt_packed", "cycles"]),
      "cycles / decapsulation": f"{cyc_['sram_only_sysBCD']:,} (RTL, Section 8)",
      "resources": "NTT block: {:.3f} mm² cells + {:.3f} mm² SRAM macro".format(*(a / 1e6 for a in total_area("ntt_packed_20ns")))},
+    {"design": "HSKEM, streamed system (this work)", "platform": "Agilex 5 FPGA, 50 MHz",
+     "cycles / NTT": int(re.search(r"NTT_RESULT .*?cycles_fwd=(\d+)", (ROOT/"results/sim_packed/packed2_x1.log").read_text())[1]),
+     "cycles / decapsulation": f"{dc['H']['fpga']:,} (RTL), {int(fb.decaps_cycles.iloc[0]):,} (board)",
+     "resources": f"two-lane NTT engine: {alm_ntt:.0f} ALMs, 1 M20K, 4 DSP"},
     {"design": "Xing and Li, TCHES 2021 [13]", "platform": "Artix-7 FPGA, 161 MHz",
      "cycles / NTT": 448, "cycles / decapsulation": "6,668 (k = 2)",
      "resources": "complete KEM, server configuration: 7,412 LUTs, 2 DSP, 3 BRAM"},
@@ -1919,6 +2164,7 @@ ctx = pd.DataFrame([
 # guards for the comparison in the text below
 assert int(P.loc["ntt_packed", "cycles"]) < 1289 and 1.8 < int(P.loc["ntt_packed", "cycles"]) / 448 < 2.5
 assert 5.2 < cyc_["sram_only_sysBCD"] / 6668 < 5.6
+assert 1.02 < dc["H"]["fpga"] / 6668 < 1.03                     # "within 3 %"
 ctx
 """)
 
@@ -1928,9 +2174,12 @@ engine, because they complete at least one butterfly per clock. Sapphire is the 
 stores its coefficients in single-port SRAMs but spreads them over banks, so that the operands and
 results of a butterfly never compete for one port. The packed iteration of Section 7 reaches the same
 effect with a single macro: at 988 cycles it needs fewer than Sapphire and about twice as many as Xing
-and Li's design, whose two memory banks also hold pairs of coefficients. A decapsulation, at 36,110
-cycles in RTL simulation, still takes more than five times as many cycles as theirs, because the
-datapath around the NTT advances one coefficient every few cycles (Section 8).
+and Li's design, whose two memory banks also hold pairs of coefficients. A decapsulation at step D, 36,110
+cycles in RTL simulation, still took more than five times as many cycles as theirs, because the datapath
+around the NTT advanced one coefficient every few cycles. The streamed system of Section 8, whose two-lane
+engine needs 568 cycles per transform, comes within 3 % of their count with 6,856 cycles. The comparison
+concerns cycles only: their design runs at 161 MHz on an Artix-7 and implements the KEM alone in 7,412
+LUTs, while HSKEM is a complete security module running at 50 MHz.
 """)
 
 md(r"""
@@ -1949,6 +2198,9 @@ transfers is to obtain every important number twice, by routes that share no sho
 | The expectation that wiring capacitance raises energy | The extracted layout draws *less* energy per access than the schematic | The same extracted netlist simulated with and without its capacitors (Appendix C.4) |
 | A clean design-rule report from the flow | Its front-end section was disabled; with it, implant gaps inside the OpenRAM macros produce 180,456 markers | Running the front-end rules on their own (Appendix C.3) |
 | Repaired transitions on the macro's address pins | The macro sat against the die edge, so the repair buffers ended up 25 to 70 µm from its pins | Measuring the transition at every address pin after routing (Appendix B.4) |
+| A noise write placed on the cycles in which the streamed encryption leaves the single-port store free | The write is registered and lands one cycle later, on the encryption's next read; the FPGA build passed and the single-port builds produced wrong ciphertexts | The full-system testbench in the single-port configuration (Section 8) |
+| A schedule that runs J(z‖c) between the noise jobs, so that it ends sooner | It made the decapsulation slower: J then competed for the ciphertext memory with the codec's segment checks, which have priority | The time per controller state and a timeline of the re-encryption (Section 8) |
+| A bitstream of the streamed system that passed every functional check | It missed timing by 2.3 ns, because functions that only the self-test uses sat on the new multiplier paths | Static timing analysis of each failing endpoint (Section 9) |
 """)
 
 code(r"""
@@ -1962,6 +2214,7 @@ assert wd_["without_wiring"]["read_pj"] > wd_["with_wiring"]["read_pj"]
 fe = json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())
 assert fe["signed_off_gds"]["markers_total"] == 180456 and set(fe["signed_off_gds"]["markers_by_location"]) == {"OpenRAM macro"}
 assert fe["after_implant_fix"]["markers_total"] == 0
+assert "missed timing (-2.257 ns)" in fbj["first_build_timing_note"]
 print(f"OpenRAM power view of the 16x256 macro: {lib_w / 1e6:.1f} MW; FEOL markers before/after the implant fix: "
       f"{fe['signed_off_gds']['markers_total']:,} / {fe['after_implant_fix']['markers_total']}")
 """)
@@ -1988,10 +2241,18 @@ The findings hold within the following boundaries.
   and averaged for the others, and the access energy depends on the clock period (Appendix C.4).
 * **Scope.** Apart from the macro-store points, the block-level stores are built from flip-flops, and
   dual-port or banked SRAM macros were not evaluated.
-* **The redesigns are not in the chip.** Both NTT iterations, the restored one-round Keccak, the
-  overlapped hashes and the streamed loops are verified in RTL simulation and, for the blocks, at gate
-  level after place-and-route; the final system also ran on the board (Section 9). The signed-off chip
-  and its energy keep the original engines.
+* **The redesigns are not in the chip.** The NTT iterations, the restored one-round Keccak, the
+  overlapped hashes, the streamed loops and the streamed system are verified in RTL simulation, and the
+  blocks also at gate level after place-and-route. Step D and the streamed system also ran on the board
+  (Section 9). The signed-off chip and its energy keep the original engines, so the energy of a streamed
+  decapsulation is not yet measured.
+* **The streamed system.** Two terms of its cycle model are measured rather than derived: the length of
+  J(z‖c), and, with the row-serialized Keccak, the 418 cycles that the busy sponge adds to the end of a
+  decapsulation. Its FPGA build closes timing with 0.68 ns of slack instead of 1.7 ns, its peak
+  power was not assessed, and the engine's stream mode has no leakage assessment of its own. Two of its
+  changes share one read of each ciphertext byte between checks, which lowers the redundancy against
+  injected faults, and the Karatsuba products form the sum of two secret coefficients, which a masked
+  implementation would have to protect.
 * **Security and hardware.** The leakage assessment is a register-transition model of the logic, not a
   power measurement. The PUF and entropy sources are ring oscillators on the FPGA and service interfaces
   on the ASIC, and the FPGA measurements come from a single board.
@@ -2090,6 +2351,34 @@ ax.legend(loc="lower left", bbox_to_anchor=(0, 1.02), ncols=2, markerscale=5, fr
 fig.suptitle("The two coefficients read by every butterfly of a forward NTT; their distance halves in each layer",
              x=0.01, ha="left", y=0.99, fontsize=11.5, fontweight="bold")
 ps.finish(fig); plt.show()
+""")
+
+md(r"""
+### A.3 The streamed system, step by step
+
+Section 8 verifies the streamed system at its four milestones. The table below lists the twenty-six
+changes behind them in the order in which they were added, with the decapsulation that each cumulative
+build took in its full-system simulation during development. Every development build passed the same
+testbench and landed on its cycle model; the four milestone rows were built again for this notebook, and
+the assertions check that they agree. A blank entry means that the build with the row-serialized Keccak was
+only verified together with the next change.
+""")
+
+code(r"""
+steps_ = pd.read_csv(ROOT/"results/system_sim/streamed_steps.csv").set_index("step")
+for ms_ in MS:   # the last change of every milestone is the rebuilt milestone
+    last = steps_[steps_.milestone == ms_].iloc[-1]
+    assert last.record == "milestone build" and last.decaps_one_round_keccak == dc[ms_]["sram_only"]
+    assert int(last.decaps_serialized_keccak) == dc[ms_]["asic"]
+assert (steps_.decaps_one_round_keccak.diff().dropna() <= 0).all()      # no change lengthens a decapsulation
+assert len(steps_) == 26
+show_ = steps_.drop(columns=["record"]).rename(columns={
+    "decaps_one_round_keccak": "decapsulation, one-round Keccak",
+    "decaps_serialized_keccak": "decapsulation, row-serialized Keccak"})
+show_["decapsulation, row-serialized Keccak"] = show_["decapsulation, row-serialized Keccak"].map(
+    lambda v: "" if pd.isna(v) else f"{int(v):,}")
+show_["decapsulation, one-round Keccak"] = show_["decapsulation, one-round Keccak"].map(lambda v: f"{v:,}")
+show_
 """)
 
 md(r"""
@@ -2432,7 +2721,7 @@ rules fired, every marker inside the OpenRAM macros, where abutted cells leave s
 itself says should be merged by hand. `scripts/implant_fix.py` closes them as mask preparation would and
 refuses to write a result if any transistor or resistor would change, and `scripts/verify_untouched.py`
 confirms that everything outside the macros is identical, shape for shape. The corrected chip passes all
-FEOL rules, as do all 27 block-level layouts.
+FEOL rules, as do all 28 block-level layouts.
 """)
 
 code(r"""
@@ -2446,7 +2735,7 @@ print(f"block-level layouts checked: {len(fb)}, FEOL markers in total: {sum(v['f
 assert set(fd["signed_off_gds"]["markers_by_rule"]) == {"n/psdm.1", "npc.2"}
 assert fd["signed_off_gds"]["markers_by_location"] == {"OpenRAM macro": fd["signed_off_gds"]["markers_total"]}
 assert fd["after_implant_fix"]["markers_total"] == 0
-assert len(fb) == 27 and all(v["feol_markers"] == 0 and v["vpp_shapes"] == 0 for v in fb.values())
+assert len(fb) == 28 and all(v["feol_markers"] == 0 and v["vpp_shapes"] == 0 for v in fb.values())
 assert {"ntt_macro_20ns", "ntt_opt_pipe_macro_20ns", "ntt_opt_pipe_macro_12ns", "ntt_packed_20ns", "ntt_packed_12ns"} <= set(fb)
 """)
 

@@ -16,7 +16,10 @@ module tb_ntt;
 `endif
     always #(`CLK_HALF) clk = ~clk;
 
-`ifdef NTT_PACKED
+`ifdef NTT_PACKED2
+    // two-lane packed-pair engine with two fused passes (rtl/kyber_ntt_engine_packed2.sv)
+    kyber_ntt_engine_packed2 #(.EXTRA_STAGE(`XSTAGE)) dut (
+`elsif NTT_PACKED
     // packed-pair, layer-fused engine (rtl/kyber_ntt_engine_packed.sv)
     kyber_ntt_engine_packed #(.EXTRA_STAGE(`XSTAGE)) dut (
 `elsif NTT_OPT
@@ -27,6 +30,12 @@ module tb_ntt;
 `endif
         .clk(clk), .rst_n(rst_n), .start(start), .inverse(inverse),
         .busy(busy), .done(done), .waddr(waddr), .wdata(wdata), .we(we),
+`ifdef NTT_PACKED2
+        .we_pair(1'b0), .wdata_odd(12'd0), .rdata_pair(), .stream(1'b0), .re(1'b0),
+`endif
+`ifdef GLS_PAIR_PORTS
+        .we_pair(1'b0), .wdata_odd(12'd0), .rdata_pair(), .stream(1'b0), .re(1'b0),
+`endif
         .rdata(rdata), .raddr(raddr));
 
     reg [15:0] vin  [0:`N_NTT*256-1];

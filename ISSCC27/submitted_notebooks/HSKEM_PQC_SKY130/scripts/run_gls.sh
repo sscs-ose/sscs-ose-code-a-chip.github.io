@@ -21,6 +21,11 @@ if grep -q "sky130_sram_1rw_16x256_wpr8 " "$TMP/netlist.v"; then
   sed "s/parameter VERBOSE = 1/parameter VERBOSE = 0/" "$ROOT/flow/macros/sky130_sram_1rw_16x256_wpr8.v" > "$TMP/sram_model.v"
   MODELS="sram_model.v -DRD_SAMPLE_DELAY=10"    # its dout0 is valid only 3 ns after the falling edge
 fi
+if grep -q "sky130_sram_1rw_24x128 " "$TMP/netlist.v"; then
+  sed "s/parameter VERBOSE = 1/parameter VERBOSE = 0/" "$ROOT/flow/macros/sky130_sram_1rw_24x128.v" > "$TMP/sram_model.v"
+  MODELS="sram_model.v -DRD_SAMPLE_DELAY=10"
+fi
+[ "$TOP" = kyber_ntt_engine_packed2 ] && MODELS="$MODELS -DGLS_PAIR_PORTS"   # its pair and stream ports, tied off
 (cd "$ROOT/golden" && python3 gen_vectors.py --out "$TMP" --ntt 1 --keccak 1 > /dev/null)
 cd "$TMP"
 # a functional check: unit cell delays and a relaxed 100 ns clock, so that no timing effect can mask a logic error

@@ -14,9 +14,24 @@ module ntt_packed_checker;
     wire       start = tb_trustedge_spi.dut.u_shared_ntt.start;
     wire [7:0] waddr = tb_trustedge_spi.dut.u_shared_ntt.waddr;
     wire [15:0] wdata = tb_trustedge_spi.dut.u_shared_ntt.wdata;
+`ifdef TRUSTEDGE_PAIR_PORT
+    wire        we_pair   = tb_trustedge_spi.dut.u_shared_ntt.we_pair;
+    wire [11:0] wdata_odd = tb_trustedge_spi.dut.u_shared_ntt.wdata_odd;
+`else
+    wire        we_pair   = 1'b0;
+    wire [11:0] wdata_odd = 12'd0;
+`endif
 
     always @(posedge tb_trustedge_spi.clk) begin
-        if (!busy && we) begin
+        if (!busy && we && we_pair) begin
+            // a whole pair in one write: an even address, nothing pending, both values canonical
+            n_wr = n_wr + 2;
+            if (waddr[0] || pend || (wdata >= 16'd3329) || (wdata_odd >= 12'd3329)) begin
+                n_err = n_err + 1;
+                $display("NTT_PACKED_VIOLATION t=%0t pair write addr=%0d pending=%0d data=%0d/%0d",
+                         $time, waddr, pend, wdata, wdata_odd);
+            end
+        end else if (!busy && we) begin
             n_wr = n_wr + 1;
             if (wdata >= 16'd3329) begin
                 n_err = n_err + 1;

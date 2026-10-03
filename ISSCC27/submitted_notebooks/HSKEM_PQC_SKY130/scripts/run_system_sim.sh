@@ -20,7 +20,8 @@ if [ "${CAC_PACKED_SYSTEM:-0}" = 1 ]; then
   python3 "$ROOT/scripts/make_packed_system.py" "$SRC" "$SYS_TMP/hskem_rtl" "$ROOT/rtl" \
       "$ROOT/results/system_sim/packed_system.diff"
   SRC="$SYS_TMP/hskem_rtl"
-  PACKED_FILES=(rtl/kyber/barrett_reduce_1c.v rtl/kyber/kyber_ntt_engine_packed.sv)
+  PACKED_FILES=(rtl/kyber/barrett_reduce_1c.v rtl/kyber/kyber_ntt_engine_packed.sv
+               rtl/kyber/kyber_ntt_engine_packed2.sv)
 fi
 OUT="$ROOT/results/system_sim"; mkdir -p "$OUT"
 # fpga: dual-port NTT store + one-round Keccak; asic: both ASIC choices;
@@ -57,6 +58,8 @@ PROF=(); [ "${CAC_PROFILE:-0}" = 1 ] && PROF=(-s decaps_profiler "$ROOT/tb/decap
 # CAC_STATE_PROF=1 adds tb/decaps_state_profiler.sv (decapsulation cycles binned by FSM state)
 # CAC_PACKED_CHECK=1 adds tb/ntt_packed_checker.sv (the packed engine's write contract)
 [ "${CAC_PACKED_CHECK:-0}" = 1 ] && PROF+=(-s ntt_packed_checker "$ROOT/tb/ntt_packed_checker.sv")
+[ "${CAC_J_PROBE:-0}" = 1 ] && PROF+=(-s j_phase_probe "$ROOT/tb/j_phase_probe.sv")
+[ "${CAC_TL_PROBE:-0}" = 1 ] && PROF+=(-s reenc_timeline_probe "$ROOT/tb/reenc_timeline_probe.sv")
 [ "${CAC_STATE_PROF:-0}" = 1 ] && PROF+=(-s decaps_state_profiler "$ROOT/tb/decaps_state_profiler.sv")
 cd "$SRC"
 V="tb_${CFG}${OUTTAG}.vvp"; L="tb_trustedge_spi_${CFG}${OUTTAG}.log"
