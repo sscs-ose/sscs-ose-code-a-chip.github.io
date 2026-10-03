@@ -55,10 +55,12 @@ def numbers() -> dict:
     e = {k: v * 1e-3 * t * 1e6 for k, v in pw["power_mw"].items()}
     e["sram"] = se["sram_energy_per_decaps_uj"]
     g = {r: j(f"gls_power/{r}/summary.json")["energy_per_forward_ntt_nj"] / 1e3
-         for r in ("ntt_sp_20ns", "ntt_opt_b1_w12_20ns", "ntt_macro_20ns")}
+         for r in ("ntt_sp_20ns", "ntt_opt_b1_w12_20ns", "ntt_macro_20ns", "ntt_packed_20ns")}
     import csv
     dse = {(r["variant"], float(r["clk_target_ns"])): r for r in csv.DictReader(open(R / "dse_metrics.csv"))}
     o, n = dse[("ntt_sp", 20.0)], dse[("ntt_opt_pipe_w12", 20.0)]
+    m0, pk = dse[("ntt_macro", 20.0)], dse[("ntt_packed", 20.0)]
+    steps = j("system_sim/packed_system.json")["steps"]
     prof = j("system_sim/decaps_profile.json")["configs"]["fpga"]["profile"]
     import pandas as pd
     c3 = pd.read_csv(R / "fpga/c3_repeat.csv")
@@ -67,7 +69,8 @@ def numbers() -> dict:
             "fmax": (float(o["fmax_mhz"]), float(n["fmax_mhz"])),
             "at": float(n["at_product"]) / float(o["at_product"]), "area": float(n["cell_area_um2"]) / float(o["cell_area_um2"]),
             "ntt_busy": prof["ntt_busy"] / prof["cycles"], "perm_busy": prof["perm_busy"] / prof["cycles"],
-            "c3": (int(c3.result_pass.sum()), len(c3)), "tv": tv,
+            "c3": (int(c3.result_pass.sum()), len(c3)), "tv": tv, "steps": steps,
+            "pk_lat": (float(m0["latency_us_at_fmax"]), float(pk["latency_us_at_fmax"])),
             "acvp": j("acvp_rtl/keygen_asic.json"), "cells": j("fullchip/summary.json")["orfs_metrics"]}
 
 
@@ -138,9 +141,11 @@ def main(out: str = "figures/poster.pdf") -> None:
     image(nb_png("fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))"), x, 0.53, cw, 0.17)
     text(x, 0.525, f"A measured redesign of the NTT, after routing: fmax {N['fmax'][0]:.0f} → {N['fmax'][1]:.0f} MHz, "
                    f"area {N['area'] - 1:+.0%}, area × time {N['at'] - 1:+.0%}.", 22, width=cw)
-    image(nb_png("show_points"), x, 0.33, cw, 0.15)
-    text(x, 0.325, f"Energy per forward NTT: {N['ntt_e']['ntt_sp_20ns']:.2f} µJ with a flip-flop store, "
-                   f"{N['ntt_e']['ntt_macro_20ns']:.2f} µJ with the chip's SRAM macro.", 22, width=cw)
+    image(nb_png("STEPS = [("), x, 0.33, cw, 0.15)
+    text(x, 0.325, f"A second redesign stores two coefficients in every SRAM word: a forward NTT takes "
+                   f"{N['pk_lat'][1]:.0f} instead of {N['pk_lat'][0]:.0f} µs and {N['ntt_e']['ntt_packed_20ns']:.2f} instead of "
+                   f"{N['ntt_e']['ntt_macro_20ns']:.2f} µJ. With three changes that remove no check, a decapsulation takes "
+                   f"{N['steps']['D']:,} instead of {N['steps']['published']:,} cycles (RTL simulation).", 22, width=cw)
     ax = fig.add_axes([x + 0.01, 0.12, cw - 0.02, 0.13], zorder=2)
     e = N["e"]; tot = sum(e.values())
     parts = [("clock network and\nregister clock pins", e["clock"] + e["sequential"], ps.SERIES[0]),

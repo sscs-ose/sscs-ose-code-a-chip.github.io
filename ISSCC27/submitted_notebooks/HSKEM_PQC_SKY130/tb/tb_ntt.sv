@@ -16,7 +16,10 @@ module tb_ntt;
 `endif
     always #(`CLK_HALF) clk = ~clk;
 
-`ifdef NTT_OPT
+`ifdef NTT_PACKED
+    // packed-pair, layer-fused engine (rtl/kyber_ntt_engine_packed.sv)
+    kyber_ntt_engine_packed #(.EXTRA_STAGE(`XSTAGE)) dut (
+`elsif NTT_OPT
     // design-iteration variant (rtl/kyber_ntt_engine_opt.sv)
     kyber_ntt_engine_opt #(.BARRETT_1C(`B1C), .PIPE_MUL(`PIPE), .COEFF_W(`CW)) dut (
 `else

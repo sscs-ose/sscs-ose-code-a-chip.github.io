@@ -1,0 +1,44 @@
+OpenROAD f552262465b0bfef8f097e258f94bc501d01e19d 
+Features included (+) or not (-): +GPU +GUI +Python
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+[INFO ORD-0030] Using 12 thread(s).
+read_liberty /opt/eda/orfs-6101364b/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty /mnt/d/TKVM_ATTT_2026_test/codeachip_packed/flow/macros/sky130_sram_1rw_24x128_TT_1p8V_25C.lib
+read_db /root/cac_runs/ntt_packed_20ns/results/sky130hd/cac_ntt_packed_20ns/base/3_3_place_gp.odb
+read_sdc /root/cac_runs/ntt_packed_20ns/results/sky130hd/cac_ntt_packed_20ns/base/2_floorplan.sdc
+source /opt/eda/orfs-6101364b/flow/platforms/sky130hd/setRC.tcl
+estimate_parasitics -placement
+Perform buffer insertion and gate resizing...
+repair_design -verbose -cap_margin 40 -slew_margin 40 -match_cell_footprint
+Iteration |   Area    | Resized | Buffers | Nets repaired | Remaining
+---------------------------------------------------------------------
+        0 |     +0.0% |       0 |       0 |             0 |      8345
+     1000 |     +0.0% |       8 |       0 |             0 |      7345
+     2000 |     +0.0% |      10 |       3 |             3 |      6345
+     3000 |     +0.1% |      15 |      10 |             9 |      5345
+     4000 |     +0.1% |      25 |      14 |            11 |      4345
+     5000 |     +0.2% |      40 |      14 |            11 |      3345
+     6000 |     +0.2% |      42 |      19 |            16 |      2345
+     7000 |     +0.3% |      51 |      20 |            17 |      1345
+     8000 |     +0.7% |      53 |     159 |            43 |       345
+    final |     +0.7% |      53 |     159 |            43 |         0
+---------------------------------------------------------------------
+[INFO RSZ-0034] Found 72 slew violations.
+[INFO RSZ-0036] Found 34 capacitance violations.
+[INFO RSZ-0039] Resized 53 instances.
+[INFO RSZ-0038] Inserted 159 buffers in 43 nets.
+[INFO RSZ-0504] Runtime: 0.91s
+Floating nets: 
+Report metrics stage 3, resizer...
+
+==========================================================================
+resizer report_design_area
+--------------------------------------------------------------------------
+Design area 203889 um^2 61% utilization.
+Instance count before 10191, after 10350
+Pin count before 29777, after 30095
+write_db /root/cac_runs/ntt_packed_20ns/results/sky130hd/cac_ntt_packed_20ns/base/3_4_place_resized.odb
+Elapsed time: 0:05.12[h:]min:sec. CPU time: user 6.36 sys 1.96 (162%). Peak memory: 175552KB.
+Log                       Ext     Elapsed/s Peak Memory/MB sha1sum result [0:20)
+3_4_place_resized         .odb            5            171 6965eb7b0cd9364e2738

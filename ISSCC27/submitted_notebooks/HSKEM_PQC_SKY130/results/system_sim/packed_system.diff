@@ -1,0 +1,739 @@
+--- a/rtl/trustedge_top.v
++++ b/rtl/trustedge_top.v
+@@ -1376,7 +1376,12 @@
+                                      (shared_ntt_owner == 3'd1) ?
+                                      mlkem512_ntt_req_inverse : 1'b0;
+ 
++`ifdef TRUSTEDGE_PACKED_NTT
++    // packed-pair, layer-fused NTT: same ports, one 24 x 128 single-port coefficient store
++    kyber_ntt_engine_packed #(.EXTRA_STAGE(1'b1)) u_shared_ntt (
++`else
+     kyber_ntt_engine u_shared_ntt (
++`endif
+         .clk(clk), .rst_n(core_rst_n_mlkem_a),
+         .start(shared_ntt_start),
+         .inverse(shared_ntt_inverse),
+--- a/rtl/mlkem512/mlkem512_partial_kem_selftests.sv
++++ b/rtl/mlkem512/mlkem512_partial_kem_selftests.sv
+@@ -588,6 +588,17 @@
+     end
+ endmodule
+ 
++`ifdef TRUSTEDGE_HASH_OVERLAP
++`define DCP_HS hstate
++`define DCP_HEK_NEXT (hjob_hc_q ? ST_HC_START : ST_IDLE)
++`define DCP_HC_NEXT (hjob_j_q ? ST_J_START : ST_IDLE)
++`define DCP_J_NEXT ST_IDLE
++`else
++`define DCP_HS state
++`define DCP_HEK_NEXT (encaps_mode_q ? ST_G_START : ST_HC_START)
++`define DCP_HC_NEXT (encaps_mode_q ? ST_HASH_DONE : ST_G_START)
++`define DCP_J_NEXT ST_REENC_START
++`endif
+ module mlkem512_decaps_partial_selftest (
+     input  wire       clk,
+     input  wire       rst_n,
+@@ -711,9 +722,20 @@
+         ST_REENC_START=6'd41, ST_REENC_WAIT=6'd42,
+         ST_CMP_REQ=6'd43, ST_CMP_WAIT=6'd44, ST_CMP_CHECK=6'd45,
+         ST_J_START=6'd46, ST_J_REQ=6'd47, ST_J_WAIT=6'd48,
+-        ST_J_FEED=6'd49, ST_J_OUT=6'd50, ST_HASH_DONE=6'd51;
++        ST_J_FEED=6'd49, ST_J_OUT=6'd50, ST_HASH_DONE=6'd51,
++        ST_HASH_JOIN=6'd52, ST_HASH_JOIN2=6'd53;
+     localparam [12:0] Q13 = 13'd3329;
+     reg [5:0] state;
++    // Hash sequencer (TRUSTEDGE_HASH_OVERLAP): H(ek), H(c) and J(z||c) depend only on the inputs, so
++    // they run on hstate while the decryption uses the NTT; hjob_* select the hashes after H(ek).
++    // The sequencer drives the sponge whenever it is active. Without the define, hstate stays idle.
++    reg [5:0] hstate;
++    reg       hjob_hc_q, hjob_j_q;
++`ifdef TRUSTEDGE_HASH_OVERLAP
++    wire [5:0] sp_state = (hstate != ST_IDLE) ? hstate : state;
++`else
++    wire [5:0] sp_state = state;
++`endif
+     reg poly_index;
+     reg [7:0] coeff_index;
+     reg [6:0] pair_index;
+@@ -756,7 +778,7 @@
+ `ifdef TRUSTEDGE_ASIC_SRAM
+     // Ciphertext import and comparison are phase-exclusive. A write occupies
+     // the single physical port; its read output is intentionally not consumed.
+-    wire ciphertext_ref_write = (state == ST_HC_FEED) &&
++    wire ciphertext_ref_write = (sp_state == ST_HC_FEED) &&
+                                 sponge_ext_in_ready;
+     wire [9:0] ciphertext_ref_sram_addr = ciphertext_ref_write ?
+         sponge_feed_index : compare_index;
+@@ -850,55 +872,55 @@
+                               (ek_byte_sub == 2'd1) ?
+                               ekpke_ext_pair_data[15:8] :
+                               ekpke_ext_pair_data[23:16];
+-    wire hash_start_state = (state == ST_HEK_START) ||
+-                            (state == ST_HC_START) ||
+-                            (state == ST_G_START) ||
+-                            (state == ST_J_START);
++    wire hash_start_state = (sp_state == ST_HEK_START) ||
++                            (sp_state == ST_HC_START) ||
++                            (sp_state == ST_G_START) ||
++                            (sp_state == ST_J_START);
+     assign sponge_ext_start = hash_start_state;
+-    assign sponge_ext_mode = ((state == ST_G_START) ||
+-                              (state == ST_G_FEED) ||
+-                              (state == ST_G_OUT)) ? 2'd1 :
+-                             ((state == ST_J_START) ||
+-                              (state == ST_J_REQ) ||
+-                              (state == ST_J_WAIT) ||
+-                              (state == ST_J_FEED) ||
+-                              (state == ST_J_OUT)) ? 2'd3 : 2'd0;
+-    assign sponge_ext_message_len = ((state == ST_HEK_START) ||
+-                                     (state == ST_HEK_REQ) ||
+-                                     (state == ST_HEK_WAIT) ||
+-                                     (state == ST_HEK_FEED) ||
+-                                     (state == ST_HEK_OUT)) ? 16'd800 :
+-                                    ((state == ST_HC_START) ||
+-                                     (state == ST_HC_REQ) ||
+-                                     (state == ST_HC_WAIT) ||
+-                                     (state == ST_HC_FEED) ||
+-                                     (state == ST_HC_OUT)) ? 16'd768 :
+-                                    ((state == ST_J_START) ||
+-                                     (state == ST_J_REQ) ||
+-                                     (state == ST_J_WAIT) ||
+-                                     (state == ST_J_FEED) ||
+-                                     (state == ST_J_OUT)) ? 16'd800 : 16'd64;
+-    assign sponge_ext_output_len = ((state == ST_G_START) ||
+-                                    (state == ST_G_FEED) ||
+-                                    (state == ST_G_OUT)) ? 16'd64 : 16'd32;
+-    assign sponge_ext_in_valid = (state == ST_HEK_FEED) ||
+-                                 (state == ST_HC_FEED) ||
+-                                 (state == ST_G_FEED) ||
+-                                 (state == ST_J_FEED);
+-    assign sponge_ext_in_byte = (state == ST_HEK_FEED) ?
++    assign sponge_ext_mode = ((sp_state == ST_G_START) ||
++                              (sp_state == ST_G_FEED) ||
++                              (sp_state == ST_G_OUT)) ? 2'd1 :
++                             ((sp_state == ST_J_START) ||
++                              (sp_state == ST_J_REQ) ||
++                              (sp_state == ST_J_WAIT) ||
++                              (sp_state == ST_J_FEED) ||
++                              (sp_state == ST_J_OUT)) ? 2'd3 : 2'd0;
++    assign sponge_ext_message_len = ((sp_state == ST_HEK_START) ||
++                                     (sp_state == ST_HEK_REQ) ||
++                                     (sp_state == ST_HEK_WAIT) ||
++                                     (sp_state == ST_HEK_FEED) ||
++                                     (sp_state == ST_HEK_OUT)) ? 16'd800 :
++                                    ((sp_state == ST_HC_START) ||
++                                     (sp_state == ST_HC_REQ) ||
++                                     (sp_state == ST_HC_WAIT) ||
++                                     (sp_state == ST_HC_FEED) ||
++                                     (sp_state == ST_HC_OUT)) ? 16'd768 :
++                                    ((sp_state == ST_J_START) ||
++                                     (sp_state == ST_J_REQ) ||
++                                     (sp_state == ST_J_WAIT) ||
++                                     (sp_state == ST_J_FEED) ||
++                                     (sp_state == ST_J_OUT)) ? 16'd800 : 16'd64;
++    assign sponge_ext_output_len = ((sp_state == ST_G_START) ||
++                                    (sp_state == ST_G_FEED) ||
++                                    (sp_state == ST_G_OUT)) ? 16'd64 : 16'd32;
++    assign sponge_ext_in_valid = (sp_state == ST_HEK_FEED) ||
++                                 (sp_state == ST_HC_FEED) ||
++                                 (sp_state == ST_G_FEED) ||
++                                 (sp_state == ST_J_FEED);
++    assign sponge_ext_in_byte = (sp_state == ST_HEK_FEED) ?
+         ((sponge_feed_index < 10'd768) ? ek_feed_byte : rho_ext_data) :
+-        (state == ST_HC_FEED) ? ciphertext_ext_data :
+-        (state == ST_G_FEED) ?
++        (sp_state == ST_HC_FEED) ? ciphertext_ext_data :
++        (sp_state == ST_G_FEED) ?
+             ((sponge_feed_index < 10'd32) ?
+              recovered_message_q[sponge_feed_index*8 +: 8] :
+              h_ek_q[(sponge_feed_index-10'd32)*8 +: 8]) :
+-        (state == ST_J_FEED) ?
++        (sp_state == ST_J_FEED) ?
+             ((sponge_feed_index < 10'd32) ?
+              runtime_z[sponge_feed_index*8 +: 8] : ciphertext_ref_q) : 8'd0;
+-    assign sponge_ext_out_ready = (state == ST_HEK_OUT) ||
+-                                  (state == ST_HC_OUT) ||
+-                                  (state == ST_G_OUT) ||
+-                                  (state == ST_J_OUT);
++    assign sponge_ext_out_ready = (sp_state == ST_HEK_OUT) ||
++                                  (sp_state == ST_HC_OUT) ||
++                                  (sp_state == ST_G_OUT) ||
++                                  (sp_state == ST_J_OUT);
+ 
+     assign ntt_ext_start=(state==ST_NTT_START)||(state==ST_INV_START);
+     assign ntt_ext_inverse=(state==ST_INV_START);
+@@ -952,6 +974,7 @@
+             encaps_mode_q<=1'b0;
+             general_runtime_mode_q<=1'b0;
+             state <= ST_IDLE;
++            hstate <= ST_IDLE; hjob_hc_q <= 1'b0; hjob_j_q <= 1'b0;
+         end else begin
+             done <= 1'b0;
+             reencrypt_start <= 1'b0;
+@@ -980,7 +1003,12 @@
+                         compare_index<=10'd0;compare_diff_q<=8'd0;
+                         ciphertext_match_q<=1'b0;reencrypt_pass_q<=1'b0;
+                         reencrypt_active<=1'b0;
++`ifdef TRUSTEDGE_HASH_OVERLAP
++                        hstate<=ST_HEK_START;hjob_hc_q<=1'b0;hjob_j_q<=1'b0;
++                        state<=ST_HASH_JOIN;
++`else
+                         state<=ST_HEK_START;
++`endif
+                     end else begin
+                         state<=ST_FAIL_DONE;
+                     end
+@@ -1007,6 +1035,9 @@
+                         compare_index<=10'd0;compare_diff_q<=8'd0;
+                         ciphertext_match_q<=1'b0;reencrypt_pass_q<=1'b0;
+                         reencrypt_active<=1'b0;
++`ifdef TRUSTEDGE_HASH_OVERLAP
++                        hstate<=ST_HEK_START;hjob_hc_q<=1'b1;hjob_j_q<=1'b1;
++`endif
+                         state<=ST_U_REQ;
+                     end else if (!ciphertext_ready) begin
+                         // Compatibility KAT for historical HSM regression.
+@@ -1020,7 +1051,11 @@
+                         state <= ST_FAIL_DONE;
+                     end
+                 end
++`ifdef TRUSTEDGE_STREAM_IO
++                ST_U_REQ: state<=ST_U_CAP;      // one-cycle read latency
++`else
+                 ST_U_REQ: state<=ST_U_WAIT;
++`endif
+                 ST_U_WAIT: state<=ST_U_CAP;
+                 ST_U_CAP: begin decoded_q<=decoded_ext_data;state<=ST_U_WRITE;end
+                 ST_U_WRITE: begin
+@@ -1031,11 +1066,19 @@
+                 ST_NTT_START: state<=ST_NTT_WAIT;
+                 ST_NTT_WAIT: if(ntt_ext_done) begin pair_index<=0;
+                     dkpke_ext_pair_addr<={poly_index,7'd0};state<=ST_PAIR_REQ0;end
++`ifdef TRUSTEDGE_STREAM_IO
++                ST_PAIR_REQ0: state<=ST_PAIR_CAP0;      // one-cycle read latency
++`else
+                 ST_PAIR_REQ0: state<=ST_PAIR_WAIT0;
++`endif
+                 ST_PAIR_WAIT0: state<=ST_PAIR_CAP0;
+                 ST_PAIR_CAP0: begin u0_q<=ntt_ext_rdata[11:0];
+                     s0_q<=secret0;s1_q<=secret1;state<=ST_PAIR_REQ1;end
++`ifdef TRUSTEDGE_STREAM_IO
++                ST_PAIR_REQ1: state<=ST_PAIR_CAP1;      // one-cycle read latency
++`else
+                 ST_PAIR_REQ1: state<=ST_PAIR_WAIT1;
++`endif
+                 ST_PAIR_WAIT1: state<=ST_PAIR_CAP1;
+                 ST_PAIR_CAP1: begin u1_q<=ntt_ext_rdata[11:0];state<=ST_MUL0;end
+                 ST_MUL0: begin p0_q<=mul_reduced;state<=ST_MUL1;end
+@@ -1063,7 +1106,11 @@
+                 ST_INV_START: state<=ST_INV_WAIT;
+                 ST_INV_WAIT: if(ntt_ext_done) begin coeff_index<=0;
+                     decoded_ext_addr<=10'd512;state<=ST_MSG_REQ;end
++`ifdef TRUSTEDGE_STREAM_IO
++                ST_MSG_REQ: state<=ST_MSG_CAP;      // one-cycle read latency
++`else
+                 ST_MSG_REQ: state<=ST_MSG_WAIT;
++`endif
+                 ST_MSG_WAIT: state<=ST_MSG_CAP;
+                 ST_MSG_CAP: begin
+                     coeff_digest_q<=coeff_digest_next;
+@@ -1075,6 +1122,9 @@
+                         message_byte_q<=0;
+                     end
+                     if(coeff_index==8'd255) begin
++`ifdef TRUSTEDGE_HASH_OVERLAP
++                        state<=ST_HASH_JOIN;      // the hash sequencer may still be running
++`else
+                         sponge_feed_index<=10'd0;
+                         sponge_output_index<=7'd0;
+                         sponge_output_complete<=1'b0;
+@@ -1083,75 +1133,14 @@
+                         ek_byte_sub<=2'd0;
+                         h_ek_fp_q<=32'h48454B31;
+                         state<=ST_HEK_START;
++`endif
+                     end else begin coeff_index<=coeff_index+1'b1;
+                         decoded_ext_addr<=decoded_ext_addr+1'b1;state<=ST_MSG_REQ;end
+                 end
+-                ST_HEK_START: begin
+-                    sponge_feed_index<=10'd0;ekpke_ext_pair_addr<=8'd0;
+-                    rho_ext_addr<=5'd0;ek_byte_sub<=2'd0;
+-                    sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
+-                    h_ek_q<=256'd0;h_ek_fp_q<=32'h48454B31;
+-                    state<=ST_HEK_REQ;
+-                end
+-                ST_HEK_REQ: state<=ST_HEK_WAIT;
+-                ST_HEK_WAIT: state<=ST_HEK_FEED;
+-                ST_HEK_FEED: if(sponge_ext_in_ready) begin
+-                    if(sponge_feed_index==10'd799) begin
+-                        sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
+-                        state<=ST_HEK_OUT;
+-                    end else begin
+-                        if(sponge_feed_index<10'd767) begin
+-                            if(ek_byte_sub==2'd2) begin
+-                                ek_byte_sub<=2'd0;
+-                                ekpke_ext_pair_addr<=ekpke_ext_pair_addr+1'b1;
+-                            end else ek_byte_sub<=ek_byte_sub+1'b1;
+-                        end else if(sponge_feed_index>=10'd768)
+-                            rho_ext_addr<=rho_ext_addr+1'b1;
+-                        sponge_feed_index<=sponge_feed_index+1'b1;
+-                        state<=ST_HEK_REQ;
+-                    end
+-                end
+-                ST_HEK_OUT: begin
+-                    if(sponge_ext_out_valid) begin
+-                        h_ek_q[sponge_output_index*8 +: 8]<=sponge_ext_out_byte;
+-                        h_ek_fp_q<=hash_digest_step(h_ek_fp_q,sponge_ext_out_byte);
+-                        if(sponge_ext_out_last) sponge_output_complete<=1'b1;
+-                        else sponge_output_index<=sponge_output_index+1'b1;
+-                    end
+-                    if(sponge_ext_done&&sponge_output_complete)
+-                        state<=encaps_mode_q?ST_G_START:ST_HC_START;
+-                end
+-                ST_HC_START: begin
+-                    sponge_feed_index<=10'd0;ciphertext_ext_addr<=10'd0;
+-                    sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
+-                    h_c_q<=256'd0;h_c_fp_q<=32'h48435431;
+-                    state<=ST_HC_REQ;
+-                end
+-                ST_HC_REQ: state<=ST_HC_WAIT;
+-                ST_HC_WAIT: state<=ST_HC_FEED;
+-                ST_HC_FEED: if(sponge_ext_in_ready) begin
+-`ifndef TRUSTEDGE_ASIC_SRAM
+-                    ciphertext_ref_ram[sponge_feed_index] <= ciphertext_ext_data;
+-`endif
+-                    if(sponge_feed_index==10'd767) begin
+-                        sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
+-                        state<=ST_HC_OUT;
+-                    end else begin
+-                        sponge_feed_index<=sponge_feed_index+1'b1;
+-                        ciphertext_ext_addr<=ciphertext_ext_addr+1'b1;
+-                        state<=ST_HC_REQ;
+-                    end
+-                end
+-                ST_HC_OUT: begin
+-                    if(sponge_ext_out_valid) begin
+-                        h_c_q[sponge_output_index*8 +: 8]<=sponge_ext_out_byte;
+-                        h_c_fp_q<=hash_digest_step(h_c_fp_q,sponge_ext_out_byte);
+-                        if(sponge_ext_out_last) sponge_output_complete<=1'b1;
+-                        else sponge_output_index<=sponge_output_index+1'b1;
+-                    end
+-                    if(sponge_ext_done&&sponge_output_complete)
+-                        state<=encaps_mode_q?ST_HASH_DONE:ST_G_START;
+-                end
++                // handled by the hash sequencer below
++                ST_HEK_START, ST_HEK_REQ, ST_HEK_WAIT, ST_HEK_FEED, ST_HEK_OUT,
++                ST_HC_START, ST_HC_REQ, ST_HC_WAIT, ST_HC_FEED, ST_HC_OUT,
++                ST_J_START, ST_J_REQ, ST_J_WAIT, ST_J_FEED, ST_J_OUT: ;
+                 ST_G_START: begin
+                     sponge_feed_index<=10'd0;sponge_output_index<=7'd0;
+                     sponge_output_complete<=1'b0;kbar_q<=256'd0;coins_q<=256'd0;
+@@ -1175,39 +1164,14 @@
+                         else sponge_output_index<=sponge_output_index+1'b1;
+                     end
+                     if(sponge_ext_done&&sponge_output_complete)
++`ifdef TRUSTEDGE_HASH_OVERLAP
++                        state<=ST_REENC_START;      // J(z||c) is already done
++`else
+                         state<=encaps_mode_q?ST_REENC_START:ST_J_START;
++`endif
+                 end
+                 // FIPS 203 Algorithm 18 computes J(z||c) on every Decaps
+                 // invocation before the constant-time ciphertext selection.
+-                ST_J_START: begin
+-                    sponge_feed_index<=10'd0;sponge_output_index<=7'd0;
+-                    sponge_output_complete<=1'b0;compare_index<=10'd0;
+-                    j_q<=256'd0;j_fp_q<=32'h53533138;state<=ST_J_REQ;
+-                end
+-                ST_J_REQ: begin
+-                    if(sponge_feed_index>=10'd32)
+-                        compare_index<=sponge_feed_index-10'd32;
+-                    state<=ST_J_WAIT;
+-                end
+-                ST_J_WAIT: state<=ST_J_FEED;
+-                ST_J_FEED: if(sponge_ext_in_ready) begin
+-                    if(sponge_feed_index==10'd799) begin
+-                        sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
+-                        state<=ST_J_OUT;
+-                    end else begin
+-                        sponge_feed_index<=sponge_feed_index+1'b1;
+-                        state<=ST_J_REQ;
+-                    end
+-                end
+-                ST_J_OUT: begin
+-                    if(sponge_ext_out_valid) begin
+-                        j_q[sponge_output_index*8 +: 8]<=sponge_ext_out_byte;
+-                        j_fp_q<=hash_digest_step(j_fp_q,sponge_ext_out_byte);
+-                        if(sponge_ext_out_last) sponge_output_complete<=1'b1;
+-                        else sponge_output_index<=sponge_output_index+1'b1;
+-                    end
+-                    if(sponge_ext_done&&sponge_output_complete) state<=ST_REENC_START;
+-                end
+                 ST_REENC_START: begin
+                     reencrypt_message<=recovered_message_q;
+                     reencrypt_coins<=coins_q;
+@@ -1222,7 +1186,12 @@
+                         // Release the Encrypt owner before hashing the newly
+                         // generated ciphertext with the shared sponge.
+                         reencrypt_active<=1'b0;
++`ifdef TRUSTEDGE_HASH_OVERLAP
++                        hstate<=ST_HC_START;hjob_hc_q<=1'b0;hjob_j_q<=1'b0;
++                        state<=ST_HASH_JOIN2;
++`else
+                         state<=ST_HC_START;
++`endif
+                     end else begin
+                         compare_index<=10'd0;
+                         compare_diff_q<=8'd0;
+@@ -1232,7 +1201,11 @@
+                 end
+                 ST_CMP_REQ: begin
+                     ciphertext_ext_addr<=compare_index;
++`ifdef TRUSTEDGE_STREAM_IO
++                    state<=ST_CMP_CHECK;      // the address was set with the previous byte
++`else
+                     state<=ST_CMP_WAIT;
++`endif
+                 end
+                 ST_CMP_WAIT: state<=ST_CMP_CHECK;
+                 ST_CMP_CHECK: begin
+@@ -1245,9 +1218,14 @@
+                         state<=ST_HASH_DONE;
+                     end else begin
+                         compare_index<=compare_index+1'b1;
++`ifdef TRUSTEDGE_STREAM_IO
++                        ciphertext_ext_addr<=compare_index+1'b1;
++`endif
+                         state<=ST_CMP_REQ;
+                     end
+                 end
++                ST_HASH_JOIN: if(hstate==ST_IDLE) state<=ST_G_START;
++                ST_HASH_JOIN2: if(hstate==ST_IDLE) state<=ST_HASH_DONE;
+                 ST_HASH_DONE: begin
+                     busy<=0;done<=1;
+                     // ML-KEM Decaps does not fail outward when the
+@@ -1289,6 +1267,109 @@
+                     corrupt_shared_digest<=0;state<=ST_IDLE;end
+                 default: state <= ST_IDLE;
+             endcase
++            // hash handlers: on hstate with TRUSTEDGE_HASH_OVERLAP, otherwise on state as before
++            case (`DCP_HS)
++                ST_HEK_START: begin
++                    sponge_feed_index<=10'd0;ekpke_ext_pair_addr<=8'd0;
++                    rho_ext_addr<=5'd0;ek_byte_sub<=2'd0;
++                    sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
++                    h_ek_q<=256'd0;h_ek_fp_q<=32'h48454B31;
++                    `DCP_HS<=ST_HEK_REQ;
++                end
++                ST_HEK_REQ: `DCP_HS<=ST_HEK_WAIT;
++                ST_HEK_WAIT: `DCP_HS<=ST_HEK_FEED;
++                ST_HEK_FEED: if(sponge_ext_in_ready) begin
++                    if(sponge_feed_index==10'd799) begin
++                        sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
++                        `DCP_HS<=ST_HEK_OUT;
++                    end else begin
++                        if(sponge_feed_index<10'd767) begin
++                            if(ek_byte_sub==2'd2) begin
++                                ek_byte_sub<=2'd0;
++                                ekpke_ext_pair_addr<=ekpke_ext_pair_addr+1'b1;
++                            end else ek_byte_sub<=ek_byte_sub+1'b1;
++                        end else if(sponge_feed_index>=10'd768)
++                            rho_ext_addr<=rho_ext_addr+1'b1;
++                        sponge_feed_index<=sponge_feed_index+1'b1;
++                        `DCP_HS<=ST_HEK_REQ;
++                    end
++                end
++                ST_HEK_OUT: begin
++                    if(sponge_ext_out_valid) begin
++                        h_ek_q[sponge_output_index*8 +: 8]<=sponge_ext_out_byte;
++                        h_ek_fp_q<=hash_digest_step(h_ek_fp_q,sponge_ext_out_byte);
++                        if(sponge_ext_out_last) sponge_output_complete<=1'b1;
++                        else sponge_output_index<=sponge_output_index+1'b1;
++                    end
++                    if(sponge_ext_done&&sponge_output_complete)
++                        `DCP_HS<=`DCP_HEK_NEXT;
++                end
++                ST_HC_START: begin
++                    sponge_feed_index<=10'd0;ciphertext_ext_addr<=10'd0;
++                    sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
++                    h_c_q<=256'd0;h_c_fp_q<=32'h48435431;
++                    `DCP_HS<=ST_HC_REQ;
++                end
++                ST_HC_REQ: `DCP_HS<=ST_HC_WAIT;
++                ST_HC_WAIT: `DCP_HS<=ST_HC_FEED;
++                ST_HC_FEED: if(sponge_ext_in_ready) begin
++`ifndef TRUSTEDGE_ASIC_SRAM
++                    ciphertext_ref_ram[sponge_feed_index] <= ciphertext_ext_data;
++`endif
++                    if(sponge_feed_index==10'd767) begin
++                        sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
++                        `DCP_HS<=ST_HC_OUT;
++                    end else begin
++                        sponge_feed_index<=sponge_feed_index+1'b1;
++                        ciphertext_ext_addr<=ciphertext_ext_addr+1'b1;
++                        `DCP_HS<=ST_HC_REQ;
++                    end
++                end
++                ST_HC_OUT: begin
++                    if(sponge_ext_out_valid) begin
++                        h_c_q[sponge_output_index*8 +: 8]<=sponge_ext_out_byte;
++                        h_c_fp_q<=hash_digest_step(h_c_fp_q,sponge_ext_out_byte);
++                        if(sponge_ext_out_last) sponge_output_complete<=1'b1;
++                        else sponge_output_index<=sponge_output_index+1'b1;
++                    end
++                    if(sponge_ext_done&&sponge_output_complete)
++                        `DCP_HS<=`DCP_HC_NEXT;
++                end
++                ST_J_START: begin
++                    sponge_feed_index<=10'd0;sponge_output_index<=7'd0;
++                    sponge_output_complete<=1'b0;compare_index<=10'd0;
++                    j_q<=256'd0;j_fp_q<=32'h53533138;`DCP_HS<=ST_J_REQ;
++                end
++                ST_J_REQ: begin
++                    if(sponge_feed_index>=10'd32)
++                        compare_index<=sponge_feed_index-10'd32;
++                    `DCP_HS<=ST_J_WAIT;
++                end
++                ST_J_WAIT: `DCP_HS<=ST_J_FEED;
++                ST_J_FEED: if(sponge_ext_in_ready) begin
++                    if(sponge_feed_index==10'd799) begin
++                        sponge_output_index<=7'd0;sponge_output_complete<=1'b0;
++                        `DCP_HS<=ST_J_OUT;
++                    end else begin
++                        sponge_feed_index<=sponge_feed_index+1'b1;
++                        `DCP_HS<=ST_J_REQ;
++                    end
++                end
++                ST_J_OUT: begin
++                    if(sponge_ext_out_valid) begin
++                        j_q[sponge_output_index*8 +: 8]<=sponge_ext_out_byte;
++                        j_fp_q<=hash_digest_step(j_fp_q,sponge_ext_out_byte);
++                        if(sponge_ext_out_last) sponge_output_complete<=1'b1;
++                        else sponge_output_index<=sponge_output_index+1'b1;
++                    end
++                    if(sponge_ext_done&&sponge_output_complete) `DCP_HS<=`DCP_J_NEXT;
++                end
++                default: ;
++            endcase
+         end
+     end
+ endmodule
++`undef DCP_HS
++`undef DCP_HEK_NEXT
++`undef DCP_HC_NEXT
++`undef DCP_J_NEXT
+--- a/rtl/mlkem512/mlkem512_kpke_encrypt_selftest.sv
++++ b/rtl/mlkem512/mlkem512_kpke_encrypt_selftest.sv
+@@ -589,14 +589,22 @@
+                 S_PRF_START: state<=S_PRF_WAIT;
+                 S_PRF_WAIT: if(prf_done) begin runtime_prf_ok_q<=prf_pass;
+                     y_poly<=0;y_pair<=0;state<=prf_pass?S_Y_FETCH:S_CODEC_WAIT; end
++`ifdef TRUSTEDGE_STREAM_IO
++                S_Y_FETCH: state<=S_Y_WRITE0;      // one-cycle read latency
++`else
+                 S_Y_FETCH: state<=S_Y_WAIT;
++`endif
+                 S_Y_WAIT: state<=S_Y_WRITE0;
+                 S_Y_WRITE0: state<=S_Y_WRITE1;
+                 S_Y_WRITE1: begin if(y_pair==127) state<=S_Y_NTT_START;
+                     else begin y_pair<=y_pair+1'b1;state<=S_Y_FETCH;end end
+                 S_Y_NTT_START: state<=S_Y_NTT_WAIT;
+                 S_Y_NTT_WAIT: if(ntt_done) begin y_read_index<=0;state<=S_Y_READ_REQ;end
++`ifdef TRUSTEDGE_STREAM_IO
++                S_Y_READ_REQ: state<=S_Y_READ_CAP;      // one-cycle read latency
++`else
+                 S_Y_READ_REQ: state<=S_Y_READ_WAIT;
++`endif
+                 S_Y_READ_WAIT: state<=S_Y_READ_CAP;
+                 S_Y_READ_CAP: begin if(y_read_index==255) state<=S_Y_NEXT;
+                     else begin y_read_index<=y_read_index+1'b1;state<=S_Y_READ_REQ;end end
+@@ -634,7 +642,11 @@
+                     state<=runtime_valid_q?S_OPERAND_WAIT:S_OPERAND;end end
+                 S_INV_START: state<=S_INV_WAIT;
+                 S_INV_WAIT: if(ntt_done) begin read_index<=0;state<=S_READ_REQ;end
++`ifdef TRUSTEDGE_STREAM_IO
++                S_READ_REQ: state<=S_READ_LOAD;      // one-cycle read latency
++`else
+                 S_READ_REQ: state<=S_READ_WAIT;
++`endif
+                 S_READ_WAIT: state<=S_READ_LOAD;
+                 S_READ_LOAD: begin if(read_index==255) begin
+                     if(poly_index==2) state<=S_CODEC_START;
+--- a/rtl/mlkem512/mlkem512_ciphertext_codec.sv
++++ b/rtl/mlkem512/mlkem512_ciphertext_codec.sv
+@@ -422,7 +422,11 @@
+                     end
+                 end
+ 
++`ifdef TRUSTEDGE_STREAM_IO
++                ST_U_REQ: state <= ST_U_CAPTURE;      // one-cycle read latency
++`else
+                 ST_U_REQ: state <= ST_U_WAIT;
++`endif
+                 ST_U_WAIT: state <= ST_U_CAPTURE;
+                 ST_U_CAPTURE: begin
+                     pack_bits <= u_pack_next;
+@@ -454,7 +458,11 @@
+                     end
+                 end
+ 
++`ifdef TRUSTEDGE_STREAM_IO
++                ST_V_REQ: state <= ST_V_CAPTURE;      // one-cycle read latency
++`else
+                 ST_V_REQ: state <= ST_V_WAIT;
++`endif
+                 ST_V_WAIT: state <= ST_V_CAPTURE;
+                 ST_V_CAPTURE: begin
+                     pack_bits <= v_pack_next;
+@@ -497,7 +505,11 @@
+                 // decoded value against Compress(source) followed by
+                 // Decompress(source). This catches pack order, RAM read and
+                 // decompression errors without exposing ciphertext or key data.
++`ifdef TRUSTEDGE_STREAM_IO
++                ST_D_REQ: state <= ST_D_ACC;      // one-cycle read latency
++`else
+                 ST_D_REQ: state <= ST_D_WAIT;
++`endif
+                 ST_D_WAIT: state <= ST_D_ACC;
+                 ST_D_ACC: begin
+                     decode_pack <= decode_pack_next;
+--- a/sim/tb/tb_trustedge_spi.sv
++++ b/sim/tb/tb_trustedge_spi.sv
+@@ -60,31 +60,104 @@
+     localparam integer ENCAPS_SHARED_PERMUTATIONS = 20;
+     localparam integer DECAPS_SHARED_PERMUTATIONS = 26;
+ `ifdef TRUSTEDGE_ASIC_SRAM
+-    localparam [15:0] EXPECTED_KYBER_CYCLES = 16'd6789;
+-    localparam [15:0] EXPECTED_MLKEM512_CYCLES = 16'd29211;
+-    localparam [15:0] EXPECTED_KPKE_CYCLES = 16'd42339 +
++    localparam integer EXPECTED_KYBER_CYCLES_OLD = 16'd6789;
++    localparam integer EXPECTED_MLKEM512_CYCLES_OLD = 16'd29211;
++    localparam integer EXPECTED_KPKE_CYCLES_OLD = 16'd42339 +
+         KPKE_SHARED_PERMUTATIONS * KECCAK_EXTRA_CYCLES_PER_PERM;
+-    localparam [15:0] EXPECTED_CODEC_CYCLES = 16'd40336;
+-    localparam [15:0] EXPECTED_RUNTIME_ENCRYPT_CYCLES = 16'd59409 +
++    localparam integer EXPECTED_CODEC_CYCLES_OLD = 16'd40336;
++    localparam integer EXPECTED_RUNTIME_ENCRYPT_CYCLES_OLD = 16'd59409 +
+         RUNTIME_ENCRYPT_SHARED_PERMUTATIONS *
+         KECCAK_EXTRA_CYCLES_PER_PERM;
+-    localparam integer EXPECTED_ENCAPS_CYCLES_RAW = 64652 +
++    localparam integer EXPECTED_ENCAPS_CYCLES_RAW_OLD = 64652 +
+         ENCAPS_SHARED_PERMUTATIONS * KECCAK_EXTRA_CYCLES_PER_PERM;
+-    localparam [15:0] EXPECTED_ENCAPS_CYCLES =
+-        (EXPECTED_ENCAPS_CYCLES_RAW > 65535) ? 16'hFFFF :
+-        EXPECTED_ENCAPS_CYCLES_RAW;
++    // decapsulation, measured with the replaced engines (results/system_sim/summary.json)
++    localparam integer EXPECTED_DECAPS_CYCLES_RAW_OLD = 95793 +
++        DECAPS_SHARED_PERMUTATIONS * KECCAK_EXTRA_CYCLES_PER_PERM;
+     localparam integer MLKEM512_WAIT_CYCLES = 34000;
+     localparam integer MLKEM_STAGE_WAIT_CYCLES = 50000;
+ `else
+-    localparam [15:0] EXPECTED_KYBER_CYCLES = 16'd4997;
+-    localparam [15:0] EXPECTED_MLKEM512_CYCLES = 16'd22043;
+-    localparam [15:0] EXPECTED_KPKE_CYCLES = 16'd35171;
+-    localparam [15:0] EXPECTED_CODEC_CYCLES = 16'd34960;
+-    localparam [15:0] EXPECTED_RUNTIME_ENCRYPT_CYCLES = 16'd50449;
+-    localparam [15:0] EXPECTED_ENCAPS_CYCLES = 16'd55692;
++    localparam integer EXPECTED_KYBER_CYCLES_OLD = 16'd4997;
++    localparam integer EXPECTED_MLKEM512_CYCLES_OLD = 16'd22043;
++    localparam integer EXPECTED_KPKE_CYCLES_OLD = 16'd35171;
++    localparam integer EXPECTED_CODEC_CYCLES_OLD = 16'd34960;
++    localparam integer EXPECTED_RUNTIME_ENCRYPT_CYCLES_OLD = 16'd50449;
++    localparam integer EXPECTED_ENCAPS_CYCLES_RAW_OLD = 55692;
++    localparam integer EXPECTED_DECAPS_CYCLES_RAW_OLD = 81457 +
++        DECAPS_SHARED_PERMUTATIONS * KECCAK_EXTRA_CYCLES_PER_PERM;
+     localparam integer MLKEM512_WAIT_CYCLES = 22000;
+     localparam integer MLKEM_STAGE_WAIT_CYCLES = 40000;
+ `endif
++    // Packed-pair NTT (TRUSTEDGE_PACKED_NTT): each transform is shorter by the difference between the
++    // replaced engine's cycles and the packed engine's (988 forward, 1116 inverse, EXTRA_STAGE = 1), so the
++    // expected values follow from the number of transforms in each operation, like the Keccak term above.
++`ifdef TRUSTEDGE_ASIC_SRAM
++    localparam integer NTT_FWD_DIFF = 6274 - 988;      // single-port engine minus packed engine
++    localparam integer NTT_INV_DIFF = 7554 - 1116;
++`else
++    localparam integer NTT_FWD_DIFF = 4482 - 988;      // dual-port engine minus packed engine
++    localparam integer NTT_INV_DIFF = 5762 - 1116;
++`endif
++`ifdef TRUSTEDGE_PACKED_NTT
++    localparam integer NTT_FWD_SAVED = NTT_FWD_DIFF;
++    localparam integer NTT_INV_SAVED = NTT_INV_DIFF;
++`else
++    localparam integer NTT_FWD_SAVED = 0;
++    localparam integer NTT_INV_SAVED = 0;
++`endif
++    // Hash overlap (TRUSTEDGE_HASH_OVERLAP): H(ek), H(c) and J(z||c) run on a second sequencer during the
++    // decryption, so a decapsulation saves the shorter of the two phases and pays one hand-over cycle,
++    // and each of an encapsulation's two hash jobs adds one hand-over cycle. Phase lengths come from the
++    // state profile (tb/decaps_state_profiler.sv): the decryption takes 9,239 cycles with the packed engine
++    // (two forward and one inverse transform), the three hashes 7,668 cycles plus the serial-Keccak term
++    // of their 18 permutations.
++    // Step D (TRUSTEDGE_STREAM_IO): one wait cycle less per element of ten read loops. Decryption: 512
++    // coefficients of u, 256 operand pairs read twice, 256 message coefficients; encryption: 256 noise pairs
++    // and 512 coefficients of y (runtime inputs only), 768 results read back; codec: 768 coefficients
++    // encoded and 768 bytes decoded; comparison: 768 ciphertext bytes.
++`ifdef TRUSTEDGE_STREAM_IO
++    localparam integer DECRYPT_STREAM_SAVED = 512 + 2 * 256 + 256;
++    localparam integer READBACK_STREAM_SAVED = 768;
++    localparam integer CODEC_STREAM_SAVED = 768 + 768;
++    localparam integer ENCRYPT_STREAM_SAVED = 256 + 512 + READBACK_STREAM_SAVED + CODEC_STREAM_SAVED;
++    localparam integer COMPARE_STREAM_SAVED = 768;
++`else
++    localparam integer DECRYPT_STREAM_SAVED = 0;
++    localparam integer READBACK_STREAM_SAVED = 0;
++    localparam integer CODEC_STREAM_SAVED = 0;
++    localparam integer ENCRYPT_STREAM_SAVED = 0;
++    localparam integer COMPARE_STREAM_SAVED = 0;
++`endif
++`ifdef TRUSTEDGE_HASH_OVERLAP
++    localparam integer DECRYPT_CYCLES = 9239 + 2 * (NTT_FWD_DIFF - NTT_FWD_SAVED) +
++        (NTT_INV_DIFF - NTT_INV_SAVED) - DECRYPT_STREAM_SAVED;
++    localparam integer HASH_CYCLES = 7668 + 18 * KECCAK_EXTRA_CYCLES_PER_PERM;
++    localparam integer DECAPS_OVERLAP_SAVED =
++        ((DECRYPT_CYCLES < HASH_CYCLES) ? DECRYPT_CYCLES : HASH_CYCLES) - 1;
++    localparam integer ENCAPS_HANDOVER_CYCLES = 2;
++`else
++    localparam integer DECAPS_OVERLAP_SAVED = 0;
++    localparam integer ENCAPS_HANDOVER_CYCLES = 0;
++`endif
++    // transforms per operation (forward, inverse): NTT self-test 1/0, ML-KEM self-test 2/2, K-PKE key
++    // generation 4/0, codec stage 0/3, encryption and encapsulation 2/3, decapsulation 4/4
++    localparam [15:0] EXPECTED_KYBER_CYCLES = EXPECTED_KYBER_CYCLES_OLD - NTT_FWD_SAVED;
++    localparam [15:0] EXPECTED_MLKEM512_CYCLES = EXPECTED_MLKEM512_CYCLES_OLD -
++        2 * NTT_FWD_SAVED - 2 * NTT_INV_SAVED;
++    localparam [15:0] EXPECTED_KPKE_CYCLES = EXPECTED_KPKE_CYCLES_OLD - 4 * NTT_FWD_SAVED;
++    localparam [15:0] EXPECTED_CODEC_CYCLES = EXPECTED_CODEC_CYCLES_OLD - 3 * NTT_INV_SAVED -
++        READBACK_STREAM_SAVED - CODEC_STREAM_SAVED;      // the codec stage runs on fixed inputs
++    localparam [15:0] EXPECTED_RUNTIME_ENCRYPT_CYCLES = EXPECTED_RUNTIME_ENCRYPT_CYCLES_OLD -
++        2 * NTT_FWD_SAVED - 3 * NTT_INV_SAVED - ENCRYPT_STREAM_SAVED;
++    localparam integer EXPECTED_ENCAPS_CYCLES_RAW = EXPECTED_ENCAPS_CYCLES_RAW_OLD -
++        2 * NTT_FWD_SAVED - 3 * NTT_INV_SAVED + ENCAPS_HANDOVER_CYCLES - ENCRYPT_STREAM_SAVED;
++    localparam integer EXPECTED_DECAPS_CYCLES_RAW = EXPECTED_DECAPS_CYCLES_RAW_OLD -
++        4 * NTT_FWD_SAVED - 4 * NTT_INV_SAVED - DECAPS_OVERLAP_SAVED - ENCRYPT_STREAM_SAVED -
++        COMPARE_STREAM_SAVED - DECRYPT_STREAM_SAVED;
++    // the 16-bit response field saturates
++    localparam [15:0] EXPECTED_ENCAPS_CYCLES =
++        (EXPECTED_ENCAPS_CYCLES_RAW > 65535) ? 16'hFFFF : EXPECTED_ENCAPS_CYCLES_RAW;
++    localparam [15:0] EXPECTED_DECAPS_CYCLES =
++        (EXPECTED_DECAPS_CYCLES_RAW > 65535) ? 16'hFFFF : EXPECTED_DECAPS_CYCLES_RAW;
+     reg clk, rst_n;
+     reg spi_cs_n, spi_sck, spi_mosi;
+     wire spi_miso;
+@@ -2023,7 +2096,7 @@
+             mlkem_stage_digest_b !== 32'hBC3DC488 ||
+             mlkem_stage_digest_a === 32'h23B34C51 ||
+             mlkem_stage_digest_a === mlkem_stage_digest_b ||
+-            mlkem_stage_cycles !== 16'hFFFF ||
++            mlkem_stage_cycles !== EXPECTED_DECAPS_CYCLES ||
+             dut.u_mlkem512_decaps_partial.h_ek_fp_q !== 32'h2E782439 ||
+             dut.u_mlkem512_decaps_partial.g_fp_q !== 32'h55853EBD ||
+             !dut.u_mlkem512_decaps_partial.ciphertext_match_q ||
+@@ -2059,7 +2132,7 @@
+             mlkem_stage_digest_b !== 32'hBC3DC488 ||
+             mlkem_stage_digest_a === 32'h27033E5E ||
+             mlkem_stage_digest_a === 32'h0429546C ||
+-            mlkem_stage_cycles !== 16'hFFFF ||
++            mlkem_stage_cycles !== EXPECTED_DECAPS_CYCLES ||
+             dut.u_mlkem512_decaps_partial.ciphertext_match_q !== 1'b0) begin
+             errors = errors + 1;
+             $display("  FAIL runtime_kpke_decrypt_corrupt_ciphertext_reject ok=%b status=%02h digest=%08h",

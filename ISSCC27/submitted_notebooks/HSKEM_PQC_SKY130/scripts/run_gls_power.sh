@@ -23,6 +23,7 @@ TOP=$(grep -m1 -oE "^module [A-Za-z0-9_]+" "$B/6_final.v" | cut -d' ' -f2)
 CLK_NS=$(grep -m1 -oE "create_clock.*-period [0-9.]+" "$B/6_final.sdc" | grep -oE "[0-9.]+$")
 HALF=$(python3 -c "print($CLK_NS/2)")
 MACRO=""; grep -q "sky130_sram_1rw_16x256_wpr8 " "$B/6_final.v" && MACRO=sky130_sram_1rw_16x256_wpr8
+grep -q "sky130_sram_1rw_24x128 " "$B/6_final.v" && MACRO=sky130_sram_1rw_24x128
 
 if [ "${SKIP_GLS:-0}" = 1 ] && [ -f "$OUT/ntt_fwd.vcd.gz" ]; then
   gunzip -kf "$OUT/ntt_fwd.vcd.gz"          # reuse the recorded activity; only redo the power step
@@ -57,7 +58,7 @@ fi
 
 # OpenSTA reads no $dumpon/$dumpoff blocks: cut the file to the recorded window first. The power step
 # works in a local temporary directory (OpenROAD can stall on files of a mounted Windows drive under WSL).
-PW="$(mktemp -d)"
+PW="$(mktemp -d)"; cd "$PW"     # a local working directory: the simulation directory has been removed
 python3 "$ROOT/scripts/vcd_window.py" "$OUT/ntt_fwd.vcd" "$PW/window.vcd"
 cp "$ROOT/flow/power_vcd.tcl" "$PW/"
 [ -n "$MACRO" ] && cp "$ROOT/flow/macros/${MACRO}_TT_1p8V_25C.lib" "$PW/macro.lib" && export LIB_MACRO="$PW/macro.lib"

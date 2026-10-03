@@ -15,16 +15,30 @@ module tb_ntt_leak;
 
     always #5 clk = ~clk;
 
+`ifdef NTT_PACKED
+    kyber_ntt_engine_packed #(.EXTRA_STAGE(1'b1)) dut (
+        .clk(clk), .rst_n(rst_n), .start(start), .inverse(1'b0),
+        .busy(busy), .done(done), .waddr(waddr), .wdata(wdata), .we(we),
+        .rdata(rdata), .raddr(8'd0));
+
+    // Datapath registers of the packed engine: both register banks (32 x 12 bits), the multiplier and
+    // reduction pipeline, the SRAM read word and the operation counter
+    localparam integer W = 384 + 12 + 24 + 12 + 12 + 24 + 5;
+    wire [W-1:0] regs = {dut.bank[0][0][0], dut.bank[0][0][1], dut.bank[0][1][0], dut.bank[0][1][1], dut.bank[0][2][0], dut.bank[0][2][1], dut.bank[0][3][0], dut.bank[0][3][1], dut.bank[0][4][0], dut.bank[0][4][1], dut.bank[0][5][0], dut.bank[0][5][1], dut.bank[0][6][0], dut.bank[0][6][1], dut.bank[0][7][0], dut.bank[0][7][1], dut.bank[1][0][0], dut.bank[1][0][1], dut.bank[1][1][0], dut.bank[1][1][1], dut.bank[1][2][0], dut.bank[1][2][1], dut.bank[1][3][0], dut.bank[1][3][1], dut.bank[1][4][0], dut.bank[1][4][1], dut.bank[1][5][0], dut.bank[1][5][1], dut.bank[1][6][0], dut.bank[1][6][1], dut.bank[1][7][0], dut.bank[1][7][1],
+                         dut.s1_x, dut.s1_prod, dut.s2_x, dut.s2_r, dut.sram_rdata, dut.op};
+`else
     kyber_ntt_engine dut (
         .clk(clk), .rst_n(rst_n), .start(start), .inverse(1'b0),
         .busy(busy), .done(done), .waddr(waddr), .wdata(wdata), .we(we),
         .rdata(rdata), .raddr(8'd0));
 
     // Architectural datapath registers (identical names in both RAM variants)
-    wire [139:0] regs = {dut.coeff_a_q, dut.coeff_b_q, dut.zeta_q,
+    localparam integer W = 140;
+    wire [W-1:0] regs = {dut.coeff_a_q, dut.coeff_b_q, dut.zeta_q,
                          dut.result_lo_q, dut.result_hi_q, dut.mul_reduced_q,
                          dut.ram_q_a, dut.scale_coeff_q, dut.st};
-    reg  [139:0] prev;
+`endif
+    reg  [W-1:0] prev;
 
     reg [15:0] vin [0:`N_LEAK*256-1];
     integer t, i, fd, hd;

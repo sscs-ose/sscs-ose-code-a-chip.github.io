@@ -33,6 +33,32 @@ else ifeq ($(CAC_VARIANT),ntt_opt_pipe_macro)
   export VERILOG_FILES = $(CAC_ROOT)/rtl/kyber_pkg.sv $(CAC_ROOT)/rtl/barrett_reduce.v \
                          $(CAC_ROOT)/rtl/barrett_reduce_1c.v $(CAC_ROOT)/rtl/sram_macro_16x256.sv \
                          $(CAC_ROOT)/rtl/sram_macro_16x256_opt.sv $(CAC_ROOT)/rtl/kyber_ntt_engine_opt.sv
+else ifneq ($(filter ntt_packed ntt_packed_x0,$(CAC_VARIANT)),)
+  # packed-pair, layer-fused NTT with the chip's 24x128 OpenRAM macro (rtl/kyber_ntt_engine_packed.sv)
+  export DESIGN_NAME = kyber_ntt_engine_packed
+  export VERILOG_DEFINES = -D NTT_PAIR_SRAM_MACRO
+  ifeq ($(CAC_VARIANT),ntt_packed_x0)
+    export VERILOG_TOP_PARAMS = EXTRA_STAGE 0
+  else
+    export VERILOG_TOP_PARAMS = EXTRA_STAGE 1
+  endif
+  export VERILOG_FILES = $(CAC_ROOT)/rtl/kyber_pkg.sv $(CAC_ROOT)/rtl/barrett_reduce_1c.v \
+                         $(CAC_ROOT)/rtl/ntt_pair_sram_macro.sv $(CAC_ROOT)/rtl/kyber_ntt_engine_packed.sv
+  export ADDITIONAL_LEFS = $(CAC_ROOT)/flow/macros/sky130_sram_1rw_24x128.lef
+  export ADDITIONAL_LIBS = $(CAC_ROOT)/flow/macros/sky130_sram_1rw_24x128_TT_1p8V_25C.lib
+  CAC_SRAM_GDS ?= /opt/eda/openram-smoke/sky130_sram_1rw_24x128_vdd_via_column_mux_candidate/sky130_sram_1rw_24x128_implantfix.gds
+  export ADDITIONAL_GDS = $(CAC_SRAM_GDS)
+  export PRE_PDN_TCL = $(CAC_ROOT)/flow/pre_pdn_sram.tcl
+  # the 641 um wide macro needs a wide die; the logic sits above the macro
+  export CORE_UTILIZATION =
+  export DIE_AREA = 0 0 760 470
+  export CORE_AREA = 10 10 750 460
+  export MACRO_PLACE_HALO ?= 10 10
+  export MACRO_PLACEMENT_TCL = $(CAC_ROOT)/flow/macro_place_packed.tcl
+  # the bank multiplexers drive wide fan-outs: repair slew and load with a 40 % margin
+  export SLEW_MARGIN ?= 40
+  export CAP_MARGIN ?= 40
+  export POST_GLOBAL_ROUTE_TCL = $(CAC_ROOT)/flow/post_grt_macro_pins.tcl
 else ifeq ($(CAC_VARIANT),keccak_r1)
   export DESIGN_NAME = keccak_lane_wrapper
   export VERILOG_TOP_PARAMS = SERIAL_ROUND 0
