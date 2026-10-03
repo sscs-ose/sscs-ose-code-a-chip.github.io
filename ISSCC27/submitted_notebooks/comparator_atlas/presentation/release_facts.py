@@ -185,7 +185,7 @@ def load_facts() -> dict:
 
 def readme_text(facts: dict, design_table: str) -> str:
     full = facts["postlayout_pvt45"]
-    return f"""# Comparator Atlas: When Calibration Is Not Enough
+    return f"""# Comparator Atlas: SKY130 StrongARM characterization
 
 **Wei-Lun Hsu — National Tsing Hua University**\x20\x20
 IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
@@ -196,27 +196,34 @@ IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
 
 ## Current area version: single-row-a1
 
-The frozen single-row candidate reduces the **all-material GDS bbox by6.01852%**:
-129.6 x17.03um =2207.088um2 ->121.8 x17.03um =2074.254um2.
+The adopted single-row layout reduces the **all-material GDS bbox by 6.01852%**:
+129.6 x 17.03 um (2207.088 um2) to 121.8 x 17.03 um (2074.254 um2).
 Wells, body ties, guards and shields are included; only TEXT is excluded.
-Pair order/mirroring/y,27guarded PCells/WL/flavors/junctions,15ports and local
-escapes are unchanged; pitch4.8->4.5um requires horizontal routing endpoints
-to follow placements.14native checks passed on one actual candidate DRC attempt.
+The 27 guarded PCells, device dimensions, flavors, junctions, 15 ports,
+pair order, mirroring, vertical placement and local escapes are unchanged.
+Pitch decreases from 4.8 to 4.5 um; horizontal routing endpoints follow the
+new placements. The candidate passed 14 native checks on one actual DRC attempt.
 Original-control native proof was reused, not rerun.
 
-A separate known-nonblind nominal code-zero paired45-PVT experiment completed
-**1440new transients /720qualified10/5pspairs /180keys per mode/layout**.
-Both control/candidate C/RC are180/180correct at the fixed2ns primary deadline.
-At1ns C improves168->170correct (SS1.62V-40C,+/-10mV); RC remains156correct,
-24unresolved with identical keys. No formerly correct point is lost.
-RC mean core energy425.490->421.045fJ (-1.0448%ratio of means), worst recorded
-latency1.835032->1.810632ns. Small approximately1%energy and1-25ps timing
-changes are not robust globalPPA;1%/20ps numerical criteria are not uncertainty bounds.
+A separate nominal, code-zero comparison of both layouts completed
+**1440 transients and 720 qualified 10/5 ps pairs**, with 180 input/PVT
+points per layout and export mode (C or RC). The conditions were known
+before qualification; this was not a blinded test.
+Both layouts and modes are correct at all 180 points at the fixed 2 ns
+primary deadline. At 1 ns, C-only improves from 168 to 170 correct points
+(SS / 1.62 V / -40 C / +/-10 mV). RC retains 156 correct and the same
+24 unresolved points. No previously correct point is lost.
+Mean RC core energy decreases from 425.490 to 421.045 fJ per cycle
+(-1.0448%, ratio of means); worst recorded latency decreases from 1.835032
+to 1.810632 ns. All matched energy and latency pairs decrease, but changes
+of approximately 1% and 1-25 ps do not establish robust global PPA benefits.
+The 1% energy / 20 ps numerical criteria are not physical uncertainty bounds.
 
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
 [Exact versioned native/raw evidence and offline audit](layout_single_row/v1/README.md).
-Original control, its historical full45 study, schematic49 study and failure
-records remain separate and unchanged. No silicon, qualifiedPEX or signoff claim.
+The original compact control, its historical 45-PVT study, the calibrated
+49-condition schematic study and failure records remain separate and unchanged.
+No silicon, independently qualified PEX or signoff result is claimed.
 
 Download the [interactive report](results/study/report.html) and open the
 HTML file locally; GitHub's file viewer does not execute its JavaScript.
@@ -225,7 +232,7 @@ examples with a deadline cursor and complementary-rail thresholds.
 View or download the [poster PDF](results/study/Comparator_Atlas_Poster.pdf)
 or its [preview image](results/study/poster_preview.png).
 
-## Overview
+## Research question and contribution
 
 Offset calibration alone does not ensure that a comparator finishes its
 decision in time. This notebook follows a SKY130 StrongARM comparator from
@@ -233,9 +240,15 @@ device sizing and calibration through PVT evaluation, layout and parasitic
 extraction. Interactive waveforms explain the difference between a wrong
 decision and an unresolved one.
 
-The workflow includes a nine-candidate design comparison, an additional
-lower-energy control, and a physical implementation of the selected
-27-transistor circuit.
+The question is how the input band and decision deadline affect correctness
+and core energy after calibration, and how a smaller legal layout changes
+the recorded nominal-layout outcomes under matched conditions.
+The contribution is a reproducible finite-grid comparison, not a new
+comparator topology. StrongARM operation and auxiliary-pair calibration
+are established topics; see the complete references in the Notebook.
+Nine sizing candidates were compared before a separate lower-energy
+control was evaluated. Layout comparisons use the selected 27-transistor
+circuit without inheriting the schematic calibration or width stress.
 
 ## Results
 
@@ -252,26 +265,29 @@ These are finite-grid results: 45 PVT combinations at controlled width
 stress plus four nominal controls. The lower-energy candidate was evaluated
 after the original selection.
 
-The physical implementation passes the recorded DRC/LVS and negative controls.
-Its full nominal, code-zero study covers **45 PVT conditions and four signed
+### Historical original compact control: schematic and archived RC
+
+The original compact control passes its recorded DRC/LVS and negative controls.
+Its historical nominal, code-zero study covers **45 PVT conditions and four signed
 inputs per condition**. Schematic and extracted RC were simulated under the
 same ngspice-47 settings and checked at 10/5 ps.
 
-| Nominal full-grid result | Schematic | Extracted RC |
+| Historical original compact control | Schematic | Archived original-control RC |
 | --- | ---: | ---: |
 | Correct at 1 ns | 180/180 | {full["rc_correct_1ns"]}/180 |
 | Correct at the declared 2 ns deadline | 180/180 | {full["rc_correct_2ns"]}/180 |
 | Mean core energy (fJ/cycle) | {full["mean_schematic_energy_fj"]:.2f} | {full["mean_rc_energy_fj"]:.2f} |
 
-The slowest RC sample is **{full["worst_rc_delay_ns"]:.3f} ns at FS / 1.62 V /
+The slowest original-control RC sample is **{full["worst_rc_delay_ns"]:.3f} ns at FS / 1.62 V /
 -40 C / -3 mV**. The 24 remaining 1 ns points are unresolved, not wrong.
 The earlier five-condition ngspice-42 layout pilot remains a separate record:
 12/20 RC points met its original 1 ns target; 20/20 met a retained 2 ns window.
 The full-grid 2 ns criterion was declared separately rather than rewriting that
 pilot's result.
 
-![Full post-layout PVT timing](results/study/postlayout_pvt45/figures/pvt45_timing.png)
+![Historical original compact control: 45-PVT timing](results/study/postlayout_pvt45/figures/pvt45_timing.png)
 
+This historical original-control figure is not the adopted area version.
 Each cell is the maximum over four signed inputs. Black outlines mark
 conditions with a missed 1 ns sample. [Vector PDF](results/study/postlayout_pvt45/figures/pvt45_timing.pdf).
 
@@ -295,7 +311,9 @@ Local CPU execution is supported; Colab's free tier has resource limits.
 - `Comparator_Atlas.ipynb` — circuit, methods, plots and discussion.
 - `comparator_atlas/` — simulation, calibration and analysis code.
 - `results/study/` — measurements, figures, report, poster and abstract.
-- `layout_compact_repair/` — final layout, extraction and physical evidence.
+- `layout_single_row/v1/` — adopted single-row-a1 geometry, paired qualification and raw traces.
+- `layout_compact_repair/` — historical original compact control, extraction and physical evidence.
+- `results/study/postlayout_pvt45/` — historical original-control schematic/RC grid, not candidate data.
 - `REPRODUCIBILITY.md` — tool versions, data map and complete run commands.
 
 ## Scope
@@ -340,13 +358,16 @@ or its [preview image](results/study/poster_preview.png).
 {facts["rc_model_applicability"]["notice"]}
 See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
-**Current layout: single-row-a1.** Actual all-material area2207.088->2074.254um2
-(6.01852%less), with unchanged27guardedMOS/15ports. The paired45-PVT qualification
-has1440new transients/720qualified pairs: both C/RC layouts180correct at2ns;
-C1ns168->170correct, RC1ns156correct/24unresolved unchanged. RC mean425.490->
-421.045fJ, worst1.835032->1.810632ns. Small changes are not robust globalPPA.
+**Current layout: single-row-a1.** All-material area decreases from 2207.088
+to 2074.254 um2 (6.01852%), retaining 27 guarded MOS devices and 15 ports.
+The paired 45-PVT qualification contains 1440 transients and 720 qualified
+pairs. Both layouts and C/RC modes have 180 correct points at 2 ns.
+At 1 ns, C-only improves from 168 to 170 correct points; RC retains 156
+correct and the same 24 unresolved points. Mean RC core energy changes from
+425.490 to 421.045 fJ; worst latency changes from 1.835032 to 1.810632 ns.
+These small changes are not robust global PPA benefits.
 Read the [current version and all raw/native records](layout_single_row/v1/README.md)
-before the explicitly historical studies below. The1%/20ps criteria are
+before the explicitly historical studies below. The 1% / 20 ps criteria are
 numerical acceptance bands, not physical uncertainty bounds.
 
 1. **Question and circuit.** Read the abstract and 27-transistor circuit guide.
@@ -372,9 +393,11 @@ numerical acceptance bands, not physical uncertainty bounds.
    unresolved samples settle: longer deadlines need not improve every
    outcome class. All 1,176 matched pairs and grouped counts are in the JSON.
    Locations and codes do not establish a physical failure cause.
-3. **Inspect actual layout evidence.** View the hash-checked GDS, DRC/LVS
+3. **Compare the adopted layout with the original compact control.**
+   The current version's GDS, paired table and two-layout figures are in
+   Notebook Section 8. The later original-control sections retain the historical GDS, DRC/LVS
    negative controls and matched schematic/connectivity/C/RC results.
-   The full 45-condition nominal RC study gives
+   The historical original-control 45-condition nominal RC study gives
    {full["rc_correct_1ns"]}/{full["points_per_mode"]} correct at 1 ns and
    {full["rc_correct_2ns"]}/{full["points_per_mode"]} at its declared 2 ns
    deadline. Its worst sample is {full["worst_rc_delay_ns"]:.3f} ns at

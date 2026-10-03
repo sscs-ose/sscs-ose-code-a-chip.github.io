@@ -119,8 +119,8 @@ def test_reviewer_guide_regeneration_preserves_early_map_failures_limits(monkeyp
     release_facts.write_judge_guide(facts)
     guide = captured[str(ROOT / "REVIEWER_GUIDE.md")]
     assert guide == (ROOT / "REVIEWER_GUIDE.md").read_text(encoding="utf-8")
-    assert guide.index("strict specification map") < guide.index("Inspect actual layout")
-    assert guide.index("keyed transition matrices") < guide.index("Inspect actual layout")
+    assert guide.index("strict specification map") < guide.index("Compare the adopted layout")
+    assert guide.index("keyed transition matrices") < guide.index("Compare the adopted layout")
     for item in ("1,176", "all exact limiting ties", "NONE stays null", "20 wrong",
                  "two-point RC sensitivity", "GDS geometry audit", "before its interactive controls",
                  "GitHub Copilot assisted", "Archived RC-deck outcomes; model physical fidelity"):

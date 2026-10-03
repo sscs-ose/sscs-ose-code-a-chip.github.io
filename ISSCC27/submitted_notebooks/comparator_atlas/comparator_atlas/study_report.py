@@ -400,8 +400,8 @@ are observations, not evidence of trim saturation, residual offset or noise.</p>
     layout_geometry = physical.geometry_summary(layout)
     layout_costs = physical.matched_tt_comparison(layout)
     layout_section = f"""
-<section id="layout-evidence"><h2>Layout geometry, structural checks and five-condition pilot</h2>
-<p>The nominal 27-device layout has recorded GDS, named-style DRC, independent LVS,
+<section id="layout-evidence"><h2>Historical original compact control: geometry and pilot</h2>
+<p>The original compact control, not the adopted single-row-a1 layout, has recorded GDS, named-style DRC, independent LVS,
 wrong-net/bulk/width/SVT-LVT negative controls, and separate connectivity/C/RC exports.
 The original layout development used <strong>five code-zero conditions</strong>.
 The following expanded study covers 45 PVT conditions with the same nominal geometry.
@@ -433,8 +433,9 @@ not a hidden DRC/LVS failure. Source replay instructions bind the original exper
 </section>"""
     pvt_table = pvt45_results.comparison_table(full_pvt["frame"])
     pvt_section = f"""
-<section id="pvt45-evidence"><h2>Nominal 45-PVT grid: 180 SC and 180 archived RC points</h2>
-<p>The repaired nominal, code-zero schematic and RC circuits were evaluated at
+<section id="pvt45-evidence"><h2>Historical original compact control: 45-PVT schematic/RC grid</h2>
+<p>The following tables and figures describe the original compact control,
+not candidate data. Its nominal, code-zero schematic and RC circuits were evaluated at
 five process corners, three supplies and three temperatures: <strong>45 conditions,
 four signed inputs each, 180 points per mode</strong>. The primary 2 ns deadline
 was declared before this expanded study; 1 ns is reported alongside it.</p>
@@ -511,6 +512,11 @@ label{{display:flex;align-items:center;gap:6px;font-size:13px}}select{{padding:8
 <p>SKY130 StrongARM comparator: calibrated schematic characterization and archived
 nominal-layout simulations. Decision correctness, delay and core-rail energy are
 reported for explicit input, PVT and deadline conditions.</p>
+<p>The question is how input band and deadline affect calibrated decisions,
+and how a smaller legal layout changes the recorded outcomes under matched
+nominal conditions. StrongARM operation and auxiliary-pair calibration are
+established topics. This study contributes a finite-grid comparison and a
+layout-area revision, not a new comparator topology or silicon benchmark.</p>
 </header><main>
 <section><h2>Study design and aggregate schematic results</h2>
 <p>The schematic study uses ngspice {html.escape(version.group(1))} and
@@ -614,33 +620,45 @@ evaluation starts at 22.025 ns. Pin error includes deterministic settling and ki
 <p class="muted">{html.escape(stress["numerical_scope"])} Refinement limits are identical outcomes,
 at most 1% core-energy difference and at most 20 ps resolved-latency difference. These checks are not production signoff.</p></section>
 <section id="single-row-a1"><h2>Adopted area version: single-row-a1</h2>
-<p><strong>All-material GDS bbox2207.088 ->2074.254um2 (6.01852%less).</strong>
-129.6x17.03 ->121.8x17.03um; all wells, body contacts, guards and shields included,
-TEXTonlyexcluded.27guardedMOS/15ports, device WL/flavors/junctions, pair order,
-mirroring/y and local escapes stay fixed; pitch4.8->4.5um and required horizontal
-routing endpoints follow placements. No matching-benefit or diffusion-sharing claim.</p>
+<p><strong>All-material GDS bbox: 2207.088 to 2074.254 um2 (6.01852% less).</strong>
+The original compact control measures 129.6 x 17.03 um; adopted single-row-a1
+measures 121.8 x 17.03 um. Wells, body contacts, guards and shields are included;
+only TEXT is excluded. The 27 guarded MOS devices, 15 ports, device dimensions,
+flavors, junctions, pair order, mirroring, vertical placement and local escapes
+remain fixed. Pitch decreases from 4.8 to 4.5 um, with horizontal endpoints
+following placement. No matching benefit or diffusion sharing is claimed.</p>
 {pictures["single_row_layout.png"]}
-<p>Separate known-nonblind, nominal codezero full45:1440NEWtransients,720qualified
-10/5pspairs,180keys per layout/mode;2nsPRIMARY. Bothlayouts C/RC180correct at2ns.
-At1ns C168->170correct ONLY at SS1.62V-40C,+/-10mV; RC retains the SAME24unresolved
-keys (156correct). No wrong/newunresolved2ns or formerlycorrect1nspoint lost.</p>
+<p>The separate nominal code-zero comparison completed 1440 transients and
+720 qualified 10/5 ps pairs, with 180 points per layout and C/RC mode.
+Conditions were known before qualification. Both layouts and modes are correct
+at all points at the fixed 2 ns primary deadline. At 1 ns, C-only improves
+from 168 to 170 correct points, only at SS / 1.62 V / -40 C / +/-10 mV.
+RC retains 156 correct and the same 24 unresolved points. No previously
+correct point is lost; no wrong or unresolved primary point is introduced.</p>
 <div class="table-scroll">{area.table(adopted).to_html(index=False, border=0)}</div>
 {pictures["single_row_comparison.png"]}
-<p>RC mean425.490->421.045fJ (-1.0448%ratioofmeans), worstrecorded1.835032->1.810632ns;
-sampled2nsmargin164.968->189.368ps. Cmean356.712->353.340fJ (-0.9453%).
-All180energy/latency pairs decrease in EACHmode, but small~1%energy/1-25ps timing
-changes are not robust globalPPA.1%/20ps numerical criteria are acceptance bands,
-not uncertainty bounds. Maxactual10/5ps discrepancies:0.017538%energy/9.755pslatency.</p>
+<p>From original control to candidate, mean RC core energy decreases from
+425.490 to 421.045 fJ (-1.0448%, ratio of means), and worst recorded latency
+from 1.835032 to 1.810632 ns. Minimum sampled 2 ns margin increases from
+164.968 to 189.368 ps. Mean C-only energy decreases from 356.712 to
+353.340 fJ (-0.9453%). All 180 energy and latency pairs decrease in each
+mode. The decreases are numerically consistent in these decks, but
+approximately 1% energy and 1-25 ps timing changes are not robust physical
+PPA benefits. The 1% / 20 ps acceptance criteria are not uncertainty bounds;
+maximum actual step discrepancies are 0.017538% energy and 9.755 ps latency.</p>
 {pictures["single_row_worst.png"]}
-<p>Candidate14native checks passed on one actual DRC attempt BEFOREfull45;
-original-control native proof was reused, not rerun. No publication EDA/SPICE.
-Fresh original-control RC matches the historical180-key grid outcomes at1/2ns;
+<p>The candidate passed 14 native checks on one actual DRC attempt before full45
+qualification. Original-control native proof was reused, not rerun; publication
+added no EDA/SPICE execution. Fresh original-control RC matches the historical
+180-point grid outcomes at 1/2 ns;
 floating-precision differences were measured, not assumed. Historical traces are
 not credited as new executions. C-only has no historical population or independent truth.</p>
-<p><strong>{html.escape(area.NOTICE)}.</strong> Not calibrated49stress/noise/mismatch/trim,
-silicon, qualifiedPEX or signoff. Core excludes drivers/controller/calibration.
+<p><strong>{html.escape(area.NOTICE)}.</strong> This nominal comparison is not the
+calibrated 49-condition width-stress study or a post-layout noise, mismatch,
+trim, silicon, independently qualified PEX or signoff result.
+Core energy excludes drivers, controller and calibration infrastructure.
 <a href="../../layout_single_row/v1/README.md">All versioned native/raw records,
-720numerical receipts, keyed transitions, limiting keys, pins and offline remeasurement</a>.
+720 numerical receipts, keyed transitions, limiting points and offline remeasurement</a>.
 The original studies below remain preserved history, not candidate data.</p></section>
 {layout_section}
 {pvt_section}
@@ -660,16 +678,20 @@ The calibrated schematic and nominal-layout experiments have separate condition 
 DRC/LVS do not establish silicon performance or complete foundry signoff.</p>
 <h3>Established ideas and related work</h3>
 <ul>
-<li>B. Razavi, <a href="https://doi.org/10.1109/MSSC.2015.2418155">The StrongARM Latch</a>, 2015.</li>
-<li>S. Li, Z. Xu and T. Iizuka, <a href="https://doi.org/10.1007/s10470-022-01992-6">
-Analysis of strong-arm comparator with auxiliary pair for offset calibration</a>, 2022.</li>
+<li>Behzad Razavi, <a href="https://doi.org/10.1109/MSSC.2015.2418155">The StrongARM Latch
+[A Circuit for All Seasons]</a>, IEEE Solid-State Circuits Magazine, vol. 7,
+no. 2, pp. 12-17, 2015.</li>
+<li>Shuowei Li, Zule Xu and Tetsuya Iizuka, <a href="https://doi.org/10.1007/s10470-022-01992-6">
+Analysis of strong-arm comparator with auxiliary pair for offset calibration</a>,
+Analog Integrated Circuits and Signal Processing, vol. 110, no. 3, pp. 535-546, 2022.</li>
 <li><a href="https://github.com/ChrisZonghaoLi/sky130_comparator_rl">Open comparator optimization research</a>
 and <a href="https://github.com/edonD/sky130-comparator">an existing SKY130/LVT comparator example</a>.
 Their code, figures, performance claims and statistical assumptions are not reused as this study's evidence.</li>
 <li><a href="https://github.com/google/skywater-pdk-libs-sky130_fd_pr">Official SKY130 primitive models</a>
 and <a href="https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io">current competition rules</a>.</li>
 </ul><p class="muted">GitHub Copilot assisted implementation, experiment automation, figures
-and documentation. Original code is MIT licensed; model and tool licenses are retained.</p>
+and documentation; the author is responsible for the work.
+Original code is MIT licensed; model and tool licenses are retained.</p>
 </section></main>
 <script id="atlas-cube" type="application/json">{payload}</script>
 <script id="waveform-lab-data" type="application/json">{waveform_payload}</script>

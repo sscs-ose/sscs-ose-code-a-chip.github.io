@@ -48,11 +48,37 @@ ngspice 47; a different simulator version is not assumed numerically identical.
 
 ## Experiment scopes
 
+### Current adopted layout and historical controls
+
+The current layout is `layout_single_row/v1/`, version **single-row-a1**.
+Its paired comparison includes the original compact control and the adopted
+candidate, each in C-only and distributed RC modes: 45 PVT conditions,
+four signed inputs, and 10/5 ps steps (1440 recorded transients, 720 pairs).
+The primary deadline is 2 ns; 1 ns is a parallel readout of the same waves.
+See the [versioned package](layout_single_row/v1/README.md) for raw traces,
+native records, model references and the offline remeasurement command.
+
+`layout_compact_repair/` remains the **historical original compact control**.
+The figures and schematic/RC tables in `results/study/postlayout_pvt45/`
+belong to that original study, not the adopted candidate. Its 425.49 fJ
+RC mean and 1.835 ns worst latency must not be read as candidate metrics.
+The calibrated 49-condition schematic study is a third, distinct population.
+Neither nominal-layout study applies schematic width stress or calibration.
+
+Default analysis reconstructs results from recorded sources, not new physical
+verification. The native generators are preserved execution-time sources;
+they require their documented control/PCell/tool inputs and are not promised
+to rebuild on a reviewer's machine using unavailable private directories.
+Canonical public MAG/GDS, netlists and recorded checks support inspection.
+Independent physical PEX qualification, silicon measurements, post-layout
+calibration, noise, mismatch statistics and yield remain outside this entry.
+
 ### Archived RC model applicability
 
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
-This limitation applies to both the original five-condition ngspice-42 pilot
-and the subsequent separately declared 45-condition ngspice-47 study.
+This limitation applies to the original five-condition ngspice-42 pilot,
+the historical original-control 45-PVT study and the current paired
+single-row-a1 qualification.
 Their reported measurements, numerical comparisons and historical pass/fail
 records remain unchanged; they describe the decks actually executed.
 
@@ -67,7 +93,7 @@ and distributed RC. The archived
 mutual capacitances while grounded capacitance increases; they are not
 ground-only exports. The existing
 [parasitic accounting](layout_compact_repair/evidence/attempt1/parasitic-analysis.json)
-records these native values. The full-grid study reuses this same RC netlist,
+records these native values. The historical original-control full-grid study reuses this same RC netlist,
 whose SHA-256 is
 `8f76622f875c815303157682cfa841fcb54829d586cb31d858f4c81bc9755f92`.
 
@@ -464,22 +490,24 @@ The current run is linked in the submission PR.
 Original code is MIT licensed. Model/tool licenses and references are listed
 in `THIRD_PARTY_NOTICES.txt` and the notebook. Verbatim upstream tool notices
 are in `third_party_licenses/`; tool binaries are obtained separately.
-# Adopted single-row-a1 area version
+## Adopted single-row-a1 area version
 
 The current layout/report/Notebook/poster explicitly select the exact frozen
-single-row-a1 candidate. [Versioned native assets, original control, all1440raw
-traces,720numerical receipts and offline audit](layout_single_row/v1/README.md)
-are public and hash-closed. All-material area2207.088->2074.254um2 (6.01852%less);
-pair/order/mirroring/y,27guardedMOS/15ports, WL/body/junctions/escapes preserved.
-The14native checks/one candidateDRCattempt precede full45; original-control native
+single-row-a1 candidate. [Versioned native assets, original control, all 1440 raw
+traces, 720 numerical receipts and offline audit](layout_single_row/v1/README.md)
+are public. All-material area decreases from 2207.088 to 2074.254 um2
+(6.01852%). Pair order, mirroring, vertical placement, 27 guarded MOS devices,
+15 ports, dimensions, body contacts, junctions and local escapes are preserved.
+The 14 native checks and one candidate DRC attempt precede full45; original-control native
 outputs were reused, not rerun. Publication performed no EDA/SPICE.
 
-Both layouts/modes are180correct at2ns;1nsRC retains24unresolved. The separate
-known-nonblind nominal codezero paired45 grid is not the49condition schematic
-calibrated study. Approximately1%energy changes are not robust globalPPA;
-numerical1%/20ps acceptance bands are not physical uncertainty bounds.
+Both layouts and modes have 180 correct points at 2 ns; RC retains 24 unresolved
+points at 1 ns. This nominal code-zero comparison used known conditions and is
+not the calibrated 49-condition schematic study. Approximately 1% energy
+changes are not robust global PPA benefits; numerical 1% / 20 ps acceptance
+bands are not physical uncertainty bounds.
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
-Original studies below remain preserved historical control evidence.
-The lossless twelve rawZIPpartitions add243,620,890bytes to source bootstrap.
-All400models refer to the existing public exactraw/canonicalGitmanifest;
+The original studies remain preserved historical control evidence.
+The twelve lossless raw ZIP partitions add 243,620,890 bytes to source bootstrap.
+All 400 models refer to the existing public raw-byte/canonical-Git manifest;
 no duplicate model corpus, LFS, private-only raw dependency or installer is added.

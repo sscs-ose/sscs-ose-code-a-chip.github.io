@@ -19,7 +19,7 @@ def code(text: str):
 def main() -> None:
     cells = [
         markdown("""
-        # Comparator Atlas: When Calibration Is Not Enough
+        # Comparator Atlas: SKY130 StrongARM characterization
 
         **Wei-Lun Hsu — National Tsing Hua University**
 
@@ -43,12 +43,13 @@ def main() -> None:
         waveforms connect circuit behavior to decision time and core energy.
         Schematic and extracted results are compared under explicitly stated
         conditions. The adopted **single-row-a1 area version** reduces the
-        all-material GDS bbox from2207.088 to2074.254um2 (6.01852%).
-        Its paired45-PVT qualification completed1440new transients and720
-        numerical pairs: both layouts/modes give180/180correct at2ns.
-        Candidate RC retains156/180at1ns (24unresolved), with worst sampled
-        delay1.811ns. Small approximately1%core-energy changes do not
-        establish robust globalPPA. Original studies remain below.
+        all-material GDS bbox from 2207.088 to 2074.254 um2 (6.01852%).
+        Its paired 45-PVT qualification completed 1440 transients and 720
+        numerical pairs: both layouts and C/RC modes give 180/180 correct
+        decisions at 2 ns. Candidate RC retains 156/180 at 1 ns
+        (24 unresolved), with worst sampled delay 1.811 ns. The observed
+        approximately 1% core-energy decrease does not establish a robust
+        physical PPA benefit. The original studies remain separate below.
         In the original 45-condition nominal, code-zero study, archived RC
         decks give 156/180 correct decisions at 1 ns (24 unresolved) and
         180/180 at the prospectively declared 2 ns deadline; the worst sampled
@@ -57,6 +58,16 @@ def main() -> None:
         Schematic results are unaffected by this extraction concern.
         See the model-applicability limitation in Section 8 and
         [Reproducibility](REPRODUCIBILITY.md#archived-rc-model-applicability).
+
+        **Research question and contribution.** How do the input band and
+        deadline affect calibrated decision correctness and core energy,
+        and what changes between two legal layouts under matched nominal
+        conditions? StrongARM operation is established (Razavi, 2015).
+        Auxiliary-pair offset calibration and its timing/parasitic effects
+        have also been analyzed (Li, Xu and Iizuka, 2022).
+        This work contributes a finite-grid comparison and a recorded
+        layout-area revision, not a new latch topology, noise theory or
+        silicon benchmark. Full references appear in the discussion.
 
         ## Getting started
 
@@ -613,36 +624,41 @@ def main() -> None:
         markdown("""
         ## 8. Adopted single-row-a1 area version
 
-        The exact frozen guarded27-MOS/15-port candidate has a121.8x17.03um
-        all-material GDS bbox (2074.254um2), versus the original legal compact
-        control129.6x17.03um (2207.088um2): **6.01852%less area**.
+        The adopted 27-MOS, 15-port layout has a 121.8 x 17.03 um
+        all-material GDS bbox (2074.254 um2), versus the original compact
+        control's 129.6 x 17.03 um (2207.088 um2): **6.01852% less area**.
         Wells, body ties, guards and shields are included; only TEXT is excluded.
-        Pitch changes4.8->4.5um; pair order/mirroring/y, device WL/flavors,
+        Pitch decreases from 4.8 to 4.5 um; pair order, mirroring, vertical placement, device WL/flavors,
         junctions and local M1/M2 escapes remain unchanged. Only necessary
         horizontal bus/output/shield endpoints and symmetric spines follow
         placements. There is no diffusion sharing or matching-benefit claim.
 
         **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
-        The candidate passed14native checks on ONE actualDRCattempt in its
+        The candidate passed 14 native checks on one actual DRC attempt in its
         earlier spacing round; the unchanged original-control native proof was
-        reused, not rerun. Full45 and publication performed no new native runs.
-        The subsequent known-nonblind nominal code-zero grid used BOTH layouts,
-        C/RC,45PVT conditions, signed +/-3/10mV and10/5ps: **1440new transients,
-        720qualified pairs**,180points per mode/layout.2ns staysPRIMARY.
-        All2ns points are correct.1nsC improves168->170correct ONLY at
-        SS1.62V-40C+/-10mV; RC remains156correct/24unresolved with the SAME
-        unresolved keys. No previously correct point is lost.
+        reused, not rerun. Full45 qualification and publication added no native runs.
+        The subsequent nominal code-zero grid used both layouts, C and RC,
+        45 PVT conditions, signed +/-3 and +/-10 mV inputs, and 10/5 ps steps:
+        **1440 transients and 720 qualified pairs**, with 180 points per
+        layout and mode. The conditions were known before qualification.
+        All points are correct at the fixed 2 ns primary deadline.
+        At 1 ns, C-only improves from 168 to 170 correct points, only at
+        SS / 1.62 V / -40 C / +/-10 mV. RC retains 156 correct and the same
+        24 unresolved points. No previously correct point is lost.
 
-        All180matched energies and recorded2ns latencies decrease in EACH
-        mode, but ratio-of-mean energy changes are only-0.9453%C/-1.0448%RC.
-        The declared1%energy/20pslatency criteria are numerical acceptance
-        bands, **not uncertainty bounds**. No robust globalPPA/yield/silicon,
-        independentqualifiedPEX or signoff follows. Core energy excludes
+        All 180 matched energies and recorded 2 ns latencies decrease in
+        each mode. Ratio-of-mean energy changes are -0.9453% for C-only and
+        -1.0448% for RC. These decreases are numerically consistent in the
+        recorded decks, but their physical accuracy is unknown.
+        The declared 1% energy / 20 ps latency criteria are numerical acceptance
+        bands, **not uncertainty bounds**. No robust global PPA, yield, silicon,
+        independently qualified PEX or signoff conclusion follows. Core energy excludes
         drivers/controller/calibration. C-only is not independent ground truth.
-        This is NOT the49-condition calibrated stress/noise/mismatch/trim study.
+        This is not the calibrated 49-condition width-stress study, nor a
+        post-layout calibration, noise or mismatch qualification.
 
         [Versioned raw traces, native geometry, pins and audit recipe](layout_single_row/v1/README.md)
-        retain all1440decks/logs/waveforms,720numerical receipts and keyed
+        retain all 1440 decks, logs and waveforms, 720 numerical receipts and keyed
         comparisons. Earlier studies below remain historical, not candidate data.
         """),
         code("""
@@ -722,7 +738,7 @@ def main() -> None:
         plt.close(figure)
         """),
         markdown("""
-        ### Earlier five-condition layout comparison
+        ### Historical original compact control: five-condition comparison
 
         At matched TT +/-3 mV points, the archived compact RC decks reduce mean
         delay from 0.843 to 0.645 ns and core energy from 521 to 425 fJ
@@ -755,14 +771,14 @@ def main() -> None:
         markdown("""
         ### Historical original-control full-grid archived-deck outcomes
 
-        The same nominal 27-device layout is now evaluated over all five
+        This historical original compact control was evaluated over all five
         process corners, three supplies (1.62, 1.80, 1.95 V), and three
         temperatures (-40, 27, 125 C). Each of the 45 conditions uses
         differential inputs -10, -3, +3 and +10 mV: **180 points per mode**.
         Schematic and extracted RC use code zero, common mode 0.5 VDD,
         5 fF output loads, and the same 10 ns clock with 50 ps edges.
 
-        This new study declares **2 ns** as its primary deadline while also
+        This historical study declared **2 ns** as its primary deadline while also
         reporting 1 ns. Both modes were freshly simulated with ngspice 47
         at 10 and 5 ps; all 360 pointwise numerical comparisons meet the
         fixed decision, 1% energy and 20 ps latency criteria. The five
@@ -894,12 +910,12 @@ def main() -> None:
 
         ### References
 
-        1. B. Razavi, “The StrongARM Latch [A Circuit for All Seasons],”
+        1. Behzad Razavi, “The StrongARM Latch [A Circuit for All Seasons],”
            *IEEE Solid-State Circuits Magazine*, vol. 7, no. 2, pp. 12–17,
            2015. DOI: [10.1109/MSSC.2015.2418155](https://doi.org/10.1109/MSSC.2015.2418155).
-        2. S. Li, Z. Xu and T. Iizuka, “Analysis of strong-arm comparator with
+        2. Shuowei Li, Zule Xu and Tetsuya Iizuka, “Analysis of strong-arm comparator with
            auxiliary pair for offset calibration,” *Analog Integrated Circuits
-           and Signal Processing*, vol. 110, pp. 535–546, 2022.
+           and Signal Processing*, vol. 110, no. 3, pp. 535–546, 2022.
            DOI: [10.1007/s10470-022-01992-6](https://doi.org/10.1007/s10470-022-01992-6).
         3. [Official SKY130 primitive models](https://github.com/google/skywater-pdk-libs-sky130_fd_pr),
            revision `f62031a1be9aefe902d6d54cddd6f59b57627436`.

@@ -83,7 +83,7 @@ def poster_figure(facts: dict):
                        "source_pixels": list(pixels.shape[:2][::-1]),
                        "allocated_bounds": list(bounds)})
 
-    text(left, 0.966, "Calibrated decisions depend on the sampled specification",
+    text(left, 0.966, "Calibration, decision time and layout area",
          36, weight="bold", role="title")
     text(left, 0.919, "Comparator Atlas  |  SKY130 StrongARM characterization", 24, BLUE, role="subtitle")
     text(left, 0.881, f"{author['name']}  |  {author['affiliation']}", 18, role="author")
@@ -162,8 +162,8 @@ def poster_figure(facts: dict):
     bounds = [-60.9, -4.84, 60.9, 12.19]
     axes.set(xlim=(bounds[0], bounds[2]), ylim=(bounds[1], bounds[3]), aspect="equal")
     axes.axis("off")
-    text(right, 0.598, f"All-material bbox: {geometry['candidate_area_um2']:.3f} vs "
-         f"{geometry['control_area_um2']:.3f} um2 (6.02% less).\n"
+    text(right, 0.598, f"Bbox (um2): adopted {geometry['candidate_area_um2']:.3f} / "
+         f"original {geometry['control_area_um2']:.3f} (6.02% less).\n"
          "14 native checks: DRC 0 / LVS / negatives; not signoff.",
          16, MUTED, width=column_width, role="caption")
     for x, label in ((right, "Correct / 180"), (right + 0.12, "1 ns"),
@@ -171,8 +171,8 @@ def poster_figure(facts: dict):
         text(x, 0.535, label, 17, weight="bold")
     rule(right, 0.509)
     for y, name, first, second in (
-        (0.498, "Control C", 168, 180),
-        (0.466, "New C", 170, 180),
+        (0.498, "Original C", 168, 180),
+        (0.466, "Adopted C", 170, 180),
         (0.434, "Both RC", 156, 180),
     ):
         text(right, y, name, 18)
@@ -183,7 +183,7 @@ def poster_figure(facts: dict):
          "2 ns primary, prospectively declared; no lost correct keys.",
          16, width=column_width)
     image(waveform, [right, 0.220, column_width, 0.125], "retained_nominal_rc_waveform")
-    text(right, 0.207, "Worst RC: 1.835 -> 1.811 ns; same FS key.\n"
+    text(right, 0.207, "Original -> adopted; worst RC: 1.835 -> 1.811 ns.\n"
          "~1% energy change is not robust global PPA.",
          16, MUTED, width=column_width, role="caption")
 
@@ -253,8 +253,20 @@ def build() -> Path:
         "ranks designs; the original training selection is unchanged. The selected "
         f"design retains the same {facts['sampled_schematic']['selected_wrong']['count_1ns']} "
         "wrong keyed samples at 1 ns and 2 ns, all at +/-1 mV; "
-        "their locations do not establish a physical failure cause. "
-        "A separate nominal, code-zero study covers 45 PVT conditions and four signed "
+        "their locations do not establish a physical failure cause.\n\n"
+        "The adopted single-row-a1 layout reduces all-material bbox area from "
+        "2207.088 to 2074.254 um2 (6.01852%), preserving 27 guarded MOS devices "
+        "and 15 ports. A separate paired 45-PVT qualification at nominal geometry, "
+        "code zero and signed +/-3 and +/-10 mV completed 1440 transients and "
+        "720 qualified 10/5 ps pairs. Both layouts and C/RC modes retain 180/180 "
+        "correct points at the fixed 2 ns primary deadline. At 1 ns, C-only improves "
+        "from 168 to 170 correct points; RC retains 156 correct and the same "
+        "24 unresolved points. Mean RC core energy decreases from 425.490 to "
+        "421.045 fJ, and worst recorded latency from 1.835032 to 1.810632 ns. "
+        "All matched energy and delay pairs decrease, but their physical accuracy "
+        "is unqualified. The approximately 1% energy change is not a robust PPA "
+        "result; the 1% / 20 ps numerical criteria are not uncertainty bounds.\n\n"
+        "The historical original compact control's nominal, code-zero study covers 45 PVT conditions and four signed "
         f"inputs each. Schematic gives {full['schematic_correct_1ns']}/180 correct at both "
         f"deadlines; archived RC gives {full['rc_correct_1ns']}/180 at 1 ns "
         f"(24 unresolved, zero wrong) and {full['rc_correct_2ns']}/180 at its separately "
@@ -265,21 +277,11 @@ def build() -> Path:
         "remains separate: 12/20 at original 1 ns, 20/20 at post-hoc 2 ns. "
         "Results are finite observations, not continuous coverage, yield, timing signoff "
         "or a worst-cycle guarantee. Core energy excludes drivers and calibration/controller "
-        "infrastructure.\n\nScope: " + RC_SCOPE_NOTE + "\n\n"
+        "infrastructure.\n\n" + area.NOTICE + ".\n\nScope: " + RC_SCOPE_NOTE + "\n\n"
         "Original code: MIT. GitHub Copilot assisted implementation, experiment automation, "
         "figures and documentation; the author is responsible for the work.\n"
     )
     abstract_path = OUTPUT / "abstract.txt"
-    abstract += (
-        "\nAdopted area version single-row-a1: all-material bbox2207.088->2074.254um2 "
-        "(6.01852%less), preserving27guardedMOS/15ports and exact device/junction contracts. "
-        "A separate1440-new-transient/720-pair nominal C/RC matched45-PVT qualification "
-        "retains180/180correct2ns in both layouts/modes.1nsC168->170correct; RC156correct/"
-        "24unresolved with identical keys. RC mean core425.490->421.045fJ and worst sampled "
-        "delay1.835032->1.810632ns; approximately1%energy changes are not robust globalPPA. "
-        "The1%/20ps numerical acceptance criteria are not physical uncertainty bounds. "
-        "Original studies above remain separate preserved controls, not candidate data.\n"
-    )
     abstract_path.write_text(abstract, encoding="utf-8", newline="\n")
     manifest = {
         "status": "current_competition_materials_from_verified_evidence",

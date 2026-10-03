@@ -151,8 +151,9 @@ def layout_figure(evidence):
             ax.add_collection(PatchCollection(
                 [Polygon(p, closed=True) for p in polygons],
                 facecolor="#365d7d" if i % 2 else "#b4bec7", edgecolor="none", alpha=.75))
+        label = "Original compact control" if name == "control" else "Adopted single-row-a1"
         ax.set(xlim=(-64.8, 64.8), ylim=(-4.84, 12.19), aspect="equal",
-               title=f"{name}: {width:g} x17.03 um; all-material bbox {width * 17.03:.3f} um2")
+               title=f"{label}: {width:g} x 17.03 um; all-material bbox {width * 17.03:.3f} um2")
         ax.axis("off")
     fig.suptitle("single-row-a1: 6.01852% less area; exact archived GDS, identical plot scale")
     fig.tight_layout()
@@ -168,10 +169,10 @@ def comparison_figure(evidence):
                         s=14, label=mode.upper(), color=color)
         axes[1].scatter(p.control_latency_ns, 1000 * p.candidate_minus_control_latency_ns,
                         s=14, label=mode.upper(), color=color)
-    axes[0].set(xlabel="Control core energy (fJ)", ylabel="Candidate paired change (%)",
+    axes[0].set(xlabel="Original-control core energy (fJ)", ylabel="Adopted relative change (%)",
                 title="180 keys per mode; small energy changes")
-    axes[1].set(xlabel="Control recorded latency (ns)", ylabel="Candidate paired change (ps)",
-                title="2ns primary; not timing signoff")
+    axes[1].set(xlabel="Original-control recorded latency (ns)", ylabel="Adopted minus original (ps)",
+                title="2 ns primary; not timing signoff")
     for ax in axes:
         ax.axhline(0, color="#505963", linewidth=.8)
         ax.legend()
@@ -197,12 +198,13 @@ def worst_figure(evidence):
         time = (values[:, 0] - 22.025e-9) * 1e9
         selected = (time >= -.05) & (time <= 2.05)
         for column, signal, color in ((2, "Q+", "#365d7d"), (3, "Q-", "#778ba4")):
+            label = "Original control" if layout == "control" else "single-row-a1"
             ax.plot(time[selected], values[selected, column], linestyle, color=color,
-                    label=f"{layout} {signal}")
+                    label=f"{label} {signal}")
     ax.axvline(1, color="#505963", linestyle=":")
     ax.axvline(2, color="#505963", linestyle=":")
     ax.set(xlabel="Time after evaluation midpoint (ns)", ylabel="Output (V)",
-           title="Actual saved RC: FS /1.62V /-40C /-3mV; both late at1ns")
+           title="Recorded RC: FS / 1.62 V / -40 C / -3 mV; both late at 1 ns")
     ax.legend(fontsize=8, ncol=2)
     fig.tight_layout()
     return fig
