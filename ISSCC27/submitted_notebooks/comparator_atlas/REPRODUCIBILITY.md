@@ -50,13 +50,14 @@ ngspice 47; a different simulator version is not assumed numerically identical.
 
 ### Current adopted layout and historical controls
 
-The current layout is `layout_single_row/v1/`, version **single-row-a1**.
-Its paired comparison includes the original compact control and the adopted
+The current layout is `layout_single_row/v2/`, version **single-row-local-pitch-b1**.
+Its paired comparison includes the previously adopted a1 matched control and exact b1
 candidate, each in C-only and distributed RC modes: 45 PVT conditions,
 four signed inputs, and 10/5 ps steps (1440 recorded transients, 720 pairs).
 The primary deadline is 2 ns; 1 ns is a parallel readout of the same waves.
-See the [versioned package](layout_single_row/v1/README.md) for raw traces,
+See the [versioned package](layout_single_row/v2/README.md) for raw traces,
 native records, model references and the offline remeasurement command.
+The [prior a1 version](layout_single_row/v1/README.md) remains byte-identical.
 
 `layout_compact_repair/` remains the **historical original compact control**.
 The figures and schematic/RC tables in `results/study/postlayout_pvt45/`
@@ -78,7 +79,7 @@ calibration, noise, mismatch statistics and yield remain outside this entry.
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
 This limitation applies to the original five-condition ngspice-42 pilot,
 the historical original-control 45-PVT study and the current paired
-single-row-a1 qualification.
+single-row-a1 and local-pitch b1 qualifications.
 Their reported measurements, numerical comparisons and historical pass/fail
 records remain unchanged; they describe the decks actually executed.
 
@@ -490,24 +491,35 @@ The current run is linked in the submission PR.
 Original code is MIT licensed. Model/tool licenses and references are listed
 in `THIRD_PARTY_NOTICES.txt` and the notebook. Verbatim upstream tool notices
 are in `third_party_licenses/`; tool binaries are obtained separately.
-## Adopted single-row-a1 area version
+## Adopted local-pitch b1 version
 
 The current layout/report/Notebook/poster explicitly select the exact frozen
-single-row-a1 candidate. [Versioned native assets, original control, all 1440 raw
-traces, 720 numerical receipts and offline audit](layout_single_row/v1/README.md)
-are public. All-material area decreases from 2207.088 to 2074.254 um2
-(6.01852%). Pair order, mirroring, vertical placement, 27 guarded MOS devices,
+local-pitch b1 candidate. [Versioned native assets, matched a1 control, all 1440 full45
+and 64 earlier diagnostic traces, numerical receipts and offline audit](layout_single_row/v2/README.md)
+are public. All-material area decreases from matched a1's 2074.254 to 1873.3 um2
+(9.688013%). Pair order, mirroring, vertical placement, 27 guarded MOS devices,
 15 ports, dimensions, body contacts, junctions and local escapes are preserved.
-The 14 native checks and one candidate DRC attempt precede full45; original-control native
-outputs were reused, not rerun. Publication performed no EDA/SPICE.
+The 14 native checks and one candidate DRC attempt precede full45; both native
+proofs/extracts were reused, not rerun. Publication performed no EDA/SPICE.
+New local planning margins are at least 0.20 um; inherited unchanged global
+M3 margin is 0.16 um. Historical pre-route recovered MAG differs from final MAG.
 
-Both layouts and modes have 180 correct points at 2 ns; RC retains 24 unresolved
-points at 1 ns. This nominal code-zero comparison used known conditions and is
-not the calibrated 49-condition schematic study. Approximately 1% energy
+Both layouts and modes have 180 correct points at 2 ns; RC changes from 24 to 22 unresolved
+points at 1 ns, only SS / 1.62 V / 125 C / +/-10 mV. C retains 10 unresolved
+keys; FS late points remain, with null recorded latency at 1 ns.
+There are 720 finest 5 ps traces and 1440 two-deadline rows, not 1440 independent
+finest experiments. This nominal code-zero comparison used known conditions and is
+not the calibrated 49-condition schematic study. Approximately 1.94% energy
 changes are not robust global PPA benefits; numerical 1% / 20 ps acceptance
 bands are not physical uncertainty bounds.
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
 The original studies remain preserved historical control evidence.
-The twelve lossless raw ZIP partitions add 243,620,890 bytes to source bootstrap.
+The preceding a1 version and its twelve lossless raw partitions remain unchanged.
+The b1 source adds eleven lossless sub-30 MB ZIP partitions; exact sizes/member
+hashes and model-reference identities are recorded in publication provenance.
+Bootstrap downloads both current evidence and retained history; use sufficient
+disk space and a short Windows path. Archived host paths in source receipts are
+provenance only, not executable dependencies. The default saved-data reader does
+not run the archived native scripts that require unavailable private directories.
 All 400 models refer to the existing public raw-byte/canonical-Git manifest;
 no duplicate model corpus, LFS, private-only raw dependency or installer is added.

@@ -42,13 +42,14 @@ def main() -> None:
         selected design into actual layout and parasitic extraction. Interactive
         waveforms connect circuit behavior to decision time and core energy.
         Schematic and extracted results are compared under explicitly stated
-        conditions. The adopted **single-row-a1 area version** reduces the
-        all-material GDS bbox from 2207.088 to 2074.254 um2 (6.01852%).
+        conditions. The adopted **local-pitch b1 version** reduces the
+        all-material GDS bbox from matched a1's 2074.254 to 1873.3 um2 (9.688013%).
         Its paired 45-PVT qualification completed 1440 transients and 720
         numerical pairs: both layouts and C/RC modes give 180/180 correct
-        decisions at 2 ns. Candidate RC retains 156/180 at 1 ns
-        (24 unresolved), with worst sampled delay 1.811 ns. The observed
-        approximately 1% core-energy decrease does not establish a robust
+        decisions at 2 ns. Candidate RC gives 158/180 at 1 ns
+        (22 unresolved), versus a1's 156/180 (24 unresolved), with worst
+        recorded 2 ns delay 1.760276 ns. The observed
+        approximately 1.94% core-energy decrease does not establish a robust
         physical PPA benefit. The original studies remain separate below.
         In the original 45-condition nominal, code-zero study, archived RC
         decks give 156/180 correct decisions at 1 ns (24 unresolved) and
@@ -622,33 +623,40 @@ def main() -> None:
         display(entry.calibration_workload(evidence))
         """),
         markdown("""
-        ## 8. Adopted single-row-a1 area version
+        ## 8. Adopted local-pitch b1 version
 
-        The adopted 27-MOS, 15-port layout has a 121.8 x 17.03 um
-        all-material GDS bbox (2074.254 um2), versus the original compact
-        control's 129.6 x 17.03 um (2207.088 um2): **6.01852% less area**.
+        The adopted 27-MOS, 15-port b1 layout has a 110 x 17.03 um
+        all-material GDS bbox (1873.3 um2), versus matched adopted a1's
+        121.8 x 17.03 um (2074.254 um2): **9.688013% less area**.
         Wells, body ties, guards and shields are included; only TEXT is excluded.
-        Pitch decreases from 4.8 to 4.5 um; pair order, mirroring, vertical placement, device WL/flavors,
+        Fixed local intervals are 3.8/4.2 um; pair order, mirroring, vertical placement, device WL/flavors,
         junctions and local M1/M2 escapes remain unchanged. Only necessary
         horizontal bus/output/shield endpoints and symmetric spines follow
         placements. There is no diffusion sharing or matching-benefit claim.
 
         **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
         The candidate passed 14 native checks on one actual DRC attempt in its
-        earlier spacing round; the unchanged original-control native proof was
+        earlier spacing round; both unchanged a1/b1 native proofs/extracts were
         reused, not rerun. Full45 qualification and publication added no native runs.
+        New local planning margins are at least 0.20 um; unchanged inherited
+        global M3 margin is 0.16 um. Pre-route restored MAG is not final routed MAG.
         The subsequent nominal code-zero grid used both layouts, C and RC,
         45 PVT conditions, signed +/-3 and +/-10 mV inputs, and 10/5 ps steps:
         **1440 transients and 720 qualified pairs**, with 180 points per
         layout and mode. The conditions were known before qualification.
         All points are correct at the fixed 2 ns primary deadline.
-        At 1 ns, C-only improves from 168 to 170 correct points, only at
-        SS / 1.62 V / -40 C / +/-10 mV. RC retains 156 correct and the same
-        24 unresolved points. No previously correct point is lost.
+        At 1 ns, C-only retains 170 correct / 10 unresolved points.
+        RC changes from 156 correct / 24 unresolved to 158 correct / 22 unresolved,
+        only at SS / 1.62 V / 125 C / +/-10 mV, not FS. No previously correct
+        point is lost; unresolved latency stays null.
 
         All 180 matched energies and recorded 2 ns latencies decrease in
-        each mode. Ratio-of-mean energy changes are -0.9453% for C-only and
-        -1.0448% for RC. These decreases are numerically consistent in the
+        each mode. Ratio-of-mean energy changes are -1.923720% for C-only and
+        -1.939286% for RC; mean per-point changes are -1.932155% and -1.945659%.
+        These are different estimators. There are 720 finest 5 ps traces and
+        1440 two-deadline rows, not 1440 finest independent experiments.
+        Fresh control readings agree exactly with archived adopted-a1 readings.
+        These decreases are numerically consistent in the
         recorded decks, but their physical accuracy is unknown.
         The declared 1% energy / 20 ps latency criteria are numerical acceptance
         bands, **not uncertainty bounds**. No robust global PPA, yield, silicon,
@@ -657,7 +665,8 @@ def main() -> None:
         This is not the calibrated 49-condition width-stress study, nor a
         post-layout calibration, noise or mismatch qualification.
 
-        [Versioned raw traces, native geometry, pins and audit recipe](layout_single_row/v1/README.md)
+        [Versioned raw traces, native geometry, pins and audit recipe](layout_single_row/v2/README.md)
+        and the unchanged [historical a1 version](layout_single_row/v1/README.md)
         retain all 1440 decks, logs and waveforms, 720 numerical receipts and keyed
         comparisons. Earlier studies below remain historical, not candidate data.
         """),

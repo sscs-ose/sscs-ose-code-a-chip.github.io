@@ -7,7 +7,7 @@ import pytest
 
 import entry_tools
 import layout_evidence as physical
-import single_row_evidence as area
+import single_row_a1_evidence as area
 
 
 @pytest.fixture(scope="module")

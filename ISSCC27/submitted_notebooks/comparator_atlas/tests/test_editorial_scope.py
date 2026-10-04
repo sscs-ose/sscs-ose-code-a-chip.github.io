@@ -11,7 +11,7 @@ def test_readme_labels_current_and_historical_results_locally():
     text = (ROOT / "README.md").read_text(encoding="utf-8")
     current, historical = text.split(
         "### Historical original compact control: schematic and archived RC", 1)
-    assert "421.045" in current and "1.810632" in current
+    assert "412.879469" in current and "1.760276" in current
     assert "425.49" in historical and "1.835" in historical
     assert "Archived original-control RC" in historical
     assert "not the adopted area version" in historical
@@ -26,7 +26,7 @@ def test_report_marks_both_historical_physical_sections():
     assert "not candidate data" in report
     assert "not a new comparator topology or silicon benchmark" in report
     assert "1440 transients" in report and "720 qualified 10/5 ps pairs" in report
-    assert "original compact control measures 129.6 x 17.03" in report
+    assert "Matched adopted a1 measures 121.8 x 17.03" in report
 
 
 def test_current_surfaces_preserve_warning_disclosure_and_readable_units():
@@ -68,6 +68,6 @@ def test_reproduction_and_abstract_keep_populations_separate():
     assert "not the adopted candidate" in reproduction
     assert "unavailable private directories" in reproduction
     assert "historical original compact control" in abstract
-    assert "24 unresolved" in abstract and "2 ns primary deadline" in abstract
+    assert "24 unresolved" in abstract and "22 unresolved" in abstract and "2 ns primary deadline" in abstract
     assert "not uncertainty bounds" in abstract
     assert "post-hoc" in abstract and "not a robust PPA" in abstract

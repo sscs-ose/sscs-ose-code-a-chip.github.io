@@ -71,9 +71,9 @@ def test_actual_poster_text_bounds_columns_contrast_and_semantics(facts):
             "local_boundary", "49", "through 30 mV", "294/294", "98/98",
             "249.655", "150.531", "154.517", "363.217", "NONE", "not defined",
             "Post-hoc", "do not identify a physical failure cause", "45 PVT", "code-zero",
-            "156/180", "180/180", "24 unresolved", "zero wrong", "prospectively declared",
-            "2074.254", "2207.088", "6.02%", "425.49", "421.04", "1.811",
-            "single-row-a1", "not signoff", "no lost correct keys",
+            "156/180", "158/180", "180/180", "a1 24 -> b1 22", "zero wrong", "prospectively declared",
+            "2074.254", "1873.300", "9.69%", "421.04", "412.88", "1.760",
+            "Local-pitch b1", "not signoff", "no lost correct keys",
             "GitHub Copilot assisted", "the author is responsible",
         ):
             assert required in text.replace("\n", " "), required

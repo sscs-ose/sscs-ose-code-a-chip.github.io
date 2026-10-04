@@ -17,15 +17,16 @@ or its [preview image](results/study/poster_preview.png).
 These RC results are outcomes of the archived 27-device simulation decks; extracted-model physical fidelity is not yet qualified. In the pinned Magic/open_pdks pipeline, mutual capacitances are retained while grounded capacitance increases. The physical error magnitude and direction are unknown; no exact duplication factor or corrected counts or energy are inferred. C-only is not independent ground truth, and RC-versus-C performance differences cannot be attributed solely to resistance. DRC/LVS establish their recorded structural checks, not parasitic-model fidelity. Schematic results are unaffected by this extraction concern. Recorded numerical agreement and simulation coverage do not establish silicon PVT performance.
 See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
-**Current layout: single-row-a1.** All-material area decreases from 2207.088
-to 2074.254 um2 (6.01852%), retaining 27 guarded MOS devices and 15 ports.
+**Current layout: single-row-local-pitch-b1.** All-material area decreases from
+matched a1's 2074.254 to 1873.3 um2 (9.688013%), retaining 27 guarded MOS devices and 15 ports.
 The paired 45-PVT qualification contains 1440 transients and 720 qualified
 pairs. Both layouts and C/RC modes have 180 correct points at 2 ns.
-At 1 ns, C-only improves from 168 to 170 correct points; RC retains 156
-correct and the same 24 unresolved points. Mean RC core energy changes from
-425.490 to 421.045 fJ; worst latency changes from 1.835032 to 1.810632 ns.
+At 1 ns, C retains 170 correct / 10 unresolved; RC changes from 156/24 to
+158/22 correct/unresolved, only at SS / 1.62 V / 125 C / +/-10 mV.
+Mean RC core energy changes from 421.044730 to 412.879469 fJ;
+worst latency changes from 1.810632 to 1.760276 ns.
 These small changes are not robust global PPA benefits.
-Read the [current version and all raw/native records](layout_single_row/v1/README.md)
+Read the [current version and all raw/native records](layout_single_row/v2/README.md)
 before the explicitly historical studies below. The 1% / 20 ps criteria are
 numerical acceptance bands, not physical uncertainty bounds.
 
@@ -52,7 +53,7 @@ numerical acceptance bands, not physical uncertainty bounds.
    unresolved samples settle: longer deadlines need not improve every
    outcome class. All 1,176 matched pairs and grouped counts are in the JSON.
    Locations and codes do not establish a physical failure cause.
-3. **Compare the adopted layout with the original compact control.**
+3. **Compare the adopted layout (b1) with matched a1, then read the original-control history.**
    The current version's GDS, paired table and two-layout figures are in
    Notebook Section 8. The later original-control sections retain the historical GDS, DRC/LVS
    negative controls and matched schematic/connectivity/C/RC results.

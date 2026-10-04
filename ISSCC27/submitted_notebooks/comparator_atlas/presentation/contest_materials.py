@@ -149,7 +149,7 @@ def poster_figure(facts: dict):
          "at signed +/-1 mV. Locations and trim codes do not identify "
          "a physical failure cause.", 16, width=column_width)
 
-    text(right, 0.797, "single-row-a1; known nonblind, code-zero: 45 PVT conditions "
+    text(right, 0.797, "Local-pitch b1 vs adopted a1; known nonblind, code-zero: 45 PVT conditions "
          "x four signed inputs (-10, -3, +3, +10 mV). "
          "180 keys per layout / C or RC; ngspice-47.",
          17, width=column_width, role="rc_scope")
@@ -159,11 +159,11 @@ def poster_figure(facts: dict):
         axes.add_collection(PatchCollection(
             [Polygon(points, closed=True) for points in polygons],
             facecolor=BLUE if index % 2 else "#b4bec7", edgecolor="none", alpha=0.75))
-    bounds = [-60.9, -4.84, 60.9, 12.19]
+    bounds = [-55.0, -4.84, 55.0, 12.19]
     axes.set(xlim=(bounds[0], bounds[2]), ylim=(bounds[1], bounds[3]), aspect="equal")
     axes.axis("off")
     text(right, 0.598, f"Bbox (um2): adopted {geometry['candidate_area_um2']:.3f} / "
-         f"original {geometry['control_area_um2']:.3f} (6.02% less).\n"
+         f"matched a1 {geometry['control_area_um2']:.3f} (9.69% less).\n"
          "14 native checks: DRC 0 / LVS / negatives; not signoff.",
          16, MUTED, width=column_width, role="caption")
     for x, label in ((right, "Correct / 180"), (right + 0.12, "1 ns"),
@@ -171,20 +171,21 @@ def poster_figure(facts: dict):
         text(x, 0.535, label, 17, weight="bold")
     rule(right, 0.509)
     for y, name, first, second in (
-        (0.498, "Original C", 168, 180),
-        (0.466, "Adopted C", 170, 180),
-        (0.434, "Both RC", 156, 180),
+        (0.498, "Both C", 170, 180),
+        (0.466, "a1 RC", 156, 180),
+        (0.434, "b1 RC", 158, 180),
     ):
         text(right, y, name, 18)
         text(right + 0.12, y, f"{first}/180", 18)
         text(right + 0.20, y, f"{second}/180", 18)
-    text(right, 0.399, "RC mean: 425.49 -> 421.04 fJ / cycle", 17, BLUE, role="rc_energy")
-    text(right, 0.370, "24 unresolved RC keys at 1 ns; zero wrong.\n"
+    text(right, 0.399, "RC mean: 421.04 -> 412.88 fJ / cycle", 17, BLUE, role="rc_energy")
+    text(right, 0.370, "1 ns RC unresolved: a1 24 -> b1 22; zero wrong.\n"
+         "Only SS / 1.62 V / 125 C / +/-10 mV improve; FS remains late.\n"
          "2 ns primary, prospectively declared; no lost correct keys.",
          16, width=column_width)
-    image(waveform, [right, 0.220, column_width, 0.125], "retained_nominal_rc_waveform")
-    text(right, 0.207, "Original -> adopted; worst RC: 1.835 -> 1.811 ns.\n"
-         "~1% energy change is not robust global PPA.",
+    image(waveform, [right, 0.210, column_width, 0.115], "retained_nominal_rc_waveform")
+    text(right, 0.197, "Matched a1 -> b1; worst RC: 1.811 -> 1.760 ns.\n"
+         "~1.94% energy change is not robust global PPA.",
          16, MUTED, width=column_width, role="caption")
 
     rule(left, 0.132, 0.92)
@@ -254,17 +255,19 @@ def build() -> Path:
         f"design retains the same {facts['sampled_schematic']['selected_wrong']['count_1ns']} "
         "wrong keyed samples at 1 ns and 2 ns, all at +/-1 mV; "
         "their locations do not establish a physical failure cause.\n\n"
-        "The adopted single-row-a1 layout reduces all-material bbox area from "
-        "2207.088 to 2074.254 um2 (6.01852%), preserving 27 guarded MOS devices "
+        "The adopted local-pitch b1 layout reduces all-material bbox area from "
+        "matched adopted a1's 2074.254 to 1873.3 um2 (9.688013%), preserving 27 guarded MOS devices "
         "and 15 ports. A separate paired 45-PVT qualification at nominal geometry, "
         "code zero and signed +/-3 and +/-10 mV completed 1440 transients and "
         "720 qualified 10/5 ps pairs. Both layouts and C/RC modes retain 180/180 "
-        "correct points at the fixed 2 ns primary deadline. At 1 ns, C-only improves "
-        "from 168 to 170 correct points; RC retains 156 correct and the same "
-        "24 unresolved points. Mean RC core energy decreases from 425.490 to "
-        "421.045 fJ, and worst recorded latency from 1.835032 to 1.810632 ns. "
+        "correct points at the fixed 2 ns primary deadline. At 1 ns, C-only retains "
+        "170 correct / 10 unresolved; RC improves from 156 correct / 24 unresolved "
+        "to 158 correct / 22 unresolved, only at SS / 1.62 V / 125 C / +/-10 mV. "
+        "Mean RC core energy decreases from 421.044730 to "
+        "412.879469 fJ (-1.939286%, ratio of means; -1.945659%, mean per-point change), "
+        "and worst recorded latency from 1.810632 to 1.760276 ns. "
         "All matched energy and delay pairs decrease, but their physical accuracy "
-        "is unqualified. The approximately 1% energy change is not a robust PPA "
+        "is unqualified. The approximately 1.94% energy change is not a robust PPA "
         "result; the 1% / 20 ps numerical criteria are not uncertainty bounds.\n\n"
         "The historical original compact control's nominal, code-zero study covers 45 PVT conditions and four signed "
         f"inputs each. Schematic gives {full['schematic_correct_1ns']}/180 correct at both "

@@ -401,7 +401,7 @@ are observations, not evidence of trim saturation, residual offset or noise.</p>
     layout_costs = physical.matched_tt_comparison(layout)
     layout_section = f"""
 <section id="layout-evidence"><h2>Historical original compact control: geometry and pilot</h2>
-<p>The original compact control, not the adopted single-row-a1 layout, has recorded GDS, named-style DRC, independent LVS,
+<p>The original compact control, not the adopted b1 layout, has recorded GDS, named-style DRC, independent LVS,
 wrong-net/bulk/width/SVT-LVT negative controls, and separate connectivity/C/RC exports.
 The original layout development used <strong>five code-zero conditions</strong>.
 The following expanded study covers 45 PVT conditions with the same nominal geometry.
@@ -619,47 +619,56 @@ Codes are frozen before perturbing the interface. The history step changes the e
 evaluation starts at 22.025 ns. Pin error includes deterministic settling and kickback, not random noise.</p>
 <p class="muted">{html.escape(stress["numerical_scope"])} Refinement limits are identical outcomes,
 at most 1% core-energy difference and at most 20 ps resolved-latency difference. These checks are not production signoff.</p></section>
-<section id="single-row-a1"><h2>Adopted area version: single-row-a1</h2>
-<p><strong>All-material GDS bbox: 2207.088 to 2074.254 um2 (6.01852% less).</strong>
-The original compact control measures 129.6 x 17.03 um; adopted single-row-a1
-measures 121.8 x 17.03 um. Wells, body contacts, guards and shields are included;
+<section id="single-row-b1"><h2>Adopted area version: single-row-local-pitch-b1</h2>
+<p><strong>All-material GDS bbox: matched a1 2074.254 to b1 1873.3 um2 (9.688013% less).</strong>
+Matched adopted a1 measures 121.8 x 17.03 um; adopted b1
+measures 110 x 17.03 um. Wells, body contacts, guards and shields are included;
 only TEXT is excluded. The 27 guarded MOS devices, 15 ports, device dimensions,
 flavors, junctions, pair order, mirroring, vertical placement and local escapes
-remain fixed. Pitch decreases from 4.8 to 4.5 um, with horizontal endpoints
+remain fixed. Fixed local intervals are 3.8/4.2 um, with horizontal endpoints
 following placement. No matching benefit or diffusion sharing is claimed.</p>
 {pictures["single_row_layout.png"]}
 <p>The separate nominal code-zero comparison completed 1440 transients and
 720 qualified 10/5 ps pairs, with 180 points per layout and C/RC mode.
 Conditions were known before qualification. Both layouts and modes are correct
-at all points at the fixed 2 ns primary deadline. At 1 ns, C-only improves
-from 168 to 170 correct points, only at SS / 1.62 V / -40 C / +/-10 mV.
-RC retains 156 correct and the same 24 unresolved points. No previously
+at all points at the fixed 2 ns primary deadline. At 1 ns, C-only retains
+170 correct and 10 unresolved points. RC improves from 156 correct / 24
+unresolved to 158 correct / 22 unresolved, only at SS / 1.62 V / 125 C / +/-10 mV.
+FS unresolved points remain; unresolved latencies stay null. No previously
 correct point is lost; no wrong or unresolved primary point is introduced.</p>
 <div class="table-scroll">{area.table(adopted).to_html(index=False, border=0)}</div>
 {pictures["single_row_comparison.png"]}
-<p>From original control to candidate, mean RC core energy decreases from
-425.490 to 421.045 fJ (-1.0448%, ratio of means), and worst recorded latency
-from 1.835032 to 1.810632 ns. Minimum sampled 2 ns margin increases from
-164.968 to 189.368 ps. Mean C-only energy decreases from 356.712 to
-353.340 fJ (-0.9453%). All 180 energy and latency pairs decrease in each
+<p>From matched adopted a1 to b1, mean RC core energy decreases from
+421.044730 to 412.879469 fJ (-1.939286%, ratio of means; -1.945659%, mean
+per-point change), and worst recorded latency from 1.810632 to 1.760276 ns.
+Minimum observed 2 ns margin increases from 189.368 to 239.724 ps.
+Mean C-only energy decreases from 353.340125 to 346.542852 fJ
+(-1.923720%, ratio of means; -1.932155%, mean per-point change).
+All 180 energy and latency pairs decrease in each
 mode. The decreases are numerically consistent in these decks, but
-approximately 1% energy and 1-25 ps timing changes are not robust physical
+approximately 2% energy and 4-51 ps timing changes are not robust physical
 PPA benefits. The 1% / 20 ps acceptance criteria are not uncertainty bounds;
-maximum actual step discrepancies are 0.017538% energy and 9.755 ps latency.</p>
+maximum actual step discrepancies are 0.022142% energy and 9.631727 ps latency.
+There are 720 finest 5 ps traces and 1440 two-deadline rows, not 1440 finest
+independent experiments. Max energy is FF / 1.95 V / 125 C / -3 mV; worst
+recorded timing is FS / 1.62 V / -40 C / -3 mV, in all four populations.</p>
 {pictures["single_row_worst.png"]}
 <p>The candidate passed 14 native checks on one actual DRC attempt before full45
-qualification. Original-control native proof was reused, not rerun; publication
-added no EDA/SPICE execution. Fresh original-control RC matches the historical
-180-point grid outcomes at 1/2 ns;
-floating-precision differences were measured, not assumed. Historical traces are
-not credited as new executions. C-only has no historical population or independent truth.</p>
+qualification. Both native proofs and extracts were reused, not rerun;
+publication added no EDA/SPICE execution. New local planning safety is at least
+0.20 um; unchanged inherited global M3 margin is 0.16 um. The recovered pre-route
+MAG is distinct from final routed MAG. Fresh adopted-a1 control C/RC readings
+match the archived adopted-a1 population exactly at all six helper deadlines;
+this was measured, not assumed. Historical traces are not credited as new
+executions. C-only is not independent physical ground truth.</p>
 <p><strong>{html.escape(area.NOTICE)}.</strong> This nominal comparison is not the
 calibrated 49-condition width-stress study or a post-layout noise, mismatch,
 trim, silicon, independently qualified PEX or signoff result.
 Core energy excludes drivers, controller and calibration infrastructure.
-<a href="../../layout_single_row/v1/README.md">All versioned native/raw records,
+<a href="../../layout_single_row/v2/README.md">All versioned native/raw records,
 720 numerical receipts, keyed transitions, limiting points and offline remeasurement</a>.
-The original studies below remain preserved history, not candidate data.</p></section>
+The <a href="../../layout_single_row/v1/README.md">prior adopted a1 version</a>
+and original studies below remain preserved history, not candidate data.</p></section>
 {layout_section}
 {pvt_section}
 <section><h2>Reproduction, scope and references</h2>

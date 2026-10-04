@@ -62,8 +62,8 @@ def load_facts() -> dict:
         "pull_request_url": PR_URL,
         "area_optimization": {
             "version": area.VERSION,
-            "control_area_um2": 2207.088,
-            "candidate_area_um2": 2074.254,
+            "control_area_um2": 2074.254,
+            "candidate_area_um2": 1873.3,
             "reduction_percent": adopted["analysis"]["area_reduction_percent"],
             "table": area.table(adopted).to_dict("records"),
             "evidence_manifest_sha256": entry.digest(area.FOLDER / "evidence-sha256.json"),
@@ -194,33 +194,40 @@ IEEE SSCS Code-a-Chip · ISSCC 2027 · MIT License
 [Run in Colab]({facts["colab_url"]}) |
 [Reproduction instructions](REPRODUCIBILITY.md)
 
-## Current area version: single-row-a1
+## Current area version: single-row-local-pitch-b1
 
-The adopted single-row layout reduces the **all-material GDS bbox by 6.01852%**:
-129.6 x 17.03 um (2207.088 um2) to 121.8 x 17.03 um (2074.254 um2).
+Relative to the matched adopted a1 control, b1 reduces the
+**all-material GDS bbox by 9.688013%**:
+121.8 x 17.03 um (2074.254 um2) to 110 x 17.03 um (1873.3 um2).
 Wells, body ties, guards and shields are included; only TEXT is excluded.
 The 27 guarded PCells, device dimensions, flavors, junctions, 15 ports,
 pair order, mirroring, vertical placement and local escapes are unchanged.
-Pitch decreases from 4.8 to 4.5 um; horizontal routing endpoints follow the
-new placements. The candidate passed 14 native checks on one actual DRC attempt.
-Original-control native proof was reused, not rerun.
+The fixed ordinary/ordinary and ordinary/wide intervals are 3.8 and 4.2 um;
+horizontal endpoints follow placements. The prior bounded candidate passed
+14 native checks on one actual DRC attempt. Both native proofs and extracts
+were reused, not rerun, in full45 and publication. New local planning margins
+are at least 0.20 um; inherited unchanged global M3 margin is 0.16 um.
 
 A separate nominal, code-zero comparison of both layouts completed
 **1440 transients and 720 qualified 10/5 ps pairs**, with 180 input/PVT
 points per layout and export mode (C or RC). The conditions were known
 before qualification; this was not a blinded test.
 Both layouts and modes are correct at all 180 points at the fixed 2 ns
-primary deadline. At 1 ns, C-only improves from 168 to 170 correct points
-(SS / 1.62 V / -40 C / +/-10 mV). RC retains 156 correct and the same
-24 unresolved points. No previously correct point is lost.
-Mean RC core energy decreases from 425.490 to 421.045 fJ per cycle
-(-1.0448%, ratio of means); worst recorded latency decreases from 1.835032
-to 1.810632 ns. All matched energy and latency pairs decrease, but changes
-of approximately 1% and 1-25 ps do not establish robust global PPA benefits.
+primary deadline. At 1 ns, C-only retains 170 correct / 10 unresolved points.
+RC improves from 156 correct / 24 unresolved to 158 correct / 22 unresolved,
+only at SS / 1.62 V / 125 C / +/-10 mV; FS unresolved keys remain.
+No previously correct point is lost. Unresolved latency remains null.
+Mean RC core energy decreases from 421.044730 to 412.879469 fJ per cycle
+(-1.939286%, ratio of means; -1.945659%, mean per-point change);
+worst recorded latency decreases from 1.810632 to 1.760276 ns.
+Observed minimum 2 ns RC margin changes from 189.368 to 239.724 ps.
+All 360 primary energy and timing changes decrease, but these finite-grid
+observations do not establish robust physical global PPA benefits.
 The 1% energy / 20 ps numerical criteria are not physical uncertainty bounds.
 
 **Archived RC-deck outcomes; model physical fidelity not yet qualified.**
-[Exact versioned native/raw evidence and offline audit](layout_single_row/v1/README.md).
+[Exact versioned native/raw evidence and offline audit](layout_single_row/v2/README.md).
+The [prior adopted a1 version](layout_single_row/v1/README.md) is retained unchanged.
 The original compact control, its historical 45-PVT study, the calibrated
 49-condition schematic study and failure records remain separate and unchanged.
 No silicon, independently qualified PEX or signoff result is claimed.
@@ -311,7 +318,8 @@ Local CPU execution is supported; Colab's free tier has resource limits.
 - `Comparator_Atlas.ipynb` — circuit, methods, plots and discussion.
 - `comparator_atlas/` — simulation, calibration and analysis code.
 - `results/study/` — measurements, figures, report, poster and abstract.
-- `layout_single_row/v1/` — adopted single-row-a1 geometry, paired qualification and raw traces.
+- `layout_single_row/v2/` — adopted b1 geometry, matched a1/b1 qualification and raw traces.
+- `layout_single_row/v1/` — historical adopted a1 geometry, earlier qualification and raw traces.
 - `layout_compact_repair/` — historical original compact control, extraction and physical evidence.
 - `results/study/postlayout_pvt45/` — historical original-control schematic/RC grid, not candidate data.
 - `REPRODUCIBILITY.md` — tool versions, data map and complete run commands.
@@ -358,15 +366,16 @@ or its [preview image](results/study/poster_preview.png).
 {facts["rc_model_applicability"]["notice"]}
 See [the model-applicability evidence](REPRODUCIBILITY.md#archived-rc-model-applicability).
 
-**Current layout: single-row-a1.** All-material area decreases from 2207.088
-to 2074.254 um2 (6.01852%), retaining 27 guarded MOS devices and 15 ports.
+**Current layout: single-row-local-pitch-b1.** All-material area decreases from
+matched a1's 2074.254 to 1873.3 um2 (9.688013%), retaining 27 guarded MOS devices and 15 ports.
 The paired 45-PVT qualification contains 1440 transients and 720 qualified
 pairs. Both layouts and C/RC modes have 180 correct points at 2 ns.
-At 1 ns, C-only improves from 168 to 170 correct points; RC retains 156
-correct and the same 24 unresolved points. Mean RC core energy changes from
-425.490 to 421.045 fJ; worst latency changes from 1.835032 to 1.810632 ns.
+At 1 ns, C retains 170 correct / 10 unresolved; RC changes from 156/24 to
+158/22 correct/unresolved, only at SS / 1.62 V / 125 C / +/-10 mV.
+Mean RC core energy changes from 421.044730 to 412.879469 fJ;
+worst latency changes from 1.810632 to 1.760276 ns.
 These small changes are not robust global PPA benefits.
-Read the [current version and all raw/native records](layout_single_row/v1/README.md)
+Read the [current version and all raw/native records](layout_single_row/v2/README.md)
 before the explicitly historical studies below. The 1% / 20 ps criteria are
 numerical acceptance bands, not physical uncertainty bounds.
 
@@ -393,7 +402,7 @@ numerical acceptance bands, not physical uncertainty bounds.
    unresolved samples settle: longer deadlines need not improve every
    outcome class. All 1,176 matched pairs and grouped counts are in the JSON.
    Locations and codes do not establish a physical failure cause.
-3. **Compare the adopted layout with the original compact control.**
+3. **Compare the adopted layout (b1) with matched a1, then read the original-control history.**
    The current version's GDS, paired table and two-layout figures are in
    Notebook Section 8. The later original-control sections retain the historical GDS, DRC/LVS
    negative controls and matched schematic/connectivity/C/RC results.
