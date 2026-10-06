@@ -1,0 +1,200 @@
+#! /usr/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/system.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2005_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/va_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2009.vpi";
+S_0x580988be44f0 .scope package, "$unit" "$unit" 2 1;
+ .timescale -9 -12;
+S_0x580988be4680 .scope module, "mask" "mask" 3 10;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rst_n";
+    .port_info 2 /INPUT 1 "enable";
+    .port_info 3 /INPUT 1 "split_valid";
+    .port_info 4 /INPUT 24 "coeff_in";
+    .port_info 5 /INPUT 24 "rand_mask";
+    .port_info 6 /OUTPUT 24 "share0_out";
+    .port_info 7 /OUTPUT 24 "share1_out";
+    .port_info 8 /OUTPUT 1 "split_done";
+    .port_info 9 /INPUT 1 "combine_valid";
+    .port_info 10 /INPUT 24 "share0_in";
+    .port_info 11 /INPUT 24 "share1_in";
+    .port_info 12 /OUTPUT 24 "coeff_out";
+    .port_info 13 /OUTPUT 1 "combine_done";
+P_0x580988c0d000 .param/l "Q" 0 3 12, C4<011111111110000000000001>;
+P_0x580988c0d040 .param/l "WIDTH" 0 3 11, +C4<00000000000000000000000000011000>;
+o0x78483bae6198 .functor BUFZ 1, C4<z>; HiZ drive
+v0x580988c3cb10_0 .net "clk", 0 0, o0x78483bae6198;  0 drivers
+o0x78483bae61c8 .functor BUFZ 24, C4<zzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x580988c3cbf0_0 .net "coeff_in", 23 0, o0x78483bae61c8;  0 drivers
+v0x580988c3ccd0_0 .var "coeff_out", 23 0;
+v0x580988c3cdc0_0 .var "combine_done", 0 0;
+o0x78483bae6258 .functor BUFZ 1, C4<z>; HiZ drive
+v0x580988c3ce80_0 .net "combine_valid", 0 0, o0x78483bae6258;  0 drivers
+o0x78483bae6288 .functor BUFZ 1, C4<z>; HiZ drive
+v0x580988c3cf90_0 .net "enable", 0 0, o0x78483bae6288;  0 drivers
+o0x78483bae62b8 .functor BUFZ 24, C4<zzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x580988c3d050_0 .net "rand_mask", 23 0, o0x78483bae62b8;  0 drivers
+o0x78483bae62e8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x580988c3d130_0 .net "rst_n", 0 0, o0x78483bae62e8;  0 drivers
+o0x78483bae6318 .functor BUFZ 24, C4<zzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x580988c3d1f0_0 .net "share0_in", 23 0, o0x78483bae6318;  0 drivers
+v0x580988c3d2d0_0 .var "share0_out", 23 0;
+o0x78483bae6378 .functor BUFZ 24, C4<zzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x580988c3d3b0_0 .net "share1_in", 23 0, o0x78483bae6378;  0 drivers
+v0x580988c3d490_0 .var "share1_out", 23 0;
+v0x580988c3d570_0 .var "split_done", 0 0;
+o0x78483bae6408 .functor BUFZ 1, C4<z>; HiZ drive
+v0x580988c3d630_0 .net "split_valid", 0 0, o0x78483bae6408;  0 drivers
+E_0x580988c1dcf0/0 .event negedge, v0x580988c3d130_0;
+E_0x580988c1dcf0/1 .event posedge, v0x580988c3cb10_0;
+E_0x580988c1dcf0 .event/or E_0x580988c1dcf0/0, E_0x580988c1dcf0/1;
+S_0x580988c102e0 .scope function.vec4.s24, "mod_add" "mod_add" 3 32, 3 32 0, S_0x580988be4680;
+ .timescale -9 -12;
+v0x580988bf6430_0 .var "a", 23 0;
+v0x580988c3c2d0_0 .var "b", 23 0;
+; Variable mod_add is vec4 return value of scope S_0x580988c102e0
+v0x580988c3c4a0_0 .var "sum", 24 0;
+TD_mask.mod_add ;
+    %load/vec4 v0x580988bf6430_0;
+    %pad/u 25;
+    %load/vec4 v0x580988c3c2d0_0;
+    %pad/u 25;
+    %add;
+    %store/vec4 v0x580988c3c4a0_0, 0, 25;
+    %load/vec4 v0x580988c3c4a0_0;
+    %cmpi/u 8380417, 0, 25;
+    %flag_inv 5; GE is !LT
+    %flag_mov 8, 5;
+    %jmp/0 T_0.0, 8;
+    %load/vec4 v0x580988c3c4a0_0;
+    %subi 8380417, 0, 25;
+    %jmp/1 T_0.1, 8;
+T_0.0 ; End of true expr.
+    %load/vec4 v0x580988c3c4a0_0;
+    %parti/s 24, 0, 2;
+    %pad/u 25;
+    %jmp/0 T_0.1, 8;
+ ; End of false expr.
+    %blend;
+T_0.1;
+    %pad/u 24;
+    %ret/vec4 0, 0, 24;  Assign to mod_add (store_vec4_to_lval)
+    %end;
+S_0x580988c3c580 .scope function.vec4.s24, "mod_sub" "mod_sub" 3 42, 3 42 0, S_0x580988be4680;
+ .timescale -9 -12;
+v0x580988c3c780_0 .var "a", 23 0;
+v0x580988c3c860_0 .var "b", 23 0;
+v0x580988c3c940_0 .var/s "diff", 24 0;
+; Variable mod_sub is vec4 return value of scope S_0x580988c3c580
+TD_mask.mod_sub ;
+    %load/vec4 v0x580988c3c780_0;
+    %pad/u 25;
+    %load/vec4 v0x580988c3c860_0;
+    %pad/u 25;
+    %sub;
+    %store/vec4 v0x580988c3c940_0, 0, 25;
+    %load/vec4 v0x580988c3c940_0;
+    %pad/s 32;
+    %cmpi/s 0, 0, 32;
+    %flag_mov 8, 5;
+    %jmp/0 T_1.2, 8;
+    %load/vec4 v0x580988c3c940_0;
+    %addi 8380417, 0, 25;
+    %jmp/1 T_1.3, 8;
+T_1.2 ; End of true expr.
+    %load/vec4 v0x580988c3c940_0;
+    %parti/s 24, 0, 2;
+    %pad/u 25;
+    %jmp/0 T_1.3, 8;
+ ; End of false expr.
+    %blend;
+T_1.3;
+    %pad/u 24;
+    %ret/vec4 0, 0, 24;  Assign to mod_sub (store_vec4_to_lval)
+    %end;
+    .scope S_0x580988be4680;
+T_2 ;
+    %wait E_0x580988c1dcf0;
+    %load/vec4 v0x580988c3d130_0;
+    %nor/r;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_2.0, 8;
+    %pushi/vec4 0, 0, 24;
+    %assign/vec4 v0x580988c3d2d0_0, 0;
+    %pushi/vec4 0, 0, 24;
+    %assign/vec4 v0x580988c3d490_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x580988c3d570_0, 0;
+    %pushi/vec4 0, 0, 24;
+    %assign/vec4 v0x580988c3ccd0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x580988c3cdc0_0, 0;
+    %jmp T_2.1;
+T_2.0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x580988c3d570_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x580988c3cdc0_0, 0;
+    %load/vec4 v0x580988c3d630_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_2.2, 8;
+    %load/vec4 v0x580988c3cf90_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_2.4, 8;
+    %load/vec4 v0x580988c3cbf0_0;
+    %load/vec4 v0x580988c3d050_0;
+    %pushi/vec4 8380417, 0, 24;
+    %mod;
+    %store/vec4 v0x580988c3c860_0, 0, 24;
+    %store/vec4 v0x580988c3c780_0, 0, 24;
+    %callf/vec4 TD_mask.mod_sub, S_0x580988c3c580;
+    %assign/vec4 v0x580988c3d2d0_0, 0;
+    %load/vec4 v0x580988c3d050_0;
+    %pushi/vec4 8380417, 0, 24;
+    %mod;
+    %assign/vec4 v0x580988c3d490_0, 0;
+    %jmp T_2.5;
+T_2.4 ;
+    %load/vec4 v0x580988c3cbf0_0;
+    %assign/vec4 v0x580988c3d2d0_0, 0;
+    %pushi/vec4 0, 0, 24;
+    %assign/vec4 v0x580988c3d490_0, 0;
+T_2.5 ;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x580988c3d570_0, 0;
+T_2.2 ;
+    %load/vec4 v0x580988c3ce80_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_2.6, 8;
+    %load/vec4 v0x580988c3cf90_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_2.8, 8;
+    %load/vec4 v0x580988c3d1f0_0;
+    %load/vec4 v0x580988c3d3b0_0;
+    %store/vec4 v0x580988c3c2d0_0, 0, 24;
+    %store/vec4 v0x580988bf6430_0, 0, 24;
+    %callf/vec4 TD_mask.mod_add, S_0x580988c102e0;
+    %assign/vec4 v0x580988c3ccd0_0, 0;
+    %jmp T_2.9;
+T_2.8 ;
+    %load/vec4 v0x580988c3d1f0_0;
+    %assign/vec4 v0x580988c3ccd0_0, 0;
+T_2.9 ;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x580988c3cdc0_0, 0;
+T_2.6 ;
+T_2.1 ;
+    %jmp T_2;
+    .thread T_2;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "-";
+    "/home/faisal/vlsi_project/sscs-ose-code-a-chip.github.io/ISSCC27/submitted_notebooks/open_ntt_pqc_accelerator/src/mask.v";
