@@ -14,15 +14,17 @@
 ## Overview
 
 HSKEM is a post-quantum hardware security module that I designed, prototyped on a DE25-Nano FPGA board
-and implemented as a SKY130 digital core with open-source tools. This submission examines the two
+and implemented twice as a SKY130 digital core with open-source tools. This submission examines the two
 datapaths at the heart of ML-KEM-512 — the number-theoretic transform and the Keccak-f[1600]
 permutation — and measures, from RTL to routed layout and up to the complete chip, what each
-architectural decision made for the ASIC actually costs in area, latency, energy and security. From
-those measurements it derives redesigns of the NTT and of the datapath around it: storing two
-coefficients in every word of an OpenRAM macro and then streaming data between a two-lane engine and the
-datapath, with changes that remove no check, cut a decapsulation of the whole co-processor from 99,537 to
-6,856 cycles in RTL simulation, within 3 % of a compact published design, and the FPGA board reproduces
-the count to the cycle.
+architectural decision of the first integration, HSKEM-1, actually costs in area, latency, energy and
+security. Those measurements led to an NTT that stores two coefficients in every word of an OpenRAM macro
+and processes them in two lanes, and to a datapath that streams data to and from it without removing a
+single check. The second integration, HSKEM-2, carries this design: a decapsulation takes 6,856 instead
+of 99,537 cycles, 14.5 times fewer and within 3 % of a compact published design, the FPGA board
+reproduces the count to the cycle, and the signed-off layout, which passes LVS and, once the implant gaps
+inside the OpenRAM macros are closed, the complete DRC deck, spends about 31 µJ per decapsulation instead
+of 0.35 mJ.
 
 The entry point is `HSKEM_PQC_SKY130.ipynb`, which runs locally or in Google Colab. Every table and
 figure in the notebook is computed from the files in this folder, and the quantitative statements in its
@@ -65,11 +67,11 @@ text are guarded by assertions against the data, so the prose cannot silently dr
 | `figures/` | Method overview and block diagrams of HSKEM and of the NTT datapath, the layout renders, in `figures/pdf/` vector copies of the main figures, written by the notebook, and the A0 poster `figures/poster.pdf` (`scripts/make_poster.py`) |
 | `tests/` | Unit tests of the analysis scripts on hand-checked inputs (`python3 -m pytest -q tests`); the notebook runs them in Appendix E.4 |
 | `tb/` | Icarus Verilog testbenches (bit-exact comparison, latency and constant-time checks, zeroize, leakage traces), the read-only decapsulation cycle and state profilers, the packed engine's write-contract checker, the SRAM access counter and the activity window of the chip-level energy measurement |
-| `flow/` | OpenROAD-flow-scripts design configuration, timing constraints and OpenSTA scripts for SKY130 HD, with the macro-placement and macro-pin repair hooks of the macro-store points; `flow/macros/` holds the OpenRAM views of the chip's NTT coefficient SRAM and of the 24 × 128 macro used by the packed engine, and `flow/macros/spice/` the transistor netlists of all eight macro types on the chip |
+| `flow/` | OpenROAD-flow-scripts design configuration, timing constraints and OpenSTA scripts for SKY130 HD, with the macro-placement and macro-pin repair hooks of the macro-store points; `flow/macros/` holds the OpenRAM views of HSKEM-1's NTT coefficient SRAM (16 × 256) and of the 24 × 128 macro used by the packed engine and HSKEM-2, and `flow/macros/spice/` the transistor netlists of HSKEM-2's seven macro types and of the 16 × 256 one |
 | `board/` | Measurement scripts for the DE25-Nano and ESP32: UART console, repeated two-role ML-KEM flow, repeated HSM-invariant scenario |
 | `scripts/` | Simulation, Colab synthesis, place-and-route, gate-level simulation and power, corner analysis, front-end design-rule check, system-level profiling, chip-level energy (logic and SRAM), metric collection, the layout renders (`render_gds.py`, `make_layout_figures.py`, and `layout_zoom_figure.py` for the three-scale view of the released macro-store GDS) and notebook generation |
 | `third_party/` | SKY130 HD functional cell models (Apache-2.0), so that routed netlists can be simulated without downloading the PDK |
-| `results/` | Simulation logs, controller traces, synthesis and post-route metrics with routed netlists of the compared design points, per-block chip statistics, system-level profiles, the full chip's signoff summary, three-corner timing, front-end DRC and energy, TVLA data, and FPGA measurements with SHA-256 checksums |
+| `results/` | Simulation logs, controller traces, synthesis and post-route metrics with routed netlists of the compared design points, per-block chip statistics, system-level profiles, the signoff summary, three-corner timing, front-end DRC and energy of HSKEM-2 (with HSKEM-1's summaries in `results/fullchip/first_chip/`), TVLA data, and FPGA measurements with SHA-256 checksums |
 
 ## Reproducing the physical design
 
@@ -93,8 +95,9 @@ python3 scripts/sram_energy_model.py results/fullchip/sram_macro_spice.json resu
 ```
 
 simulates one macro from `flow/macros/spice/` (20 minutes to two hours per macro) and turns the committed
-per-macro results into the energy of a decapsulation. The logic part, `scripts/fullchip_power.sh`, needs
-the chip's layout database, which is not published (see below).
+per-macro results into the energy of a decapsulation. The logic part, `scripts/fullchip_power.sh`, and
+the chip's corner analysis, `scripts/sta_corners_fullchip.sh`, need the chip's routed database and
+parasitics, which are not published (see below).
 
 Without an ORFS installation, the exact build used here is available as a relocatable archive
 (`orfs-6101364b-sky130hd.tar.xz`, about 130 MB, attached to the release
@@ -106,10 +109,13 @@ threads and with two), the single-port NTT and the one-round-per-clock Keccak co
 
 The routed GDS files of the block-level design points compared in the notebook are attached to the
 release [`hskem-block-layouts`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-block-layouts)
-of the author's fork, with their SHA-256 sums. The full-chip layout itself is not published: its logic contains the demonstration board's
-provisioning test credential (see `hskem_rtl/PUBLICATION_PATCH.diff`). Its signoff results, the SHA-256 of
-the GDS and a cell-level placement map without connectivity are provided in `results/fullchip/`, and a
-downscaled render that shows the floorplan but resolves no cell or wire in `figures/fullchip_layout.jpg`.
+of the author's fork, with their SHA-256 sums. The signed-off full-chip GDS of HSKEM-2 (58 MB compressed) is
+attached to the release [`hskem-fullchip`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-fullchip),
+and `results/fullchip/release_gds_sha256.txt` holds its hashes. Its logic contains a provisioning test
+credential of the demonstration board, which was rotated out of the board before publication (the published
+RTL carries a placeholder instead, see `hskem_rtl/PUBLICATION_PATCH.diff`). The routed database and the
+parasitics stay private; their SHA-256, the signoff results and a cell-level placement map are provided in
+`results/fullchip/`, and a downscaled render of the floorplan in `figures/fullchip_layout.jpg`.
 
 ## Tool versions
 

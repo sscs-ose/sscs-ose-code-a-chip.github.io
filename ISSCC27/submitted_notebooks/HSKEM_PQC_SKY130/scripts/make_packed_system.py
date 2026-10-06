@@ -61,6 +61,11 @@ same tree:
                           encryption uses that RAM (with TRUSTEDGE_BG_PRF);
   TRUSTEDGE_POLY_GUARD    an encryption's inverse transform waits only for the noise polynomial its
                           read adds; a decapsulation keeps the strict wait (with PRF_FINE_HOLD, DEFER_J);
+  TRUSTEDGE_PMAC_RETIME   (chip) stage A of both pipelined products is four dedicated multipliers on the
+                          RAM outputs, registered unreduced (the macros launch their reads on the falling
+                          edge); the shared multipliers keep register operands only (with PIPE_MAC);
+  TRUSTEDGE_SO_PIPE       (chip) the codec compresses and packs each U coefficient one cycle after its load
+                          (with TRUSTEDGE_STREAM_OUT);
   (testbench)             sim/tb/tb_trustedge_spi.sv: the expected cycle counts follow from the number of
                           transforms per operation, the two phase lengths and the elements of each read
                           loop, as the testbench already does for the serial Keccak.
@@ -852,7 +857,24 @@ DEC_DATAPATH = """`ifdef TRUSTEDGE_DEC_STREAM
     wire [6:0]  dk_gidx = 7'd64 + {1'b0, di_j[6:1]};
     wire [15:0] dk_gfull = kyber_zeta(dk_gidx);
     wire [11:0] dk_gamma = di_j[0] ? (12'd3329 - dk_gfull[11:0]) : dk_gfull[11:0];
-    wire [23:0] dk_prod4 = da_p1 * da_g;
+`ifdef TRUSTEDGE_PMAC_RETIME
+    // stage A as in the encryption: four dedicated multipliers on the RAM outputs, products unreduced
+    wire [23:0] rt_d00 = secret0 * ntt_ext_rdata_pair[11:0];
+    wire [23:0] rt_d11 = secret1 * ntt_ext_rdata_pair[23:12];
+    wire [23:0] rt_d01 = secret0 * ntt_ext_rdata_pair[23:12];
+    wire [23:0] rt_d10 = secret1 * ntt_ext_rdata_pair[11:0];
+    reg  [23:0] da_r0, da_r1, da_r2, da_r3;
+    wire [11:0] dq0, dq1, dq2, dq3;
+    barrett_reduce u_rt_dreduce0(.a(da_r0), .r(dq0));
+    barrett_reduce u_rt_dreduce1(.a(da_r1), .r(dq1));
+    barrett_reduce u_rt_dreduce2(.a(da_r2), .r(dq2));
+    barrett_reduce u_rt_dreduce3(.a(da_r3), .r(dq3));
+    wire [11:0] dk_odd = add_mod_q(dq2, dq3);
+`else
+    wire [11:0] dq0 = da_p0, dq1 = da_p1, dq3 = da_p3;
+    wire [11:0] dk_odd = sub_mod_q(sub_mod_q(dq3, dq0), dq1);
+`endif
+    wire [23:0] dk_prod4 = dq1 * da_g;
     wire [11:0] dk_red4;
     barrett_reduce u_dec_reduce4(.a(dk_prod4), .r(dk_red4));
     assign dk_c0 = add_mod_q(db_p0, db_t);
@@ -867,8 +889,11 @@ DEC_DATAPATH = """`ifdef TRUSTEDGE_DEC_STREAM
             di_v <= dk_issue; di_j <= dk_j;
             da_v <= di_v; da_j <= di_j;
             da_p0 <= mul_reduced; da_p1 <= mul2_reduced; da_p3 <= dk_red3; da_g <= dk_gamma;
+`ifdef TRUSTEDGE_PMAC_RETIME
+            da_r0 <= rt_d00; da_r1 <= rt_d11; da_r2 <= rt_d01; da_r3 <= rt_d10;
+`endif
             db_v <= da_v; db_j <= da_j;
-            db_p0 <= da_p0; db_t <= dk_red4; db_c1 <= sub_mod_q(sub_mod_q(da_p3, da_p0), da_p1);
+            db_p0 <= dq0; db_t <= dk_red4; db_c1 <= dk_odd;
         end
     end
 `endif
@@ -892,7 +917,9 @@ def dec_stream(s: str) -> str:
             "    wire [11:0] base1 = sub_mod_q(sub_mod_q(p3_q, p0_q), p1_q);\n" + DEC_DATAPATH)
     # the two existing multipliers take the first two products of stage A
     s = rep(s, "            ST_MUL2: begin mul_lhs=p1_q; mul_rhs=gamma; end\n", """`ifdef TRUSTEDGE_DEC_STREAM
+`ifndef TRUSTEDGE_PMAC_RETIME
             ST_MUL2: begin mul_lhs=secret0; mul_rhs=ntt_ext_rdata_pair[11:0]; end
+`endif
 `else
             ST_MUL2: begin mul_lhs=p1_q; mul_rhs=gamma; end
 `endif
@@ -900,7 +927,9 @@ def dec_stream(s: str) -> str:
     s = rep(s, "        else if (state == ST_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end\n",
             """        else if (state == ST_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end
 `ifdef TRUSTEDGE_DEC_STREAM
+`ifndef TRUSTEDGE_PMAC_RETIME
         else if (state == ST_MUL2) begin mul2_lhs = secret1; mul2_rhs = ntt_ext_rdata_pair[23:12]; end
+`endif
 `endif
 """)
     # product RAM: one write port (the pipeline), read at stage B for the second polynomial
@@ -1588,8 +1617,28 @@ PMAC_DATAPATH = """`ifdef TRUSTEDGE_PIPE_MAC
     wire [6:0]  pm_gidx = 7'd64 + {1'b0, mi_p[6:1]};
     wire [15:0] pm_gfull = kyber_zeta(pm_gidx);
     wire [11:0] pm_gamma = mi_p[0] ? (12'd3329 - pm_gfull[11:0]) : pm_gfull[11:0];
+`ifdef TRUSTEDGE_PMAC_RETIME
+    // stage A is four dedicated multipliers on the RAM outputs: a macro read, which arrives half a cycle
+    // after the edge, reaches the unreduced products through one multiplier and nothing else, and stage B,
+    // which starts at a register, reduces them. The odd product is a0 b1 + a1 b0, so no adder precedes a
+    // multiplier, and the shared multipliers keep register operands only.
+    wire [23:0] rt_p00 = key_operand_a0 * noise_even_q;
+    wire [23:0] rt_p11 = key_operand_a1 * noise_odd_q;
+    wire [23:0] rt_p01 = key_operand_a0 * noise_odd_q;
+    wire [23:0] rt_p10 = key_operand_a1 * noise_even_q;
+    reg  [23:0] ma_r0, ma_r1, ma_r2, ma_r3;
+    wire [11:0] rp0, rp1, rp2, rp3;
+    barrett_reduce u_rt_reduce0(.a(ma_r0), .r(rp0));
+    barrett_reduce u_rt_reduce1(.a(ma_r1), .r(rp1));
+    barrett_reduce u_rt_reduce2(.a(ma_r2), .r(rp2));
+    barrett_reduce u_rt_reduce3(.a(ma_r3), .r(rp3));
+    wire [11:0] pm_odd = add_mod_q(rp2, rp3);
+`else
+    wire [11:0] rp0 = ma_p0, rp1 = ma_p1, rp3 = ma_p3;
+    wire [11:0] pm_odd = sub_mod_q(sub_mod_q(rp3, rp0), rp1);
+`endif
     // stage B
-    wire [23:0] pm_prod4 = ma_p1 * ma_g;
+    wire [23:0] pm_prod4 = rp1 * ma_g;
     wire [11:0] pm_red4;
     barrett_reduce u_reduce4(.a(pm_prod4), .r(pm_red4));
     // stage R
@@ -1605,8 +1654,11 @@ PMAC_DATAPATH = """`ifdef TRUSTEDGE_PIPE_MAC
             mi_v <= mk_issuing; mi_c <= mk_t[0]; mi_p <= mk_t[7:1];
             ma_v <= mi_v; ma_c <= mi_c; ma_p <= mi_p;
             ma_p0 <= mul_reduced; ma_p1 <= mul2_reduced; ma_p3 <= pm_red3; ma_g <= pm_gamma;
+`ifdef TRUSTEDGE_PMAC_RETIME
+            ma_r0 <= rt_p00; ma_r1 <= rt_p11; ma_r2 <= rt_p01; ma_r3 <= rt_p10;
+`endif
             mb_v <= ma_v; mb_c <= ma_c; mb_p <= ma_p;
-            mb_p0 <= ma_p0; mb_t <= pm_red4; mb_c1 <= sub_mod_q(sub_mod_q(ma_p3, ma_p0), ma_p1);
+            mb_p0 <= rp0; mb_t <= pm_red4; mb_c1 <= pm_odd;
             mr_v <= mb_v && mb_c;
             mr_p <= mb_p;
             if (mb_v && !mb_c) begin macc0 <= pm_c0; macc1 <= mb_c1; end
@@ -1776,7 +1828,9 @@ def pipe_mac(s: str) -> str:
 """)
     # the existing two multipliers take the first two products of stage A
     s = rep(s, "            S_MUL2: begin mul_lhs=p1_q; mul_rhs=gamma_q; end\n", """`ifdef TRUSTEDGE_PIPE_MAC
+`ifndef TRUSTEDGE_PMAC_RETIME
             S_MUL2: begin mul_lhs=key_operand_a0; mul_rhs=noise_even_q; end   // bound key only
+`endif
 `else
             S_MUL2: begin mul_lhs=p1_q; mul_rhs=gamma_q; end
 `endif
@@ -1784,7 +1838,9 @@ def pipe_mac(s: str) -> str:
     s = rep(s, "        else if (state == S_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end\n",
             """        else if (state == S_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end
 `ifdef TRUSTEDGE_PIPE_MAC
+`ifndef TRUSTEDGE_PMAC_RETIME
         else if (state == S_MUL2) begin mul2_lhs = key_operand_a1; mul2_rhs = noise_odd_q; end   // bound key only
+`endif
 `endif
 """)
     s = rep(s, "    wire [11:0] base1 = sub_mod_q(sub_mod_q(p3_q, p0_q), p1_q);\n",
@@ -2314,7 +2370,84 @@ def edit_codec(s: str) -> str:
         s = rep(s, "                " + a + "\n",
                 "`ifdef TRUSTEDGE_STREAM_IO\n                " + b + "      // one-cycle read latency\n"
                 "`else\n                " + a + "\n`endif\n")
-    return seg_check(pipe_check(fused_cmp_codec(fast_check(fold_readback(stream_out(s))))))
+    return so_pipe(seg_check(pipe_check(fused_cmp_codec(fast_check(fold_readback(stream_out(s)))))))
+
+
+def so_pipe(s: str) -> str:
+    """TRUSTEDGE_SO_PIPE (with TRUSTEDGE_STREAM_OUT): a U coefficient is registered in its load cycle and
+    compressed and packed in the next, so that the RAM reads behind it (which reach the codec half a cycle
+    after the edge on the chip) no longer pass through Compress_10. The last coefficient of u0 and of u1 is
+    followed by the next polynomial's computation, so the cycle counts do not change; the two flush states
+    also wait for a pending coefficient."""
+    s = rep(s, "    reg [9:0]  so_addr;                      // next ciphertext byte\n",
+            """    reg [9:0]  so_addr;                      // next ciphertext byte
+`ifdef TRUSTEDGE_SO_PIPE
+    reg        so_lv;                        // a U coefficient waits one cycle before Compress_10
+    reg [11:0] so_lc;
+    wire       so_idle = (so_left == 3'd0) && !so_vvalid && !so_lv;
+`else
+    wire       so_idle = (so_left == 3'd0) && !so_vvalid;
+`endif
+""")
+    s = rep(s, "            so_vbyte <= 8'd0; so_vvalid <= 1'b0; so_addr <= 10'd0;\n",
+            """            so_vbyte <= 8'd0; so_vvalid <= 1'b0; so_addr <= 10'd0;
+`ifdef TRUSTEDGE_SO_PIPE
+            so_lv <= 1'b0; so_lc <= 12'd0;
+`endif
+""")
+    s = rep(s, """            end else if (so_vvalid) begin
+                so_vvalid <= 1'b0; so_addr <= so_addr + 10'd1;
+            end
+""", """            end else if (so_vvalid) begin
+                so_vvalid <= 1'b0; so_addr <= so_addr + 10'd1;
+            end
+`ifdef TRUSTEDGE_SO_PIPE
+            so_lv <= 1'b0;
+            if (so_lv) begin                         // the U coefficient loaded in the previous cycle
+                if (so_sub == 3'd3) begin
+                    so_out <= so_pack | ({30'd0, compress10(so_lc)} << 30);
+                    so_left <= 3'd5; so_pack <= 40'd0; so_sub <= 3'd0;
+                end else begin
+                    so_pack <= so_pack | ({30'd0, compress10(so_lc)} << (so_sub * 10));
+                    so_sub <= so_sub + 3'd1;
+                end
+            end
+`endif
+""")
+    s = rep(s, "                so_pack <= 40'd0; so_sub <= 3'd0; so_left <= 3'd0; so_vvalid <= 1'b0; so_addr <= 10'd0;\n",
+            """                so_pack <= 40'd0; so_sub <= 3'd0; so_left <= 3'd0; so_vvalid <= 1'b0; so_addr <= 10'd0;
+`ifdef TRUSTEDGE_SO_PIPE
+                so_lv <= 1'b0;
+`endif
+""")
+    s = rep(s, """                    if (load_index < 10'd512) begin
+                        if (so_sub == 3'd3) begin
+                            so_out <= so_pack | ({30'd0, compress10(load_coeff)} << 30);
+                            so_left <= 3'd5; so_pack <= 40'd0; so_sub <= 3'd0;
+                        end else begin
+                            so_pack <= so_pack | ({30'd0, compress10(load_coeff)} << (so_sub * 10));
+                            so_sub <= so_sub + 3'd1;
+                        end
+                    end else if (so_sub == 3'd1) begin
+""", """                    if (load_index < 10'd512) begin
+`ifdef TRUSTEDGE_SO_PIPE
+                        so_lv <= 1'b1; so_lc <= load_coeff;
+`else
+                        if (so_sub == 3'd3) begin
+                            so_out <= so_pack | ({30'd0, compress10(load_coeff)} << 30);
+                            so_left <= 3'd5; so_pack <= 40'd0; so_sub <= 3'd0;
+                        end else begin
+                            so_pack <= so_pack | ({30'd0, compress10(load_coeff)} << (so_sub * 10));
+                            so_sub <= so_sub + 3'd1;
+                        end
+`endif
+                    end else if (so_sub == 3'd1) begin
+""")
+    s = rep(s, "                ST_S_FLUSH: if ((so_left == 3'd0) && !so_vvalid) begin\n",
+            "                ST_S_FLUSH: if (so_idle) begin\n")
+    s = rep(s, "                ST_SEG_FLUSH: if ((so_left == 3'd0) && !so_vvalid) begin",
+            "                ST_SEG_FLUSH: if (so_idle) begin")
+    return s
 
 
 def seg_check(s: str) -> str:

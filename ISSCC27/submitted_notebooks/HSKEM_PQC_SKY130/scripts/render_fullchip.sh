@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Render the HSKEM full-chip Run17 GDS (not part of the Colab path: 60 MB input).
+# Render the signed-off HSKEM full-chip GDS (not part of the Colab path: the layout is not published).
+# usage: FULLCHIP_GDS=<6_final.gds of the chip run> scripts/render_fullchip.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PKG="$ROOT/../report/orfs_a3_p82/signoff/a3_r16_v14_run17_evidence_r1/final_design"
-TMP=$(mktemp -d); gunzip -c "$PKG/6_final.gds.gz" > "$TMP/chip.gds"
-klayout -zz -r "$ROOT/scripts/render_gds.py" -rd gds="$TMP/chip.gds" \
+GDS="${FULLCHIP_GDS:-$ROOT/../report/orfs_chip_v2_r2_a3grt/final_from_h1r/results/6_final.gds}"
+klayout -zz -r "$ROOT/scripts/render_gds.py" -rd gds="$GDS" \
         -rd png="$ROOT/results/fullchip/fullchip_layout.png" -rd px=2400
-rm -rf "$TMP"

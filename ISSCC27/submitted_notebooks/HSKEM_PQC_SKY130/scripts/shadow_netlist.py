@@ -11,7 +11,11 @@ script instead keeps every combinational cell of the routed netlist and replaces
 Simulated next to the RTL testbench, the combinational nets then switch exactly as the routed logic
 would without glitches, and a VCD of them gives OpenSTA a measured activity for every net.
 
-usage: python3 shadow_netlist.py <6_final.v> <out.v> [<names to skip, one per line>]
+Registers the RTL simulation cannot name (listed in the skip file) are tied to 0, or with the mode "self"
+simulated in the shadow itself as reset flip-flops on the RTL clock (chip v2: the NTT engine's
+multi-dimensional register arrays, which synthesis flattened to one index).
+
+usage: python3 shadow_netlist.py <6_final.v> <out.v> [<names to skip, one per line>] [tie|self]
 SPDX-License-Identifier: Apache-2.0
 """
 from __future__ import annotations
@@ -35,8 +39,11 @@ def conn(body: str, pin: str) -> str | None:
     return m[1].strip() if m else None
 
 
-def main(src: str, dst: str, skip_file: str | None = None) -> None:
+def main(src: str, dst: str, skip_file: str | None = None, mode: str = "tie") -> None:
     skip = set(open(skip_file).read().split()) if skip_file else set()
+    # mode "self": skipped dfrtp registers are simulated in the shadow instead of being tied to 0
+    self_sim = mode == "self"
+    n_self = 0
     text = open(src).read()
     m = re.search(r"module\s+trustedge_asic_core\s*\(.*?\);(.*)endmodule", text, re.S)
     out = ["// shadow of the routed trustedge_asic_core (scripts/shadow_netlist.py); simulation only",
@@ -71,11 +78,22 @@ def main(src: str, dst: str, skip_file: str | None = None) -> None:
             if q is None:
                 continue
             base = re.sub(r"\$_\w+$", "", bare)
+            d, rb = conn(body, "D"), conn(body, "RESET_B")
             if base.startswith("u_reset_sync."):
                 ref = f"{RTL}.rst_n"
             elif base.startswith("u_common.") and base not in skip:
                 ref = f"{RTL}.{base[len('u_common.'):]}"
                 n_ref += 1
+            elif base in skip and self_sim and cell.startswith("sky130_fd_sc_hd__dfrtp") and d and rb:
+                # a register the RTL simulation cannot name (chip v2: the NTT engine's bank[][][] and
+                # valid[][] arrays, flattened to one index by synthesis): the shadow keeps it as a real
+                # register on the RTL clock with its own reset, fed by the routed logic's D input
+                n_self += 1
+                r = f"shadow_ff_{n_self}"
+                out.append(f"reg {r} ; always @(posedge tb_trustedge_spi.clk or negedge {rb}) "
+                           f"if (!{rb}) {r} <= 1'b0 ; else {r} <= {d} ;")
+                out.append(f"assign {q} = {r} ;")
+                continue
             else:
                 ref = "1'b0"
             out.append(f"assign {q} = {ref} ;")
@@ -84,7 +102,9 @@ def main(src: str, dst: str, skip_file: str | None = None) -> None:
             n_mac += 1
             dout = conn(body, "dout0")
             nets = [x.strip() for x in dout.strip("{}").split(",")] if dout and dout.startswith("{") else []
-            wrapper = re.sub(r"\.g_\w+\.u_macro$", "", bare)[len("u_common."):]
+            # the wrapper owns the macro directly (chip v2's NTT store: u_shared_ntt.u_sram.u_macro) or
+            # through a generate block (u_..._sram.g_12x256.u_macro)
+            wrapper = re.sub(r"(\.g_\w+)?\.u_macro$", "", bare)[len("u_common."):]
             w = WIDTH[re.search(r"1rw_(\d+x\d+)", cell)[1]]
             for k, net in enumerate(reversed(nets)):          # concatenation lists the MSB first
                 if net.startswith(("1'", "_unconnected")) or not net:
@@ -95,8 +115,9 @@ def main(src: str, dst: str, skip_file: str | None = None) -> None:
         out.append(re.sub(r"^sky130_fd_sc_hd__(and2_1|inv_1)\b", r"shadow_sky130_\1", s) + " ;")
     out.append("endmodule")
     open(dst, "w").write("\n".join(out) + "\n")
-    print(f"flip-flops {n_ff}, referenced {n_ref}, macros {n_mac}, statements {len(out)}")
+    print(f"flip-flops {n_ff}, referenced {n_ref}, simulated in the shadow {n_self}, macros {n_mac}, "
+          f"statements {len(out)}")
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
+    main(*sys.argv[1:5])

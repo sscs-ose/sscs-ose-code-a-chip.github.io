@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import placement_map as pm  # noqa: E402
 import plotstyle as ps      # noqa: E402
 
-RUNS = [("ntt_sp_20ns", "(a) NTT, original single-port"), ("ntt_opt_pipe_w12_20ns", "(b) NTT, redesign (Section 7)"),
+RUNS = [("ntt_sp_20ns", "(a) NTT, original single-port"), ("ntt_opt_pipe_w12_20ns", "(b) NTT, iteration 1 (Section 7)"),
         ("keccak_r1_20ns", "(c) Keccak, one round per clock"), ("keccak_s7_20ns", "(d) Keccak, row-serialized")]
 
 

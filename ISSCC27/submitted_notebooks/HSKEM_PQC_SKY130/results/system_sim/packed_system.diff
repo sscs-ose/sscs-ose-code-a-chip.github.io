@@ -397,7 +397,7 @@
  `endif
  
      function automatic [11:0] add_mod_q;
-@@ -808,8 +956,16 @@
+@@ -808,8 +956,18 @@
          mul_lhs=12'd0; mul_rhs=12'd0;
          case(state)
              ST_MUL0: begin mul_lhs=s0_q; mul_rhs=u0_q; end
@@ -407,14 +407,16 @@
              ST_MUL1: begin mul_lhs=s1_q; mul_rhs=u1_q; end
 +`endif
 +`ifdef TRUSTEDGE_DEC_STREAM
++`ifndef TRUSTEDGE_PMAC_RETIME
 +            ST_MUL2: begin mul_lhs=secret0; mul_rhs=ntt_ext_rdata_pair[11:0]; end
++`endif
 +`else
              ST_MUL2: begin mul_lhs=p1_q; mul_rhs=gamma; end
 +`endif
              ST_MUL3: begin mul_lhs=s0_q; mul_rhs=u1_q; end
              ST_MUL4: begin mul_lhs=s1_q; mul_rhs=u0_q; end
              default: begin mul_lhs=12'd0; mul_rhs=12'd0; end
-@@ -819,12 +975,72 @@
+@@ -819,12 +977,94 @@
      wire [11:0] mul_reduced;
      barrett_reduce u_dec_reduce(.a(mul_product),.r(mul_reduced));
      wire [11:0] base0=add_mod_q(p0_q,p2_q);
@@ -427,7 +429,9 @@
 +        if (state == ST_MUL0) begin mul2_lhs = s1_q; mul2_rhs = u1_q; end
 +        else if (state == ST_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end
 +`ifdef TRUSTEDGE_DEC_STREAM
++`ifndef TRUSTEDGE_PMAC_RETIME
 +        else if (state == ST_MUL2) begin mul2_lhs = secret1; mul2_rhs = ntt_ext_rdata_pair[23:12]; end
++`endif
 +`endif
 +    end
 +    wire [23:0] mul2_product = mul2_lhs * mul2_rhs;
@@ -447,7 +451,24 @@
 +    wire [6:0]  dk_gidx = 7'd64 + {1'b0, di_j[6:1]};
 +    wire [15:0] dk_gfull = kyber_zeta(dk_gidx);
 +    wire [11:0] dk_gamma = di_j[0] ? (12'd3329 - dk_gfull[11:0]) : dk_gfull[11:0];
-+    wire [23:0] dk_prod4 = da_p1 * da_g;
++`ifdef TRUSTEDGE_PMAC_RETIME
++    // stage A as in the encryption: four dedicated multipliers on the RAM outputs, products unreduced
++    wire [23:0] rt_d00 = secret0 * ntt_ext_rdata_pair[11:0];
++    wire [23:0] rt_d11 = secret1 * ntt_ext_rdata_pair[23:12];
++    wire [23:0] rt_d01 = secret0 * ntt_ext_rdata_pair[23:12];
++    wire [23:0] rt_d10 = secret1 * ntt_ext_rdata_pair[11:0];
++    reg  [23:0] da_r0, da_r1, da_r2, da_r3;
++    wire [11:0] dq0, dq1, dq2, dq3;
++    barrett_reduce u_rt_dreduce0(.a(da_r0), .r(dq0));
++    barrett_reduce u_rt_dreduce1(.a(da_r1), .r(dq1));
++    barrett_reduce u_rt_dreduce2(.a(da_r2), .r(dq2));
++    barrett_reduce u_rt_dreduce3(.a(da_r3), .r(dq3));
++    wire [11:0] dk_odd = add_mod_q(dq2, dq3);
++`else
++    wire [11:0] dq0 = da_p0, dq1 = da_p1, dq3 = da_p3;
++    wire [11:0] dk_odd = sub_mod_q(sub_mod_q(dq3, dq0), dq1);
++`endif
++    wire [23:0] dk_prod4 = dq1 * da_g;
 +    wire [11:0] dk_red4;
 +    barrett_reduce u_dec_reduce4(.a(dk_prod4), .r(dk_red4));
 +    assign dk_c0 = add_mod_q(db_p0, db_t);
@@ -462,8 +483,11 @@
 +            di_v <= dk_issue; di_j <= dk_j;
 +            da_v <= di_v; da_j <= di_j;
 +            da_p0 <= mul_reduced; da_p1 <= mul2_reduced; da_p3 <= dk_red3; da_g <= dk_gamma;
++`ifdef TRUSTEDGE_PMAC_RETIME
++            da_r0 <= rt_d00; da_r1 <= rt_d11; da_r2 <= rt_d01; da_r3 <= rt_d10;
++`endif
 +            db_v <= da_v; db_j <= da_j;
-+            db_p0 <= da_p0; db_t <= dk_red4; db_c1 <= sub_mod_q(sub_mod_q(da_p3, da_p0), da_p1);
++            db_p0 <= dq0; db_t <= dk_red4; db_c1 <= dk_odd;
 +        end
 +    end
 +`endif
@@ -487,7 +511,7 @@
      wire product_pair_write = (state == ST_ACCUM) && !poly_index;
      te_sram_1rw #(
          .WIDTH(24), .DEPTH(128), .ADDR_WIDTH(7)
-@@ -832,6 +1048,7 @@
+@@ -832,6 +1072,7 @@
          .clk(clk), .we(product_pair_write),
          .addr(pair_index), .wdata({base1, base0}), .rdata(product_pair_q)
      );
@@ -495,7 +519,7 @@
  `endif
      wire [12:0] subtract_wide = {1'b0,decoded_ext_data} + Q13 -
                                  {1'b0,ntt_ext_rdata[11:0]};
-@@ -850,68 +1067,120 @@
+@@ -850,68 +1091,120 @@
                                (ek_byte_sub == 2'd1) ?
                                ekpke_ext_pair_data[15:8] :
                                ekpke_ext_pair_data[23:16];
@@ -659,7 +683,7 @@
                            (state==ST_WRITE0)?{4'd0,result0_q}:
                            {4'd0,result1_q};
  
-@@ -930,9 +1199,9 @@
+@@ -930,9 +1223,9 @@
              reencrypt_message <= 256'd0;
              reencrypt_coins <= 256'd0;
              dkpke_ext_pair_addr <= 8'd0;
@@ -672,7 +696,7 @@
              decoded_ext_addr <= 10'd0;
              poly_index <= 1'b0;
              coeff_index <= 8'd0;
-@@ -952,6 +1221,10 @@
+@@ -952,6 +1245,10 @@
              encaps_mode_q<=1'b0;
              general_runtime_mode_q<=1'b0;
              state <= ST_IDLE;
@@ -683,7 +707,7 @@
          end else begin
              done <= 1'b0;
              reencrypt_start <= 1'b0;
-@@ -980,7 +1253,12 @@
+@@ -980,7 +1277,12 @@
                          compare_index<=10'd0;compare_diff_q<=8'd0;
                          ciphertext_match_q<=1'b0;reencrypt_pass_q<=1'b0;
                          reencrypt_active<=1'b0;
@@ -696,7 +720,7 @@
                      end else begin
                          state<=ST_FAIL_DONE;
                      end
-@@ -1007,6 +1285,13 @@
+@@ -1007,6 +1309,13 @@
                          compare_index<=10'd0;compare_diff_q<=8'd0;
                          ciphertext_match_q<=1'b0;reencrypt_pass_q<=1'b0;
                          reencrypt_active<=1'b0;
@@ -710,7 +734,7 @@
                          state<=ST_U_REQ;
                      end else if (!ciphertext_ready) begin
                          // Compatibility KAT for historical HSM regression.
-@@ -1020,50 +1305,144 @@
+@@ -1020,50 +1329,144 @@
                          state <= ST_FAIL_DONE;
                      end
                  end
@@ -856,7 +880,7 @@
                  ST_MSG_WAIT: state<=ST_MSG_CAP;
                  ST_MSG_CAP: begin
                      coeff_digest_q<=coeff_digest_next;
-@@ -1075,83 +1454,29 @@
+@@ -1075,83 +1478,29 @@
                          message_byte_q<=0;
                      end
                      if(coeff_index==8'd255) begin
@@ -955,7 +979,7 @@
                  ST_G_START: begin
                      sponge_feed_index<=10'd0;sponge_output_index<=7'd0;
                      sponge_output_complete<=1'b0;kbar_q<=256'd0;coins_q<=256'd0;
-@@ -1175,64 +1500,87 @@
+@@ -1175,64 +1524,87 @@
                          else sponge_output_index<=sponge_output_index+1'b1;
                      end
                      if(sponge_ext_done&&sponge_output_complete)
@@ -1074,7 +1098,7 @@
                  end
                  ST_CMP_WAIT: state<=ST_CMP_CHECK;
                  ST_CMP_CHECK: begin
-@@ -1245,9 +1593,19 @@
+@@ -1245,9 +1617,19 @@
                          state<=ST_HASH_DONE;
                      end else begin
                          compare_index<=compare_index+1'b1;
@@ -1094,7 +1118,7 @@
                  ST_HASH_DONE: begin
                      busy<=0;done<=1;
                      // ML-KEM Decaps does not fail outward when the
-@@ -1289,6 +1647,137 @@
+@@ -1289,6 +1671,137 @@
                      corrupt_shared_digest<=0;state<=ST_IDLE;end
                  default: state <= ST_IDLE;
              endcase
@@ -1505,7 +1529,7 @@
      // ekPKE serializes a pair as c0[7:0], c0[11:8]|c1[3:0], c1[11:4].
      // Do not treat its low 12 stored bits as c0: that would splice in the
      // low nibble of c1 and silently corrupt every t-hat multiply.
-@@ -382,8 +530,16 @@
+@@ -382,8 +530,18 @@
          mul_lhs=12'd0; mul_rhs=12'd0;
          case(state)
              S_MUL0: begin mul_lhs=operand_a0_q; mul_rhs=operand_b0_q; end
@@ -1515,14 +1539,16 @@
              S_MUL1: begin mul_lhs=operand_a1_q; mul_rhs=operand_b1_q; end
 +`endif
 +`ifdef TRUSTEDGE_PIPE_MAC
++`ifndef TRUSTEDGE_PMAC_RETIME
 +            S_MUL2: begin mul_lhs=key_operand_a0; mul_rhs=noise_even_q; end   // bound key only
++`endif
 +`else
              S_MUL2: begin mul_lhs=p1_q; mul_rhs=gamma_q; end
 +`endif
              S_MUL3: begin mul_lhs=operand_a0_q; mul_rhs=operand_b1_q; end
              S_MUL4: begin mul_lhs=operand_a1_q; mul_rhs=operand_b0_q; end
              default: begin mul_lhs=12'd0; mul_rhs=12'd0; end
-@@ -393,25 +549,136 @@
+@@ -393,25 +551,161 @@
      wire [11:0] mul_reduced;
      barrett_reduce u_reduce(.a(mul_product),.r(mul_reduced));
      wire [11:0] base0=add_mod_q(p0_q,p2_q);
@@ -1535,7 +1561,9 @@
 +        if (state == S_MUL0) begin mul2_lhs = operand_a1_q; mul2_rhs = operand_b1_q; end
 +        else if (state == S_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end
 +`ifdef TRUSTEDGE_PIPE_MAC
++`ifndef TRUSTEDGE_PMAC_RETIME
 +        else if (state == S_MUL2) begin mul2_lhs = key_operand_a1; mul2_rhs = noise_odd_q; end   // bound key only
++`endif
 +`endif
 +    end
 +    wire [23:0] mul2_product = mul2_lhs * mul2_rhs;
@@ -1559,8 +1587,28 @@
 +    wire [6:0]  pm_gidx = 7'd64 + {1'b0, mi_p[6:1]};
 +    wire [15:0] pm_gfull = kyber_zeta(pm_gidx);
 +    wire [11:0] pm_gamma = mi_p[0] ? (12'd3329 - pm_gfull[11:0]) : pm_gfull[11:0];
++`ifdef TRUSTEDGE_PMAC_RETIME
++    // stage A is four dedicated multipliers on the RAM outputs: a macro read, which arrives half a cycle
++    // after the edge, reaches the unreduced products through one multiplier and nothing else, and stage B,
++    // which starts at a register, reduces them. The odd product is a0 b1 + a1 b0, so no adder precedes a
++    // multiplier, and the shared multipliers keep register operands only.
++    wire [23:0] rt_p00 = key_operand_a0 * noise_even_q;
++    wire [23:0] rt_p11 = key_operand_a1 * noise_odd_q;
++    wire [23:0] rt_p01 = key_operand_a0 * noise_odd_q;
++    wire [23:0] rt_p10 = key_operand_a1 * noise_even_q;
++    reg  [23:0] ma_r0, ma_r1, ma_r2, ma_r3;
++    wire [11:0] rp0, rp1, rp2, rp3;
++    barrett_reduce u_rt_reduce0(.a(ma_r0), .r(rp0));
++    barrett_reduce u_rt_reduce1(.a(ma_r1), .r(rp1));
++    barrett_reduce u_rt_reduce2(.a(ma_r2), .r(rp2));
++    barrett_reduce u_rt_reduce3(.a(ma_r3), .r(rp3));
++    wire [11:0] pm_odd = add_mod_q(rp2, rp3);
++`else
++    wire [11:0] rp0 = ma_p0, rp1 = ma_p1, rp3 = ma_p3;
++    wire [11:0] pm_odd = sub_mod_q(sub_mod_q(rp3, rp0), rp1);
++`endif
 +    // stage B
-+    wire [23:0] pm_prod4 = ma_p1 * ma_g;
++    wire [23:0] pm_prod4 = rp1 * ma_g;
 +    wire [11:0] pm_red4;
 +    barrett_reduce u_reduce4(.a(pm_prod4), .r(pm_red4));
 +    // stage R
@@ -1576,8 +1624,11 @@
 +            mi_v <= mk_issuing; mi_c <= mk_t[0]; mi_p <= mk_t[7:1];
 +            ma_v <= mi_v; ma_c <= mi_c; ma_p <= mi_p;
 +            ma_p0 <= mul_reduced; ma_p1 <= mul2_reduced; ma_p3 <= pm_red3; ma_g <= pm_gamma;
++`ifdef TRUSTEDGE_PMAC_RETIME
++            ma_r0 <= rt_p00; ma_r1 <= rt_p11; ma_r2 <= rt_p01; ma_r3 <= rt_p10;
++`endif
 +            mb_v <= ma_v; mb_c <= ma_c; mb_p <= ma_p;
-+            mb_p0 <= ma_p0; mb_t <= pm_red4; mb_c1 <= sub_mod_q(sub_mod_q(ma_p3, ma_p0), ma_p1);
++            mb_p0 <= rp0; mb_t <= pm_red4; mb_c1 <= pm_odd;
 +            mr_v <= mb_v && mb_c;
 +            mr_p <= mb_p;
 +            if (mb_v && !mb_c) begin macc0 <= pm_c0; macc1 <= mb_c1; end
@@ -1659,7 +1710,7 @@
          .sponge_ext_start(sponge_ext_start),.sponge_ext_mode(sponge_ext_mode),
          .sponge_ext_message_len(sponge_ext_message_len),
          .sponge_ext_output_len(sponge_ext_output_len),
-@@ -425,6 +692,17 @@
+@@ -425,6 +719,17 @@
          .sponge_ext_busy(sponge_ext_busy),.sponge_ext_done(sponge_ext_done),
          .sponge_ext_error(sponge_ext_error));
  
@@ -1677,7 +1728,7 @@
      wire y_phase = (state==S_Y_FETCH)||(state==S_Y_WAIT)||
                     (state==S_Y_WRITE0)||(state==S_Y_WRITE1)||
                     (state==S_Y_NTT_START)||(state==S_Y_NTT_WAIT)||
-@@ -432,22 +710,62 @@
+@@ -432,22 +737,62 @@
                     (state==S_Y_READ_CAP)||(state==S_Y_NEXT);
      always @* begin
          if (y_phase)
@@ -1740,7 +1791,7 @@
              if (y_read_index[0])
                  noise_odd_ram[{2'd0,y_poly,y_read_index[7:1]}] <= ntt_rdata[11:0];
              else
-@@ -458,10 +776,25 @@
+@@ -458,10 +803,25 @@
      // PRF fill, Y-NTT writeback and arithmetic reads are disjoint phases.
      // Write priority therefore preserves the existing synchronous latency
      // while replacing each parity bank with one physical 1RW port.
@@ -1766,7 +1817,7 @@
      wire [9:0] noise_even_waddr = prf_coeff_valid ?
          prf_coeff_addr[10:1] : {2'd0, y_poly, y_read_index[7:1]};
      wire [9:0] noise_odd_waddr = prf_coeff_valid ?
-@@ -479,27 +812,134 @@
+@@ -479,27 +839,134 @@
          u_noise_odd_sram (
              .clk(clk), .we(noise_odd_we),
              .addr(noise_odd_we ? noise_odd_waddr : noise_read_addr),
@@ -1901,7 +1952,7 @@
      generate
          if(USE_EXTERNAL_NTT) begin:g_external_ntt
              assign ntt_busy=ntt_ext_busy; assign ntt_done=ntt_ext_done;
-@@ -525,6 +965,10 @@
+@@ -525,6 +992,10 @@
      wire codec_load_clear=(state==S_CODEC_CLR);
      wire codec_load_valid=(state==S_READ_LOAD);
      wire codec_start=(state==S_CODEC_START);
@@ -1912,7 +1963,7 @@
      wire codec_busy,codec_done,codec_pass;
      wire [31:0] codec_digest_a,codec_digest_b;
      wire [31:0] codec_decode_digest;
-@@ -545,9 +989,15 @@
+@@ -545,9 +1016,15 @@
          .import_start(ciphertext_import_start),
          .import_compare_source(ciphertext_import_compare_source),
          .start(codec_start),.busy(codec_busy),.done(codec_done),.pass(codec_pass),
@@ -1928,7 +1979,7 @@
          .ct_read_data(ciphertext_read_data),.decoded_read_addr(decoded_read_addr),
          .decoded_read_data(decoded_read_data),
          .imported_bytes(ciphertext_imported_bytes));
-@@ -561,12 +1011,22 @@
+@@ -561,12 +1038,22 @@
              runtime_valid_q<=0;runtime_key_bound_q<=0;
              runtime_message_q<=0;runtime_coins_q<=0;
              runtime_prf_ok_q<=0;operand_wait_q<=0;
@@ -1951,7 +2002,7 @@
              case(state)
                  S_IDLE: begin busy<=0; if(start) begin
                      busy<=1;pass<=0;status<=0;ciphertext_digest<=0;audit_digest<=0;
-@@ -586,24 +1046,98 @@
+@@ -586,24 +1073,98 @@
                      else
                          state<=runtime_valid_q?S_PRF_START:S_PAIR_INIT;
                  end
@@ -2050,7 +2101,7 @@
                      state<=runtime_valid_q?S_OPERAND_WAIT:S_OPERAND;end
                  // Runtime PRF RAM already needed one wait state.  Bound-key
                  // reads add one further wait so data from the synchronous
-@@ -618,28 +1152,97 @@
+@@ -618,28 +1179,97 @@
                      operand_b0_q<=runtime_valid_q?noise_even_q:legacy_b0;
                      operand_b1_q<=runtime_valid_q?noise_odd_q:legacy_b1;
                      gamma_q<=gamma;state<=S_MUL0;end
@@ -2183,7 +2234,7 @@
  
  `ifdef TRUSTEDGE_ASIC_SRAM
      wire [11:0] coeff_q;
-@@ -96,8 +105,75 @@
+@@ -96,8 +105,82 @@
      reg decode_v_phase;
      reg decode_error;
      reg import_error;
@@ -2242,6 +2293,13 @@
 +    reg [7:0]  so_vbyte;                     // a finished V byte waiting behind a U group
 +    reg        so_vvalid;
 +    reg [9:0]  so_addr;                      // next ciphertext byte
++`ifdef TRUSTEDGE_SO_PIPE
++    reg        so_lv;                        // a U coefficient waits one cycle before Compress_10
++    reg [11:0] so_lc;
++    wire       so_idle = (so_left == 3'd0) && !so_vvalid && !so_lv;
++`else
++    wire       so_idle = (so_left == 3'd0) && !so_vvalid;
++`endif
 +`endif
  
      assign ct_read_data = ct_ram_q;
@@ -2259,7 +2317,7 @@
      assign decoded_read_data = decoded_ram_q;
  
      function automatic [9:0] compress10;
-@@ -201,6 +277,12 @@
+@@ -201,6 +284,12 @@
      wire decode_mismatch = (compare_decoded_coeff != compare_source_coeff);
      wire [31:0] decode_digest_next = decode_digest_step(decode_digest,
                                                            compare_decoded_coeff);
@@ -2272,7 +2330,7 @@
  
      // Present Quartus with exactly one synchronous write port.  Keeping the
      // import path and the encoder FSM as separate array assignments caused the
-@@ -217,6 +299,12 @@
+@@ -217,6 +306,12 @@
              ct_mem_we    = 1'b1;
              ct_mem_waddr = import_addr;
              ct_mem_wdata = import_data;
@@ -2285,7 +2343,7 @@
          end else if (busy && (state == ST_U_WRITE)) begin
              ct_mem_we    = 1'b1;
              ct_mem_waddr = ct_write_addr;
-@@ -251,13 +339,21 @@
+@@ -251,13 +346,21 @@
          else if (busy && ((state == ST_D_CMP_REQ) ||
                            (state == ST_D_CMP_WAIT) ||
                            (state == ST_D_CMP_ACC)))
@@ -2309,7 +2367,7 @@
          else if (!busy)
              ct_ram_q <= ciphertext_ram[ct_read_addr];
      end
-@@ -271,19 +367,37 @@
+@@ -271,19 +374,37 @@
          (busy && ((state == ST_D_CMP_REQ) ||
                    (state == ST_D_CMP_WAIT) ||
                    (state == ST_D_CMP_ACC))) ?
@@ -2350,7 +2408,7 @@
  
      te_sram_1rw #(.WIDTH(12), .DEPTH(768), .ADDR_WIDTH(10))
          u_coeff_sram (
-@@ -298,7 +412,7 @@
+@@ -298,7 +419,7 @@
      te_sram_1rw #(.WIDTH(12), .DEPTH(768), .ADDR_WIDTH(10))
          u_decoded_coeff_sram (
              .clk(clk), .we(decoded_mem_we), .addr(decoded_mem_addr),
@@ -2359,7 +2417,7 @@
          );
  `endif
  
-@@ -315,6 +429,9 @@
+@@ -315,6 +436,9 @@
              cycles <= 16'd0;
              loaded_coeffs <= 10'd0;
              imported_bytes <= 10'd0;
@@ -2369,13 +2427,16 @@
              load_error <= 1'b0;
              import_error <= 1'b0;
              proc_index <= 10'd0;
-@@ -334,15 +451,49 @@
+@@ -334,15 +458,71 @@
              decoded_coeff_cmp_q <= 12'd0;
              canonical_source_coeff_cmp_q <= 12'd0;
  `endif
 +`ifdef TRUSTEDGE_STREAM_OUT
 +            so_pack <= 40'd0; so_out <= 40'd0; so_sub <= 3'd0; so_left <= 3'd0;
 +            so_vbyte <= 8'd0; so_vvalid <= 1'b0; so_addr <= 10'd0;
++`ifdef TRUSTEDGE_SO_PIPE
++            so_lv <= 1'b0; so_lc <= 12'd0;
++`endif
 +`endif
          end else begin
              done <= 1'b0;
@@ -2385,6 +2446,18 @@
 +            end else if (so_vvalid) begin
 +                so_vvalid <= 1'b0; so_addr <= so_addr + 10'd1;
 +            end
++`ifdef TRUSTEDGE_SO_PIPE
++            so_lv <= 1'b0;
++            if (so_lv) begin                         // the U coefficient loaded in the previous cycle
++                if (so_sub == 3'd3) begin
++                    so_out <= so_pack | ({30'd0, compress10(so_lc)} << 30);
++                    so_left <= 3'd5; so_pack <= 40'd0; so_sub <= 3'd0;
++                end else begin
++                    so_pack <= so_pack | ({30'd0, compress10(so_lc)} << (so_sub * 10));
++                    so_sub <= so_sub + 3'd1;
++                end
++            end
++`endif
 +`endif
  
              if (load_clear && !busy) begin
@@ -2395,12 +2468,18 @@
                  load_error <= 1'b0;
 +`ifdef TRUSTEDGE_STREAM_OUT
 +                so_pack <= 40'd0; so_sub <= 3'd0; so_left <= 3'd0; so_vvalid <= 1'b0; so_addr <= 10'd0;
++`ifdef TRUSTEDGE_SO_PIPE
++                so_lv <= 1'b0;
++`endif
 +`endif
              end else if (load_valid && !busy) begin
                  if (!load_error && (load_index == loaded_coeffs) &&
                      (loaded_coeffs < 10'd768)) begin
 +`ifdef TRUSTEDGE_STREAM_OUT
 +                    if (load_index < 10'd512) begin
++`ifdef TRUSTEDGE_SO_PIPE
++                        so_lv <= 1'b1; so_lc <= load_coeff;
++`else
 +                        if (so_sub == 3'd3) begin
 +                            so_out <= so_pack | ({30'd0, compress10(load_coeff)} << 30);
 +                            so_left <= 3'd5; so_pack <= 40'd0; so_sub <= 3'd0;
@@ -2408,6 +2487,7 @@
 +                            so_pack <= so_pack | ({30'd0, compress10(load_coeff)} << (so_sub * 10));
 +                            so_sub <= so_sub + 3'd1;
 +                        end
++`endif
 +                    end else if (so_sub == 3'd1) begin
 +                        so_vbyte <= so_pack[7:0] | {compress4(load_coeff), 4'd0};
 +                        so_vvalid <= 1'b1; so_pack <= 40'd0; so_sub <= 3'd0;
@@ -2419,7 +2499,7 @@
  `ifndef TRUSTEDGE_ASIC_SRAM
                      coeff_ram[load_index] <= load_coeff;
  `endif
-@@ -369,6 +520,12 @@
+@@ -369,6 +549,12 @@
  
              case (state)
                  ST_IDLE: begin
@@ -2432,7 +2512,7 @@
                      if (import_start) begin
                          // pass is meaningful only with done.  Do not clear it
                          // on a valid launch: keeping that write out of the
-@@ -378,6 +535,9 @@
+@@ -378,6 +564,9 @@
                          digest_a <= 32'd0;
                          digest_b <= 32'd0;
                          decode_digest <= 32'h44454331;
@@ -2442,7 +2522,7 @@
                          decode_pass <= 1'b0;
                          cycles <= 16'd0;
                          if ((imported_bytes == 10'd768) && !import_error &&
-@@ -402,10 +562,16 @@
+@@ -402,10 +591,16 @@
                      end else if (start) begin
                          // See import_start above.  Invalid launches still
                          // explicitly return pass=0 together with done.
@@ -2459,7 +2539,7 @@
                          cycles <= 16'd0;
                          if ((loaded_coeffs == 10'd768) && !load_error) begin
                              busy <= 1'b1;
-@@ -413,7 +579,11 @@
+@@ -413,7 +608,11 @@
                              group_sub <= 3'd0;
                              ct_write_addr <= 10'd0;
                              pack_bits <= 40'd0;
@@ -2471,14 +2551,14 @@
                          end else begin
                              busy <= 1'b0;
                              pass <= 1'b0;
-@@ -422,7 +592,46 @@
+@@ -422,7 +621,46 @@
                      end
                  end
  
 +`ifdef TRUSTEDGE_STREAM_IO
 +`ifdef TRUSTEDGE_STREAM_OUT
 +`ifdef TRUSTEDGE_SEG_CHECK
-+                ST_SEG_FLUSH: if ((so_left == 3'd0) && !so_vvalid) begin   // the group bytes are written
++                ST_SEG_FLUSH: if (so_idle) begin   // the group bytes are written
 +                    if (seg_count == 2'd0) begin      // the first segment starts the check
 +                        decode_digest <= 32'h44454331; decode_error <= 1'b0; decode_pass <= 1'b0;
 +                        digest_a <= 32'h43543131; digest_b <= 32'h4B504B45;
@@ -2487,7 +2567,7 @@
 +                        state <= ST_D_PIPE;
 +                end
 +`endif
-+                ST_S_FLUSH: if ((so_left == 3'd0) && !so_vvalid) begin
++                ST_S_FLUSH: if (so_idle) begin
 +                    // the state that the encoder leaves behind at the end of the V pass
 +                    ct_write_addr <= so_addr;
 +`ifdef TRUSTEDGE_SEG_CHECK
@@ -2518,7 +2598,7 @@
                  ST_U_WAIT: state <= ST_U_CAPTURE;
                  ST_U_CAPTURE: begin
                      pack_bits <= u_pack_next;
-@@ -454,7 +663,11 @@
+@@ -454,7 +692,11 @@
                      end
                  end
  
@@ -2530,7 +2610,7 @@
                  ST_V_WAIT: state <= ST_V_CAPTURE;
                  ST_V_CAPTURE: begin
                      pack_bits <= v_pack_next;
-@@ -484,6 +697,9 @@
+@@ -484,6 +726,9 @@
                          decode_v_phase <= 1'b0;
                          decode_error <= 1'b0;
                          decode_digest <= 32'h44454331;
@@ -2540,7 +2620,7 @@
                          state <= ST_D_REQ;
                      end else begin
                          proc_index <= proc_index + 10'd1;
-@@ -497,10 +713,87 @@
+@@ -497,10 +742,87 @@
                  // decoded value against Compress(source) followed by
                  // Decompress(source). This catches pack order, RAM read and
                  // decompression errors without exposing ciphertext or key data.
@@ -2628,7 +2708,7 @@
                      if ((!decode_v_phase && (decode_byte_sub == 3'd4)) ||
                          (decode_v_phase && (decode_byte_sub == 3'd0))) begin
                          decode_cmp_sub <= 3'd0;
-@@ -508,7 +801,11 @@
+@@ -508,7 +830,11 @@
                      end else begin
                          decode_ct_addr <= decode_ct_addr + 10'd1;
                          decode_byte_sub <= decode_byte_sub + 3'd1;
@@ -2640,7 +2720,7 @@
                      end
                  end
  
-@@ -523,8 +820,10 @@
+@@ -523,8 +849,10 @@
                  ST_D_CMP_ACC: begin
                      decode_digest <= decode_digest_next;
  `ifndef TRUSTEDGE_ASIC_SRAM
@@ -2651,7 +2731,7 @@
  `endif
                      if (decode_mismatch && import_compare_source)
                          decode_error <= 1'b1;
-@@ -546,10 +845,21 @@
+@@ -546,10 +874,21 @@
                              decode_pass <= !(decode_error ||
                                               (decode_mismatch &&
                                                import_compare_source));
@@ -2673,7 +2753,7 @@
                          end else begin
                              decode_ct_addr <= decode_ct_addr + 10'd1;
                              decode_coeff_base <= decode_coeff_base + 10'd2;
-@@ -560,7 +870,11 @@
+@@ -560,7 +899,11 @@
                          end
                      end else begin
                          decode_cmp_sub <= decode_cmp_sub + 3'd1;

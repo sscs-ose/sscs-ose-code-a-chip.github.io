@@ -22,9 +22,9 @@ SHORT_TEXT = 14          # text columns whose longest entry is at most this many
 # Readable names for the identifiers that the result files use (run names, column keys, corners).
 # Only the rendering changes; the data and every assertion keep the original identifiers.
 VALUES = {
-    "fpga": "FPGA configuration", "asic": "ASIC configuration (both choices)",
+    "fpga": "FPGA configuration", "asic": "HSKEM-1 configuration (both choices)",
     "keccak_only": "row-serialized Keccak only", "sram_only": "single-port store only",
-    "ntt_opt_ref": "NTT iteration: reference (single-port)", "ntt_opt_b1": "NTT iteration: 1-subtraction Barrett",
+    "ntt_opt_ref": "iteration 1: reference (original, single-port)", "ntt_opt_b1": "iteration 1: 1-subtraction Barrett",
     "kyber_ntt_engine (u_shared_ntt)": "NTT engine",
     "keccak_f1600_iter one-round (u_permutation)": "Keccak permutation (one round per clock)",
     "keccak sponge incl. permutation (u_shared_mlkem_sponge)": "Keccak sponge, including the permutation",
@@ -49,7 +49,7 @@ HEADERS = {
     "area_vs_ref": "area vs reference", "delay_vs_ref": "delay vs reference", "latency_vs_ref": "latency vs reference",
     "gls_pass": "gate-level simulation passed", "decaps_cycles": "decapsulation cycles",
     "decaps_keccak_permutations": "Keccak permutations", "shared_secret_fingerprints": "shared-secret fingerprints",
-    "tb_result": "testbench result", "decaps_ms_at_50MHz": "decapsulation at 50 MHz [ms]",
+    "tb_result": "testbench result", "run": "run", "result_pass": "passed", "keygen_cycles": "key generation [cycles]", "encaps_cycles": "encapsulation [cycles]", "ciphertext_final_cycles": "ciphertext finalization [cycles]", "decaps_ms_at_50MHz": "decapsulation at 50 MHz [ms]",
     "delta_vs_fpga": "change vs FPGA configuration", "alms_needed": "ALMs", "block_memory_bits": "block-memory bits",
     "m20k": "M20K blocks", "dsp": "DSP blocks", "saturated": "saturated runs",
     "core_time_ms (at median)": "core time at median [ms]", "runs_per_trace": "runs per trace",

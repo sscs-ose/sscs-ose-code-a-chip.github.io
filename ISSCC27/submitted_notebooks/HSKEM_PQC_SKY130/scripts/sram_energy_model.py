@@ -16,11 +16,12 @@ extraction of its layout (devices plus every net's capacitance; "flat_layout" in
 own wiring factor, flat over schematic, for the access energies and for the idle cycle; a macro without
 one would take the mean factor of the others.
 
-Every macro performs one access per cycle on the chip (chip select tied active), so the energy of a
-decapsulation is reads x E_read + writes x E_write per macro (results/fullchip/sram_accesses.json), the
-reads at a new address at E_read and the rest at E_read_repeat. The
-projection with chip-select gating keeps the useful accesses (a write, or a read at a new address) and
-charges E_idle for every other cycle.
+A macro whose chip select is tied active performs one access per cycle; a macro selected by its block's
+requests (the NTT store of the signed-off chip) performs only those and idles in the other cycles. The
+energy of a decapsulation is therefore reads x E_read + writes x E_write + idle cycles x E_idle per macro
+(results/fullchip/sram_accesses.json), the reads at a new address at E_read and the rest at
+E_read_repeat. The projection with chip-select gating keeps the useful accesses (a write, or a read at a
+new address) and charges E_idle for every other cycle.
 usage: python3 sram_energy_model.py <sram_macro_spice.json> <sram_accesses.json> <out.json>
 SPDX-License-Identifier: Apache-2.0
 """
@@ -85,8 +86,10 @@ def main(spice_file: str, acc_file: str, out: str) -> None:
     for name, v in acc["instances"].items():
         e = per[v["master"]]
         u = v["useful_accesses"]
+        idle = n - v["reads"] - v["writes"]                   # zero for a macro whose chip select is tied active
+        assert idle >= 0 and (idle == 0 or v.get("chip_select") == "block requests"), name
         ea = ((u - v["writes"]) * e["read_pj"] + (v["reads"] - u + v["writes"]) * e["read_repeat_pj"]
-              + v["writes"] * e["write_pj"])
+              + v["writes"] * e["write_pj"] + idle * e["idle_pj"])
         eg = (u - v["writes"]) * e["read_pj"] + v["writes"] * e["write_pj"] + (n - u) * e["idle_pj"]
         inst[name] = {"master": v["master"], "energy_uj": ea * 1e-6, "energy_with_chip_select_gating_uj": eg * 1e-6}
         tot += ea

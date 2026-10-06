@@ -54,6 +54,8 @@ def numbers() -> dict:
     t = pw["window_cycles"] * pw["clock_ns"] * 1e-9
     e = {k: v * 1e-3 * t * 1e6 for k, v in pw["power_mw"].items()}
     e["sram"] = se["sram_energy_per_decaps_uj"]
+    pw0, se0 = j("fullchip/first_chip/power.json"), j("fullchip/first_chip/sram_energy.json")
+    e_first = pw0["logic_power_mw"] * pw0["window_cycles"] * pw0["clock_ns"] * 1e-6 + se0["sram_energy_per_decaps_uj"]
     g = {r: j(f"gls_power/{r}/summary.json")["energy_per_forward_ntt_nj"] / 1e3
          for r in ("ntt_sp_20ns", "ntt_opt_b1_w12_20ns", "ntt_macro_20ns", "ntt_packed_20ns")}
     import csv
@@ -66,7 +68,7 @@ def numbers() -> dict:
     import pandas as pd
     c3 = pd.read_csv(R / "fpga/c3_repeat.csv")
     tv = {k: j(f"{d}/tvla_summary.json")["max_abs_t"] for k, d in (("plain", "leakage"), ("masked", "leakage_masked"))}
-    return {"e": e, "gate": se["sram_energy_with_chip_select_gating_uj"], "ntt_e": g,
+    return {"e": e, "e_first": e_first, "gate": se["sram_energy_with_chip_select_gating_uj"], "ntt_e": g,
             "fmax": (float(o["fmax_mhz"]), float(n["fmax_mhz"])),
             "at": float(n["at_product"]) / float(o["at_product"]), "area": float(n["cell_area_um2"]) / float(o["cell_area_um2"]),
             "ntt_busy": prof["ntt_busy"] / prof["cycles"], "perm_busy": prof["perm_busy"] / prof["cycles"],
@@ -140,14 +142,14 @@ def main(out: str = "figures/poster.pdf") -> None:
     # --- column II
     x = cols[1]
     image(nb_png("fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))"), x, 0.53, cw, 0.17)
-    text(x, 0.525, f"A measured redesign of the NTT, after routing: fmax {N['fmax'][0]:.0f} → {N['fmax'][1]:.0f} MHz, "
+    text(x, 0.525, f"A first measured iteration of the NTT, after routing: fmax {N['fmax'][0]:.0f} → {N['fmax'][1]:.0f} MHz, "
                    f"area {N['area'] - 1:+.0%}, area × time {N['at'] - 1:+.0%}.", 22, width=cw)
     image(nb_png("STAIR = [("), x, 0.33, cw, 0.15)
-    text(x, 0.325, f"A second redesign stores two coefficients in every SRAM word: a forward NTT takes "
+    text(x, 0.325, f"A second iteration stores two coefficients in every SRAM word: a forward NTT takes "
                    f"{N['pk_lat'][1]:.0f} instead of {N['pk_lat'][0]:.0f} µs and {N['ntt_e']['ntt_packed_20ns']:.2f} instead of "
-                   f"{N['ntt_e']['ntt_macro_20ns']:.2f} µJ. Streaming data between a two-lane engine and the datapath, with "
-                   f"changes that remove no check, a decapsulation takes {N['streamed']['H']['sram_only']:,} instead of "
-                   f"{N['steps']['published']:,} cycles, as the board confirms.", 22, width=cw)
+                   f"{N['ntt_e']['ntt_macro_20ns']:.2f} µJ. With a two-lane engine and a streamed datapath that removes no "
+                   f"check, a decapsulation takes {N['streamed']['H']['sram_only']:,} instead of "
+                   f"{N['steps']['published']:,} cycles (HSKEM-1 → HSKEM-2), as the board confirms.", 22, width=cw)
     ax = fig.add_axes([x + 0.01, 0.12, cw - 0.02, 0.13], zorder=2)
     e = N["e"]; tot = sum(e.values())
     parts = [("clock network and\nregister clock pins", e["clock"] + e["sequential"], ps.SERIES[0]),
@@ -159,10 +161,11 @@ def main(out: str = "figures/poster.pdf") -> None:
             ax.text(left + v / 2, 0.32, f"{lab}\n{v:.0f} µJ", ha="center", va="bottom", fontsize=17)
         left += v
     ax.set_xlim(0, tot); ax.set_ylim(-0.4, 1.4); ax.axis("off")
-    ax.set_title(f"One decapsulation on the chip: {tot / 1e3:.2f} mJ at 25 MHz", fontsize=24, loc="left")
-    text(x, 0.11, f"The integration, not ML-KEM, sets the energy: gating the clock of idle blocks and the chip "
-                  f"selects of the macros would save roughly 40 to 55 %. The NTT is busy {N['ntt_busy']:.0%} of a "
-                  f"decapsulation, the Keccak permutation {N['perm_busy']:.1%}.", 21, width=cw)
+    ax.set_title(f"A decapsulation on HSKEM-2: {tot:.0f} µJ", fontsize=24, loc="left")
+    text(x, 0.11, f"HSKEM-2, the signed-off SKY130 chip of the streamed system, spends {tot:.0f} µJ per decapsulation "
+                  f"instead of HSKEM-1's {N['e_first'] / 1e3:.2f} mJ. The rest is set by the integration: gating the clock "
+                  f"of idle blocks and the chip selects of the macros would save roughly 28 to 42 %.",
+         21, width=cw)
 
     # --- column III
     x = cols[2]
@@ -174,7 +177,7 @@ def main(out: str = "figures/poster.pdf") -> None:
                    f"first-order masking (threshold 4.5).", 22, width=cw)
     lessons = ["Weigh a block by how often the system waits for it.",
                "Measure the integrated chip, not only its blocks.",
-               "Check the check: nine results here first looked right and were not.",
+               "Check the check: ten results here first looked right and were not.",
                "Tie the prose to the data: assertions stop the notebook when they part."]
     text(x, 0.26, "What transfers", 32, "bold", accent)
     y = 0.225
