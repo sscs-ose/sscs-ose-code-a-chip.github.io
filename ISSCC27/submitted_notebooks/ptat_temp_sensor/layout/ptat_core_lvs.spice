@@ -1,0 +1,10 @@
+* LVS source boundary for the present PTAT core.
+* IREF is an external bias input. VOUT1/VOUT2 expose the two diode-connected
+* NMOS sense nodes; their difference is the PTAT observable.
+.subckt ptat_core VDD VSS IREFNODE VOUT1 VOUT2
+XMPREF IREFNODE IREFNODE VDD VDD sky130_fd_pr__pfet_01v8 L=1u W=4u
+XMP1 VOUT1 IREFNODE VDD VDD sky130_fd_pr__pfet_01v8 L=1u W=4u
+XMP2 VOUT2 IREFNODE VDD VDD sky130_fd_pr__pfet_01v8 L=1u W=4u
+XMN1 VOUT1 VOUT1 VSS VSS sky130_fd_pr__nfet_01v8 L=0.5u W=1u
+XMN2 VOUT2 VOUT2 VSS VSS sky130_fd_pr__nfet_01v8 L=0.5u W=8u
+.ends ptat_core
