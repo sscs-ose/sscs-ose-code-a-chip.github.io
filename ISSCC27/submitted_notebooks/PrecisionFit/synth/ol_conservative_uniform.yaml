@@ -1,0 +1,25 @@
+# PrecisionFit -- conservative_uniform headline design
+# LibreLane 3.x config (sky130A, HD standard-cell library)
+#
+# IMPORTANT: all settings below are IDENTICAL across all three headline
+# configs except DESIGN_NAME and VERILOG_FILES. Do not change anything
+# else without applying the same change to all three configs, or the
+# area/timing comparison becomes invalid.
+
+PDK: sky130A
+DESIGN_NAME: fir_conservative_uniform
+VERILOG_FILES:
+  - dir::src/verilog/rtl/fir_conservative_uniform.v
+
+CLOCK_PORT: clk
+CLOCK_PERIOD: 14.6          # ns -- chosen so conservative_uniform closes TT with +2.0 ns slack
+                            # (TT critical path: ~12.6 ns at nom_tt_025C_1v80, 1.8 V).
+                            # SS-max-OCV corner cannot close at any practical frequency for this
+                            # fully-parallel topology (effective SS critical path: ~24 ns).
+                            # All three configs use this identical value for a fair comparison.
+
+DIE_AREA: [0, 0, 500, 500]  # um: generous 500x500 die so placement is not congested
+CORE_AREA: [10, 10, 490, 490]
+
+PL_TARGET_DENSITY_PCT: 50      # cells occupy 50% of the core area
+SYNTH_STRATEGY: AREA 0      # tell Yosys/ABC to optimise for area (fair comparison)

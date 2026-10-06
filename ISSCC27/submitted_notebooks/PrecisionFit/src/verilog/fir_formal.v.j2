@@ -1,0 +1,126 @@
+{#
+Formal verification wrapper for the generated FIR modules.
+
+Renders ONE self-contained Verilog file: `define FORMAL (+ FORMAL_STREAM for
+the stream environment), then `include of the generated DUT, then a harness
+module whose inputs are unconstrained free signals -- which is what makes the
+proofs exhaustive (the solver explores ALL input sequences).
+
+Two environments:
+  live   (fir_formal_harness): in_valid free. The driver proves this as TWO
+         tasks whose property UNION is the full live set:
+           live_main  -- all properties except the output-freeze P4s_b
+                         (`define FORMAL_P4S left undefined)
+           live_stall -- ONLY P1 + P4s_b (`define FORMAL_STALL_ONLY):
+                         any cross-frame output relation proved TOGETHER with
+                         the datapath properties makes the SMT solver stall
+                         under free in_valid, while each subset closes in
+                         seconds. Union => soundness unchanged.
+  stream (fir_formal_stream):  additionally assumes in_valid == 1 so the
+         datapath equivalence P4a/P4b can be stated over the raw input
+         history ($past window). All properties active (P4s_b included:
+         the pinned-valid environment discharges it cheaply).
+
+No shadow state and no reset-ordering assumption are needed: the DUT's
+formal block pins its registers with initial values, and the P4 guards
+require a long clean (rst_n && in_valid) window, after which the delay line
+provably holds true input history regardless of power-on state.
+
+The stream environment additionally assumes reset is deasserted for the
+entire trace (a_stream_rst). This is sound AND complete for this property
+set: P1 covers reset behavior explicitly, and after the a_rst_monotonic
+contract any reset edge simply returns the datapath to the same pinned
+all-zero state the proof starts from. It also makes the depth-26 BMC a
+complete proof of the full window property (no late-reset edge cases to
+enumerate) -- and it is REQUIRED for P4b soundness: with async reset free
+to fire at edge k, the clocked properties still sample pre-edge values,
+so out_data clears to 0 while f_acc_q1 holds a nonzero acc_reg from edge
+k-1. P1 covers reset behavior in the live environment instead.
+#}
+`define FORMAL
+{% if stream_env %}
+`define FORMAL_STREAM
+{% endif %}
+{% if enable_p4s %}
+`define FORMAL_P4S
+{% endif %}
+{% if stall_only %}
+`define FORMAL_STALL_ONLY
+{% endif %}
+
+`include "{{ dut_file }}"
+
+module {{ top_name }} (
+    input wire clk,
+    input wire rst_n,
+    input wire in_valid,
+    input wire signed [{{ input_total_bits - 1 }}:0] in_data
+);
+
+    {{ module_name }} dut (
+        .clk      (clk),
+        .rst_n    (rst_n),
+        .in_valid (in_valid),
+        .in_data  (in_data),
+        .out_valid(),
+        .out_data ()
+    );
+
+    // Verification contract (environment, not DUT): reset is monotonic --
+    // once released it stays released. The DUT uses ASYNC reset, so a falling
+    // rst_n coincident with a clock edge clears the flops immediately while
+    // the clocked property block still samples pre-edge values, tearing the
+    // $past sampling window (a spurious P4b failure, not a design bug).
+    // Holding reset stable after release is the standard assumption for
+    // formally verifying async-reset IP.
+    //
+    // a_rst_initial: force reset asserted on the very first cycle so that
+    // all async-to-sync conversion shadow flops (introduced by Yosys during
+    // elaboration of the negedge rst_n sensitivity list) are in a known-clean
+    // state before any data is clocked in. Without this the solver is free to
+    // start in an arbitrary RTL state that bypasses the formal init block and
+    // produces spurious P4s_b counterexamples.
+    // NOT emitted in the stream environment: a_stream_rst pins rst_n=1 for the
+    // entire trace, so the async reset can never fire and the ghost-flop issue
+    // cannot arise; emitting a_rst_initial (rst_n=0) alongside a_stream_rst
+    // (rst_n=1) would produce PREUNSAT at step 0.
+    //
+    // The P4s_b guard (rst_n && f_rst_hist[0] && !in_valid) already requires
+    // one clean posedge after reset before firing, which eliminates any
+    // async2sync race window. No combinational (inter-posedge) assumption
+    // on rst_n is needed here.
+    reg h_past_valid = 1'b0;
+    always @(posedge clk) begin
+        h_past_valid <= 1'b1;
+{% if not stream_env %}
+        // Live environment only: force reset asserted on the first cycle so
+        // async-to-sync shadow flops are initialised before any data is clocked.
+        if (!h_past_valid) begin
+            a_rst_initial: assume (rst_n == 1'b0);
+        end
+{% endif %}
+        // Clocked monotonicity: once released, keep released at posedges.
+        // This is the standard contract for formally verifying async-reset IP.
+        if ($past(rst_n)) begin
+            a_rst_monotonic: assume (rst_n == 1'b1);
+        end
+    end
+
+{% if stream_env %}
+    // stream environment: reset is deasserted for the whole trace (see header
+    // comment for why this is sound and required for P4b soundness).
+    // NOTE: this must be a clocked (procedural) assumption -- a bare module-
+    // level `assume` is a syntax error in Yosys (it expects `assume property`).
+    always @(posedge clk) begin
+        a_stream_rst: assume (rst_n == 1'b1);
+    end
+{% endif %}
+
+{% if stream_env %}
+    // stream environment: continuous valid stream (assumption, not assertion)
+    always @(posedge clk) begin
+        a_stream: assume (in_valid == 1'b1);
+    end
+{% endif %}
+
+endmodule

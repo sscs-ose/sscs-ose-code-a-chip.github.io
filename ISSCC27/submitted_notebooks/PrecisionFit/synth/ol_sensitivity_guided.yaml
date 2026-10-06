@@ -1,0 +1,21 @@
+# PrecisionFit -- sensitivity_guided headline design
+# LibreLane 3.x config (sky130A, HD standard-cell library)
+#
+# IMPORTANT: all settings below are IDENTICAL across all three headline
+# configs except DESIGN_NAME and VERILOG_FILES. Do not change anything
+# else without applying the same change to all three configs, or the
+# area/timing comparison becomes invalid.
+
+PDK: sky130A
+DESIGN_NAME: fir_sensitivity_guided
+VERILOG_FILES:
+  - dir::src/verilog/rtl/fir_sensitivity_guided.v
+
+CLOCK_PORT: clk
+CLOCK_PERIOD: 14.6          # ns -- same value as conservative_uniform (TT signoff corner, derived from production runs)
+
+DIE_AREA: [0, 0, 500, 500]  # um: generous 500x500 die so placement is not congested
+CORE_AREA: [10, 10, 490, 490]
+
+PL_TARGET_DENSITY_PCT: 50
+SYNTH_STRATEGY: AREA 0
