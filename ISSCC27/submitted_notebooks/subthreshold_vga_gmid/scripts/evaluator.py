@@ -107,7 +107,9 @@ SPACE = dict(
     vctrl_cm=[1.05, 1.10, 1.15, 1.20, 1.25],
     vbias=[0.59, 0.61, 0.63],
 )
-VDS_MIN_LUT = 0.140   # 130 mV SPICE target + 10 mV LUT margin (see validation table)
+HEADROOM_SPICE = 0.150  # design margin enforced on SPICE-verified designs: 130 mV weak-inversion saturation limit
+                        # (Table 2) plus 20 mV, because undistorted output swing collapses as headroom nears 130 mV
+VDS_MIN_LUT = HEADROOM_SPICE + 0.010   # the LUT is optimistic by about 10 mV at the input pair (Table 8)
 I_TOT_MAX = 5e-6
 
 _LUT = None

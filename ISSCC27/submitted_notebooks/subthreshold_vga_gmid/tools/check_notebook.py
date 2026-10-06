@@ -64,9 +64,14 @@ def main():
     lay = root / "layout"
     if (lay / "drc_report.txt").exists() != (lay / "lvs_report.txt").exists():
         E.append("layout: DRC and LVS reports must both exist or both be absent")
+    import subprocess
+    def ignored(path):                      # a stray file that git already ignores is not a problem
+        try: return subprocess.run(["git", "check-ignore", "-q", str(path)], cwd=root).returncode == 0
+        except Exception: return False
     for p in root.rglob("*"):
-        if p.is_file() and (p.suffix in (".raw", ".log") or "__pycache__" in p.parts or ".ipynb_checkpoints" in p.parts):
-            W.append(f"stray file: {p.relative_to(root)}")
+        if p.is_file() and (p.suffix in (".raw", ".log") or "__pycache__" in p.parts or ".ipynb_checkpoints" in p.parts) \
+           and not ignored(p):
+            W.append(f"stray file not in .gitignore: {p.relative_to(root)}")
     size = lambda p: sum(f.stat().st_size for f in Path(p).rglob("*") if f.is_file()) / 1e6
     nbmb, cmb, tot = nbp.stat().st_size / 1e6, size(root / "cache") if (root / "cache").exists() else 0, size(root)
     print(f"sizes: notebook {nbmb:.1f} MB | cache {cmb:.1f} MB | folder {tot:.1f} MB")

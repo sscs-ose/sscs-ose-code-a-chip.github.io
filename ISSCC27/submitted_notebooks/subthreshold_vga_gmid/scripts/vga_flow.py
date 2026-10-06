@@ -227,11 +227,25 @@ wrdata {WORK}/thd.txt v(v_out)
                 vout_fund_pk=float(amp[0]))
 
 def swing_at_thd(p: dict, vctrl: float, av: float, thd_limit: float = 1.0,
-                 vout_grid=(0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6)) -> dict:
-    """Largest output amplitude (peak) with THD <= thd_limit %, scanning output levels."""
-    best, rows = 0.0, []
+                 vout_grid=(0.01, 0.02, 0.03, 0.04, 0.05, 0.075, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6)) -> dict:
+    """Output amplitude (peak) at which THD reaches thd_limit.
+
+    Scans the output level upward; at the first level that fails, the crossing is interpolated between it and
+    the last passing level assuming THD ~ amplitude**k over that step (k fitted from the two points). If even
+    the smallest level fails, THD ~ amplitude is assumed. Interpolating removes the coarse quantisation of a
+    pass/fail grid, which otherwise exaggerates differences between designs."""
+    rows, prev = [], None
     for vo in vout_grid:
         r = thd(p, vctrl, vo / av); rows.append(r)
-        if r["thd_pct"] <= thd_limit: best = vo
-        else: break
-    return dict(vout_pk_max=best, rows=rows, vctrl=vctrl)
+        t1 = r["thd_pct"]
+        if t1 > thd_limit:
+            if prev is None:
+                best = vo * thd_limit / t1
+            else:
+                v0, t0 = prev
+                k = math.log(t1 / t0) / math.log(vo / v0) if (t1 > t0 > 0) else 1.0
+                best = v0 * (thd_limit / t0) ** (1.0 / k) if k > 0.2 else v0
+                best = min(max(best, v0), vo)
+            return dict(vout_pk_max=float(best), rows=rows, vctrl=vctrl, interpolated=True)
+        prev = (vo, t1)
+    return dict(vout_pk_max=float(vout_grid[-1]), rows=rows, vctrl=vctrl, interpolated=False)

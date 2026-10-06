@@ -57,3 +57,23 @@ def plot_style():
 
 def spice_available(pdk_lib) -> bool:
     return shutil.which("ngspice") is not None and Path(pdk_lib).exists()
+
+
+# ---- honest comparison of one design against a reference, computed (never typed) ----------------------
+METRICS = [("control range", "range_db", +1), ("monotonic control range", "mono_range_db", +1),
+           ("bandwidth at min gain", "f3db_lo", +1), ("bandwidth at max gain", "f3db_hi", +1),
+           ("integrated noise at min gain", "vrms_lo", -1), ("integrated noise at max gain", "vrms_hi", -1),
+           ("NEF at max gain", "nef_hi", -1), ("supply power", "power", -1),
+           ("output swing at max gain", "swing_hi", +1)]
+
+def compare(new: dict, ref: dict, tol: float = 0.03):
+    """Metrics where `new` is better / worse than `ref` by more than `tol` (relative). Direction-aware:
+    higher is better for range, bandwidth, swing; lower is better for noise, NEF, power."""
+    better, worse = [], []
+    for name, key, sgn in METRICS:
+        a, b = new.get(key), ref.get(key)
+        if a is None or b is None or a != a or b != b or b == 0: continue
+        rel = (a - b) / abs(b) * sgn
+        if rel > tol: better.append(name)
+        elif rel < -tol: worse.append(name)
+    return better, worse
