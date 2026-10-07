@@ -116,6 +116,8 @@ export function mountExplorer(document, cube) {
         const button = document.createElement("button");
         const input = cube.inputs[inputIndex];
         button.className = "grid-cell";
+        button.dataset.caseIndex = String(caseIndex);
+        button.dataset.inputIndex = String(inputIndex);
         if (input === 0 || Math.abs(input) < minimum) button.classList.add("outside-score");
         button.style.backgroundColor = COLORS[row[5]];
         button.title = `${cube.cases[caseIndex]}, ${input} mV: ${STATUS[row[5]]}`;
@@ -141,6 +143,26 @@ export function mountExplorer(document, cube) {
     element.addEventListener("change", update);
   }
   update();
+  document.defaultView.atlasStoredExplorer = {
+    focus(record) {
+      const indices = [cube.designs.indexOf(record.design_name), cube.cases.indexOf(record.case_id),
+        cube.deadlines.indexOf(record.deadline_ns), cube.inputs.indexOf(record.input_mv)];
+      if (indices.some(index => index < 0) || !cube.policies.includes("local_boundary")) {
+        throw new Error("The measurement key is outside this stored-decision map");
+      }
+      design.value = String(indices[0]);
+      policy.value = String(cube.policies.indexOf("local_boundary"));
+      deadline.value = String(indices[2]);
+      reserved.checked = false;
+      update();
+      const button = grid.querySelector(`[data-case-index="${indices[1]}"][data-input-index="${indices[3]}"]`);
+      if (!button) throw new Error("The keyed decision-map cell is missing");
+      grid.closest("details").open = true;
+      button.click();
+      button.focus();
+      button.scrollIntoView({ block: "nearest" });
+    },
+  };
 }
 
 if (typeof document !== "undefined") {

@@ -173,7 +173,7 @@ def main() -> None:
         sys.path.insert(0, str(entry_root))
         import matplotlib.pyplot as plt
         import pandas as pd
-        from IPython.display import Image, display
+        from IPython.display import HTML, Image, display
         import entry_tools as entry
         import layout_evidence as physical
 
@@ -683,10 +683,9 @@ def main() -> None:
 
         def inspect_area_version(layout_version, extraction_mode):
             rows = adopted["frame"]
-            display(rows[
-                (rows.layout == layout_version)
-                & (rows["mode"] == extraction_mode)
-            ].drop(columns=["execution"]))
+            matched = rows.layout.eq(layout_version)
+            matched &= rows["mode"].eq(extraction_mode)
+            display(rows[matched])
 
 
         area_controls = widgets.interactive(
@@ -959,6 +958,21 @@ def main() -> None:
             if 0 <= prior_index < len(previous.cells) and (
                     len(previous.cells) == len(cells) or index not in (17, 18)):
                 cell.id = previous.cells[prior_index].id
+    from presentation.judge_decision import integrate_notebook, validate_notebook_outputs
+
+    integrate_notebook(notebook)
+    if destination.exists():
+        previous = nbf.read(destination, as_version=4)
+        if [(c.id, c.source) for c in previous.cells] == [(c.id, c.source) for c in notebook.cells]:
+            validate_notebook_outputs(previous)
+            for cell, saved in zip(notebook.cells, previous.cells):
+                if cell.cell_type == "code":
+                    cell.outputs = saved.outputs
+                    cell.execution_count = saved.execution_count
+                    cell.metadata = saved.metadata
+            if "widgets" in previous.metadata:
+                notebook.metadata["widgets"] = previous.metadata["widgets"]
+    nbf.validate(notebook)
     nbf.write(notebook, destination)
     print(f"Generated {destination.name}: {len(cells)} cells")
 

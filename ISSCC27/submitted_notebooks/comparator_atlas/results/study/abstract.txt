@@ -1,7 +1,18 @@
-Comparator Atlas: SKY130 StrongARM characterization
+Comparator Atlas: correct before the deadline - or NONE?
 Wei-Lun Hsu - National Tsing Hua University
 
-This study measures calibration, decision deadline and full-cycle core energy in a SKY130 StrongARM comparator. A declared nine-candidate sizing comparison is followed by a lower-energy control and a nominal 27-device layout. For three locally calibrated schematic designs, a post-hoc strict specification map uses all 49 controlled-width-stress conditions and both signs at the included finite sampled inputs through 30 mV. At 1 ns, no compared design qualifies for the >=1 mV band. For >=3 mV, lvt_balanced_4b gives 294/294 correct at 249.655 fJ mean core energy; for >=30 mV, lvt_base_3b gives 98/98 at 150.531 fJ. Qualification requires every included point to be correct before mean energy ranks designs; the original training selection is unchanged. The selected design retains the same 20 wrong keyed samples at 1 ns and 2 ns, all at +/-1 mV; their locations do not establish a physical failure cause.
+Calibration does not necessarily mean correct before the deadline.
+Comparator Atlas asks a concrete design question: for a sampled input band and deadline,
+does any compared circuit qualify at every included point? Only then should mean energy
+rank designs. A useful design tool must return NONE rather than a best-average fallback.
+The same saved 49-condition schematic study gives three different answers at 1 ns:
+>=1 mV: NONE; >=3 mV: lvt_balanced_4b, 294/294, 249.655 fJ;
+>=30 mV: lvt_base_3b, 98/98, 150.531 fJ. This is a post-hoc comparison of three
+designs under local_boundary calibration, both signed finite sampled inputs through
+30 mV, not continuous coverage or a global optimization. Energies from different
+input bands are not a same-specification energy improvement.
+
+A declared nine-candidate sizing comparison is followed by a lower-energy control and a nominal 27-device layout. For three locally calibrated schematic designs, a post-hoc strict specification map uses all 49 controlled-width-stress conditions and both signs at the included finite sampled inputs through 30 mV. At 1 ns, no compared design qualifies for the >=1 mV band. For >=3 mV, lvt_balanced_4b gives 294/294 correct at 249.655 fJ mean core energy; for >=30 mV, lvt_base_3b gives 98/98 at 150.531 fJ. Qualification requires every included point to be correct before mean energy ranks designs; the original training selection is unchanged. The selected design retains the same 20 wrong keyed samples at 1 ns and 2 ns, all at +/-1 mV; their locations do not establish a physical failure cause.
 
 The adopted local-pitch b1 layout reduces all-material bbox area from matched adopted a1's 2074.254 to 1873.3 um2 (9.688013%), preserving 27 guarded MOS devices and 15 ports. A separate paired 45-PVT qualification at nominal geometry, code zero and signed +/-3 and +/-10 mV completed 1440 transients and 720 qualified 10/5 ps pairs. Both layouts and C/RC modes retain 180/180 correct points at the fixed 2 ns primary deadline. At 1 ns, C-only retains 170 correct / 10 unresolved; RC improves from 156 correct / 24 unresolved to 158 correct / 22 unresolved, only at SS / 1.62 V / 125 C / +/-10 mV. Mean RC core energy decreases from 421.044730 to 412.879469 fJ (-1.939286%, ratio of means; -1.945659%, mean per-point change), and worst recorded latency from 1.810632 to 1.760276 ns. All matched energy and delay pairs decrease, but their physical accuracy is unqualified. The approximately 1.94% energy change is not a robust PPA result; the 1% / 20 ps numerical criteria are not uncertainty bounds.
 

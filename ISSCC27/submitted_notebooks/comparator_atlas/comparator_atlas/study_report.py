@@ -706,6 +706,10 @@ Original code is MIT licensed; model and tool licenses are retained.</p>
 <script id="waveform-lab-data" type="application/json">{waveform_payload}</script>
 <script type="module">{javascript}</script>
 <script type="module">{waveform_javascript}</script></html>"""
+    from presentation import judge_decision
+
+    decision_data, decision_cube = judge_decision.build_payload()
+    html_body = judge_decision.integrate_report(html_body, decision_data, decision_cube)
     path = STUDY / "report.html"
     path.write_text(html_body, encoding="utf-8")
     write_json(STUDY / "presentation_manifest.json", {
@@ -728,8 +732,12 @@ Original code is MIT licensed; model and tool licenses are retained.</p>
         "single_row_analysis_sha256": sha256(area.FOLDER / "analysis/full45-analysis.json"),
         "rc_model_applicability_notice": pvt45_results.RC_SCOPE_NOTE,
         "sampled_schematic_analysis": sampled_analysis,
+        "decision_reader_source_sha256": sha256(Path(judge_decision.__file__)),
+        "decision_ui_source_sha256": sha256(STUDY.parents[1] / "presentation/decision_explorer.mjs"),
         "artifact_sha256": {
             "report.html": sha256(path), "explorer_data.json": sha256(STUDY / "explorer_data.json"),
+            "decision_data.json": sha256(STUDY / "decision_data.json"),
+            "decision_map_data.json": sha256(STUDY / "decision_map_data.json"),
             **{str(Path("figures") / filename): sha256(figures / filename) for filename in pictures},
         },
     })

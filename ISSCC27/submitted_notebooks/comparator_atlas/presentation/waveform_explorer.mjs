@@ -215,6 +215,16 @@ export function mountWaveformLab(document, data) {
   }
   document.defaultView?.addEventListener("resize", render);
   render();
+  document.defaultView.atlasWaveformLab = {
+    show(sampleId, deadline) {
+      inspectSample(data, sampleId, deadline);
+      controls.sample.value = sampleId;
+      controls.deadline.value = String(data.deadlines_ns.indexOf(deadline));
+      render();
+      controls.sample.focus();
+      document.getElementById("waveform-lab").scrollIntoView({ block: "start" });
+    },
+  };
 }
 
 if (typeof document !== "undefined") {

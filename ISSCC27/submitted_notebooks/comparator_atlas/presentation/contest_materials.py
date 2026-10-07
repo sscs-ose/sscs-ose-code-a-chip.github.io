@@ -15,12 +15,12 @@ from matplotlib.patches import Polygon
 
 import layout_evidence as physical
 import single_row_evidence as area
-from presentation.release_facts import load_facts, write_judge_guide
+from presentation.release_facts import load_facts
 from presentation.pvt45_results import RC_MODEL_LABEL, RC_SCOPE_NOTE
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results" / "study"
-PRESENTATION_TITLE = "Comparator Atlas: SKY130 StrongARM characterization"
+PRESENTATION_TITLE = "Comparator Atlas: correct before the deadline - or NONE?"
 INK, BLUE, MUTED, RULE = "#20252b", "#365d7d", "#505963", "#dce1e5"
 PAGE_INCHES = (24, 18)
 DESIGN_REFERENCES = [
@@ -83,19 +83,20 @@ def poster_figure(facts: dict):
                        "source_pixels": list(pixels.shape[:2][::-1]),
                        "allocated_bounds": list(bounds)})
 
-    text(left, 0.966, "Calibration, decision time and layout area",
-         36, weight="bold", role="title")
-    text(left, 0.919, "Comparator Atlas  |  SKY130 StrongARM characterization", 24, BLUE, role="subtitle")
+    text(left, 0.966, "Correct before the deadline - or NONE?",
+         34, weight="bold", role="title")
+    text(left, 0.919, "Comparator Atlas  |  specify, qualify, then compare energy",
+         22, BLUE, role="subtitle")
     text(left, 0.881, f"{author['name']}  |  {author['affiliation']}", 18, role="author")
     text(right, 0.881, "IEEE SSCS Code-a-Chip  /  ISSCC 2027", 16, role="contest")
     rule(left, 0.856, 0.92)
-    for x, heading in ((left, "Circuit and decision contract"),
-                       (center, "Three sampled specifications"),
-                       (right, "Area version and archived RC")):
+    for x, heading in ((left, "What a choice must satisfy"),
+                       (center, "Specify, qualify, then choose"),
+                       (right, "Separate matched layout example")):
         text(x, 0.838, heading, 23, weight="bold", role="heading")
 
-    text(left, 0.797, "27-MOS StrongARM; LVT inputs, SVT latch.\n"
-         "Source-gated trim: sign + four magnitude bits.", width=column_width)
+    text(left, 0.797, "Calibration alone is not qualification.\n"
+         "Every included point must be correct on time.", width=column_width)
     circuit = physical.circuit_guide_path()
     waveform = OUTPUT / "figures" / "single_row_worst.png"
     image(circuit, [left, 0.426, column_width, 0.307], "original_27_mos_schematic")
@@ -131,9 +132,9 @@ def poster_figure(facts: dict):
                  f"{choice['correct']}/{choice['points']} correct at all included samples", 16)
             text(x, y - 0.060, f"{choice['mean_core_energy_fj']:.3f} fJ mean core / cycle",
                  17, BLUE, role="mean_energy")
-    text(center, 0.392, "Post-hoc description of three compared designs: "
-         "all-point qualification, then least mean energy. "
-         "No interpolation or changed training selection.", 16, MUTED, width=column_width)
+    text(center, 0.392, "Post-hoc: qualify, then rank three designs. "
+         "Different-band energies are not a same-spec gain. "
+         "No interpolation or global optimum.", 16, MUTED, width=column_width)
     limits = selected["sampled_limits"]
     text(center, 0.316, f"Selected >= 3 mV band  /  same {selected['points']} samples",
          17, weight="bold")
@@ -164,7 +165,7 @@ def poster_figure(facts: dict):
     axes.axis("off")
     text(right, 0.598, f"Bbox (um2): adopted {geometry['candidate_area_um2']:.3f} / "
          f"matched a1 {geometry['control_area_um2']:.3f} (9.69% less).\n"
-         "14 native checks: DRC 0 / LVS / negatives; not signoff.",
+         "Historical native proofs reused, not rerun; no signoff.",
          16, MUTED, width=column_width, role="caption")
     for x, label in ((right, "Correct / 180"), (right + 0.12, "1 ns"),
                      (right + 0.20, "2 ns")):
@@ -199,8 +200,8 @@ def poster_figure(facts: dict):
          "Li, Xu & Iizuka (2022), DOI 10.1007/s10470-022-01992-6.", 14, MUTED, role="reference")
     text(left, 0.028, "Original code: MIT; SKY130: Apache-2.0. GitHub Copilot assisted implementation, "
          "experiment automation, figures and documentation; the author is responsible.", 14, role="acknowledgment")
-    text(right + 0.18, 0.119, "Notebook", 16, BLUE, url=facts["notebook_url"], role="link")
-    text(right + 0.25, 0.119, "Colab", 16, BLUE, url=facts["colab_url"], role="link")
+    text(right + 0.075, 0.119, "Source Notebook", 15, BLUE, url=facts["notebook_url"], role="link")
+    text(right + 0.22, 0.119, "Source Colab", 14, BLUE, url=facts["colab_url"], role="link")
     figure.canvas.draw()
     renderer = figure.canvas.get_renderer()
     measured = []
@@ -224,8 +225,11 @@ def poster_figure(facts: dict):
 
 
 def build() -> Path:
+    from presentation.judge_decision import OPENING, write_reader_docs
+
     facts = load_facts()
-    guide = write_judge_guide(facts)
+    write_reader_docs()
+    guide = ROOT / "REVIEWER_GUIDE.md"
     figure, audit = poster_figure(facts)
     author = facts["authors"][0]
     full = facts["postlayout_pvt45"]
@@ -239,8 +243,8 @@ def build() -> Path:
     plt.close(figure)
     abstract = (
         f"{PRESENTATION_TITLE}\n{author['name']} - {author['affiliation']}\n\n"
-        "This study measures calibration, decision deadline and full-cycle core energy "
-        "in a SKY130 StrongARM comparator. A declared nine-candidate sizing comparison "
+        + OPENING + "\n\n"
+        "A declared nine-candidate sizing comparison "
         "is followed by a lower-energy control and a nominal 27-device layout. "
         "For three locally calibrated schematic designs, a post-hoc strict specification "
         "map uses all 49 controlled-width-stress conditions and both signs at the "

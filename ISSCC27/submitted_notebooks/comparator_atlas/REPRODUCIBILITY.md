@@ -523,3 +523,51 @@ provenance only, not executable dependencies. The default saved-data reader does
 not run the archived native scripts that require unavailable private directories.
 All 400 models refer to the existing public raw-byte/canonical-Git manifest;
 no duplicate model corpus, LFS, private-only raw dependency or installer is added.
+# Integrated decision reader and dated execution scope
+
+The report, Notebook and poster now lead with a strict question: is any of
+three compared designs correct at every included sampled point before the
+deadline? Qualification precedes energy ranking; an infeasible specification
+returns **NONE**. The unchanged `presentation/specification_map.py` defines
+the 36 choices. `presentation/judge_decision.py` adds exact CSV record
+locations and connects the existing stored map and waveform lab, without
+changing measurements or promising a retained raw waveform for every key.
+Different sampled input-band energies are not a same-specification energy
+improvement. This calibrated 49-condition schematic comparison is separate
+from the archived nominal code-zero b1/a1 45-PVT layout example.
+
+From the entry directory, the presentation-only regeneration route is
+`python -B -m presentation.judge_decision`. It uses shipped Python sources,
+checked saved tables and checked existing figures; no private templates,
+session files or native geometry generator are required. Individual routes
+remain `python -B -m scripts.build_entry_notebook`,
+`python -B -m presentation.contest_materials` and the existing study-report
+renderer. Default Notebook execution remains saved-data mode; optional
+live/full modes keep their documented explicit prerequisites.
+
+**Dated maintainer scope (2026-10-07).** One actual GitHub HTTPS Windows
+default saved-data execution on 2026-10-06 retrieved source
+`db82273a5df8b73d39ebf20593309e433d1a1d50`: 28 cells visited, 13 code cells
+freshly executed, zero **top-level cell** errors, Python 3.10.18 and 11
+unchanged review pins. A 2026-10-07 recursive review subsequently found one
+saved layout-selector widget error: an obsolete column drop in its callback.
+Thus the older run does **not** establish complete interactive-reader success.
+Its Notebook SHA256 was
+`9335085a23b4f7db0fbded369c4ce969b41e04ffb0e54f8f9ca2d0167c66efd3`.
+A separately modified private preview was also executed once locally on
+2026-10-07 (28/13/0 top-level), with the same subsequently discovered widget
+failure. The initial local publication-candidate run also exposed it and
+failed the reader gate before commit or push. This release removes the
+obsolete drop and adds actual four-way layout/mode callback checks plus
+a recursive error validator and a negative widget-error fixture.
+**Neither older run certifies this changed public reader source.**
+Historical records are preserved, not relabeled. Detailed receipts remain
+private; these statements
+are not public execution-proof links. Release-specific execution results
+are reported separately with their actual source identities.
+
+No live SPICE, full campaign or native layout reconstruction was enabled in
+those reader runs. They are not external-human, Linux or Colab reproduction,
+physical-model qualification, silicon evidence or green-CI statements.
+Archived native proofs remain reused, not rerun. Archived RC-deck outcomes;
+model physical fidelity not yet qualified.
