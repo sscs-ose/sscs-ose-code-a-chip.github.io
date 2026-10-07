@@ -459,7 +459,11 @@ def notebook(analysis, team=None):
     title = FULL_TITLE if primary else FALLBACK_TITLE
     total = analysis['functional']['total_case_executions']
     author_line = ('owner-confirmed names, affiliations and representative are pending. No placeholder identity is presented as an author. See `TEAM.json` before any public submission.'
-                   if team is None else '; '.join(f"{p['name']} ({p['name_romanized']}) — {p['affiliation']} — {p['email']}" for p in team['members'])
+                   if team is None else '; '.join(
+                       f"{p['name_romanized']} — {p['affiliation_en']} — {p['email']}"
+                       if p.get('affiliation_en') else
+                       f"{p['name']} ({p['name_romanized']}) — {p['affiliation']} — {p['email']}"
+                       for p in team['members'])
                    + '. Representative: ' + team['representative'] + '.')
     cells = [cell('markdown', f'''# {title}
 
@@ -656,13 +660,26 @@ This reproducible view selects top-cell polygons and paths on GDS layers 67–72
         cell('code', f'''display(Image(filename=str(ROOT / 'figures/final/layout_overview.png'), alt={layout_alt!r}))
 display(Markdown({layout_caption!r}))
 show_details('Layout file identities', analysis['layout_sources'])'''),
+        cell('markdown', f'''## What this experiment establishes
+
+### {total}/{total} exact agreement
+
+Across 2×2, 4×4 and 8×8 configurations, the independent numerical model, token-cycle model and recorded RTL observations agree on every accepted case: exact numerical outputs and exact cycle counts.
+
+### Cycle semantics are executable, not assumed
+
+The harness observes completion from the RTL's result-valid behavior and counts simulated clock edges. A closed-form latency predictor does not supply the observed completion time.
+
+### Evidence levels remain separate
+
+Functional correctness, successful tool execution, generated physical artifacts and qualified physical evidence answer different questions. The accepted functional result stands on its own; the incomplete accelerator physical family supports no comparative performance or ranking claim.'''),
         cell('markdown', '''## 6. Reproduce and extend responsibly
 
 1. Create a Python environment and install `requirements.txt`.
 2. Run `python scripts/build_submission.py --verify-package` from this directory. This verifies bundled hashes, reparses the counter evidence, regenerates GEMM/token results and checks captured RTL observations.
 3. Run `python scripts/reproduce_figures.py --root . --portable --check` to verify figure regeneration, then execute this notebook top to bottom.
 
-The full development repository retains source freezes, Git history, complete capture receipts and the original qualification runners. Full repository reproduction and fresh tool execution have different costs and requirements from the portable offline replay; see `README.md`. Do not treat a cached notebook output as new physical evidence.
+The package supports offline replay of the recorded observations. Optional fresh tool runs are described in `REBUILD.md`; the development repository retains the complete run history and qualification records.
 
 Boundaries: idealized streaming compute core; no external-memory system, application demonstration, power or energy estimate. Verification coverage is finite. A single PDK/library and fixed backend cannot establish behavior across technologies or process variation. Agent assistance was used for engineering, tests and explanation; humans remain responsible for claims, provenance, licensing and authorship.
 
@@ -902,6 +919,104 @@ qualified; the original accepted measurements remain unchanged.
     write_asset(destination / 'REBUILD.md', text)
 
 
+def readme(analysis):
+    """Render the reviewer overview from accepted structured functional data."""
+    total = analysis['functional']['total_case_executions']
+    numerical = sum(row['numerical_passed'] for row in analysis['functional']['coverage'])
+    cycles = sum(row['cycle_passed'] for row in analysis['functional']['coverage'])
+    title = FULL_TITLE if analysis['analysis_mode'] == 'PRIMARY_RESEARCH' else FALLBACK_TITLE
+    return f'''# {title}
+
+Explore a parameterized **2×2 / 4×4 / 8×8 output-stationary systolic array**
+with an independent numerical model, an independent token-cycle model and
+parameterized SystemVerilog RTL. Across
+**{analysis['functional']['total_case_executions']} accepted case/configuration executions**,
+the models and captured RTL agree exactly on numerical results and cycle counts.
+
+**[Open the executable Jupyter notebook](Model2GDS.ipynb)** to inspect the design,
+replay the verification, and follow the reproducible
+**raw evidence → parser → structured result → figure** workflow.
+A separate tiny-counter design proves the open-source RTL-to-GDS toolchain.
+
+## Key results
+
+| Result | Model2GDS |
+|---|---|
+| Array sizes | 2×2 / 4×4 / 8×8 |
+| Accepted executions | **{total}** |
+| Numerical agreement | **{numerical} / {total}** |
+| Cycle agreement | **{cycles} / {total}** |
+| Models | Independent numerical + token-cycle |
+| RTL | Parameterized SystemVerilog |
+| Reproduction | Executable notebook + offline replay |
+
+![Independent token-model cycles and RTL-observed cycles coincide across all accepted 2×2, 4×4 and 8×8 executions.](figures/final/cycle_agreement.png)
+
+*Exact cycle agreement across the accepted corpus. Coincident points can overlap;
+this verifies cycle semantics and does not measure physical frequency.*
+
+**Yixuan Zhuang — School of Microelectronics, Fudan University**  
+Contact: yixuanzhuangfudan@gmail.com · [Team metadata](TEAM.json)
+
+## Offline reproduction
+
+Use Python 3.12 with the recorded dependency versions. From this directory:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+python scripts/build_submission.py --verify-package
+python scripts/reproduce_figures.py --root . --portable --check
+python scripts/build_submission.py --execute-notebook
+```
+
+On Windows, activate `.venv/Scripts/Activate.ps1`.
+JupyterLab can also open the notebook and run all cells. The offline verification
+needs only Python's standard library; display/plot dependencies are listed above.
+Nothing in this workflow invokes a simulator, synthesis, P&R, STA or Docker.
+`--execute-notebook` runs cells in memory and preserves the bundled source bytes.
+The exact observed notebook dependency versions are in `support/notebook_runtime.json`.
+
+The replay recomputes GEMM/token results from preserved inputs and compares them
+with the recorded RTL observations. It reparses the tiny-counter raw evidence and
+regenerates analysis/figures, without running a simulator or physical flow.
+Raw command records retain historical machine paths solely as provenance.
+
+## What is included
+
+- `Model2GDS.ipynb`: the narrative and executable checks.
+- `model/`, `rtl/`, `verification/`: independent references and synthesizable fabric/harness.
+- `results/processed/`: immutable accepted functional/counter data and final analysis.
+- `results/raw/`: captured simulation and counter RTL-to-GDS sources for displayed claims.
+- `figures/final/`: deterministic figures and their source manifest.
+- `file_manifest.json`: exact SHA256 and byte size of every package file, excluding itself.
+- `environment/toolchain.lock.json`: recorded tool, PDK and library versions.
+- `docs/`: arithmetic, cycle, workload and final-analysis contracts.
+
+[REBUILD.md](REBUILD.md) describes optional fresh Verilator and pinned OpenLane
+runs from bundled sources, with outputs kept in a separate work directory.
+The notebook and these rebuild demonstrations are self-contained. The complete
+development history and qualification records are available from the author.
+
+## Scope and submission
+
+The tiny counter proves the ASIC toolchain; it is never an accelerator result.
+Accelerator physical qualification is incomplete: the final 2×2 implementation
+qualified, 4×4 did not pass final antenna signoff, and 8×8 was therefore not run.
+Incomplete physical families and rejected physical metrics are excluded from
+comparative performance and ranking claims. No silicon Fmax, power/energy or
+process-variation result is claimed. The notebook retains the qualification
+summary and expandable provenance.
+
+Apache-2.0 project license: `LICENSE`. GDS cell attribution: `NOTICE` and
+`third_party/`. Primary references: `REFERENCES.md`.
+Official rule provenance: `support/official_rules.json`. Place this entire folder
+under `ISSCC27/submitted_notebooks/Model2GDS/` in the official fork; change no other
+project. Team and contact details are in `TEAM.json`.
+'''
+
+
 def build(root=ROOT, *, execute=False):
     root = Path(root).resolve()
     analysis, functional, frozen = (read(root / p) for p in (ANALYSIS, FUNCTIONAL, 'PROJECT_FREEZE.json'))
@@ -943,82 +1058,7 @@ The project source uses the bundled Apache-2.0 license. Bundled GDS contains
 upstream standard-cell geometry; `NOTICE` identifies its sources and `third_party/`
 retains exact upstream license copies. Tools and PDK material retain their licenses.
 ''')
-    title = FULL_TITLE if analysis['analysis_mode'] == 'PRIMARY_RESEARCH' else FALLBACK_TITLE
-    write_asset(destination / 'README.md', f'''# {title}
-
-Explore a parameterized **2×2 / 4×4 / 8×8 output-stationary systolic array**
-with independent numerical and token-cycle models. Across
-**{analysis['functional']['total_case_executions']} accepted case/configuration executions**,
-the models and captured RTL agree exactly on numerical results and cycle counts.
-
-**[Open the executable Jupyter notebook](Model2GDS.ipynb)** to inspect the design,
-replay the verification, and follow the reproducible
-**raw evidence → parser → structured result → figure** workflow.
-A separate tiny-counter design proves the open-source RTL-to-GDS toolchain.
-
-This educational design workflow includes reusable Python/SystemVerilog sources,
-preserved evidence and reproducible figures. Author and representative details
-are in [TEAM.json](TEAM.json) and the notebook header.
-
-## Offline reproduction
-
-Use Python 3.12 with the recorded dependency versions. From this directory:
-
-```bash
-python -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements.txt
-python scripts/build_submission.py --verify-package
-python scripts/reproduce_figures.py --root . --portable --check
-python scripts/build_submission.py --execute-notebook
-```
-
-On Windows, activate `.venv/Scripts/Activate.ps1`.
-JupyterLab can also open the notebook and run all cells. The offline verification
-needs only Python's standard library; display/plot dependencies are listed above.
-Nothing in this workflow invokes a simulator, synthesis, P&R, STA or Docker.
-`--execute-notebook` runs cells in memory and preserves the bundled source bytes.
-The exact observed notebook dependency versions are in `support/notebook_runtime.json`.
-
-The replay recomputes GEMM/token results from preserved inputs and compares them
-with the recorded RTL observations. It reparses the tiny-counter raw evidence and
-regenerates analysis/figures. It does not pretend to be a new simulator/ASIC run.
-Raw command records retain historical machine paths solely as provenance.
-
-## What is included
-
-- `Model2GDS.ipynb`: the narrative and executable checks.
-- `model/`, `rtl/`, `verification/`: independent references and synthesizable fabric/harness.
-- `results/processed/`: immutable accepted functional/counter data and final analysis.
-- `results/raw/`: captured simulation and counter RTL-to-GDS sources for displayed claims.
-- `figures/final/`: deterministic figures and their source manifest.
-- `file_manifest.json`: exact SHA256 and byte size of every package file, excluding itself.
-- `environment/toolchain.lock.json`: observed tool/PDK/library identities, not guessed versions.
-- `docs/`: arithmetic, cycle, workload and final-analysis contracts.
-
-`REBUILD.md` supplies optional fresh Verilator and pinned OpenLane commands using
-only bundled source/configuration. The portable RTL helper needs no historical
-Git objects. Its outputs go to a new external work directory. Full forensic
-qualification additionally uses the development repository's frozen history and
-original runners; the basic notebook and rebuild demonstrations do not depend on
-that repository being published or available.
-The full forensic archive is available from the author using the contact in
-`TEAM.json`. In research mode, `support/physical_evidence_inventory.json` lists
-both bundled metric authorities and omitted bulky intermediates explicitly.
-
-## Scope and submission
-
-The tiny counter proves the ASIC toolchain; it is never an accelerator result.
-Only a complete qualified set of implementations can support physical comparisons. The
-notebook excludes rejected performance and makes no accelerator
-ranking claim. No silicon Fmax, power/energy or process-variation result is claimed.
-
-Apache-2.0 project license: `LICENSE`. GDS cell attribution: `NOTICE` and
-`third_party/`. Primary references: `REFERENCES.md`.
-Official rule provenance: `support/official_rules.json`. Place this entire folder
-under `ISSCC27/submitted_notebooks/Model2GDS/` in the official fork; change no other
-project. Team and contact details are in `TEAM.json`.
-''')
+    write_asset(destination / 'README.md', readme(analysis))
     nb = notebook(analysis, team)
     write_asset(destination / 'Model2GDS.ipynb', canonical(nb))
     seal_package(destination)

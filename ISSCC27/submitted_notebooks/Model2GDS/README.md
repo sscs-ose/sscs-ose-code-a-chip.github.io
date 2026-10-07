@@ -1,7 +1,8 @@
 # Model2GDS: An Auditable Model-to-RTL Workflow for Reproducible Systolic-Array Design
 
 Explore a parameterized **2×2 / 4×4 / 8×8 output-stationary systolic array**
-with independent numerical and token-cycle models. Across
+with an independent numerical model, an independent token-cycle model and
+parameterized SystemVerilog RTL. Across
 **441 accepted case/configuration executions**,
 the models and captured RTL agree exactly on numerical results and cycle counts.
 
@@ -10,9 +11,25 @@ replay the verification, and follow the reproducible
 **raw evidence → parser → structured result → figure** workflow.
 A separate tiny-counter design proves the open-source RTL-to-GDS toolchain.
 
-This educational design workflow includes reusable Python/SystemVerilog sources,
-preserved evidence and reproducible figures. Author and representative details
-are in [TEAM.json](TEAM.json) and the notebook header.
+## Key results
+
+| Result | Model2GDS |
+|---|---|
+| Array sizes | 2×2 / 4×4 / 8×8 |
+| Accepted executions | **441** |
+| Numerical agreement | **441 / 441** |
+| Cycle agreement | **441 / 441** |
+| Models | Independent numerical + token-cycle |
+| RTL | Parameterized SystemVerilog |
+| Reproduction | Executable notebook + offline replay |
+
+![Independent token-model cycles and RTL-observed cycles coincide across all accepted 2×2, 4×4 and 8×8 executions.](figures/final/cycle_agreement.png)
+
+*Exact cycle agreement across the accepted corpus. Coincident points can overlap;
+this verifies cycle semantics and does not measure physical frequency.*
+
+**Yixuan Zhuang — School of Microelectronics, Fudan University**  
+Contact: yixuanzhuangfudan@gmail.com · [Team metadata](TEAM.json)
 
 ## Offline reproduction
 
@@ -36,7 +53,7 @@ The exact observed notebook dependency versions are in `support/notebook_runtime
 
 The replay recomputes GEMM/token results from preserved inputs and compares them
 with the recorded RTL observations. It reparses the tiny-counter raw evidence and
-regenerates analysis/figures. It does not pretend to be a new simulator/ASIC run.
+regenerates analysis/figures, without running a simulator or physical flow.
 Raw command records retain historical machine paths solely as provenance.
 
 ## What is included
@@ -47,25 +64,23 @@ Raw command records retain historical machine paths solely as provenance.
 - `results/raw/`: captured simulation and counter RTL-to-GDS sources for displayed claims.
 - `figures/final/`: deterministic figures and their source manifest.
 - `file_manifest.json`: exact SHA256 and byte size of every package file, excluding itself.
-- `environment/toolchain.lock.json`: observed tool/PDK/library identities, not guessed versions.
+- `environment/toolchain.lock.json`: recorded tool, PDK and library versions.
 - `docs/`: arithmetic, cycle, workload and final-analysis contracts.
 
-`REBUILD.md` supplies optional fresh Verilator and pinned OpenLane commands using
-only bundled source/configuration. The portable RTL helper needs no historical
-Git objects. Its outputs go to a new external work directory. Full forensic
-qualification additionally uses the development repository's frozen history and
-original runners; the basic notebook and rebuild demonstrations do not depend on
-that repository being published or available.
-The full forensic archive is available from the author using the contact in
-`TEAM.json`. In research mode, `support/physical_evidence_inventory.json` lists
-both bundled metric authorities and omitted bulky intermediates explicitly.
+[REBUILD.md](REBUILD.md) describes optional fresh Verilator and pinned OpenLane
+runs from bundled sources, with outputs kept in a separate work directory.
+The notebook and these rebuild demonstrations are self-contained. The complete
+development history and qualification records are available from the author.
 
 ## Scope and submission
 
 The tiny counter proves the ASIC toolchain; it is never an accelerator result.
-Only a complete qualified set of implementations can support physical comparisons. The
-notebook excludes rejected performance and makes no accelerator
-ranking claim. No silicon Fmax, power/energy or process-variation result is claimed.
+Accelerator physical qualification is incomplete: the final 2×2 implementation
+qualified, 4×4 did not pass final antenna signoff, and 8×8 was therefore not run.
+Incomplete physical families and rejected physical metrics are excluded from
+comparative performance and ranking claims. No silicon Fmax, power/energy or
+process-variation result is claimed. The notebook retains the qualification
+summary and expandable provenance.
 
 Apache-2.0 project license: `LICENSE`. GDS cell attribution: `NOTICE` and
 `third_party/`. Primary references: `REFERENCES.md`.
