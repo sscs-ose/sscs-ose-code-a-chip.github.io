@@ -23,8 +23,8 @@ and processes them in two lanes, and to a datapath that streams data to and from
 single check. The second integration, HSKEM-2, carries this design: a decapsulation takes 6,856 instead
 of 99,537 cycles, 14.5 times fewer and within 3 % of a compact published design, the FPGA board
 reproduces the count to the cycle, and the signed-off layout, which passes LVS and, once the implant gaps
-inside the OpenRAM macros are closed, the complete DRC deck, spends about 31 µJ per decapsulation instead
-of 0.35 mJ.
+inside the OpenRAM macros are closed, the complete DRC deck, spends about 27 µJ per decapsulation instead
+of 0.34 mJ.
 
 The entry point is `HSKEM_PQC_SKY130.ipynb`, which runs locally or in Google Colab. Every table and
 figure in the notebook is computed from the files in this folder, and the quantitative statements in its

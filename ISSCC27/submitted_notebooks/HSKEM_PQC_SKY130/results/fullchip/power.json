@@ -9,14 +9,16 @@
   "registers_simulated_in_shadow": 805,
   "register_references_tied_off": 0,
   "power_mw": {
-    "sequential": 31.73368,
-    "combinational": 21.47162,
+    "sequential": 30.82962,
+    "combinational": 5.3682620000000005,
     "clock": 37.47554
   },
-  "logic_power_mw": 90.68084,
-  "logic_energy_per_decaps_uj": 24.864686327999998,
+  "logic_power_mw": 73.673422,
+  "logic_energy_per_decaps_uj": 20.2012523124,
   "method": "zero-delay activity of the routed logic from a shadow of the netlist driven by the RTL simulation (scripts/shadow_netlist.py); clock network and register clock pins from OpenSTA's clock analysis; SRAM macros excluded (their Liberty power views are not physical)",
   "registers_never_toggling": 23354,
   "registers_compared": 29774,
-  "registers_note": "flip-flops of the routed netlist whose output never changes in the window, counted on the shadow VCD, which traces every flip-flop (scripts/shadow_toggles.py)"
+  "registers_note": "flip-flops of the routed netlist whose output never changes in the window, counted on the shadow VCD, which traces every flip-flop (scripts/shadow_toggles.py)",
+  "vcd_time_stretch": 4,
+  "vcd_time_stretch_note": "the system testbench runs a 10 ns clock and the chip's constraints a 40 ns one; the shadow VCD is stretched by this factor before OpenSTA reads it, because OpenSTA counts transitions per second of VCD time (scripts/vcd_shift.py). An earlier version of these results omitted the stretch and so priced the data-dependent power at four times the clock rate."
 }

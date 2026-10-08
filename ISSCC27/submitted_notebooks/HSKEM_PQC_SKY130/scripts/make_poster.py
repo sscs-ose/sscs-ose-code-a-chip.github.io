@@ -164,7 +164,7 @@ def main(out: str = "figures/poster.pdf") -> None:
     ax.set_title(f"A decapsulation on HSKEM-2: {tot:.0f} µJ", fontsize=24, loc="left")
     text(x, 0.11, f"HSKEM-2, the signed-off SKY130 chip of the streamed system, spends {tot:.0f} µJ per decapsulation "
                   f"instead of HSKEM-1's {N['e_first'] / 1e3:.2f} mJ. The rest is set by the integration: gating the clock "
-                  f"of idle blocks and the chip selects of the macros would save roughly 28 to 42 %.",
+                  f"of idle blocks and the chip selects of the macros would save roughly 33 to 49 %.",
          21, width=cw)
 
     # --- column III
@@ -177,7 +177,7 @@ def main(out: str = "figures/poster.pdf") -> None:
                    f"first-order masking (threshold 4.5).", 22, width=cw)
     lessons = ["Weigh a block by how often the system waits for it.",
                "Measure the integrated chip, not only its blocks.",
-               "Check the check: ten results here first looked right and were not.",
+               "Check the check: eleven results here first looked right and were not.",
                "Tie the prose to the data: assertions stop the notebook when they part."]
     text(x, 0.26, "What transfers", 32, "bold", accent)
     y = 0.225

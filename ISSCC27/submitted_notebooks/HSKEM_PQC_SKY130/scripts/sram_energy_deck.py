@@ -21,7 +21,8 @@ import random
 import re
 import sys
 
-VDD, T = 1.8, 40.0                           # V, clock period ns
+VDD = 1.8                                    # V
+T = float(os.environ.get("SRAM_ENERGY_T_NS", 40.0))   # clock period [ns]; the committed results use 40 (25 MHz)
 SETTLE = int(os.environ.get("SRAM_ENERGY_SETTLE", 3))   # idle cycles before the first write
 N_W = int(os.environ.get("SRAM_ENERGY_ACCESSES", 3))   # writes (= reads)
 REPEAT = os.environ.get("SRAM_ENERGY_READS") == "repeat"

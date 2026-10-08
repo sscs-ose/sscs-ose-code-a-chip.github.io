@@ -66,7 +66,11 @@ done
 (( ok )) || { echo "shadow compile failed, see $W/compile.log"; exit 2; }
 (cd "$ROOT/results/system_sim" && vvp -n "$W/shadow.vvp" +skip=1 +vcd="$W/shadow.vcd" > "$W/sim.log" 2>&1)
 grep "DECAPS_VCD" "$W/sim.log"
-python3 "$ROOT/scripts/vcd_shift.py" "$W/shadow.vcd" "$W/shadow0.vcd" && rm -f "$W/shadow.vcd"
+# stretch the testbench's 10 ns clock to the chip's clock (OpenSTA reads activity per second of VCD time)
+CLK_NS=$(grep -m1 -oE "create_clock.*-period [0-9.]+" "$B/6_final.sdc" | grep -oE "[0-9.]+$")
+TB_NS=$(grep -m1 -oE "always #[0-9]+ clk" "$SRC/sim/tb/tb_trustedge_spi.sv" | grep -oE "[0-9]+" | head -1)
+K=$(python3 -c "k = $CLK_NS / (2 * $TB_NS); assert k == int(k), k; print(int(k))")
+python3 "$ROOT/scripts/vcd_shift.py" "$W/shadow.vcd" "$W/shadow0.vcd" "$K" && rm -f "$W/shadow.vcd"
 python3 "$ROOT/scripts/shadow_toggles.py" "$B/6_final.v" "$W/shadow0.vcd" "$OUT/register_toggles.json" "$W/toggles_by_block.json"
 cat > "$W/power.tcl" <<TCL
 read_liberty $ORFS/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
@@ -97,8 +101,8 @@ foreach inst [[ord::get_db_block] getInsts] {
 close \$fh
 TCL
 "$ORFS/tools/install/OpenROAD/bin/openroad" -no_splash -exit "$W/power.tcl" > "$W/power.log" 2>&1
-python3 - "$W" "$OUT/power.json" "$B/6_final.sdc" <<'PY'
-import json, re, sys, pathlib
+VCD_K="$K" python3 - "$W" "$OUT/power.json" "$B/6_final.sdc" <<'PY'
+import json, os, re, sys, pathlib
 w, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 log, sim = (w / "power.log").read_text(), (w / "sim.log").read_text()
 skip = (w / "shadow_skip.txt").read_text().split()
@@ -115,6 +119,7 @@ res = {"chip": "chip v2 sign-off final (report/orfs_chip_v2_r2_a3grt/final_from_
        "window_cycles": cycles, "clock_ns": clk, "corner": "tt_025C_1v80",
        "pins_annotated_from_vcd": vcd_pins, "pins_unannotated": unann,
        "registers_simulated_in_shadow": n_self, "register_references_tied_off": len(skip) - n_self,
+       "vcd_time_stretch": int(os.environ["VCD_K"]),
        "power_mw": {g: v * 1e3 for g, v in logic.items()}, "logic_power_mw": sum(logic.values()) * 1e3,
        "logic_energy_per_decaps_uj": sum(logic.values()) * cycles * clk * 1e-9 * 1e6,
        "method": "zero-delay activity of the routed logic from a shadow of the netlist driven by the RTL simulation "

@@ -17,6 +17,8 @@ def main() -> None:
     ap.add_argument("--ntt", type=int, default=200, help="random NTT polynomials")
     ap.add_argument("--keccak", type=int, default=200, help="random Keccak states")
     ap.add_argument("--seed", type=int, default=2027)
+    ap.add_argument("--more-corners", action="store_true",
+                    help="also alternating 0 / q-1 patterns, every coefficient +-1, and the first and last coefficient set")
     args = ap.parse_args()
 
     out = pathlib.Path(args.out)
@@ -25,6 +27,9 @@ def main() -> None:
 
     # Corner cases first, then uniform random coefficients in [0, q).
     polys = [[0] * 256, [ref.Q - 1] * 256, [1] + [0] * 255, list(range(256))]
+    if args.more_corners:
+        polys += [[0, ref.Q - 1] * 128, [ref.Q - 1, 0] * 128, [rng.choice((1, ref.Q - 1)) for _ in range(256)],
+                  [ref.Q - 1] + [0] * 254 + [ref.Q - 1], [0] * 255 + [ref.Q - 1]]
     polys += [[rng.randrange(ref.Q) for _ in range(256)] for _ in range(args.ntt)]
 
     with open(out / "ntt_in.hex", "w") as fi, \

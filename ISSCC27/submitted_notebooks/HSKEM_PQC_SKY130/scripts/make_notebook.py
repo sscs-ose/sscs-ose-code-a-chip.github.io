@@ -33,8 +33,8 @@ def code(s: str) -> None:
 GLANCE = [
     ("Decapsulation, HSKEM-2 vs HSKEM-1", "6,856 vs 99,537 cycles (14.5× fewer), every check and output unchanged; "
      "6,858 on the FPGA board in 5/5 runs of the streamed build", "§8, §10"),
-    ("Energy per decapsulation, 25 MHz", "31 vs 353 µJ (11× less); clock network and register clock pins 61%, "
-     "SRAM macros 21%, combinational logic 19%", "§9"),
+    ("Energy per decapsulation, 25 MHz", "27 vs 344 µJ (13× less); clock network and register clock pins 70%, "
+     "SRAM macros 24%, combinational logic 6%", "§9"),
     ("HSKEM-2 layout", "11.2 mm² die, 361,801 standard cells, 18 SRAM macros; timing met at the typical corner "
      "(27.8 MHz), 13.9 MHz at the slow corner", "§9, §13"),
     ("HSKEM-2 sign-off", "LVS: circuits match uniquely, with the SRAMs verified separately; DRC: 0 markers once "
@@ -84,7 +84,7 @@ The answers redesigned the chip. Their main lesson is that a block's price depen
 Keccak, nine times slower on its own, barely lengthened a decapsulation of HSKEM-1 but would add about a
 third once everything else was fast, while the single-port store, the cheaper block, set most of HSKEM-1's
 latency. Two coefficients per SRAM word, two butterfly lanes and a streamed datapath that removes no check
-became **HSKEM-2**, which needs 14.5 times fewer cycles and eleven times less energy per decapsulation; the
+became **HSKEM-2**, which needs 14.5 times fewer cycles and thirteen times less energy per decapsulation; the
 FPGA board confirms the cycle count, and the layout passes layout-versus-schematic (LVS) and the complete
 design-rule (DRC) deck within the limits of Section 13. Both chips are pre-silicon. Every number below is
 recomputed from committed results and guarded by an assertion, except a few development-log figures marked
@@ -99,7 +99,7 @@ as such; chip-level results rest on private routed databases, published as summa
 * **A block decision priced at system level twice**, with opposite verdicts (Section 8).
 * **An open SKY130 HSM core, signed off within the limits of Section 13,** with transistor-level SRAM
   energies and a published GDS (Section 9).
-* **Ten open-flow results that looked right and were not**, each with the check that exposed it (Section 12).
+* **Eleven open-flow results that looked right and were not**, each with the check that exposed it (Section 12).
 
 **Results at a glance** (the first cell after Setup recomputes every value from the committed results):
 
@@ -326,7 +326,7 @@ assert 8.5 < mac0.latency_us_at_fmax / pkd.latency_us_at_fmax < 9.5 and 0.28 < e
 assert (psy_["published"], psy_["D"]) == (99537, 36110)
 assert all(ssy_["checks"].values()) and ssy_["decaps_cycles"]["H"]["sram_only"] == 6856
 assert fbd_.result_pass.all() and (fbd_.decaps_cycles == 6858).all()
-assert 10.5 < e_first / e_tot < 11.5 and 30 < e_tot < 32.5                  # "eleven times less", "about 31 µJ"
+assert 12.5 < e_first / e_tot < 13.4 and 26 < e_tot < 27.5                  # "thirteen times less", "about 27 µJ"
 assert 14.4 < psy_["published"] / h_["sram_only"] < 14.6                     # "14.5 times fewer"
 assert dse.loc[("ntt_packed2", 20.0)].cycles == 568 and pkd.cycles == 988
 assert pw_["window_cycles"] + 1 == ssy_["decaps_cycles"]["H"]["sram_only"]   # the chip runs the final design
@@ -965,6 +965,7 @@ assert (it.drc_errors == 0).all() and (it.antenna_violating_nets == 0).all()
 assert it.loc["ntt_opt_pipe_w12", "latency_us_at_fmax"] < 0.75 * base_it.latency_us_at_fmax
 assert it.loc["ntt_opt_b1_w12", "cell_area_um2"] < 0.8 * base_it.cell_area_um2
 assert it.loc["ntt_opt_b1_w12", "fmax_mhz"] >= 50 > base_it.fmax_mhz
+assert base_it.flops - it.loc["ntt_opt_b1_w12", "flops"] == 1028                  # "removes 1,028 flip-flops"
 assert base_it.flops - it.loc["ntt_opt_b1_w12", "flops"] == 1024 + 4    # stated in the text below
 tab.round(3)
 """)
@@ -1587,6 +1588,7 @@ assert 0.66 < pH["ntt_busy"] / pH["cycles"] < 0.68 and 0.65 < pH["sponge_busy"] 
 assert pHa["sponge_busy"] / pHa["cycles"] > 0.995
 assert 0.035 < serial_then - 1 < 0.045 and 0.35 < serial_now - 1 < 0.37
 assert pD["ntt_busy"] / pD["cycles"] < 0.3
+assert abs(4 * 568 + 4 * 569 - 4550) < 10 and dse.loc[("ntt_packed2", 20.0)].cycles == 568   # "the eight transforms alone take about 4,550 cycles"
 """)
 
 md(r"""
@@ -1652,6 +1654,7 @@ assert (m["finish__timing__drv__max_slew"], m["finish__timing__drv__max_cap"]) =
 # the abstract quotes these figures
 assert m["finish__design__instance__count__stdcell"] > 360_000 and m["finish__design__instance__count__macros"] == 18
 assert s["sram_masters"] == 7 and s["drc_markers"] == 0 and s["status"] == "PASS"
+assert round(m["finish__design__instance__count__class:sequential_cell"], -3) == 30000                # "30,000 registers"
 # the chip's configuration (final design + the two (chip) defines) in the full-system testbench
 chip_sim = (ROOT/"results/system_sim/tb_trustedge_spi_sram_only_chipv2acc.log").read_text(errors="replace")
 h_sim = (ROOT/"results/system_sim/tb_trustedge_spi_sram_only_strH.log").read_text(errors="replace")
@@ -1672,7 +1675,7 @@ plt.show()
 """)
 
 md(r"""
-### Energy: eleven times less per decapsulation
+### Energy: thirteen times less per decapsulation
 
 Both chips are priced by the same method: the profiled decapsulation is replayed with the extracted
 parasitics on a shadow of the routed netlist, whose combinational cells are those of the layout and whose
@@ -1721,7 +1724,7 @@ axes[0].legend(ncol=3, loc="lower left", bbox_to_anchor=(0, 1.22), frameon=False
 import warnings
 with warnings.catch_warnings():          # tight_layout cannot place the legend above (a); the layout is set by hand
     warnings.simplefilter("ignore", UserWarning)
-    ps.finish(fig, title="HSKEM-2 spends eleven times less energy per decapsulation than HSKEM-1")
+    ps.finish(fig, title="HSKEM-2 spends thirteen times less energy per decapsulation than HSKEM-1")
 fig.text(0.01, -0.02, "Lower bars of (b) are projections from the measured activity, not changes to HSKEM-2. "
          "Typical corner; logic from zero-delay activity.", fontsize=8.5, color=ps.MUTED)
 ps.save_pdf(fig, "decaps_energy"); plt.show()
@@ -1737,37 +1740,38 @@ cmp_ = pd.DataFrame({"HSKEM-1": [pw0["window_cycles"] + 1, logic0, sram0, logic0
                     index=["decapsulation [cycles]", "logic [µJ]", "SRAM macros [µJ]", "total [µJ]", "mean power [mW]"])
 nbd.show(cmp_.round(1).rename_axis("per decapsulation, 25 MHz"), index=True)
 # guards for the statements made in the text below
-assert 0.74 < (e["clock"] + e["sequential"]) / logic < 0.79                   # "about three quarters is clock"
+assert 0.90 < (e["clock"] + e["sequential"]) / logic < 0.95                   # "more than nine tenths is clock"
 assert 0.76 < pw["registers_never_toggling"] / pw["registers_compared"] < 0.8  # "more than three quarters"
-assert 30 < logic + sram < 32.5                                                # "about 31 µJ"
-assert 0.18 < sram / (logic + sram) < 0.23                                     # "about a fifth"
+assert 26 < logic + sram < 27.5                                                # "about 27 µJ"
+assert 0.22 < sram / (logic + sram) < 0.26                                     # "about a quarter"
 assert 0.7 < 1 - gate / sram < 0.78                                            # "about three quarters"
-assert 27.5 < 100 * (sram - gate + saved_lo) / (logic + sram) < 28.5           # "roughly 28 to 42 %"
-assert 41.0 < 100 * (sram - gate + saved_hi) / (logic + sram) < 42.5
+assert 32.0 < 100 * (sram - gate + saved_lo) / (logic + sram) < 33.5           # "roughly 33 to 49 %"
+assert 48.0 < 100 * (sram - gate + saved_hi) / (logic + sram) < 49.5
 assert cg["idle_flip_flops"] == 13405
 assert useful / built < 0.2 and len(tied) == 17 and "u_shared_ntt.u_sram" not in tied   # "fewer than one in five"
 assert cg["idle_blocks"] == ["g_qualification_puf_vault", "u_hsm_shell", "u_security_hmac", "u_c2_shake_drbg", "u_puf"]
 assert 0.2 < cg["saved_fraction"] and cg["saved_upper_fraction"] < 0.5
-assert 10.5 < (logic0 + sram0) / (logic + sram) < 11.5                         # "eleven times less"
-assert 1.25 < ((logic + sram) / t_dec) / ((logic0 + sram0) / t0) < 1.33        # "about 30 % higher"
+assert 12.5 < (logic0 + sram0) / (logic + sram) < 13.4                         # "thirteen times less"
+assert 1.10 < ((logic + sram) / t_dec) / ((logic0 + sram0) / t0) < 1.15        # "about an eighth higher"
 assert abs(logic0 - pw0["logic_energy_per_decaps_uj"]) < 0.01 and abs(logic - pw["logic_energy_per_decaps_uj"]) < 0.01
-assert 0.33 < (logic0 + sram0) * 1e-3 < 0.37                                    # "0.35 mJ" (abstract)
-assert (e0["clock"] + e0["sequential"]) / logic0 > 0.95                          # "96 % of HSKEM-1's logic power"
+assert round(logic0 + sram0) == 344                                            # "the 344 µJ of HSKEM-1"
+assert round(100 * (e0["clock"] + e0["sequential"]) / logic0) == 99              # "99 % of HSKEM-1's logic power"
+assert pw["vcd_time_stretch"] == pw0["vcd_time_stretch"] == 4                    # activity read at the chip's 40 ns clock
 un_ = {k: p["pins_unannotated"] / (p["pins_unannotated"] + p["pins_annotated_from_vcd"]) for k, p in (("HSKEM-2", pw), ("HSKEM-1", pw0))}
 assert round(100 * un_["HSKEM-2"]) == 15 and round(100 * un_["HSKEM-1"]) == 18                 # Section 13: "15 % to 18 %"
 """)
 
 md(r"""
-HSKEM-2 spends about 31 µJ per decapsulation at 25 MHz, eleven times less than the 353 µJ of HSKEM-1
-(figure, panel a). It finishes 14.5 times sooner, while its mean power is about 30 % higher because more
-of its logic works in every cycle. The energy thus tracks the cycle count, because on HSKEM-1 the clock
-network and the registers drew 96 % of the logic power whether or not they computed.
+HSKEM-2 spends about 27 µJ per decapsulation at 25 MHz, thirteen times less than the 344 µJ of HSKEM-1
+(figure, panel a). It finishes 14.5 times sooner, while its mean power is about an eighth higher because
+more logic works every cycle. The energy thus tracks the cycle count, because on HSKEM-1 the clock
+network and the registers drew 99 % of the logic power whether or not they computed.
 
-Clocking also dominates HSKEM-2 (panel b). About three quarters of the logic's energy goes into the clock
+Clocking also dominates HSKEM-2 (panel b). More than nine tenths of the logic's energy goes into the clock
 network and the clock pins of the 30,000 registers, more than three quarters of which never change during
-the operation. The SRAM macros add about a fifth, because 17 of the 18 keep their chip selects tied active
+the operation. The SRAM macros add about a quarter, because 17 of the 18 keep their chip selects tied active
 although fewer than one access in five does useful work. Gating the clock of the blocks that stay idle and
-driving every chip select from the block's own requests would together save roughly 28 to 42 %, a
+driving every chip select from the block's own requests would together save roughly 33 to 49 %, a
 projection from the measured activity rather than a change to HSKEM-2 (Appendix C.6).
 """)
 
@@ -1816,6 +1820,7 @@ st["note"] = ["counter saturated: lower bound only" if s else "" for s in st["sa
 display(st)
 core_ms = st.loc[["keygen","encaps","ciphertext_final","decaps"], "median"].sum() / F_CLK * 1e3
 e2e_ms = b.esp32_latency_us.median() / 1e3
+assert round(e2e_ms / 1e3, 1) == 8.6                                              # "an 8.6 s run"
 print(f"runs: {len(b)}  all PASS: {bool(b.result_pass.all())}  shared-secret match in every run")
 print(f"end-to-end time of one two-role run seen by the ESP32: median {e2e_ms:.1f} ms  (min {b.esp32_latency_us.min()/1e3:.1f}, max {b.esp32_latency_us.max()/1e3:.1f})")
 print(f"FPGA core time (lower bound, decaps saturated): {core_ms:.2f} ms  ->  {100*core_ms/e2e_ms:.3f} % of the end-to-end time")
@@ -2037,7 +2042,7 @@ F["Packed (routed): total area vs macro original"] = round(sum(total_area("ntt_p
 F["Packed system (step D): decapsulation vs HSKEM-1"] = round(cyc_["sram_only_sysBCD"] / cyc_["asic_sysR"], 3)
 F["HSKEM-2: decapsulation cycles vs HSKEM-1"] = round(dc["H"]["sram_only"] / cyc_["asic_sysR"], 3)
 F["HSKEM-2: energy per decapsulation vs HSKEM-1"] = round(e_tot / e_first, 3)
-assert 14 < 1 / F["HSKEM-2: decapsulation cycles vs HSKEM-1"] < 15 and 10.5 < 1 / F["HSKEM-2: energy per decapsulation vs HSKEM-1"] < 11.5
+assert 14 < 1 / F["HSKEM-2: decapsulation cycles vs HSKEM-1"] < 15 and 12.5 < 1 / F["HSKEM-2: energy per decapsulation vs HSKEM-1"] < 13.4
 assert 1.35 < F["Packed (routed): total area vs macro original"] < 1.55     # "almost half more area"
 assert F["Packed (routed): latency vs macro original"] < 1 / 8.5            # "nine times faster"
 assert (round(P.loc["ntt_packed", "latency_us_at_fmax"]), round(P.loc["ntt_macro", "latency_us_at_fmax"])) == (14, 130)   # Section 7
@@ -2056,9 +2061,9 @@ md(r"""
 | **Let each redesign answer a measurement.** | a proof and a routed critical path gave the first NTT iteration, the macro's share of a transform's energy the second, and the system profiles every step of the streamed datapath | 4, 7, 8 |
 | **Feed the memory, not the multiplier.** | two coefficients per word removed most macro accesses and let one single-port macro do what published designs do with banks | 7 |
 | **A faster engine pays only while the datapath keeps up.** | the packed NTT alone left the datapath as the bottleneck; only streaming it let the shared engines set the pace | 8 |
-| **Clocking and integration set the energy of an open-source chip.** | most of HSKEM-2's energy clocks registers that do not change and macros selected in every cycle; two standard remedies would save roughly a third | 9 |
+| **Clocking and integration set the energy of an open-source chip.** | most of HSKEM-2's energy clocks registers that do not change and macros selected in every cycle; two standard remedies would save a third to a half | 9 |
 | **In the prototype, the interface is the bottleneck and the unmasked NTT leaks.** | the core takes a tiny fraction of a board run; first-order masking removes the modelled leakage at twice the transform time | 10, 11 |
-| **Obtain every important number twice.** | ten results that looked right were wrong, each exposed by an independent route (last table of this section) | 12 |
+| **Obtain every important number twice.** | eleven results that looked right were wrong, each exposed by an independent route (last table of this section) | 12 |
 """)
 
 md(r"""
@@ -2133,6 +2138,7 @@ independent route disagreed.
 | A noise write scheduled in cycles when the single-port store is free | The write is registered and lands one cycle later, on the encryption's next read; the FPGA build passed and the single-port builds produced wrong ciphertexts | The full-system testbench in the single-port configuration (Section 8) |
 | A schedule that runs J(z‖c) between the noise jobs, so that it ends sooner | It made the decapsulation slower: J then competed for the ciphertext memory with the ciphertext checks, which have priority | The time per controller state and a timeline of the re-encryption (Section 8) |
 | A bitstream of the streamed system that passed every functional check | It missed timing by 2.3 ns, because functions that only the self-test uses sat on the new multiplier paths | Static timing analysis of each failing endpoint (Appendix D.3) |
+| The chip's logic energy from the system testbench's activity | The testbench clocks at 10 ns, the chip at 40 ns, and OpenSTA counts toggles per second of VCD time, so the data-dependent power was that of a four times faster chip (HSKEM-2: 24.9 instead of 20.2 µJ) | Annotating the registers per 40 ns cycle, whose cycle count disagreed with the VCD's length; a four times stretched VCD then cut the combinational power exactly by four (`scripts/vcd_shift.py`) |
 """)
 
 code(r"""
@@ -2148,6 +2154,8 @@ fe = json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())
 assert fe["signed_off_gds"]["markers_total"] == 163731 and set(fe["signed_off_gds"]["markers_by_location"]) == {"OpenRAM macro"}
 assert fe["after_implant_fix"]["markers_total"] == 0
 assert "missed timing (-2.257 ns)" in fbj["first_build_timing_note"]
+pwc = json.loads((ROOT/"results/fullchip/power.json").read_text())
+assert pwc["vcd_time_stretch"] == 4 and round(pwc["logic_energy_per_decaps_uj"], 1) == 20.2   # the last row
 print(f"OpenRAM power view of the 16x256 macro: {lib_w / 1e6:.1f} MW; FEOL markers before/after the implant fix: "
       f"{fe['signed_off_gds']['markers_total']:,} / {fe['after_implant_fix']['markers_total']}")
 """)
@@ -2843,7 +2851,7 @@ Keccak sponge about a tenth, with fewer flip-flops than HSKEM-1's row-serialized
 md(r"""
 ### C.6 The two energy remedies
 
-The projection of Section 9 gates the clock of the five blocks that stay idle during a decapsulation (PUF
+Section 9's projection gates the clock of the five blocks idle during a decapsulation (PUF
 root and key vault, PUF interface, HSM policy shell, HMAC and SHAKE DRBG; 13,405 flip-flops) and drives
 every chip select from the block's own requests, as HSKEM-2 does only for the NTT store; for all 18 macros
 this removes about three quarters of the SRAM energy.
@@ -2870,8 +2878,8 @@ assert (ntt_fpga["m20k"], ntt_fpga["dsp"], ntt_fpga["block_memory_bits"]) == ("1
 md(r"""
 ### D.2 The host link
 
-The ESP32 bit-bangs the SPI link at a nominal 10 kHz, chosen for robustness; the effective rate of
-Section 10 follows from the logged latency and the 3,136 payload bytes of a run.
+The ESP32 bit-bangs the SPI link at a nominal 10 kHz for robustness; Section 10's effective rate follows
+from the logged latency and the 3,136 payload bytes per run.
 """)
 
 md(r"""
@@ -2890,9 +2898,8 @@ md(r"""
 
 ### E.1 Run time in Colab
 
-A `Run all` takes about half an hour on a free Colab instance, mostly in Sections 4 and 5 and
-Appendix B.6; the last cell reports the time per section (the stored table is from a local run, which
-skips the Colab-only checks). Cells marked `RUN_…` repeat the long runs and are off by default, except
+A `Run all` takes about half an hour on a free Colab instance, mostly in Sections 4 and 5 and Appendix B.6;
+the last cell reports the time per section (the stored table is from a local run). Cells marked `RUN_…` repeat the long runs and are off by default, except
 `RUN_ACVP_RTL` and `RUN_GLS`, which run in Colab only.
 """)
 
@@ -2951,13 +2958,23 @@ md(r"""
 ### E.4 Unit tests of the analysis scripts
 
 The scripts that turn simulation output into numbers are tested on small inputs with hand-computed
-results.
+results; `scripts/prose_number_coverage.py` counts the prose numbers tied to the data.
 """)
 
 code(r"""
 out = sh("python3 -m pytest -q -p no:cacheprovider tests")
 assert " passed" in out and "failed" not in out and "error" not in out.lower()
 """)
+
+code(r"""
+cov = json.loads((ROOT/"results/prose_number_coverage.json").read_text())      # rewritten by scripts/prose_number_coverage.py after a full run
+print(f"numbers in the prose of the body: {cov['total']}; asserted {cov['asserted']}, shown in an executed output {cov['shown']}, "
+      f"neither {cov['neither']} ({cov['covered_pct']} % covered)")
+print("not tied to the data (definitions, a download size, one figure from an uncommitted development log):",
+      "; ".join(f"{t.split('.')[0][:14]}: {', '.join(v)}" for t, v in cov["neither_by_section"].items()))
+assert cov["covered_pct"] >= 95
+""")
+
 
 # ------------------------------------------------------------ run time
 code(r"""
