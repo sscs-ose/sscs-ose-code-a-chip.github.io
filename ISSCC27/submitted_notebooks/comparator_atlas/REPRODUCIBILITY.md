@@ -1,0 +1,573 @@
+# Reproducing Comparator Atlas
+
+## Run the notebook
+
+Open `Comparator_Atlas.ipynb` and run all cells. The default mode uses the
+provided data, verifies experiment records, redraws the figures and remeasures
+saved waveforms. Use the fork Colab link in the README before upstream merge.
+
+For local execution from the project directory:
+
+```text
+python -m pip install -r requirements-review.txt
+python -m pytest --nbmake --nbmake-timeout=600 Comparator_Atlas.ipynb
+```
+
+The reviewer environment supports Python 3.10 with NumPy 2.2.6, pandas 2.2.3,
+Matplotlib 3.10.3 and ipywidgets 8.1.7. Use a short checkout path on Windows.
+If Colab has already imported another package version, restart the runtime
+as prompted; the complete downloaded source is reused.
+
+The execution tools and PDK are available free of charge; no paid API key or
+commercial EDA license is required. Colab is optional and its free resources
+are limited, so long experiments may instead use a local CPU. The project
+does not require Colab Pro, a GPU, a paid cloud runner or a Copilot account
+to reproduce its results. Keep applicable third-party license notices.
+
+## Execution modes
+
+| Mode | What runs |
+| --- | --- |
+| Default | Analyze the provided schematic and layout data; no simulator installation is required. |
+| `RUN_LIVE_SPICE = True` | Run six fresh schematic examples using an installed ngspice and the pinned public models. |
+| `RUN_FULL_CAMPAIGN = True` | Re-run schematic selection, PVT characterization, numerical checks and the lower-energy control. This can take hours. |
+
+For the full schematic campaign, the corresponding CLI stages are:
+
+```text
+python -m comparator_atlas optimize
+python -m comparator_atlas study
+python -m comparator_atlas stress
+python -m comparator_atlas.professional_audit
+python -m presentation.waveform_lab
+```
+
+Windows users may use `node scripts/setup.mjs` to install project-local
+Python 3.12.10 and ngspice 47. The recorded reference schematic campaign uses
+ngspice 47; a different simulator version is not assumed numerically identical.
+
+## Experiment scopes
+
+### Current adopted layout and historical controls
+
+The current layout is `layout_single_row/v2/`, version **single-row-local-pitch-b1**.
+Its paired comparison includes the previously adopted a1 matched control and exact b1
+candidate, each in C-only and distributed RC modes: 45 PVT conditions,
+four signed inputs, and 10/5 ps steps (1440 recorded transients, 720 pairs).
+The primary deadline is 2 ns; 1 ns is a parallel readout of the same waves.
+See the [versioned package](layout_single_row/v2/README.md) for raw traces,
+native records, model references and the offline remeasurement command.
+The [prior a1 version](layout_single_row/v1/README.md) remains byte-identical.
+
+`layout_compact_repair/` remains the **historical original compact control**.
+The figures and schematic/RC tables in `results/study/postlayout_pvt45/`
+belong to that original study, not the adopted candidate. Its 425.49 fJ
+RC mean and 1.835 ns worst latency must not be read as candidate metrics.
+The calibrated 49-condition schematic study is a third, distinct population.
+Neither nominal-layout study applies schematic width stress or calibration.
+
+Default analysis reconstructs results from recorded sources, not new physical
+verification. The native generators are preserved execution-time sources;
+they require their documented control/PCell/tool inputs and are not promised
+to rebuild on a reviewer's machine using unavailable private directories.
+Canonical public MAG/GDS, netlists and recorded checks support inspection.
+Independent physical PEX qualification, silicon measurements, post-layout
+calibration, noise, mismatch statistics and yield remain outside this entry.
+
+### Archived RC model applicability
+
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+This limitation applies to the original five-condition ngspice-42 pilot,
+the historical original-control 45-PVT study and the current paired
+single-row-a1 and local-pitch b1 qualifications.
+Their reported measurements, numerical comparisons and historical pass/fail
+records remain unchanged; they describe the decks actually executed.
+
+The recorded extraction used Magic 8.3.684 at
+`4f53bb3091d1e4a9b2009a58f157a8a4331d4c84` and open_pdks at
+`aa3fc215a80d32437b8cca1cb3fdee819d18c4c9`
+([recorded sources](layout_compact_repair/evidence/attempt1/sources.tsv)).
+The [export commands](layout_nominal27/layout.tcl) enable coupling for C-only
+and distributed RC. The archived
+[C-only](layout_compact_repair/evidence/attempt1/atlas.c.spice) and
+[RC](layout_compact_repair/evidence/attempt1/atlas.rc.spice) outputs retain
+mutual capacitances while grounded capacitance increases; they are not
+ground-only exports. The existing
+[parasitic accounting](layout_compact_repair/evidence/attempt1/parasitic-analysis.json)
+records these native values. The historical original-control full-grid study reuses this same RC netlist,
+whose SHA-256 is
+`8f76622f875c815303157682cfa841fcb54829d586cb31d858f4c81bc9755f92`.
+
+Physical fidelity has not been qualified by an independent parasitic reference
+or a complete common-node capacitance-equivalence check. The physical error
+magnitude and direction are unknown: no exact duplication factor, corrected
+counts or energy, or conservative performance bound is inferred.
+C-only is not independent ground truth, and RC-versus-C performance differences
+cannot be attributed solely to resistance. DRC/LVS establish their recorded
+structural checks, not parasitic-model fidelity. Schematic results are unaffected
+by this extraction concern. Timestep agreement, source hashes and clean-start
+same-deck reproduction do not establish silicon PVT performance.
+
+Historical receipts and frozen reproduction sources preserve their original
+wording and status; this current limitation governs interpretation of their
+RC outcomes, including the saved waveform teaching examples and comparisons
+between legal layouts. No model correction was made. The separate,
+subsequently run sensitivity check below does not replace any archived result.
+
+### Bounded RC sensitivity check
+
+The [plan](results/study/rc_sensitivity/plan.json) and
+[per-pair measurements](results/study/rc_sensitivity/summary.json)
+document a subsequent exploratory rerun of two **already published**
+points: TT / 1.8 V / 27 C / -10 mV (`c01-rc-m10`) and the slowest archived
+RC point, FS / 1.62 V / -40 C / -3 mV (`c37-rc-m03`). The unchanged
+5 ps baselines reproduce their archived energy and 1/2 ns decisions.
+Each point was run at 10 and 5 ps under seven settings: original; C only
+times 0.8 or 1.2; R only times 0.8 or 1.2; and both times 0.8 or 1.2.
+Only the original `atlas` subcircuit's 319 C and 675 R cards were scaled.
+The 27 MOS, 5 fF external output loads, clocks, thresholds and model files
+were held fixed. All 28 new transient records succeeded; the 14 timestep
+pairs met the existing 1% energy / 20 ps latency / same-decision rule.
+
+| RC point, 5 ps | Original 2 ns | C x 0.8 | C x 1.2 | R x 0.8 | R x 1.2 | Both x 0.8 | Both x 1.2 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TT -10 mV | correct | correct | correct | correct | correct | correct | correct |
+| FS -3 mV | correct | correct | **unresolved** | correct | correct | correct | **unresolved** |
+
+At 1 ns the TT point is correct in all seven settings; the FS point is
+unresolved in all seven. The original FS decision time is 1.835032 ns;
+the FS C x 1.2 run records energy but **no** valid 2 ns decision time.
+These synchronized +/-20% whole-subcircuit card factors are chosen
+illustrations, **not** a characterized PDK uncertainty interval or a
+physically qualified PEX alternative. In particular, this is not a
+rerun of all 45 PVT conditions or a revision of the archived nominal
+180/180 result.
+
+The [runner](reproduction/pvt45/run_rc_sensitivity.py) checks the unchanged
+public source/netlist and ngspice-47/model pins, then creates an empty
+short-path output directory and keeps each executed deck, log, waveform,
+measurement and numerical comparison. Its raw outputs remain local; the
+published JSON contains only the path-free plan and qualified measurements,
+not a redistributed model tree. From the entry root, with the same pinned
+Windows tools and caller-supplied read-only models described in
+[the clean-start reproduction](reproduction/pvt45/pvt45_reproduce/README.md):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:OMP_NUM_THREADS = '1'
+$env:OPENBLAS_NUM_THREADS = '1'
+$env:MKL_NUM_THREADS = '1'
+& $Python -B .\reproduction\pvt45\run_rc_sensitivity.py `
+  --entry .\reproduction\pvt45 --models $Models `
+  --ngspice $Ngspice --out $env:ATLAS_FRESH_SENS_OUT
+```
+
+Use a **new, nonexistent, short** `$env:ATLAS_FRESH_SENS_OUT` path; this
+optional 28-transient experiment is not started by the notebook default.
+The separate [GDS geometry audit and conditional layer-coefficient
+components](results/study/gds_geometry/README.md) provide public inputs,
+a path-free script and source hashes. Restoring GDS ports and matching
+exported polygons do not make its imported RC graph interchangeable with
+the archived MAG graph. No complete whole-net R/C estimate or qualified
+external PEX reference has been established.
+
+| Experiment | Conditions and controls | Reporting |
+| --- | --- | --- |
+| Schematic design comparison | 45 PVT combinations at controlled main-pair width stress, plus four nominal controls; 49 conditions per design | Same calibration policy, input band and deadline for circuit comparisons |
+| Lower-energy control | Existing `lvt_base_3b` candidate, characterized after the original selection | Identified separately from selection data |
+| Extracted layout | Five conditions, nominal matched geometry, code zero, four inputs `-10, -3, +3, +10 mV`, four netlist modes | Original 1 ns pilot and separately labeled retained 2 ns observations |
+| Full-grid post-layout study | Same nominal repaired layout and schematic, TT/SS/FF/SF/FS, 1.62/1.8/1.95 V, -40/27/125 C, the same four inputs; 180 points per mode | Independently declared 2 ns primary deadline, with parallel 1 ns results |
+| Waveform lab | Eight representative saved schematic/RC traces | Illustrates the measurement rules; not additional validation coverage |
+
+The earlier ngspice-42 layout pilot is 12/20 correct at 1 ns and 20/20 at
+the retained 2 ns window. That post-hoc characterization does not revise its
+original failed gate.
+
+The completed full-grid ngspice-47 study is distinct: RC is correct at
+180/180 points at its prospectively declared 2 ns deadline, and 156/180
+at 1 ns; the other 24 are unresolved. All 360 schematic/RC histories
+qualify at 10/5 ps under the same numerical criteria. The five pilot
+conditions were previously observed, while forty are new post-layout
+conditions; this is not a blinded external test. No 3.5 ns result is claimed.
+
+## Full-grid failure distribution
+
+Notebook Section 8 includes a 15-row marginal table locating the original
+24 RC decisions unresolved at 1 ns. Reproduce it from the public 360-row
+finest-result CSV, without any waveform remeasurement or new simulation:
+
+```text
+python -B -m scripts.audit_pvt_failures --format markdown
+python -B -m scripts.audit_pvt_failures
+```
+
+Run these commands from the entry directory with the existing reviewer
+dependencies. The [audit](scripts/audit_pvt_failures.py) reuses the published
+grid/rail validators and verifies pinned source artifacts, exactly 180
+distinct points per mode, unique point/attempt/run identities, and the fixed
+SC/RC outcomes at both deadlines. Missing/duplicate records, inconsistent
+labels or incomplete numerical qualification fail rather than shrinking
+denominators. JSON output includes all marginal counts and the 24 affected
+point/run identities; the [tests](tests/test_pvt_failure_audit.py) also verify
+the notebook's displayed table against the actual CSV.
+
+Each factor independently partitions the same 180 RC points: each corner
+has 36, each supply/temperature 60, and each signed input 45. The four
+partitions overlap and cannot be summed or used as independent observations.
+All 24 unresolved records occur at 1.62 V in SS or FS, with all three
+temperatures and all four input levels represented. This is a descriptive
+association in the archived decks, not a statistical-significance, causal,
+continuous-input or silicon claim. RC remains 156 correct / 24 unresolved /
+0 wrong at 1 ns and 180 correct at the prospectively declared 2 ns; SC is
+180 correct at both. The earlier pilot's post-hoc 2 ns result stays separate.
+Record-level classification is not full 720-raw-trace remeasurement, and the
+RC model's physical fidelity remains unqualified.
+
+## Independent public-waveform check
+
+From the entry directory, run the standalone standard-library checker:
+
+```text
+python -I -S -B scripts/check_public_waveforms.py
+```
+
+This command reads the ten published NPZ traces in
+`results/study/postlayout_pvt45/representative-traces/` and prints a JSON report
+to stdout; it does not install packages, start a simulator, or rewrite files.
+Unlike the notebook's existing replay through `comparator_atlas.spice.measure`,
+the [checker](scripts/check_public_waveforms.py) separately implements NPZ/NPY
+reading, scalar interpolation, decision classification, latency and energy
+integration without importing that producer or NumPy. **Independent refers to
+the reader and arithmetic implementation, not the experiment or personnel.**
+
+The fixed contract is unchanged: evaluation starts at 22.025 ns; both outputs
+must satisfy complementary inclusive 80%/20% supply rails at 1 ns or 2 ns after
+that instant. An opposite resolved sign is wrong, while missing complementary
+rails are unresolved. Reset checks both output and internal-node pairs against
+90% of supply 100 ps before evaluation. Latency is the first sampled valid
+point after the last invalid sample before the deadline, with interpolated
+evaluation/deadline endpoints; it is not an interpolated threshold-crossing
+estimate. Full-cycle core energy is the negative supply voltage times the
+trapezoidal integral of supply current over **20-30 ns**, with interpolated
+cycle endpoints, regardless of the decision deadline.
+
+The checker pins the public index and comparison-table SHA-256 values,
+checks all 60 indexed artifacts, and binds each waveform to its original
+metadata, collector record and unique published table row. It compares all
+eight measurement fields at both deadlines against the collector and table.
+Labels, reset state and unresolved null latency must match exactly; numeric
+comparisons use the existing replay tolerance of `1e-11` relative and `1e-11`
+absolute in each reported unit solely for arithmetic roundoff. This does not
+change the separate simulation-convergence limits of 1% energy and 20 ps.
+The JSON includes input/checker hashes, all 20 observations and numeric absolute
+differences against both references. Missing, modified, malformed or relabeled
+evidence returns a nonzero exit status rather than a partial PASS.
+
+These are **ten existing representative/teaching selections**, not random
+samples or a held-out validation set; selection may be post-hoc. The expected
+subset has eight correct and two unresolved decisions at 1 ns, and ten correct
+at 2 ns. These counts are **not** the full-grid 156/180 and 180/180 results.
+No additional simulations, full 720-trace replay, or new statistical coverage
+are claimed. The RC decks' physical fidelity remains unqualified. Hashes detect
+changes relative to the checked-in pins, not coordinated replacement of the
+checker and data; agreement checks measurement arithmetic, not physical truth.
+The reader deliberately accepts only the published NPY 1.0, C-order,
+little-endian float64 nine-column format and bounded file sizes.
+
+Synthetic hand-calculated cases and missing-trace, tamper, identity and CLI
+failure tests are in [test_public_waveforms.py](tests/test_public_waveforms.py).
+With the existing reviewer dependencies installed:
+
+```text
+python -B -m pytest -q tests/test_public_waveforms.py
+```
+
+## Numerical measurements
+
+A decision requires complementary 80%/20% output rails and the correct input
+polarity. Zero differential input is unscored. Core energy is integrated over
+the complete 20–30 ns cycle; external drivers and calibration infrastructure
+are excluded.
+
+Timestep comparisons use identical decision/outcome labels, at most 1% energy
+difference and at most 20 ps resolved-latency difference. Sensitive schematic
+points receive further timestep halving, with unfavorable corrections retained.
+The layout's stored 10/5 ps comparisons are provided for its sampled conditions.
+These are numerical consistency checks, not a noise or yield model.
+
+## Data and physical source
+
+| Location | Contents |
+| --- | --- |
+| `results/study/selection.json` | Declared candidate-selection result |
+| `results/study/verified_measurements.csv` | Reported schematic observations after explicit numerical corrections |
+| `results/study/measurement_refinements.csv` | Original-to-refined observation replacements |
+| `results/study/professional/` | Lower-energy control and its numerical checks |
+| `evidence_traces/` | Schematic teaching waveforms and source identities |
+| `layout_compact_repair/evidence/attempt1/` | Actual GDS/MAG, LVS/C/RC netlists, checks, measured tables and six RC trace examples |
+| `layout_compact_repair/verification-receipt.json` | Physical experiment provenance and measured comparison |
+| `layout_nominal27/`, `layout_preflight/` | Physical generation/verification support and preceding references |
+| `results/study/postlayout_pvt45/` | Complete 360-row schematic/RC comparison, independently audited results, 45-condition table, figures and ten representative raw examples |
+
+The physical snapshot contains 108 selected files and review tables; it is
+not the entire CI payload. Per-file hashes bind the included data to the
+recorded experiment. The default notebook checks the data it displays.
+
+### Full-grid numerical reference
+
+The expanded PVT reference uses Windows ngspice 47, Python 3.12.10 and
+NumPy 2.2.6. Both schematic and RC use the same tool/model environment.
+The extracted RC and GDS are byte-identical to the repaired physical
+reference; Magic/DRC/LVS were not rerun for the expanded SPICE study.
+The model checkout is unmodified at the pinned SKY130 commit. Its actual
+Windows CRLF bytes are recorded separately from canonical Git blobs.
+
+The full reference consists of 720 distinct point/timestep evaluations.
+Two reserved-but-unstarted slots and the documented execution continuations
+are retained separately. An initial reporting issue accepted only an exact
+ngspice log-destination banner after checking the original log and waveform;
+later timing and checkpoint-I/O interruptions were resolved through explicit
+continuations without changing the circuit, inputs or numerical thresholds.
+The original execution-window timing failure remains recorded. Final data
+completeness and numerical/functional qualification are separate from that
+historical timing-conformance flag.
+
+`source-summary.json` and `independent-audit.json` preserve these distinctions.
+The published ten trace examples retain original metadata alongside the linked
+collector acceptance; six original metadata files contain the earlier
+`measurement_error` status. They were not rewritten. The examples allow
+remeasurement of matched TT points, the global-delay FS corner and the
+maximum-energy FF point; they do not constitute all 720 original traces.
+The default notebook independently checks the complete table and remeasures
+the ten included raw waveforms.
+
+### Figure regeneration
+
+```text
+python scripts/build_pvt45_figure.py
+```
+
+This regenerates the full-PVT timing map, all-180-pair delay/energy comparison,
+and matched worst-case waveform from checked data. PDF masters are vector,
+with embedded fonts at the actual 7.16-inch two-column size; SVG and 600 dpi
+PNG companions and separate captions are also provided. No simulations run.
+
+### Fresh schematic/RC reproduction
+
+The clean-start source is isolated in `reproduction/pvt45/` so its pinned
+helper files do not overwrite the main entry or depend on historical private
+checkpoints. It requires the existing free Windows x64 Python 3.12.10,
+NumPy 2.2.6, ngspice-47 console and the recorded unmodified SKY130 model
+checkout. Exact runtime and Windows raw-model identities are verified;
+an arbitrary different model checkout is not silently substituted.
+
+From `reproduction/pvt45`, supply your own existing paths and run:
+
+```powershell
+& $Python -B .\pvt45_reproduce\reproduce.py --smoke `
+  --ngspice $Ngspice --models $Models --out $FreshOutput
+```
+
+`--smoke` performs four transients: TT/1.8 V/27 C, -10 mV, schematic and RC,
+each at 10 and 5 ps. This clean-start test was executed and independently
+remeasured; both numerical pairs and all same-point reference comparisons
+pass. It is separate from the 720-transient full-grid dataset.
+
+The explicit `--full` mode uses the complete fixed grid with a fresh ledger,
+the original numerical criteria and a bounded local supervisor. Its 720
+initial points and possible refinement decks were checked against the
+recorded plan. A new full-matrix rerun of this clean entrypoint was **not**
+performed. Do not interpret a successful smoke or static plan check as
+another full-PVT validation.
+
+Running without a mode prints help and performs no simulation.
+Detailed model-byte expectations, parameter examples and output structure
+are in [the clean-start README](reproduction/pvt45/pvt45_reproduce/README.md).
+No paid API, cloud runner, tool download or global system change is required.
+
+### Re-run the physical flow
+
+The physical reference uses unmodified SKY130 primitive revision
+`f62031a1be9aefe902d6d54cddd6f59b57627436`, Magic 8.3.684, Netgen 1.5.323,
+open_pdks/sky130A 1.0.608, ngspice `42+ds-3build1` and NumPy 2.2.6.
+
+Prepare the exact historical source without installing tools or running SPICE:
+
+```text
+python scripts/reproduce_layout_reference.py --prepare-only
+```
+
+The helper verifies source commit `68832ec0ae7c526afcb4cded405a0bfd753a65c3`
+and its checksum context. In a disposable Ubuntu 24.04 environment, install
+the packages specified by that source's `layout_compact_repair/ci.yml`, then
+run `bash layout_compact_repair/run.sh` from the prepared project directory.
+The flow preserves structural and simulation evidence and returns a failure
+status when its original 1 ns performance gate is not met.
+
+## Strict schematic specification map
+
+The [saved map](results/study/specification_map/selection_map.png) and
+[JSON records](results/study/specification_map/summary.json) are descriptive,
+post-hoc analysis of the existing `local_boundary` calibrated **schematic**
+study: three compared designs, all 49 controlled-width-stress conditions,
+and both signs of the recorded nonzero inputs. This is not the nominal
+45-PVT RC experiment.
+
+The six minimum absolute inputs (0.25, 0.5, 1, 3, 10, 30 mV) and six recorded
+deadlines (0.25, 0.35, 0.5, 0.75, 1, 2 ns) define 36 specification cells.
+A design qualifies only when every included point at every condition is
+correct. The winner minimizes measured mean full-cycle core energy across
+that sampled band, not worst-cycle energy or total system/calibration cost.
+No energy budget is imposed. No feasible design yields the explicit status
+`No feasible compared design` and JSON-null winner/energy, never a
+best-average substitute. Exact equal energy means are recorded as ties;
+display selection follows the declared compared-design order.
+
+The analysis calls `entry.load_evidence()` and `entry.summary()` without
+changing calibration or original training selection. It rejects missing,
+duplicate, unavailable and nonfinite observations. The JSON contains
+108 per-design rows, 36 per-specification rows, source/provenance SHA256s,
+and the saved figure hash. Recompute and compare all records read-only:
+
+```text
+python -B -m presentation.specification_map
+```
+
+`--write` regenerates only the JSON, selection map and failure-transition
+PNG presentation artifacts; if
+used for publication, refresh their entry checksums afterward. No new
+SPICE, interpolation, continuous-input coverage, yield or physical-model
+qualification is involved. Baseline's zero winning cells apply only to
+this compared calibrated sampled domain.
+
+### Matched failures and sampled limits
+
+Schema 2 of the same JSON preserves the original 108 design rows and 36
+specifications (28 NONE / 5 selected / 3 control / 0 baseline). It adds:
+
+- `failure_analysis.grouped_counts`: all 10,584 calibrated nonzero
+  observations, grouped separately by design/deadline, signed input, corner,
+  voltage, temperature, width skew and complete condition. Each group
+  explicitly counts correct, wrong and unresolved.
+- `matched_samples`: 1,176 one-to-one design/condition/signed-input pairs at
+  1 and 2 ns for |input| >= 1 mV, with endpoint run IDs, outcomes, times,
+  energies, location and local calibration code. Missing/duplicate/unmatched
+  keys, unavailable policies and inconsistent metadata fail explicitly;
+  order is lexical keys, not CSV row position. Unresolved times remain null.
+- `transition_matrix`: all nine outcome transitions for each design,
+  including zeros. There is no monotonicity assumption. Selected wrong-sample
+  identities are compared as sets, then both endpoints of every sample wrong
+  at either deadline are retained. The archived data give the same 20 at both
+  deadlines, all at +/-1 mV. Locations/codes alone do not prove trim saturation,
+  residual offset, noise or any other physical cause.
+- `sampled_limits`: for each strictly qualified design and each winner,
+  minimum `(deadline_ns - decision_time_ns) * 1000` in ps and maximum
+  measured full-cycle core energy in fJ over the same included band. All
+  exact equal limiting values retain their complete observations in lexical
+  sample-key order. Unqualified designs and NONE winners have null limits;
+  no energy cap or alternative selection rule is introduced.
+
+Resolved nonzero observations require finite decision times; unresolved
+observations require missing times. A 4e-15 ns tolerance handles recorded
+seconds-to-nanoseconds roundoff at exact deadline endpoints, not a physical
+guardband; reported margins are not clamped or rounded in JSON. The observed
+limits are not confidence bounds over continuous PVT/noise/jitter, timing
+signoff, a worst-cycle guarantee, or total system/calibration costs. The
+same read-only command above recomputes every field and checks both PNG hashes.
+
+## Checks
+
+```text
+python -m pytest -q tests presentation
+python -m nbqa flake8 --ignore=E402,E226 Comparator_Atlas.ipynb
+node --test tests/test_explorer.mjs tests/test_waveform_lab.mjs
+```
+
+The entry-specific Linux workflow also executes the notebook from a
+notebook-only public download and again after a fresh kernel restart.
+This checks the source bootstrap; it is not a Google-account runtime test.
+The current run is linked in the submission PR.
+
+Original code is MIT licensed. Model/tool licenses and references are listed
+in `THIRD_PARTY_NOTICES.txt` and the notebook. Verbatim upstream tool notices
+are in `third_party_licenses/`; tool binaries are obtained separately.
+## Adopted local-pitch b1 version
+
+The current layout/report/Notebook/poster explicitly select the exact frozen
+local-pitch b1 candidate. [Versioned native assets, matched a1 control, all 1440 full45
+and 64 earlier diagnostic traces, numerical receipts and offline audit](layout_single_row/v2/README.md)
+are public. All-material area decreases from matched a1's 2074.254 to 1873.3 um2
+(9.688013%). Pair order, mirroring, vertical placement, 27 guarded MOS devices,
+15 ports, dimensions, body contacts, junctions and local escapes are preserved.
+The 14 native checks and one candidate DRC attempt precede full45; both native
+proofs/extracts were reused, not rerun. Publication performed no EDA/SPICE.
+New local planning margins are at least 0.20 um; inherited unchanged global
+M3 margin is 0.16 um. Historical pre-route recovered MAG differs from final MAG.
+
+Both layouts and modes have 180 correct points at 2 ns; RC changes from 24 to 22 unresolved
+points at 1 ns, only SS / 1.62 V / 125 C / +/-10 mV. C retains 10 unresolved
+keys; FS late points remain, with null recorded latency at 1 ns.
+There are 720 finest 5 ps traces and 1440 two-deadline rows, not 1440 independent
+finest experiments. This nominal code-zero comparison used known conditions and is
+not the calibrated 49-condition schematic study. Approximately 1.94% energy
+changes are not robust global PPA benefits; numerical 1% / 20 ps acceptance
+bands are not physical uncertainty bounds.
+**Archived RC-deck outcomes; model physical fidelity not yet qualified.**
+The original studies remain preserved historical control evidence.
+The preceding a1 version and its twelve lossless raw partitions remain unchanged.
+The b1 source adds eleven lossless sub-30 MB ZIP partitions; exact sizes/member
+hashes and model-reference identities are recorded in publication provenance.
+Bootstrap downloads both current evidence and retained history; use sufficient
+disk space and a short Windows path. Archived host paths in source receipts are
+provenance only, not executable dependencies. The default saved-data reader does
+not run the archived native scripts that require unavailable private directories.
+All 400 models refer to the existing public raw-byte/canonical-Git manifest;
+no duplicate model corpus, LFS, private-only raw dependency or installer is added.
+# Integrated decision reader and dated execution scope
+
+The report, Notebook and poster now lead with a strict question: is any of
+three compared designs correct at every included sampled point before the
+deadline? Qualification precedes energy ranking; an infeasible specification
+returns **NONE**. The unchanged `presentation/specification_map.py` defines
+the 36 choices. `presentation/judge_decision.py` adds exact CSV record
+locations and connects the existing stored map and waveform lab, without
+changing measurements or promising a retained raw waveform for every key.
+Different sampled input-band energies are not a same-specification energy
+improvement. This calibrated 49-condition schematic comparison is separate
+from the archived nominal code-zero b1/a1 45-PVT layout example.
+
+From the entry directory, the presentation-only regeneration route is
+`python -B -m presentation.judge_decision`. It uses shipped Python sources,
+checked saved tables and checked existing figures; no private templates,
+session files or native geometry generator are required. Individual routes
+remain `python -B -m scripts.build_entry_notebook`,
+`python -B -m presentation.contest_materials` and the existing study-report
+renderer. Default Notebook execution remains saved-data mode; optional
+live/full modes keep their documented explicit prerequisites.
+
+**Dated maintainer scope (2026-10-07).** One actual GitHub HTTPS Windows
+default saved-data execution on 2026-10-06 retrieved source
+`db82273a5df8b73d39ebf20593309e433d1a1d50`: 28 cells visited, 13 code cells
+freshly executed, zero **top-level cell** errors, Python 3.10.18 and 11
+unchanged review pins. A 2026-10-07 recursive review subsequently found one
+saved layout-selector widget error: an obsolete column drop in its callback.
+Thus the older run does **not** establish complete interactive-reader success.
+Its Notebook SHA256 was
+`9335085a23b4f7db0fbded369c4ce969b41e04ffb0e54f8f9ca2d0167c66efd3`.
+A separately modified private preview was also executed once locally on
+2026-10-07 (28/13/0 top-level), with the same subsequently discovered widget
+failure. The initial local publication-candidate run also exposed it and
+failed the reader gate before commit or push. This release removes the
+obsolete drop and adds actual four-way layout/mode callback checks plus
+a recursive error validator and a negative widget-error fixture.
+**Neither older run certifies this changed public reader source.**
+Historical records are preserved, not relabeled. Detailed receipts remain
+private; these statements
+are not public execution-proof links. Release-specific execution results
+are reported separately with their actual source identities.
+
+No live SPICE, full campaign or native layout reconstruction was enabled in
+those reader runs. They are not external-human, Linux or Colab reproduction,
+physical-model qualification, silicon evidence or green-CI statements.
+Archived native proofs remain reused, not rerun. Archived RC-deck outcomes;
+model physical fidelity not yet qualified.

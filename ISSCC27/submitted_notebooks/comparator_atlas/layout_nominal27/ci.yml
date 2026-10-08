@@ -1,0 +1,55 @@
+name: Experimental nominal 27-device layout
+
+on:
+  push:
+    branches: ["verify/comparator-atlas-layout-nominal27"]
+    paths:
+      - ".github/workflows/comparator-atlas-layout-nominal27.yml"
+      - "ISSCC27/submitted_notebooks/comparator_atlas/layout_nominal27/**"
+
+permissions:
+  contents: read
+
+jobs:
+  nominal27:
+    if: github.repository == 'WLHsu0827/sscs-ose-code-a-chip.github.io'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      ENTRY: ISSCC27/submitted_notebooks/comparator_atlas
+      NOMINAL27: ISSCC27/submitted_notebooks/comparator_atlas/layout_nominal27
+    steps:
+      - name: Exact public shallow sparse checkout, no historical submodules
+        run: |
+          git init -q .
+          git config core.autocrlf false
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git config remote.origin.promisor true
+          git config remote.origin.partialclonefilter blob:none
+          git sparse-checkout init --cone
+          git sparse-checkout set "$NOMINAL27" "$ENTRY/layout_preflight" \
+            "$ENTRY/comparator_atlas" "$ENTRY/results/study"
+          git fetch -q --depth=1 --filter=blob:none origin "$GITHUB_SHA"
+          git checkout -q --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Declared packages on this disposable runner only
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            $(cat "$ENTRY/layout_preflight/apt-packages.txt") \
+            ngspice=42+ds-3build1 python3-venv
+      - name: Fail-closed source, connectivity, units, and numerical controls
+        run: |
+          bash -n "$NOMINAL27/run.sh" "$ENTRY/layout_preflight/build_toolchain.sh"
+          python3 -m unittest discover -s "$NOMINAL27" -p test_nominal27.py -v
+      - name: Actual nominal27 DRC, LVS, extraction, and matched simulation gates
+        run: timeout --signal=TERM --kill-after=30s 24m bash "$NOMINAL27/run.sh"
+      - name: Retain real evidence, including a failed or budget-limited run
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sky130-layout-nominal27
+          path: ISSCC27/submitted_notebooks/comparator_atlas/layout_nominal27/out
+          if-no-files-found: warn
+          retention-days: 14
+          include-hidden-files: true
