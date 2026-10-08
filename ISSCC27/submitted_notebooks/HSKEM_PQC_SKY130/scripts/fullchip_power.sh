@@ -13,7 +13,7 @@
 #      clock analysis, which needs no activity;
 #   5. scripts/shadow_toggles.py counts the register toggles in the VCD, and scripts/clock_gating_whatif.py
 #      projects what gating the clock of the idle blocks would save.
-# The SRAM macros are not part of this figure: their Liberty power views are not physical (notebook, Section 8);
+# The SRAM macros are not part of this figure: their Liberty power views are not physical (notebook, Section 9);
 # see scripts/sram_energy_spice.sh and scripts/sram_energy_model.py. The layout database is not published,
 # so this needs the private run directory (like sta_corners_fullchip.sh); only the summaries in
 # results/fullchip/ (power.json, register_toggles.json, clock_gating_whatif.json) are published.

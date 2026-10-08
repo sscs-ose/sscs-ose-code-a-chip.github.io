@@ -1,6 +1,6 @@
 """Energy of the chip's SRAM macros over one decapsulation, from transistor-level simulation of the macros.
 
-The macros' Liberty power views come from OpenRAM's analytical model and are not physical (notebook, Section 8).
+The macros' Liberty power views come from OpenRAM's analytical model and are not physical (notebook, Section 9).
 Each macro was instead simulated whole in ngspice (scripts/sram_energy_spice.sh): six idle cycles, three
 writes and three reads at the chip's 25 MHz clock, with the energy of every cycle integrated from the
 supply current (results/fullchip/sram_macro_spice.json). Per macro this gives

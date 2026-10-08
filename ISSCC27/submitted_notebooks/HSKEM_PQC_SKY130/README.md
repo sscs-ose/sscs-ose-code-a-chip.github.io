@@ -45,10 +45,10 @@ text are guarded by assertions against the data, so the prose cannot silently dr
    minutes) or `RUN_STREAMED_SYSTEM = True` (the twelve builds of the streamed system, about a quarter of
    an hour on twelve cores and correspondingly longer on Colab's two).
 4. The notebook is organized around three questions — Part I *Is it correct?*, Part II *What does it
-   cost?*, Part III *Does it hold up?* — followed by findings and limitations; supporting detail is in
-   Appendices A–E. A reader with ten minutes can read the "At a glance" section and the findings of
-   Section 11, which close with the checks that looked right and were not, and with the lessons that
-   transfer to other designs.
+   cost?*, Part III *Does it hold up?* — followed by the lessons that transfer and the limitations;
+   supporting detail is in Appendices A–E. A reader with ten minutes can read the opening page (abstract,
+   what is new, results at a glance) and Section 12, which closes with the checks that looked right and
+   were not.
 5. Appendix B.2 renders one of the published block layouts from its GDS file after checking its
    SHA-256; `RUN_DRC_COLAB = True` also runs the SKY130 front-end design rules on it.
 
@@ -86,7 +86,7 @@ python3 scripts/collect_metrics.py
 `scripts/run_chunk.sh` lists every design point that was run; `scripts/sta_corners.sh` repeats the corner
 analysis on the routed results.
 
-The SRAM energy of Section 8 is reproducible from the published files alone. With ngspice 41 or later
+The SRAM energy of Section 9 is reproducible from the published files alone. With ngspice 41 or later
 (built with KLU) and the SKY130 PDK,
 
 ```
