@@ -1,0 +1,59 @@
+* ============================================================
+* Testbench: inv_dcdl_glitchless 64-stage characterization
+* ============================================================
+
+* --- Technology models ---
+.lib "/Users/shreyas/.ciel/ciel/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+* --- Post-layout extracted netlist ---
+.include "/Users/shreyas/Code/CaC_Spring26/spice/netlists/inv_dcdl_glitchless.spice"
+
+* ============================================================
+* Parameters & Supplies
+* ============================================================
+.param vdd_val = 1.8
+Vdd  VPWR 0 DC vdd_val
+Vss  VGND 0 DC 0
+
+* Reset Signal: Pulse High for 5ns at start to initialize one-hot registers
+Vrst rst_node VGND PULSE(0 vdd_val 0 50p 50p 5n 2000n)
+
+* Input Signal A & Update Clock: 10ns period (100MHz)
+* Using the same source for A and clk ensures negedge switching is aligned
+Va   A_in     VGND PULSE(0 vdd_val 7n 50p 50p 4.9n 10n)
+Vclk clk_node VGND PULSE(0 vdd_val 7n 50p 50p 4.9n 10n)
+
+* ============================================================
+* Binary Control Signals (0 to 63)
+* Each state lasts 20ns. Total sim time = 1280ns.
+* ============================================================
+Vq0  Q0_node  VGND PULSE(0 vdd_val 20n 50p 50p 19.9n 40n)
+Vq1  Q1_node  VGND PULSE(0 vdd_val 40n 50p 50p 39.9n 80n)
+Vq2  Q2_node  VGND PULSE(0 vdd_val 80n 50p 50p 79.9n 160n)
+Vq3  Q3_node  VGND PULSE(0 vdd_val 160n 50p 50p 159.9n 320n)
+Vq4  Q4_node  VGND PULSE(0 vdd_val 320n 50p 50p 319.9n 640n)
+Vq5  Q5_node  VGND PULSE(0 vdd_val 640n 50p 50p 639.9n 1280n)
+
+* ============================================================
+* DUT Instantiation
+* Port Order based on your netlist: A Q[0] Q[1] Q[2] Q[3] Q[4] Q[5] VGND VPWR Y clk rst
+* ============================================================
+Xdut A_in Q0_node Q1_node Q2_node Q3_node Q4_node Q5_node VGND VPWR Y clk_node rst_node inv_dcdl_glitchless
+
+Cload Y VGND 5f
+
+* Simulate for 1280ns
+.tran 10p 1280n
+
+.control
+run
+
+* Saving data for analysis
+wrdata /Users/shreyas/Code/CaC_Spring26/spice/results/inv_dcdl_glitchless_results.csv v(A_in) v(Y) v(Q0_node) v(Q1_node) v(Q2_node) v(Q3_node) v(Q4_node) v(Q5_node) v(clk_node) v(rst_node)
+
+* Plotting a few cycles to visually check for glitches at a major transition (e.g. 31 to 32)
+plot v(A_in) (v(Y)+2) (v(clk_node)+4)
+
+quit
+.endc
+.end

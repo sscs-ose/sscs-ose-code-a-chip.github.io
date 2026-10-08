@@ -1,0 +1,108 @@
+* NGSPICE file created from nand_dcdl.ext - technology: sky130A
+
+.subckt sky130_fd_sc_hd__inv_1 VPB VNB VGND VPWR A Y
+X0 Y A VGND VNB sky130_fd_pr__nfet_01v8 ad=0.169 pd=1.82 as=0.169 ps=1.82 w=0.65 l=0.15
+X1 Y A VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.26 pd=2.52 as=0.26 ps=2.52 w=1 l=0.15
+.ends
+
+.subckt sky130_fd_sc_hd__nand2_1 VPB VNB VGND VPWR A Y B
+X0 VPWR A Y VPB sky130_fd_pr__pfet_01v8_hvt ad=0.26 pd=2.52 as=0.135 ps=1.27 w=1 l=0.15
+X1 Y A a_113_47# VNB sky130_fd_pr__nfet_01v8 ad=0.169 pd=1.82 as=0.08775 ps=0.92 w=0.65 l=0.15
+X2 a_113_47# B VGND VNB sky130_fd_pr__nfet_01v8 ad=0.08775 pd=0.92 as=0.169 ps=1.82 w=0.65 l=0.15
+X3 Y B VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.135 pd=1.27 as=0.26 ps=2.52 w=1 l=0.15
+.ends
+
+.subckt sky130_fd_sc_hd__decap_4 VGND VPWR VPB VNB
+X0 VPWR VGND VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.2262 pd=2.26 as=0 ps=0 w=0.87 l=1.05
+X1 VGND VPWR VGND VNB sky130_fd_pr__nfet_01v8 ad=0.143 pd=1.62 as=0 ps=0 w=0.55 l=1.05
+.ends
+
+.subckt sky130_ef_sc_hd__decap_12 VGND VPWR VPB VNB
+X0 VPWR VGND VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.2262 pd=2.26 as=0 ps=0 w=0.87 l=4.73
+X1 VGND VPWR VGND VNB sky130_fd_pr__nfet_01v8 ad=0.143 pd=1.62 as=0 ps=0 w=0.55 l=4.73
+.ends
+
+.subckt sky130_fd_sc_hd__decap_3 VPWR VGND VPB VNB
+X0 VPWR VGND VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.2262 pd=2.26 as=0 ps=0 w=0.87 l=0.59
+X1 VGND VPWR VGND VNB sky130_fd_pr__nfet_01v8 ad=0.143 pd=1.62 as=0 ps=0 w=0.55 l=0.59
+.ends
+
+.subckt sky130_fd_sc_hd__decap_6 VPWR VGND VPB VNB
+X0 VPWR VGND VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.2262 pd=2.26 as=0 ps=0 w=0.87 l=1.97
+X1 VGND VPWR VGND VNB sky130_fd_pr__nfet_01v8 ad=0.143 pd=1.62 as=0 ps=0 w=0.55 l=1.97
+.ends
+
+.subckt sky130_fd_sc_hd__decap_8 VPWR VGND VPB VNB
+X0 VPWR VGND VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.2262 pd=2.26 as=0 ps=0 w=0.87 l=2.89
+X1 VGND VPWR VGND VNB sky130_fd_pr__nfet_01v8 ad=0.143 pd=1.62 as=0 ps=0 w=0.55 l=2.89
+.ends
+
+.subckt sky130_fd_sc_hd__buf_2 VPWR VGND X A VPB VNB
+X0 VPWR a_27_47# X VPB sky130_fd_pr__pfet_01v8_hvt ad=0.265 pd=2.53 as=0.135 ps=1.27 w=1 l=0.15
+X1 X a_27_47# VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.135 pd=1.27 as=0.149 ps=1.325 w=1 l=0.15
+X2 VPWR A a_27_47# VPB sky130_fd_pr__pfet_01v8_hvt ad=0.149 pd=1.325 as=0.1664 ps=1.8 w=0.64 l=0.15
+X3 X a_27_47# VGND VNB sky130_fd_pr__nfet_01v8 ad=0.08775 pd=0.92 as=0.097 ps=0.975 w=0.65 l=0.15
+X4 VGND a_27_47# X VNB sky130_fd_pr__nfet_01v8 ad=0.17225 pd=1.83 as=0.08775 ps=0.92 w=0.65 l=0.15
+X5 VGND A a_27_47# VNB sky130_fd_pr__nfet_01v8 ad=0.097 pd=0.975 as=0.1092 ps=1.36 w=0.42 l=0.15
+.ends
+
+.subckt sky130_fd_sc_hd__conb_1 LO HI VPB VNB VGND VPWR
+X0 VPWR HI sky130_fd_pr__res_generic_po w=0.48 l=0.045
+X1 LO VGND sky130_fd_pr__res_generic_po w=0.48 l=0.045
+.ends
+
+.subckt nand_dcdl A Q[0] Q[1] Q[2] Q[3] VGND VPWR Y
+Xcell1.inv1.core_inv VPWR VGND VGND VPWR Q[1] cell1.inv1_output sky130_fd_sc_hd__inv_1
+Xcell2.nand2_1.core_nand VPWR VGND VGND VPWR s3 cell2.nand_cell_1 cell2.inv1_output
++ sky130_fd_sc_hd__nand2_1
+Xcell0.nand2_2.core_nand VPWR VGND VGND VPWR A cell0.nand_cell_2 Q[0] sky130_fd_sc_hd__nand2_1
+XFILLER_0_29 VGND VPWR VPWR VGND sky130_fd_sc_hd__decap_4
+XFILLER_3_17 VGND VPWR VPWR VGND sky130_ef_sc_hd__decap_12
+XFILLER_3_29 VGND VPWR VPWR VGND sky130_fd_sc_hd__decap_4
+XPHY_EDGE_ROW_1_Right_1 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+XPHY_EDGE_ROW_0_Left_6 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+Xcell3.nand2_2.core_nand VPWR VGND VGND VPWR A cell3.nand_cell_2 Q[3] sky130_fd_sc_hd__nand2_1
+Xcell1.nand2_3.core_nand VPWR VGND VGND VPWR cell1.nand_cell_1 s1 cell1.nand_cell_2
++ sky130_fd_sc_hd__nand2_1
+XPHY_EDGE_ROW_5_Right_5 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+Xcell3.inv1.core_inv VPWR VGND VGND VPWR Q[3] cell3.inv1_output sky130_fd_sc_hd__inv_1
+XFILLER_4_21 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_6
+XFILLER_1_23 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_8
+Xcell0.nand2_1.core_nand VPWR VGND VGND VPWR s1 cell0.nand_cell_1 cell0.inv1_output
++ sky130_fd_sc_hd__nand2_1
+Xcell0.inv1.core_inv VPWR VGND VGND VPWR Q[0] cell0.inv1_output sky130_fd_sc_hd__inv_1
+XPHY_EDGE_ROW_0_Right_0 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+XPHY_EDGE_ROW_1_Left_7 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+Xcell1.nand2_2.core_nand VPWR VGND VGND VPWR A cell1.nand_cell_2 Q[1] sky130_fd_sc_hd__nand2_1
+Xcell3.nand2_1.core_nand VPWR VGND VGND VPWR _0_ cell3.nand_cell_1 cell3.inv1_output
++ sky130_fd_sc_hd__nand2_1
+XFILLER_4_29 VGND VPWR VPWR VGND sky130_fd_sc_hd__decap_4
+XPHY_EDGE_ROW_4_Right_4 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+X_2_ VPWR VGND _2_/X Y VPWR VGND sky130_fd_sc_hd__buf_2
+X_1_ _0_ _1_/HI VPWR VGND VGND VPWR sky130_fd_sc_hd__conb_1
+Xcell2.nand2_3.core_nand VPWR VGND VGND VPWR cell2.nand_cell_1 s2 cell2.nand_cell_2
++ sky130_fd_sc_hd__nand2_1
+XFILLER_2_11 VGND VPWR VPWR VGND sky130_ef_sc_hd__decap_12
+XPHY_EDGE_ROW_2_Left_8 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+Xcell2.inv1.core_inv VPWR VGND VGND VPWR Q[2] cell2.inv1_output sky130_fd_sc_hd__inv_1
+XFILLER_2_23 VGND VPWR VPWR VGND sky130_fd_sc_hd__decap_4
+Xcell1.nand2_1.core_nand VPWR VGND VGND VPWR s2 cell1.nand_cell_1 cell1.inv1_output
++ sky130_fd_sc_hd__nand2_1
+XPHY_EDGE_ROW_5_Left_11 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+XPHY_EDGE_ROW_3_Right_3 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+XFILLER_5_15 VGND VPWR VPWR VGND sky130_ef_sc_hd__decap_12
+XFILLER_0_8 VGND VPWR VPWR VGND sky130_ef_sc_hd__decap_12
+XFILLER_2_29 VGND VPWR VPWR VGND sky130_fd_sc_hd__decap_4
+Xcell0.nand2_3.core_nand VPWR VGND VGND VPWR cell0.nand_cell_1 Y cell0.nand_cell_2
++ sky130_fd_sc_hd__nand2_1
+Xcell2.nand2_2.core_nand VPWR VGND VGND VPWR A cell2.nand_cell_2 Q[2] sky130_fd_sc_hd__nand2_1
+XPHY_EDGE_ROW_3_Left_9 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+XFILLER_5_29 VGND VPWR VPWR VGND sky130_fd_sc_hd__decap_4
+XFILLER_0_20 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_8
+XPHY_EDGE_ROW_4_Left_10 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+XPHY_EDGE_ROW_2_Right_2 VPWR VGND VPWR VGND sky130_fd_sc_hd__decap_3
+Xcell3.nand2_3.core_nand VPWR VGND VGND VPWR cell3.nand_cell_1 s3 cell3.nand_cell_2
++ sky130_fd_sc_hd__nand2_1
+XFILLER_5_3 VGND VPWR VPWR VGND sky130_ef_sc_hd__decap_12
+.ends
+
