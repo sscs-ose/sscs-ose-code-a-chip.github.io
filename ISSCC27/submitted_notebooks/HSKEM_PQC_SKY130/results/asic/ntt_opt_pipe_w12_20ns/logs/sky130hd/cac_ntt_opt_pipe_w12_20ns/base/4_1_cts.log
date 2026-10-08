@@ -1,0 +1,146 @@
+OpenROAD f552262465b0bfef8f097e258f94bc501d01e19d 
+Features included (+) or not (-): +GPU +GUI +Python
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+[INFO ORD-0030] Using 12 thread(s).
+read_liberty /opt/eda/orfs-6101364b/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_db /root/cac_runs/ntt_opt_pipe_w12_20ns/results/sky130hd/cac_ntt_opt_pipe_w12_20ns/base/3_place.odb
+read_sdc /root/cac_runs/ntt_opt_pipe_w12_20ns/results/sky130hd/cac_ntt_opt_pipe_w12_20ns/base/3_place.sdc
+source /opt/eda/orfs-6101364b/flow/platforms/sky130hd/setRC.tcl
+clock_tree_synthesis -sink_clustering_enable -repair_clock_nets
+[INFO CTS-0050] Root buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0051] Sink buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0052] The following clock buffers will be used for CTS:
+                    sky130_fd_sc_hd__clkbuf_16
+[INFO CTS-0049] Characterization buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0007] Net "clk" found for clock "clk".
+[INFO CTS-0010]  Clock net "clk" has 3265 sinks.
+[INFO CTS-0008] TritonCTS found 1 clock nets.
+[INFO CTS-0097] Characterization used 1 buffer(s) types.
+[INFO CTS-0201] 0 blockages from hard placement blockages and placed macros will be used.
+[INFO CTS-0027] Generating H-Tree topology for net clk.
+[INFO CTS-0028]  Total number of sinks: 3265.
+[INFO CTS-0090]  Sinks will be clustered based on buffer max cap.
+[INFO CTS-0030]  Number of static layers: 0.
+[INFO CTS-0020]  Wire segment unit: 13600  dbu (13 um).
+[INFO CTS-0206] Best clustering solution was found from max clustering size of 14 and max clustering diameter of 105.
+[INFO CTS-0019]  Total number of sinks after clustering: 313.
+[INFO CTS-0024]  Normalized sink region: [(1.2252, 3.16814), (41.6154, 42.0493)].
+[INFO CTS-0025]     Width:  40.3902.
+[INFO CTS-0026]     Height: 38.8811.
+ Level 1
+    Direction: Horizontal
+    Sinks per sub-region: 157
+    Sub-region size: 20.1951 X 38.8811
+[INFO CTS-0034]     Segment length (rounded): 10.
+ Level 2
+    Direction: Vertical
+    Sinks per sub-region: 79
+    Sub-region size: 20.1951 X 19.4406
+[INFO CTS-0034]     Segment length (rounded): 10.
+ Level 3
+    Direction: Horizontal
+    Sinks per sub-region: 40
+    Sub-region size: 10.0975 X 19.4406
+[INFO CTS-0034]     Segment length (rounded): 6.
+ Level 4
+    Direction: Vertical
+    Sinks per sub-region: 20
+    Sub-region size: 10.0975 X 9.7203
+[INFO CTS-0034]     Segment length (rounded): 4.
+ Level 5
+    Direction: Horizontal
+    Sinks per sub-region: 10
+    Sub-region size: 5.0488 X 9.7203
+[INFO CTS-0034]     Segment length (rounded): 2.
+[INFO CTS-0038]  Stop criterion found. Sink region hpwl is smaller than max wirelength (1911.535 um) and max number of sinks is 15.
+[INFO CTS-0035]  Number of sinks covered: 313.
+[INFO CTS-0018]     Created 350 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 4.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 4.
+[INFO CTS-0015]     Created 350 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 3:2, 4:2, 5:2, 6:4, 7:10, 8:14, 9:52, 10:83, 11:84, 12:73, 13:16, 14:3..
+[INFO CTS-0017]     Max level of the clock tree: 5.
+[INFO CTS-0098] Clock net "clk"
+[INFO CTS-0099]  Sinks 3540
+[INFO CTS-0100]  Leaf buffers 313
+[INFO CTS-0101]  Average sink wire length 972.36 um
+[INFO CTS-0102]  Path depth 3 - 4
+[INFO CTS-0207]  Dummy loads inserted 275
+[INFO CTS-0500] Runtime: 2.35s
+estimate_parasitics -placement
+detailed_placement
+[INFO DPL-0006] Core area: 336863.08 um^2
+[INFO DPL-0007] Movable instances area: 164103.64 um^2
+[INFO DPL-0008] Fixed instances area within core: 5649.17 um^2
+[INFO DPL-0009] Utilization: 50.4%
+[INFO DPL-0005] Diamond search max displacement: +/- 500 sites horizontally, +/- 100 rows vertically.
+[INFO DPL-1102] Legalizing using negotiation legalizer.
+[INFO DPL-1103] Negotiation base search window: +/-20 sites horizontally, +/-5 rows vertically 
+	Automatic search window extension enabled.
+	Search window extendable up to the max displacement cap of +/-500 sites, +/-100 rows near walls.
+[INFO DPL-1104] NegotiationLegalizer DRC penalty: 5.
+[INFO DPL-0392] Negotiation cell height distribution (1 unique row-count(s)):
+[INFO DPL-0393]   height 1 row(s): 17141 cells
+          |      Total |  Illegal |  Illegal
+Iteration | Violations |    Cells |    Sites
+---------------------------------------------
+        0 |        295 |        49 |       246
+        1 |         36 |        10 |        26
+        2 |          0 |         0 |         0
+Negotiation phase 1 converged at iteration 2.
+[INFO DPL-0500] Runtime: 0.28s
+Placement Analysis
+---------------------------------
+total displacement      13007.2 u
+average displacement        0.8 u
+max displacement           25.7 u
+original HPWL          303449.4 u
+legalized HPWL         309525.3 u
+delta HPWL                    2 %
+
+estimate_parasitics -placement
+Warning: master sky130_ef_sc_hd__decap_12 has signal pins but no liberty cell
+repair_timing -setup_margin 0 -hold_margin 0 -repair_tns 100 -match_cell_footprint -verbose
+[INFO RSZ-0100] Repair move sequence: UnbufferMove SizeUpMove SwapPinsMove BufferMove CloneMove SplitLoadMove 
+[INFO RSZ-0098] No setup violations found
+[INFO RSZ-0505] Runtime: 0.88s
+[INFO RSZ-0033] No hold violations found.
+[INFO RSZ-0506] Runtime: 0.23s
+Warning: master sky130_ef_sc_hd__decap_12 has signal pins but no liberty cell
+Repair timing output passed lec test
+detailed_placement
+[INFO DPL-0006] Core area: 336863.08 um^2
+[INFO DPL-0007] Movable instances area: 164103.64 um^2
+[INFO DPL-0008] Fixed instances area within core: 5649.17 um^2
+[INFO DPL-0009] Utilization: 50.4%
+[INFO DPL-0005] Diamond search max displacement: +/- 500 sites horizontally, +/- 100 rows vertically.
+[INFO DPL-1102] Legalizing using negotiation legalizer.
+[INFO DPL-1103] Negotiation base search window: +/-20 sites horizontally, +/-5 rows vertically 
+	Automatic search window extension enabled.
+	Search window extendable up to the max displacement cap of +/-500 sites, +/-100 rows near walls.
+[INFO DPL-1104] NegotiationLegalizer DRC penalty: 5.
+[INFO DPL-0392] Negotiation cell height distribution (1 unique row-count(s)):
+[INFO DPL-0393]   height 1 row(s): 17141 cells
+[INFO DPL-0500] Runtime: 0.10s
+Placement Analysis
+---------------------------------
+total displacement          0.0 u
+average displacement        0.0 u
+max displacement            0.0 u
+original HPWL          309525.3 u
+legalized HPWL         309525.3 u
+delta HPWL                    0 %
+
+estimate_parasitics -placement
+Report metrics stage 4, cts final...
+
+==========================================================================
+cts final report_design_area
+--------------------------------------------------------------------------
+Design area 169753 um^2 50% utilization.
+write_db /root/cac_runs/ntt_opt_pipe_w12_20ns/results/sky130hd/cac_ntt_opt_pipe_w12_20ns/base/4_1_cts.odb
+write_sdc -no_timestamp /root/cac_runs/ntt_opt_pipe_w12_20ns/results/sky130hd/cac_ntt_opt_pipe_w12_20ns/base/4_cts.sdc
+Elapsed time: 0:18.57[h:]min:sec. CPU time: user 22.25 sys 4.38 (143%). Peak memory: 346752KB.
+Log                       Ext     Elapsed/s Peak Memory/MB sha1sum result [0:20)
+4_1_cts                   .odb           18            338 47542cb03d1fe88bff0d

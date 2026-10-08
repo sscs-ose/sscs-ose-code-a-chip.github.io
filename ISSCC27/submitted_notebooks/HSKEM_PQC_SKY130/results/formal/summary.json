@@ -1,0 +1,12 @@
+{
+  "tool": "Yosys 0.69+154 built-in SAT (minisat), OSS CAD Suite 2026-09-28; property harness formal/barrett_prop.v",
+  "property": "barrett_reduce(a) == a mod 3329 for every 24-bit a (2^24 inputs), reference remainder built by the synthesizer",
+  "results": {
+    "rtl/barrett_reduce.v (three corrections)": "PROVEN (results/formal/barrett_proof.log)",
+    "formal/barrett_reduce_no_r3.v (third correction removed)": "PROVEN (barrett_no_third_correction.log)",
+    "formal/barrett_reduce_one_correction.v (second and third removed)": "PROVEN (barrett_one_correction.log)",
+    "formal/barrett_reduce_mutant_none.v (negative control: no correction)": "FAILS as required, counterexample a=4557569 gives r=3497 instead of 168 (barrett_negative_control_no_correction.log)"
+  },
+  "cross_check": "exhaustive numpy evaluation of the RTL formula: pre-correction remainder in [0, 5713] < 2q; 6,012,719 inputs need exactly one subtraction, none need two",
+  "conclusion": "one conditional subtraction is necessary and sufficient; the RTL's second and third 25-bit compare/subtract stages are provably redundant and sit on the NTT critical path"
+}
