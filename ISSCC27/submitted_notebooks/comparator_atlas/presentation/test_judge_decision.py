@@ -116,7 +116,7 @@ def test_notebook_static_presets_have_working_source_and_honest_scope(data):
         output = preview.notebook_view(minimum, 1)
         assert "wrong" in output and "unresolved" in output and "local_boundary" in output
         assert ("NONE" if minimum == 1 else preview.inspect(minimum, 1, data)[0]["winner"]) in output
-    assert preview.LABEL in "".join(notebook["cells"][0]["source"])
+    assert preview.SUBTITLE in "".join(notebook["cells"][0]["source"])
 
 
 def test_generators_have_only_public_source_dependencies():

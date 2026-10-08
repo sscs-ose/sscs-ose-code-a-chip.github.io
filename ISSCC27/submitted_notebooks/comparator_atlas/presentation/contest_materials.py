@@ -85,36 +85,36 @@ def poster_figure(facts: dict):
 
     text(left, 0.966, "Correct before the deadline - or NONE?",
          34, weight="bold", role="title")
-    text(left, 0.919, "Comparator Atlas  |  specify, qualify, then compare energy",
+    text(left, 0.919, "Comparator Atlas  |  SKY130 StrongARM comparators",
          22, BLUE, role="subtitle")
     text(left, 0.881, f"{author['name']}  |  {author['affiliation']}", 18, role="author")
     text(right, 0.881, "IEEE SSCS Code-a-Chip  /  ISSCC 2027", 16, role="contest")
     rule(left, 0.856, 0.92)
-    for x, heading in ((left, "What a choice must satisfy"),
-                       (center, "Specify, qualify, then choose"),
-                       (right, "Separate matched layout example")):
+    for x, heading in ((left, "1. Define a correct decision"),
+                       (center, "2. Qualify before ranking energy"),
+                       (right, "3. Separate layout evidence")):
         text(x, 0.838, heading, 23, weight="bold", role="heading")
 
-    text(left, 0.797, "Calibration alone is not qualification.\n"
-         "Every included point must be correct on time.", width=column_width)
+    text(left, 0.797, "Calibration is not a timing guarantee.\n"
+         "Every included sample must be correct on time.", width=column_width)
     circuit = physical.circuit_guide_path()
     waveform = OUTPUT / "figures" / "single_row_worst.png"
     image(circuit, [left, 0.426, column_width, 0.307], "original_27_mos_schematic")
-    text(left, 0.413, "Recorded circuit topology. Nine declared sizing candidates; "
-         "the lower-energy control was evaluated after selection.",
+    text(left, 0.413, "Established StrongARM topology in SKY130. Nine sizing candidates; "
+         "the lower-energy control was tested after selection.",
          16, MUTED, width=column_width, role="caption")
     text(left, 0.343, "Correct, wrong or unresolved", 22, weight="bold", role="heading")
-    text(left, 0.305, "A correct decision reaches complementary 80% / 20% "
-         "output rails with the expected polarity before the deadline. "
-         "Wrong polarity and unresolved outputs are counted separately.",
+    text(left, 0.305, "Correct: complementary 80% / 20% output rails, "
+         "expected polarity, before the deadline. "
+         "Wrong polarity and unresolved outputs are separate outcomes.",
          width=column_width)
-    text(left, 0.218, "Calibration and full-cycle core energy are evaluated "
-         "from archived measurements. A later readout does not rerun "
-         "SPICE or shorten the measured energy cycle.", 17, width=column_width)
+    text(left, 0.218, "Read stored measurements, not new simulations. "
+         "A later deadline changes the readout, not the "
+         "full 20-30 ns core-energy cycle.", 17, width=column_width)
 
-    text(center, 0.797, "Calibrated SCHEMATIC: local_boundary; all 49 "
-         "controlled-width-stress conditions. Both signs at finite "
-         "sampled inputs through 30 mV; 1 ns deadline.",
+    text(center, 0.797, "Calibrated SCHEMATIC, not layout RC.\n"
+         "local_boundary; all 49 controlled-width-stress conditions. "
+         "Both signed samples through 30 mV; 1 ns deadline.",
          17, width=column_width, role="schematic_scope")
     for y, choice, label in zip((0.690, 0.590, 0.490),
                                 (none, selected, control), ("NONE", "Selected", "Control")):
@@ -132,8 +132,8 @@ def poster_figure(facts: dict):
                  f"{choice['correct']}/{choice['points']} correct at all included samples", 16)
             text(x, y - 0.060, f"{choice['mean_core_energy_fj']:.3f} fJ mean core / cycle",
                  17, BLUE, role="mean_energy")
-    text(center, 0.392, "Post-hoc: qualify, then rank three designs. "
-         "Different-band energies are not a same-spec gain. "
+    text(center, 0.392, "Post-hoc comparison of three designs. Different "
+         "bands are different specs, not energy savings. "
          "No interpolation or global optimum.", 16, MUTED, width=column_width)
     limits = selected["sampled_limits"]
     text(center, 0.316, f"Selected >= 3 mV band  /  same {selected['points']} samples",
@@ -150,8 +150,8 @@ def poster_figure(facts: dict):
          "at signed +/-1 mV. Locations and trim codes do not identify "
          "a physical failure cause.", 16, width=column_width)
 
-    text(right, 0.797, "Local-pitch b1 vs adopted a1; known nonblind, code-zero: 45 PVT conditions "
-         "x four signed inputs (-10, -3, +3, +10 mV). "
+    text(right, 0.797, "Local-pitch b1 vs adopted a1: nominal, code-zero, "
+         "known nonblind. 45 PVT conditions x signed +/-3 and +/-10 mV. "
          "180 keys per layout / C or RC; ngspice-47.",
          17, width=column_width, role="rc_scope")
     axes = figure.add_axes([right, 0.611, column_width, 0.106])
@@ -180,12 +180,12 @@ def poster_figure(facts: dict):
         text(right + 0.12, y, f"{first}/180", 18)
         text(right + 0.20, y, f"{second}/180", 18)
     text(right, 0.399, "RC mean: 421.04 -> 412.88 fJ / cycle", 17, BLUE, role="rc_energy")
-    text(right, 0.370, "1 ns RC unresolved: a1 24 -> b1 22; zero wrong.\n"
-         "Only SS / 1.62 V / 125 C / +/-10 mV improve; FS remains late.\n"
-         "2 ns primary, prospectively declared; no lost correct keys.",
+    text(right, 0.370, "1 ns RC: 24 -> 22 unresolved; zero wrong.\n"
+         "Only SS 1.62 V / 125 C / +/-10 mV improve; FS unresolved.\n"
+         "2 ns declared primary; no lost correct keys.",
          16, width=column_width)
-    image(waveform, [right, 0.210, column_width, 0.115], "retained_nominal_rc_waveform")
-    text(right, 0.197, "Matched a1 -> b1; worst RC: 1.811 -> 1.760 ns.\n"
+    image(waveform, [right, 0.200, column_width, 0.115], "retained_nominal_rc_waveform")
+    text(right, 0.187, "Matched a1 -> b1; worst RC: 1.811 -> 1.760 ns.\n"
          "~1.94% energy change is not robust global PPA.",
          16, MUTED, width=column_width, role="caption")
 
@@ -219,9 +219,13 @@ def poster_figure(facts: dict):
             a, b, c, d = other["bounds"]
             if min(x + w, a + c) > max(x, a) and min(y + h, b + d) > max(y, b):
                 raise ValueError(f"Poster text overlap: {item['text']} / {other['text']}")
+        for picture in images:
+            a, b, c, d = picture["allocated_bounds"]
+            if min(x + w, a + c) > max(x, a) and min(y + h, b + d) > max(y, b):
+                raise ValueError(f"Poster text overlaps image: {item['text']} / {picture['role']}")
     return figure, {"page_inches": list(PAGE_INCHES), "columns": [left, center, right],
                     "column_width": column_width, "text": measured, "images": images,
-                    "all_text_in_bounds": True, "text_overlaps": 0}
+                    "all_text_in_bounds": True, "text_overlaps": 0, "text_image_overlaps": 0}
 
 
 def build() -> Path:
@@ -254,6 +258,8 @@ def build() -> Path:
         f"correct at {selected['mean_core_energy_fj']:.3f} fJ mean core energy; for >=30 mV, "
         f"{control['winner']} gives {control['correct']}/{control['points']} at "
         f"{control['mean_core_energy_fj']:.3f} fJ. "
+        "Different input bands are different specifications, not a same-specification "
+        "energy improvement. "
         "Qualification requires every included point to be correct before mean energy "
         "ranks designs; the original training selection is unchanged. The selected "
         f"design retains the same {facts['sampled_schematic']['selected_wrong']['count_1ns']} "

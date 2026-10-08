@@ -1,25 +1,25 @@
 # Comparator Atlas: correct before the deadline - or NONE?
 
-**Comparator Atlas | finite sampled design decisions**
+**SKY130 StrongARM comparators | sampled design decisions**
 
 **Wei-Lun Hsu - National Tsing Hua University**
 
-Calibration does not necessarily mean correct before the deadline.
-Comparator Atlas asks a concrete design question: for a sampled input band and deadline,
-does any compared circuit qualify at every included point? Only then should mean energy
-rank designs. A useful design tool must return NONE rather than a best-average fallback.
-The same saved 49-condition schematic study gives three different answers at 1 ns:
->=1 mV: NONE; >=3 mV: lvt_balanced_4b, 294/294, 249.655 fJ;
->=30 mV: lvt_base_3b, 98/98, 150.531 fJ. This is a post-hoc comparison of three
-designs under local_boundary calibration, both signed finite sampled inputs through
-30 mV, not continuous coverage or a global optimization. Energies from different
-input bands are not a same-specification energy improvement.
+IEEE SSCS Code-a-Chip - ISSCC 2027 | Original code: MIT
+
+[Notebook](Comparator_Atlas.ipynb) | [Quick tour](REVIEWER_GUIDE.md) | [Reproduction](REPRODUCIBILITY.md) | [Run in Colab](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb)
+
+Which SKY130 StrongARM comparator meets your sampled input band and deadline?
+Calibration alone does not ensure a correct decision on time. Comparator Atlas lets you
+compare three designs using saved schematic measurements: choose a specification, inspect
+correct, wrong and unresolved outcomes, and trace failures to their exact records.
+Rank mean energy only after every included point qualifies. If none does, return NONE,
+not the best average.
 
 ## A three-minute route
 
-1. Open [the self-contained report](results/study/report.html) as a local HTML file. Use the **1 ns / >=1 mV** preset: every candidate fails strict qualification; NONE is not a low-energy result.
-2. Change to **>=3 mV**, then **>=30 mV**. Compare all three designs' correct/wrong/unresolved counts before their mean energy. Inspect exact disqualifying keys, trim codes, recorded latencies and CSV record locations in the same panel/map.
-3. Keep wrong and unresolved distinct: the selected design's same 20 +/-1 mV wrong samples remain at 2 ns. Only an actual identity-matched retained waveform gets a wave button. Other keys show the measurement record honestly. Then read the separate b1/a1 layout example and its physical-fidelity warning.
+1. Download [the self-contained report](results/study/report.html) and open it locally; GitHub's viewer does not run its controls. Try the three 1 ns presets below.
+2. Inspect each design's qualification and exact failing keys, trim codes, latencies and CSV record locations. Only identity-matched retained traces get a waveform link; other keys show measurement records.
+3. Compare wrong with unresolved: the same 20 selected +/-1 mV wrong samples remain at 2 ns. Then read the separate b1/a1 layout example and its physical-fidelity warning.
 
 | 1 ns sampled band | Strict choice | Correct / included points | Mean core energy |
 |---|---|---|---|
@@ -28,6 +28,8 @@ input bands are not a same-specification energy improvement.
 | >=30 mV | lvt_base_3b | 98/98 | 150.531 fJ |
 
 This is a post-hoc comparison of exactly three schematic designs, local_boundary calibration, all 49 controlled-width-stress conditions and both signs at six finite sampled magnitudes through 30 mV. The six deadlines produce 36 cells: 28 NONE, 5 selected, 3 lower-energy control. Exact mean-energy ties retain every tied design; no interpolation or global optimization is implied. The original nine-candidate training choice is unchanged.
+
+**Different input bands are different specifications.** The table is not a same-specification energy improvement.
 
 **Energy and evidence contract.** Full-cycle 20-30 ns core energy excludes input/clock drivers and calibration/controller infrastructure. A null unresolved latency is not zero; failed designs and NONE retain null sampled limits. The report shows all keyed witnesses with their source table and record number; a retained raw wave is not promised for every measurement.
 
@@ -43,7 +45,7 @@ The [Notebook](Comparator_Atlas.ipynb) has the same integrated strict Python sel
 
 [Poster PDF](results/study/Comparator_Atlas_Poster.pdf) | [Poster preview](results/study/poster_preview.png) | [Abstract](results/study/abstract.txt) | [Methodology and dated execution scope](REPRODUCIBILITY.md).
 
-Different input-band energies in the teaching table are not a same-specification energy improvement. Saved results, source links and maintainer executions are distinct forms of evidence; see the dated reproduction scope rather than assuming an older run certifies changed source.
+Saved results, source links and maintainer executions are distinct forms of evidence; the dated reproduction scope states which source was actually executed.
 
 GitHub Copilot assisted implementation, experiment automation, figures and documentation; the author is responsible for the work.
 
