@@ -2,7 +2,7 @@
 
 **IEEE SSCS Open-Source Ecosystem Code-a-Chip Travel Grant Submission for ISSCC 2027**
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/rv32i_vga_soc/rv32i_vga_soc.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HSGHamza/RV32I-VGA-SOC/blob/main/ISSCC27/submitted_notebooks/rv32i_vga_soc/rv32i_vga_soc.ipynb)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Process: SkyWater 130nm](https://img.shields.io/badge/PDK-SkyWater%20130nm-orange.svg)](https://github.com/google/skywater-pdk)
 [![Toolchain: OpenLane / OpenROAD](https://img.shields.io/badge/EDA-OpenLane%20%2F%20OpenROAD-purple.svg)](https://github.com/The-OpenROAD-Project/OpenLane)
@@ -64,7 +64,7 @@ ISSCC27/submitted_notebooks/rv32i_vga_soc/
 
 ### Option A: Run in Google Colab (One-Click)
 Click the badge above or navigate to:
-[https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/rv32i_vga_soc/rv32i_vga_soc.ipynb](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/rv32i_vga_soc/rv32i_vga_soc.ipynb)
+[https://colab.research.google.com/github/HSGHamza/RV32I-VGA-SOC/blob/main/ISSCC27/submitted_notebooks/rv32i_vga_soc/rv32i_vga_soc.ipynb](https://colab.research.google.com/github/HSGHamza/RV32I-VGA-SOC/blob/main/ISSCC27/submitted_notebooks/rv32i_vga_soc/rv32i_vga_soc.ipynb)
 
 Select **Runtime -> Run all**. The notebook automatically configures its environment, downloads dependencies, emulates the Pong framebuffer, inspects the GDSII silicon geometry, and plots the 9-corner STA sign-off dashboard.
 
