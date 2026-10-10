@@ -1,0 +1,256 @@
+100001b7 // Instr   0 (PC 0x000): lui  x3, 0x10000               // x3 = 0x1000_0000 (VGA_CTRL MMIO address)
+00100093 // Instr   1 (PC 0x004): addi x1, x0, 1                 // x1 = 1 (display_enable)
+0011a023 // Instr   2 (PC 0x008): sw   x1, 0(x3)                 // mem[0x1000_0000] = 1 (enable VGA output)
+500001b7 // Instr   3 (PC 0x00C): lui  x3, 0x50000               // x3 = 0x5000_0000 (Framebuffer Base Address)
+00fff137 // Instr   4 (PC 0x010): lui  x2, 0xFFF                 // x2 = 0x00FFF000
+fff16113 // Instr   5 (PC 0x014): ori  x2, x2, 0xFFF             // x2 = 0x00FFFFFF (White Color)
+05000213 // Instr   6 (PC 0x018): addi x4, x0, 80                // x4 = Ball X = 80
+03c00293 // Instr   7 (PC 0x01C): addi x5, x0, 60                // x5 = Ball Y = 60
+00100313 // Instr   8 (PC 0x020): addi x6, x0, 1                 // x6 = Ball DX = +1
+00100393 // Instr   9 (PC 0x024): addi x7, x0, 1                 // x7 = Ball DY = +1
+03200413 // Instr  10 (PC 0x028): addi x8, x0, 50                // x8 = Left Paddle Y = 50
+03200493 // Instr  11 (PC 0x02C): addi x9, x0, 50                // x9 = Right Paddle Y = 50
+00020713 // Instr  12 (PC 0x030): addi x14, x4, 0                // x14 = Prev Ball X = 80
+00028793 // Instr  13 (PC 0x034): addi x15, x5, 0                // x15 = Prev Ball Y = 60
+00040813 // Instr  14 (PC 0x038): addi x16, x8, 0                // x16 = Prev Left Paddle Y = 50
+00048893 // Instr  15 (PC 0x03C): addi x17, x9, 0                // x17 = Prev Right Paddle Y = 50
+00000013 // Instr  16 (PC 0x040): nop                            // Start of animation frame
+00979513 // Instr  17 (PC 0x044): slli x10, x15, 9               // x10 = prev_y * 512
+00779593 // Instr  18 (PC 0x048): slli x11, x15, 7               // x11 = prev_y * 128
+00b50533 // Instr  19 (PC 0x04C): add  x10, x10, x11             // x10 = prev_y * 640
+00271593 // Instr  20 (PC 0x050): slli x11, x14, 2               // x11 = prev_x * 4
+00b50533 // Instr  21 (PC 0x054): add  x10, x10, x11             // x10 = byte offset
+00350533 // Instr  22 (PC 0x058): add  x10, x10, x3              // x10 = absolute address
+00052023 // Instr  23 (PC 0x05C): sw   x0, 0(x10)                // Erase ball row 0 col 0
+00052223 // Instr  24 (PC 0x060): sw   x0, 4(x10)                // Erase ball row 0 col 1
+28052023 // Instr  25 (PC 0x064): sw   x0, 640(x10)              // Erase ball row 1 col 0
+28052223 // Instr  26 (PC 0x068): sw   x0, 644(x10)              // Erase ball row 1 col 1
+00981513 // Instr  27 (PC 0x06C): slli x10, x16, 9               // x10 = prev_yL * 512
+00781593 // Instr  28 (PC 0x070): slli x11, x16, 7               // x11 = prev_yL * 128
+00b50533 // Instr  29 (PC 0x074): add  x10, x10, x11             // x10 = prev_yL * 640
+01850513 // Instr  30 (PC 0x078): addi x10, x10, 24              // x10 += X*4 = 6*4 = 24
+00350533 // Instr  31 (PC 0x07C): add  x10, x10, x3              // x10 += FB Base
+01000593 // Instr  32 (PC 0x080): addi x11, x0, 16               // x11 = 16 rows
+00052023 // Instr  33 (PC 0x084): sw   x0, 0(x10)                // Erase left paddle pixel
+00052223 // Instr  34 (PC 0x088): sw   x0, 4(x10)                // Erase left paddle width pixel
+28050513 // Instr  35 (PC 0x08C): addi x10, x10, 640             // Next line
+fff58593 // Instr  36 (PC 0x090): addi x11, x11, -1              // Decrement counter
+fe0598e3 // Instr  37 (PC 0x094): bne  x11, x0, erase_lpad (-16) // Loop until paddle erased
+00989513 // Instr  38 (PC 0x098): slli x10, x17, 9               // x10 = prev_yR * 512
+00789593 // Instr  39 (PC 0x09C): slli x11, x17, 7               // x11 = prev_yR * 128
+00b50533 // Instr  40 (PC 0x0A0): add  x10, x10, x11             // x10 = prev_yR * 640
+26050513 // Instr  41 (PC 0x0A4): addi x10, x10, 608             // x10 += X*4 = 152*4 = 608
+00350533 // Instr  42 (PC 0x0A8): add  x10, x10, x3              // x10 += FB Base
+01000593 // Instr  43 (PC 0x0AC): addi x11, x0, 16               // x11 = 16 rows
+00052023 // Instr  44 (PC 0x0B0): sw   x0, 0(x10)                // Erase right paddle pixel
+00052223 // Instr  45 (PC 0x0B4): sw   x0, 4(x10)                // Erase right paddle width pixel
+28050513 // Instr  46 (PC 0x0B8): addi x10, x10, 640             // Next line
+fff58593 // Instr  47 (PC 0x0BC): addi x11, x11, -1              // Decrement counter
+fe0598e3 // Instr  48 (PC 0x0C0): bne  x11, x0, erase_rpad (-16) // Loop until paddle erased
+00620233 // Instr  49 (PC 0x0C4): add  x4, x4, x6                // BALL_X += VELOCITY_X
+007282b3 // Instr  50 (PC 0x0C8): add  x5, x5, x7                // BALL_Y += VELOCITY_Y
+00300613 // Instr  51 (PC 0x0CC): addi x12, x0, 3                // x12 = 3 (top boundary)
+00565663 // Instr  52 (PC 0x0D0): bge  x12, x5, bounce_y (+12)   // if 3 >= BALL_Y, reverse DY
+07300613 // Instr  53 (PC 0x0D4): addi x12, x0, 115              // x12 = 115 (bottom boundary)
+00c2c463 // Instr  54 (PC 0x0D8): blt  x5, x12, check_pad_coll (+8) // if BALL_Y < 115, skip
+407003b3 // Instr  55 (PC 0x0DC): sub  x7, x0, x7                // VELOCITY_Y = -VELOCITY_Y
+00800613 // Instr  56 (PC 0x0E0): addi x12, x0, 8                // x12 = 8 (left paddle X bound)
+00465863 // Instr  57 (PC 0x0E4): bge  x12, x4, test_left_pad (+16) // if BALL_X <= 8, check left paddle
+09600613 // Instr  58 (PC 0x0E8): addi x12, x0, 150              // x12 = 150 (right paddle X bound)
+02c25463 // Instr  59 (PC 0x0EC): bge  x4, x12, test_right_pad (+40) // if BALL_X >= 150, check right paddle
+0600006f // Instr  60 (PC 0x0F0): jal  x0, read_inputs (+96)     // Inside court, go handle controls
+0082ca63 // Instr  61 (PC 0x0F4): blt  x5, x8, check_left_goal (+20) // if BALL_Y < yL, miss!
+01040613 // Instr  62 (PC 0x0F8): addi x12, x8, 16               // x12 = yL + 16
+00c2d663 // Instr  63 (PC 0x0FC): bge  x5, x12, check_left_goal (+12) // if BALL_Y >= yL + 16, miss!
+00100313 // Instr  64 (PC 0x100): addi x6, x0, 1                 // VELOCITY_X = +1 (Bounce Right!)
+04c0006f // Instr  65 (PC 0x104): jal  x0, read_inputs (+76)     // Paddle hit, continue
+00200613 // Instr  66 (PC 0x108): addi x12, x0, 2                // Left goal threshold
+02c24463 // Instr  67 (PC 0x10C): blt  x4, x12, reset_ball_right (+40) // Ball passed left paddle -> goal!
+0400006f // Instr  68 (PC 0x110): jal  x0, read_inputs (+64)     // Not past goal yet
+0092ca63 // Instr  69 (PC 0x114): blt  x5, x9, check_right_goal (+20) // if BALL_Y < yR, miss!
+01048613 // Instr  70 (PC 0x118): addi x12, x9, 16               // x12 = yR + 16
+00c2d663 // Instr  71 (PC 0x11C): bge  x5, x12, check_right_goal (+12) // if BALL_Y >= yR + 16, miss!
+fff00313 // Instr  72 (PC 0x120): addi x6, x0, -1                // VELOCITY_X = -1 (Bounce Left!)
+02c0006f // Instr  73 (PC 0x124): jal  x0, read_inputs (+44)     // Paddle hit, continue
+09c00613 // Instr  74 (PC 0x128): addi x12, x0, 156              // Right goal threshold
+00c25c63 // Instr  75 (PC 0x12C): bge  x4, x12, reset_ball_left (+24) // Ball passed right paddle -> goal!
+0200006f // Instr  76 (PC 0x130): jal  x0, read_inputs (+32)     // Not past goal yet
+05000213 // Instr  77 (PC 0x134): addi x4, x0, 80                // Reset Ball X to center
+03c00293 // Instr  78 (PC 0x138): addi x5, x0, 60                // Reset Ball Y to center
+00100313 // Instr  79 (PC 0x13C): addi x6, x0, 1                 // Serve right (+1)
+0100006f // Instr  80 (PC 0x140): jal  x0, read_inputs (+16)     // Go handle controls
+05000213 // Instr  81 (PC 0x144): addi x4, x0, 80                // Reset Ball X to center
+03c00293 // Instr  82 (PC 0x148): addi x5, x0, 60                // Reset Ball Y to center
+fff00313 // Instr  83 (PC 0x14C): addi x6, x0, -1                // Serve left (-1)
+10000937 // Instr  84 (PC 0x150): lui  x18, 0x10000              // x18 = 0x1000_0000 (MMIO Base)
+01092983 // Instr  85 (PC 0x154): lw   x19, 16(x18)              // x19 = mem[0x1000_0010] (btn & sw)
+0019f093 // Instr  86 (PC 0x158): andi x1, x19, 0x1              // x1 = btn[0] (Left UP)
+00008c63 // Instr  87 (PC 0x15C): beq  x1, x0, check_btn1 (+24)  // if BTN0 not pressed, check BTN1
+ffe40413 // Instr  88 (PC 0x160): addi x8, x8, -2                // yL -= 2 (move up)
+00200613 // Instr  89 (PC 0x164): addi x12, x0, 2                // Top clamp limit
+02c45263 // Instr  90 (PC 0x168): bge  x8, x12, check_right_pad_ctrl (+36) // if yL >= 2, ok
+00200413 // Instr  91 (PC 0x16C): addi x8, x0, 2                 // clamp yL = 2
+01c0006f // Instr  92 (PC 0x170): jal  x0, check_right_pad_ctrl (+28) // done left paddle
+0029f093 // Instr  93 (PC 0x174): andi x1, x19, 0x2              // x1 = btn[1] (Left DOWN)
+00008a63 // Instr  94 (PC 0x178): beq  x1, x0, check_right_pad_ctrl (+20) // if BTN1 not pressed, done left paddle
+00240413 // Instr  95 (PC 0x17C): addi x8, x8, 2                 // yL += 2 (move down)
+06600613 // Instr  96 (PC 0x180): addi x12, x0, 102              // Bottom clamp limit (118-16 = 102)
+00c44463 // Instr  97 (PC 0x184): blt  x8, x12, check_right_pad_ctrl (+8) // if yL < 102, ok
+06600413 // Instr  98 (PC 0x188): addi x8, x0, 102               // clamp yL = 102
+0049f093 // Instr  99 (PC 0x18C): andi x1, x19, 0x4              // x1 = btn[2] (Right UP)
+00008c63 // Instr 100 (PC 0x190): beq  x1, x0, check_btn3 (+24)  // if BTN2 not pressed, check BTN3
+ffe48493 // Instr 101 (PC 0x194): addi x9, x9, -2                // yR -= 2 (move up)
+00200613 // Instr 102 (PC 0x198): addi x12, x0, 2                // Top clamp limit
+04c4de63 // Instr 103 (PC 0x19C): bge  x9, x12, draw_frame (+92) // if yR >= 2, ok
+00200493 // Instr 104 (PC 0x1A0): addi x9, x0, 2                 // clamp yR = 2
+0540006f // Instr 105 (PC 0x1A4): jal  x0, draw_frame (+84)      // done right paddle
+0089f093 // Instr 106 (PC 0x1A8): andi x1, x19, 0x8              // x1 = btn[3] (Right DOWN)
+00008c63 // Instr 107 (PC 0x1AC): beq  x1, x0, check_ai_right (+24) // if BTN3 not pressed, check AI assist
+00248493 // Instr 108 (PC 0x1B0): addi x9, x9, 2                 // yR += 2 (move down)
+06600613 // Instr 109 (PC 0x1B4): addi x12, x0, 102              // Bottom clamp limit
+04c4c063 // Instr 110 (PC 0x1B8): blt  x9, x12, draw_frame (+64) // if yR < 102, ok
+06600493 // Instr 111 (PC 0x1BC): addi x9, x0, 102               // clamp yR = 102
+0380006f // Instr 112 (PC 0x1C0): jal  x0, draw_frame (+56)      // done right paddle
+0209f093 // Instr 113 (PC 0x1C4): andi x1, x19, 0x20             // x1 = sw[1] (bit 5)
+02009863 // Instr 114 (PC 0x1C8): bne  x1, x0, draw_frame (+48)  // if SW1 is ON (strict manual), don't move right paddle
+00848613 // Instr 115 (PC 0x1CC): addi x12, x9, 8                // x12 = yR + 8 (paddle center)
+00565a63 // Instr 116 (PC 0x1D0): bge  x12, x5, rpad_ai_up (+20) // if yR+8 >= BALL_Y, try moving up
+06600613 // Instr 117 (PC 0x1D4): addi x12, x0, 102              // Bottom clamp limit
+02c4d063 // Instr 118 (PC 0x1D8): bge  x9, x12, draw_frame (+32) // Already at bottom, stop
+00148493 // Instr 119 (PC 0x1DC): addi x9, x9, 1                 // yR += 1 (move down)
+0180006f // Instr 120 (PC 0x1E0): jal  x0, draw_frame (+24)      // Finished right paddle
+00c2c463 // Instr 121 (PC 0x1E4): blt  x5, x12, rpad_do_up (+8)  // if BALL_Y < yR+8, move up
+0100006f // Instr 122 (PC 0x1E8): jal  x0, draw_frame (+16)      // Centered, don't move
+00200613 // Instr 123 (PC 0x1EC): addi x12, x0, 2                // Top clamp limit
+00965463 // Instr 124 (PC 0x1F0): bge  x12, x9, draw_frame (+8)  // Already at top, stop
+fff48493 // Instr 125 (PC 0x1F4): addi x9, x9, -1                // yR -= 1 (move up)
+00941513 // Instr 126 (PC 0x1F8): slli x10, x8, 9                // x10 = yL * 512
+00741593 // Instr 127 (PC 0x1FC): slli x11, x8, 7                // x11 = yL * 128
+00b50533 // Instr 128 (PC 0x200): add  x10, x10, x11             // x10 = yL * 640
+01850513 // Instr 129 (PC 0x204): addi x10, x10, 24              // x10 += X*4 = 6*4 = 24
+00350533 // Instr 130 (PC 0x208): add  x10, x10, x3              // x10 += FB Base
+01000593 // Instr 131 (PC 0x20C): addi x11, x0, 16               // x11 = 16 rows
+00252023 // Instr 132 (PC 0x210): sw   x2, 0(x10)                // Draw left paddle pixel
+00252223 // Instr 133 (PC 0x214): sw   x2, 4(x10)                // Draw left paddle width pixel
+28050513 // Instr 134 (PC 0x218): addi x10, x10, 640             // Next row
+fff58593 // Instr 135 (PC 0x21C): addi x11, x11, -1              // Decrement height
+fe0598e3 // Instr 136 (PC 0x220): bne  x11, x0, draw_lpad (-16)  // Loop until paddle drawn
+00949513 // Instr 137 (PC 0x224): slli x10, x9, 9                // x10 = yR * 512
+00749593 // Instr 138 (PC 0x228): slli x11, x9, 7                // x11 = yR * 128
+00b50533 // Instr 139 (PC 0x22C): add  x10, x10, x11             // x10 = yR * 640
+26050513 // Instr 140 (PC 0x230): addi x10, x10, 608             // x10 += X*4 = 152*4 = 608
+00350533 // Instr 141 (PC 0x234): add  x10, x10, x3              // x10 += FB Base
+01000593 // Instr 142 (PC 0x238): addi x11, x0, 16               // x11 = 16 rows
+00252023 // Instr 143 (PC 0x23C): sw   x2, 0(x10)                // Draw right paddle pixel
+00252223 // Instr 144 (PC 0x240): sw   x2, 4(x10)                // Draw right paddle width pixel
+28050513 // Instr 145 (PC 0x244): addi x10, x10, 640             // Next row
+fff58593 // Instr 146 (PC 0x248): addi x11, x11, -1              // Decrement height
+fe0598e3 // Instr 147 (PC 0x24C): bne  x11, x0, draw_rpad (-16)  // Loop until paddle drawn
+00929513 // Instr 148 (PC 0x250): slli x10, x5, 9                // x10 = y * 512
+00729593 // Instr 149 (PC 0x254): slli x11, x5, 7                // x11 = y * 128
+00b50533 // Instr 150 (PC 0x258): add  x10, x10, x11             // x10 = y * 640
+00221593 // Instr 151 (PC 0x25C): slli x11, x4, 2                // x11 = x * 4
+00b50533 // Instr 152 (PC 0x260): add  x10, x10, x11             // x10 = relative offset
+00350533 // Instr 153 (PC 0x264): add  x10, x10, x3              // x10 = absolute address
+00252023 // Instr 154 (PC 0x268): sw   x2, 0(x10)                // Draw ball row 0 col 0
+00252223 // Instr 155 (PC 0x26C): sw   x2, 4(x10)                // Draw ball row 0 col 1
+28252023 // Instr 156 (PC 0x270): sw   x2, 640(x10)              // Draw ball row 1 col 0
+28252223 // Instr 157 (PC 0x274): sw   x2, 644(x10)              // Draw ball row 1 col 1
+00020713 // Instr 158 (PC 0x278): addi x14, x4, 0                // prev_x = ball_x
+00028793 // Instr 159 (PC 0x27C): addi x15, x5, 0                // prev_y = ball_y
+00040813 // Instr 160 (PC 0x280): addi x16, x8, 0                // prev_yL = yL
+00048893 // Instr 161 (PC 0x284): addi x17, x9, 0                // prev_yR = yR
+000186b7 // Instr 162 (PC 0x288): lui  x13, 0x18                 // x13 = 98,304 delay iterations
+fff68693 // Instr 163 (PC 0x28C): addi x13, x13, -1              // x13 -= 1
+fe069ee3 // Instr 164 (PC 0x290): bne  x13, x0, delay_loop (-4)  // loop until delay expires
+dadff06f // Instr 165 (PC 0x294): jal  x0, game_loop (-596)      // Next frame
+00000013 // Instr 166 (PC 0x298): nop                            // Padding
+00000013 // Instr 167 (PC 0x29C): nop                            // Padding
+00000013 // Instr 168 (PC 0x2A0): nop                            // Padding
+00000013 // Instr 169 (PC 0x2A4): nop                            // Padding
+00000013 // Instr 170 (PC 0x2A8): nop                            // Padding
+00000013 // Instr 171 (PC 0x2AC): nop                            // Padding
+00000013 // Instr 172 (PC 0x2B0): nop                            // Padding
+00000013 // Instr 173 (PC 0x2B4): nop                            // Padding
+00000013 // Instr 174 (PC 0x2B8): nop                            // Padding
+00000013 // Instr 175 (PC 0x2BC): nop                            // Padding
+00000013 // Instr 176 (PC 0x2C0): nop                            // Padding
+00000013 // Instr 177 (PC 0x2C4): nop                            // Padding
+00000013 // Instr 178 (PC 0x2C8): nop                            // Padding
+00000013 // Instr 179 (PC 0x2CC): nop                            // Padding
+00000013 // Instr 180 (PC 0x2D0): nop                            // Padding
+00000013 // Instr 181 (PC 0x2D4): nop                            // Padding
+00000013 // Instr 182 (PC 0x2D8): nop                            // Padding
+00000013 // Instr 183 (PC 0x2DC): nop                            // Padding
+00000013 // Instr 184 (PC 0x2E0): nop                            // Padding
+00000013 // Instr 185 (PC 0x2E4): nop                            // Padding
+00000013 // Instr 186 (PC 0x2E8): nop                            // Padding
+00000013 // Instr 187 (PC 0x2EC): nop                            // Padding
+00000013 // Instr 188 (PC 0x2F0): nop                            // Padding
+00000013 // Instr 189 (PC 0x2F4): nop                            // Padding
+00000013 // Instr 190 (PC 0x2F8): nop                            // Padding
+00000013 // Instr 191 (PC 0x2FC): nop                            // Padding
+00000013 // Instr 192 (PC 0x300): nop                            // Padding
+00000013 // Instr 193 (PC 0x304): nop                            // Padding
+00000013 // Instr 194 (PC 0x308): nop                            // Padding
+00000013 // Instr 195 (PC 0x30C): nop                            // Padding
+00000013 // Instr 196 (PC 0x310): nop                            // Padding
+00000013 // Instr 197 (PC 0x314): nop                            // Padding
+00000013 // Instr 198 (PC 0x318): nop                            // Padding
+00000013 // Instr 199 (PC 0x31C): nop                            // Padding
+00000013 // Instr 200 (PC 0x320): nop                            // Padding
+00000013 // Instr 201 (PC 0x324): nop                            // Padding
+00000013 // Instr 202 (PC 0x328): nop                            // Padding
+00000013 // Instr 203 (PC 0x32C): nop                            // Padding
+00000013 // Instr 204 (PC 0x330): nop                            // Padding
+00000013 // Instr 205 (PC 0x334): nop                            // Padding
+00000013 // Instr 206 (PC 0x338): nop                            // Padding
+00000013 // Instr 207 (PC 0x33C): nop                            // Padding
+00000013 // Instr 208 (PC 0x340): nop                            // Padding
+00000013 // Instr 209 (PC 0x344): nop                            // Padding
+00000013 // Instr 210 (PC 0x348): nop                            // Padding
+00000013 // Instr 211 (PC 0x34C): nop                            // Padding
+00000013 // Instr 212 (PC 0x350): nop                            // Padding
+00000013 // Instr 213 (PC 0x354): nop                            // Padding
+00000013 // Instr 214 (PC 0x358): nop                            // Padding
+00000013 // Instr 215 (PC 0x35C): nop                            // Padding
+00000013 // Instr 216 (PC 0x360): nop                            // Padding
+00000013 // Instr 217 (PC 0x364): nop                            // Padding
+00000013 // Instr 218 (PC 0x368): nop                            // Padding
+00000013 // Instr 219 (PC 0x36C): nop                            // Padding
+00000013 // Instr 220 (PC 0x370): nop                            // Padding
+00000013 // Instr 221 (PC 0x374): nop                            // Padding
+00000013 // Instr 222 (PC 0x378): nop                            // Padding
+00000013 // Instr 223 (PC 0x37C): nop                            // Padding
+00000013 // Instr 224 (PC 0x380): nop                            // Padding
+00000013 // Instr 225 (PC 0x384): nop                            // Padding
+00000013 // Instr 226 (PC 0x388): nop                            // Padding
+00000013 // Instr 227 (PC 0x38C): nop                            // Padding
+00000013 // Instr 228 (PC 0x390): nop                            // Padding
+00000013 // Instr 229 (PC 0x394): nop                            // Padding
+00000013 // Instr 230 (PC 0x398): nop                            // Padding
+00000013 // Instr 231 (PC 0x39C): nop                            // Padding
+00000013 // Instr 232 (PC 0x3A0): nop                            // Padding
+00000013 // Instr 233 (PC 0x3A4): nop                            // Padding
+00000013 // Instr 234 (PC 0x3A8): nop                            // Padding
+00000013 // Instr 235 (PC 0x3AC): nop                            // Padding
+00000013 // Instr 236 (PC 0x3B0): nop                            // Padding
+00000013 // Instr 237 (PC 0x3B4): nop                            // Padding
+00000013 // Instr 238 (PC 0x3B8): nop                            // Padding
+00000013 // Instr 239 (PC 0x3BC): nop                            // Padding
+00000013 // Instr 240 (PC 0x3C0): nop                            // Padding
+00000013 // Instr 241 (PC 0x3C4): nop                            // Padding
+00000013 // Instr 242 (PC 0x3C8): nop                            // Padding
+00000013 // Instr 243 (PC 0x3CC): nop                            // Padding
+00000013 // Instr 244 (PC 0x3D0): nop                            // Padding
+00000013 // Instr 245 (PC 0x3D4): nop                            // Padding
+00000013 // Instr 246 (PC 0x3D8): nop                            // Padding
+00000013 // Instr 247 (PC 0x3DC): nop                            // Padding
+00000013 // Instr 248 (PC 0x3E0): nop                            // Padding
+00000013 // Instr 249 (PC 0x3E4): nop                            // Padding
+00000013 // Instr 250 (PC 0x3E8): nop                            // Padding
+00000013 // Instr 251 (PC 0x3EC): nop                            // Padding
+00000013 // Instr 252 (PC 0x3F0): nop                            // Padding
+00000013 // Instr 253 (PC 0x3F4): nop                            // Padding
+00000013 // Instr 254 (PC 0x3F8): nop                            // Padding
+00000013 // Instr 255 (PC 0x3FC): nop                            // Padding
