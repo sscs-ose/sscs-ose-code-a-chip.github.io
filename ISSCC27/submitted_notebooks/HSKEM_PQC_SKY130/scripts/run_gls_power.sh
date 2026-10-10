@@ -9,6 +9,10 @@
 # left out of the power, and the macro's cycles in the window, counted from the VCD, are priced with the
 # transistor-level energies of results/fullchip/sram_energy.json instead.
 # usage: run_gls_power.sh <run, e.g. ntt_sp_20ns>
+# GLS_DELAY=unit (default: the SKY130 functional models, one time unit per cell, as committed), zero (functional models
+# without delay) or sdf (the timing models with the delays of the routed database, written by OpenSTA from its SPEF at
+# tt, one inertial delay per cell output by scripts/sdf_inertial_netlist.py): plan item 2.1, the glitches that the zero-delay activity leaves out. A non-default
+# mode writes to results/gls_power/<run>_<mode>.
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 RUN=${1:?run}
@@ -18,7 +22,8 @@ PDK="${SKY130_HD:-$(ls -d /opt/eda/pdks-openram/ciel/sky130/versions/*/sky130A/l
 [ -z "${CAC_NO_LOCAL_IV:-}" ] && [ -d "$HOME/eda/iverilog12/bin" ] && export PATH="$HOME/eda/iverilog12/bin:$PATH"
 B="${CAC_WORK:-$HOME/cac_runs}/$RUN/results/sky130hd/cac_$RUN/base"
 # CAC_VEC_SEED / CAC_POWER_TAG: another random input, recorded in a separate folder (defaults reproduce the committed run)
-OUT="$ROOT/results/gls_power/$RUN${CAC_POWER_TAG:-}"; mkdir -p "$OUT"
+GLS_DELAY="${GLS_DELAY:-unit}"; [ "$GLS_DELAY" = unit ] && DTAG="" || DTAG="_$GLS_DELAY"
+OUT="$ROOT/results/gls_power/$RUN${CAC_POWER_TAG:-}$DTAG"; mkdir -p "$OUT"
 TOP=$(grep -m1 -oE "^module [A-Za-z0-9_]+" "$B/6_final.v" | cut -d' ' -f2)
 CLK_NS=$(grep -m1 -oE "create_clock.*-period [0-9.]+" "$B/6_final.sdc" | grep -oE "[0-9.]+$")
 HALF=$(python3 -c "print($CLK_NS/2)")
@@ -30,12 +35,30 @@ if [ "${SKIP_GLS:-0}" = 1 ] && [ -f "$OUT/ntt_fwd.vcd.gz" ]; then
 else
 VEC="$OUT/vectors"; mkdir -p "$VEC"
 (cd "$ROOT/golden" && python3 gen_vectors.py --seed "${CAC_VEC_SEED:-2027}" --out "$VEC" --ntt 1 --keccak 1 > /dev/null)
-DEFS=(-DFUNCTIONAL -DUNIT_DELAY=#1 -DCLK_HALF=$HALF -DVCD_VEC=4 "-DVCD_OUT=\"$OUT/ntt_fwd.vcd\"")
-[ "$TOP" = kyber_ntt_engine_packed2 ] && DEFS+=(-DGLS_PAIR_PORTS)   # its pair and stream ports, tied off
+case "$GLS_DELAY" in
+  unit) DEFS=(-DFUNCTIONAL -DUNIT_DELAY=#1) ;;
+  zero) DEFS=(-DFUNCTIONAL "-DUNIT_DELAY=") ;;
+  sdf)  SDFW="$(mktemp -d)"            # OpenSTA writes the routed delays; the top keeps the name the testbench uses
+        cat > "$SDFW/sdf.tcl" <<TCL
+read_liberty $ORFS/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_db $B/6_final.odb
+read_sdc $B/6_final.sdc
+read_spef $B/6_final.spef
+set_propagated_clock [all_clocks]
+write_sdf -divider . -digits 4 $SDFW/netlist.sdf
+TCL
+        "$ORFS/tools/install/OpenROAD/bin/openroad" -no_splash -exit "$SDFW/sdf.tcl" > "$OUT/sdf.log" 2>&1
+        # the open_pdks cell models have no specify paths: each cell output gets its SDF delay as an inertial assign
+        python3 "$ROOT/scripts/sdf_inertial_netlist.py" "$B/6_final.v" "$SDFW/netlist.sdf"           "$ORFS/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib" "$SDFW/netlist_dly.v" "$OUT/sdf_delays.json"
+        NETSRC="$SDFW/netlist_dly.v"; DEFS=(-DFUNCTIONAL "-DUNIT_DELAY=") ;;
+  *) echo "GLS_DELAY: unit, zero or sdf"; exit 2 ;;
+esac
+DEFS+=(-DCLK_HALF=$HALF -DVCD_VEC=4 "-DVCD_OUT=\"$OUT/ntt_fwd.vcd\"")
+[ "$TOP" = kyber_ntt_engine_packed2 ] && grep -q "we_pair" "$B/6_final.v" && DEFS+=(-DGLS_PAIR_PORTS)   # its pair and stream ports, tied off (netlists built with them)
 if [ "$TOP" != kyber_ntt_engine ]; then     # netlists of other tops keep the port list; alias the module name
-  sed "s/^module $TOP /module kyber_ntt_engine /" "$B/6_final.v" > "$OUT/netlist.v"
+  sed "s/^module $TOP /module kyber_ntt_engine /" "${NETSRC:-$B/6_final.v}" > "$OUT/netlist.v"
 else
-  cp "$B/6_final.v" "$OUT/netlist.v"
+  cp "${NETSRC:-$B/6_final.v}" "$OUT/netlist.v"
 fi
 # Icarus rejects text after `endif, which the SKY130 cell models use as a comment;
 # a cleaned temporary copy is compiled instead (the PDK itself is left untouched).
@@ -46,14 +69,16 @@ done
 SRAM_MODEL=()
 if [ -n "$MACRO" ]; then      # OpenRAM's behavioural model; its dout0 is valid 3 ns after the falling edge
   sed "s/parameter VERBOSE = 1/parameter VERBOSE = 0/" "$ROOT/flow/macros/$MACRO.v" > "$MODELS/sram_model.v"
-  SRAM_MODEL=("$MODELS/sram_model.v"); DEFS+=(-DRD_SAMPLE_DELAY=5)
+  SRAM_MODEL=("$MODELS/sram_model.v")
+  # read data is sampled after the model presents it: 5 ns after the falling edge, 9 ns with the routed delays (clock tree)
+  [ "$GLS_DELAY" = sdf ] && DEFS+=(-DRD_SAMPLE_DELAY=9) || DEFS+=(-DRD_SAMPLE_DELAY=5)
 fi
 cd "$VEC"
 iverilog -g2012 -I . "${DEFS[@]}" -o "$OUT/gls.vvp" \
     "$MODELS/primitives.v" "$MODELS/sky130_fd_sc_hd.v" "${SRAM_MODEL[@]}" "$OUT/netlist.v" "$ROOT/tb/tb_ntt.sv" > "$OUT/compile.log" 2>&1 \
   || { grep -v -i warning "$OUT/compile.log" | head -20; exit 1; }
 vvp -n "$OUT/gls.vvp" > "$OUT/gls.log"
-rm -rf "$OUT/gls.vvp" "$OUT/netlist.v" "$MODELS" "$VEC"
+rm -rf "$OUT/gls.vvp" "$OUT/netlist.v" "$MODELS" "$VEC" "${SDFW:-}"
 grep -E "NTT_RESULT|PASS|FAIL|MISMATCH" "$OUT/gls.log" | head -5
 fi
 

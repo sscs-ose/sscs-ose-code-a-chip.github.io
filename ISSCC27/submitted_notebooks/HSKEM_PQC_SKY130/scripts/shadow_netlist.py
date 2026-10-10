@@ -84,14 +84,30 @@ def main(src: str, dst: str, skip_file: str | None = None, mode: str = "tie") ->
             elif base.startswith("u_common.") and base not in skip:
                 ref = f"{RTL}.{base[len('u_common.'):]}"
                 n_ref += 1
-            elif base in skip and self_sim and cell.startswith("sky130_fd_sc_hd__dfrtp") and d and rb:
-                # a register the RTL simulation cannot name (chip v2: the NTT engine's bank[][][] and
-                # valid[][] arrays, flattened to one index by synthesis): the shadow keeps it as a real
-                # register on the RTL clock with its own reset, fed by the routed logic's D input
+            elif base in skip and self_sim and d and re.match(r"sky130_fd_sc_hd__(dfrtp|dfstp|dfxtp|edfxtp)", cell):
+                # a register the RTL simulation cannot name (chip v2: the NTT engine's bank[][][] and valid[][]
+                # arrays, flattened to one index by synthesis) or names wrongly (an unpacked array that synthesis
+                # flattened to a bit vector: the netlist's name[k] is bit k, the RTL's name[k] is word k): the shadow
+                # keeps it as a real register on the RTL clock, fed by the routed logic's D input, with the reset or
+                # enable the cell has
                 n_self += 1
                 r = f"shadow_ff_{n_self}"
-                out.append(f"reg {r} ; always @(posedge tb_trustedge_spi.clk or negedge {rb}) "
-                           f"if (!{rb}) {r} <= 1'b0 ; else {r} <= {d} ;")
+                clk = "tb_trustedge_spi.clk"
+                if cell.startswith("sky130_fd_sc_hd__dfrtp") and rb:
+                    out.append(f"reg {r} ; always @(posedge {clk} or negedge {rb} ) "
+                               f"if (!{rb} ) {r} <= 1'b0 ; else {r} <= {d} ;")
+                elif cell.startswith("sky130_fd_sc_hd__dfstp") and conn(body, "SET_B"):
+                    sb = conn(body, "SET_B")
+                    out.append(f"reg {r} ; always @(posedge {clk} or negedge {sb} ) "
+                               f"if (!{sb} ) {r} <= 1'b1 ; else {r} <= {d} ;")
+                elif cell.startswith("sky130_fd_sc_hd__edfxtp") and conn(body, "DE"):
+                    out.append(f"reg {r} ; always @(posedge {clk}) if ({conn(body, 'DE')} ) {r} <= {d} ;")
+                elif cell.startswith("sky130_fd_sc_hd__dfxtp"):
+                    out.append(f"reg {r} ; always @(posedge {clk}) {r} <= {d} ;")
+                else:
+                    n_self -= 1
+                    out.append(f"assign {q} = 1'b0 ;")
+                    continue
                 out.append(f"assign {q} = {r} ;")
                 continue
             else:

@@ -15,7 +15,10 @@ ORFS="${ORFS_ROOT:-/opt/eda/orfs-6101364b}"
 [ -z "${CAC_NO_LOCAL_IV:-}" ] && [ -d "$HOME/eda/iverilog12/bin" ] && export PATH="$HOME/eda/iverilog12/bin:$PATH"
 B="${CAC_WORK:-$HOME/cac_runs}/$RUN/results/sky130hd/cac_$RUN/base"
 # CAC_VEC_SEED / CAC_POWER_TAG: another random input, recorded in a separate folder (defaults reproduce the committed run)
-OUT="$ROOT/results/gls_power/$RUN${CAC_POWER_TAG:-}"; mkdir -p "$OUT"; TMP="$(mktemp -d)"
+# GLS_DELAY=unit (default, as committed), zero, or sdf (routed delays at tt as inertial delays per cell output,
+# scripts/sdf_inertial_netlist.py): plan item 2.1; a non-default mode writes to results/gls_power/<run>_<mode>
+GLS_DELAY="${GLS_DELAY:-unit}"; [ "$GLS_DELAY" = unit ] && DTAG="" || DTAG="_$GLS_DELAY"
+OUT="$ROOT/results/gls_power/$RUN${CAC_POWER_TAG:-}$DTAG"; mkdir -p "$OUT"; TMP="$(mktemp -d)"
 TOP=$(grep -m1 -oE "^module [A-Za-z0-9_]+" "$B/6_final.v" | cut -d' ' -f2)
 CLK_NS=$(grep -m1 -oE "create_clock.*-period [0-9.]+" "$B/6_final.sdc" | grep -oE "[0-9.]+$")
 HALF=$(python3 -c "print($CLK_NS/2)")
@@ -23,12 +26,27 @@ if [ "${SKIP_GLS:-0}" = 1 ] && [ -f "$OUT/keccak_perm.vcd.gz" ]; then
   gunzip -kf "$OUT/keccak_perm.vcd.gz"      # reuse the recorded activity; only redo the power step
   rm -rf "$TMP"
 else
-sed "s/^module $TOP /module keccak_lane_wrapper /" "$B/6_final.v" > "$TMP/netlist.v"
+NETSRC="$B/6_final.v"; DLY="-DUNIT_DELAY=#1"
+if [ "$GLS_DELAY" = zero ]; then DLY="-DUNIT_DELAY="; fi
+if [ "$GLS_DELAY" = sdf ]; then
+  cat > "$TMP/sdf.tcl" <<TCL
+read_liberty $ORFS/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_db $B/6_final.odb
+read_sdc $B/6_final.sdc
+read_spef $B/6_final.spef
+set_propagated_clock [all_clocks]
+write_sdf -divider . -digits 4 $TMP/netlist.sdf
+TCL
+  "$ORFS/tools/install/OpenROAD/bin/openroad" -no_splash -exit "$TMP/sdf.tcl" > "$OUT/sdf.log" 2>&1
+  python3 "$ROOT/scripts/sdf_inertial_netlist.py" "$B/6_final.v" "$TMP/netlist.sdf"     "$ORFS/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib" "$TMP/netlist_dly.v" "$OUT/sdf_delays.json"
+  NETSRC="$TMP/netlist_dly.v"; DLY="-DUNIT_DELAY="
+fi
+sed "s/^module $TOP /module keccak_lane_wrapper /" "$NETSRC" > "$TMP/netlist.v"
 for f in primitives.v sky130_fd_sc_hd.v; do gunzip -c "$ROOT/third_party/sky130_fd_sc_hd/$f.gz" > "$TMP/$f"; done
 (cd "$ROOT/golden" && python3 gen_vectors.py --seed "${CAC_VEC_SEED:-2027}" --out "$TMP" --ntt 1 --keccak 3 > /dev/null)
 N=$(grep -oE "N_KECCAK [0-9]+" "$TMP/counts.vh" | cut -d' ' -f2)
 cd "$TMP"
-iverilog -g2012 -I . -DFUNCTIONAL -DUNIT_DELAY=#1 -DCLK_HALF=$HALF -DVCD_VEC=$((N - 1)) \
+iverilog -g2012 -I . -DFUNCTIONAL "$DLY" -DCLK_HALF=$HALF -DVCD_VEC=$((N - 1)) \
     "-DVCD_OUT=\"$OUT/keccak_perm.vcd\"" -o gls.vvp primitives.v sky130_fd_sc_hd.v netlist.v \
     "$ROOT/tb/tb_keccak_lanes.sv" > "$OUT/compile.log" 2>&1 || { grep -v -i warning "$OUT/compile.log" | head; exit 1; }
 vvp -n gls.vvp > "$OUT/gls.log"

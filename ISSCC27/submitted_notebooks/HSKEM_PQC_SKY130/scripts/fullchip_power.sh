@@ -46,11 +46,15 @@ gunzip -c "$ROOT/third_party/sky130_fd_sc_hd/sky130_fd_sc_hd.v.gz" | \
   sed -E 's/\bmodule sky130_fd_sc_hd__(and2_1|inv_1)\b/module shadow_sky130_\1/' > "$W/sky130_shadow_lib.v"
 : > "$W/shadow_skip.txt"
 ok=0
-for round in 1 2 3 4; do
+for round in 1 2 3 4 5 6; do
   python3 "$ROOT/scripts/shadow_netlist.py" "$B/6_final.v" "$W/shadow.v" "$W/shadow_skip.txt" self | tee "$W/shadow_gen.log"
-  if (cd "$SRC" && iverilog -g2012 -I rtl/kyber $DEFS -DDUMP_SHADOW -s tb_trustedge_spi -s shadow_chip -s decaps_vcd_window \
+  if (cd "$SRC" && iverilog -g2012 -Wselect-range -I rtl/kyber $DEFS -DDUMP_SHADOW -s tb_trustedge_spi -s shadow_chip -s decaps_vcd_window \
         -o "$W/shadow.vvp" $F "$W/primitives.v" "$W/sky130_shadow_lib.v" "$W/shadow.v" "$ROOT/tb/decaps_vcd_window.sv") \
-        > "$W/compile.log" 2>&1; then ok=1; break; fi
+        > "$W/compile.log" 2>&1; then
+    # registers the shadow reads at the wrong place of an unpacked array are simulated in the shadow instead
+    (( $(python3 "$ROOT/scripts/shadow_oob_skip.py" "$W/compile.log" "$W/shadow.v" "$W/shadow_skip.txt") )) || { ok=1; break; }
+    continue
+  fi
   python3 - "$W/compile.log" "$W/shadow_skip.txt" <<'PY'
 import re, sys
 log, skip = sys.argv[1], sys.argv[2]

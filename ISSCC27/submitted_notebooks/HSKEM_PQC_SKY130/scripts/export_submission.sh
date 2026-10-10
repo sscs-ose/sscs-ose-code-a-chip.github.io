@@ -11,7 +11,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"; DST=${1:?destination}
 mkdir -p "$DST"
 rsync -a --delete --delete-excluded \
   --exclude 'pdk/' --exclude 'vectors*/' --exclude 'results/sim_notebook/' --exclude 'results/gls_notebook/' \
-  --exclude '*.gds' --exclude '*.vvp' --exclude '__pycache__/' \
+  --exclude '*.gds' --exclude '*.vvp' --exclude '__pycache__/' --exclude '.pytest_cache/' \
   --exclude 'results/synth/*/netlist.v' --exclude 'results/synth/*/yosys.log' \
   --exclude 'results/leakage*/leak_traces.txt' --exclude 'results/leakage*/leak_in.hex' \
   --exclude 'BOARD_SESSION_PLAN.md' --exclude 'HEAVY_RUNS_PLAN.md' --exclude 'REVIEW_CRITERIA.md' --exclude 'PR_DESCRIPTION_DRAFT.md' --exclude 'BOARD_KEY_ROTATION_PLAN.md' --exclude 'PENDING_REVIEW_*.md' --exclude 'LESSONS_*.md' --exclude 'prose_lint.py' --exclude 'STYLE_PASS.md' --exclude 'board/*.log' --exclude 'board/*.csv' \

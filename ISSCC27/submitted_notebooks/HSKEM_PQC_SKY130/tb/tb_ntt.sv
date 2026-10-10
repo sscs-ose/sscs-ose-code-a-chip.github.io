@@ -15,6 +15,9 @@ module tb_ntt;
 `define CLK_HALF 5
 `endif
     always #(`CLK_HALF) clk = ~clk;
+`ifdef SDF_FILE
+    initial $sdf_annotate(`SDF_FILE, dut);     // timed gate-level run (scripts/run_gls_power.sh, GLS_DELAY=sdf)
+`endif
 
 `ifdef NTT_PACKED2
     // two-lane packed-pair engine with two fused passes (rtl/kyber_ntt_engine_packed2.sv)
