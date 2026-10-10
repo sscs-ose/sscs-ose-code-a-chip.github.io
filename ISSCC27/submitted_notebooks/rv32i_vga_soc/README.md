@@ -29,8 +29,8 @@ All results are packaged into a reproducible, interactive Jupyter Notebook ([`rv
 * **Notebook Title:** RV32I Processor Core with AXI4-Lite Interconnect & 4x Scaled VGA Subsystem on SkyWater 130nm
 * **Designated Representative (Primary Applicant):** Hamza Shahid
 * **Team Members:** Hamza Shahid, Alishba Khan
-* **Affiliation:** *(Your University / Institution / Organization)*
-* **Applicant Category:** *(e.g., Undergraduate student / Graduate student)*
+* **Affiliation:** UIT University
+* **Applicant Category:** Graduate student or other eligible applicant (Graduated)
 * **Eligible Conference:** IEEE International Solid-State Circuits Conference (ISSCC) 2027, San Francisco, CA
 
 ---
