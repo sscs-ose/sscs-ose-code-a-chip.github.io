@@ -34,7 +34,9 @@ PDK_ROOT = pathlib.Path(os.environ.get("PDK_ROOT", pathlib.Path.home() / ".ciel"
 IMAGE = "ghcr.io/librelane/librelane:3.0.14"
 OSS = pathlib.Path.home() / "tools" / "oss-cad-suite" / "bin"
 CLK_NS, IOW = 20, 32
-N_POWER_SAMPLES = int(os.environ.get("N_POWER_SAMPLES", 4))
+N_POWER_SAMPLES = int(os.environ.get("N_POWER_SAMPLES", 4))      # windows per measurement phase, spread over the users
+N_POWER_USERS = int(os.environ.get("N_POWER_USERS", 1))          # how many unseen users the windows come from
+POWER_TAG = os.environ.get("POWER_TAG", "")                      # suffix for the output json, to keep different protocols apart
 
 
 def pdk_file(pattern):
@@ -254,7 +256,7 @@ link_design hdc_chip
 read_sdc {sdc}
 read_spef {spef}
 read_vcd -scope gls_tb/dut {vcd}
-report_power
+report_power -digits 6
 report_power -instances [get_cells *] -digits 6 -limit 0
 """
 
@@ -287,10 +289,10 @@ def cmd_power(d):
     cfg = T.CFG
     data = T.data.load(cfg.F, cfg.Q)
     xr, yr, sr = data["test"]
-    # one unseen user's windows, spread over the recording
-    subj = sorted(set(sr.tolist()))[0]
-    ids = np.flatnonzero(sr == subj)
-    pick = ids[np.linspace(0, len(ids) - 1, N_POWER_SAMPLES).astype(int)]
+    # windows spread over the recordings of the first N_POWER_USERS unseen users
+    subjects = sorted(set(sr.tolist()))[:N_POWER_USERS]
+    per_user = max(1, N_POWER_SAMPLES // len(subjects))
+    pick = np.concatenate([np.flatnonzero(sr == sj)[np.linspace(0, int((sr == sj).sum()) - 1, per_user).astype(int)] for sj in subjects])
     results = {}
     for phase, name in ((1, "infer"), (2, "learn")):
         if phase == 2 and not cfg.learn:
@@ -299,26 +301,29 @@ def cmd_power(d):
         samples = [(xr[i], int(yr[i]), int(phase == 2), int(cfg.learn == 2)) for i in pick]
         exp = expected(T, L, samples)
         stim = stim_lines(cfg, chunks_per_word(T), preload_words(T, trained_learner(T, data)), samples, phase)
-        out, bdir = simulate(d, f"power_{name}", stim)
+        out, bdir = simulate(d, f"power{POWER_TAG}_{name}", stim)
         res, win = parse_res(out)
         match = [r[1:] for r in res] == exp
         t_ns = (win[1] - win[0]) / 1000.0
         vcd = bdir / f"gls_{name}.vcd"
         t0 = time.time()
         pw = sta_power(d, vcd, name)
+        vcd_mb = round(vcd.stat().st_size / 2 ** 20, 1)
+        if not os.environ.get("GLS_KEEP_VCD"):
+            vcd.unlink()                                   # the dump can be a gigabyte; the numbers are in the json
         n = len(samples)
         updates = sum(e[1] for e in exp)
         results[name] = dict(samples=n, updates=updates, window_ns=t_ns, cycles=round(t_ns / CLK_NS),
-                             vcd_mb=round(vcd.stat().st_size / 2 ** 20, 1), model_match=match,
+                             vcd_mb=vcd_mb, model_match=match,
                              **pw, energy_per_sample_nj=pw["total_w"] * t_ns / n)
         print(f"{name:6s}: {n} samples, {results[name]['cycles']} cycles, match={match}, "
               f"P={pw['total_w'] * 1e3:.2f} mW (int {pw['internal_w'] * 1e3:.2f}, sw "
               f"{pw['switching_w'] * 1e3:.2f}, leak {pw['leakage_w'] * 1e6:.1f} uW), "
               f"E/sample={results[name]['energy_per_sample_nj']:.1f} nJ  [sta {time.time() - t0:.0f}s]",
               flush=True)
-    out = ROOT / "results" / f"power_{d.name}.json"
+    out = ROOT / "results" / f"power{POWER_TAG}_{d.name}.json"
     out.write_text(json.dumps(dict(design=d.name, clock_ns=CLK_NS, corner="nom_tt_025C_1v80",
-                                   subject=int(subj), phases=results), indent=2, default=float))
+                                   subjects=[int(x) for x in subjects], windows_per_phase=int(len(pick)), phases=results), indent=2, default=float))
     print("saved", out)
 
 
