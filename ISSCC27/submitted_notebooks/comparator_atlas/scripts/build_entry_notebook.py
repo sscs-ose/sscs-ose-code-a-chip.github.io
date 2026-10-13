@@ -16,7 +16,11 @@ def code(text: str):
     return nbf.v4.new_code_cell(textwrap.dedent(text).strip())
 
 
-def main() -> None:
+def main(support_digest: str | None = None) -> None:
+    from presentation import release_identity
+
+    if support_digest is None:
+        support_digest = release_identity.support_digest(release_identity.release_files(ROOT))
     cells = [
         markdown("""
         # Comparator Atlas: SKY130 StrongARM characterization
@@ -85,11 +89,17 @@ def main() -> None:
         """),
         code(r"""
         from pathlib import Path
+        import hashlib
         import importlib.util
         from importlib import metadata
+        import json
         import subprocess
         import sys
 
+        # Identity of the support files this Notebook was generated with.
+        EXPECTED_SUPPORT_DIGEST = (
+            "__SUPPORT_RELEASE__"
+        )
         parts = (
             "ISSCC27", "submitted_notebooks", "comparator_atlas"
         )
@@ -137,6 +147,33 @@ def main() -> None:
             entry_root = source.joinpath(*parts)
             if not (entry_root / "entry_tools.py").is_file():
                 raise RuntimeError("The downloaded entry is incomplete.")
+        release_checksums = entry_root / "entry_checksums.json"
+        support_hashes = None
+        if release_checksums.is_file():
+            support_hashes = json.loads(release_checksums.read_bytes())
+            support_hashes.pop("Comparator_Atlas.ipynb", None)
+            canonical = json.dumps(
+                support_hashes, sort_keys=True, separators=(",", ":")
+            )
+            found = hashlib.sha256(canonical.encode()).hexdigest()
+            if found != EXPECTED_SUPPORT_DIGEST:
+                raise RuntimeError(
+                    f"Release mismatch: the support files in {entry_root} "
+                    f"(support digest {found[:12]}) are not the release "
+                    "this Notebook was generated with "
+                    f"({EXPECTED_SUPPORT_DIGEST[:12]}). A reused "
+                    "'comparator-atlas-source' folder is stale, or the "
+                    "submitted branch moved after this copy was saved. "
+                    "Rename or delete that folder and Run all again, or "
+                    "open the Notebook stored in the same folder or "
+                    "commit as the support files. Nothing was overwritten."
+                )
+        elif entry_root == source.joinpath(*parts):
+            raise RuntimeError(
+                f"{release_checksums} is missing, so the downloaded "
+                "source cannot be matched to this Notebook. Rename or "
+                "delete 'comparator-atlas-source' and Run all again."
+            )
         required = {
             "numpy": "2.2.6",
             "pandas": "2.2.3",
@@ -178,19 +215,14 @@ def main() -> None:
         import layout_evidence as physical
 
         %matplotlib inline
-        release_checksums = entry_root / "entry_checksums.json"
-        if release_checksums.is_file():
-            import json
-            support_hashes = json.loads(
-                release_checksums.read_text(encoding="utf-8")
-            )
-            support_hashes.pop("Comparator_Atlas.ipynb", None)
+        if support_hashes is not None:
             entry.verify_files(
                 entry_root,
                 support_hashes,
             )
             print(
-                "Public support files verified. The notebook itself "
+                "Public support files verified against release "
+                f"{EXPECTED_SUPPORT_DIGEST[:12]}. The notebook itself "
                 "remains editable for execution-mode switches."
             )
         else:
@@ -944,6 +976,9 @@ def main() -> None:
         retain their licenses.
         """),
     ]
+    bootstrap = cells[1].source
+    assert bootstrap.count(release_identity.PLACEHOLDER) == 1
+    cells[1].source = bootstrap.replace(release_identity.PLACEHOLDER, support_digest)
     notebook = nbf.v4.new_notebook(cells=cells)
     notebook.metadata.update({
         "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},

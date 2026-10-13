@@ -571,3 +571,33 @@ those reader runs. They are not external-human, Linux or Colab reproduction,
 physical-model qualification, silicon evidence or green-CI statements.
 Archived native proofs remain reused, not rerun. Archived RC-deck outcomes;
 model physical fidelity not yet qualified.
+
+## Release binding and standalone reading
+
+**Notebook and support files.** `entry_checksums.json` seals every entry file.
+The Notebook bootstrap embeds `EXPECTED_SUPPORT_DIGEST`: SHA256 of the canonical
+JSON (sorted keys, `,`/`:` separators) of that map without the editable
+Notebook entry. Before installing anything or importing entry code, it
+recomputes the digest from the support folder it found or downloaded. A
+reused `comparator-atlas-source` folder from an older run, or a submitted branch
+that moved after a Notebook copy was saved, stops with a release-mismatch
+error instead of mixing versions; nothing is overwritten. Rename or delete that
+folder and Run all again, or open the Notebook stored with the support files.
+A downloaded folder without `entry_checksums.json` is also refused. Only a
+local development checkout without a release map may continue, and it says so.
+The file-by-file seal is then verified as before.
+
+**Standalone report and Notebook-only reading.** Folder-relative links still
+work in the complete entry. Each is followed by a *public copy* on GitHub. Linked
+evidence is pinned in `presentation/public_sources.json` to an already
+published commit whose bytes equal the local file; the build fails if a local
+file differs. Regenerated reader documents (Notebook, report, README, guide,
+this file) follow the submitted branch. Measurement records link to the pinned
+table; record N is line N+1 because the header is line 1. GitHub may show
+large CSVs only as raw or downloadable files.
+
+Regeneration order: `python -B -m presentation.judge_decision`, then
+`python -B scripts/execute_notebook.py`, then
+`python -B -c "from presentation.judge_decision import reseal; reseal()"`.
+The last step seals the executed Notebook; the support digest is unchanged.
+After publishing changed evidence, refresh its pin with `python -B -m presentation.release_identity --pin PATH`.

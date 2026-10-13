@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { selection, witnesses } from "./decision_explorer.mjs";
+import { publicSource, selection, witnesses } from "./decision_explorer.mjs";
 import { validateCube } from "../comparator_atlas/assets/explorer.mjs";
 import { validateLab } from "./waveform_explorer.mjs";
 
@@ -21,6 +21,18 @@ test("36 exact selections,108 count closures,nulls and all witnesses", () => {
     }
     if (result.choice.winner === null) assert.equal(result.choice.sampled_limits, null);
   }
+});
+test("standalone records name the pinned public table line, never a guessed copy", () => {
+  const html = fs.readFileSync(new URL("../results/study/report.html", import.meta.url), "utf8");
+  const sources = JSON.parse(html.match(/<script id="atlas-public-sources" type="application\/json">(.*?)<\/script>/)[1]);
+  for (const record of data.observations) {
+    const copy = publicSource(sources, record);
+    assert.equal(copy.href, sources[record.source_csv].url);
+    assert.match(copy.href, /^https:\/\/github\.com\/WLHsu0827\/sscs-ose-code-a-chip\.github\.io\/blob\/[0-9a-f]{40}\//);
+    assert.ok(copy.text.endsWith(`record ${record.source_record} is line ${record.source_record + 1})`));
+  }
+  assert.equal(publicSource({}, data.observations[0]), null);
+  assert.throws(() => publicSource(sources, { ...data.observations[0], source_record: 0 }), /Invalid source record/);
 });
 test("1 ns presets and return transition remain correct", () => {
   assert.deepEqual([1, 3, 30, 1].map(band => selection(data, band, 1).choice.winner),

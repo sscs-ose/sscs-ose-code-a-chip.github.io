@@ -24,9 +24,9 @@ def bootstrap_source() -> str:
     return textwrap.dedent(first)
 
 
-def execute_directory_detection(monkeypatch, cwd: Path) -> dict:
-    # Use the exact generated bootstrap through its directory-detection block.
-    source = bootstrap_source()
+def execute_directory_detection(monkeypatch, cwd: Path, digest: str = "0" * 64) -> dict:
+    # Use the exact generated bootstrap through its directory-detection and release-identity block.
+    source = bootstrap_source().replace("__SUPPORT_RELEASE__", digest)
     source = source[:source.index("required = {")]
     monkeypatch.chdir(cwd)
     namespace = {}
@@ -198,11 +198,32 @@ def test_saved_waveform_outputs_are_readable_without_widget_javascript():
 
 
 def test_completed_colab_checkout_is_reused_after_kernel_restart(tmp_path, monkeypatch):
+    from presentation.release_identity import support_digest
+
     entry = tmp_path / "comparator-atlas-source" / "ISSCC27" / "submitted_notebooks" / "comparator_atlas"
     entry.mkdir(parents=True)
     (entry / "entry_tools.py").write_text("# fixture\n")
-    result = execute_directory_detection(monkeypatch, tmp_path)
+    sealed = {"entry_tools.py": "a" * 64, "Comparator_Atlas.ipynb": "b" * 64}
+    (entry / "entry_checksums.json").write_text(json.dumps(sealed))
+    result = execute_directory_detection(monkeypatch, tmp_path, support_digest(sealed))
     assert result["entry_root"] == entry
+    assert result["support_hashes"] == {"entry_tools.py": "a" * 64}
+
+
+def test_stale_or_unidentified_source_cache_stops_with_an_explanation(tmp_path, monkeypatch):
+    from presentation.release_identity import support_digest
+
+    entry = tmp_path / "comparator-atlas-source" / "ISSCC27" / "submitted_notebooks" / "comparator_atlas"
+    entry.mkdir(parents=True)
+    (entry / "entry_tools.py").write_text("# fixture\n")
+    with pytest.raises(RuntimeError, match="entry_checksums.json is missing"):
+        execute_directory_detection(monkeypatch, tmp_path)
+    older = {"entry_tools.py": "a" * 64}
+    (entry / "entry_checksums.json").write_text(json.dumps(older))
+    expected = support_digest({"entry_tools.py": "c" * 64})
+    with pytest.raises(RuntimeError, match="Release mismatch.*comparator-atlas-source.*Nothing was overwritten"):
+        execute_directory_detection(monkeypatch, tmp_path, expected)
+    assert (entry / "entry_tools.py").read_text() == "# fixture\n"
 
 
 def test_incomplete_download_is_not_silently_overwritten(tmp_path, monkeypatch):

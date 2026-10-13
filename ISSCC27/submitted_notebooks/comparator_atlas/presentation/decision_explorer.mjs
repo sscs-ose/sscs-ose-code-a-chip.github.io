@@ -32,7 +32,21 @@ export function witnesses(data, minimum, deadline, design) {
     && Math.abs(row.input_mv) >= minimum && row.outcome !== "correct");
 }
 
-export function mountDecision(document, data) {
+// Standalone readers lack the entry folder: point each record at its pinned public table line.
+export function publicSource(sources, record) {
+  const source = sources?.[record.source_csv];
+  if (!source) return null;
+  if (!Number.isInteger(record.source_record) || record.source_record < 1) {
+    throw new Error("Invalid source record number");
+  }
+  const line = record.source_record + 1;
+  return {
+    href: source.url,
+    text: `Public copy of the table (commit ${source.commit.slice(0, 7)}; record ${record.source_record} is line ${line})`,
+  };
+}
+
+export function mountDecision(document, data, sources = {}) {
   const element = id => {
     const value = document.getElementById(id);
     if (!value) throw new Error(`Missing integrated decision control: ${id}`);
@@ -70,6 +84,13 @@ export function mountDecision(document, data) {
       const link = document.createElement("a");
       link.href = record.source_csv;
       link.textContent = "Open exact source measurement table";
+      const copy = publicSource(sources, record);
+      const publicLink = document.createElement(copy ? "a" : "span");
+      if (copy) {
+        publicLink.href = copy.href;
+        publicLink.className = "public-copy";
+        publicLink.textContent = copy.text;
+      }
       const map = document.createElement("button");
       map.type = "button"; map.textContent = "Inspect this key in the stored map";
       map.addEventListener("click", () => document.defaultView.atlasStoredExplorer.focus(record));
@@ -82,7 +103,7 @@ export function mountDecision(document, data) {
         wave.addEventListener("click", () => document.defaultView.atlasWaveformLab.show(
           record.waveform_sample_id, record.deadline_ns));
       }
-      item.append(title, values, identity, document.createElement("br"), link, map, wave);
+      item.append(title, values, identity, document.createElement("br"), link, publicLink, map, wave);
       list.append(item);
     }
     records.replaceChildren(list);
@@ -188,5 +209,6 @@ export function mountDecision(document, data) {
 
 if (typeof document !== "undefined") {
   const source = document.getElementById("atlas-decision-data");
-  if (source) mountDecision(document, JSON.parse(source.textContent));
+  const sources = document.getElementById("atlas-public-sources");
+  if (source) mountDecision(document, JSON.parse(source.textContent), sources ? JSON.parse(sources.textContent) : {});
 }

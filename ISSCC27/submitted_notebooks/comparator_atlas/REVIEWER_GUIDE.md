@@ -17,7 +17,7 @@ not the best average.
 
 ## A three-minute route
 
-1. Download [the self-contained report](results/study/report.html) and open it locally; GitHub's viewer does not run its controls. Try the three 1 ns presets below.
+1. Download [the self-contained report](results/study/report.html) and open it locally; GitHub's viewer does not run its controls. Opened as a single file, each folder link is followed by a pinned public copy. Try the three 1 ns presets below.
 2. Inspect each design's qualification and exact failing keys, trim codes, latencies and CSV record locations. Only identity-matched retained traces get a waveform link; other keys show measurement records.
 3. Compare wrong with unresolved: the same 20 selected +/-1 mV wrong samples remain at 2 ns. Then read the separate b1/a1 layout example and its physical-fidelity warning.
 
@@ -41,7 +41,7 @@ The adopted b1's 110 x 17.03 um all-material GDS bbox is 1873.3 um2 versus match
 
 ## Notebook, artifacts and execution
 
-The [Notebook](Comparator_Atlas.ipynb) has the same integrated strict Python selection controls and saved static presets. Run all in the review environment; its bootstrap retrieves the submitted GitHub entry when needed and checks requirements-review.txt. Default execution analyzes saved data. Optional live/full modes require the explicitly documented tools and models and are false by default.
+The [Notebook](Comparator_Atlas.ipynb) has the same integrated strict Python selection controls and saved static presets. Run all in the review environment; its bootstrap retrieves the submitted GitHub entry when needed, refuses support files from a different release than the Notebook (for example a stale `comparator-atlas-source` folder) and checks requirements-review.txt. Default execution analyzes saved data. Optional live/full modes require the explicitly documented tools and models and are false by default.
 
 [Poster PDF](results/study/Comparator_Atlas_Poster.pdf) | [Poster preview](results/study/poster_preview.png) | [Abstract](results/study/abstract.txt) | [Methodology and dated execution scope](REPRODUCIBILITY.md).
 

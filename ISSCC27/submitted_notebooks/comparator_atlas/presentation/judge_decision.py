@@ -10,6 +10,7 @@ import re
 import pandas as pd
 
 import entry_tools as entry
+from presentation import release_identity
 from presentation import specification_map as spec
 
 ROOT = entry.ROOT
@@ -149,14 +150,19 @@ def notebook_view(minimum, deadline):
     witnesses = [r for r in data["observations"] if r["deadline_ns"] == deadline
                  and abs(r["input_mv"]) >= minimum and r["outcome"] != "correct"]
     rows = []
+    sources = release_identity.source_table_links()
     for record in witnesses:
         link = f"results/study/report.html#decision={minimum},{deadline},{record['observation_id']}"
+        source = sources[record["source_csv"]]
+        public = (f'<a href="{html.escape(source["url"], quote=True)}">line '
+                  f'{record["source_record"] + 1} @ {source["commit"][:7]}</a>')
         rows.append({
             "design": record["design_name"], "case": record["case_id"],
             "input_mV": record["input_mv"], "trim": record["trim_code"],
             "outcome": record["outcome"], "decision_ns": record["decision_time_ns"],
             "run_id": record["run_id"],
             "source": f"{record['source_csv']} record {record['source_record']}",
+            "public_source": public,
             "raw_waveform": record["waveform_sample_id"] or "No matching retained raw waveform",
             "inspect_exact_key": f'<a href="{html.escape(link, quote=True)}">Open keyed report/map</a>',
         })
@@ -164,7 +170,8 @@ def notebook_view(minimum, deadline):
     return (f"<h3>Sampled |input| &gt;= {minimum:g} mV; {deadline:g} ns</h3><p><strong>{title}</strong></p>"
             + table.to_html(index=False, float_format=lambda v: f"{v:.3f}")
             + f"<p>{len(rows)} exact disqualifying measurements across all three designs. First twelve below; "
-            "the report exposes every witness and its CSV location. Null unresolved latency is not zero.</p>"
+            "the report exposes every witness and its CSV location. Public sources are pinned table lines "
+            "(record N is line N+1). Null unresolved latency is not zero.</p>"
             + witness_table + "<p>All 49 controlled-width-stress schematic conditions, local_boundary, "
             "both signed sampled inputs through 30 mV. Full-cycle 20-30 ns core energy; no interpolation, "
             "noise/yield/global optimum or driver/controller energy claim.</p>")
@@ -190,7 +197,9 @@ def integrate_notebook(notebook):
         "are not a same-specification improvement.\n\n"
         "Download the HTML and open it locally: GitHub's file viewer does not run its controls. "
         "Default execution verifies supplied evidence and remeasures saved waveforms, not new simulations. "
-        "The bootstrap retrieves the submitted GitHub source when needed and uses requirements-review.txt. "
+        "The bootstrap retrieves the submitted GitHub source when needed, stops with an explanation "
+        "if those support files are not the release this Notebook was generated with, "
+        "and uses requirements-review.txt. "
         "Optional RUN_LIVE_SPICE and RUN_FULL_CAMPAIGN require the explicit tools/models "
         "described in Reproducibility; both are false by default.\n\n"
         f"**{WARNING}**. StrongARM and calibration are established; this finite comparison "
@@ -246,6 +255,9 @@ for band in (1.0, 3.0, 30.0):
 """
     notebook.cells[8].outputs = []
     notebook.cells[8].execution_count = None
+    for cell in notebook.cells:
+        if cell.cell_type == "markdown":
+            cell.source = release_identity.add_public_copies_markdown(cell.source)
     return notebook
 
 
@@ -258,7 +270,10 @@ def integrate_report(document, payload, cube):
 <a href="../../REVIEWER_GUIDE.md">3. Read the scope and reproduction route</a></nav>
 <p><a href="../../Comparator_Atlas.ipynb">Notebook</a> | <a href="Comparator_Atlas_Poster.pdf">Poster</a></p>
 <p class="muted">All controls use stored measurements;
-no simulation, interpolation or independent physical qualification occurs here.</p></header>""",
+no simulation, interpolation or independent physical qualification occurs here.</p>
+<p class="muted" id="standalone-notice">Opened as a single downloaded file? Folder links need the
+complete entry folder; each is followed by a <em>public copy</em> on GitHub, pinned to a published
+commit with identical bytes (reader documents follow the submitted branch).</p></header>""",
                       document, count=1, flags=re.S)
     pattern = r'<section><h2>Stored decision map: circuit, calibration and deadline</h2>.*?</section>'
     match = re.search(pattern, document, re.S)
@@ -312,7 +327,9 @@ The waveform lab below remains eight declared examples, not raw evidence for eve
                           lambda m: m.group(1) + encoded + m.group(2), document, count=1, flags=re.S)
     replace_payload("atlas-cube", cube)
     encoded = json.dumps(payload, separators=(",", ":"), allow_nan=False).replace("<", "\\u003c")
-    extra = f'<script id="atlas-decision-data" type="application/json">{encoded}</script><script type="module">' \
+    sources = json.dumps(release_identity.source_table_links(), separators=(",", ":")).replace("<", "\\u003c")
+    extra = f'<script id="atlas-public-sources" type="application/json">{sources}</script>' \
+        + f'<script id="atlas-decision-data" type="application/json">{encoded}</script><script type="module">' \
         + (ROOT / "presentation/decision_explorer.mjs").read_text(encoding="utf-8") + "</script>"
     document = document.replace("</html>", extra + "</html>", 1)
     styles = """
@@ -323,12 +340,13 @@ button:disabled{opacity:.5;cursor:default}button:focus-visible,select:focus-visi
 #decision-error{color:#a32b3f}.measurement-record{padding:13px 0;border-bottom:1px solid #dce1e5;overflow-wrap:anywhere}
 .measurement-record p{margin:5px 0}.measurement-record button,.measurement-record a{margin:8px 10px 4px 0}
 .measurement-record code{white-space:normal}#decision-records ol{padding-left:22px}details{margin:15px 0}
+a.public-copy{font-size:.88em}
 @media(max-width:600px){header,main{padding-left:16px;padding-right:16px}.controls label{display:block}select{max-width:100%}h2{font-size:23px}}
 """
     document = document.replace("</style>", styles + "</style>", 1)
     document = document.replace("<title>Comparator Atlas | SKY130 StrongARM characterization</title>",
                                 "<title>Comparator Atlas | Correct before deadline?</title>")
-    return document
+    return release_identity.add_public_copies_html(document, "results/study")
 
 
 def write_reader_docs():
@@ -358,7 +376,7 @@ IEEE SSCS Code-a-Chip - ISSCC 2027 | Original code: MIT
 
 ## A three-minute route
 
-1. Download [the self-contained report](results/study/report.html) and open it locally; GitHub's viewer does not run its controls. Try the three 1 ns presets below.
+1. Download [the self-contained report](results/study/report.html) and open it locally; GitHub's viewer does not run its controls. Opened as a single file, each folder link is followed by a pinned public copy. Try the three 1 ns presets below.
 2. Inspect each design's qualification and exact failing keys, trim codes, latencies and CSV record locations. Only identity-matched retained traces get a waveform link; other keys show measurement records.
 3. Compare wrong with unresolved: the same 20 selected +/-1 mV wrong samples remain at 2 ns. Then read the separate b1/a1 layout example and its physical-fidelity warning.
 
@@ -382,7 +400,7 @@ The adopted b1's 110 x 17.03 um all-material GDS bbox is 1873.3 um2 versus match
 
 ## Notebook, artifacts and execution
 
-The [Notebook](Comparator_Atlas.ipynb) has the same integrated strict Python selection controls and saved static presets. Run all in the review environment; its bootstrap retrieves the submitted GitHub entry when needed and checks requirements-review.txt. Default execution analyzes saved data. Optional live/full modes require the explicitly documented tools and models and are false by default.
+The [Notebook](Comparator_Atlas.ipynb) has the same integrated strict Python selection controls and saved static presets. Run all in the review environment; its bootstrap retrieves the submitted GitHub entry when needed, refuses support files from a different release than the Notebook (for example a stale `comparator-atlas-source` folder) and checks requirements-review.txt. Default execution analyzes saved data. Optional live/full modes require the explicitly documented tools and models and are false by default.
 
 [Poster PDF](results/study/Comparator_Atlas_Poster.pdf) | [Poster preview](results/study/poster_preview.png) | [Abstract](results/study/abstract.txt) | [Methodology and dated execution scope](REPRODUCIBILITY.md).
 
@@ -407,10 +425,7 @@ Saved results, source links and maintainer executions are distinct forms of evid
 
 
 def reseal():
-    files = {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(ROOT.rglob("*"))
-             if p.is_file() and p.name != "entry_checksums.json"
-             and "__pycache__" not in p.parts and ".pytest_cache" not in p.parts}
-    write_json(ROOT / "entry_checksums.json", files)
+    write_json(ROOT / release_identity.CHECKSUMS, release_identity.release_files(ROOT))
 
 
 def build():
@@ -420,10 +435,15 @@ def build():
 
     render_study(refresh_figures=set())
     build_materials()
-    build_notebook()
     write_reader_docs()
+    # Every support file is final here; the Notebook records their identity before sealing.
+    digest = release_identity.support_digest(release_identity.release_files(ROOT))
+    build_notebook(digest)
     reseal()
+    sealed = json.loads((ROOT / release_identity.CHECKSUMS).read_bytes())
+    assert release_identity.support_digest(sealed) == digest, "Support files changed while sealing"
     print("Generated integrated report, Notebook, reader guide, poster and public seal from shipped source.")
+    print(f"Support release digest: {digest}")
 
 
 if __name__ == "__main__":
