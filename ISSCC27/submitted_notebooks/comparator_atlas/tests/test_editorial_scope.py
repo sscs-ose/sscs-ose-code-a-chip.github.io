@@ -24,7 +24,7 @@ def test_report_marks_both_historical_physical_sections():
     assert "Historical original compact control: geometry and pilot" in report
     assert "Historical original compact control: 45-PVT schematic/RC grid" in report
     assert "not candidate data" in report
-    assert "not a new comparator topology or silicon benchmark" in report
+    assert "not a claim of lower area, lower system power, silicon yield or a new comparator topology" in report
     assert "1440 transients" in report and "720 qualified 10/5 ps pairs" in report
     assert "Matched adopted a1 measures 121.8 x 17.03" in report
 

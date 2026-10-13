@@ -34,42 +34,62 @@ def execute_directory_detection(monkeypatch, cwd: Path, digest: str = "0" * 64) 
     return namespace
 
 
+def notebook_cells() -> list[str]:
+    root = Path(__file__).resolve().parents[1]
+    notebook = json.loads((root / NOTEBOOK).read_bytes())
+    return ["".join(cell["source"]) for cell in notebook["cells"]]
+
+
+def cell_with_heading(cells: list[str], heading: str) -> int:
+    matches = [index for index, source in enumerate(cells) if source.startswith(heading + "\n")]
+    assert len(matches) == 1, heading
+    return matches[0]
+
+
 def test_current_colab_link_is_to_the_live_submission_branch():
     assert "/github/WLHsu0827/sscs-ose-code-a-chip.github.io/" in COLAB_URL
     assert "/blob/wlhsu0827-comparator-atlas-isscc27/" in COLAB_URL
     assert COLAB_URL.endswith("/" + NOTEBOOK)
-    root = Path(__file__).resolve().parents[1]
-    notebook = json.loads((root / NOTEBOOK).read_bytes())
-    introduction = "".join(notebook["cells"][0]["source"])
-    assert f"[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]({COLAB_URL})" in introduction
-    assert "Official-main Colab link (available only after merge)" in introduction
+    introduction = notebook_cells()[0]
+    badge = f"[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]({COLAB_URL})"
+    assert introduction.count("colab-badge") == 1
+    assert introduction.count(badge) == 1
+    assert introduction.index(badge) < introduction.index("## Three-minute route")
 
 
 def test_notebook_abstract_reports_both_full_grid_deadlines(monkeypatch):
     from scripts import build_entry_notebook
 
-    root = Path(__file__).resolve().parents[1]
-    notebook = json.loads((root / NOTEBOOK).read_bytes())
-    introduction = "".join(notebook["cells"][0]["source"])
-    abstract = " ".join(
-        introduction.split("## Abstract", 1)[1].split("## Getting started", 1)[0].split()
-    )
+    cells = notebook_cells()
+    grid = cell_with_heading(cells, "### Historical original-control full-grid archived-deck outcomes")
+    fidelity = cell_with_heading(cells, "### Original control: layout and post-layout results")
+    discussion = cell_with_heading(cells, "## 9. Discussion and limitations")
+    flat = {index: " ".join(cells[index].replace("**", "").split())
+            for index in (grid, fidelity, discussion)}
     facts = load_facts()
     full = facts["postlayout_pvt45"]
     assert full["nominal_geometry"] is True
     assert full["trim_code"] == 0
-    expected = (
-        f"In the original {full['conditions']}-condition nominal, code-zero study, archived RC "
-        f"decks give {full['rc_correct_1ns']}/{full['points_per_mode']} correct "
-        f"decisions at {full['parallel_deadline_ns']} ns "
-        f"({full['rc_unresolved_1ns']} unresolved) and "
-        f"{full['rc_correct_2ns']}/{full['points_per_mode']} at the prospectively "
-        f"declared {full['primary_deadline_ns']} ns deadline; the worst sampled "
-        f"decision time is {full['worst_rc_delay_ns']:.3f} ns."
-    )
-    assert expected in abstract
-    assert "extracted-model physical fidelity is not yet qualified." in abstract
-    assert "Schematic results are unaffected by this extraction concern." in abstract
+    points = full["points_per_mode"]
+    for expected in (
+        f"Each of the {full['conditions']} conditions",
+        f"{points} points per mode",
+        "Schematic and extracted RC use code zero",
+        f"declared {full['primary_deadline_ns']} ns as its primary deadline while also "
+        f"reporting {full['parallel_deadline_ns']} ns",
+        f"Archived RC decks are correct at {full['rc_correct_2ns']}/{points} sampled points at "
+        f"{full['primary_deadline_ns']} ns, and {full['rc_correct_1ns']}/{points} at "
+        f"{full['parallel_deadline_ns']} ns.",
+        f"The {full['rc_unresolved_1ns']} remaining {full['parallel_deadline_ns']} ns points are "
+        "unresolved, not wrong-sign decisions.",
+        f"at {full['worst_rc_delay_ns']:.3f} ns",
+    ):
+        assert expected in flat[grid], expected
+    assert (f"records {full['rc_correct_1ns']}/{points} correct RC decisions at "
+            f"{full['parallel_deadline_ns']} ns and {full['rc_correct_2ns']}/{points} at its declared "
+            f"{full['primary_deadline_ns']} ns deadline") in flat[discussion]
+    assert "Archived RC-deck outcomes; model physical fidelity not yet qualified." in flat[fidelity]
+    assert "Schematic results are unaffected by this extraction concern." in flat[fidelity]
     generated = []
     monkeypatch.setattr(
         build_entry_notebook.nbf, "write",
@@ -77,26 +97,33 @@ def test_notebook_abstract_reports_both_full_grid_deadlines(monkeypatch):
     )
     build_entry_notebook.main()
     assert len(generated) == 1
-    assert generated[0].cells[0].source == introduction
+    for index in (0, grid, fidelity, discussion):
+        assert generated[0].cells[index].source == cells[index]
 
 
 def test_reviewer_navigation_links_resolve_to_local_artifacts():
+    import re
+
     root = Path(__file__).resolve().parents[1]
     for name in ("README.md", "REVIEWER_GUIDE.md"):
         text = (root / name).read_text(encoding="utf-8")
-        first_section = text.index("\n## ")
-        warning = "GitHub's file viewer does not execute its JavaScript"
+        route = text.index("\n## A three-minute route\n")
+        secondary = text.index("\n## Separate secondary demonstration")
+        warning = "GitHub's viewer does not run its controls"
         assert text.count(warning) == 1
-        assert text.index(warning) < first_section
-        for label, target in (
-            ("interactive report", "results/study/report.html"),
-            ("poster PDF", "results/study/Comparator_Atlas_Poster.pdf"),
-            ("preview image", "results/study/poster_preview.png"),
-        ):
-            link = f"[{label}]({target})"
-            assert text.count(link) == 1
-            assert text.index(link) < first_section
-            assert (root / target).is_file()
+        assert route < text.index(warning) < secondary
+        report = "[the self-contained report](results/study/report.html)"
+        assert text.count(report) == 1
+        assert route < text.index(report) < text.index(warning)
+        for link in ("[Notebook](Comparator_Atlas.ipynb)",
+                     "[Poster PDF](results/study/Comparator_Atlas_Poster.pdf)",
+                     "[Poster preview](results/study/poster_preview.png)",
+                     "[Abstract](results/study/abstract.txt)"):
+            assert link in text, link
+        for target in re.findall(r"\]\(([^)\s]+)\)", text):
+            if re.match(r"[a-z]+:", target) or target.startswith("#"):
+                continue
+            assert (root / target.split("#", 1)[0]).is_file(), (name, target)
 
 
 def test_static_review_sources_match_the_notebook_generator(monkeypatch):
@@ -115,17 +142,15 @@ def test_static_review_sources_match_the_notebook_generator(monkeypatch):
 
 
 def test_getting_started_links_work_outside_the_repository():
-    root = Path(__file__).resolve().parents[1]
-    notebook = json.loads((root / NOTEBOOK).read_bytes())
-    introduction = "".join(notebook["cells"][0]["source"])
-    getting_started = introduction.split("## Getting started", 1)[1]
+    introduction = notebook_cells()[0]
+    getting_started = introduction.split("## Three-minute route", 1)[1]
     fork = COLAB_URL.replace("https://colab.research.google.com/github/", "https://github.com/")
     entry_url = fork.rsplit("/", 1)[0]
-    for target in ("REVIEWER_GUIDE.md", "results/study/report.html"):
-        assert f"]({entry_url}/{target})" in getting_started
-    assert "Download the report and open its HTML locally" in getting_started
-    assert "remeasures saved waveforms" in getting_started
-    assert "does not run new simulations" in getting_started
+    for target in ("REVIEWER_GUIDE.md", "results/study/report.html", "REPRODUCIBILITY.md"):
+        assert f"]({target}) ([public copy]({entry_url}/{target}))" in getting_started
+    assert "Download the HTML and open it locally" in getting_started
+    assert "remeasures saved waveforms, not new simulations" in getting_started
+    assert "stops with an explanation if those support files are not the release" in getting_started
 
 
 def test_static_waveform_examples_use_existing_one_ns_readings(monkeypatch):

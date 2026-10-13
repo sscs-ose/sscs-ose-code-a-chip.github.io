@@ -71,9 +71,9 @@ def test_actual_poster_text_bounds_columns_contrast_and_semantics(facts):
             "local_boundary", "49", "through 30 mV", "294/294", "98/98",
             "249.655", "150.531", "154.517", "363.217", "NONE", "not defined",
             "Post-hoc", "do not identify a physical failure cause", "45 PVT", "code-zero",
-            "156/180", "158/180", "180/180", "a1 24 -> b1 22", "zero wrong", "prospectively declared",
+            "156/180", "158/180", "180/180", "1 ns RC: 24 -> 22 unresolved", "zero wrong", "2 ns declared primary",
             "2074.254", "1873.300", "9.69%", "421.04", "412.88", "1.760",
-            "Local-pitch b1", "not signoff", "no lost correct keys",
+            "Local-pitch b1", "no signoff", "no lost correct keys",
             "GitHub Copilot assisted", "the author is responsible",
         ):
             assert required in text.replace("\n", " "), required
@@ -113,15 +113,24 @@ def test_poster_artifacts_pdf_fonts_links_dimensions_and_integrity(facts):
 
 
 def test_reviewer_guide_regeneration_preserves_early_map_failures_limits(monkeypatch, facts):
+    from presentation import judge_decision
+
     captured = {}
     monkeypatch.setattr(Path, "write_text",
                         lambda path, text, **kwargs: captured.update({str(path): text}))
-    release_facts.write_judge_guide(facts)
+    judge_decision.write_reader_docs()
     guide = captured[str(ROOT / "REVIEWER_GUIDE.md")]
     assert guide == (ROOT / "REVIEWER_GUIDE.md").read_text(encoding="utf-8")
-    assert guide.index("strict specification map") < guide.index("Compare the adopted layout")
-    assert guide.index("keyed transition matrices") < guide.index("Compare the adopted layout")
-    for item in ("1,176", "all exact limiting ties", "NONE stays null", "20 wrong",
-                 "two-point RC sensitivity", "GDS geometry audit", "before its interactive controls",
+    assert captured[str(ROOT / "README.md")] == (ROOT / "README.md").read_text(encoding="utf-8")
+    layout = guide.index("## Separate secondary demonstration: archived b1 vs a1")
+    for row in ("| >=1 mV | NONE | No candidate qualifies at all points | null, not zero |",
+                "| >=3 mV | lvt_balanced_4b | 294/294 | 249.655 fJ |",
+                "| >=30 mV | lvt_base_3b | 98/98 | 150.531 fJ |",
+                "the same 20 selected +/-1 mV wrong samples remain at 2 ns"):
+        assert guide.index(row) < layout, row
+    for item in ("28 NONE, 5 selected, 3 lower-energy control", "Exact mean-energy ties retain every tied design",
+                 "failed designs and NONE retain null sampled limits",
+                 "The record number is 1-based excluding the CSV header",
+                 "b1 RC gives 158 correct / 0 wrong / 22 unresolved at 1 ns versus a1's 156/0/24",
                  "GitHub Copilot assisted", "Archived RC-deck outcomes; model physical fidelity"):
-        assert item in guide
+        assert item in guide, item
