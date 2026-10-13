@@ -108,6 +108,9 @@ def test_notebook_static_presets_have_working_source_and_honest_scope(data):
     source = "".join(notebook["cells"][1]["source"])
     assert "https://github.com/WLHsu0827/" in source
     assert '"git", "clone"' in source and "requirements-review.txt" in source
+    assert '"-r"' not in source and "*pins" in source
+    pins_filter = "line.split(\"==\")[0].strip() in required"
+    assert pins_filter in source
     assert "PRIVATE" not in source and "sys.version_info[:3]" not in source
     assert "RUN_LIVE_SPICE = False" in source and "RUN_FULL_CAMPAIGN = False" in source
     controls = "".join(notebook["cells"][8]["source"])

@@ -188,11 +188,16 @@ def main(support_digest: str | None = None) -> None:
             elif metadata.version(name) != version:
                 needs_setup.append(name)
         if needs_setup:
+            # Runtime pins only: never reinstall the pytest/nbmake/ipykernel
+            # that may be executing this Notebook.
+            pins_file = entry_root / "requirements-review.txt"
+            pins = [
+                line.strip()
+                for line in pins_file.read_text().splitlines()
+                if line.split("==")[0].strip() in required
+            ]
             subprocess.run(
-                [
-                    sys.executable, "-m", "pip", "install", "-q",
-                    "-r", str(entry_root / "requirements-review.txt"),
-                ],
+                [sys.executable, "-m", "pip", "install", "-q", *pins],
                 check=True,
             )
         stale = []
