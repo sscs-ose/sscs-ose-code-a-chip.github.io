@@ -10,10 +10,11 @@ Edit BANNED for strings that must never appear (stale values, old node names).
 import argparse, json, re, sys
 from pathlib import Path
 
-BANNED = ["n_mirror", "TODO", "FIXME", "17.83 dB", "19.1 dB"]
+BANNED = ["n_mirror", "TODO", "FIXME", "17.83 dB", "19.1 dB", "Flow-S", "Flow-R", "RERUN_SWEEP", "at five corners", "all five corners",
+          "by_vctrl", "Pelgrom coefficients"]
 LEAKS = ["/Users/", "/home/"]
 UNITS = r"(?:dB|kHz|MHz|Hz|µA|µW|µV|µm|µS|MΩ|kΩ|mV|nV/√Hz|nV|V|%)"
-FLAGS = ("REBUILD_LUT", "RERUN_SWEEP", "RERUN_SPICE")
+FLAGS = ("REBUILD_LUT", "RERUN_FLOW", "RERUN_SPICE", "RUN_LAYOUT")
 
 def out_text(c):
     t = []
@@ -23,6 +24,49 @@ def out_text(c):
             d = o["data"]; t.append("".join(d.get("text/markdown", d.get("text/plain", ""))))
         elif o["output_type"] == "error": t.append(o["ename"] + ": " + o["evalue"])
     return "\n".join(t)
+
+PROSE_UNITS = r"(dB|kHz|µA|µV|nV/√Hz|mV|µm²|fF|pF|ms|µs|%)"
+NUM = re.compile(r"(?<![\w.])(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s?" + PROSE_UNITS)
+
+def _numbers(text):
+    """Every number in a text, as floats (thousands separators removed)."""
+    return [float(m.replace(",", "")) for m in re.findall(r"(?<![\w.])-?\d[\d,]*\.?\d*(?:[eE][-+]?\d+)?", text)
+            if re.fullmatch(r"-?\d{1,3}(,\d{3})*(\.\d*)?([eE][-+]?\d+)?|-?\d+(\.\d*)?([eE][-+]?\d+)?", m)]
+
+def prose_check(nb, results):
+    """Numbers with units in hand-written (markdown) prose that match nothing the notebook computes: no code output,
+    no value in results.json and no number of the specification table, at the precision the prose prints."""
+    import bisect
+    known = []
+    for c in nb["cells"]:
+        if c["cell_type"] == "code":
+            known += _numbers(out_text(c))
+        elif "*Table 2." in "".join(c["source"]):         # the specification: inputs, not results
+            known += _numbers("".join(c["source"]))
+    def walk(x):
+        if isinstance(x, dict):
+            for v in x.values(): yield from walk(v)
+        elif isinstance(x, (list, tuple)):
+            for v in x: yield from walk(v)
+        elif isinstance(x, (int, float)) and not isinstance(x, bool):
+            yield float(x)
+        elif isinstance(x, str):
+            yield from _numbers(x)
+    # (results.json is not used directly: every value a reader can check is printed by a code cell)
+    K = sorted(set(abs(k) for k in known))
+    out = []
+    for i, c in enumerate(nb["cells"]):
+        src = re.sub(r"data:image/png;base64,[A-Za-z0-9+/=]+", "data:image", "".join(c["source"]))   # embedded figures
+        if c["cell_type"] != "markdown" or "⟦FILL" in src or "*Table 2." in src:
+            continue
+        for m in NUM.finditer(src):
+            ip, fp, unit = m.group(1), m.group(2) or "", m.group(3)
+            v = float(ip.replace(",", "") + fp); tol = 0.5 * 10 ** -(len(fp) - 1 if fp else 0) + 1e-9
+            j = bisect.bisect_left(K, v - tol)
+            if not (j < len(K) and K[j] <= v + tol):
+                out.append(f"cell {i}: '{m.group(0)}' in prose matches no computed value — "
+                           + src[max(0, m.start() - 50):m.end() + 30].replace("\n", " "))
+    return out
 
 def main():
     ap = argparse.ArgumentParser()
@@ -34,7 +78,7 @@ def main():
 
     fills = {}
     for i, c in enumerate(nb["cells"]):
-        src = "".join(c["source"])
+        src = re.sub(r"data:image/png;base64,[A-Za-z0-9+/=]+", "data:image", "".join(c["source"]))   # embedded figures
         n = src.count("⟦FILL")
         if n: fills[i] = n
         if c["cell_type"] == "code":
@@ -51,10 +95,18 @@ def main():
             toks = sorted(set(re.findall(rf"\d[\d,]*\.?\d*\s?{UNITS}", src)))
             if toks: print(f"cell {i:2d}: " + " | ".join(toks))
     if fills: bad.append(f"{sum(fills.values())} ⟦FILL⟧ markers left, in cells {sorted(fills)}")
+    rjp = root / "cache/results.json"
+    if rjp.exists():
+        R = json.loads(rjp.read_text())
+        W.extend(prose_check(nb, R))
+        top = out_text(nb["cells"][1]) if nb["cells"][1]["cell_type"] == "code" else ""
+        norm = lambda t: re.sub(r"\s+", " ", t).strip()
+        if R.get("tldr_md") and top and norm(R["tldr_md"]) not in norm(top):
+            E.append("cell 1: the TL;DR shown at the top differs from the one this run generated - run the notebook twice")
 
     md = "\n".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "markdown")
     if "**(A — layout completed)**" in md and "**(B — layout not included)**" in md:
-        bad.append("§10 still has BOTH layout paragraphs — keep exactly one")
+        bad.append("§13 still has BOTH layout paragraphs — keep exactly one")
 
     for f in ("LICENSE", "README.md", "cache/results.json", "cache/lut_sky130.npz"):
         if not (root / f).exists(): E.append(f"missing {f}")
@@ -62,8 +114,13 @@ def main():
     if rj.exists() and rd.exists() and rd.stat().st_mtime < rj.stat().st_mtime - 1:
         W.append("README.md is older than results.json — re-run the last cells to regenerate it")
     lay = root / "layout"
-    if (lay / "drc_report.txt").exists() != (lay / "lvs_report.txt").exists():
-        E.append("layout: DRC and LVS reports must both exist or both be absent")
+    if (lay / "layout_report.json").exists():
+        LR = json.loads((lay / "layout_report.json").read_text())
+        st = {x["step"]: x for x in LR.get("steps", [])}
+        if not LR.get("skipped") and not ("drc" in st and "lvs" in st):
+            E.append("layout: layout_report.json lacks a DRC or LVS step")
+        for k_, x in st.items():
+            if not x.get("ok"): W.append(f"layout: step {k_} did not pass")
     import subprocess
     def ignored(path):                      # a stray file that git already ignores is not a problem
         try: return subprocess.run(["git", "check-ignore", "-q", str(path)], cwd=root).returncode == 0
@@ -72,7 +129,13 @@ def main():
         if p.is_file() and (p.suffix in (".raw", ".log") or "__pycache__" in p.parts or ".ipynb_checkpoints" in p.parts) \
            and not ignored(p):
             W.append(f"stray file not in .gitignore: {p.relative_to(root)}")
-    size = lambda p: sum(f.stat().st_size for f in Path(p).rglob("*") if f.is_file()) / 1e6
+    try:                                    # what a commit would carry: tracked and untracked files, not the ignored ones
+        r_ = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "-z"], cwd=root, capture_output=True, check=True)
+        shipped = {(root / f).resolve() for f in r_.stdout.decode().split("\0") if f}
+    except Exception:
+        shipped = None                      # not a git checkout: count every file
+    size = lambda p: sum(f.stat().st_size for f in Path(p).rglob("*")
+                         if f.is_file() and (shipped is None or f.resolve() in shipped)) / 1e6
     nbmb, cmb, tot = nbp.stat().st_size / 1e6, size(root / "cache") if (root / "cache").exists() else 0, size(root)
     print(f"sizes: notebook {nbmb:.1f} MB | cache {cmb:.1f} MB | folder {tot:.1f} MB")
     if nbmb > 10 or tot > 40: W.append("large submission — a past rejected entry was a 23 MB notebook")

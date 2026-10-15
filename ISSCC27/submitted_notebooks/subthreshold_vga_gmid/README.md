@@ -1,76 +1,179 @@
-# Subthreshold current-steering VGA core + SPICE-validated gm/ID LUT flow (SKY130)
+# Subthreshold current-steering VGA core + finger-exact gm/ID lookup-table flow (SKY130)
 
 IEEE SSCS Code-a-Chip, ISSCC 2027. Notebook: `notebook.ipynb`. License: Apache-2.0.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/normie2099/sscs-ose-code-a-chip.github.io/blob/subthreshold-vga-gmid/ISSCC27/submitted_notebooks/subthreshold_vga_gmid/notebook.ipynb) runs tier 1 (cached results, no SPICE).
+
+**Scope:** the gain core of a hearing-aid compressor and the flow that sizes it. No envelope detector or gain-control
+loop, so no compression behaviour is claimed.
+
 ## Summary
-A **SPICE-validated $g_m/I_D$ lookup-table flow** for a nine-transistor subthreshold current-steering VGA core
-in open SKY130. A LUT evaluator — KCL operating-point solve on interpolated device data with body effect,
-plus a full small-signal nodal solve, no SPICE in the loop — predicts gain within **0.31 dB**
-and output resistance within **1.2 %** at its calibration point, where the textbook estimate
-misses by **22.9 dB** and gets the direction of gain control wrong: the output device is a cascode
-on a node the gain control itself modulates. Across 15 SPICE-checked designs spanning
-2.5–80 µm widths its error grows to 2.7 dB (SKY130 width binning),
-so the flow re-verifies every design it keeps in SPICE. It swept **4,320** candidates under headroom,
-current and bandwidth constraints and returns a Pareto front plus two SPICE-verified picks; neither pick dominates the hand-sized baseline:
+A **finger-exact $g_m/I_D$ lookup-table flow** that takes a specification to a SPICE-verified subthreshold current-steering
+VGA core in open SKY130, and the core it produced. Every transistor is built from identical 5 µm fingers, so the
+device tables are exact. The circuit model on them runs in 7.4 ms per design and corner and stays within
+**0.40 dB** (gain) and **1.3 %** (noise) of SPICE on 42 random designs; its worst
+bandwidth over-estimate is 17 % (Table 9b), so SPICE decides every pick.
 
-- **Flow-S** (speed and noise): control range 12.5 dB, max-gain bandwidth 8.7 kHz, integrated input noise 14.8 µV, 5.43 µW; better than the hand-sized baseline on 4 compared metrics (bandwidth at min gain, bandwidth at max gain, integrated noise at max gain, NEF at max gain), worse on 4 (control range, monotonic control range, supply power, output swing at max gain).
-- **Flow-R** (range): control range 17.3 dB, max-gain bandwidth 1.9 kHz, integrated input noise 21.5 µV, 2.44 µW; better than the hand-sized baseline on 6 compared metrics (control range, monotonic control range, integrated noise at min gain, integrated noise at max gain, NEF at max gain, supply power), worse on 3 (bandwidth at min gain, bandwidth at max gain, output swing at max gain).
-- **Hand-sized baseline:** control range 13.9 dB, max-gain bandwidth 4.8 kHz, integrated input noise 29.1 µV, 3.67 µW.
+**The hand-sized nine-transistor core cannot meet the specification:** none of 12,164 sizings reaches the 30 dB
+control range (best 10.4 dB), and the flow reports range as a limit no solved design meets. The analysis of
+§3.4 explains why (the output devices starve as the gain falls), and a designer added **two keep-alive sinks and a reference
+diode**. On that 12-transistor core, **none** of the 138,240 designs of the starting grid met all 24 corners;  the search extension grew the grid for 32 rounds (5,874 more designs), found the first design meeting every corner in round 5 and lowered the best noise to 6.72 µV (LUT).
 
-Flow-S meets 3 of 11 graded targets and Flow-R 2. Every miss is traced to a mechanism
-in §9: a structural gain floor, $R_{out}$-shared gain–bandwidth, and flicker noise.
+**Layout in the loop:** a first layout (drawn for an interim sizing) puts 207 fF of wiring on the output; with it, the first pass's pick fails at 6 of 24 corners (bandwidth at the lowest gain step), and every design of that pass sits too close to the bandwidth margin to absorb it. The fitted equivalent, 0.3 pF, becomes part of the load and the flow runs again: 35 of 35 verified designs pass, and the new pick passes every corner with that layout's extracted capacitors added (and with them scaled ×1.5).
 
-| Evaluator accuracy | Value |
-|:--|:--|
-| Error vs SPICE at the calibration point (gain / $R_{out}$) | 0.31 dB / 1.2 % |
-| Error across the SPICE-checked designs (gain / $R_{out}$) | 2.7 dB / 26 % |
-| Textbook-estimate error (gain) | 22.9 dB |
-| Candidates swept / feasible / Pareto | 4,320 / 344 / 144 |
+**The final pick** passes all 24 gate corners and 21 of the 21 other corners of the process × temperature ×
+supply grid: control range ≥ **47.0 dB**, bandwidth ≥ **11.8 kHz** with the wiring allowance, supply
+**4.63–4.83 µA** (≤ 5 µA with 3σ of bias mismatch), headroom ≥ **173 mV** at every
+control step. At tt it has **6.88 µV** of integrated input noise (up to 8.4 µV at the noisiest corner),
+60 nV/√Hz at 1 kHz and NEF **4.08**, in 17,120 µm² of gate area, and meets
+**6 of 7** graded targets; it misses noise density at 1 kHz (Table 20c).
+Monte Carlo with the PDK's per-device mismatch model: **800 of 800**
+dies pass the full gate at 4 corners behind an ideal output DC servo. Without a servo, 198 of 200 dies keep their headroom at the worst of these corners; the servo must source or sink 88 nA to cover 99.7 % of dies.
 
-| Headline | Baseline (hand) | Flow-S | Flow-R |
+**Final layout** (§13, gLayout generator, from the frozen sizes): DRC-clean (3 rule decks natively, the 2 installed in IIC-OSIC-TOOLS) and LVS-clean, device sizes included, in both runs, whose LVS also rejects 6 of 6 deliberately altered netlists. The extracted netlist (724 transistor fingers as drawn, 44 of them dummies; 55 extracted capacitors, 49 non-zero) passes all 24 corners of the same gate: bandwidth ≥ **12.3 kHz** (worst at sf/85/1.62V), headroom ≥ 173 mV, 6.88 µV at tt, and it still passes with every extracted capacitor ×1.5. Its parasitics act like 236 fF on the output, inside the 300 fF allowance the sizes were frozen with.
+
+| | 9T baseline (hand) | 12T hand screen (8 Oct) | 12T flow pick |
 |:--|:--:|:--:|:--:|
-| Control range, 0–0.3 V / monotonic (dB) | 13.9 / 16.8 | 12.5 / 14.2 | 17.3 / 20.2 |
-| $f_{-3dB}$ min / max gain, $C_L$ = 1 pF (kHz) | 11.0 / 4.8 | 17.3 / 8.7 | 6.4 / 1.9 |
-| Integrated input noise min / max gain (µV$_{rms}$) | 46.9 / 29.1 | 46.4 / 14.8 | 35.9 / 21.5 |
-| Supply current (µA) / power (µW) | 2.04 / 3.67 | 3.01 / 5.43 | 1.35 / 2.44 |
+| Control range in the bandwidth window, worst corner (dB) | -9.1 | 18.4 | 47.0 |
+| f-3dB at maximum gain, worst corner (kHz) | 2.6 | 12.9 | 34.3 |
+| Headroom, every step, worst corner (mV) | 4 | -63 | 173 |
+| Corners passing the gate | 0 of 24 | 0 of 24 | 24 of 24 |
+| Integrated input noise, max gain, tt (µV) | 29.1 | 26.8 | 6.9 |
+| Supply current, worst corner (µA) | 6.18 | 5.64 | 4.83 |
+| Drawn gate area (µm²) | 75 | 398 | 17,120 |
 
+## Specification compliance (SPICE, schematic level, 24 corners)
 
-## Specification compliance (tt, 27 °C, 1.8 V, schematic level)
+| Parameter | Target | 9T baseline (hand) | 12T hand screen (8 Oct) | 12T flow pick | met: 9T | met: hand 12T | met: pick |
+|:--|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Supply current, worst corner (nominal) | report | 6.18 µA | 5.64 µA | 4.83 µA | — | — | — |
+| Supply current + 3σ local mismatch, worst corner | ≤ 5 µA | — | — | 4.95 µA | — | — | ✅ |
+| Control range in the bandwidth window, worst corner | ≥ 30 dB | -9.1 dB | 18.4 dB | 47.0 dB | ❌ | ❌ | ✅ |
+| f-3dB at every gain step in the window, worst corner (C_L 1 pF; the pick with the layout wiring added) | ≥ 10 kHz | — | 10.3 kHz | 11.8 kHz | ❌ | ✅ | ✅ |
+| f-3dB at maximum gain, worst corner | report | 2.6 kHz | 12.9 kHz | 34.3 kHz | — | — | — |
+| Headroom V_DS at every control step, worst corner | ≥ 130 mV | 3.7 mV | -62.8 mV | 173.0 mV | ❌ | ❌ | ✅ |
+| Corners passing the full gate (process, temperature, supply) | report | 0 of 24 | 0 of 24 | 24 of 24 | — | — | — |
+| Maximum gain (tt) | report | 58.2 dB | 47.1 dB | 40.9 dB | — | — | — |
+| Integrated input noise, max gain (tt) | ≤ 7 µV | 29.1 µV | 26.8 µV | 6.9 µV | ❌ | ❌ | ✅ |
+| Input noise density at 1 kHz, max gain | ≤ 50 nV/√Hz | 348 nV/√Hz | 312 nV/√Hz | 60 nV/√Hz | ❌ | ❌ | ❌ |
+| NEF, max gain | ≤ 5 | 11.3 | 14.9 | 4.1 | ❌ | ❌ | ✅ |
+| Output swing at THD 1 %, max gain | report | 52 mV pk | 146 mV pk | 105 mV pk | — | — | — |
+| Dynamic range at max gain (1 % THD swing over input noise) | report | 3.9 dB | 24.7 dB | 39.7 dB | — | — | — |
+| Input offset, 1σ, max gain | report | 3.35 mV | — | 0.58 mV | — | — | — |
+| Open-loop output DC spread, 1σ, max gain | report | 2621 mV | — | 65 mV | — | — | — |
 
-| Parameter | Target | Baseline (hand) | Flow-S | Flow-R | Met S | Met R |
-|:--|:--:|:--:|:--:|:--:|:--:|:--:|
-| Supply current | ≤ 5 µA | 2.04 µA | 3.01 µA | 1.35 µA | ✅ | ✅ |
-| Power | — | 3.67 µW | 5.43 µW | 2.44 µW | — | — |
-| Control range, 0 → 0.3 V | ≥ 30 dB | 13.87 dB | 12.50 dB | 17.31 dB | ❌ | ❌ |
-| Monotonic control range | ≥ 30 dB | 16.85 dB | 14.16 dB | 20.16 dB | ❌ | ❌ |
-| f-3dB, min gain (C_L 1 pF) | ≥ 10 kHz | 11.00 kHz | 17.26 kHz | 6.38 kHz | ✅ | ❌ |
-| f-3dB, max gain (C_L 1 pF) | ≥ 10 kHz | 4.82 kHz | 8.71 kHz | 1.88 kHz | ❌ | ❌ |
-| Noise @1 kHz, min gain | ≤ 50 nV/√Hz | 563 nV/√Hz | 560 nV/√Hz | 419 nV/√Hz | ❌ | ❌ |
-| Noise @1 kHz, max gain | ≤ 50 nV/√Hz | 348 nV/√Hz | 171 nV/√Hz | 247 nV/√Hz | ❌ | ❌ |
-| Integrated noise, min gain | ≤ 7 µV | 46.9 µV | 46.4 µV | 35.9 µV | ❌ | ❌ |
-| Integrated noise, max gain | ≤ 7 µV | 29.1 µV | 14.8 µV | 21.5 µV | ❌ | ❌ |
-| NEF, max gain | ≤ 5 | 11.3 | 7.0 | 6.8 | ❌ | ❌ |
-| Output swing at THD ≤ 1 %, min gain | report | 34 mV pk | 20 mV pk | 24 mV pk | — | — |
-| Output swing at THD ≤ 1 %, max gain | report | 54 mV pk | 38 mV pk | 37 mV pk | — | — |
-| Input dynamic range, max gain | report | 4.1 dB | 8.6 dB | -1.0 dB | — | — |
-| Min device V_DS, both endpoints | ≥ 130 mV | 165 mV | 157 mV | 156 mV | ✅ | ✅ |
+## Claims and where they are tested
 
-## Device sizes (W / L in µm) and bias
+| Claim | Evidence (notebook) | Holds |
+|:--|:--:|:--:|
+| No 9T sizing meets the control-range gate | Tables 10c–10d | yes |
+| Evaluator headroom error on random designs is inside the screen's headroom margin | Tables 9b, 10b | yes |
+| Evaluator bandwidth over-estimate on random designs (17.4 %) is inside the screen's bandwidth margin (12 %); every pick is decided in SPICE either way | Tables 9b, 10b | no |
+| Evaluator ranks designs as SPICE does (Spearman ≥ 0.99 for noise and bandwidth) | Table 9b | yes |
+| Corner tables predict SPICE headroom and bandwidth inside the screening margins at every corner | Table 12b | yes |
+| Every verified front design passes at every corner (both passes) | Tables 12, 17c | yes |
+| The final pick passes every corner with the first layout's extracted capacitors added | §9.3 | yes |
+| The final layout is DRC- and LVS-clean (device sizes included) in a native and a container run, and its LVS rejects every deliberately altered netlist | Tables 27, 27b | yes |
+| The extracted final layout passes every corner of the gate, also with every extracted capacitor ×1.5 | Table 28 | yes |
+| The pick meets range, bandwidth, current and headroom at every corner, supply corners included | Table 17e | yes |
+| The hand-screened 12T fails headroom mid-span | Table 16 | yes |
+| With an ideal reference current, the pick's supply current moves by less than 5 % across corners | Table 17e | yes |
+| Control range follows the steering law within 10 % at every temperature (SPICE/law ratio, law with the fitted n) | Table 18 | yes |
+| PTAT-scaled control removes most of the temperature dependence | Table 18 | yes |
+| The pick passes the gate at V_DD ± 10 % | Table 20 | yes |
+| The search extension converged (stopped on its improvement criterion, not on the round limit) | Table 11b | yes |
+| No single-axis step from the pick wins under the pick rule (checked in SPICE where the LUT says it might) | Table 17f | yes |
+| Monte Carlo: every die passes the gate behind an ideal output servo, at tt and at the pick's most critical corners | Table 21b | yes |
+| DC-match predicts the Monte Carlo open-loop output spread within 15 % | Tables 21, 21b | yes |
+| The flow's supply-current mismatch sigma (1.00 %) matches Monte Carlo (1.05 %) within two standard errors of a 200-die estimate | Table 21b | yes |
+| The LVS netlist reproduces the pick in SPICE | §9.4 | yes |
+| Integrated input noise ≤ 7 µV at maximum gain, tt (the target's condition; every corner in Table 20b) | Table 23 | yes |
 
-| Device group | Baseline (hand) | Flow-S | Flow-R |
-|:--|:--:|:--:|:--:|
-| M2, M3 (input pair) | 20 / 1 | 80 / 2 | 20 / 2 |
-| M6–M9 (steering) | 5 / 1 | 2.5 / 1 | 10 / 1 |
-| M1, M4 (PMOS mirror) | 5 / 1 | 10 / 1 | 10 / 2 |
-| M5 (tail) | 5 / 1 | 5 / 1 | 5 / 1 |
-| V_bias (V) | 0.61 | 0.63 | 0.59 |
-| steering common mode (V) | 1.15 | 1.20 | 1.10 |
+## The pick: devices and bias (every width is whole 5 µm fingers)
+
+| Device(s) | Role | W (µm) | L (µm) | Copies m |
+|:--|:--:|:--:|:--:|:--:|
+| M2, M3 | input pair | 128 × 5 = 640 | 8 | 1 |
+| M6–M9 | steering | 4 × 5 = 20 | 2 | 1 |
+| M1, M4 | PMOS mirror | 128 × 5 = 640 | 0.5 | 1 |
+| M5 | tail (unit copies) | 8 × 5 = 40 | 8 | 14 |
+| M10, M11 | keep-alive sinks (unit copies) | 8 × 5 = 40 | 8 | 2 |
+| M12 | reference diode (unit) | 8 × 5 = 40 | 8 | 1 |
+
+| Bias | Value |
+|:--|:--:|
+| V_DD | 1.8 V |
+| input common mode | 0.75 V |
+| steering common mode | 1.05 V |
+| reference current I_ref (into the iref pin) | 0.25 µA |
+
+LVS reference netlist: `layout/vga_core_12t.spice` (generated by the notebook). Final layout: `layout/vga_core_12t.gds`
+(gLayout generator in `layout/generator/`); sign-off reports, proof files and the extracted netlist in `layout/reports/`.
+
+## Figures
+
+**The flow**
+
+![The flow](images/flow.png)
+
+**Device tables; current density versus finger width**
+
+![Device tables; current density versus finger width](images/lut_gmid.png)
+
+**Evaluator against SPICE**
+
+![Evaluator against SPICE](images/evaluator_accuracy.png)
+
+**Hand-sized 9T: the gain floor**
+
+![Hand-sized 9T: the gain floor](images/gain_curve_baseline.png)
+
+**No 9T sizing meets the specification**
+
+![No 9T sizing meets the specification](images/design_space_9t.png)
+
+**The 12T flow: grid, extension and the first pass's pick**
+
+![The 12T flow: grid, extension and the first pass's pick](images/front_12t.png)
+
+**Layout in the loop: the first layout's wiring and the two picks**
+
+![Layout in the loop: the first layout's wiring and the two picks](images/layout_loop.png)
+
+**The final layout (layout/vga_core_12t.gds)**
+
+![The final layout (layout/vga_core_12t.gds)](images/layout_12t.png)
+
+**Gain law over temperature, with and without PTAT control**
+
+![Gain law over temperature, with and without PTAT control](images/gain_law_temperature.png)
+
+**Noise of the pick**
+
+![Noise of the pick](images/noise_pick.png)
+
+**Monte Carlo with the PDK mismatch model**
+
+![Monte Carlo with the PDK mismatch model](images/monte_carlo.png)
+
+**The control port: feedthrough and gain steps**
+
+![The control port: feedthrough and gain steps](images/control_port.png)
 
 ## Reproduce
-* Tier 1 (Python only, < 1 min): `pip install numpy scipy pandas matplotlib jupyter`, open `notebook.ipynb`, Run All.
-* Tier 2/3 (IIC-OSIC-TOOLS container): set `RERUN_SPICE`, `REBUILD_LUT`, `RERUN_SWEEP` to `True` in §2 and Run All,
-  or run `python tools/run_nb.py --mode full`.
+* Tier 1 (Python only, about a minute): `pip install -r requirements.txt`, open `notebook.ipynb`, Run All.
+* Tier 2/3 (IIC-OSIC-TOOLS container): `python tools/run_nb.py --mode spice` or `--mode full`; or set `RERUN_SPICE`,
+  `REBUILD_LUT`, `RERUN_FLOW` in §2 and Run All. `python tools/run_flow.py` runs the flow alone and
+  `python tools/verify_pick.py` the pick's Monte Carlo, control-port and stress checks.
+* Layout: `python tools/run_nb.py --mode layout` (or `python tools/postlayout_pick.py --rerun`) reruns the post-layout
+  gate on the committed extraction (ngspice + SKY130). DRC, LVS and extraction rerun with the layout author's scripts
+  in `layout/generator/`, as in `layout/README.md` (IIC-OSIC-TOOLS); `python tools/import_signoff.py` reads their
+  reports into `layout/layout_report.json`.
+* Table 1 of the notebook records the toolchain of the last run; Table 1b where the flow caches were produced.
 
-## Layout
-`scripts/` holds all simulation logic; `cache/` the characterisation table, sweep and every simulation result;
-`images/` every figure.
+## Repository contents
+`scripts/` all simulation and flow logic; `tools/` headless runners, the flow CLI and the lint; `cache/` the device
+tables, screens and every simulation result; `images/` every figure; `schematic/` the xschem drawings of Figures 1
+and 6 (`tools/schematics.py` writes the sizes in, checks them against the LVS netlist and renders the figures);
+`layout/` the generated LVS netlist and sizes file, the final layout, its generator (`layout/generator/`) and sign-off
+(`layout/reports/`); `layout/layout1/` the first layout (an interim sizing), whose extraction feeds §9.3.

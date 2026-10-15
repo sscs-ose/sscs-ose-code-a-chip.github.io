@@ -1,0 +1,66 @@
+==============================================================================
+1. PARASITIC CAPACITANCE PER NET (from the PEX netlist, Magic extraction)
+==============================================================================
+net            total  to gnd/vdd  to signals   largest signal coupling
+net5          772.8f      230.6f      542.1f   vin_n 135.9 fF
+iref          741.2f      601.2f      140.0f   net5 108.4 fF
+vin_n         580.8f      328.9f      251.9f   net5 135.9 fF
+vin_p         579.6f      342.9f      236.7f   net5 118.8 fF
+net4          329.4f      256.0f       73.4f   v_out 32.7 fF
+net2          296.2f       98.4f      197.9f   vin_p 73.2 fF
+net3          295.0f       78.3f      216.7f   net5 90.6 fF
+v_out         191.0f      130.9f       60.1f   net4 32.7 fF
+vctrl_p        28.8f       10.6f       18.2f   net4 6.0 fF
+vctrl_n        28.4f       14.4f       14.0f   net3 6.3 fF
+
+Largest signal-to-signal couplings:
+   net5     <-> vin_n     135.93 fF
+   net5     <-> vin_p     118.75 fF
+   iref     <-> net5      108.36 fF
+   net3     <-> net5       90.58 fF
+   net2     <-> vin_p      73.17 fF
+   net3     <-> vin_n      68.84 fF
+
+==============================================================================
+2. SYMMETRY OF MATCHED NETS (wiring capacitance)
+==============================================================================
+   net2       296.25 fF  vs  net3       295.00 fF   difference   1.25 fF (0.4 %)
+   vin_p      579.59 fF  vs  vin_n      580.82 fF   difference   1.23 fF (0.2 %)
+   vctrl_p     28.81 fF  vs  vctrl_n     28.44 fF   difference   0.38 fF (1.3 %)
+
+==============================================================================
+3. JUNCTION (DIFFUSION) AREA: LAYOUT vs DESIGNER NETLIST
+==============================================================================
+   Simulation models compute drain/source junction capacitance from AD/AS/PD/PS. The designer's
+   pre-layout netlist assumes values; the PEX netlist carries what the layout actually has.
+   net         area layout  area schem.  ratio  perim layout  perim schem.
+   iref              6.6um2        5.8um2  1.14x        42.6um        42.3um
+   net2            121.2um2      101.5um2  1.19x       768.5um       740.6um
+   net3            121.2um2      101.5um2  1.19x       768.5um       740.6um
+   net4            122.1um2      107.3um2  1.14x       788.8um       782.9um
+   net5            339.6um2      269.7um2  1.26x      2135.8um      1967.9um
+   v_out           122.1um2      107.3um2  1.14x       788.8um       782.9um
+   (supply nets omitted; dummy transistors excluded)
+
+==============================================================================
+4. RESISTANCE OF THE SHARED ROUTING (met3 buses + met4 trunk, all in series = upper bound)
+==============================================================================
+   net        R bound   C total      RC pole   IR drop at 1 uA
+   v_out       48.4 ohm   191.0fF      17.2 GHz   48 uV
+   net4        60.8 ohm   329.4fF       7.9 GHz   61 uV
+   net2        51.1 ohm   296.2fF      10.5 GHz   51 uV
+   net3        50.3 ohm   295.0fF      10.7 GHz   50 uV
+   net5        87.6 ohm   772.8fF       2.4 GHz   88 uV
+   iref        45.4 ohm   741.2fF       4.7 GHz   45 uV
+   Even as an upper bound the routing poles are in the GHz range and IR drops are microvolts
+   at the uA-level currents of this circuit, so capacitance-only extraction is adequate for audio.
+
+==============================================================================
+5. LAYOUT STATISTICS
+==============================================================================
+   layout 404.2 x 238.0 um = 96,200 um^2;  total gate area (W x L) 17,120 um^2 = 17.8 % of the layout
+   transistors in the layout: 724 (680 active gate fingers, 44 dummies = 6 %)
+   block mirror  pfet L= 0.5 um, unit  32 fingers, 4 x 2 array
+   block gain    nfet L= 2.0 um, unit   2 fingers, 2 x 4 array
+   block bias    nfet L= 8.0 um, unit   4 fingers, 4 x 10 array
+   block diff    nfet L= 8.0 um, unit  16 fingers, 8 x 2 array
