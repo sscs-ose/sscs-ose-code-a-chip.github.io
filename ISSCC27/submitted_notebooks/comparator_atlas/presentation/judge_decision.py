@@ -30,6 +30,16 @@ compare three designs using saved schematic measurements: choose a specification
 correct, wrong and unresolved outcomes, and trace failures to their exact records.
 Rank mean energy only after every included point qualifies. If none does, return NONE,
 not the best average."""
+EXTENSION_SUMMARY = (
+    "**Why NONE at 1 mV? (Section 9, later extension.)** Every wrong decision occurs when the input "
+    "lies between zero and the static post-calibration residual offset (303/303, no misses), and "
+    "sealed predictions for six new designs matched 97.9% of 10,584 held-out decisions. The cause is "
+    "the binary trim array's major-carry step. A unit-element 5-bit trim with a doubled input pair "
+    "keeps the residual within 0.59 mV in paired mismatch Monte Carlo at about 1.7x core energy "
+    "(420 vs 244 fJ), but a sealed 49-condition test (96.9% of 1,764 held-out decisions predicted) "
+    "shows its finer trim saturating in 11 conditions with width skew: it qualifies only at 30 mV, "
+    "worse than the shipped design. The next limit is trim range. These are "
+    "later schematic simulations; the fix has no layout of its own.")
 
 
 def sha(path):
@@ -186,7 +196,7 @@ def integrate_notebook(notebook):
         "(https://colab.research.google.com/github/WLHsu0827/"
         "sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/"
         "ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb)\n\n"
-        + OPENING + "\n\n## Three-minute route\n\n"
+        + OPENING + "\n\n" + EXTENSION_SUMMARY + "\n\n## Three-minute route\n\n"
         "Choose one of the three 1 ns presets in Section 4; inspect exact failing keys; "
         "separate the schematic decision lesson from the b1/a1 archived-layout result in Section 8. "
         "[Self-contained report](results/study/report.html), [quick tour](REVIEWER_GUIDE.md), "
@@ -374,6 +384,8 @@ IEEE SSCS Code-a-Chip - ISSCC 2027 | Original code: MIT
 [Notebook](Comparator_Atlas.ipynb) | [Quick tour](REVIEWER_GUIDE.md) | [Reproduction](REPRODUCIBILITY.md) | [Run in Colab](https://colab.research.google.com/github/WLHsu0827/sscs-ose-code-a-chip.github.io/blob/wlhsu0827-comparator-atlas-isscc27/ISSCC27/submitted_notebooks/comparator_atlas/Comparator_Atlas.ipynb)
 
 {OPENING}
+
+{EXTENSION_SUMMARY} See Notebook Section 9 and the [research extension](REPRODUCIBILITY.md#research-extension).
 
 ## A three-minute route
 

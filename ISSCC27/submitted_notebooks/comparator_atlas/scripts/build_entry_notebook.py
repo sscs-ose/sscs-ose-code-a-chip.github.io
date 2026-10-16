@@ -914,7 +914,107 @@ def main(support_digest: str | None = None) -> None:
         plt.close(figure)
         """),
         markdown("""
-        ## 9. Discussion and limitations
+        ## 9. Extension: why no design reaches 1 mV, a candidate fix, and its limit
+
+        > **Scope.** Added after the main study. Later local SKY130/ngspice
+        > schematic simulations (plus one extraction *estimate*) under the
+        > same calibration policy and outcome rules. Nothing here changes
+        > Sections 1–8 or the sealed decision record. Every number below is
+        > loaded from a hash-checked archive; commands and runtimes are in
+        > [Reproducibility](REPRODUCIBILITY.md#research-extension).
+
+        **Question.** Section 4 finds *no feasible compared design* at
+        input bands of 1 mV or below, at every deadline. Is that a latch-speed
+        limit or a calibration limit?
+
+        **A one-line law.** Calibration leaves each comparator with a static
+        residual offset *m*, measured at the 3.5 ns calibration deadline.
+        A resolved decision on input *v* is wrong exactly when
+        0 < *v*/*m* < 1, i.e. when *v* lies between zero and *m*. Over the three
+        atlas designs and six deadlines this flags all 303 wrong decisions
+        among 5,295 resolved ones, with no misses and 4 false alarms
+        (all lvt_base_3b). The selected design keeps |*m*| > 1 mV in 20 of
+        49 conditions (maximum 2.58 mV), so it cannot qualify at 1 mV however
+        long it is given: the limit is the trim, not regeneration speed.
+        """),
+        code("""
+        from presentation import research_extension as ext
+
+        extension = ext.load()
+        display(ext.law_table(extension))
+        display(ext.prospective_table(extension))
+        display(ext.atlas_table(extension))
+        """),
+        markdown("""
+        **Prospective test.** For six designs never simulated before, the law
+        plus a decision-time model fitted only on |*v*| ≥ 3 mV predicted every
+        held-out outcome (±0.25 to ±1 mV) before those inputs were simulated;
+        the predictions were sealed by sha256. 10,359 of 10,584 decisions
+        (97.9%) and all 108 predictive atlas cells agreed. The atlas table
+        above adds those six designs and the candidate fix below: none of the
+        ten qualifies at 1 mV.
+
+        **Cause: the binary trim array.** Bit 0 is a single minimum-width
+        (0.42 µm) device and the larger bits are wider single devices, so the
+        bit weights are not exact binary ratios (we attribute this to
+        narrow-width effects). The step at the 7→8 major carry reaches 11.25 mV at
+        SS 1.62 V −40 °C, a DNL of +2.2 LSB (panel a). In a paired mismatch
+        Monte Carlo (per-device Vth shifts from the PDK's own Pelgrom term,
+        identical draws for every variant) two of 40 SS seeds land on that
+        carry with |*m*| = 4.1–4.8 mV and decide ±3 mV wrongly.
+
+        **Candidate fix.** Build each trim bit from 2<sup>k</sup> identical 0.42 µm units,
+        add a fifth bit, and double the input pair (W = 6 µm) to reduce the
+        offset that the trim must cover. On the same seeds, |*m*| ≤ 0.59 mV and
+        ±1 mV is correct 80/80 at 0.75 ns at both TT and SS, against 70/80
+        (10 wrong) at TT and 26/80 (3 wrong) at SS for the shipped design
+        (table and panel b).
+
+        **Its limit: trim range.** We then ran the fix through the full
+        49-condition atlas as a sealed prospective test (sha256 registered
+        before the held-out inputs were simulated). The sealed prediction was
+        that it would *not* qualify at 1 mV, and it does not: in 11 of 49
+        conditions the calibration code saturates at ±31 and |*m*| reaches
+        1.2–10.9 mV (second table below: FF and SF at 1.95 V and SF at 1.80 V
+        with +4% width skew, and both ±8% skews at TT). In the other 38,
+        |*m*| ≤ 0.39 mV. The unit
+        trim removes the carry error, but its range does not cover deterministic
+        skew at fast-NMOS, high-supply corners; a qualifying design needs more
+        trim range, not a faster latch. The sealed predictions matched 1,710
+        of 1,764 held-out decisions (96.9%) and all 18 predictive atlas cells.
+        Across the atlas the fix qualifies only at ≥30 mV, *worse* than the
+        shipped design's ≥3 mV at 1 ns: its finer step costs range (at
+        TT 1.62 V −40 °C, +4% skew, the shipped design needs code −2 of ±15,
+        the fix −12 of ±31). The next design must size step and range
+        together.
+        """),
+        code("""
+        display(ext.mc_table(extension))
+        display(ext.fix_residual_table(extension))
+        display(ext.energy_table(extension))
+        display(ext.postlayout_table(extension))
+        figure = ext.figure(extension)
+        display(figure)
+        plt.close(figure)
+        """),
+        markdown("""
+        **Cost, and what did not work.** Core energy follows total trim gate
+        area (panel c): the fix uses 420 fJ against 244 fJ (TT, code 0),
+        consistent with every trim channel being charged each cycle through
+        its series switch, whatever the code. A gate-switched trim avoids that
+        charge (188 fJ), but its transfer becomes corner-dependent and even
+        non-monotonic (we attribute this to switch kickback onto the trim
+        gates) and two TT seeds fall outside its range, so it is rejected. Reusing the archived b1 extraction with
+        resized devices (an estimate, not a re-layout) gives 178/180 correct
+        at 1 ns, and 180/180 with the latch-output wiring halved, at
+        579–605 fJ.
+
+        **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
+        bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
+        The fix has no layout, DRC/LVS or extraction of its own.
+        """),
+        markdown("""
+        ## 10. Discussion and limitations
 
         Under the same local calibration policy, the selected circuit
         increases 1 ns correct decisions from 310/392 to 372/392 across
@@ -992,12 +1092,15 @@ def main(support_digest: str | None = None) -> None:
     nbf.validate(notebook)
     destination = ROOT / "Comparator_Atlas.ipynb"
     if destination.exists():
+        import difflib
+
         previous = nbf.read(destination, as_version=4)
-        for index, cell in enumerate(cells):
-            prior_index = index if len(previous.cells) == len(cells) or index < 17 else index - 2
-            if 0 <= prior_index < len(previous.cells) and (
-                    len(previous.cells) == len(cells) or index not in (17, 18)):
-                cell.id = previous.cells[prior_index].id
+        matcher = difflib.SequenceMatcher(
+            a=[c.source for c in previous.cells], b=[c.source for c in cells], autojunk=False)
+        for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+            if tag == "equal" or (tag == "replace" and i2 - i1 == j2 - j1):
+                for i, j in zip(range(i1, i2), range(j1, j2)):
+                    cells[j].id = previous.cells[i].id
     from presentation.judge_decision import integrate_notebook, validate_notebook_outputs
 
     integrate_notebook(notebook)

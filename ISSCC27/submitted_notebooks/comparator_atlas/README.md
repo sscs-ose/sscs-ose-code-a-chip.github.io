@@ -15,6 +15,8 @@ correct, wrong and unresolved outcomes, and trace failures to their exact record
 Rank mean energy only after every included point qualifies. If none does, return NONE,
 not the best average.
 
+**Why NONE at 1 mV? (Section 9, later extension.)** Every wrong decision occurs when the input lies between zero and the static post-calibration residual offset (303/303, no misses), and sealed predictions for six new designs matched 97.9% of 10,584 held-out decisions. The cause is the binary trim array's major-carry step. A unit-element 5-bit trim with a doubled input pair keeps the residual within 0.59 mV in paired mismatch Monte Carlo at about 1.7x core energy (420 vs 244 fJ), but a sealed 49-condition test (96.9% of 1,764 held-out decisions predicted) shows its finer trim saturating in 11 conditions with width skew: it qualifies only at 30 mV, worse than the shipped design. The next limit is trim range. These are later schematic simulations; the fix has no layout of its own. See Notebook Section 9 and the [research extension](REPRODUCIBILITY.md#research-extension).
+
 ## A three-minute route
 
 1. Download [the self-contained report](results/study/report.html) and open it locally; GitHub's viewer does not run its controls. Opened as a single file, each folder link is followed by a pinned public copy. Try the three 1 ns presets below.

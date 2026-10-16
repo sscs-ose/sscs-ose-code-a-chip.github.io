@@ -601,3 +601,62 @@ Regeneration order: `python -B -m presentation.judge_decision`, then
 `python -B -c "from presentation.judge_decision import reseal; reseal()"`.
 The last step seals the executed Notebook; the support digest is unchanged.
 After publishing changed evidence, refresh its pin with `python -B -m presentation.release_identity --pin PATH`.
+
+## Research extension
+
+Notebook Section 9 reports later schematic studies that ask why no compared
+design qualifies at 1 mV and test one proposed fix. They are an extension,
+not part of the sealed decision record of Sections 1-8; nothing in the
+specification map, the 49-condition data or the layout example is changed.
+
+**Saved results.** `results/research/` holds the archived outputs of studies
+r1-r14 (JSON, JSONL and CSV, LF line endings).
+`results/research/manifest.json` lists the SHA256 of every archived file and
+of every `research/*.py` script. `presentation/research_extension.py` pins the
+manifest's own SHA256 and refuses to draw Section 9 if the manifest, any
+archived file or any script differs. Default Notebook execution reads only
+these saved files; it runs no simulation.
+
+**Studies.** All scripts are in `research/`; each docstring states its
+command line.
+
+| Study | Script | Question |
+| --- | --- | --- |
+| r1 | `r1_trim_floor.py` | Is every wrong decision explained by the static residual offset? (saved data only) |
+| r2 | `r2_prospective.py`, `r2_warm.py` | Do sealed predictions hold for six new designs? |
+| r3 | `r3_mismatch_mc.py` | Paired Vth-mismatch Monte Carlo of the trim residual |
+| r4 | `r4_tau_model.py`, `r4b_model_atlas.py` | Regeneration-time model of unresolved decisions |
+| r5, r6 | `r5_parasitic.py`, `r6_layout_budget.py` | Pre-layout parasitic sensitivity; post-layout slowdown attribution on the b1 extraction |
+| r7 | `r7_trim_dnl.py` | Trim-step DNL and the binary major-carry step |
+| r8-r10 | `r8_unit_trim_mc.py`, `r9_combo_mc.py`, `r10_combo5b.py` | Unit-element trim and wider input pair in mismatch MC |
+| r11 | `r11_post_layout_5b.py` | RC estimate for the fix on the b1 extraction (no drawn layout) |
+| r12 | `r12_gate_trim.py` | Gate-switched trim alternative (rejected) |
+| r13 | `r13_fix_atlas.py` | Sealed 49-condition atlas test of the fix; per-condition trim code and residual |
+| r14 | `r14_energy.py` | Energy across PVT and trim area |
+
+**Re-running.** Live studies use the same project-local ngspice 47 and pinned
+SKY130 models as the full campaign (`node scripts/setup.mjs` on Windows;
+`NGSPICE_EXE` may name another ngspice 47 console). From the entry directory:
+
+```text
+python -B research/r1_trim_floor.py
+python -B research/r7_trim_dnl.py
+python -B research/archive_results.py research/out
+```
+
+`research/out/` and `research/cache/` are ignored scratch folders.
+`archive_results.py` replaces `results/research/` and prints the new manifest
+SHA256; a changed result must be pinned again in
+`presentation/research_extension.py` before the Notebook will display it.
+Runtimes on one laptop CPU range from seconds (r1) to several hours per Monte
+Carlo or 49-condition study. The r7 trim-DNL study was re-run from the entry
+folder and reproduced the archived step boundaries exactly; the other live
+studies were not re-run after archiving.
+
+**Scope.** Mismatch MC models threshold-voltage mismatch only, from the PDK's
+Pelgrom term, with 40 paired seeds per variant. The fix's RC numbers reuse the
+adopted b1 extraction with trim devices split into unit copies and the added
+bit's wiring estimated from bit 3; the fix has no drawn or extracted layout.
+In the 49-condition atlas (r13) the fix's 5-bit trim saturates at code
++/-31 in 11 conditions with width skew, so it does not qualify at 1 mV.
+None of these studies is silicon, Linux, Colab or external-human evidence.

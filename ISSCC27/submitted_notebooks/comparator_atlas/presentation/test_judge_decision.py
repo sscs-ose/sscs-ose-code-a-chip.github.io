@@ -104,7 +104,7 @@ def test_wrong_is_not_unresolved_same20_actual_keys(data):
 
 def test_notebook_static_presets_have_working_source_and_honest_scope(data):
     notebook = json.loads((entry.ROOT / "Comparator_Atlas.ipynb").read_bytes())
-    assert len(notebook["cells"]) == 28 and sum(c["cell_type"] == "code" for c in notebook["cells"]) == 13
+    assert len(notebook["cells"]) == 33 and sum(c["cell_type"] == "code" for c in notebook["cells"]) == 15
     source = "".join(notebook["cells"][1]["source"])
     assert "https://github.com/WLHsu0827/" in source
     assert '"git", "clone"' in source and "requirements-review.txt" in source

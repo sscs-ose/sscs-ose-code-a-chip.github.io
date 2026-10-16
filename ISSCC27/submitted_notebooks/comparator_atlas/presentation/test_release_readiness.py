@@ -63,7 +63,7 @@ def test_notebook_abstract_reports_both_full_grid_deadlines(monkeypatch):
     cells = notebook_cells()
     grid = cell_with_heading(cells, "### Historical original-control full-grid archived-deck outcomes")
     fidelity = cell_with_heading(cells, "### Original control: layout and post-layout results")
-    discussion = cell_with_heading(cells, "## 9. Discussion and limitations")
+    discussion = cell_with_heading(cells, "## 10. Discussion and limitations")
     flat = {index: " ".join(cells[index].replace("**", "").split())
             for index in (grid, fidelity, discussion)}
     facts = load_facts()
