@@ -1001,6 +1001,16 @@ def main(support_digest: str | None = None) -> None:
         calibration routine accepts at most ±31 codes; for the 6-bit run only
         that input check was raised to 63 in a local copy, and the search
         itself is unchanged.
+
+        **The 6-bit design under random mismatch (r16).** On the same 40
+        paired seeds as the fix (identical draws for every shared device; only
+        the added bit-5 units draw new values), the 6-bit design's range
+        covers every seed at TT and SS, |*m*| ≤ 0.59 mV, and ±1 mV is correct
+        80/80 at both 0.75 ns and 1 ns at both conditions (first table below).
+        At ±0.5 mV and 1 ns it is not reliable: 77/80 (3 wrong) at TT and
+        64/80 (16 unresolved) at SS. Its nominal core energy is about 3× the
+        shipped design's at all three corners (731, 460 and 1,065 fJ against
+        244, 167 and 341 fJ at code 0; energy table below).
         """),
         code("""
         display(ext.mc_table(extension))
@@ -1027,9 +1037,9 @@ def main(support_digest: str | None = None) -> None:
         **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
         bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
         The cost paragraph above refers to the r13 fix. The 6-bit design has
-        only the 49-condition atlas test: no mismatch Monte Carlo, layout,
-        DRC/LVS or extraction of its own, and its 49 conditions use
-        deterministic width skews, not random mismatch.
+        no layout, DRC/LVS or extraction of its own; its mismatch Monte Carlo
+        covers two conditions without width skew, and its 49-condition test
+        uses deterministic width skews, not random mismatch.
         """),
         markdown("""
         ## 10. Discussion and limitations

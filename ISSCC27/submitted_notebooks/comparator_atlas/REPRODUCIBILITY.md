@@ -610,7 +610,7 @@ not part of the sealed decision record of Sections 1-8; nothing in the
 specification map, the 49-condition data or the layout example is changed.
 
 **Saved results.** `results/research/` holds the archived outputs of studies
-r1-r15 (JSON, JSONL and CSV, LF line endings).
+r1-r16 (JSON, JSONL and CSV, LF line endings).
 `results/research/manifest.json` lists the SHA256 of every archived file and
 of every `research/*.py` script. `presentation/research_extension.py` pins the
 manifest's own SHA256 and refuses to draw Section 9 if the manifest, any
@@ -634,6 +634,7 @@ command line.
 | r13 | `r13_fix_atlas.py` | Sealed 49-condition atlas test of the fix; per-condition trim code and residual |
 | r14 | `r14_energy.py` | Energy across PVT and trim area |
 | r15 | `r15_range.py` | Sealed 49-condition tests of trim step against range: 5-bit unit trim with input W 3 (a), 6-bit unit trim with input W 6 (b) |
+| r16 | `r16_six_bit.py` | The r15b 6-bit design: paired mismatch MC (TT and SS, 40 seeds each, same draws as r10) and nominal energy at three corners |
 
 **Re-running.** Live studies use the same project-local ngspice 47 and pinned
 SKY130 models as the full campaign (`node scripts/setup.mjs` on Windows;
@@ -660,9 +661,13 @@ adopted b1 extraction with trim devices split into unit copies and the added
 bit's wiring estimated from bit 3; the fix has no drawn or extracted layout.
 In the 49-condition atlas (r13) the fix's 5-bit trim saturates at code
 +/-31 in 11 conditions with width skew, so it does not qualify at 1 mV.
-The r15 6-bit design (b) qualifies at 1 mV at 1 and 2 ns but has only the
-49-condition test. The shared calibration routine checks `max_code <= 31`;
+The r15 6-bit design (b) qualifies at 1 mV at 1 and 2 ns; r16 adds paired
+mismatch MC at TT and SS without width skew, but it has no layout. The
+shared calibration routine checks `max_code <= 31`;
 r15b uses a local copy of `select_trim` with only that check raised to 63,
 and r15 scales ngspice's wall-clock guard (15 s per point) by 4 for the
-larger unit-element netlists. Neither change alters a simulated result.
+larger unit-element netlists. r16 likewise scales r3's 900 s per-deck guard by
+4; two SS batches stopped on that guard under full machine load and were
+restarted, and the affected seeds then completed normally. Neither change
+alters a simulated result.
 None of these studies is silicon, Linux, Colab or external-human evidence.

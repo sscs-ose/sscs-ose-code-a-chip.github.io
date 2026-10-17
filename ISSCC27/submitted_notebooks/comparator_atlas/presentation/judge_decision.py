@@ -38,8 +38,8 @@ EXTENSION_SUMMARY = (
     "remove it, the trim range (a 5-bit unit trim saturates in 11 of 49 conditions). A unit-element "
     "6-bit trim with a doubled input pair, tested with sealed predictions over all 49 conditions, is "
     "the only design here that qualifies at +/-1 mV (at 1 and 2 ns), at about 3x mean core energy "
-    "(760 vs 250 fJ). These are later schematic simulations; it has no layout or mismatch Monte Carlo "
-    "of its own.")
+    "(760 vs 250 fJ); in paired mismatch Monte Carlo (40 seeds at each of two conditions) it keeps the residual "
+    "within 0.59 mV. These are later schematic simulations; it has no layout of its own.")
 
 
 def sha(path):

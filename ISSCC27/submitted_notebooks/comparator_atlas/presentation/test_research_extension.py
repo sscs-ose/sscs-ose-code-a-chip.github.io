@@ -97,6 +97,17 @@ def test_six_bit_trim_reaches_one_millivolt(data):
     assert rng.loc["r15a: unit 5b, input W 3", "max |m| (mV)"] == 1.33
 
 
+def test_six_bit_mismatch_and_energy(data):
+    mc = ext.mc_table(data)
+    six = mc.loc["6-bit: unit 6b trim, input W 6"]
+    assert list(six["trim range covers offset"]) == ["40/40", "40/40"]
+    assert list(six["+/-1 mV @ 0.75 ns"]) == ["80/80", "80/80"]
+    assert list(six["+/-1 mV @ 1 ns"]) == ["80/80", "80/80"]
+    assert six["max |m| (mV)"].max() == 0.59
+    energy = ext.energy_table(data)
+    assert energy.loc["6-bit: unit 6b, input W 6", "TT 1.8 V 27 C (fJ)"] == "731 / 780"
+
+
 def test_cost_tables(data):
     energy = ext.energy_table(data)
     assert energy.loc["Shipped: binary 4b, input W 3", "TT 1.8 V 27 C (fJ)"] == "244 / 252"

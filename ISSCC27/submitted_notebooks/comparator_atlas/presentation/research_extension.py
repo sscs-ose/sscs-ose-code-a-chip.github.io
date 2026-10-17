@@ -17,7 +17,7 @@ from entry_tools import artifact_path, digest, verify_files
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "results" / "research"
-MANIFEST_SHA256 = "42f7fd8d9ed1b6ed192988cc3635cdf6b061c7fc92aa2b945562c10ce7c9083d"
+MANIFEST_SHA256 = "b053340d97c012e0ff7f7fff44c1e8a4ab86894c9096528ef058517dc8b49e0b"
 ATLAS_DESIGNS = ("baseline", "lvt_base_3b", "lvt_balanced_4b")
 PROSPECTIVE_DESIGNS = ("svt_fast_4b", "lvt_fine_3b", "lvt_fine_4b", "lvt_fast_4b", "lvt_fast_fine_4b", "lvt_wide_5b")
 FIX = "fix_x2_unit5b"
@@ -45,6 +45,8 @@ MC_VARIANTS = (
     ("Fix: unit 5b trim, input W 6", "SS 1.62 V -40 C", "r10/mc_combo_5b_ss1.62V-40C_*.jsonl", 40),
     ("Rejected: gate-switched 5b trim", "TT 1.8 V 27 C", "r12/mc_gate5b_tt1.8V27C_*.jsonl", 40),
     ("Rejected: gate-switched 5b trim", "SS 1.62 V -40 C", "r12/mc_gate5b_ss1.62V-40C_*.jsonl", 40),
+    ("6-bit: unit 6b trim, input W 6", "TT 1.8 V 27 C", "r16/mc_unit6_tt1.8V27C_*.jsonl", 40),
+    ("6-bit: unit 6b trim, input W 6", "SS 1.62 V -40 C", "r16/mc_unit6_ss1.62V-40C_*.jsonl", 40),
 )
 MC_CHECKS = ((3.0, 1.0), (1.0, 0.75), (1.0, 1.0), (0.5, 1.0))
 ENERGY_VARIANTS = {
@@ -54,6 +56,7 @@ ENERGY_VARIANTS = {
     "unit5_w3": "Unit 5b, input W 3",
     "unit5_w6_fix": "Fix: unit 5b, input W 6",
     "gate5_w6_r12": "Rejected: gate-switched 5b",
+    "unit6_w6": "6-bit: unit 6b, input W 6",
 }
 ENERGY_CONDITIONS = (("tt", 1.8, 27.0), ("ss", 1.62, -40.0), ("ff", 1.95, 125.0))
 
@@ -232,8 +235,9 @@ def postlayout_table(data: dict) -> pd.DataFrame:
 
 
 def energy_table(data: dict) -> pd.DataFrame:
-    rows = _json("r14/energy.json")
-    frame = pd.DataFrame(rows if isinstance(rows, list) else rows["rows"])
+    """r14 and r16: nominal core energy at code 0 / full scale, three corners."""
+    rows = [row for name in ("r14/energy.json", "r16/energy.json") for row in _json(name)]
+    frame = pd.DataFrame(rows)
     frame = frame[frame.variant.isin(ENERGY_VARIANTS)]
     out = []
     for variant, label in ENERGY_VARIANTS.items():
