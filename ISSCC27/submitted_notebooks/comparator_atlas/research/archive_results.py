@@ -32,6 +32,10 @@ STUDIES = {
     "r13": ["r13/registered_predictions_fix.*", "r13/r2_evaluation.json", "r13/r2_atlas_new_designs.csv",
             "r13/fix_residuals.csv"],
     "r14": ["r14/energy.json"],
+    "r15a": ["r15a/registered_predictions_a.*", "r15a/r2_evaluation.json", "r15a/r2_atlas_new_designs.csv",
+             "r15a/unit5_w3_residuals.csv"],
+    "r15b": ["r15b/registered_predictions_b.*", "r15b/r2_evaluation.json", "r15b/r2_atlas_new_designs.csv",
+             "r15b/unit6_w6_residuals.csv"],
 }
 
 

@@ -49,7 +49,7 @@ def test_atlas_extension_keeps_the_original_answers(data):
     assert atlas.loc["baseline", "1 ns"] == "none <= 30 mV"
     assert atlas.loc["lvt_balanced_4b", "1 ns"].startswith(">= 3 mV")
     assert atlas.loc["lvt_balanced_4b", "0.75 ns"].startswith(">= 10 mV")
-    assert set(atlas.index) == {*ext.ATLAS_DESIGNS, *ext.PROSPECTIVE_DESIGNS, ext.FIX}
+    assert set(atlas.index) == {*ext.ATLAS_DESIGNS, *ext.PROSPECTIVE_DESIGNS, ext.FIX, *ext.RANGE_DESIGNS}
 
 
 def test_prospective_agreement(data):
@@ -79,6 +79,22 @@ def test_fix_hits_trim_range_in_atlas(data):
     assert table.loc["other 38 conditions", "residual m (mV)"] == "|m| <= 0.39"
     atlas = ext.atlas_table(data)
     assert atlas.loc[ext.FIX, "1 ns"].startswith(">= 30 mV")
+
+
+def test_six_bit_trim_reaches_one_millivolt(data):
+    atlas = ext.atlas_table(data)
+    assert atlas.loc["unit6_w6", "1 ns"].startswith(">= 1 mV")
+    assert atlas.loc["unit6_w6", "2 ns"].startswith(">= 1 mV")
+    assert atlas.loc["unit6_w6", "0.75 ns"].startswith(">= 3 mV")
+    assert atlas.loc["unit5_w3", "1 ns"].startswith(">= 3 mV")
+    table = ext.prospective_table(data)
+    assert table.loc["unit5_w3", "held-out decisions predicted"] == "1695/1764"
+    assert table.loc["unit6_w6", "held-out decisions predicted"] == "1677/1764"
+    rng = ext.range_table(data)
+    six = rng.loc["r15b: unit 6b, input W 6"]
+    assert (six["max |m| (mV)"], six["conditions at range end"], six["conditions with |m| > 1 mV"]) == (0.55, 0, 0)
+    assert rng.loc["r13 fix: unit 5b, input W 6", "conditions at range end"] == 11
+    assert rng.loc["r15a: unit 5b, input W 3", "max |m| (mV)"] == 1.33
 
 
 def test_cost_tables(data):

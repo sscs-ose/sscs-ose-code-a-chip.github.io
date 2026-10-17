@@ -914,7 +914,7 @@ def main(support_digest: str | None = None) -> None:
         plt.close(figure)
         """),
         markdown("""
-        ## 9. Extension: why no design reaches 1 mV, a candidate fix, and its limit
+        ## 9. Extension: why no design reaches 1 mV, and a design that does
 
         > **Scope.** Added after the main study. Later local SKY130/ngspice
         > schematic simulations (plus one extraction *estimate*) under the
@@ -950,9 +950,9 @@ def main(support_digest: str | None = None) -> None:
         plus a decision-time model fitted only on |*v*| ≥ 3 mV predicted every
         held-out outcome (±0.25 to ±1 mV) before those inputs were simulated;
         the predictions were sealed by sha256. 10,359 of 10,584 decisions
-        (97.9%) and all 108 predictive atlas cells agreed. The atlas table
-        above adds those six designs and the candidate fix below: none of the
-        ten qualifies at 1 mV.
+        (97.9%) and all 108 predictive atlas cells agreed. None of those six
+        qualifies at 1 mV either. The atlas table also lists the three later
+        trim designs discussed below (r13, r15).
 
         **Cause: the binary trim array.** Bit 0 is a single minimum-width
         (0.42 µm) device and the larger bits are wider single devices, so the
@@ -970,27 +970,42 @@ def main(support_digest: str | None = None) -> None:
         (10 wrong) at TT and 26/80 (3 wrong) at SS for the shipped design
         (table and panel b).
 
-        **Its limit: trim range.** We then ran the fix through the full
+        **Its limit: trim range (r13).** We then ran the fix through the full
         49-condition atlas as a sealed prospective test (sha256 registered
         before the held-out inputs were simulated). The sealed prediction was
         that it would *not* qualify at 1 mV, and it does not: in 11 of 49
         conditions the calibration code saturates at ±31 and |*m*| reaches
-        1.2–10.9 mV (second table below: FF and SF at 1.95 V and SF at 1.80 V
-        with +4% width skew, and both ±8% skews at TT). In the other 38,
-        |*m*| ≤ 0.39 mV. The unit
-        trim removes the carry error, but its range does not cover deterministic
-        skew at fast-NMOS, high-supply corners; a qualifying design needs more
-        trim range, not a faster latch. The sealed predictions matched 1,710
-        of 1,764 held-out decisions (96.9%) and all 18 predictive atlas cells.
-        Across the atlas the fix qualifies only at ≥30 mV, *worse* than the
-        shipped design's ≥3 mV at 1 ns: its finer step costs range (at
-        TT 1.62 V −40 °C, +4% skew, the shipped design needs code −2 of ±15,
-        the fix −12 of ±31). The next design must size step and range
-        together.
+        1.2–10.9 mV (FF and SF at 1.95 V and SF at 1.80 V with +4% width skew,
+        and both ±8% skews at TT; second table below). In the other 38,
+        |*m*| ≤ 0.39 mV. The sealed predictions matched 1,710 of 1,764
+        held-out decisions (96.9%) and all 18 predictive atlas cells. Its
+        finer step costs range (at TT 1.62 V −40 °C, +4% skew, the shipped
+        design needs code −2 of ±15, the fix −12 of ±31), so across the atlas
+        it qualifies only at ≥30 mV.
+
+        **Step and range together: a design that reaches 1 mV (r15).** Two
+        more sealed 49-condition tests separate the two limits (third table
+        below). Keeping the 5-bit unit trim with the original W = 3 µm input
+        pair (coarser step) removes saturation but leaves |*m*| up to
+        1.33 mV: ≥3 mV at 1 ns at 402 fJ, no better than the shipped design.
+        Keeping W = 6 µm and adding a sixth unit bit (±63 codes) keeps the
+        fine step *and* covers the skew: codes reach −52, |*m*| ≤ 0.55 mV in
+        all 49 conditions, and the design qualifies at **±1 mV at 1 ns and
+        2 ns** (98 of 98 ±1 mV decisions correct at each), at 760 fJ mean
+        core energy, about 3× the shipped design's 250 fJ at ±3 mV. It is the
+        only design in this study that answers Section 4's 1 mV question with
+        something other than NONE. At 0.75 ns it qualifies at ±3 mV: the
+        sealed ±1 mV prediction failed by one unresolved decision
+        (SS 1.62 V 125 °C, +4% skew, *v* = −1 mV against *m* = −0.55 mV).
+        Held-out agreement was 96.1% (5-bit) and 95.1% (6-bit). The shared
+        calibration routine accepts at most ±31 codes; for the 6-bit run only
+        that input check was raised to 63 in a local copy, and the search
+        itself is unchanged.
         """),
         code("""
         display(ext.mc_table(extension))
         display(ext.fix_residual_table(extension))
+        display(ext.range_table(extension))
         display(ext.energy_table(extension))
         display(ext.postlayout_table(extension))
         figure = ext.figure(extension)
@@ -1011,7 +1026,10 @@ def main(support_digest: str | None = None) -> None:
 
         **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
         bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
-        The fix has no layout, DRC/LVS or extraction of its own.
+        The cost paragraph above refers to the r13 fix. The 6-bit design has
+        only the 49-condition atlas test: no mismatch Monte Carlo, layout,
+        DRC/LVS or extraction of its own, and its 49 conditions use
+        deterministic width skews, not random mismatch.
         """),
         markdown("""
         ## 10. Discussion and limitations

@@ -1,8 +1,8 @@
 # Research extension scripts
 
 Scripts for Notebook Section 9: later local SKY130/ngspice schematic studies
-(r1-r14) asking why no compared design qualifies at 1 mV, and testing one
-proposed trim fix. They are not part of the sealed decision record.
+(r1-r15) asking why no compared design qualifies at 1 mV, and testing trim
+designs that address it. They are not part of the sealed decision record.
 
 Each script's docstring gives its command line. `archive_results.py` copies the
 selected outputs from `research/out/` into `results/research/` and writes a

@@ -17,11 +17,21 @@ from entry_tools import artifact_path, digest, verify_files
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "results" / "research"
-MANIFEST_SHA256 = "136f9534cc42cf146fd7c704df37b0e54c78062f5f8b6e01cc906e2ec4c31d64"
+MANIFEST_SHA256 = "42f7fd8d9ed1b6ed192988cc3635cdf6b061c7fc92aa2b945562c10ce7c9083d"
 ATLAS_DESIGNS = ("baseline", "lvt_base_3b", "lvt_balanced_4b")
 PROSPECTIVE_DESIGNS = ("svt_fast_4b", "lvt_fine_3b", "lvt_fine_4b", "lvt_fast_4b", "lvt_fast_fine_4b", "lvt_wide_5b")
 FIX = "fix_x2_unit5b"
 FIX_CODE_LIMIT = 31
+RANGE_DESIGNS = ("unit5_w3", "unit6_w6")
+RANGE_VARIANTS = (
+    # design, label, residual file, code limit
+    ("lvt_balanced_4b", "Shipped: binary 4b, input W 3", "r1/r1_residuals.csv", 15),
+    (FIX, "r13 fix: unit 5b, input W 6", "r13/fix_residuals.csv", 31),
+    ("unit5_w3", "r15a: unit 5b, input W 3", "r15a/unit5_w3_residuals.csv", 31),
+    ("unit6_w6", "r15b: unit 6b, input W 6", "r15b/unit6_w6_residuals.csv", 63),
+)
+PROSPECTIVE_STUDIES = (("r2", "prospective"), ("r13", "prospective fix"),
+                       ("r15a", "prospective range"), ("r15b", "prospective range"))
 BANDS_MV = (0.5, 1.0, 3.0, 10.0, 30.0)
 TABLE_DEADLINES_NS = (0.75, 1.0, 2.0)
 SCOPE_LABEL = "Extension: later local schematic simulations, not part of the sealed decision record"
@@ -97,7 +107,7 @@ def _atlas_cells() -> pd.DataFrame:
     rows = [{"design": r["design"], "band_mv": r["minimum_abs_input_mv"], "deadline_ns": r["deadline_ns"],
              "qualifies": bool(r["all_correct"]), "energy_fj": r["mean_core_energy_fj"], "source": "atlas"}
             for r in summary["per_design"]]
-    for study, source in (("r2", "prospective"), ("r13", "prospective fix")):
+    for study, source in PROSPECTIVE_STUDIES:
         frame = pd.read_csv(artifact_path(DATA, f"{study}/r2_atlas_new_designs.csv"))
         rows += [{"design": r.design_name, "band_mv": r.band_mv, "deadline_ns": r.deadline_ns,
                   "qualifies": bool(r.observed_qualifies), "energy_fj": r.mean_core_energy_fj, "source": source}
@@ -109,7 +119,7 @@ def atlas_table(data: dict) -> pd.DataFrame:
     """Smallest input band in which every one of 49 conditions is correct, per deadline."""
     cells = _atlas_cells()
     rows = []
-    for design in (*ATLAS_DESIGNS, *PROSPECTIVE_DESIGNS, FIX):
+    for design in (*ATLAS_DESIGNS, *PROSPECTIVE_DESIGNS, FIX, *RANGE_DESIGNS):
         part = cells[cells.design.eq(design)]
         row = {"design": design, "source": part.source.iloc[0]}
         for deadline in TABLE_DEADLINES_NS:
@@ -124,14 +134,13 @@ def atlas_table(data: dict) -> pd.DataFrame:
 
 
 def prospective_table(data: dict) -> pd.DataFrame:
-    """r2 and r13: predictions sealed by sha256 before the held-out inputs were simulated."""
+    """r2, r13 and r15: predictions sealed by sha256 before the held-out inputs were simulated."""
     rows = []
-    for study in ("r2", "r13"):
+    for study, _ in PROSPECTIVE_STUDIES:
         report = _json(f"{study}/r2_evaluation.json")
         for design, agreement in report["sample_agreement"].items():
             rows.append({"design": design, "study": study,
-                         "registry sha256": report["registrations"][0]["sha256"][:12] if study == "r13"
-                         else ", ".join(r["sha256"][:12] for r in report["registrations"]),
+                         "registry sha256": ", ".join(r["sha256"][:12] for r in report["registrations"]),
                          "held-out decisions predicted": f"{agreement['agree']}/{agreement['n']}",
                          "agreement": f"{agreement['agree'] / agreement['n']:.1%}"})
         rows.append({"design": f"all {study}", "study": study, "registry sha256": "",
@@ -150,6 +159,25 @@ def fix_residual_table(data: dict) -> pd.DataFrame:
     rows.append({"condition": f"other {len(rest)} conditions", "code": f"{rest.code.min()} to {rest.code.max()}",
                  "residual m (mV)": f"|m| <= {rest.residual_mv.abs().max():.2f}"})
     return pd.DataFrame(rows).set_index("condition")
+
+
+def range_table(data: dict) -> pd.DataFrame:
+    """Trim step against trim range: calibration codes and residual m over the 49 conditions."""
+    atlas = atlas_table(data)
+    rows = []
+    for design, label, name, limit in RANGE_VARIANTS:
+        frame = pd.read_csv(artifact_path(DATA, name))
+        if "design_name" in frame:
+            frame = frame[frame.design_name.eq(design)]
+        if len(frame) != 49 or frame.code.isna().any():
+            raise RuntimeError(f"{name}: expected 49 calibrated conditions")
+        rows.append({"variant": label, "code range": f"+/-{limit}",
+                     "codes used": f"{int(frame.code.min())} to {int(frame.code.max())}",
+                     "conditions at range end": int(frame.code.abs().eq(limit).sum()),
+                     "conditions with |m| > 1 mV": int(frame.residual_mv.abs().gt(1).sum()),
+                     "max |m| (mV)": round(float(frame.residual_mv.abs().max()), 2),
+                     "atlas @ 1 ns": atlas.loc[design, "1 ns"]})
+    return pd.DataFrame(rows).set_index("variant")
 
 
 def _mc_summary(records: list[dict], limit: int) -> dict:

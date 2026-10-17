@@ -33,13 +33,13 @@ not the best average."""
 EXTENSION_SUMMARY = (
     "**Why NONE at 1 mV? (Section 9, later extension.)** Every wrong decision occurs when the input "
     "lies between zero and the static post-calibration residual offset (303/303, no misses), and "
-    "sealed predictions for six new designs matched 97.9% of 10,584 held-out decisions. The cause is "
-    "the binary trim array's major-carry step. A unit-element 5-bit trim with a doubled input pair "
-    "keeps the residual within 0.59 mV in paired mismatch Monte Carlo at about 1.7x core energy "
-    "(420 vs 244 fJ), but a sealed 49-condition test (96.9% of 1,764 held-out decisions predicted) "
-    "shows its finer trim saturating in 11 conditions with width skew: it qualifies only at 30 mV, "
-    "worse than the shipped design. The next limit is trim range. These are "
-    "later schematic simulations; the fix has no layout of its own.")
+    "sealed predictions for six new designs matched 97.9% of 10,584 held-out decisions. The limit is "
+    "the trim, not latch speed: first the binary array's major-carry step, then, once unit elements "
+    "remove it, the trim range (a 5-bit unit trim saturates in 11 of 49 conditions). A unit-element "
+    "6-bit trim with a doubled input pair, tested with sealed predictions over all 49 conditions, is "
+    "the only design here that qualifies at +/-1 mV (at 1 and 2 ns), at about 3x mean core energy "
+    "(760 vs 250 fJ). These are later schematic simulations; it has no layout or mismatch Monte Carlo "
+    "of its own.")
 
 
 def sha(path):
