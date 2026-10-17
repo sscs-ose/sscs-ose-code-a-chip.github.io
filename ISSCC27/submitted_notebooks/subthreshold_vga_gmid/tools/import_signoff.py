@@ -50,6 +50,7 @@ def run(folder, proof_file, env_file=None):
     l_ = json.loads((folder / "lvs_status.json").read_text())
     pr = proof(folder / proof_file)
     committed = {n: sha(ROOT / "layout" / n) for n in ("vga_core_12t.spice", "vga_core_12t_sizes.json", "vga_core_12t.gds")}
+    committed["verify12t.py"] = sha(ROOT / "layout" / "generator" / "verify12t.py")   # the checker the run used
     out = dict(drc=dict(passed=d["pass"], violations=d["violations"], time=d["time"]),
                lvs=dict(passed=l_["pass"], unique="match uniquely" in l_["final"], property_errors=l_["property_errors"],
                         time=l_["time"]),

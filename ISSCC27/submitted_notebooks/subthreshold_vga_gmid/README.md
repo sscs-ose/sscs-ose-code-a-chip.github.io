@@ -30,7 +30,7 @@ control step. At tt it has **6.88 µV** of integrated input noise (up to 8.4 µV
 Monte Carlo with the PDK's per-device mismatch model: **800 of 800**
 dies pass the full gate at 4 corners behind an ideal output DC servo. Without a servo, 198 of 200 dies keep their headroom at the worst of these corners; the servo must source or sink 88 nA to cover 99.7 % of dies.
 
-**Final layout** (§13, gLayout generator, from the frozen sizes): DRC-clean (3 rule decks natively, the 2 installed in IIC-OSIC-TOOLS) and LVS-clean, device sizes included, in both runs, whose LVS also rejects 6 of 6 deliberately altered netlists. The extracted netlist (724 transistor fingers as drawn, 44 of them dummies; 55 extracted capacitors, 49 non-zero) passes all 24 corners of the same gate: bandwidth ≥ **12.3 kHz** (worst at sf/85/1.62V), headroom ≥ 173 mV, 6.88 µV at tt, and it still passes with every extracted capacitor ×1.5. Its parasitics act like 236 fF on the output, inside the 300 fF allowance the sizes were frozen with.
+**Final layout** (§13, gLayout generator, from the frozen sizes): DRC-clean (3 rule decks natively, the 2 installed in IIC-OSIC-TOOLS) and LVS-clean, device sizes included, in both runs, whose LVS also rejects 6 of 6 deliberately altered netlists. The extracted netlist (724 transistor fingers as drawn, 44 of them dummies; 55 extracted capacitors, 49 non-zero) passes all 24 corners of the same gate: bandwidth ≥ **12.3 kHz** (worst at sf/85/1.62V), headroom ≥ 173 mV, 6.88 µV at tt, and it still passes with every extracted capacitor ×1.5. Its parasitics act like 236 fF on the output, inside the 300 fF allowance the sizes were frozen with. With resistance extracted too (68,749 resistors; 218–466 Ω from each signal pin to its farthest transistor, RC poles ≥ 0.88 GHz) it passes the gate at the 3 corners that bound it, its bandwidth within 0.02 % of the capacitance-only result.
 
 | | 9T baseline (hand) | 12T hand screen (8 Oct) | 12T flow pick |
 |:--|:--:|:--:|:--:|
@@ -75,6 +75,7 @@ dies pass the full gate at 4 corners behind an ideal output DC servo. Without a 
 | The final pick passes every corner with the first layout's extracted capacitors added | §9.3 | yes |
 | The final layout is DRC- and LVS-clean (device sizes included) in a native and a container run, and its LVS rejects every deliberately altered netlist | Tables 27, 27b | yes |
 | The extracted final layout passes every corner of the gate, also with every extracted capacitor ×1.5 | Table 28 | yes |
+| With resistance extracted too, the final layout passes the gate at the corners that bound the capacitance-only result | Table 28c | yes |
 | The pick meets range, bandwidth, current and headroom at every corner, supply corners included | Table 17e | yes |
 | The hand-screened 12T fails headroom mid-span | Table 16 | yes |
 | With an ideal reference current, the pick's supply current moves by less than 5 % across corners | Table 17e | yes |

@@ -176,6 +176,7 @@ def circuit(p: dict) -> str:
             _fet("M8", "vdd", "vctrl_n", "net3", "0", "nfet", d["W_st"], d["L_st"], nf_of(d, "st")) +
             _fet("M9", "v_out", "vctrl_p", "net3", "0", "nfet", d["W_st"], d["L_st"], nf_of(d, "st")))
     devs = fets + _bias_net(d)
+    # d["klu"]: use ngspice's KLU solver (same results; much faster on the RC-extracted netlist, ~80k nodes)
     if d.get("subckt"):                              # an external netlist of the core: schematic or extracted layout
         devs = subckt_instance(*d["subckt"]) + f"Iref vdd vbias DC {d['iref']}\n"
     lib = PDK_LIB
@@ -183,7 +184,7 @@ def circuit(p: dict) -> str:
         devs, lib = _apply_mm(devs, d["mm"]), mismatch_lib()
     return f"""
 .lib {lib} {d['corner']}
-{SIM_OPTS}
+{SIM_OPTS}{" klu" if d.get("klu") else ""}
 .temp {d['temp']}
 VDD   vdd 0 {d['vdd']}
 {devs}Vid   vid   0 DC {d.get('vid_dc', 0)} AC 1
@@ -321,7 +322,7 @@ print rout
 
 def gain_curve(p: dict, vctrls, f_lo: float = 100.0) -> np.ndarray:
     """Low-frequency |Av| (V/V) at each Vctrl, from .ac (exact linearisation)."""
-    body = "\n".join(f"alter vctrl dc = {v}\nac lin 1 {f_lo} {f_lo}\nlet g{i} = vm(v_out)\nprint g{i}"
+    body = "\n".join(f"alter vctrl dc = {v}\nac lin 1 {f_lo} {f_lo}\nlet g{i} = vm(v_out)\nprint g{i}\ndestroy all"   # free each plot: an RC netlist has ~80k vectors
                      for i, v in enumerate(vctrls))
     out = run(circuit(p) + f"\n.control\n{body}\n.endc", "gaincurve")
     r = parse_print(out)
@@ -351,7 +352,8 @@ wrdata {WORK}/bw.txt mag
 
 def noise(p: dict, vctrl: float, f1: float = 20.0, f2: float = 20e3) -> dict:
     """Input-referred noise (differential input), integrated over [f1, f2]."""
-    deck = circuit(p) + f"""
+    # ngspice runs no noise analysis with KLU ("operation not supported"), so the default solver here
+    deck = circuit(dict(p, klu=False)) + f"""
 .control
 set wr_singlescale
 set wr_vecnames

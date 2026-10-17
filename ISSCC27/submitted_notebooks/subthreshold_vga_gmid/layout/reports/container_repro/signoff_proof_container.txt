@@ -1,9 +1,15 @@
-SIGN-OFF PROOF  2026-10-14 16:24  host d71f43aff86c
+SIGN-OFF PROOF  2026-10-16 14:43  host d71f43aff86c
+tools: KLayout 0.30.11 | magic 8.3.681 | Netgen 1.5.323 | PDK_ROOT=/foss/pdks
+
+== 0. Pre-flight ==
+verify12t: /foss/designs/vga12t_repro/verify12t.py
+glayout: NOT importable, SKIP_GLAYOUT=1 -> the gLayout KLayout deck will be missing from this proof
 
 == 1. Fingerprints (sha256) - compare these with the files you received ==
 a1f3931c2e7e966509e8c2a227b2000982776b26060819d895ff1352f5c94191  layout/vga_core_12t.spice
 633a0bdc1730a79a188baadfa51bef6b961a04f8899518b1bc4981d457fad4a7  layout/vga_core_12t_sizes.json
 c61e0b8da3ca335562a80856bf2a47eb9f6aec760a8ad6baf69f25348d42aee3  layout/vga_core_12t.gds
+671b9d7e59fa172bf2341d6a070bf570ae65bed0442c3cacf49c0487bd71be29  /foss/designs/vga12t_repro/verify12t.py
 
 == 2. Every device: netlist sizes vs JSON sizes ==
 dev   netlist  W / L / nf / m      JSON  W / L / nf / m         ok
@@ -23,12 +29,12 @@ RESULT: netlist and JSON sizes IDENTICAL
 
 == 3. Fresh DRC and LVS (previous results deleted; LVS reference = layout/vga_core_12t.spice) ==
 DRC: PASS  (/foss/designs/vga12t_repro/verify_proof/drc_status.json)
-LVS: PASS  (/foss/designs/vga12t_repro/verify_proof/lvs_status.json)
 [klayout_official] deck /foss/pdks/sky130A/libs.tech/klayout/drc/sky130A_mr.drc
   violations: 0
 [magic_full] Magic drc(full), flattened
   violations: 0
 RESULT: PASS
+LVS: PASS  (/foss/designs/vga12t_repro/verify_proof/lvs_status.json)
 Subcircuit summary:
 Circuit 1: vga_core_12t                    |Circuit 2: vga_core_12t                    
 -------------------------------------------|-------------------------------------------
@@ -55,7 +61,8 @@ Device classes vga_core_12t and vga_core_12t are equivalent.
 Final result: Circuits match uniquely.
 No property (W/L/nf/m) errors
 
-== 4. Negative controls: the same layout against a netlist with ONE change must FAIL ==
+== 4. Controls: the unchanged netlist must PASS; each netlist with ONE change must FAIL ==
+  unchanged netlist (positive control)     -> PASS (correctly accepted)
   M5 copies m 14 -> 13                     -> FAIL (correctly rejected)
   M10 copies m 2 -> 3                      -> FAIL (correctly rejected)
   M1 length L 0.5 -> 1                     -> FAIL (correctly rejected)
