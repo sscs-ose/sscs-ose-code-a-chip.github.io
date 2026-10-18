@@ -1,0 +1,66 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+* statistics {
+*   mismatch {
+*   }
+* }
+.subckt  sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4 c0 c1 b m4
++ 
+.param  mult = 1.0
++ 
++ ctot_a = {26.560e-15*sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2_noshield__cor+0.0283/sqrt(6.1*6.8*mult*2)*26.560e-15*sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2_noshield__cor*sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2_noshield__slope}
++ cm4_c0 = {2.74e-15*c0m4m3_vpp}
++ cm4_c1 = {1.53e-15*c1m4m3_vpp}
++ cli2s = {(3.00e-15-3.26e-16)*cli2s_vpp}
++ rat_m3 = 0.160
++ rat_m2 = 0.394
++ rat_m1 = 0.404
++ rat_m12li = 0.042
++ cap_m3 = {rat_m3*ctot_a}
++ cap_m2 = {rat_m2*ctot_a}
++ cap_m1 = {rat_m1*ctot_a}
++ cap_m12li = {rat_m12li*ctot_a}
++ lm1 = 2.42
++ lm2 = 2.77
++ lm3 = 2.25
++ wm1 = 0.140
++ wm2 = 0.140
++ wm3 = 0.300
++ nfm1 = 42.0
++ nfm2 = 38.0
++ nfm3 = 22.0
++ nvia2_c0 = 48.0
++ nvia2_c1 = 23.0
++ nvia_c0 = 60.0
++ nvia_c1 = 32.0
++ nmcon = 64.0
+ccmvpp6p8x6p1_lim4shield m4 c0  c = {cm4_c0}
+cm4_1 m4 c1 c = {cm4_c1}
+rm31 c0 z1 r = {rm3*lm3/wm3*(1/3)*(1/nfm3)}
+cm3 z1 c1 c = {cap_m3}
+rvia2_1 c0 d0 r = {rcvia2/nvia2_c0}
+rvia2_2 c1 d1 r = {rcvia2/nvia2_c1}
+rm21 d0 a1 r = {rm2*lm2/wm2*(1/3)*(1/nfm2)}
+cm2 a1 d1 c = {cap_m2}
+rvia1 d0 e0 r = {rcvia/nvia_c0}
+rvia2 d1 e1 r = {rcvia/nvia_c1}
+rm11 e0 b1 r = {rm1*lm1/wm1*(1/3)*(1/nfm1)}
+cm1 b1 e1 c = {cap_m1}
+rmcon e0 f0 r = {rcl1/nmcon}
+rliw f0 g0 r = {rl1}
+cli2b g0 b c = {cli2s}
+cm12li e1 g0 c = {cap_m12li}
+.ends sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4

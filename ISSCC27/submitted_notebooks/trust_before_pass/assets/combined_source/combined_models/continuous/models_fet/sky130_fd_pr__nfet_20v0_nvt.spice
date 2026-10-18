@@ -1,0 +1,437 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+******************************************************************
+******************************************************************
+*  *****************************************************
+*  03/21/2021 Usman Suriono
+*      Why     : New infrastructure of the sky130_fd_pr__nfet_01v8 DE Native 20V model
+*      What    : Converted from n20nativevhv1 models
+*                Replace the Deep Nwell-Sub to Pwell-Deep Nwelll for D/B diode
+*                based on the layout, the same as the 20V sky130_fd_pr__nfet_20v0 model.
+*                Add matching to VTH0.
+*                Add Process Monte Carlo
+*                Changed the parasitic diode from internal dimension calculation
+*                to receive it from PDK
+*
+*  *****************************************************
+*
+*  Nmos Native 20V VHV DE Model
+*  	Fixed L = 1.5
+*  -----------------------------------------------------
+
+.subckt  sky130_fd_pr__nfet_20v0_nvt d g s b  w=60u   sa=0 sb=0 sd=0  nf=2 mult=1
+*** All values are estimated, the real values supplied and overwritten by PDK netlist
++ ad  = '11.33 * (w+11) - 8.75*(w+9)'
++ pd  = '2 * ( 11.33 + w+11 + 8.75+w+9 )'
++ as  = '0.29  * w'
++ ps  = '2*(0.29 + w)'
+*** preserve values, the resistance is dominated by "rldd" resistor
++ nrd = '0.205*nf/w'
++ nrs = '0.145*nf/w'
+******* Deep Nwell dimension
++ adnw = '11.33 * (w+11)'
++ pdnw = '2 * (11.33 + w + 11)'
+
+
+
+*[Global parameters]
+.PARAM  rdrift_tnom=1.648600e+004 vgdep_tnom=1.102900e-001 vth_tnom=7.000000e-001 vbdep_tnom=-5.260300e-001 
+***** Swap these two lines if want to simulate in proplus
+****+ vth2=+1.048000e-001 hvvsat_tnom=1.878600 avsat_tnom=7.467500e-001 deltaw=9.000000e-007 hvnel_sky130_fd_pr__nfet_20v0_iso=1.50e-06 hvvbdep=-2.490600e-002
++ vth2=+1.048000e-001 hvvsat_tnom=1.878600 avsat_tnom=7.467500e-001 deltaw=9.000000e-001 hvnel_sky130_fd_pr__nfet_20v0_iso=1.50 hvvbdep=-2.490600e-002
+
+******junction cap model fitting
+.param
++ sky130_fd_pr__nfet_20v0_nvt_k2_diff = '-1.2365e-01 + 0.03 * sw_vth0_sky130_fd_pr__nfet_01v8_nat'
++ sky130_fd_pr__nfet_20v0_nvt_hvvsat_mult = 5.4501e-01
++ sky130_fd_pr__nfet_20v0_nvt_rdrift_mult = 7.2610e-01
++sky130_fd_pr__nfet_20v0_pgatejunction_mult = 1.7357
++sky130_fd_pr__nfet_20v0_mjswgatejunction_mult = 5.3981e-01
++sky130_fd_pr__nfet_20v0_pbswgatejunction_mult = 3.4999e+00
+
+
+****pre native changes
+**.param tc1_rdrift_n20nativevhviso1=0.00621917042930238
+.param tc1_vgdep=0
+.param tc1_vth=0
+.param tc1_vbdep=0
+.param tc1_hvvsat_n20nativevhviso1=0.0061411164700097
+**.param tc1_avsat_n20nativevhviso1=-0.000120490754051872
+.param tc2_rdrift_n20nativevhviso1=0.000021055807983754
+.param tc2_vgdep=0
+.param tc2_vth=0
+.param tc2_vbdep=0
+.param tc2_hvvsat_n20nativevhviso1=3.61396725197052E-05
+.param tc2_avsat_n20nativevhviso1=3.0122688512968E-06
+******
+*.param tc1_rdrift_n20nativevhviso1=1.2314e-02
+*.param tc1_hvvsat_n20nativevhviso1=-2.5733e-02
+*****
+.param tc1_rdrift_n20nativevhviso1=7.6637e-03
+.param tc1_avsat_n20nativevhviso1=-7.4563e-04
+
+
+.param
++rdrift='rdrift_tnom*((w-deltaw)/w)*(1+tc1_rdrift_n20nativevhviso1*(temper-30)+tc2_rdrift_n20nativevhviso1*(temper-30)*(temper-30))*sky130_fd_pr__nfet_20v0_nvt_rdrift_mult * sw_nw_rs_mult**0.72'
++vgdep='vgdep_tnom*(1+tc1_vgdep*(temper-30)+tc2_vgdep*(temper-30)*(temper-30))'
++vth='vth_tnom*(1+tc1_vth*(temper-30)+tc2_vth*(temper-30)*(temper-30))'
++vbdep='vbdep_tnom*(1+tc1_vbdep*(temper-30)+tc2_vbdep*(temper-30)*(temper-30))'
++hvvsat='hvvsat_tnom*(1+tc1_hvvsat_n20nativevhviso1*(temper-30)+tc2_hvvsat_n20nativevhviso1*(temper-30)*(temper-30))*sky130_fd_pr__nfet_20v0_nvt_hvvsat_mult * sw_nldd**0.8 '
++avsat='avsat_tnom*(1+tc1_avsat_n20nativevhviso1*(temper-30)+tc2_avsat_n20nativevhviso1*(temper-30)*(temper-30))'
++ swx_vth0_mm =  sw_mm_vth0_sky130_fd_pr__nfet_01v8_nat * mismatch_factor*MC_MM_SWITCH*AGAUSS(0,1.0,1)/sqrt(hvnel_sky130_fd_pr__nfet_20v0_iso*w*mult)
+
+**** FET model ******************
+**** Drain rsh=1700 while Source is 120. Since rsh=1700 in the model, nrs is compensated by sw_rdn/sw_rnw
+
+m1 d1 g s b sky130_fd_pr__nfet_20v0_base  w=w l=hvnel_sky130_fd_pr__nfet_20v0_iso ad=0 as=0 pd=0 ps=0 nrd=nrd  nrs='nrs*sw_rdn/sw_rnw' nf=nf
+* + deltox  = 'sw_tox_hv_corner - sw_tox_hv_nom + sw_tox_hv_mc + sw_mm_tox_hv * mismatch_factor*MC_MM_SWITCH*AGAUSS(0,1.0,1)/sqrt(hvnel_sky130_fd_pr__nfet_20v0_iso*w*mult)'
++ delvto  = '-0.0025 +sw_vth0_sky130_fd_pr__nfet_01v8_nat*4.35  + swx_vth0_mm + sw_vth0_sky130_fd_pr__nfet_g5v0d16v0_mc * 1.25'
+* + mulu0   = sw_u0_sky130_fd_pr__nfet_01v8_nat
+* + delk1   = '-0.003 + 0.75*(sw_vth0_sky130_fd_pr__nfet_01v8_nat + swx_vth0_mm)'
+
+
+rldd d d1 r='abs((1/w)*(rdrift/(1+vgdep*(v(g,s)-vth-vbdep*v(b,s))))*(1+pwr((abs(v(d,s)+vth2-min(v(d1,s),60))/(hvvsat*(1+hvvbdep*v(b,s)))),avsat)))' tc1 = 0 tc2 = 0
+***********
+
+
+
+*********adding diodes
+xdNDrain1 b d sky130_fd_pr__model__parasitic__diode_pw2dn_defet area = {ad} perim = {pd} m = 0.5
+xdNDrain2 b d1 sky130_fd_pr__model__parasitic__diode_pw2dn_defet area = {ad} perim = {pd} m = 0.5
+xdNSrc b s sky130_fd_pr__diode_pw2nd_05v5_defet area = {as} perim = {ps}
+
+
+
+.model sky130_fd_pr__nfet_20v0_base.0 nmos 
+*
+*DC IV MOS PARAMETERS
+*
++ lmin = 4.95e-07 lmax = 3.05e-06 wmin = 1.9995e-05 wmax = 1.0005e-03
++ level = 54
++ tnom = 30
++ version = 4.5
++ toxm = 1.16e-008
++ xj = 1.5e-007
++ lln = 1
++ lwn = 1
++ wln = 1
++ wwn = 1
++ lint = '7.6507e-08-sw_polycd'
++ ll = 0
++ lw = 0
++ lwl = 0
++ wint = '2.1346e-08+sw_activecd'
++ wl = 0
++ ww = 0
++ wwl = 0
++ xl = 0
++ xw = 0
++ mobmod = 0
++ binunit = 2
++ dwg = -4.1292e-009
++ dwb = -1.6944e-009
+*NEW BSIM4 Parameters(Model Selectors)
++ igcmod = 0
++ igbmod = 0
++ rgatemod = 0
++ rbodymod = 1
++ trnqsmod = 0
++ acnqsmod = 0
++ fnoimod = 1
++ tnoimod = 1
++ permod = 1
++ geomod = 0
++ rdsmod = 0
++ tempmod = 0
+*******
+*NEW BSIM4 Parameters(4.4 Version)
++ lintnoi = 0.0
++ vfbsdoff = 0
++ lambda = 0
++ vtl = 0
++ lc = 5e-009
++ xn = 3
++ rnoia = 0.794
++ rnoib = 0.38
++ tnoia = 7.5e6
++ tnoib = 7.2e6
+*NEW BSIM4 Parameters(Process Parameters)
++ epsrox = 3.9
++ toxe = 1.16e-08
++ dtox = 0
++ ndep = 1.7e+017
++ nsd = 1e+020
++ rshg = 0.1
+****
++ rsh = {sw_rnw}
+*
+* THRESHOLD VOLTAGE PARAMETERS
+*
++ vth0 = '0.84689+3.0654e-02-0.600'
++ k1 = 1.019
++ k2 = '-0.055829+sky130_fd_pr__nfet_20v0_nvt_k2_diff'
++ k3 = -0.884
++ dvt0 = 0
++ dvt1 = 0.53
++ dvt2 = -0.19251
++ dvt0w = 0.16
++ dvt1w = 6.9091e+006
++ dvt2w = -0.036016
++ w0 = 0
++ k3b = 0.43
+*NEW BSIM4 Parameters for Level 54
++ phin = 0
++ lpe0 = 0
++ lpeb = -2.182e-007
++ vbm = -3
++ dvtp0 = 0
++ dvtp1 = 0
+*
+* MOBILITY PARAMETERS
+*
++ vsat = 2.2883e+005
++ ua = -1.131400e-010
++ ub = 4.1888e-018
++ uc = 7.0353e-011
++ rdsw = 4720.6
++ prwb = 0.36549
++ prwg = 0.002801
++ wr = 1
++ u0 = 0.10816
++ a0 = 0.96953
++ keta = -0.18204
++ a1 = 0.37848
++ a2 = 0.54362
++ ags = 0.60228
++ b0 = 3.2933e-08
++ b1 = 0.0
+*NEW BSIM4 Parameters(Mobility Parameters)
++ eu = 1.67
++ rdswmin = 0
++ rdw = 0
++ rdwmin = 0
++ rsw = 0
++ rswmin = 0
+*****
+*
+* SUBTHRESHOLD CURRENT PARAMETERS
+*
++ voff = -0.20613
++ nfactor = 0.2786
++ up = 0.0
++ ud = 0.0
++ lp = 1.0
++ tvfbsdoff = 0.0
++ tvoff = 0.0
++ cit = -0.0008
++ cdsc = 0
++ cdscb = 0
++ cdscd = 0
++ eta0 = 0.038662
++ etab = -0.028284
++ dsub = 0.42
+*NEW BSIM4 Parameters(Sub-threshold parameters)
++ voffl = -4.2579486e-007
++ minv = 0
+*****
+*
+* ROUT PARAMETERS
+*
++ pclm = 0.2
++ pdiblc1 = 0.21098
++ pdiblc2 = 0.0002
++ pdiblcb = -0.26831
++ drout = 0.36075
++ pscbe1 = 4.0572e+009
++ pscbe2 = 1.68e-006
++ pvag = 1.99
++ delta = 0.14671
++ alpha0 = 1.6301e-008
++ alpha1 = 0
++ beta0 = 36.96
+*NEW BSIM4 Parameters(ROUT Parameters)
++ fprout = 10.125
++ pdits = 0.0
++ pditsl = 0
++ pditsd = 0.0
+****
+*NEW BSIM4 Parameters(GATE INDUCED DRAIN LEAKAGE MODEL PARAMTERS)
++ agidl = 5.06e-016
++ bgidl = 1.058e+009
++ cgidl = 4000
++ egidl = 0.8
+****
+*NEW BSIM4 Parameters(Gate Leakage Current Parameters)
++ aigbacc = 1
++ bigbacc = 0
++ cigbacc = 0
++ nigbacc = 1
++ aigbinv = 0.35
++ bigbinv = 0.03
++ cigbinv = 0.006
++ eigbinv = 1.1
++ nigbinv = 3
++ aigc = 0.43
++ bigc = 0.054
++ cigc = 0.075
++ nigc = 1
++ aigsd = 0.43
++ bigsd = 0.054
++ cigsd = 0.075
++ dlcig = 0
++ poxedge = 1
++ pigcd = 1
++ ntox = 1
++ toxref = 1.16e-008
+*****
+*
+* TEMPERATURE EFFECTS PARAMETERS
+*
++ kt1 = -0.34636
++ kt2 = -0.042078
++ at = 69440
++ ute = -0.67527
++ ua1 = 3.0525e-009
++ ub1 = -1.5515e-018
++ uc1 = -5.9821e-011
++ kt1l = 0
++ prt = 0
+*NEW BSIM4 Parameters(HIGH SPEED RF MODEL PARAMETERS)
++ xrcrg1 = 12
++ xrcrg2 = 1
++ rbpb = 50
++ rbpd = 50
++ rbps = 50
++ rbdb = 50
++ rbsb = 50
++ gbmin = 1e-012
+****
+*NEW BSIM4 Parameters(FLICKER and THERMAL NOISE PARAMETERS)
++ noia = 2.6e+41
++ noib = 0.0
++ noic = 0.0
++ em = 4.1000000E+07
++ af = 1
++ ef = 0.89
++ kf = 0
++ ntnoi = 1
+*****
+*NEW BSIM4 Parameters(LAYOUT DEPENDENT PARASITIC MODEL PARAMETERS)
++ dmcg = 0
++ dmcgt = 0
++ dmdg = 0
++ xgw = 0
++ xgl = 0
++ ngcon = 1
+****
+*
+*DIODE DC IV PARAMTERS
+*
+*NEW BSIM4 Parameters(DIODE DC IV parameters)
++ diomod = 1
++ njs = 1.0773
++ jss = 0.000375
++ jsws = 5.84e-11
++ xtis = 0.76
++ bvs = 12.636
++ xjbvs = 1
++ ijthsrev = 0.1
++ ijthsfwd = 0.1
+*
+* DIODE and FET CAPACITANCE PARAMETERS
+*
++ tpb = 0.001344
++ tpbsw = 0.00099005
++ tpbswg = 0
++ tcj = 0.00067434
++ tcjsw = 0.0002493
+***make tcjswg negative so that not have to tweak other standard diodes to fit unit cell meas
++ tcjswg = -0.005
++ cgdo = '4.3400e-010 / sw_func_tox_hv_ratio'
++ cgso = '4.3400e-010 / sw_func_tox_hv_ratio'
++ cgbo = 0
++ capmod = 2
++ xpart = 0
++ cgsl = '5e-011 / sw_func_tox_hv_ratio'
++ cgdl = '5e-011 / sw_func_tox_hv_ratio'
++ cf = 0
++ clc = 1e-007
++ cle = 0.6
++ dlc = '6.5995e-08-sw_polycd'
++ dwc = {sw_activecd}
++ vfbcv = -1
++ acde = 0.4176
++ moin = 15
++ noff = 4
++ voffcv = -0.4104
++ ngate = 1e+023
++ lwc = 0
++ llc = 0
++ lwlc = 0
++ wlc = 0
++ wwc = 0
++ wwlc = 0
+*NEW BSIM4 Parameters(FET and DIODE capacitance parameters)
++ ckappas = 0.6
++ cjs = '8.310E-04*sw_func_nsd_pw_cj'
++ mjs = 0.295
++ pbs = 0.72468
++ cjsws = '1.5204e-011*sw_func_nsd_pw_cj'
++ mjsws = 0.037586
++ pbsws = 0.29067
++ cjswgs = '5.4e-011*sky130_fd_pr__nfet_20v0_pgatejunction_mult*sw_func_nsd_pw_cj'
++ mjswgs = '0.78692*sky130_fd_pr__nfet_20v0_mjswgatejunction_mult'
++ pbswgs = '0.54958*sky130_fd_pr__nfet_20v0_pbswgatejunction_mult'
+* Set Drain Diode Cap param to 0 , D Diode is handled in subcircuit
++ cjd = 0.0
++ cjswgd = 0.0
++ cjswd = 0.0
+*
+*STRESS PARAMETERS
+*
++ saref = 1.81e-06
++ sbref = 1.81e-06
++ wlod = 0.0
++ kvth0 = 1.1e-08
++ lkvth0 = 0.0
++ wkvth0 = 6.5e-07
++ pkvth0 = 0
++ llodvth = 0
++ wlodvth = 1
++ stk2 = 0
++ lodk2 = 1
++ lodeta0 = 1
++ ku0 = -4.5e-08
++ lku0 = 0.0
++ wku0 = 2.0e-07
++ pku0 = 0
++ llodku0 = 0
++ wlodku0 = 1
++ kvsat = 0.3
++ steta0 = 0
++ tku0 = 0
+
+.ends sky130_fd_pr__nfet_20v0_nvt
+*[Instances section]
+
+*[analysis and output]
+
+*simulator lang = spectre insensitive=yes
+
+*simulator lang = spice
+*[netlist end]
+
+*.END
+*** ; $&%*(C)Proplus Inc. All rights Reserved.
