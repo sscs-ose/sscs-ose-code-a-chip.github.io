@@ -1,7 +1,7 @@
 """Summarize the full-chip FEOL DRC into results/fullchip/feol_drc.json.
 
-The full-chip layout is not published (README), so the KLayout report databases stay private; this
-script records only the per-rule marker counts and where the markers lie. The runs it summarizes:
+It records the per-rule marker counts and where the markers lie (revision A in results/fullchip/, whose
+layout database is private; revision B, published, in results/fullchip/rev_b/). The runs it summarizes:
   * the signed-off chip GDS, with the 266 enabled FEOL rules of the SKY130 KLayout deck split into
     parallel jobs (rule vpp.5 excluded: the vpp layer 82/64 holds no shape, so it cannot fire);
   * the same GDS after scripts/implant_fix.py, which closes the sub-rule implant gaps inside the

@@ -22,9 +22,9 @@ security. Those measurements led to an NTT that stores two coefficients in every
 and processes them in two lanes, and to a datapath that streams data to and from it without removing a
 single check. The second integration, HSKEM-2, carries this design: a decapsulation takes 6,856 instead
 of 99,537 cycles, 14.5 times fewer and within 3 % of a compact published design, the FPGA board
-reproduces the count to the cycle, and the signed-off layout, which passes LVS and, once the implant gaps
-inside the OpenRAM macros are closed, the complete DRC deck, spends about 27 µJ per decapsulation instead
-of 0.34 mJ.
+reproduces the count to the cycle, and the signed-off layout, which meets timing at the slow, typical and
+fast corners and passes LVS and, once the implant gaps inside the OpenRAM macros are closed, the complete DRC
+deck, spends about 27 µJ per decapsulation instead of 0.34 mJ; its routed database is published.
 
 The entry point is `HSKEM_PQC_SKY130.ipynb`, which runs locally or in Google Colab. Every table and
 figure in the notebook is computed from the files in this folder, and the quantitative statements in its
@@ -68,6 +68,7 @@ text are guarded by assertions against the data, so the prose cannot silently dr
 | `tests/` | Unit tests of the analysis scripts on hand-checked inputs (`python3 -m pytest -q tests`); the notebook runs them in Appendix E.4 |
 | `tb/` | Icarus Verilog testbenches (bit-exact comparison, latency and constant-time checks, zeroize, leakage traces), the read-only decapsulation cycle and state profilers, the packed engine's write-contract checker, the SRAM access counter and the activity window of the chip-level energy measurement |
 | `flow/` | OpenROAD-flow-scripts design configuration, timing constraints and OpenSTA scripts for SKY130 HD, with the macro-placement and macro-pin repair hooks of the macro-store points; `flow/macros/` holds the OpenRAM views of HSKEM-1's NTT coefficient SRAM (16 × 256) and of the 24 × 128 macro used by the packed engine and HSKEM-2, and `flow/macros/spice/` the transistor netlists of HSKEM-2's seven macro types and of the 16 × 256 one |
+| `flow/chip_rev_b/` | The signed-off chip, HSKEM-2 revision B: the ASIC wrapper RTL and `rtl/make_root.sh`, which rebuilds the synthesized RTL from the published sources, and the flow, sign-off and analysis scripts as they ran (`README.md`) |
 | `board/` | Measurement scripts for the DE25-Nano and ESP32: UART console, repeated two-role ML-KEM flow, repeated HSM-invariant scenario |
 | `scripts/` | Simulation, Colab synthesis, place-and-route, gate-level simulation and power, corner analysis, front-end design-rule check, system-level profiling, chip-level energy (logic and SRAM), metric collection, the layout renders (`render_gds.py`, `make_layout_figures.py`, and `layout_zoom_figure.py` for the three-scale view of the released macro-store GDS) and notebook generation |
 | `third_party/` | SKY130 HD functional cell models (Apache-2.0), so that routed netlists can be simulated without downloading the PDK |
@@ -95,9 +96,8 @@ python3 scripts/sram_energy_model.py results/fullchip/sram_macro_spice.json resu
 ```
 
 simulates one macro from `flow/macros/spice/` (20 minutes to two hours per macro) and turns the committed
-per-macro results into the energy of a decapsulation. The logic part, `scripts/fullchip_power.sh`, and
-the chip's corner analysis, `scripts/sta_corners_fullchip.sh`, need the chip's routed database and
-parasitics, which are not published (see below).
+per-macro results into the energy of a decapsulation. The logic part and the chip's corner analysis need the
+chip's routed database and parasitics, published for revision B (see below; the scripts are in `flow/chip_rev_b/`).
 
 Without an ORFS installation, the exact build used here is available as a relocatable archive
 (`orfs-6101364b-sky130hd.tar.xz`, about 130 MB, attached to the release
@@ -109,19 +109,23 @@ threads and with two), the single-port NTT and the one-round-per-clock Keccak co
 
 The routed GDS files of the block-level design points compared in the notebook are attached to the
 release [`hskem-block-layouts`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-block-layouts)
-of the author's fork, with their SHA-256 sums. The signed-off full-chip GDS of HSKEM-2 (58 MB compressed) is
-attached to the release [`hskem-fullchip`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-fullchip),
-and `results/fullchip/release_gds_sha256.txt` holds its hashes. Its logic contains a provisioning test
-credential of the demonstration board, which was rotated out of the board before publication (the published
-RTL carries a placeholder instead, see `hskem_rtl/PUBLICATION_PATCH.diff`). The routed database and the
-parasitics stay private; their SHA-256, the signoff results and a cell-level placement map are provided in
-`results/fullchip/`, and a downscaled render of the floorplan in `figures/fullchip_layout.jpg`.
+of the author's fork, with their SHA-256 sums. The signed-off chip, HSKEM-2 revision B, is published
+whole: its routed database (netlist, DEF, OpenDB, extracted parasitics, SDC) and both GDS files, before and
+after the implant fix, are attached to the release
+[`hskem2-rev-b`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem2-rev-b),
+with their hashes in `results/fullchip/rev_b/release_sha256.txt` and `summary.json`. Its RTL is rebuilt from the
+published sources by `flow/chip_rev_b/rtl/make_root.sh` and carries only the public placeholder credential;
+`flow/chip_rev_b/README.md` lists the flow and sign-off scripts as they ran. Revision A, the first layout of
+HSKEM-2, keeps its summaries in `results/fullchip/` and its GDS on the release
+[`hskem-fullchip`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-fullchip);
+its routed database stays private because its logic contains a provisioning test credential of the
+demonstration board, rotated out of the board before publication.
 
 ## Tool versions
 
 The committed results were produced with Icarus Verilog 12.0; the YosysHQ OSS CAD Suite 2026-09-28
 (Icarus Verilog 14-devel, Yosys with the `slang` front end); OpenROAD-flow-scripts commit `6101364b`
-(OpenROAD `f5522624`, with its OpenSTA); KLayout 0.30.7; Magic 8.3.629 and ngspice 41 (conda-forge build)
+(OpenROAD `f5522624`, with its OpenSTA); KLayout 0.30.7; Netgen 6.2 for the LVS of revision B; Magic 8.3.629 and ngspice 41 (conda-forge build)
 for the SRAM energy; and Python 3 with NumPy, pandas, Matplotlib
 and `kyber-py` 1.2.0. The FPGA bitstream used for the hardware cross-check was
 built with Quartus Prime Pro 26.1; it is the only non-open-source tool involved.

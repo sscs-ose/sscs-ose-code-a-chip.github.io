@@ -17,7 +17,7 @@ rsync -a --delete --delete-excluded \
   --exclude 'BOARD_SESSION_PLAN.md' --exclude 'HEAVY_RUNS_PLAN.md' --exclude 'REVIEW_CRITERIA.md' --exclude 'PR_DESCRIPTION_DRAFT.md' --exclude 'BOARD_KEY_ROTATION_PLAN.md' --exclude 'PENDING_REVIEW_*.md' --exclude 'LESSONS_*.md' --exclude 'prose_lint.py' --exclude 'STYLE_PASS.md' --exclude 'board/*.log' --exclude 'board/*.csv' \
   --exclude 'board/__pycache__/' --exclude '*_ant10/' --exclude '*_superseded/' --exclude '*_udocker/' --exclude '*_bundle*/' --exclude '*_hm[0-9]*/' \
   --exclude 'results/asic/*/images/' --exclude 'results/asic/*/layout.png' \
-  --exclude 'results/fullchip/fullchip_layout.png' --exclude '*.vcd' --exclude '*.vcd.gz' \
+  --exclude 'results/fullchip/fullchip_layout.png' --exclude 'results/fullchip/rev_b/fullchip_layout.png' --exclude '*.vcd' --exclude '*.vcd.gz' \
   --exclude 'results/asic/ntt_dp_15ns/6_final.v' --exclude 'results/asic/ntt_dp_30ns/6_final.v' \
   --exclude 'results/asic/ntt_sp_1[25]ns/6_final.v' --exclude 'results/asic/ntt_sp_30ns/6_final.v' \
   --exclude 'results/asic/keccak_*_7ns/6_final.v' --exclude 'results/asic/keccak_*_10ns/6_final.v' \

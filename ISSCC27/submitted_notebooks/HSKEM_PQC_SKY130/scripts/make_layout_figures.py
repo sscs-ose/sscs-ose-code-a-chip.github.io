@@ -50,14 +50,17 @@ def blocks() -> None:
 
 
 def fullchip() -> None:
-    img = Image.open(ROOT / "results/fullchip/fullchip_layout.png").convert("RGB")
-    img.thumbnail((1400, 1400), Image.LANCZOS)
-    img.save(ROOT / "figures/fullchip_layout.jpg", quality=85, optimize=True)
+    # revision A (results/fullchip/) and revision B (results/fullchip/rev_b/), the signed-off chip
+    for src, dst in (("results/fullchip/fullchip_layout.png", "figures/fullchip_layout.jpg"),
+                     ("results/fullchip/rev_b/fullchip_layout.png", "figures/fullchip_layout_rev_b.jpg")):
+        img = Image.open(ROOT / src).convert("RGB")
+        img.thumbnail((1400, 1400), Image.LANCZOS)
+        img.save(ROOT / dst, quality=85, optimize=True)
 
 
 if __name__ == "__main__":
     blocks()
     fullchip()
-    for f in ("block_layouts.jpg", "fullchip_layout.jpg"):
+    for f in ("block_layouts.jpg", "fullchip_layout.jpg", "fullchip_layout_rev_b.jpg"):
         p = ROOT / "figures" / f
         print(p.name, p.stat().st_size, Image.open(p).size)

@@ -1,3 +1,506 @@
+--- a/rtl/mlkem512/mlkem512_matrix_mac_selftest.sv
++++ b/rtl/mlkem512/mlkem512_matrix_mac_selftest.sv
+@@ -103,7 +103,8 @@
+                      S_EK_HASH = 6'd32,
+                      S_DK_READ_ADDR = 6'd33,
+                      S_DK_READ_WAIT = 6'd34,
+-                     S_DK_HASH = 6'd35;
++                     S_DK_HASH = 6'd35,
++                     S_MUL5 = 6'd36;
+ 
+     localparam [31:0] DIGEST_INIT = 32'h4D414331;
+     localparam [12:0] Q13 = 13'd3329;
+@@ -154,6 +155,10 @@
+     reg [11:0] p2_q;
+     reg [11:0] p3_q;
+     reg [11:0] p4_q;
++`ifdef TRUSTEDGE_T3_MM_PIPE
++    reg [23:0] mm_prod_q;
++    reg [11:0] gamma_q;
++`endif
+     reg [11:0] accum0_q;
+     reg [11:0] accum1_q;
+     reg [11:0] secret_b0_q;
+@@ -190,6 +195,9 @@
+     wire [7:0] error_read_addr = {row_index, pair_index};
+     wire [23:0] result_pair_bytes;
+     wire [23:0] secret_pair_bytes;
++`ifdef TRUSTEDGE_T3_MARGIN
++    reg t3_dig_chk;                          // compare the last pair's digest in S_DK_ADDR
++`endif
+ 
+ `ifndef TRUSTEDGE_ASIC_SRAM
+     // One write plus one synchronous read per bank is directly inferable as
+@@ -463,7 +471,11 @@
+         case (state)
+             S_MUL0: begin mul_lhs = a0_q; mul_rhs = secret_b0_q; end
+             S_MUL1: begin mul_lhs = a1_q; mul_rhs = secret_b1_q; end
++`ifdef TRUSTEDGE_T3_MM_PIPE
++            S_MUL2: begin mul_lhs = p1_q; mul_rhs = gamma_q; end
++`else
+             S_MUL2: begin mul_lhs = p1_q; mul_rhs = gamma; end
++`endif
+             S_MUL3: begin mul_lhs = a0_q; mul_rhs = secret_b1_q; end
+             S_MUL4: begin mul_lhs = a1_q; mul_rhs = secret_b0_q; end
+             default: begin mul_lhs = 12'd0; mul_rhs = 12'd0; end
+@@ -472,7 +484,12 @@
+ 
+     wire [23:0] mul_product = mul_lhs * mul_rhs;
+     wire [11:0] mul_reduced;
++`ifdef TRUSTEDGE_T3_MM_PIPE
++    always @(posedge clk) begin mm_prod_q <= mul_product; gamma_q <= gamma; end
++    barrett_reduce u_mac_reduce (.a(mm_prod_q), .r(mul_reduced));
++`else
+     barrett_reduce u_mac_reduce (.a(mul_product), .r(mul_reduced));
++`endif
+ 
+     wire [11:0] base_c0 = add_mod_q(p0_q, p2_q);
+     wire [11:0] base_c1 = add_mod_q(p3_q, p4_q);
+@@ -528,6 +545,9 @@
+             rho_loaded_bytes <= 6'd0;
+             rho_index <= 5'd0;
+             core_ok <= 1'b0;
++`ifdef TRUSTEDGE_T3_MARGIN
++            t3_dig_chk <= 1'b0;
++`endif
+             serial_pair_index <= 8'd0;
+             loaded_coeffs <= 11'd0;
+             busy <= 1'b0;
+@@ -678,11 +698,20 @@
+                     a1_q <= ram_odd_q;
+                     state <= S_MUL0;
+                 end
++`ifdef TRUSTEDGE_T3_MM_PIPE
++                S_MUL0: state <= S_MUL1;                                   // mm_prod_q <= a0 b0
++                S_MUL1: begin p0_q <= mul_reduced; state <= S_MUL3; end    // mm_prod_q <= a1 b1
++                S_MUL3: begin p1_q <= mul_reduced; state <= S_MUL4; end    // mm_prod_q <= a0 b1
++                S_MUL4: begin p3_q <= mul_reduced; state <= S_MUL2; end    // mm_prod_q <= a1 b0
++                S_MUL2: begin p4_q <= mul_reduced; state <= S_MUL5; end    // mm_prod_q <= p1 gamma
++                S_MUL5: begin p2_q <= mul_reduced; state <= S_ACCUMULATE; end
++`else
+                 S_MUL0: begin p0_q <= mul_reduced; state <= S_MUL1; end
+                 S_MUL1: begin p1_q <= mul_reduced; state <= S_MUL2; end
+                 S_MUL2: begin p2_q <= mul_reduced; state <= S_MUL3; end
+                 S_MUL3: begin p3_q <= mul_reduced; state <= S_MUL4; end
+                 S_MUL4: begin p4_q <= mul_reduced; state <= S_ACCUMULATE; end
++`endif
+ 
+                 S_ACCUMULATE: begin
+                     if (!column_index) begin
+@@ -709,7 +738,12 @@
+                                            (!check_expected ||
+                                             ((secret_digest == EXPECTED_SECRET_DIGEST) &&
+                                              (error_digest == EXPECTED_ERROR_DIGEST) &&
++                                             `ifdef TRUSTEDGE_T3_MARGIN
++                                             1'b1));     // the digest is checked in S_DK_ADDR
++                                t3_dig_chk <= check_expected;
++`else
+                                              (digest_after_pair == EXPECTED_DIGEST)));
++`endif
+                                 column_index <= 1'b0;
+                                 state <= S_DK_ADDR;
+                             end else begin
+@@ -723,7 +757,15 @@
+                     end
+                 end
+ 
++`ifdef TRUSTEDGE_T3_MARGIN
++                S_DK_ADDR: begin
++                    state <= S_DK_WAIT;
++                    if (t3_dig_chk && (digest != EXPECTED_DIGEST)) core_ok <= 1'b0;
++                    t3_dig_chk <= 1'b0;
++                end
++`else
+                 S_DK_ADDR: state <= S_DK_WAIT;
++`endif
+                 S_DK_WAIT: state <= S_DK_CAPTURE;
+                 S_DK_CAPTURE: begin
+ `ifndef TRUSTEDGE_ASIC_SRAM
+--- a/rtl/math/barrett_reduce.v
++++ b/rtl/math/barrett_reduce.v
+@@ -40,5 +40,9 @@
+     wire [24:0] r2 = (r1 >= Q) ? (r1 - Q) : r1;
+     wire [24:0] r3 = (r2 >= Q) ? (r2 - Q) : r2;
+ 
++`ifdef TRUSTEDGE_T3_BARRETT_1C
++    assign r = r1[11:0];      // r0 < 2q for every 24-bit input
++`else
+     assign r = r3[11:0];
++`endif
+ endmodule
+--- a/rtl/spi/spi_command_bridge.v
++++ b/rtl/spi/spi_command_bridge.v
+@@ -166,6 +166,11 @@
+     endfunction
+ 
+     reg [15:0] crc_acc;
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++    reg        crc_go, crc_busy, crc_fin, tx_req;
++    reg [15:0] crc_s;
++    reg [5:0]  crc_i;
++`endif
+     integer    bi;
+ 
+     task build_enroll_resp;
+@@ -181,6 +186,9 @@
+             ext_tx_buf[7]  = id[7:0];
+             for (bi = 8; bi < 20; bi = bi + 1)
+                 ext_tx_buf[bi] = 8'd0;
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b1;
++`else
+             crc_acc = 16'hFFFF;
+             crc_acc = crc16_byte(crc_acc, ext_tx_buf[1]);
+             crc_acc = crc16_byte(crc_acc, ext_tx_buf[2]);
+@@ -189,6 +197,7 @@
+                 crc_acc = crc16_byte(crc_acc, ext_tx_buf[bi]);
+             ext_tx_buf[20] = crc_acc[15:8];
+             ext_tx_buf[21] = crc_acc[7:0];
++`endif
+             ext_tx_len     = 8'd22;
+         end
+     endtask
+@@ -201,6 +210,9 @@
+             ext_tx_buf[2]  = 8'd0;
+             ext_tx_buf[3]  = 8'd1;
+             ext_tx_buf[4]  = ok ? 8'd1 : 8'd0;
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b1;
++`else
+             crc_acc = 16'hFFFF;
+             crc_acc = crc16_byte(crc_acc, ext_tx_buf[1]);
+             crc_acc = crc16_byte(crc_acc, ext_tx_buf[2]);
+@@ -208,6 +220,7 @@
+             crc_acc = crc16_byte(crc_acc, ext_tx_buf[4]);
+             ext_tx_buf[5]  = crc_acc[15:8];
+             ext_tx_buf[6]  = crc_acc[7:0];
++`endif
+             ext_tx_len     = 8'd7;
+         end
+     endtask
+@@ -228,6 +241,9 @@
+             ext_tx_buf[8]  = dig[7:0];
+             ext_tx_buf[9]  = cyc[15:8];
+             ext_tx_buf[10] = cyc[7:0];
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b1;
++`else
+             crc_acc = 16'hFFFF;
+             crc_acc = crc16_byte(crc_acc, ext_tx_buf[1]);
+             crc_acc = crc16_byte(crc_acc, ext_tx_buf[2]);
+@@ -236,6 +252,7 @@
+                 crc_acc = crc16_byte(crc_acc, ext_tx_buf[bi]);
+             ext_tx_buf[11] = crc_acc[15:8];
+             ext_tx_buf[12] = crc_acc[7:0];
++`endif
+             for (bi = 13; bi < 22; bi = bi + 1)
+                 ext_tx_buf[bi] = 8'd0;
+             ext_tx_len     = 8'd13;
+@@ -265,11 +282,15 @@
+             ext_tx_buf[13] = vdig[7:0];
+             ext_tx_buf[14] = cyc[15:8];
+             ext_tx_buf[15] = cyc[7:0];
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b1;
++`else
+             crc_acc = 16'hFFFF;
+             for (bi = 1; bi < 16; bi = bi + 1)
+                 crc_acc = crc16_byte(crc_acc, ext_tx_buf[bi]);
+             ext_tx_buf[16] = crc_acc[15:8];
+             ext_tx_buf[17] = crc_acc[7:0];
++`endif
+             for (bi = 18; bi < 22; bi = bi + 1)
+                 ext_tx_buf[bi] = 8'd0;
+             ext_tx_len     = 8'd18;
+@@ -300,11 +321,15 @@
+             ext_tx_buf[13] = dig_b[7:0];
+             ext_tx_buf[14] = cyc[15:8];
+             ext_tx_buf[15] = cyc[7:0];
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b1;
++`else
+             crc_acc = 16'hFFFF;
+             for (bi = 1; bi < 16; bi = bi + 1)
+                 crc_acc = crc16_byte(crc_acc, ext_tx_buf[bi]);
+             ext_tx_buf[16] = crc_acc[15:8];
+             ext_tx_buf[17] = crc_acc[7:0];
++`endif
+             for (bi = 18; bi < 22; bi = bi + 1)
+                 ext_tx_buf[bi] = 8'd0;
+             ext_tx_len     = 8'd18;
+@@ -327,11 +352,15 @@
+             ext_tx_buf[5] = {3'd0, chunk_index};
+             for (bi = 0; bi < 32; bi = bi + 1)
+                 ext_tx_buf[6 + bi] = data[bi*8 +: 8];
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b1;
++`else
+             crc_acc = 16'hFFFF;
+             for (bi = 1; bi < 38; bi = bi + 1)
+                 crc_acc = crc16_byte(crc_acc, ext_tx_buf[bi]);
+             ext_tx_buf[38] = crc_acc[15:8];
+             ext_tx_buf[39] = crc_acc[7:0];
++`endif
+             ext_tx_len = 8'd40;
+         end
+     endtask
+@@ -346,11 +375,15 @@
+             ext_tx_buf[3]  = 8'd8;
+             for (bi = 0; bi < 8; bi = bi + 1)
+                 ext_tx_buf[4 + bi] = data[63-bi*8 -: 8];
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b1;
++`else
+             crc_acc = 16'hFFFF;
+             for (bi = 1; bi < 12; bi = bi + 1)
+                 crc_acc = crc16_byte(crc_acc, ext_tx_buf[bi]);
+             ext_tx_buf[12] = crc_acc[15:8];
+             ext_tx_buf[13] = crc_acc[7:0];
++`endif
+             for (bi = 14; bi < 22; bi = bi + 1)
+                 ext_tx_buf[bi] = 8'd0;
+             ext_tx_len = 8'd14;
+@@ -442,6 +475,9 @@
+             hsm_ext_data         <= 256'd0;
+             ext_tx_load  <= 1'b0;
+             ext_tx_len   <= 8'd0;
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            crc_go <= 1'b0; crc_busy <= 1'b0; crc_fin <= 1'b0; tx_req <= 1'b0; crc_s <= 16'd0; crc_i <= 6'd0;
++`endif
+             bridge_st    <= ST_IDLE;
+         end else begin
+             cmd_enroll  <= 1'b0;
+@@ -463,6 +499,22 @@
+             hsm_ext_cmd_valid <= 1'b0;
+             hsm_ext_header_valid <= 1'b0;
+             ext_tx_load <= 1'b0;
++`ifdef TRUSTEDGE_T3_CRC_SERIAL
++            tx_req <= 1'b0;
++            if (tx_req && !crc_go) ext_tx_load <= 1'b1;      // a response without a CRC to compute passes straight through
++            if (crc_busy) begin
++                crc_s <= crc16_byte(crc_s, ext_tx_buf[crc_i]);
++                crc_i <= crc_i + 6'd1;
++                if ({2'b00, crc_i} + 8'd3 == ext_tx_len) begin crc_busy <= 1'b0; crc_fin <= 1'b1; end
++            end
++            if (crc_fin) begin
++                ext_tx_buf[ext_tx_len - 8'd2] = crc_s[15:8];
++                ext_tx_buf[ext_tx_len - 8'd1] = crc_s[7:0];
++                ext_tx_load <= 1'b1;
++                crc_fin <= 1'b0;
++            end
++            if (crc_go) begin crc_s <= 16'hFFFF; crc_i <= 6'd1; crc_busy <= 1'b1; crc_go <= 1'b0; end
++`endif
+ 
+             if (frame_valid) begin
+                 case (frame_cmd)
+@@ -494,7 +546,11 @@
+                             bridge_st   <= ST_WAIT_KYBER;
+                         end else begin
+                             build_kyber_resp(1'b0, 32'd0, 16'd0);
+-                            ext_tx_load <= 1'b1;
++                            `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                             bridge_st   <= ST_IDLE;
+                         end
+                     end
+@@ -505,7 +561,11 @@
+                         end else begin
+                             build_mlkem512_resp(1'b0, 8'd0, 32'd0,
+                                                 32'd0, 16'd0);
+-                            ext_tx_load <= 1'b1;
++                            `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                             bridge_st   <= ST_IDLE;
+                         end
+                     end
+@@ -535,7 +595,11 @@
+                                 build_mlkem512_stage_resp(
+                                     CMD_MLKEM512_KPKE_RESP, 1'b0, 8'hE3,
+                                     32'd0, 32'd0, 16'd0);
+-                                ext_tx_load <= 1'b1;
++                                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                                 bridge_st <= ST_IDLE;
+                             end
+                         end else if (ENABLE_INTERNAL_ENTROPY &&
+@@ -547,7 +611,11 @@
+                                 entropy_raw_samples,
+                                 {8'hC2, entropy_health_code, entropy_word_count},
+                                 16'd0);
+-                            ext_tx_load <= 1'b1;
++                            `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                             bridge_st <= ST_IDLE;
+                         end else if (ENABLE_INTERNAL_ENTROPY &&
+                                     frame_pl_len == 16'd2 &&
+@@ -580,7 +648,11 @@
+                             build_mlkem512_stage_resp(
+                                 CMD_MLKEM512_KPKE_RESP, 1'b0, 8'h00,
+                                 32'd0, 32'd0, 16'd0);
+-                            ext_tx_load <= 1'b1;
++                            `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                             bridge_st <= ST_IDLE;
+                         end
+                     end
+@@ -611,7 +683,11 @@
+                             build_mlkem512_stage_resp(
+                                 CMD_MLKEM512_ENCAPS_RESP, 1'b0, 8'h00,
+                                 32'd0, 32'd0, 16'd0);
+-                            ext_tx_load <= 1'b1;
++                            `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                             bridge_st <= ST_IDLE;
+                         end
+                     end
+@@ -669,22 +745,38 @@
+ 
+             if (bridge_st == ST_WAIT_ENROLL && enroll_done) begin
+                 build_enroll_resp(device_id);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_VERIFY && verify_done) begin
+                 build_verify_resp(verify_ok);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_KYBER && kyber_done) begin
+                 build_kyber_resp(kyber_pass, kyber_digest, kyber_cycles);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_MLKEM512 && mlkem512_done) begin
+                 build_mlkem512_resp(mlkem512_pass, mlkem512_status,
+                                     mlkem512_partial_digest,
+                                     mlkem512_polyvec_digest,
+                                     mlkem512_cycles);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_MLKEM512_KPKE &&
+                          mlkem512_kpke_done) begin
+@@ -694,7 +786,11 @@
+                                           mlkem512_kpke_digest_a,
+                                           mlkem512_kpke_digest_b,
+                                           mlkem512_kpke_cycles);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_MLKEM512_ENCAPS &&
+                          mlkem512_encaps_done) begin
+@@ -704,7 +800,11 @@
+                                           mlkem512_encaps_digest_a,
+                                           mlkem512_encaps_digest_b,
+                                           mlkem512_encaps_cycles);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_MLKEM512_DECAPS &&
+                          mlkem512_decaps_done) begin
+@@ -714,11 +814,19 @@
+                                           mlkem512_decaps_digest_a,
+                                           mlkem512_decaps_digest_b,
+                                           mlkem512_decaps_cycles);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_HSM && hsm_done) begin
+                 build_hsm_resp(hsm_resp_cmd, hsm_response_data);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_HSM_EXT && hsm_ext_done) begin
+                 hsm_ext_response_len_q  <= hsm_ext_response_len;
+@@ -760,7 +868,11 @@
+                 ext_tx_len = hsm_ext_safe_len_q + 8'd6;
+                 bridge_st <= ST_BUILD_HSM_EXT_DONE;
+             end else if (bridge_st == ST_BUILD_HSM_EXT_DONE) begin
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st   <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_C2 && c2_run_done) begin
+                 build_mlkem512_stage_resp(
+@@ -772,7 +884,11 @@
+                      entropy_health_code,
+                      entropy_word_count[7:0]},
+                     c2_run_cycles);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st <= ST_IDLE;
+             end else if (bridge_st == ST_WAIT_C3 && c3_done) begin
+                 if (c3_pending_cmd == 4'h2 || c3_pending_cmd == 4'h6)
+@@ -783,7 +899,11 @@
+                                               c3_pass, c3_status,
+                                               c3_digest_a, c3_digest_b,
+                                               c3_cycles);
+-                ext_tx_load <= 1'b1;
++                `ifdef TRUSTEDGE_T3_CRC_SERIAL
++tx_req <= 1'b1;
++`else
++ext_tx_load <= 1'b1;
++`endif
+                 bridge_st <= ST_IDLE;
+             end
+         end
 --- a/rtl/trustedge_top.v
 +++ b/rtl/trustedge_top.v
 @@ -311,6 +311,10 @@
@@ -11,7 +514,28 @@
      wire [7:0]  mlkem512_ciphertext_byte_data;
      reg         mlkem512_runtime_ciphertext_ready;
      reg         mlkem512_ciphertext_import_clear;
-@@ -1376,7 +1380,56 @@
+@@ -499,11 +503,20 @@
+         begin c3_digest_step_b={current[26:0],current[31:27]}+{24'd0,value}; end
+     endfunction
+ 
++`ifdef TRUSTEDGE_T3_MARGIN
++    reg  [23:0] c3_ek_r;                     // the ekpke macro's output, one edge after it is presented
++    always @(posedge clk) c3_ek_r <= mlkem512_runtime_ekpke_pair_data;
++    wire [7:0] c3_pk_export_byte = (c3_absolute_byte < 10'd768) ?
++        ((c3_pk_export_lane == 2'd0) ? c3_ek_r[7:0] :
++         (c3_pk_export_lane == 2'd1) ? c3_ek_r[15:8] : c3_ek_r[23:16]) :
++        mlkem512_runtime_rho_data;
++`else
+     wire [7:0] c3_pk_export_byte = (c3_absolute_byte < 10'd768) ?
+         ((c3_pk_export_lane == 2'd0) ? mlkem512_runtime_ekpke_pair_data[7:0] :
+          (c3_pk_export_lane == 2'd1) ? mlkem512_runtime_ekpke_pair_data[15:8] :
+                                        mlkem512_runtime_ekpke_pair_data[23:16]) :
+         mlkem512_runtime_rho_data;
++`endif
+     // The frame payload remains stable until the next complete request. Read
+     // the active 32-byte chunk in place instead of duplicating it into a
+     // 256-bit bridge register and another 256-bit controller register.
+@@ -1376,7 +1389,56 @@
                                       (shared_ntt_owner == 3'd1) ?
                                       mlkem512_ntt_req_inverse : 1'b0;
  
@@ -68,7 +592,7 @@
          .clk(clk), .rst_n(core_rst_n_mlkem_a),
          .start(shared_ntt_start),
          .inverse(shared_ntt_inverse),
-@@ -1410,8 +1463,17 @@
+@@ -1410,8 +1472,17 @@
      // KeyGen, Encrypt and Decrypt/hash-chain are mutually exclusive SPI
      // operations. Their SHA3/SHAKE controllers time-multiplex one sponge.
      wire shared_sponge_owner_encaps = mlkem512_encaps_busy;
@@ -86,7 +610,7 @@
      keccak_sponge_stream #(
          .SERIAL_ROUND(ASIC_KECCAK_SERIAL_ROUND)
      ) u_shared_mlkem_sponge (
-@@ -1604,6 +1666,9 @@
+@@ -1604,6 +1675,9 @@
  
          .start(mlkem512_encaps_start_mux),
          .runtime_input_valid(mlkem512_encaps_input_valid_mux),
@@ -96,7 +620,7 @@
          .runtime_message(mlkem512_encaps_message_mux),
          .runtime_coins(mlkem512_encaps_coins_mux),
  
-@@ -1620,6 +1685,14 @@
+@@ -1620,6 +1694,14 @@
          .ntt_ext_we(mlkem512_encaps_ntt_req_we),
          .ntt_ext_addr(mlkem512_encaps_ntt_req_addr),
          .ntt_ext_wdata(mlkem512_encaps_ntt_req_wdata),
@@ -111,7 +635,7 @@
          .ntt_ext_busy(shared_ntt_busy),
          .ntt_ext_done(shared_ntt_done),
          .ntt_ext_rdata(shared_ntt_rdata),
-@@ -1645,6 +1718,10 @@
+@@ -1645,6 +1727,10 @@
          .ekpke_ext_pair_data(mlkem512_crypto_ekpke_pair_data),
          .ciphertext_read_addr(mlkem512_ciphertext_byte_addr),
          .ciphertext_read_data(mlkem512_ciphertext_byte_data),
@@ -122,7 +646,7 @@
          .decoded_read_addr(mlkem512_decoded_coeff_addr),
          .decoded_read_data(mlkem512_decoded_coeff_data),
          .ciphertext_import_clear(mlkem512_ciphertext_import_clear),
-@@ -1712,6 +1789,10 @@
+@@ -1712,6 +1798,10 @@
          .rho_ext_data(mlkem512_crypto_rho_data),
          .ciphertext_ext_addr(mlkem512_decaps_ciphertext_byte_addr),
          .ciphertext_ext_data(mlkem512_ciphertext_byte_data),
@@ -133,7 +657,7 @@
          .decoded_ext_addr(mlkem512_decaps_decoded_coeff_addr),
          .decoded_ext_data(mlkem512_decoded_coeff_data),
          .ntt_ext_start(mlkem512_decaps_ntt_req_start),
-@@ -1719,6 +1800,17 @@
+@@ -1719,6 +1809,17 @@
          .ntt_ext_we(mlkem512_decaps_ntt_req_we),
          .ntt_ext_addr(mlkem512_decaps_ntt_req_addr),
          .ntt_ext_wdata(mlkem512_decaps_ntt_req_wdata),
@@ -151,7 +675,7 @@
          .ntt_ext_busy(shared_ntt_busy),
          .ntt_ext_done(shared_ntt_done),
          .ntt_ext_rdata(shared_ntt_rdata),
-@@ -1738,6 +1830,12 @@
+@@ -1738,6 +1839,12 @@
          .sponge_ext_error(shared_sponge_error),
          .reencrypt_start(mlkem512_decaps_reencrypt_start),
          .reencrypt_active(mlkem512_decaps_reencrypt_active),
@@ -236,7 +760,7 @@
      output reg [255:0] reencrypt_message,
      output reg [255:0] reencrypt_coins,
      input  wire       reencrypt_busy,
-@@ -711,9 +744,25 @@
+@@ -711,9 +744,28 @@
          ST_REENC_START=6'd41, ST_REENC_WAIT=6'd42,
          ST_CMP_REQ=6'd43, ST_CMP_WAIT=6'd44, ST_CMP_CHECK=6'd45,
          ST_J_START=6'd46, ST_J_REQ=6'd47, ST_J_WAIT=6'd48,
@@ -244,6 +768,9 @@
 +        ST_J_FEED=6'd49, ST_J_OUT=6'd50, ST_HASH_DONE=6'd51,
 +        ST_HASH_JOIN=6'd52, ST_HASH_JOIN2=6'd53;
      localparam [12:0] Q13 = 13'd3329;
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++    localparam [5:0] ST_MSG_DRAIN = 6'd54;   // the last recovered coefficient is processed
++`endif
      reg [5:0] state;
 +    // Hash sequencer (TRUSTEDGE_HASH_OVERLAP): H(ek), H(c) and J(z||c) depend only on the inputs, so
 +    // they run on hstate while the decryption uses the NTT; hjob_* select the hashes after H(ek).
@@ -263,7 +790,7 @@
      reg poly_index;
      reg [7:0] coeff_index;
      reg [6:0] pair_index;
-@@ -734,7 +783,79 @@
+@@ -734,7 +786,105 @@
      reg ciphertext_match_q;
      reg reencrypt_pass_q;
      reg encaps_mode_q;
@@ -292,6 +819,22 @@
 +    reg         di_v;  reg [6:0] di_j;
 +    reg         da_v;  reg [6:0] da_j;  reg [11:0] da_p0, da_p1, da_p3, da_g;
 +    reg         db_v;  reg [6:0] db_j;  reg [11:0] db_p0, db_t, db_c1;
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    // stages Z and W register the RAM outputs (secret pair and NTT pair); two stages keep the NTT write
++    // of the second polynomial on the odd cycles
++    reg         dz_v, dw_v;  reg [6:0] dz_j, dw_j;  reg [11:0] dz_s0, dz_s1, dz_u0, dz_u1, dw_s0, dw_s1, dw_u0, dw_u1;
++`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++    reg         dx_v;  reg [6:0] dx_j;  reg [11:0] dx_p0, dx_r1, dx_r2, dx_r3, dx_g;
++    reg         dy_v;  reg [6:0] dy_j;  reg [11:0] dy_p0, dy_odd;  reg [23:0] dy_prod;
++`ifdef TRUSTEDGE_T3_PP_EARLY
++    wire [6:0]  dk_prj = dx_j;             // read three stages before stage R; pp_r holds the data for stage R
++`else
++    wire [6:0]  dk_prj = dy_j;             // the product RAM is read when the pair is two stages before stage R
++`endif
++`else
++    wire [6:0]  dk_prj = da_j;
++`endif
 +    wire        dk_pwr = (state == ST_MUL2) && !poly_index && db_v;     // first polynomial: product RAM
 +    wire        dk_wr  = (state == ST_MUL2) && poly_index && db_v;      // second polynomial: into the NTT
 +    wire [11:0] dk_c0;                     // stage R: the finished even coefficient
@@ -313,8 +856,18 @@
 +    // the next byte is presented in the same cycle in which the sponge accepts the current one, so the
 +    // byte is ready in the next cycle; while the sponge permutes (in_ready low) the address is held.
 +    wire hk_take = (sp_state == ST_HEK_FEED) && sponge_ext_in_ready;
++`ifdef TRUSTEDGE_T3_EK_PREF
++    // word 0 from ST_HEK_START; then the word after the one in ek_cur_r
++    assign ekpke_ext_pair_addr = ((sp_state == ST_HEK_START) || (sp_state == ST_HEK_REQ)) ? 8'd0 :
++                                 ((sp_state == ST_HEK_WAIT) || (sp_state == ST_HEK_FEED)) ?
++                                 ekpke_ext_pair_addr_q + 8'd1 : ekpke_ext_pair_addr_q;
++    reg  [23:0] ek_cur_r;                  // the ek word whose bytes are fed
++    always @(posedge clk)
++        if ((sp_state == ST_HEK_WAIT) || (hk_take && (ek_byte_sub == 2'd2))) ek_cur_r <= ekpke_ext_pair_data;
++`else
 +    assign ekpke_ext_pair_addr = (hk_take && (ek_byte_sub == 2'd2) && (sponge_feed_index < 10'd767)) ?
 +                                 ekpke_ext_pair_addr_q + 8'd1 : ekpke_ext_pair_addr_q;
++`endif
 +    assign rho_ext_addr = (hk_take && (sponge_feed_index >= 10'd768)) ? rho_ext_addr_q + 5'd1 : rho_ext_addr_q;
 +    assign ciphertext_ext_addr = ((sp_state == ST_HC_FEED) && sponge_ext_in_ready &&
 +                                  (sponge_feed_index != 10'd767)) ?
@@ -343,14 +896,14 @@
  `ifdef TRUSTEDGE_ASIC_SRAM
      wire [23:0] product_pair_q;
  `else
-@@ -749,17 +870,33 @@
+@@ -749,17 +899,33 @@
  `endif
  
  `ifndef TRUSTEDGE_ASIC_SRAM
 +`ifdef TRUSTEDGE_DEC_STREAM
 +    always @(posedge clk) begin
 +        if (dk_pwr) product_pair_ram[db_j] <= {db_c1, dk_c0};
-+        product_pair_q <= product_pair_ram[(state == ST_MUL2) ? da_j : pair_index];
++        product_pair_q <= product_pair_ram[(state == ST_MUL2) ? dk_prj : pair_index];
 +    end
 +`else
      always @(posedge clk)
@@ -378,7 +931,7 @@
      te_sram_1rw #(
          .WIDTH(8), .DEPTH(768), .ADDR_WIDTH(10)
      ) u_ciphertext_ref_sram (
-@@ -769,7 +906,18 @@
+@@ -769,7 +935,18 @@
      );
  `else
      always @(posedge clk)
@@ -397,12 +950,24 @@
  `endif
  
      function automatic [11:0] add_mod_q;
-@@ -808,8 +956,18 @@
+@@ -803,28 +980,220 @@
+     wire [15:0] gamma_full = kyber_zeta(gamma_index);
+     wire [11:0] gamma_base = gamma_full[11:0];
+     wire [11:0] gamma = pair_index[0] ? (12'd3329-gamma_base) : gamma_base;
++`ifdef TRUSTEDGE_T3_SA_PIPE
++    reg [11:0] t3_gamma_q;
++`endif
+     reg [11:0] mul_lhs, mul_rhs;
+     always @* begin
          mul_lhs=12'd0; mul_rhs=12'd0;
          case(state)
              ST_MUL0: begin mul_lhs=s0_q; mul_rhs=u0_q; end
 +`ifdef TRUSTEDGE_FAST_BASEMUL
++`ifdef TRUSTEDGE_T3_SA_PIPE
++            ST_MUL1: begin mul_lhs=p1_q; mul_rhs=t3_gamma_q; end
++`else
 +            ST_MUL1: begin mul_lhs=p1_q; mul_rhs=gamma; end
++`endif
 +`else
              ST_MUL1: begin mul_lhs=s1_q; mul_rhs=u1_q; end
 +`endif
@@ -416,25 +981,64 @@
              ST_MUL3: begin mul_lhs=s0_q; mul_rhs=u1_q; end
              ST_MUL4: begin mul_lhs=s1_q; mul_rhs=u0_q; end
              default: begin mul_lhs=12'd0; mul_rhs=12'd0; end
-@@ -819,12 +977,94 @@
+         endcase
+     end
++`ifdef TRUSTEDGE_T3_MUL_SEL
++    reg         t3_in_mul1_q;                 // this cycle is MUL1 (the last one was MUL0)
++    always @(posedge clk) t3_in_mul1_q <= (state == ST_MUL0);
++`ifdef TRUSTEDGE_T3_SEL_REP
++    reg         t3_sel_ml, t3_sel_mr_n, t3_sel_m2l, t3_sel_m2r_n;
++    always @(posedge clk) begin t3_sel_ml <= (state == ST_MUL0); t3_sel_mr_n <= (state != ST_MUL0); end
++    always @(posedge clk or negedge rst_n)
++        if (!rst_n) begin t3_sel_m2l <= 1'b0; t3_sel_m2r_n <= 1'b1; end
++        else begin t3_sel_m2l <= (state == ST_MUL0); t3_sel_m2r_n <= (state != ST_MUL0); end
++    wire [11:0] t3_ml = t3_sel_ml ? p1_q : s0_q;
++    wire [11:0] t3_mr = !t3_sel_mr_n ? t3_gamma_q : u0_q;
++`else
++    wire [11:0] t3_ml = t3_in_mul1_q ? p1_q : s0_q;
++    wire [11:0] t3_mr = t3_in_mul1_q ? t3_gamma_q : u0_q;
++`endif
++    wire [23:0] mul_product = t3_ml * t3_mr;
++`else
+     wire [23:0] mul_product=mul_lhs*mul_rhs;
++`endif
      wire [11:0] mul_reduced;
      barrett_reduce u_dec_reduce(.a(mul_product),.r(mul_reduced));
      wire [11:0] base0=add_mod_q(p0_q,p2_q);
 +`ifdef TRUSTEDGE_FAST_BASEMUL
 +    wire [11:0] fast_sa = add_mod_q(s0_q, s1_q);
 +    wire [11:0] fast_sb = add_mod_q(u0_q, u1_q);
++`ifdef TRUSTEDGE_T3_SA_PIPE
++    reg  [11:0] fast_sa_q, fast_sb_q;
++    always @(posedge clk) begin fast_sa_q <= fast_sa; fast_sb_q <= fast_sb; t3_gamma_q <= gamma; end
++`endif
 +    reg  [11:0] mul2_lhs, mul2_rhs;
 +    always @* begin
 +        mul2_lhs = 12'd0; mul2_rhs = 12'd0;
 +        if (state == ST_MUL0) begin mul2_lhs = s1_q; mul2_rhs = u1_q; end
++`ifdef TRUSTEDGE_T3_SA_PIPE
++        else if (state == ST_MUL1) begin mul2_lhs = fast_sa_q; mul2_rhs = fast_sb_q; end
++`else
 +        else if (state == ST_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end
 +`ifdef TRUSTEDGE_DEC_STREAM
 +`ifndef TRUSTEDGE_PMAC_RETIME
 +        else if (state == ST_MUL2) begin mul2_lhs = secret1; mul2_rhs = ntt_ext_rdata_pair[23:12]; end
 +`endif
 +`endif
++`endif
 +    end
++`ifdef TRUSTEDGE_T3_MUL_SEL
++`ifdef TRUSTEDGE_T3_SEL_REP
++    wire [11:0] t3_m2l = t3_sel_m2l ? fast_sa_q : s1_q;
++    wire [11:0] t3_m2r = !t3_sel_m2r_n ? fast_sb_q : u1_q;
++`else
++    wire [11:0] t3_m2l = t3_in_mul1_q ? fast_sa_q : s1_q;
++    wire [11:0] t3_m2r = t3_in_mul1_q ? fast_sb_q : u1_q;
++`endif
++    wire [23:0] mul2_product = t3_m2l * t3_m2r;
++`else
 +    wire [23:0] mul2_product = mul2_lhs * mul2_rhs;
++`endif
 +    wire [11:0] mul2_reduced;
 +    barrett_reduce u_dec_reduce2(.a(mul2_product), .r(mul2_reduced));
 +    function automatic [11:0] sub_mod_q;
@@ -448,15 +1052,30 @@
 +    wire [23:0] dk_prod3 = dk_sa * dk_sb;
 +    wire [11:0] dk_red3;
 +    barrett_reduce u_dec_reduce3(.a(dk_prod3), .r(dk_red3));
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    wire [6:0]  dk_gidx = 7'd64 + {1'b0, dw_j[6:1]};
++`else
 +    wire [6:0]  dk_gidx = 7'd64 + {1'b0, di_j[6:1]};
++`endif
 +    wire [15:0] dk_gfull = kyber_zeta(dk_gidx);
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    wire [11:0] dk_gamma = dw_j[0] ? (12'd3329 - dk_gfull[11:0]) : dk_gfull[11:0];
++`else
 +    wire [11:0] dk_gamma = di_j[0] ? (12'd3329 - dk_gfull[11:0]) : dk_gfull[11:0];
++`endif
 +`ifdef TRUSTEDGE_PMAC_RETIME
 +    // stage A as in the encryption: four dedicated multipliers on the RAM outputs, products unreduced
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    wire [23:0] rt_d00 = dw_s0 * dw_u0;
++    wire [23:0] rt_d11 = dw_s1 * dw_u1;
++    wire [23:0] rt_d01 = dw_s0 * dw_u1;
++    wire [23:0] rt_d10 = dw_s1 * dw_u0;
++`else
 +    wire [23:0] rt_d00 = secret0 * ntt_ext_rdata_pair[11:0];
 +    wire [23:0] rt_d11 = secret1 * ntt_ext_rdata_pair[23:12];
 +    wire [23:0] rt_d01 = secret0 * ntt_ext_rdata_pair[23:12];
 +    wire [23:0] rt_d10 = secret1 * ntt_ext_rdata_pair[11:0];
++`endif
 +    reg  [23:0] da_r0, da_r1, da_r2, da_r3;
 +    wire [11:0] dq0, dq1, dq2, dq3;
 +    barrett_reduce u_rt_dreduce0(.a(da_r0), .r(dq0));
@@ -468,34 +1087,75 @@
 +    wire [11:0] dq0 = da_p0, dq1 = da_p1, dq3 = da_p3;
 +    wire [11:0] dk_odd = sub_mod_q(sub_mod_q(dq3, dq0), dq1);
 +`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++    wire [23:0] dk_prod4 = dy_prod;
++`else
 +    wire [23:0] dk_prod4 = dq1 * da_g;
++`endif
 +    wire [11:0] dk_red4;
 +    barrett_reduce u_dec_reduce4(.a(dk_prod4), .r(dk_red4));
 +    assign dk_c0 = add_mod_q(db_p0, db_t);
++`ifdef TRUSTEDGE_T3_PP_EARLY
++    reg  [23:0] pp_r;
++    always @(posedge clk) pp_r <= product_pair_q;
++    wire [11:0] dk_res0 = add_mod_q(pp_r[11:0], dk_c0);
++    wire [11:0] dk_res1 = add_mod_q(pp_r[23:12], db_c1);
++`else
 +    wire [11:0] dk_res0 = add_mod_q(product_pair_q[11:0], dk_c0);
 +    wire [11:0] dk_res1 = add_mod_q(product_pair_q[23:12], db_c1);
++`endif
 +    always @(posedge clk or negedge rst_n) begin
 +        if (!rst_n) begin
 +            di_v <= 1'b0; da_v <= 1'b0; db_v <= 1'b0; di_j <= 7'd0; da_j <= 7'd0; db_j <= 7'd0;
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++            dz_v <= 1'b0; dw_v <= 1'b0; dz_j <= 7'd0; dw_j <= 7'd0;
++            dz_s0 <= 12'd0; dz_s1 <= 12'd0; dz_u0 <= 12'd0; dz_u1 <= 12'd0;
++            dw_s0 <= 12'd0; dw_s1 <= 12'd0; dw_u0 <= 12'd0; dw_u1 <= 12'd0;
++`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++            dx_v <= 1'b0; dx_j <= 7'd0; dx_p0 <= 12'd0; dx_r1 <= 12'd0; dx_r2 <= 12'd0; dx_r3 <= 12'd0; dx_g <= 12'd0;
++            dy_v <= 1'b0; dy_j <= 7'd0; dy_p0 <= 12'd0; dy_odd <= 12'd0; dy_prod <= 24'd0;
++`endif
 +            da_p0 <= 12'd0; da_p1 <= 12'd0; da_p3 <= 12'd0; da_g <= 12'd0;
 +            db_p0 <= 12'd0; db_t <= 12'd0; db_c1 <= 12'd0;
 +        end else begin
 +            di_v <= dk_issue; di_j <= dk_j;
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++            dz_v <= di_v; dz_j <= di_j;
++            dz_s0 <= secret0; dz_s1 <= secret1; dz_u0 <= ntt_ext_rdata_pair[11:0]; dz_u1 <= ntt_ext_rdata_pair[23:12];
++            dw_v <= dz_v; dw_j <= dz_j; dw_s0 <= dz_s0; dw_s1 <= dz_s1; dw_u0 <= dz_u0; dw_u1 <= dz_u1;
++            da_v <= dw_v; da_j <= dw_j;
++`else
 +            da_v <= di_v; da_j <= di_j;
++`endif
 +            da_p0 <= mul_reduced; da_p1 <= mul2_reduced; da_p3 <= dk_red3; da_g <= dk_gamma;
 +`ifdef TRUSTEDGE_PMAC_RETIME
 +            da_r0 <= rt_d00; da_r1 <= rt_d11; da_r2 <= rt_d01; da_r3 <= rt_d10;
 +`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++            dx_v <= da_v; dx_j <= da_j;
++            dx_p0 <= dq0; dx_r1 <= dq1; dx_r2 <= dq2; dx_r3 <= dq3; dx_g <= da_g;
++            dy_v <= dx_v; dy_j <= dx_j;
++            dy_p0 <= dx_p0; dy_odd <= add_mod_q(dx_r2, dx_r3); dy_prod <= dx_r1 * dx_g;
++            db_v <= dy_v; db_j <= dy_j;
++            db_p0 <= dy_p0; db_t <= dk_red4; db_c1 <= dy_odd;
++`else
 +            db_v <= da_v; db_j <= da_j;
 +            db_p0 <= dq0; db_t <= dk_red4; db_c1 <= dk_odd;
++`endif
 +        end
 +    end
 +`endif
 +`else
      wire [11:0] base1=add_mod_q(p3_q,p4_q);
 +`endif
++`ifdef TRUSTEDGE_T3_PP_EARLY
++    wire [11:0] accum0=add_mod_q(pp_r[11:0],base0);
++    wire [11:0] accum1=add_mod_q(pp_r[23:12],base1);
++`else
      wire [11:0] accum0=add_mod_q(product_pair_q[11:0],base0);
      wire [11:0] accum1=add_mod_q(product_pair_q[23:12],base1);
++`endif
  `ifdef TRUSTEDGE_ASIC_SRAM
      // The product-pair result is written during the first polynomial pass and
      // consumed only during the second, so one physical port is sufficient.
@@ -504,22 +1164,47 @@
 +        .WIDTH(24), .DEPTH(128), .ADDR_WIDTH(7)
 +    ) u_product_pair_sram (
 +        .clk(clk), .we(dk_pwr),
-+        .addr(dk_pwr ? db_j : (state == ST_MUL2) ? da_j : pair_index),
++        .addr(dk_pwr ? db_j : (state == ST_MUL2) ? dk_prj : pair_index),
 +        .wdata({db_c1, dk_c0}), .rdata(product_pair_q)
 +    );
 +`else
      wire product_pair_write = (state == ST_ACCUM) && !poly_index;
      te_sram_1rw #(
          .WIDTH(24), .DEPTH(128), .ADDR_WIDTH(7)
-@@ -832,6 +1072,7 @@
-         .clk(clk), .we(product_pair_write),
+@@ -833,85 +1202,154 @@
          .addr(pair_index), .wdata({base1, base0}), .rdata(product_pair_q)
      );
-+`endif
  `endif
++`endif
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++    // stage P: the two RAM outputs and the coefficient index of the last ST_MSG_CAP cycle
++    reg         mp_v;  reg [7:0] mp_idx;  reg [11:0] mp_d, mp_u;
++    wire [12:0] subtract_wide = {1'b0,mp_d} + Q13 - {1'b0,mp_u};
++`else
      wire [12:0] subtract_wide = {1'b0,decoded_ext_data} + Q13 -
                                  {1'b0,ntt_ext_rdata[11:0]};
-@@ -850,68 +1091,120 @@
++`endif
+     wire [11:0] recovered_coeff = (subtract_wide >= Q13) ?
+                                   subtract_wide-Q13 : subtract_wide[11:0];
+     wire recovered_bit = (recovered_coeff >= 12'd833) &&
+                          (recovered_coeff <= 12'd2496);
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++    wire [7:0] message_byte_next = message_byte_q |
++                                   ({7'd0,recovered_bit} << mp_idx[2:0]);
++`else
+     wire [7:0] message_byte_next = message_byte_q |
+                                    ({7'd0,recovered_bit} << coeff_index[2:0]);
++`endif
+     wire [31:0] message_digest_next = byte_digest_step(message_digest_q,
+                                                         message_byte_next);
+     wire [31:0] coeff_digest_next = coeff_digest_step(coeff_digest_q,
+                                                        recovered_coeff);
++`ifdef TRUSTEDGE_T3_EK_PREF
++    wire [7:0] ek_feed_byte = (ek_byte_sub == 2'd0) ? ek_cur_r[7:0] :
++                              (ek_byte_sub == 2'd1) ? ek_cur_r[15:8] : ek_cur_r[23:16];
++`else
+     wire [7:0] ek_feed_byte = (ek_byte_sub == 2'd0) ?
+                               ekpke_ext_pair_data[7:0] :
                                (ek_byte_sub == 2'd1) ?
                                ekpke_ext_pair_data[15:8] :
                                ekpke_ext_pair_data[23:16];
@@ -527,6 +1212,7 @@
 -                            (state == ST_HC_START) ||
 -                            (state == ST_G_START) ||
 -                            (state == ST_J_START);
++`endif
 +    wire hash_start_state = (sp_state == ST_HEK_START) ||
 +                            (sp_state == ST_HC_START) ||
 +                            (sp_state == ST_G_START) ||
@@ -683,7 +1369,7 @@
                            (state==ST_WRITE0)?{4'd0,result0_q}:
                            {4'd0,result1_q};
  
-@@ -930,9 +1223,9 @@
+@@ -930,9 +1368,9 @@
              reencrypt_message <= 256'd0;
              reencrypt_coins <= 256'd0;
              dkpke_ext_pair_addr <= 8'd0;
@@ -696,7 +1382,17 @@
              decoded_ext_addr <= 10'd0;
              poly_index <= 1'b0;
              coeff_index <= 8'd0;
-@@ -952,6 +1245,10 @@
+@@ -940,6 +1378,9 @@
+             decoded_q<=0;u0_q<=0;u1_q<=0;s0_q<=0;s1_q<=0;
+             p0_q<=0;p1_q<=0;p2_q<=0;p3_q<=0;p4_q<=0;
+             result0_q<=0;result1_q<=0;message_byte_q<=0;
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++            mp_v<=1'b0; mp_idx<=8'd0; mp_d<=12'd0; mp_u<=12'd0;
++`endif
+             message_digest_q<=32'h4D534731;coeff_digest_q<=32'h44454332;
+             recovered_message_q<=256'd0;
+             h_ek_q<=256'd0;h_c_q<=256'd0;kbar_q<=256'd0;coins_q<=256'd0;j_q<=256'd0;
+@@ -952,11 +1393,27 @@
              encaps_mode_q<=1'b0;
              general_runtime_mode_q<=1'b0;
              state <= ST_IDLE;
@@ -707,7 +1403,24 @@
          end else begin
              done <= 1'b0;
              reencrypt_start <= 1'b0;
-@@ -980,7 +1277,12 @@
+             if (busy && cycles != 16'hFFFF)
+                 cycles <= cycles + 16'd1;
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++            mp_v <= 1'b0;
++            if (mp_v) begin                       // the coefficient taken in the last cycle
++                coeff_digest_q<=coeff_digest_next;
++                message_byte_q<=message_byte_next;
++                if(mp_idx[2:0]==3'd7) begin
++                    message_digest_q<=message_digest_next;
++                    recovered_message_q[mp_idx[7:3]*8 +: 8] <= message_byte_next;
++                    message_byte_q<=0;
++                end
++            end
++`endif
+             case (state)
+                 ST_IDLE: if (encaps_start && !busy) begin
+                     busy <= 1'b1;
+@@ -980,7 +1437,12 @@
                          compare_index<=10'd0;compare_diff_q<=8'd0;
                          ciphertext_match_q<=1'b0;reencrypt_pass_q<=1'b0;
                          reencrypt_active<=1'b0;
@@ -720,7 +1433,7 @@
                      end else begin
                          state<=ST_FAIL_DONE;
                      end
-@@ -1007,6 +1309,13 @@
+@@ -1007,6 +1469,13 @@
                          compare_index<=10'd0;compare_diff_q<=8'd0;
                          ciphertext_match_q<=1'b0;reencrypt_pass_q<=1'b0;
                          reencrypt_active<=1'b0;
@@ -734,7 +1447,7 @@
                          state<=ST_U_REQ;
                      end else if (!ciphertext_ready) begin
                          // Compatibility KAT for historical HSM regression.
-@@ -1020,50 +1329,144 @@
+@@ -1020,52 +1489,151 @@
                          state <= ST_FAIL_DONE;
                      end
                  end
@@ -879,8 +1592,15 @@
 +`endif
                  ST_MSG_WAIT: state<=ST_MSG_CAP;
                  ST_MSG_CAP: begin
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++                    mp_v<=1'b1; mp_idx<=coeff_index; mp_d<=decoded_ext_data; mp_u<=ntt_ext_rdata[11:0];
++                    if(coeff_index==8'd255) begin
++                        state<=ST_MSG_DRAIN;
++`else
                      coeff_digest_q<=coeff_digest_next;
-@@ -1075,83 +1478,29 @@
+                     message_byte_q<=message_byte_next;
+                     if(coeff_index[2:0]==3'd7) begin
+@@ -1075,83 +1643,46 @@
                          message_byte_q<=0;
                      end
                      if(coeff_index==8'd255) begin
@@ -897,6 +1617,7 @@
                          ek_byte_sub<=2'd0;
                          h_ek_fp_q<=32'h48454B31;
                          state<=ST_HEK_START;
++`endif
 +`endif
                      end else begin coeff_index<=coeff_index+1'b1;
 +`ifdef TRUSTEDGE_DEC_STREAM
@@ -972,6 +1693,22 @@
 -                end
 +`endif
 +                end
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++                ST_MSG_DRAIN: begin
++`ifdef TRUSTEDGE_HASH_OVERLAP
++                        state<=ST_HASH_JOIN;      // the hash sequencer may still be running
++`else
++                        sponge_feed_index<=10'd0;
++                        sponge_output_index<=7'd0;
++                        sponge_output_complete<=1'b0;
++                        ekpke_ext_pair_addr_q<=8'd0;
++                        rho_ext_addr_q<=5'd0;
++                        ek_byte_sub<=2'd0;
++                        h_ek_fp_q<=32'h48454B31;
++                        state<=ST_HEK_START;
++`endif
++                end
++`endif
 +                // handled by the hash sequencer below
 +                ST_HEK_START, ST_HEK_REQ, ST_HEK_WAIT, ST_HEK_FEED, ST_HEK_OUT,
 +                ST_HC_START, ST_HC_REQ, ST_HC_WAIT, ST_HC_FEED, ST_HC_OUT,
@@ -979,7 +1716,7 @@
                  ST_G_START: begin
                      sponge_feed_index<=10'd0;sponge_output_index<=7'd0;
                      sponge_output_complete<=1'b0;kbar_q<=256'd0;coins_q<=256'd0;
-@@ -1175,64 +1524,87 @@
+@@ -1175,64 +1706,87 @@
                          else sponge_output_index<=sponge_output_index+1'b1;
                      end
                      if(sponge_ext_done&&sponge_output_complete)
@@ -1098,7 +1835,7 @@
                  end
                  ST_CMP_WAIT: state<=ST_CMP_CHECK;
                  ST_CMP_CHECK: begin
-@@ -1245,9 +1617,19 @@
+@@ -1245,9 +1799,19 @@
                          state<=ST_HASH_DONE;
                      end else begin
                          compare_index<=compare_index+1'b1;
@@ -1118,7 +1855,7 @@
                  ST_HASH_DONE: begin
                      busy<=0;done<=1;
                      // ML-KEM Decaps does not fail outward when the
-@@ -1289,6 +1671,137 @@
+@@ -1289,6 +1853,141 @@
                      corrupt_shared_digest<=0;state<=ST_IDLE;end
                  default: state <= ST_IDLE;
              endcase
@@ -1132,7 +1869,11 @@
 +                    `DCP_HS<=ST_HEK_REQ;
 +                end
 +`ifdef TRUSTEDGE_FAST_FEED
++`ifdef TRUSTEDGE_T3_EK_PREF
++                ST_HEK_REQ: `DCP_HS<=ST_HEK_WAIT;      // ek_cur_r takes word 0 at the end of WAIT
++`else
 +                ST_HEK_REQ: `DCP_HS<=ST_HEK_FEED;      // one-cycle read latency
++`endif
 +`else
 +                ST_HEK_REQ: `DCP_HS<=ST_HEK_WAIT;
 +`endif
@@ -1467,7 +2208,7 @@
      reg [11:0] p0_q, p1_q, p2_q, p3_q, p4_q;
      reg [11:0] operand_a0_q, operand_a1_q;
      reg [11:0] operand_b0_q, operand_b1_q, gamma_q;
-@@ -313,9 +418,30 @@
+@@ -313,9 +418,40 @@
      reg [255:0] runtime_message_q, runtime_coins_q;
      reg runtime_prf_ok_q;
      reg operand_wait_q;
@@ -1482,7 +2223,17 @@
 +    reg         ma_v, ma_c;  reg [6:0] ma_p;  reg [11:0] ma_p0, ma_p1, ma_p3, ma_g;
 +    reg         mb_v, mb_c;  reg [6:0] mb_p;  reg [11:0] mb_p0, mb_t, mb_c1;
 +    reg         mr_v;        reg [6:0] mr_p;  reg [11:0] mr_r0, mr_r1, macc0, macc1;
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++    // two more pipeline stages between stage A and stage B (slow-corner timing): mx registers the reduced products,
++    // my registers the product of the reduced a1 b1 with gamma and the odd sum
++    reg         mx_v, mx_c;  reg [6:0] mx_p;  reg [11:0] mx_p0, mx_r1, mx_r2, mx_r3, mx_g;
++    reg         my_v, my_c;  reg [6:0] my_p;  reg [11:0] my_p0, my_odd;  reg [23:0] my_prod;
++`endif
 +    wire        pmac_wr = (state == S_MUL2) && mr_v;               // a finished pair goes to the NTT
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    // stage Z registers the RAM outputs (key pair and noise pair) of the step addressed two cycles before
++    reg         mz_v, mz_c;  reg [6:0] mz_p;  reg [11:0] mz_a0, mz_a1, mz_ne, mz_no;
++`endif
 +`endif
 +`ifdef TRUSTEDGE_TIGHT_LOOPS
 +    reg       wr_pending;
@@ -1498,7 +2249,7 @@
  
  `ifdef TRUSTEDGE_ASIC_SRAM
      wire [11:0] noise_even_q, noise_odd_q;
-@@ -355,8 +481,30 @@
+@@ -355,8 +491,30 @@
      // KeyGen stores A in row-major order, so runtime Encrypt must swap the
      // row/column selectors here.  The former A*y addressing was self-
      // consistent with its ciphertext oracle but could not decrypt correctly.
@@ -1529,7 +2280,7 @@
      // ekPKE serializes a pair as c0[7:0], c0[11:8]|c1[3:0], c1[11:4].
      // Do not treat its low 12 stored bits as c0: that would splice in the
      // low nibble of c1 and silently corrupt every t-hat multiply.
-@@ -382,8 +530,18 @@
+@@ -382,36 +540,261 @@
          mul_lhs=12'd0; mul_rhs=12'd0;
          case(state)
              S_MUL0: begin mul_lhs=operand_a0_q; mul_rhs=operand_b0_q; end
@@ -1548,25 +2299,64 @@
              S_MUL3: begin mul_lhs=operand_a0_q; mul_rhs=operand_b1_q; end
              S_MUL4: begin mul_lhs=operand_a1_q; mul_rhs=operand_b0_q; end
              default: begin mul_lhs=12'd0; mul_rhs=12'd0; end
-@@ -393,25 +551,161 @@
+         endcase
+     end
++`ifdef TRUSTEDGE_T3_MUL_SEL
++    reg         t3_in_mul1_q;                 // this cycle is MUL1 (the last one was MUL0)
++    always @(posedge clk) t3_in_mul1_q <= (state == S_MUL0);
++`ifdef TRUSTEDGE_T3_SEL_REP
++    reg         t3_sel_ml, t3_sel_mr_n, t3_sel_m2l, t3_sel_m2r_n;
++    always @(posedge clk) begin t3_sel_ml <= (state == S_MUL0); t3_sel_mr_n <= (state != S_MUL0); end
++    always @(posedge clk or negedge rst_n)
++        if (!rst_n) begin t3_sel_m2l <= 1'b0; t3_sel_m2r_n <= 1'b1; end
++        else begin t3_sel_m2l <= (state == S_MUL0); t3_sel_m2r_n <= (state != S_MUL0); end
++    wire [11:0] t3_ml = t3_sel_ml ? p1_q : operand_a0_q;
++    wire [11:0] t3_mr = !t3_sel_mr_n ? gamma_q : operand_b0_q;
++`else
++    wire [11:0] t3_ml = t3_in_mul1_q ? p1_q : operand_a0_q;
++    wire [11:0] t3_mr = t3_in_mul1_q ? gamma_q : operand_b0_q;
++`endif
++    wire [23:0] mul_product = t3_ml * t3_mr;
++`else
+     wire [23:0] mul_product=mul_lhs*mul_rhs;
++`endif
      wire [11:0] mul_reduced;
      barrett_reduce u_reduce(.a(mul_product),.r(mul_reduced));
      wire [11:0] base0=add_mod_q(p0_q,p2_q);
 +`ifdef TRUSTEDGE_FAST_BASEMUL
 +    wire [11:0] fast_sa = add_mod_q(operand_a0_q, operand_a1_q);
 +    wire [11:0] fast_sb = add_mod_q(operand_b0_q, operand_b1_q);
++`ifdef TRUSTEDGE_T3_SA_PIPE
++    reg  [11:0] fast_sa_q, fast_sb_q;
++    always @(posedge clk) begin fast_sa_q <= fast_sa; fast_sb_q <= fast_sb; end
++`endif
 +    reg  [11:0] mul2_lhs, mul2_rhs;
 +    always @* begin
 +        mul2_lhs = 12'd0; mul2_rhs = 12'd0;
 +        if (state == S_MUL0) begin mul2_lhs = operand_a1_q; mul2_rhs = operand_b1_q; end
++`ifdef TRUSTEDGE_T3_SA_PIPE
++        else if (state == S_MUL1) begin mul2_lhs = fast_sa_q; mul2_rhs = fast_sb_q; end
++`else
 +        else if (state == S_MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end
 +`ifdef TRUSTEDGE_PIPE_MAC
 +`ifndef TRUSTEDGE_PMAC_RETIME
 +        else if (state == S_MUL2) begin mul2_lhs = key_operand_a1; mul2_rhs = noise_odd_q; end   // bound key only
 +`endif
 +`endif
++`endif
 +    end
++`ifdef TRUSTEDGE_T3_MUL_SEL
++`ifdef TRUSTEDGE_T3_SEL_REP
++    wire [11:0] t3_m2l = t3_sel_m2l ? fast_sa_q : operand_a1_q;
++    wire [11:0] t3_m2r = !t3_sel_m2r_n ? fast_sb_q : operand_b1_q;
++`else
++    wire [11:0] t3_m2l = t3_in_mul1_q ? fast_sa_q : operand_a1_q;
++    wire [11:0] t3_m2r = t3_in_mul1_q ? fast_sb_q : operand_b1_q;
++`endif
++    wire [23:0] mul2_product = t3_m2l * t3_m2r;
++`else
 +    wire [23:0] mul2_product = mul2_lhs * mul2_rhs;
++`endif
 +    wire [11:0] mul2_reduced;
 +    barrett_reduce u_reduce2(.a(mul2_product), .r(mul2_reduced));
 +    function automatic [11:0] sub_mod_q;
@@ -1584,18 +2374,33 @@
 +    wire [23:0] pm_prod3 = pm_sa * pm_sb;
 +    wire [11:0] pm_red3;
 +    barrett_reduce u_reduce3(.a(pm_prod3), .r(pm_red3));
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    wire [6:0]  pm_gidx = 7'd64 + {1'b0, mz_p[6:1]};
++`else
 +    wire [6:0]  pm_gidx = 7'd64 + {1'b0, mi_p[6:1]};
++`endif
 +    wire [15:0] pm_gfull = kyber_zeta(pm_gidx);
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    wire [11:0] pm_gamma = mz_p[0] ? (12'd3329 - pm_gfull[11:0]) : pm_gfull[11:0];
++`else
 +    wire [11:0] pm_gamma = mi_p[0] ? (12'd3329 - pm_gfull[11:0]) : pm_gfull[11:0];
++`endif
 +`ifdef TRUSTEDGE_PMAC_RETIME
 +    // stage A is four dedicated multipliers on the RAM outputs: a macro read, which arrives half a cycle
 +    // after the edge, reaches the unreduced products through one multiplier and nothing else, and stage B,
 +    // which starts at a register, reduces them. The odd product is a0 b1 + a1 b0, so no adder precedes a
 +    // multiplier, and the shared multipliers keep register operands only.
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    wire [23:0] rt_p00 = mz_a0 * mz_ne;
++    wire [23:0] rt_p11 = mz_a1 * mz_no;
++    wire [23:0] rt_p01 = mz_a0 * mz_no;
++    wire [23:0] rt_p10 = mz_a1 * mz_ne;
++`else
 +    wire [23:0] rt_p00 = key_operand_a0 * noise_even_q;
 +    wire [23:0] rt_p11 = key_operand_a1 * noise_odd_q;
 +    wire [23:0] rt_p01 = key_operand_a0 * noise_odd_q;
 +    wire [23:0] rt_p10 = key_operand_a1 * noise_even_q;
++`endif
 +    reg  [23:0] ma_r0, ma_r1, ma_r2, ma_r3;
 +    wire [11:0] rp0, rp1, rp2, rp3;
 +    barrett_reduce u_rt_reduce0(.a(ma_r0), .r(rp0));
@@ -1607,8 +2412,13 @@
 +    wire [11:0] rp0 = ma_p0, rp1 = ma_p1, rp3 = ma_p3;
 +    wire [11:0] pm_odd = sub_mod_q(sub_mod_q(rp3, rp0), rp1);
 +`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++    // stage B2 registered the product of the reduced a1 b1 and gamma; stage B3 reduces it
++    wire [23:0] pm_prod4 = my_prod;
++`else
 +    // stage B
 +    wire [23:0] pm_prod4 = rp1 * ma_g;
++`endif
 +    wire [11:0] pm_red4;
 +    barrett_reduce u_reduce4(.a(pm_prod4), .r(pm_red4));
 +    // stage R
@@ -1616,19 +2426,41 @@
 +    always @(posedge clk or negedge rst_n) begin
 +        if (!rst_n) begin
 +            mi_v <= 1'b0; ma_v <= 1'b0; mb_v <= 1'b0; mr_v <= 1'b0;
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++            mz_v <= 1'b0; mz_c <= 1'b0; mz_p <= 7'd0; mz_a0 <= 12'd0; mz_a1 <= 12'd0; mz_ne <= 12'd0; mz_no <= 12'd0;
++`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++            mx_v <= 1'b0; mx_c <= 1'b0; mx_p <= 7'd0; mx_p0 <= 12'd0; mx_r1 <= 12'd0; mx_r2 <= 12'd0; mx_r3 <= 12'd0; mx_g <= 12'd0;
++            my_v <= 1'b0; my_c <= 1'b0; my_p <= 7'd0; my_p0 <= 12'd0; my_odd <= 12'd0; my_prod <= 24'd0;
++`endif
 +            mi_c <= 1'b0; mi_p <= 7'd0; ma_c <= 1'b0; ma_p <= 7'd0; mb_c <= 1'b0; mb_p <= 7'd0; mr_p <= 7'd0;
 +            ma_p0 <= 12'd0; ma_p1 <= 12'd0; ma_p3 <= 12'd0; ma_g <= 12'd0;
 +            mb_p0 <= 12'd0; mb_t <= 12'd0; mb_c1 <= 12'd0;
 +            mr_r0 <= 12'd0; mr_r1 <= 12'd0; macc0 <= 12'd0; macc1 <= 12'd0;
 +        end else begin
 +            mi_v <= mk_issuing; mi_c <= mk_t[0]; mi_p <= mk_t[7:1];
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++            mz_v <= mi_v; mz_c <= mi_c; mz_p <= mi_p;
++            mz_a0 <= key_operand_a0; mz_a1 <= key_operand_a1; mz_ne <= noise_even_q; mz_no <= noise_odd_q;
++            ma_v <= mz_v; ma_c <= mz_c; ma_p <= mz_p;
++`else
 +            ma_v <= mi_v; ma_c <= mi_c; ma_p <= mi_p;
++`endif
 +            ma_p0 <= mul_reduced; ma_p1 <= mul2_reduced; ma_p3 <= pm_red3; ma_g <= pm_gamma;
 +`ifdef TRUSTEDGE_PMAC_RETIME
 +            ma_r0 <= rt_p00; ma_r1 <= rt_p11; ma_r2 <= rt_p01; ma_r3 <= rt_p10;
 +`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++            mx_v <= ma_v; mx_c <= ma_c; mx_p <= ma_p;
++            mx_p0 <= rp0; mx_r1 <= rp1; mx_r2 <= rp2; mx_r3 <= rp3; mx_g <= ma_g;
++            my_v <= mx_v; my_c <= mx_c; my_p <= mx_p;
++            my_p0 <= mx_p0; my_odd <= add_mod_q(mx_r2, mx_r3); my_prod <= mx_r1 * mx_g;
++            mb_v <= my_v; mb_c <= my_c; mb_p <= my_p;
++            mb_p0 <= my_p0; mb_t <= pm_red4; mb_c1 <= my_odd;
++`else
 +            mb_v <= ma_v; mb_c <= ma_c; mb_p <= ma_p;
 +            mb_p0 <= rp0; mb_t <= pm_red4; mb_c1 <= pm_odd;
++`endif
 +            mr_v <= mb_v && mb_c;
 +            mr_p <= mb_p;
 +            if (mb_v && !mb_c) begin macc0 <= pm_c0; macc1 <= mb_c1; end
@@ -1710,7 +2542,7 @@
          .sponge_ext_start(sponge_ext_start),.sponge_ext_mode(sponge_ext_mode),
          .sponge_ext_message_len(sponge_ext_message_len),
          .sponge_ext_output_len(sponge_ext_output_len),
-@@ -425,6 +719,17 @@
+@@ -425,6 +808,17 @@
          .sponge_ext_busy(sponge_ext_busy),.sponge_ext_done(sponge_ext_done),
          .sponge_ext_error(sponge_ext_error));
  
@@ -1728,7 +2560,7 @@
      wire y_phase = (state==S_Y_FETCH)||(state==S_Y_WAIT)||
                     (state==S_Y_WRITE0)||(state==S_Y_WRITE1)||
                     (state==S_Y_NTT_START)||(state==S_Y_NTT_WAIT)||
-@@ -432,22 +737,62 @@
+@@ -432,22 +826,62 @@
                     (state==S_Y_READ_CAP)||(state==S_Y_NEXT);
      always @* begin
          if (y_phase)
@@ -1791,7 +2623,7 @@
              if (y_read_index[0])
                  noise_odd_ram[{2'd0,y_poly,y_read_index[7:1]}] <= ntt_rdata[11:0];
              else
-@@ -458,10 +803,25 @@
+@@ -458,10 +892,25 @@
      // PRF fill, Y-NTT writeback and arithmetic reads are disjoint phases.
      // Write priority therefore preserves the existing synchronous latency
      // while replacing each parity bank with one physical 1RW port.
@@ -1817,7 +2649,7 @@
      wire [9:0] noise_even_waddr = prf_coeff_valid ?
          prf_coeff_addr[10:1] : {2'd0, y_poly, y_read_index[7:1]};
      wire [9:0] noise_odd_waddr = prf_coeff_valid ?
-@@ -479,27 +839,134 @@
+@@ -479,27 +928,134 @@
          u_noise_odd_sram (
              .clk(clk), .we(noise_odd_we),
              .addr(noise_odd_we ? noise_odd_waddr : noise_read_addr),
@@ -1952,18 +2784,61 @@
      generate
          if(USE_EXTERNAL_NTT) begin:g_external_ntt
              assign ntt_busy=ntt_ext_busy; assign ntt_done=ntt_ext_done;
-@@ -525,6 +992,10 @@
+@@ -513,6 +1069,37 @@
+     endgenerate
+ 
+     wire [11:0] runtime_noise = read_index[0]?noise_odd_q:noise_even_q;
++`ifdef TRUSTEDGE_T3_LOAD_PIPE
++    // stage L (T3): a load cycle registers the RAM outputs and the tags; the codec takes the sum one cycle later
++    wire message_bit=runtime_valid_q ? runtime_message_q[read_index] :
++        (read_index[0]^read_index[3]^read_index[5]);
++    wire [11:0] message_coeff=message_bit?12'd1665:12'd0;
++    reg         lp_v, lp_p2, lp_seg, lp_start;
++    reg  [9:0]  lp_idx;
++    reg  [11:0] lp_rd, lp_ns, lp_msg;
++    always @(posedge clk or negedge rst_n) begin
++        if (!rst_n) begin
++            lp_v <= 1'b0; lp_p2 <= 1'b0; lp_seg <= 1'b0; lp_start <= 1'b0;
++            lp_idx <= 10'd0; lp_rd <= 12'd0; lp_ns <= 12'd0; lp_msg <= 12'd0;
++        end else begin
++            lp_v <= (state==S_READ_LOAD);
++            lp_p2 <= (poly_index==2);
++            lp_idx <= (poly_index==0)?{2'd0,read_index}:
++                      (poly_index==1)?(10'd256+read_index):(10'd512+read_index);
++            lp_rd <= ntt_rdata[11:0];
++            lp_ns <= runtime_valid_q?runtime_noise:kat_noise(poly_index,read_index);
++            lp_msg <= message_coeff;
++            lp_seg <= (state==S_READ_LOAD)&&(read_index==8'd255)&&(poly_index!=2'd2);
++            lp_start <= (state==S_CODEC_START);
++        end
++    end
++    wire [11:0] noisy_coeff=add_mod_q(lp_rd, lp_ns);
++    wire [11:0] codec_coeff=lp_p2 ? add_mod_q(noisy_coeff,lp_msg) : noisy_coeff;
++    wire [9:0] codec_index=lp_idx;
++    wire codec_load_clear=(state==S_CODEC_CLR);
++    wire codec_load_valid=lp_v;
++    wire codec_start=lp_start;
++`else
+     wire [11:0] noisy_coeff=add_mod_q(ntt_rdata[11:0],
+         runtime_valid_q?runtime_noise:kat_noise(poly_index,read_index));
+     wire message_bit=runtime_valid_q ? runtime_message_q[read_index] :
+@@ -525,6 +1112,15 @@
      wire codec_load_clear=(state==S_CODEC_CLR);
      wire codec_load_valid=(state==S_READ_LOAD);
      wire codec_start=(state==S_CODEC_START);
++`endif
 +`ifdef TRUSTEDGE_SEG_CHECK
 +    // the codec checks u0 and u1 while the next polynomial is computed (TRUSTEDGE_SEG_CHECK)
++`ifdef TRUSTEDGE_T3_LOAD_PIPE
++    wire codec_seg_start=lp_seg;
++`else
 +    wire codec_seg_start=(state==S_READ_LOAD)&&(read_index==8'd255)&&(poly_index!=2'd2);
++`endif
 +`endif
      wire codec_busy,codec_done,codec_pass;
      wire [31:0] codec_digest_a,codec_digest_b;
      wire [31:0] codec_decode_digest;
-@@ -545,9 +1016,15 @@
+@@ -545,9 +1141,15 @@
          .import_start(ciphertext_import_start),
          .import_compare_source(ciphertext_import_compare_source),
          .start(codec_start),.busy(codec_busy),.done(codec_done),.pass(codec_pass),
@@ -1979,7 +2854,7 @@
          .ct_read_data(ciphertext_read_data),.decoded_read_addr(decoded_read_addr),
          .decoded_read_data(decoded_read_data),
          .imported_bytes(ciphertext_imported_bytes));
-@@ -561,12 +1038,22 @@
+@@ -561,12 +1163,22 @@
              runtime_valid_q<=0;runtime_key_bound_q<=0;
              runtime_message_q<=0;runtime_coins_q<=0;
              runtime_prf_ok_q<=0;operand_wait_q<=0;
@@ -2002,7 +2877,7 @@
              case(state)
                  S_IDLE: begin busy<=0; if(start) begin
                      busy<=1;pass<=0;status<=0;ciphertext_digest<=0;audit_digest<=0;
-@@ -586,24 +1073,98 @@
+@@ -586,24 +1198,98 @@
                      else
                          state<=runtime_valid_q?S_PRF_START:S_PAIR_INIT;
                  end
@@ -2101,7 +2976,7 @@
                      state<=runtime_valid_q?S_OPERAND_WAIT:S_OPERAND;end
                  // Runtime PRF RAM already needed one wait state.  Bound-key
                  // reads add one further wait so data from the synchronous
-@@ -618,28 +1179,97 @@
+@@ -618,28 +1304,97 @@
                      operand_b0_q<=runtime_valid_q?noise_even_q:legacy_b0;
                      operand_b1_q<=runtime_valid_q?noise_odd_q:legacy_b1;
                      gamma_q<=gamma;state<=S_MUL0;end
@@ -2224,7 +3099,7 @@
      input  wire [9:0]  decoded_read_addr,
      output wire [11:0] decoded_read_data
  );
-@@ -65,7 +73,8 @@
+@@ -65,12 +73,17 @@
          ST_D_ACC     = 5'd14,
          ST_D_CMP_REQ = 5'd15,
          ST_D_CMP_WAIT= 5'd16,
@@ -2234,7 +3109,16 @@
  
  `ifdef TRUSTEDGE_ASIC_SRAM
      wire [11:0] coeff_q;
-@@ -96,8 +105,82 @@
+     wire [7:0] ct_ram_q;
+     wire [11:0] decoded_ram_q;
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++    reg  [11:0] coeff_r;                     // the coefficient RAM's read data, one edge after the macro presents it
++    always @(posedge clk) coeff_r <= coeff_q;
++`endif
+ `else
+     (* ramstyle = "M20K, no_rw_check" *) reg [11:0] coeff_ram [0:767];
+     (* ramstyle = "M20K, no_rw_check" *) reg [7:0] ciphertext_ram [0:767];
+@@ -96,8 +109,85 @@
      reg decode_v_phase;
      reg decode_error;
      reg import_error;
@@ -2260,6 +3144,9 @@
 +    reg        p2_v;                         // stage 2: compare, digest and decoded-RAM write
 +    reg [9:0]  p2_idx;
 +    reg [11:0] p2_dec, p2_src;
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++    reg [9:0]  p2_code;  reg p2_vph;
++`endif
 +    wire       b_issue_v = (b_addr >= 10'd640);
 +    wire       b_issue_final = b_issue_v || (i_sub == 3'd4);
 +    wire       c_take = g_full && (c_left <= 3'd1);
@@ -2317,20 +3204,47 @@
      assign decoded_read_data = decoded_ram_q;
  
      function automatic [9:0] compress10;
-@@ -201,6 +284,12 @@
+@@ -168,8 +258,13 @@
+         end
+     endfunction
+ 
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++    wire [9:0] coeff_compressed10 = compress10(coeff_r);
++    wire [3:0] coeff_compressed4 = compress4(coeff_r);
++`else
+     wire [9:0] coeff_compressed10 = compress10(coeff_q);
+     wire [3:0] coeff_compressed4 = compress4(coeff_q);
++`endif
+     wire [39:0] u_pack_next = pack_bits |
+         ({30'd0, coeff_compressed10} << (group_sub * 10));
+     wire [39:0] v_pack_next = pack_bits |
+@@ -198,9 +293,25 @@
+     wire [11:0] compare_decoded_coeff = decoded_coeff;
+     wire [11:0] compare_source_coeff = canonical_source_coeff;
+ `endif
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++    reg  [9:0] code_cmp_q;                   // the ciphertext code of the compared coefficient (taken in WAIT)
++    wire decode_mismatch = decode_v_phase ? (compress4(coeff_r) != code_cmp_q[3:0]) :
++                                            (compress10(coeff_r) != code_cmp_q);
++`else
      wire decode_mismatch = (compare_decoded_coeff != compare_source_coeff);
++`endif
      wire [31:0] decode_digest_next = decode_digest_step(decode_digest,
                                                            compare_decoded_coeff);
 +`ifdef TRUSTEDGE_PIPE_CHECK
 +    wire [39:0] b_pack_next = b_pack | ({32'd0, ct_ram_q} << (b_sub * 8));
 +    wire [11:0] p1_dec = p1_vph ? decompress4(p1_code[3:0]) : decompress10(p1_code);
 +    wire [11:0] p1_src = p1_vph ? decompress4(compress4(coeff_q)) : decompress10(compress10(coeff_q));
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++    wire        p2_mismatch = p2_vph ? (compress4(coeff_r) != p2_code[3:0]) : (compress10(coeff_r) != p2_code);
++`else
 +    wire        p2_mismatch = (p2_dec != p2_src);
++`endif
 +`endif
  
      // Present Quartus with exactly one synchronous write port.  Keeping the
      // import path and the encoder FSM as separate array assignments caused the
-@@ -217,6 +306,12 @@
+@@ -217,6 +328,12 @@
              ct_mem_we    = 1'b1;
              ct_mem_waddr = import_addr;
              ct_mem_wdata = import_data;
@@ -2343,7 +3257,7 @@
          end else if (busy && (state == ST_U_WRITE)) begin
              ct_mem_we    = 1'b1;
              ct_mem_waddr = ct_write_addr;
-@@ -251,13 +346,21 @@
+@@ -251,13 +368,21 @@
          else if (busy && ((state == ST_D_CMP_REQ) ||
                            (state == ST_D_CMP_WAIT) ||
                            (state == ST_D_CMP_ACC)))
@@ -2367,7 +3281,7 @@
          else if (!busy)
              ct_ram_q <= ciphertext_ram[ct_read_addr];
      end
-@@ -271,19 +374,37 @@
+@@ -271,19 +396,37 @@
          (busy && ((state == ST_D_CMP_REQ) ||
                    (state == ST_D_CMP_WAIT) ||
                    (state == ST_D_CMP_ACC))) ?
@@ -2408,7 +3322,7 @@
  
      te_sram_1rw #(.WIDTH(12), .DEPTH(768), .ADDR_WIDTH(10))
          u_coeff_sram (
-@@ -298,7 +419,7 @@
+@@ -298,7 +441,7 @@
      te_sram_1rw #(.WIDTH(12), .DEPTH(768), .ADDR_WIDTH(10))
          u_decoded_coeff_sram (
              .clk(clk), .we(decoded_mem_we), .addr(decoded_mem_addr),
@@ -2417,7 +3331,7 @@
          );
  `endif
  
-@@ -315,6 +436,9 @@
+@@ -315,6 +458,9 @@
              cycles <= 16'd0;
              loaded_coeffs <= 10'd0;
              imported_bytes <= 10'd0;
@@ -2427,7 +3341,7 @@
              load_error <= 1'b0;
              import_error <= 1'b0;
              proc_index <= 10'd0;
-@@ -334,15 +458,71 @@
+@@ -334,15 +480,71 @@
              decoded_coeff_cmp_q <= 12'd0;
              canonical_source_coeff_cmp_q <= 12'd0;
  `endif
@@ -2499,7 +3413,7 @@
  `ifndef TRUSTEDGE_ASIC_SRAM
                      coeff_ram[load_index] <= load_coeff;
  `endif
-@@ -369,6 +549,12 @@
+@@ -369,6 +571,12 @@
  
              case (state)
                  ST_IDLE: begin
@@ -2512,7 +3426,7 @@
                      if (import_start) begin
                          // pass is meaningful only with done.  Do not clear it
                          // on a valid launch: keeping that write out of the
-@@ -378,6 +564,9 @@
+@@ -378,6 +586,9 @@
                          digest_a <= 32'd0;
                          digest_b <= 32'd0;
                          decode_digest <= 32'h44454331;
@@ -2522,7 +3436,7 @@
                          decode_pass <= 1'b0;
                          cycles <= 16'd0;
                          if ((imported_bytes == 10'd768) && !import_error &&
-@@ -402,10 +591,16 @@
+@@ -402,10 +613,16 @@
                      end else if (start) begin
                          // See import_start above.  Invalid launches still
                          // explicitly return pass=0 together with done.
@@ -2539,7 +3453,7 @@
                          cycles <= 16'd0;
                          if ((loaded_coeffs == 10'd768) && !load_error) begin
                              busy <= 1'b1;
-@@ -413,7 +608,11 @@
+@@ -413,7 +630,11 @@
                              group_sub <= 3'd0;
                              ct_write_addr <= 10'd0;
                              pack_bits <= 40'd0;
@@ -2551,7 +3465,7 @@
                          end else begin
                              busy <= 1'b0;
                              pass <= 1'b0;
-@@ -422,7 +621,46 @@
+@@ -422,7 +643,50 @@
                      end
                  end
  
@@ -2591,26 +3505,34 @@
 +`endif
 +                end
 +`endif
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++                ST_U_REQ: state <= ST_U_WAIT;         // the data is packed from coeff_r
++`else
 +                ST_U_REQ: state <= ST_U_CAPTURE;      // one-cycle read latency
++`endif
 +`else
                  ST_U_REQ: state <= ST_U_WAIT;
 +`endif
                  ST_U_WAIT: state <= ST_U_CAPTURE;
                  ST_U_CAPTURE: begin
                      pack_bits <= u_pack_next;
-@@ -454,7 +692,11 @@
+@@ -454,7 +718,15 @@
                      end
                  end
  
 +`ifdef TRUSTEDGE_STREAM_IO
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++                ST_V_REQ: state <= ST_V_WAIT;         // the data is packed from coeff_r
++`else
 +                ST_V_REQ: state <= ST_V_CAPTURE;      // one-cycle read latency
++`endif
 +`else
                  ST_V_REQ: state <= ST_V_WAIT;
 +`endif
                  ST_V_WAIT: state <= ST_V_CAPTURE;
                  ST_V_CAPTURE: begin
                      pack_bits <= v_pack_next;
-@@ -484,6 +726,9 @@
+@@ -484,6 +756,9 @@
                          decode_v_phase <= 1'b0;
                          decode_error <= 1'b0;
                          decode_digest <= 32'h44454331;
@@ -2620,7 +3542,7 @@
                          state <= ST_D_REQ;
                      end else begin
                          proc_index <= proc_index + 10'd1;
-@@ -497,10 +742,87 @@
+@@ -497,10 +772,91 @@
                  // decoded value against Compress(source) followed by
                  // Decompress(source). This catches pack order, RAM read and
                  // decompression errors without exposing ciphertext or key data.
@@ -2661,7 +3583,11 @@
 +                        g_full <= 1'b0;
 +                    end
 +                    // stage 1: both values decompressed and registered
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++                    p2_v <= p1_v; p2_idx <= p1_idx; p2_dec <= p1_dec; p2_code <= p1_code; p2_vph <= p1_vph;
++`else
 +                    p2_v <= p1_v; p2_idx <= p1_idx; p2_dec <= p1_dec; p2_src <= p1_src;
++`endif
 +                    // stage 2
 +                    if (p2_v) begin
 +                        decode_digest <= decode_digest_step(decode_digest, p2_dec);
@@ -2708,7 +3634,7 @@
                      if ((!decode_v_phase && (decode_byte_sub == 3'd4)) ||
                          (decode_v_phase && (decode_byte_sub == 3'd0))) begin
                          decode_cmp_sub <= 3'd0;
-@@ -508,7 +830,11 @@
+@@ -508,7 +864,11 @@
                      end else begin
                          decode_ct_addr <= decode_ct_addr + 10'd1;
                          decode_byte_sub <= decode_byte_sub + 3'd1;
@@ -2720,7 +3646,18 @@
                      end
                  end
  
-@@ -523,8 +849,10 @@
+@@ -516,15 +876,21 @@
+                 ST_D_CMP_WAIT: begin
+ `ifdef TRUSTEDGE_ASIC_SRAM
+                     decoded_coeff_cmp_q <= decoded_coeff;
++`ifdef TRUSTEDGE_T3_CODEC_RETIME
++                    code_cmp_q <= decode_v_phase ? {6'd0, decoded_v4} : decoded_u10;
++`else
+                     canonical_source_coeff_cmp_q <= canonical_source_coeff;
++`endif
+ `endif
+                     state <= ST_D_CMP_ACC;
+                 end
                  ST_D_CMP_ACC: begin
                      decode_digest <= decode_digest_next;
  `ifndef TRUSTEDGE_ASIC_SRAM
@@ -2731,7 +3668,7 @@
  `endif
                      if (decode_mismatch && import_compare_source)
                          decode_error <= 1'b1;
-@@ -546,10 +874,21 @@
+@@ -546,10 +912,21 @@
                              decode_pass <= !(decode_error ||
                                               (decode_mismatch &&
                                                import_compare_source));
@@ -2753,7 +3690,7 @@
                          end else begin
                              decode_ct_addr <= decode_ct_addr + 10'd1;
                              decode_coeff_base <= decode_coeff_base + 10'd2;
-@@ -560,7 +899,11 @@
+@@ -560,7 +937,11 @@
                          end
                      end else begin
                          decode_cmp_sub <= decode_cmp_sub + 3'd1;
@@ -2767,7 +3704,7 @@
  
 --- a/sim/tb/tb_trustedge_spi.sv
 +++ b/sim/tb/tb_trustedge_spi.sv
-@@ -60,31 +60,340 @@
+@@ -60,31 +60,373 @@
      localparam integer ENCAPS_SHARED_PERMUTATIONS = 20;
      localparam integer DECAPS_SHARED_PERMUTATIONS = 26;
  `ifdef TRUSTEDGE_ASIC_SRAM
@@ -3092,29 +4029,62 @@
 +`endif
 +    // transforms per operation (forward, inverse): NTT self-test 1/0, ML-KEM self-test 2/2, K-PKE key
 +    // generation 4/0, codec stage 0/3, encryption and encapsulation 2/3, decapsulation 4/4
++`ifdef TRUSTEDGE_T3_MM_PIPE
++    localparam integer T3_KPKE_EXTRA = 512;
++`else
++    localparam integer T3_KPKE_EXTRA = 0;
++`endif
++`ifdef TRUSTEDGE_T3_MAC_DEEP
++    localparam integer T3_MD_ENC = 6, T3_MD_ENCAPS = 6, T3_MD_DECAPS = 10;
++`else
++    localparam integer T3_MD_ENC = 0, T3_MD_ENCAPS = 0, T3_MD_DECAPS = 0;
++`endif
++`ifdef TRUSTEDGE_T3_PMAC_RAW
++    localparam integer T3_PR_ENC = 3, T3_PR_ENCAPS = 3, T3_PR_DECAPS = 7;
++`else
++    localparam integer T3_PR_ENC = 0, T3_PR_ENCAPS = 0, T3_PR_DECAPS = 0;
++`endif
++`ifdef TRUSTEDGE_T3_LOAD_PIPE
++    localparam integer T3_LP_ENC = 1, T3_LP_ENCAPS = 1, T3_LP_DECAPS = 1;
++`else
++    localparam integer T3_LP_ENC = 0, T3_LP_ENCAPS = 0, T3_LP_DECAPS = 0;
++`endif
++`ifdef TRUSTEDGE_T3_MSG_PIPE
++    localparam integer T3_MP_DECAPS = 1;
++`else
++    localparam integer T3_MP_DECAPS = 0;
++`endif
++`ifdef TRUSTEDGE_T3_EK_PREF
++    localparam integer T3_EP_ENCAPS = 1, T3_EP_DECAPS = 0;   // decapsulation: H(ek) overlaps other work (measured)
++`else
++    localparam integer T3_EP_ENCAPS = 0, T3_EP_DECAPS = 0;
++`endif
++    localparam integer T3_ENC_EXTRA = T3_MD_ENC + T3_PR_ENC + T3_LP_ENC;
++    localparam integer T3_ENCAPS_EXTRA = T3_MD_ENCAPS + T3_PR_ENCAPS + T3_LP_ENCAPS + T3_EP_ENCAPS;
++    localparam integer T3_DECAPS_EXTRA = T3_MD_DECAPS + T3_PR_DECAPS + T3_LP_DECAPS + T3_MP_DECAPS + T3_EP_DECAPS;
 +    localparam [15:0] EXPECTED_KYBER_CYCLES = EXPECTED_KYBER_CYCLES_OLD - NTT_FWD_SAVED;
 +    localparam [15:0] EXPECTED_MLKEM512_CYCLES = EXPECTED_MLKEM512_CYCLES_OLD -
 +        2 * NTT_FWD_SAVED - 2 * NTT_INV_SAVED;
-+    localparam [15:0] EXPECTED_KPKE_CYCLES = EXPECTED_KPKE_CYCLES_OLD - 4 * NTT_FWD_SAVED;
++    localparam [15:0] EXPECTED_KPKE_CYCLES = EXPECTED_KPKE_CYCLES_OLD - 4 * NTT_FWD_SAVED + T3_KPKE_EXTRA;
 +    localparam [15:0] EXPECTED_CODEC_CYCLES = EXPECTED_CODEC_CYCLES_OLD - 3 * NTT_INV_SAVED -
 +        READBACK_STREAM_SAVED - CODEC_STREAM_SAVED - ENCRYPT_FAST_SAVED -
-+        OUT_STREAM_SAVED - FOLD_SAVED - CHECK_SAVED - READ_FAST_SAVED - PIPE_SAVED - SEG_SAVED;  // the codec stage runs on fixed inputs
++        OUT_STREAM_SAVED - FOLD_SAVED - CHECK_SAVED - READ_FAST_SAVED - PIPE_SAVED - SEG_SAVED + T3_LP_ENC;  // the codec stage runs on fixed inputs
 +    localparam [15:0] EXPECTED_RUNTIME_ENCRYPT_CYCLES = EXPECTED_RUNTIME_ENCRYPT_CYCLES_OLD -
 +        2 * NTT_FWD_SAVED - 3 * NTT_INV_SAVED - ENCRYPT_STREAM_SAVED - ENCRYPT_FAST_SAVED -
 +        OUT_STREAM_SAVED - FOLD_SAVED - PREFETCH_SAVED - TIGHT_WRITE_SAVED - CHECK_SAVED - FAST_Y_SAVED - PAIR_SAVED - PMAC_SAVED -
-+        PRF_SAVED - BG_PRF_SAVED - STREAM_INV_SAVED - STREAM_Y_SAVED - PRF_NTT_SAVED - READ_FAST_SAVED - PIPE_SAVED - SEG_SAVED;
++        PRF_SAVED - BG_PRF_SAVED - STREAM_INV_SAVED - STREAM_Y_SAVED - PRF_NTT_SAVED - READ_FAST_SAVED - PIPE_SAVED - SEG_SAVED + T3_ENC_EXTRA;
 +    localparam integer EXPECTED_ENCAPS_CYCLES_RAW = EXPECTED_ENCAPS_CYCLES_RAW_OLD -
 +        2 * NTT_FWD_SAVED - 3 * NTT_INV_SAVED + ENCAPS_HANDOVER_CYCLES - ENCRYPT_STREAM_SAVED -
 +        ENCRYPT_FAST_SAVED - FEED_ENCAPS_SAVED - FAST_ENCAPS_SAVED - OUT_STREAM_SAVED - FOLD_SAVED - PREFETCH_SAVED -
 +        TIGHT_WRITE_SAVED - CHECK_SAVED - FAST_Y_SAVED - PAIR_SAVED - PMAC_SAVED -
-+        PRF_SAVED - BG_PRF_SAVED - STREAM_INV_SAVED - STREAM_Y_SAVED - PRF_NTT_SAVED - READ_FAST_SAVED - PIPE_SAVED - SEG_SAVED;
++        PRF_SAVED - BG_PRF_SAVED - STREAM_INV_SAVED - STREAM_Y_SAVED - PRF_NTT_SAVED - READ_FAST_SAVED - PIPE_SAVED - SEG_SAVED + T3_ENCAPS_EXTRA;
 +    localparam integer EXPECTED_DECAPS_CYCLES_RAW = EXPECTED_DECAPS_CYCLES_RAW_OLD -
 +        4 * NTT_FWD_SAVED - 4 * NTT_INV_SAVED - DECAPS_OVERLAP_SAVED - ENCRYPT_STREAM_SAVED -
 +        COMPARE_STREAM_SAVED - DECRYPT_STREAM_SAVED - ENCRYPT_FAST_SAVED - DECRYPT_FAST_SAVED -
 +        FEED_HASH_SAVED - FAST_HASH_SAVED - FEED_U_SAVED - DEC_STREAM_SAVED - STREAM_U_SAVED - DEC_INV_SAVED - OUT_STREAM_SAVED - FOLD_SAVED - PREFETCH_SAVED -
 +        DEC_PREFETCH_SAVED - TIGHT_WRITE_SAVED - TIGHT_CMP_SAVED - CHECK_SAVED - FAST_Y_SAVED - PAIR_SAVED - PMAC_SAVED -
 +        PRF_SAVED - BG_PRF_SAVED - STREAM_INV_SAVED - STREAM_Y_SAVED - PRF_NTT_SAVED - FUSED_CMP_SAVED - READ_FAST_SAVED - PIPE_SAVED - SEG_SAVED +
-+        SPONGE_TAIL_CYCLES;
++        SPONGE_TAIL_CYCLES + T3_DECAPS_EXTRA;
 +    // the 16-bit response field saturates
 +    localparam [15:0] EXPECTED_ENCAPS_CYCLES =
 +        (EXPECTED_ENCAPS_CYCLES_RAW > 65535) ? 16'hFFFF : EXPECTED_ENCAPS_CYCLES_RAW;
@@ -3123,7 +4093,7 @@
      reg clk, rst_n;
      reg spi_cs_n, spi_sck, spi_mosi;
      wire spi_miso;
-@@ -2023,7 +2332,7 @@
+@@ -2023,7 +2365,7 @@
              mlkem_stage_digest_b !== 32'hBC3DC488 ||
              mlkem_stage_digest_a === 32'h23B34C51 ||
              mlkem_stage_digest_a === mlkem_stage_digest_b ||
@@ -3132,7 +4102,7 @@
              dut.u_mlkem512_decaps_partial.h_ek_fp_q !== 32'h2E782439 ||
              dut.u_mlkem512_decaps_partial.g_fp_q !== 32'h55853EBD ||
              !dut.u_mlkem512_decaps_partial.ciphertext_match_q ||
-@@ -2059,7 +2368,7 @@
+@@ -2059,7 +2401,7 @@
              mlkem_stage_digest_b !== 32'hBC3DC488 ||
              mlkem_stage_digest_a === 32'h27033E5E ||
              mlkem_stage_digest_a === 32'h0429546C ||

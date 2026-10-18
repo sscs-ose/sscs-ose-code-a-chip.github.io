@@ -1,6 +1,6 @@
 """What clock gating of idle blocks would save on the chip during a decapsulation (projection).
 
-Inputs (from the private layout database, see fullchip_power.sh):
+Inputs (from the chip's routed database: revision A's is private, revision B's is published; see fullchip_power.sh):
   * per-instance power of every flip-flop and clock buffer at the typical corner (OpenROAD report_power);
   * the instances each clock buffer drives (a buffer belongs to a block when all its loads do);
   * the register toggles of each block in the decapsulation window (shadow VCD).

@@ -50,7 +50,7 @@ def jpg(path: pathlib.Path):
 
 def numbers() -> dict:
     j = lambda p: json.loads((R / p).read_text())
-    pw, se = j("fullchip/power.json"), j("fullchip/sram_energy.json")
+    pw, se = j("fullchip/rev_b/power.json"), j("fullchip/rev_b/sram_energy.json")   # HSKEM-2 revision B, the signed-off chip
     t = pw["window_cycles"] * pw["clock_ns"] * 1e-9
     e = {k: v * 1e-3 * t * 1e6 for k, v in pw["power_mw"].items()}
     e["sram"] = se["sram_energy_per_decaps_uj"]
@@ -74,7 +74,7 @@ def numbers() -> dict:
             "ntt_busy": prof["ntt_busy"] / prof["cycles"], "perm_busy": prof["perm_busy"] / prof["cycles"],
             "c3": (int(c3.result_pass.sum()), len(c3)), "tv": tv, "steps": steps, "streamed": streamed,
             "pk_lat": (float(m0["latency_us_at_fmax"]), float(pk["latency_us_at_fmax"])),
-            "acvp": j("acvp_rtl/keygen_asic.json"), "cells": j("fullchip/summary.json")["orfs_metrics"]}
+            "acvp": j("acvp_rtl/keygen_asic.json"), "cells": j("fullchip/rev_b/summary.json")["orfs_metrics"]}
 
 
 def main(out: str = "figures/poster.pdf") -> None:
@@ -164,7 +164,7 @@ def main(out: str = "figures/poster.pdf") -> None:
     ax.set_title(f"A decapsulation on HSKEM-2: {tot:.0f} µJ", fontsize=24, loc="left")
     text(x, 0.11, f"HSKEM-2, the signed-off SKY130 chip of the streamed system, spends {tot:.0f} µJ per decapsulation "
                   f"instead of HSKEM-1's {N['e_first'] / 1e3:.2f} mJ. The rest is set by the integration: gating the clock "
-                  f"of idle blocks and the chip selects of the macros would save roughly 33 to 49 %.",
+                  f"of idle blocks and the chip selects of the macros would save roughly 32 to 48 %.",
          21, width=cw)
 
     # --- column III

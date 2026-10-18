@@ -31,16 +31,20 @@ def code(s: str) -> None:
 # The results table of the first page. It is written here once, placed in the title cell, and the first
 # cell after Setup recomputes every value from results/ and asserts that the two agree.
 GLANCE = [
-    ("Decapsulation, HSKEM-2 vs HSKEM-1", "6,856 vs 99,537 cycles (14.5× fewer), every check and output unchanged; "
-     "6,858 on the FPGA board in 5/5 runs of the streamed build", "§8, §10"),
-    ("Energy per decapsulation, 25 MHz", "27 vs 344 µJ (13× less); clock network and register clock pins 70%, "
-     "SRAM macros 24%, combinational logic 6%", "§9"),
-    ("HSKEM-2 layout", "11.2 mm² die, 361,801 standard cells, 18 SRAM macros; timing met at the typical corner "
-     "(27.8 MHz), 13.9 MHz at the slow corner", "§9, §13"),
+    ("Decapsulation, HSKEM-2 vs HSKEM-1", "6,856 vs 99,537 cycles (14.5× fewer) for the design (milestone H, §8), every "
+     "check and output unchanged; 6,858 on the FPGA board in 5/5 runs of the streamed build; 6,875 on the "
+     "signed-off chip (revision B)", "§8–10"),
+    ("Energy per decapsulation, 25 MHz", "27 vs 344 µJ (13× less); clock network and register clock pins 71%, "
+     "SRAM macros 24%, combinational logic 5%", "§9"),
+    ("HSKEM-2 layout (revision B, re-timed)", "11.2 mm² die, 358,152 standard cells, 18 SRAM macros; setup and hold "
+     "met at the slow, typical and fast corners (service ports on the core clock tree) with SPICE-measured macro "
+     "clock-to-output and nominal parasitics, "
+     "27.0 MHz at the slow corner", "§9, App. C"),
     ("HSKEM-2 sign-off", "LVS: circuits match uniquely, with the SRAMs verified separately; DRC: 0 markers once "
-     "implant gaps inside the macros are closed", "§9, §13"),
+     "implant gaps inside the macros are closed; routed database published", "§9, App. C"),
     ("Correctness", "0 mismatches over 208,896 NTT coefficients and 404 Keccak permutations; 25/25 NIST ACVP key "
-     "generations byte-exact on the complete RTL; reducer proven for all 2²⁴ inputs", "§2–4"),
+     "generations byte-exact on the complete RTL, and 25 encapsulation–decapsulation runs on ACVP seeds and "
+     "messages equal to the golden model; reducer proven for all 2²⁴ inputs", "§2–4"),
     ("Forward NTT, HSKEM-1's engine → HSKEM-2's (routed)", "6,274 → 568 cycles, 0.50 → 0.14 µJ, total area "
      "0.14 → 0.27 mm²", "§6–7"),
     ("Row-serialized Keccak vs one round per clock", "1% less area, 9× slower and 5.5× the energy per permutation; "
@@ -85,21 +89,22 @@ Keccak, nine times slower on its own, barely lengthened a decapsulation of HSKEM
 third once everything else was fast, while the single-port store, the cheaper block, set most of HSKEM-1's
 latency. Two coefficients per SRAM word, two butterfly lanes and a streamed datapath that removes no check
 became **HSKEM-2**, which needs 14.5 times fewer cycles and thirteen times less energy per decapsulation; the
-FPGA board confirms the cycle count, and the layout passes layout-versus-schematic (LVS) and the complete
-design-rule (DRC) deck within the limits of Section 13. Both chips are pre-silicon. Every number below is
+FPGA board confirms the RTL cycle count, and its re-timed layout (revision B) meets timing at three corners and passes
+layout-versus-schematic (LVS) and the complete design-rule (DRC) deck within the limits of Section 13. Both
+chips are pre-silicon. Every number below is
 recomputed from committed results and guarded by an assertion, except a few development-log figures marked
-as such; chip-level results rest on private routed databases, published as summaries, hashes and a GDS.
+as such; the signed-off chip's routed database is published.
 
 **What is new here** (each point is worked out in the section named):
 
 * **A packed-pair, layer-fused NTT on one single-port, compiler-generated SRAM**, measured on the routed
   layout (Section 7, with its prior art).
-* **A complete HSM that decapsulates within 3 % of the cycle count of a compact stand-alone KEM** [13] while
+* **A complete HSM whose RTL and FPGA build decapsulate within 3 % of the cycle count of a compact stand-alone KEM** [13] while
   keeping every check (Sections 8, 10).
 * **A block decision priced at system level twice**, with opposite verdicts (Section 8).
-* **An open SKY130 HSM core, signed off within the limits of Section 13,** with transistor-level SRAM
-  energies and a published GDS (Section 9).
-* **Eleven open-flow results that looked right and were not**, each with the check that exposed it (Section 12).
+* **An open SKY130 HSM core signed off at three corners** within the limits of Section 13, with SPICE-measured
+  macro clock-to-output times and its routed database published (Section 9).
+* **Thirteen open-flow results that looked right and were not**, each with the check that exposed it (Section 12).
 
 **Results at a glance** (the first cell after Setup recomputes every value from the committed results):
 
@@ -259,11 +264,11 @@ prof_ = {c: v["profile"] for c, v in json.loads((R_/"system_sim/decaps_profile.j
 c3 = pd.read_csv(R_/"fpga/c3_repeat.csv"); bank_ = pd.read_csv(R_/"fpga/bank_repeat.csv")
 tv = {k: json.loads((R_/d/"tvla_summary.json").read_text()) for k, d in [("plain", "leakage"), ("masked", "leakage_masked"),
                                                                            ("plain2", "leakage_packed2"), ("masked2", "leakage_masked_packed2")]}
-feolc_ = json.loads((R_/"fullchip/feol_drc.json").read_text())
-chip = json.loads((R_/"fullchip/summary.json").read_text()); cm = chip["orfs_metrics"]
-pw_ = json.loads((R_/"fullchip/power.json").read_text())
+feolc_ = json.loads((R_/"fullchip/rev_b/feol_drc.json").read_text())          # HSKEM-2 = revision B, the signed-off chip
+chip = json.loads((R_/"fullchip/rev_b/summary.json").read_text()); cm = chip["orfs_metrics"]
+pw_ = json.loads((R_/"fullchip/rev_b/power.json").read_text())
 e_ = {k: v * pw_["window_cycles"] * pw_["clock_ns"] * 1e-6 for k, v in pw_["power_mw"].items()}   # uJ per decapsulation
-e_["sram"] = json.loads((R_/"fullchip/sram_energy.json").read_text())["sram_energy_per_decaps_uj"]
+e_["sram"] = json.loads((R_/"fullchip/rev_b/sram_energy.json").read_text())["sram_energy_per_decaps_uj"]
 e_tot = sum(e_.values())
 def chip_energy_uj(d):
     # logic and SRAM energy per decapsulation of a chip-level result directory
@@ -274,29 +279,36 @@ e_first = chip_energy_uj(R_/"fullchip/first_chip")
 h_ = ssy_["decaps_cycles"]["H"]
 e_p2 = json.loads((R_/"gls_power/ntt_packed2_20ns/summary.json").read_text())["energy_per_forward_ntt_nj"] / 1e3
 a_p2 = sum(total_area("ntt_packed2_20ns"))
-fx_ = {k: v["ff2ff_fmax_mhz"] for k, v in json.loads((R_/"fullchip/sta_corners.json").read_text())["corners"].items()}
+st_b = json.loads((R_/"fullchip/rev_b/sta_corners.json").read_text())["runs"]
+fx_b = json.loads((R_/"fullchip/rev_b/sta_corners.json").read_text())["fmax_search"]   # fmax by period bisection
+cyc_b_ = int(re.search(r"U1 Decaps busy latency valid/implicit-rejection=(\d+)",
+                       (R_/"fullchip/rev_b/tb_trustedge_spi_rev_b.log").read_text(errors="replace"))[1])
+ed_ = json.loads((R_/"acvp_rtl/encdec_rev_b.json").read_text())
 kr_, ks_ = dse.loc[("keccak_r1", 20.0)], dse.loc[("keccak_s7", 20.0)]
 cfg_ = {k: int(v["decaps_cycles"]) for k, v in json.loads((R_/"system_sim/summary.json").read_text())["configs"].items()}
 rows = [
     ("Decapsulation, HSKEM-2 vs HSKEM-1",
-     f"{h_['sram_only']:,} vs {psy_['published']:,} cycles ({psy_['published'] / h_['sram_only']:.1f}× fewer), every check and "
-     f"output unchanged; {int(fbd_.decaps_cycles.iloc[0]):,} on the FPGA board in {len(fbd_)}/{len(fbd_)} runs of the streamed build",
-     "§8, §10"),
+     f"{h_['sram_only']:,} vs {psy_['published']:,} cycles ({psy_['published'] / h_['sram_only']:.1f}× fewer) for the design "
+     f"(milestone H, §8), every check and output unchanged; {int(fbd_.decaps_cycles.iloc[0]):,} on the FPGA board in "
+     f"{len(fbd_)}/{len(fbd_)} runs of the streamed build; {cyc_b_:,} on the signed-off chip (revision B)", "§8–10"),
     ("Energy per decapsulation, 25 MHz",
      f"{e_tot:.0f} vs {e_first:.0f} µJ ({e_first / e_tot:.0f}× less); clock network and register clock pins "
      f"{(e_['clock'] + e_['sequential']) / e_tot:.0%}, SRAM macros {e_['sram'] / e_tot:.0%}, combinational logic "
      f"{e_['combinational'] / e_tot:.0%}", "§9"),
-    ("HSKEM-2 layout",
+    ("HSKEM-2 layout (revision B, re-timed)",
      f"{cm['finish__design__die__area'] / 1e6:.1f} mm² die, {cm['finish__design__instance__count__stdcell']:,} standard cells, "
-     f"{cm['finish__design__instance__count__macros']} SRAM macros; timing met at the typical corner ({fx_['tt_025C_1v80']:.1f} MHz), "
-     f"{fx_['ss_100C_1v60']:.1f} MHz at the slow corner", "§9, §13"),
+     f"{cm['finish__design__instance__count__macros']} SRAM macros; setup and hold met at the slow, typical and fast corners "
+     f"(service ports on the core clock tree) with SPICE-measured macro clock-to-output and nominal parasitics, "
+     f"{fx_b['ss']['fmax_mhz']:.1f} MHz at the slow corner",
+     "§9, App. C"),
     ("HSKEM-2 sign-off",
      f"LVS: {chip['signoff']['primary_compare'].lower()}, with the SRAMs verified separately; DRC: "
      f"{chip['signoff']['drc_markers'] + feolc_['after_implant_fix']['markers_total']} markers once implant gaps inside the "
-     f"macros are closed", "§9, §13"),
+     f"macros are closed; routed database published", "§9, App. C"),
     ("Correctness",
      f"{n_err} mismatches over {n_coef:,} NTT coefficients and {n_kec} Keccak permutations; {acvp_rtl['passed']}/{acvp_rtl['cases']} "
-     f"NIST ACVP key generations byte-exact on the complete RTL; reducer proven for all 2²⁴ inputs", "§2–4"),
+     f"NIST ACVP key generations byte-exact on the complete RTL, and {ed_['passed']} encapsulation–decapsulation runs on ACVP "
+     f"seeds and messages equal to the golden model; reducer proven for all 2²⁴ inputs", "§2–4"),
     ("Forward NTT, HSKEM-1's engine → HSKEM-2's (routed)",
      f"{int(mac0.cycles):,} → {int(dse.loc[('ntt_packed2', 20.0)].cycles)} cycles, {e_macro:.2f} → {e_p2:.2f} µJ, "
      f"total area {a_m0 / 1e6:.2f} → {a_p2 / 1e6:.2f} mm²", "§6–7"),
@@ -329,7 +341,9 @@ assert fbd_.result_pass.all() and (fbd_.decaps_cycles == 6858).all()
 assert 12.5 < e_first / e_tot < 13.4 and 26 < e_tot < 27.5                  # "thirteen times less", "about 27 µJ"
 assert 14.4 < psy_["published"] / h_["sram_only"] < 14.6                     # "14.5 times fewer"
 assert dse.loc[("ntt_packed2", 20.0)].cycles == 568 and pkd.cycles == 988
-assert pw_["window_cycles"] + 1 == ssy_["decaps_cycles"]["H"]["sram_only"]   # the chip runs the final design
+assert pw_["window_cycles"] + 1 == cyc_b_ == ssy_["decaps_cycles"]["H"]["sram_only"] + 19   # revision B: the final design + 19 cycles
+assert ed_["passed"] == len(ed_["details"]) == 25 and all(d["c"] and d["K_enc"] and d["K_dec"] and d["K_rej"] for d in ed_["details"])
+assert pw_["vcd_time_stretch"] == 4                                           # activity read at the chip's 40 ns clock
 assert 0.03 < cfg_["asic"] / cfg_["sram_only"] - 1 < 0.04 and 0.33 < h_["asic"] / h_["sram_only"] - 1 < 0.37   # "about a third"
 print(f"results table on the first page: all {len(rows)} rows agree with the committed results")
 """.replace("@GLANCE@", repr(GLANCE)))
@@ -354,8 +368,7 @@ FPGA and both SKY130 chips, which differ in the following choices:
 | Keccak round | one full round per clock | row-serialized round (seven clocks), expected to save standard cells | one full round per clock (Section 8) |
 | Datapath around the engines | original | original | streamed, every check kept (Section 8) |
 
-HSKEM-1 used OpenRAM's single-port (1rw) macros throughout; its dual-port (1rw1r) and banked macros were
-not evaluated.
+HSKEM-1 used OpenRAM's single-port (1rw) macros throughout.
 
 **Notation.** The terms of ML-KEM [1] and SHA-3 [2] used below; others are defined where they first
 appear.
@@ -620,12 +633,14 @@ faces the NIST vectors: `scripts/acvp_rtl_keygen.py` runs all 25 key-generation 
 configurations and compares the key memories byte for byte (the whole decapsulation key except a hash of
 the already compared encapsulation key). A negative control that raises the module rank $k$ from 2 to 3
 must fail.
-The co-processor accepts no external key for encapsulation and decapsulation, so the full-system
-testbench of Section 8 checks them against an independent software model.
+For encapsulation and decapsulation, which take no external key, `scripts/acvp_rtl_encdec.py` runs each case
+with an ACVP key-generation seed and encapsulation message, and compares
+the ciphertext, both shared keys and the implicit-rejection key for a corrupted decoded coefficient with
+the golden model, on the chip's RTL.
 """)
 
 code(r"""
-RUN_ACVP_RTL = IN_COLAB   # about one minute per configuration
+RUN_ACVP_RTL = IN_COLAB   # about one minute per key-generation configuration (encapsulation: scripts/acvp_rtl_encdec.sh, ten minutes)
 if RUN_ACVP_RTL:
     for cfg in ("fpga", "asic"):
         print(sh(f"python3 scripts/acvp_rtl_keygen.py {cfg}").strip().splitlines()[-1])
@@ -635,6 +650,10 @@ for cfg in ("fpga", "asic", "fpga_streamed", "asic_streamed"):     # the last tw
     print(f"{cfg}: {r['passed']} of {r['cases']} ACVP keyGen cases byte-exact (ekPKE, dkPKE, z; {diff} differing bytes); "
           f"negative control k = 3: {r['negative_control']['ekpke_t_bytes_diff_vs_case_0']} of 768 bytes of t differ")
     assert r["passed"] == r["cases"] == 25 and diff == 0 and r["negative_control"]["ekpke_t_bytes_diff_vs_case_0"] > 0
+ed = json.loads((ROOT/"results/acvp_rtl/encdec_rev_b.json").read_text())
+print(f"HSKEM-2 revision B: {ed['passed']} of {len(ed['details'])} encapsulation-decapsulation runs on ACVP seeds and messages "
+      f"equal to the golden model (ciphertext, both shared keys, implicit rejection)")
+assert ed["passed"] == len(ed["details"]) == 25 and all(d["c"] and d["K_enc"] and d["K_dec"] and d["K_rej"] for d in ed["details"])
 """)
 
 # ------------------------------------------------------------- Part II
@@ -1290,7 +1309,7 @@ md(r"""
 
 On the chip, the blocks above share one digital core with the SPI front end, the HSM policy logic,
 SHA-256/HMAC, AES-256, the PUF services and 18 OpenRAM [9] SRAM macros. This section prices HSKEM-1's two
-decisions on that core and follows its profile, bottleneck by bottleneck, to the design of HSKEM-2.
+decisions on that core and follows its profile to the design of HSKEM-2.
 """)
 
 md(r"""
@@ -1480,8 +1499,8 @@ md(r"""
 Each step matches its cycle model to the cycle (Appendix A.3 derives every saving), and together the four
 steps shorten a decapsulation from 99,537 to 36,110 cycles, 2.8 times fewer than HSKEM-1 and 2.3 times
 fewer than the FPGA configuration. The NTT now takes under a quarter of
-what remains, while the pointwise products, the ciphertext encoding and the transfers in and out of the
-engine, each still advancing one coefficient every few cycles, take two thirds: they are the next targets.
+what remains; the pointwise products, the ciphertext encoding and the engine's transfers, still one
+coefficient every few cycles, take two thirds and are the next targets.
 """)
 
 md(r"""
@@ -1605,18 +1624,23 @@ md(r"""
 ## 9. HSKEM-2: the final design as a signed-off chip
 
 HSKEM-2 integrates milestone H, with the two-lane NTT on a 24 × 128 macro and the one-round Keccak, among
-18 OpenRAM macros of seven types. Two further defines, marked *(chip)*, only move registers so that the
-layout meets its 25 MHz clock (Appendix C); with them the full-system testbench gives the same shared keys
-and cycle counts. The routed core meets setup and hold at the typical corner and passes LVS and the
-complete SKY130 DRC deck, within the limits of Section 13. The comparison with HSKEM-1 below shows the
-price of the shorter decapsulation: 17 % more standard-cell area and a typical-corner fmax of 27.8 instead
-of 37.8 MHz, so that at each chip's own fmax the gain is 10.7 rather than 14.5 times.
+18 OpenRAM macros of seven types. Its first layout, revision A, met timing only at the typical corner: at
+the slow corner multiplier paths between flip-flops held it to 13.9 MHz, and the paths from the macros,
+which present read data half a cycle after the clock edge, failed as well. Revision B, built from the
+published RTL, registers those reads or shortens the logic behind them with fourteen further *(chip)*
+defines (Appendix C), for 19 more cycles per decapsulation, 2 % more flip-flops and the same shared keys;
+its standard-cell area is 16 % above HSKEM-1's. It meets setup and hold at the slow, typical and fast
+corners with macro clock-to-output times measured in SPICE, which OpenRAM's views understate tenfold at the
+slow corner, passes LVS and the complete SKY130 DRC deck within the limits of Section 13, and its routed
+database is published.
 """)
 
 code(r"""
-fc = json.loads((ROOT/"results/fullchip/summary.json").read_text())
-feol = json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())
+R9 = ROOT/"results/fullchip/rev_b"                    # HSKEM-2 revision B, the signed-off chip
+fc = json.loads((R9/"summary.json").read_text()); sta9 = json.loads((R9/"sta_corners.json").read_text())
+feol = json.loads((R9/"feol_drc.json").read_text())
 m, s = fc["orfs_metrics"], fc["signoff"]
+ss9, tt9, ff9 = (sta9["runs"][f"{c}_spice_soc"] for c in ("ss", "tt", "ff"))
 display(pd.Series({
     "die area [mm²]": m["finish__design__die__area"]/1e6,
     "std cells": m["finish__design__instance__count__stdcell"],
@@ -1625,46 +1649,62 @@ display(pd.Series({
     "SRAM area [mm²]": m["finish__design__instance__area__macros"]/1e6,
     "flip-flops": m["finish__design__instance__count__class:sequential_cell"],
     "clock target [ns]": fc["clock_target_ns"],
-    "setup WNS [ns]": m["finish__timing__setup__ws"], "hold WNS [ns]": m["finish__timing__hold__ws"],
-    "post-route fmax [MHz]": m["finish__timing__fmax"]/1e6,
-    "max-slew / max-capacitance violations": f'{m["finish__timing__drv__max_slew"]} / {m["finish__timing__drv__max_cap"]}',
+    "setup WNS, slow / typical / fast [ns]": f'{ss9["setup_wns"]:.3f} / {tt9["setup_wns"]:.3f} / {ff9["setup_wns"]:.3f}',
+    "hold WNS, slow / typical / fast [ns]": f'{ss9["hold_wns"]:.3f} / {tt9["hold_wns"]:.3f} / {ff9["hold_wns"]:.3f}',
+    "fmax, slow / typical / fast [MHz]": " / ".join(f'{sta9["fmax_search"][c]["fmax_mhz"]:.1f}' for c in ("ss", "tt", "ff")),
+    "router DRC / antenna violations": f'{s["router_drc_violations"]} / {s["antenna_violations"]}',
     "LVS (primary / repeat)": f'{s["primary_compare"]} / {s["repeat_compare"]}',
     "LVS negative control detected": s["negative_control_detected"],
     "DRC markers, BEOL + off-grid rules": s["drc_markers"],
     "DRC markers, FEOL rules (Appendix C.3)": feol["after_implant_fix"]["markers_total"],
-}, name="HSKEM-2"))
+}, name="HSKEM-2, revision B"))
 print("claim boundary:", s["claim_boundary"])
-# HSKEM-1 against HSKEM-2, both from their routed databases (ORFS final reports, typical corner)
+# HSKEM-1, HSKEM-2 revision A and revision B from their routed databases (ORFS final reports)
 fc0 = json.loads((ROOT/"results/fullchip/first_chip/summary.json").read_text()); m0 = fc0["orfs_metrics"]
-cyc_chip = {"HSKEM-1": psy_["published"], "HSKEM-2": ssy_["decaps_cycles"]["H"]["sram_only"]}
-chips_ = pd.DataFrame({k: [mm["finish__design__instance__area__stdcell"] / 1e6, mm["finish__design__instance__count__stdcell"],
+fcA = json.loads((ROOT/"results/fullchip/summary.json").read_text()); mA = fcA["orfs_metrics"]
+revb_sim = (R9/"tb_trustedge_spi_rev_b.log").read_text(errors="replace")
+cyc_b = int(re.search(r"U1 Decaps busy latency valid/implicit-rejection=(\d+) cycles", revb_sim)[1])
+cyc_chip = {"HSKEM-1": psy_["published"], "HSKEM-2 rev. A": ssy_["decaps_cycles"]["H"]["sram_only"], "HSKEM-2 rev. B": cyc_b}
+closed = {"HSKEM-1": "typical (OpenRAM clock-to-output)", "HSKEM-2 rev. A": "typical (OpenRAM clock-to-output)",
+          "HSKEM-2 rev. B": "slow, typical, fast (SPICE clock-to-output)"}
+fmx_ = {"HSKEM-1": f'{m0["finish__timing__fmax"] / 1e6:.1f} (flow estimate, OpenRAM view)',
+        "HSKEM-2 rev. A": f'{mA["finish__timing__fmax"] / 1e6:.1f} (flow estimate, OpenRAM view)',
+        "HSKEM-2 rev. B": f'{sta9["fmax_search"]["tt"]["fmax_mhz"]:.1f} (period search, SPICE)'}
+chips_ = pd.DataFrame({k: [round(mm["finish__design__instance__area__stdcell"] / 1e6, 2), mm["finish__design__instance__count__stdcell"],
                            mm["finish__design__instance__count__class:sequential_cell"],
-                           mm["finish__design__instance__area__macros"] / 1e6, mm["finish__timing__fmax"] / 1e6,
-                           cyc_chip[k], cyc_chip[k] * fc["clock_target_ns"] / 1e3, cyc_chip[k] / (mm["finish__timing__fmax"] / 1e6)]
-                       for k, mm in (("HSKEM-1", m0), ("HSKEM-2", m))},
+                           round(mm["finish__design__instance__area__macros"] / 1e6, 2), closed[k], fmx_[k],
+                           cyc_chip[k], round(cyc_chip[k] * fc["clock_target_ns"] / 1e3, 1)]
+                       for k, mm in (("HSKEM-1", m0), ("HSKEM-2 rev. A", mA), ("HSKEM-2 rev. B", m))},
                       index=["standard-cell area [mm²]", "standard cells", "flip-flops", "SRAM macro area [mm²]",
-                             "typical-corner fmax, ORFS [MHz]", "decapsulation [cycles]",
-                             "decapsulation at 25 MHz [µs]", "decapsulation at the chip's fmax [µs]"])
-nbd.show(chips_.round(2).rename_axis("routed core"), index=True)
-assert fc0["clock_target_ns"] == fc["clock_target_ns"] == 40.0
-assert 0.165 < chips_.loc["standard-cell area [mm²]", "HSKEM-2"] / chips_.loc["standard-cell area [mm²]", "HSKEM-1"] - 1 < 0.175   # "17 % more"
-assert (round(m0["finish__timing__fmax"] / 1e6, 1), round(m["finish__timing__fmax"] / 1e6, 1)) == (37.8, 27.8)
-assert 10.6 < chips_.loc["decapsulation at the chip's fmax [µs]", "HSKEM-1"] / chips_.loc["decapsulation at the chip's fmax [µs]", "HSKEM-2"] < 10.75
-assert (m["finish__timing__drv__max_slew"], m["finish__timing__drv__max_cap"]) == (23, 3)            # Section 13
-# the abstract quotes these figures
-assert m["finish__design__instance__count__stdcell"] > 360_000 and m["finish__design__instance__count__macros"] == 18
-assert s["sram_masters"] == 7 and s["drc_markers"] == 0 and s["status"] == "PASS"
+                             "timing closed at the corners", "typical-corner fmax [MHz]", "decapsulation [cycles]",
+                             "decapsulation at 25 MHz [µs]"])
+nbd.show(chips_.rename_axis("routed core"), index=True)
+assert fc0["clock_target_ns"] == fcA["clock_target_ns"] == fc["clock_target_ns"] == 40.0
+assert 0.155 < m["finish__design__instance__area__stdcell"] / m0["finish__design__instance__area__stdcell"] - 1 < 0.165   # "16 % more"
+assert cyc_b - cyc_chip["HSKEM-2 rev. A"] == 19                                                     # "19 cycles"
+assert 0.015 < m["finish__design__instance__count__class:sequential_cell"] / mA["finish__design__instance__count__class:sequential_cell"] - 1 < 0.025   # "2 % more flip-flops"
+assert round(m0["finish__timing__fmax"] / 1e6, 1) == 37.8 and round(mA["finish__timing__fmax"] / 1e6, 1) == 27.8
+rat_ = [sta9["macro_clk_to_dout_ns"]["ss"][k] / sta9["macro_clk_to_dout_view_ns"]["ss"][k] for k in sta9["macro_clk_to_dout_ns"]["ss"]]
+assert 9.5 < min(rat_) and max(rat_) < 12.5                                                          # "tenfold at the slow corner"
+assert round(100 * (cyc_b / 6668 - 1), 1) == 3.1 and 6856 / 6668 - 1 < 0.03                         # the comparison table of Section 12: 6,875 on the chip vs 6,668 [13]
+assert round(json.loads((ROOT/"results/fullchip/sta_corners.json").read_text())["corners"]["ss_100C_1v60"]["ff2ff_fmax_mhz"], 1) == 13.9   # revision A
+mbA = json.loads((ROOT/"results/fullchip/sta_macro_bound.json").read_text())["macro_arc_scale"]["x1"]
+assert abs(mbA["ff2ff_setup_slack_ns"] - mbA["setup_wns"]) < 0.01 and mbA["setup_wns"] < mbA["macro_paths_slack_ns"]["from_macro_setup"] < 0   # flip-flop paths set it; macro paths fail too
+assert min(ss9["setup_wns"], ss9["hold_wns"], tt9["setup_wns"], tt9["hold_wns"], ff9["setup_wns"], ff9["hold_wns"]) > 0
+assert ss9["setup_violating_endpoints"] == ss9["hold_violating_endpoints"] == 0 and sta9["provisional_views"] == 0
+assert (s["router_drc_violations"], s["antenna_violations"], s["drc_markers"]) == (0, 0, 0)
+assert s["primary_compare"] == s["repeat_compare"] == "Circuits match uniquely" and s["negative_control_detected"]
+# the abstract and Section 13 quote these figures
+assert m["finish__design__instance__count__macros"] == 18 and s["sram_masters"] == 7
 assert round(m["finish__design__instance__count__class:sequential_cell"], -3) == 30000                # "30,000 registers"
-# the chip's configuration (final design + the two (chip) defines) in the full-system testbench
-chip_sim = (ROOT/"results/system_sim/tb_trustedge_spi_sram_only_chipv2acc.log").read_text(errors="replace")
+# revision B's RTL (published sources + the (chip) defines) in the full-system testbench: same keys as milestone H
 h_sim = (ROOT/"results/system_sim/tb_trustedge_spi_sram_only_strH.log").read_text(errors="replace")
-assert "TB_TRUSTEDGE_SPI_RESULT: ALL PASS" in chip_sim
-assert set(re.findall(r"\bk=([0-9a-f]+)", chip_sim)) == set(re.findall(r"\bk=([0-9a-f]+)", h_sim))   # same shared keys
-assert re.findall(r"oracle cycles=(\d+)", chip_sim) == re.findall(r"oracle cycles=(\d+)", h_sim)       # same cycle counts
+assert "TB_TRUSTEDGE_SPI_RESULT: ALL PASS" in revb_sim
+assert set(re.findall(r"\bk=([0-9a-f]+)", revb_sim)) == set(re.findall(r"\bk=([0-9a-f]+)", h_sim))   # same shared keys
 import placement_map as pm
 from matplotlib.patches import Patch
 fig, ax = plt.subplots(figsize=(8, 8.4))
-pm.draw_chip(ax)
+pm.draw_chip(ax, R9/"cells.csv.gz")
 ax.set_position([0.02, 0.01, 0.96, 0.88])          # square die directly under the legend
 fig.legend([Patch(color=c) for _, c in pm.CLASSES] + [Patch(facecolor="#e1e0d9", edgecolor=ps.INK_2)],
            [n for n, _ in pm.CLASSES] + ["OpenRAM SRAM macro (bits × words)"], ncols=4, loc="upper left",
@@ -1677,17 +1717,17 @@ plt.show()
 md(r"""
 ### Energy: thirteen times less per decapsulation
 
-Both chips are priced by the same method: the profiled decapsulation is replayed with the extracted
-parasitics on a shadow of the routed netlist, whose combinational cells are those of the layout and whose
-flip-flops follow the RTL simulation (`scripts/fullchip_power.sh`); OpenSTA adds the clock network, and
-the SRAM macros are priced with their transistor-level energies and access counts (Appendix C.4).
+Both chips are priced alike: a shadow of the routed netlist, with the layout's combinational cells and the
+RTL simulation's flip-flops, replays the profiled decapsulation on the extracted parasitics
+(`scripts/fullchip_power.sh`); OpenSTA adds the clock network, and the SRAM macros are priced from their
+transistor-level energies and access counts (Appendix C.4).
 """)
 
 code(r"""
-pw = json.loads((ROOT/"results/fullchip/power.json").read_text())
-se = json.loads((ROOT/"results/fullchip/sram_energy.json").read_text())
-cg = json.loads((ROOT/"results/fullchip/clock_gating_whatif.json").read_text())
-sa = json.loads((ROOT/"results/fullchip/sram_accesses.json").read_text())
+pw = json.loads((R9/"power.json").read_text())                 # revision B
+se = json.loads((R9/"sram_energy.json").read_text())
+cg = json.loads((R9/"clock_gating_whatif.json").read_text())
+sa = json.loads((R9/"sram_accesses.json").read_text())
 t_dec = pw["window_cycles"] * pw["clock_ns"] * 1e-9                      # seconds
 e = {k: v * 1e-3 * t_dec * 1e6 for k, v in pw["power_mw"].items()}         # uJ per decapsulation
 sram = se["sram_energy_per_decaps_uj"]
@@ -1704,7 +1744,7 @@ logic0, sram0 = sum(e0.values()), se0["sram_energy_per_decaps_uj"]
 seg = ["clock network and register clock pins", "combinational logic", "SRAM macros (18)"]
 COL = [ps.SERIES[0], ps.SERIES[2], "#c9c6bb"]
 chips = {"HSKEM-1\n(99,537 cycles)": [e0["clock"] + e0["sequential"], e0["combinational"], sram0],
-         "HSKEM-2\n(6,856 cycles)": [e["clock"] + e["sequential"], e["combinational"], sram]}
+         f"HSKEM-2\n({pw['window_cycles'] + 1:,} cycles)": [e["clock"] + e["sequential"], e["combinational"], sram]}
 rows = {"HSKEM-2 as built": [e["clock"] + e["sequential"], e["combinational"], sram],
         "both remedies,\nconservative": [e["clock"] + e["sequential"] - saved_lo, e["combinational"], gate],
         "both remedies,\nupper estimate": [e["clock"] + e["sequential"] - saved_hi, e["combinational"], gate]}
@@ -1745,14 +1785,14 @@ assert 0.76 < pw["registers_never_toggling"] / pw["registers_compared"] < 0.8  #
 assert 26 < logic + sram < 27.5                                                # "about 27 µJ"
 assert 0.22 < sram / (logic + sram) < 0.26                                     # "about a quarter"
 assert 0.7 < 1 - gate / sram < 0.78                                            # "about three quarters"
-assert 32.0 < 100 * (sram - gate + saved_lo) / (logic + sram) < 33.5           # "roughly 33 to 49 %"
-assert 48.0 < 100 * (sram - gate + saved_hi) / (logic + sram) < 49.5
+assert 31.5 < 100 * (sram - gate + saved_lo) / (logic + sram) < 32.5           # "roughly 32 to 48 %"
+assert 47.5 < 100 * (sram - gate + saved_hi) / (logic + sram) < 48.5
 assert cg["idle_flip_flops"] == 13405
 assert useful / built < 0.2 and len(tied) == 17 and "u_shared_ntt.u_sram" not in tied   # "fewer than one in five"
 assert cg["idle_blocks"] == ["g_qualification_puf_vault", "u_hsm_shell", "u_security_hmac", "u_c2_shake_drbg", "u_puf"]
 assert 0.2 < cg["saved_fraction"] and cg["saved_upper_fraction"] < 0.5
 assert 12.5 < (logic0 + sram0) / (logic + sram) < 13.4                         # "thirteen times less"
-assert 1.10 < ((logic + sram) / t_dec) / ((logic0 + sram0) / t0) < 1.15        # "about an eighth higher"
+assert 1.13 < ((logic + sram) / t_dec) / ((logic0 + sram0) / t0) < 1.155       # "about a seventh higher"
 assert abs(logic0 - pw0["logic_energy_per_decaps_uj"]) < 0.01 and abs(logic - pw["logic_energy_per_decaps_uj"]) < 0.01
 assert round(logic0 + sram0) == 344                                            # "the 344 µJ of HSKEM-1"
 assert round(100 * (e0["clock"] + e0["sequential"]) / logic0) == 99              # "99 % of HSKEM-1's logic power"
@@ -1763,16 +1803,15 @@ assert round(100 * un_["HSKEM-2"]) == 15 and round(100 * un_["HSKEM-1"]) == 18  
 
 md(r"""
 HSKEM-2 spends about 27 µJ per decapsulation at 25 MHz, thirteen times less than the 344 µJ of HSKEM-1
-(figure, panel a). It finishes 14.5 times sooner, while its mean power is about an eighth higher because
+(panel a). It finishes 14.5 times sooner, while its mean power is about a seventh higher because
 more logic works every cycle. The energy thus tracks the cycle count, because on HSKEM-1 the clock
 network and the registers drew 99 % of the logic power whether or not they computed.
 
 Clocking also dominates HSKEM-2 (panel b). More than nine tenths of the logic's energy goes into the clock
 network and the clock pins of the 30,000 registers, more than three quarters of which never change during
 the operation. The SRAM macros add about a quarter, because 17 of the 18 keep their chip selects tied active
-although fewer than one access in five does useful work. Gating the clock of the blocks that stay idle and
-driving every chip select from the block's own requests would together save roughly 33 to 49 %, a
-projection from the measured activity rather than a change to HSKEM-2 (Appendix C.6).
+although fewer than one access in five does useful work. Gating the clocks of idle blocks and driving every
+chip select from its block's requests would save a projected 32 to 48 % (Appendix C.6).
 """)
 
 # ------------------------------------------------------------ Part III
@@ -1788,8 +1827,7 @@ md(r"""
 ## 10. The same RTL on the FPGA board
 
 The board checks that the RTL works on hardware, that the HSM's invariants hold there and that the
-redesigned systems take the predicted cycles. The first runs use the FPGA configuration of
-Section 1 and the last the redesigned systems; HSKEM-1's ASIC choices appear only in simulation and layout. At 50 MHz, driven by the ESP32 over SPI, the
+redesigned systems take the predicted cycles; HSKEM-1's ASIC choices appear only in simulation and layout. At 50 MHz, driven by the ESP32 over SPI, the
 board executed the complete two-role ML-KEM flow 100 times, from key generation and encapsulation to an
 independent decapsulation that must reproduce the shared secret. The 16-bit cycle counters saturate at
 65,535, so decapsulation is a lower bound here, and key generation and encapsulation vary by a few dozen
@@ -2063,7 +2101,7 @@ md(r"""
 | **A faster engine pays only while the datapath keeps up.** | the packed NTT alone left the datapath as the bottleneck; only streaming it let the shared engines set the pace | 8 |
 | **Clocking and integration set the energy of an open-source chip.** | most of HSKEM-2's energy clocks registers that do not change and macros selected in every cycle; two standard remedies would save a third to a half | 9 |
 | **In the prototype, the interface is the bottleneck and the unmasked NTT leaks.** | the core takes a tiny fraction of a board run; first-order masking removes the modelled leakage at twice the transform time | 10, 11 |
-| **Obtain every important number twice.** | eleven results that looked right were wrong, each exposed by an independent route (last table of this section) | 12 |
+| **Obtain every important number twice.** | thirteen results that looked right were wrong, each exposed by an independent route (last table of this section) | 12 |
 """)
 
 md(r"""
@@ -2093,7 +2131,7 @@ ctx = pd.DataFrame([
      "cycles / decapsulation": f"{dc['H']['fpga']:,} (RTL), {int(fb.decaps_cycles.iloc[0]):,} (board)",
      "resources": f"two-lane NTT engine: {alm_ntt:.0f} ALMs, 1 M20K, 4 DSP"},
     {"design": "HSKEM-2, signed-off chip (this work)", "platform": f"SKY130, {1e3 / pw['clock_ns']:.0f} MHz",
-     "cycles / NTT": int(P.loc["ntt_packed2", "cycles"]), "cycles / decapsulation": f"{pw['window_cycles'] + 1:,}",
+     "cycles / NTT": f'{int(P.loc["ntt_packed2", "cycles"])} (block)', "cycles / decapsulation": f"{pw['window_cycles'] + 1:,}",
      "resources": f"complete HSM core: {m['finish__design__instance__area__stdcell'] / 1e6:.2f} mm² cells + "
                   f"{m['finish__design__instance__area__macros'] / 1e6:.2f} mm² SRAM; {e_tot:.0f} µJ per decapsulation"},
     {"design": "Xing and Li, TCHES 2021 [13]", "platform": "Artix-7 FPGA, 161 MHz",
@@ -2138,7 +2176,9 @@ independent route disagreed.
 | A noise write scheduled in cycles when the single-port store is free | The write is registered and lands one cycle later, on the encryption's next read; the FPGA build passed and the single-port builds produced wrong ciphertexts | The full-system testbench in the single-port configuration (Section 8) |
 | A schedule that runs J(z‖c) between the noise jobs, so that it ends sooner | It made the decapsulation slower: J then competed for the ciphertext memory with the ciphertext checks, which have priority | The time per controller state and a timeline of the re-encryption (Section 8) |
 | A bitstream of the streamed system that passed every functional check | It missed timing by 2.3 ns, because functions that only the self-test uses sat on the new multiplier paths | Static timing analysis of each failing endpoint (Appendix D.3) |
-| The chip's logic energy from the system testbench's activity | The testbench clocks at 10 ns, the chip at 40 ns, and OpenSTA counts toggles per second of VCD time, so the data-dependent power was that of a four times faster chip (HSKEM-2: 24.9 instead of 20.2 µJ) | Annotating the registers per 40 ns cycle, whose cycle count disagreed with the VCD's length; a four times stretched VCD then cut the combinational power exactly by four (`scripts/vcd_shift.py`) |
+| The chip's logic energy from the system testbench's activity | The testbench clocks at 10 ns, the chip at 40 ns, and OpenSTA counts toggles per second of VCD time, so the data-dependent power was that of a four times faster chip (revision A: 24.9 instead of 20.2 µJ, development log); the same slip recurred once for revision B | Annotating the registers per 40 ns cycle, whose cycle count disagreed with the VCD's length; a four times stretched VCD then cut the combinational power exactly by four (`scripts/vcd_shift.py`). Revision B's first estimate showed four times revision A's combinational power; an assertion on the VCD's length now guards it |
+| The SRAM macros' typical-corner hold time, −0.06 ns, reused at the slow corner | At the slow corner the 24 × 256 macro corrupts data when its inputs change 0.3 ns after the clock, and needs up to 0.6 ns | A SPICE sweep of the input-change time; the chip's closest hold paths were then simulated in SPICE as well (Appendix C.1) |
+| OpenRAM's clock-to-output times, 0.34 to 0.42 ns at every corner | SPICE gives 2.1 to 2.4 ns at the typical and 3.8 to 4.2 ns at the slow corner; the macro-block frequencies, HSKEM-1 and revision A rest on the view | SPICE of every macro type at three corners, used in revision B's sign-off (Appendix C.1) |
 """)
 
 code(r"""
@@ -2155,7 +2195,14 @@ assert fe["signed_off_gds"]["markers_total"] == 163731 and set(fe["signed_off_gd
 assert fe["after_implant_fix"]["markers_total"] == 0
 assert "missed timing (-2.257 ns)" in fbj["first_build_timing_note"]
 pwc = json.loads((ROOT/"results/fullchip/power.json").read_text())
-assert pwc["vcd_time_stretch"] == 4 and round(pwc["logic_energy_per_decaps_uj"], 1) == 20.2   # the last row
+assert pwc["vcd_time_stretch"] == 4 and round(pwc["logic_energy_per_decaps_uj"], 1) == 20.2   # the VCD row
+assert json.loads((R9/"power.json").read_text())["vcd_time_stretch"] == 4                      # ... and revision B
+g_ = {float(k): v for k, v in sta9["spice_input_timing"]["sky130_sram_1rw_24x256_ss"]["points_pass"].items()}
+assert not g_[-39.7] and g_[-39.4] and sta9["macro_input_hold"]["ss"]["view_hold_ns"] == -0.056  # the SRAM hold row
+vw_ = [v for c in ("ss", "tt", "ff") for v in sta9["macro_clk_to_dout_view_ns"][c].values()]
+sp_ = {c: list(sta9["macro_clk_to_dout_ns"][c].values()) for c in ("ss", "tt")}
+assert (round(min(vw_), 2), round(max(vw_), 2)) == (0.34, 0.42)                                  # the clock-to-output row
+assert (round(min(sp_["tt"]), 1), round(max(sp_["tt"]), 1), round(min(sp_["ss"]), 1), round(max(sp_["ss"]), 1)) == (2.1, 2.4, 3.8, 4.2)
 print(f"OpenRAM power view of the 16x256 macro: {lib_w / 1e6:.1f} MW; FEOL markers before/after the implant fix: "
       f"{fe['signed_off_gds']['markers_total']:,} / {fe['after_implant_fix']['markers_total']}")
 """)
@@ -2169,34 +2216,33 @@ The results hold within the following boundaries.
 
 * **Pre-silicon and uncertified.** Nothing has been fabricated, and the design holds no NIST algorithm
   (CAVP) or module (CMVP) certificate, which only an accredited laboratory can obtain.
-* **Physical verification.** HSKEM-2 passes the complete DRC deck only after the implant gaps inside the
-  OpenRAM macros are closed, and the released GDS is the layout before that fix (Appendix C.2, C.3). Its
-  LVS abstracts the SRAMs, verified separately at transistor level, and eight multi-finger standard cells,
-  each after a switch-level proof of its truth table. 23 transition and 3 capacitance violations remain,
-  most at SRAM pins.
-* **Timing.** Closure targeted the typical corner, where HSKEM-2 reaches 27.8 MHz; at the slow corner the
-  chip would need a clock of 13.9 MHz, roughly half its 25 MHz. The SRAM timing views exist for the typical
-  corner only, and the slow-corner hold checks of the input ports rest on assumed input delays
-  (Appendix C.1).
-* **Power.** All energies are for the typical corner; the logic energy rests on zero-delay activity, so
-  glitches are not counted, and 15 % (HSKEM-2) to 18 % (HSKEM-1) of the pins take OpenSTA's propagated
-  defaults. The SRAM
-  energies come from transistor-level simulation, with a wiring correction measured on four macro types
-  and averaged for the others, and hold for 25 MHz only (Appendix C.4); the block-level energies at the
-  20 ns clock reuse them, which overstates the macro's share.
-* **Scope.** Block-level stores other than the macro-store points are flip-flops, and dual-port or banked
-  SRAM macros were not evaluated.
-* **Only the final design is in a full-chip layout.** The intermediate steps and NTT iterations are verified in RTL
-  simulation, at gate level for the routed blocks and, for step D and the streamed system, on the board;
-  neither chip was simulated at gate level as a whole.
-* **The streamed system.** Neither its peak power nor the leakage of the stream mode was assessed. Two of
-  its changes share one read of each ciphertext byte between checks, which lowers the redundancy against
-  injected faults, and the Karatsuba products form the sum of two secret coefficients, which a masked
-  implementation would have to protect.
-* **Security and hardware.** The leakage assessment is a register-transition model of the NTT logic, not
-  a power measurement, and covers first-order attacks on the NTT only, not the rest of the decapsulation,
-  higher-order attacks or glitches. The PUF and entropy sources are ring oscillators on the FPGA and
-  service interfaces on the ASIC, and the FPGA measurements come from a single board.
+* **Physical verification.** The complete DRC deck passes only after a script closes implant gaps inside
+  the OpenRAM macros (Appendix C.3). LVS abstracts the SRAMs, verified separately at transistor level, and
+  five multi-finger cells, each proven by a switch-level truth table. 58 transition and capacitance
+  violations remain, 28 at SRAM pins (Appendix C.2).
+* **Timing.** Parasitics come from SKY130's only extraction corner, nominal. Only the macros'
+  clock-to-output times are measured in SPICE; their setup and hold times are OpenRAM's typical-corner
+  values, checked in SPICE where the margins are smallest. Service-port hold assumes a neighbour on the core
+  clock tree, and a ±5 % derate leaves 0.118 ns of slow-corner slack (Appendix C.1). The frequencies of the
+  macro-store blocks, HSKEM-1 and revision A rest on OpenRAM's views and the flow's estimate, both optimistic.
+* **Data.** The routed databases of HSKEM-1 and revision A stay private, as their logic holds a rotated
+  board credential; summaries and hashes are committed.
+* **Power.** Energies are for the typical corner; the logic energy rests on zero-delay activity, without
+  glitches, and 15 % (HSKEM-2) to 18 % (HSKEM-1) of the pins take OpenSTA's propagated defaults. The SRAM
+  energies hold for 25 MHz only, with a wiring correction measured on four macro types (Appendix C.4); the
+  block-level energies at 20 ns reuse them, which overstates the macros' share.
+* **Scope.** Block-level stores other than the macro-store points are flip-flops; dual-port and banked
+  macros were not evaluated.
+* **Verification depth.** Intermediate steps and NTT iterations are verified in RTL simulation, routed
+  blocks at gate level, step D and the streamed system on the board, and HSKEM-2's routed netlist at gate
+  level without delays over one decapsulation.
+* **The streamed system.** Its peak power and the leakage of the stream mode were not assessed. Two of its
+  changes share one read of each ciphertext byte between checks, which lowers the redundancy against
+  injected faults, and the Karatsuba products form the sum of two secret coefficients, which masking must protect.
+* **Security and hardware.** The leakage assessment models register transitions of the NTT logic, not
+  measured power, and covers first-order attacks on the NTT only, not higher-order attacks or glitches. The PUF
+  and entropy sources are ring
+  oscillators on the FPGA and service interfaces on the ASIC, and the FPGA measurements come from a single board.
 
 **Reuse and AI assistance.** No existing notebook was reused, and apart from the third-party material in
 `NOTICE` (SKY130 cell models, NIST ACVP vectors) and the OpenRAM views and netlists of the SRAM macros,
@@ -2624,95 +2670,158 @@ of the storage saves about a fifth of the energy, and the pipeline register give
 md(r"""
 ## C. Chip-level details of HSKEM-2
 
-The two *(chip)* defines of Section 9 register the pipelined products before their reduction, because the
-macros launch their reads on the falling clock edge, and let the codec pack each coefficient one cycle
-after loading it; neither changes a cycle count. LVS is hierarchical: each SRAM type has its own
-transistor-level LVS in Netgen, the top level abstracts the macros to their pin frames, and a deliberately
-altered endpoint must be detected.
+The macros drive read data on the falling clock edge, half a period after the rising one, so logic that used
+it directly had only half a period. Revision B keeps revision A's two *(chip)* defines, which register the
+pipelined products before their reduction and let the codec pack each coefficient one cycle after loading it,
+and adds fourteen; each registers such a read, or shortens the logic behind it, and keeps every output
+bit-identical. Together they add 19 cycles to a decapsulation, 11 to an encapsulation and 512 to a key
+generation, whose matrix products run one coefficient pair at a time and gain one cycle per pair.
+`flow/chip_rev_b/README.md` lists them, the script that rebuilds this RTL from the published sources, and
+the flow, including the engineering changes at the macro corners that cleared the last routing violations
+and repaired hold under the I/O model of C.1. LVS is
+hierarchical: each SRAM type has its own transistor-level LVS in Netgen, the top level abstracts the macros
+to their pin frames, and a deliberately altered net must be detected.
 
-### C.1 The whole chip at three corners
+### C.1 Timing at three corners
 
-`scripts/sta_corners_fullchip.sh` re-times the routed database with its parasitics for the core clock.
-Because the SRAM timing views exist for the typical corner only, the slow and fast corners are judged on
-the flip-flop-to-flip-flop paths, which exclude the macros.
+`flow/chip_rev_b/flow/final_sta.tcl` re-times the routed database with its parasitics at each corner. The
+clock-to-output time of every macro type is measured in SPICE at that corner and replaces OpenRAM's
+analytical value, which is the same at every corner and about six times too short at the typical corner
+and ten times at the slow one. The macros' input setup and hold times still come from OpenRAM's
+typical-corner views, so SPICE checks the two places where the margins are smallest. At the slow corner the
+24 × 256 macro writes and reads correctly with its inputs ready 0.1 ns before the clock, but corrupts data
+if they change 0.3 ns after it and needs up to 0.6 ns of hold, where its view states −0.06 ns; every macro
+input of the chip changes at least 0.9 ns after its clock there. The 24 × 128 macro, which receives the
+closest hold paths, works with its inputs changing as early as those paths allow at each corner (1.12,
+0.60 and 0.40 ns; table below).
+
+The service ports (the entropy, PUF and service-interface ports; the synchronized SPI pins are excluded)
+are timed against a clock that shares the core clock tree; the rows marked "as written" show what happens
+without it. The fmax values come from shortening the clock until a path fails, because the macros'
+falling-edge reads are half-cycle paths that the flow's own estimate misses; Section 9's frequencies of
+HSKEM-1 and revision A are that estimate. HSKEM-1's routed database was re-timed with the same script at
+the typical corner, which reproduces ORFS's own report; its netlist-based analysis and its reset-path
+figures are the first two rows of the second table of Section 12.
 """)
 
 code(r"""
-fs = json.loads((ROOT/"results/fullchip/sta_corners.json").read_text())
-CN = ["ss_100C_1v60", "tt_025C_1v80", "ff_n40C_1v95"]
-fct = pd.DataFrame({c: {"flip-flop paths: fmax [MHz]": fs["corners"][c]["ff2ff_fmax_mhz"],
-                        "flip-flop paths: setup slack [ns]": fs["corners"][c]["ff2ff_setup_slack_ns"],
-                        "flip-flop paths: hold slack [ns]": fs["corners"][c]["ff2ff_hold_slack_ns"],
-                        "with the macros: setup / hold slack [ns]":
-                            f'{fs["corners"][c]["reg2reg_incl_macros_setup_slack_ns"]:.2f} / {fs["corners"][c]["reg2reg_incl_macros_hold_slack_ns"]:.2f}',
-                        "design setup WNS [ns]": fs["corners"][c]["setup_wns"],
-                        "design hold WNS [ns]": fs["corners"][c]["hold_wns"],
-                        "hold-violating endpoints": int(fs["corners"][c]["hold_violating_endpoints"])} for c in CN}).T
-# paths through the macros use typical-corner views at every corner: the slow-corner figures that include
-# them mix corners and are not shown
-fct = fct.astype(object)
-fct.loc["ss_100C_1v60", ["with the macros: setup / hold slack [ns]", "design setup WNS [ns]"]] = "not meaningful (macro views: tt only)"
-display(fct.rename_axis("corner"))
-ss_ = fs["corners"]["ss_100C_1v60"]
-ports_ = sorted({re.sub(r"\[\d+\]$", "", v["startpoint"]) for v in ss_["hold_violators"]})
-blocks_ = sorted({BLOCK.get(v["endpoint"].split(".")[1], v["endpoint"].split(".")[1]) for v in ss_["hold_violators"]})
-print(f"slow corner: {int(ss_['hold_violating_endpoints'])} hold-violating endpoints; the {len(ss_['hold_violators'])} worst "
-      f"(down to {min(v['slack_ns'] for v in ss_['hold_violators']):.2f} ns) start at the input port(s) {', '.join(ports_)} "
-      f"and end in: {', '.join(blocks_)}")
-# guards for the statements made in the text below
-clk = fs["clock_period_ns"]
-tt_, ff_ = fs["corners"]["tt_025C_1v80"], fs["corners"]["ff_n40C_1v95"]
-assert all(fs["corners"][c]["ff2ff_hold_slack_ns"] > 0 for c in CN)
-assert tt_["setup_wns"] > 2 and tt_["hold_wns"] > 0 and tt_["setup_violating_endpoints"] == tt_["hold_violating_endpoints"] == 0
-assert abs(tt_["hold_wns"] - m["finish__timing__hold__ws"]) < 0.001        # reproduces ORFS's own report
-assert abs(tt_["setup_wns"] - m["finish__timing__setup__ws"]) < 0.001
-assert 27 < tt_["ff2ff_fmax_mhz"] < 28.5 and abs(tt_["ff2ff_fmax_mhz"] - m["finish__timing__fmax"] / 1e6) < 0.05
-assert ff_["setup_wns"] > 0 and ff_["hold_violating_endpoints"] == 0 and ff_["hold_wns"] > 0.04
-assert 13 < ss_["ff2ff_fmax_mhz"] < 15 and ss_["ff2ff_fmax_mhz"] < 1e3 / clk     # "roughly half the clock rate"
-assert all("." not in v["startpoint"] and "/" not in v["startpoint"] for v in ss_["hold_violators"])   # input ports
+CN3 = {"ss": "slow (100 °C, 1.60 V)", "tt": "typical (25 °C, 1.80 V)", "ff": "fast (−40 °C, 1.95 V)"}
+ru = sta9["runs"]
+fs9 = sta9["fmax_search"]
+t9 = pd.DataFrame({CN3[c]: {"fmax [MHz]": fs9[c]["fmax_mhz"],
+                            "setup WNS [ns]": ru[f"{c}_spice_soc"]["setup_wns"],
+                            "hold WNS [ns]": ru[f"{c}_spice_soc"]["hold_wns"],
+                            "hold WNS into the macros [ns]": sta9["macro_input_hold"][c]["slack_ns"],
+                            "input change after the macro clock, closest hold path [ns]":
+                                sta9["macro_input_hold"][c]["input_change_after_macro_clock_ns"],
+                            "hold WNS, constraints as written [ns]": ru[f"{c}_spice_sdc"]["hold_wns"],
+                            "hold-violating endpoints, constraints as written": int(ru[f"{c}_spice_sdc"]["hold_violating_endpoints"]),
+                            "macro clock-to-output, SPICE [ns]": f'{min(sta9["macro_clk_to_dout_ns"][c].values()):.2f}–{max(sta9["macro_clk_to_dout_ns"][c].values()):.2f}',
+                            "macro clock-to-output, OpenRAM view [ns]": f'{min(sta9["macro_clk_to_dout_view_ns"][c].values()):.2f}–{max(sta9["macro_clk_to_dout_view_ns"][c].values()):.2f}'}
+                   for c in ("ss", "tt", "ff")})
+display(t9.rename_axis("revision B, extracted parasitics"))
+der = {c: ru[k] for c, k in (("ss", "ss_spice_soc_derate5"), ("ff", "ff_view_soc_derate5"))}
+w9 = sta9["slow_corner_worst_path"]
+print(f"±5 % cell-delay derate: slow corner setup {der['ss']['setup_wns']:+.3f} ns, hold {der['ss']['hold_wns']:+.3f} ns "
+      f"({fs9['ss_derate5']['fmax_mhz']:.2f} MHz); fast corner hold {der['ff']['hold_wns']:+.3f} ns")
+sta_fc = json.loads((ROOT/"results/fullchip/first_chip/sta_analysis.json").read_text())
+print("HSKEM-1:", sta_fc["analysis"].split(". An earlier")[0] + ".")
+print(f"slow-corner worst path: macro output on the falling edge {w9['macro_clk_to_dout_ns']:.2f} ns, {w9['repeaters']} repeaters "
+      f"{w9['repeater_delay_ns']:.2f} ns, {w9['logic_cells']} logic cells {w9['logic_delay_ns']:.2f} ns, slack {w9['slack_ns']:+.3f} ns")
+sp9 = sta9["spice_input_timing"]
+g256 = {float(k): v for k, v in sp9["sky130_sram_1rw_24x256_ss"]["points_pass"].items()}
+h128 = sp9["sky130_sram_1rw_24x128_hold_at_sta_arrival"]
+# guards for the statements made in the text above and in Section 9
+assert all(ru[f"{c}_spice_soc"][k] > 0 for c in ("ss", "tt", "ff") for k in ("setup_wns", "hold_wns"))
+assert all(der[c]["setup_wns"] > 0 and der[c]["hold_wns"] > 0 for c in der)
+assert round(fs9["ss"]["fmax_mhz"], 1) == 27.0 and abs(fs9["ss_derate5"]["fmax_mhz"] - 25.15) < 0.01
+assert all(0 <= fs9[c]["setup_wns_at_period_ns"] < 0.02 for c in fs9)                         # bisection converged
+assert abs(2 * (20 - ru["ss_spice_soc"]["setup_wns"]) - fs9["ss"]["period_ns"]) < 0.03         # a half-cycle path sets the slow corner
+assert all(fs9[c]["period_ns"] >= 2 * (20 - ru[f"{c}_spice_soc"]["setup_wns"]) - 0.03 for c in ("ss", "tt", "ff"))
+assert "reproduces ORFS's own final report" in sta_fc["analysis"]
+assert all(sta9["macro_input_hold"][c]["slack_ns"] > 0 for c in ("ss", "tt", "ff"))
+assert [round(sta9["macro_input_hold"][c]["input_change_after_macro_clock_ns"], 2) for c in ("ss", "tt", "ff")] == [1.12, 0.6, 0.4]
+assert {c: v["pass"] for c, v in h128.items()} == {"ss": True, "tt": True, "ff": True}
+assert all(abs(h128[c]["input_change_after_edge_ns"] - sta9["macro_input_hold"][c]["input_change_after_macro_clock_ns"]) < 0.002 for c in h128)
+assert g256[-0.1] and not g256[-39.7] and g256[-39.4]                     # setup 0.1 ns; hold between 0.3 and 0.6 ns
+assert sta9["macro_input_hold"]["ss"]["view_hold_ns"] == -0.056
+r_ = {c: [sta9["macro_clk_to_dout_ns"][c][k] / sta9["macro_clk_to_dout_view_ns"][c][k] for k in sta9["macro_clk_to_dout_ns"][c]] for c in ("ss", "tt")}
+assert 9.5 < min(r_["ss"]) and max(r_["ss"]) < 12.5 and 5 < min(r_["tt"]) and max(r_["tt"]) < 7   # "six times ... ten times"
+assert len({round(v, 3) for v in sta9["macro_clk_to_dout_view_ns"]["ss"].values()} ^ {round(v, 3) for v in sta9["macro_clk_to_dout_view_ns"]["ff"].values()}) == 0   # "the same at every corner"
+mh9 = sta9["macro_input_hold"]["ss"]
+assert mh9["slack_ns"] + mh9["view_hold_ns"] >= 0.9                                           # "at least 0.9 ns after its clock"
+assert int(ru["ss_spice_sdc"]["hold_violating_endpoints"]) == 370 and -1.81 <= ru["ss_spice_sdc"]["hold_wns"] < -1.80   # "up to 1.81 ns"
+assert (w9["repeaters"], w9["logic_cells"], round(w9["macro_clk_to_dout_ns"], 1)) == (10, 25, 4.1)
+cyc_ = lambda t: [int(x) for x in re.findall(r"oracle cycles=(\d+)", t)]
+assert [b_ - a_ for a_, b_ in zip(cyc_(h_sim), cyc_(revb_sim))] == [512, 10, 11]   # key generation, encryption, encapsulation
 """)
 
 md(r"""
-The typical corner reproduces ORFS's own report to the picosecond, and the fast corner meets hold by at
-least 50 ps. At the slow corner the longest flip-flop paths, about 36 ns at the typical corner, take twice
-as long, so the chip would need a 13.9 MHz clock there; its hold violations all start at input ports,
-whose arrival times the constraints only assume.
-""")
+With the constraints as written, 370 input-port hold paths would fail at the slow corner by up to 1.81 ns,
+and 7 at the typical corner. The slow corner is set by SRAM reads: the worst path leaves the ciphertext
+macro on the falling edge and spends 4.1 ns in the macro, 2.5 ns in ten repeaters across the die and 11.5 ns
+in 25 logic cells, all within half a period.
 
-md(r"""
 ### C.2 The rendered layout and the sign-off record
 
-The rendering (about 2.4 µm per pixel) shows the SRAM macros along the left and top edges and in the lower
-right corner. The GDS, 58 MB compressed, is attached to the release
-[`hskem-fullchip`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem-fullchip)
-of the author's fork; it is the signed-off layout before the implant fix of Appendix C.3, whose result is
-recorded by its hash. Its logic contains a provisioning test credential of the demonstration board,
-rotated out of the board before publication; the routed database and parasitics stay private.
+The rendering (about 2.5 µm per pixel) shows the SRAM macros along the left and top edges and in the lower
+right corner. The routed database of revision B (netlist, DEF, OpenDB, extracted parasitics, SDC and both
+GDS files, before and after the implant fix of Appendix C.3) is attached to the release
+[`hskem2-rev-b`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem2-rev-b)
+of the author's fork with the hashes below; it contains no secret, because the provisioning credential in
+its logic is the public placeholder of Appendix E.3. The back-end rules ran as eight part decks because one
+run outgrew the build machine's memory.
 
-Of the 23 transition and 3 capacitance violations, 20 are SRAM address pins over their 0.04 ns limit by at
-most 10 ps, three are standard-cell pins over 1.5 ns by 0.13 to 0.16 ns, one is a hold buffer driving
-0.17 instead of 0.15 pF and two are SRAM outputs at their limit (from the flow's final report, not
-committed). The back-end rules ran as eight part decks because one run outgrew the build machine's memory.
+Of the 58 transition and capacitance violations at the typical corner (26 in revision A), 28 are SRAM pins
+at the edge of their views' tables and 30 are caused by seven buffers that drive long wires; standard-cell
+transitions reach 2.1 ns against a 1.5 ns limit, and timing uses the actual transitions. The static IR
+drop, with ideal supplies at both ends of every top-metal strap, no package model and the activity of a
+decapsulation, is 3.5 mV.
+
+Simulated without delays next to the RTL over the first 6,873 cycles of a decapsulation, the routed netlist
+matches it at every output in every cycle; two flip-flops differ only while the RTL holds an unknown value
+in an unreset pipeline register whose result is never used.
 """)
 
 code(r"""
-display(Image(str(ROOT/"figures/fullchip_layout.jpg"), width=640))
-s_ = fc["signoff"]
+display(Image(str(ROOT/"figures/fullchip_layout_rev_b.jpg"), width=640))
+s_ = fc["signoff"]; dr9 = json.loads((R9/"drv.json").read_text()); ir9 = json.loads((R9/"ir_drop.json").read_text())
+gl9 = json.loads((R9/"gls.json").read_text())
+ird = ir9["decapsulation_activity"]
 nbd.show(pd.DataFrame({"result": {
-    "LVS, top level": f'{s_["layout_instances"]:,} instances and {s_["layout_nets"]:,} nets on both sides; '
+    "routing": f'{s_["router_drc_violations"]} router DRC violations, {s_["antenna_violations"]} antenna violations',
+    "LVS, top level": f'{s_["layout_devices"]:,} devices and {s_["layout_nets"]:,} nets on both sides; '
                       f'{s_["primary_compare"].lower()}, repeated: {s_["repeat_compare"].lower()}',
     "LVS, negative control": s_["negative_control_result"],
-    "LVS, abstracted": f'{s_["sram_masters"]} SRAM types ({s_["sram_instances"]} instances), '
-                       f'{len(s_["truth_table_verified_cells"])} multi-finger cells',
+    "LVS, abstracted": f'{s_["sram_masters"]} SRAM types (18 instances), {len(s_["truth_table_verified_cells"])} multi-finger cells',
     "DRC, back end and off-grid": f'{s_["drc_markers"]} markers; {s_["drc_deck_scope"]}',
-    "GDS SHA-256": s_["final_gds_sha256"]}}).rename_axis("sign-off"), index=True)
-assert s_["layout_instances"] == s_["reference_instances"] and s_["layout_nets"] == s_["reference_nets"]
-assert len(s_["truth_table_verified_cells"]) == 8 and "match uniquely" not in s_["negative_control_result"]
-assert s_["final_gds_sha256"] == json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())["signed_off_gds_sha256"]
-rel_ = dict(l.split()[1::-1][:2] for l in (ROOT/"results/fullchip/release_gds_sha256.txt").read_text().splitlines() if l.strip())
-assert rel_["hskem2_fullchip.gds"] == s_["final_gds_sha256"]          # the released GDS is the signed-off one
-assert rel_["hskem2_fullchip.gds"] != json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())["corrected_gds_sha256"]
-print("released GDS:", {k: v[:16] + "…" for k, v in rel_.items()})
+    "transition / capacitance violations (typical)": f'{dr9["counts"]["max_slew"]} / {dr9["counts"]["max_cap"]}, '
+                                                   f'{dr9["counts"]["sram_pins"]} at SRAM pins',
+    "static IR drop, decapsulation activity": f'VDD {ird["VDD"]["worst_mv"]:.2f} mV, VSS {ird["VSS"]["worst_mv"]:.2f} mV '
+                                              f'worst, at {ird["total_power_w"] * 1e3:.0f} mW (ideal sources at the strap ends)',
+    "gate-level simulation (zero delay)": f'{gl9["cycles_compared"]:,} cycles, {gl9["pin_mismatches"]} output mismatches',
+    }}).rename_axis("revision B sign-off"), index=True)
+rel9 = dict(l.split()[1::-1][:2] for l in (R9/"release_sha256.txt").read_text().splitlines() if l.strip())
+nbd.show(pd.DataFrame({"SHA-256": rel9}).rename_axis("released file (compressed)"), index=True)
+nbd.show(pd.DataFrame({"SHA-256": s_["final_sha256"]}).rename_axis("database file (after gunzip)"), index=True)
+# guards for the statements made in the text above
+assert set(rel9) == {f"hskem2_rev_b_{n}.gz" for n in ("6_final.v", "6_final.def", "6_final.odb", "6_final.spef",
+                                                       "6_final.sdc", "6_final.gds", "implant_fixed.gds")}
+assert s_["final_sha256"]["6_final.gds"] == feol["signed_off_gds_sha256"]          # the released GDS is the signed-off one
+assert (dr9["counts"]["max_slew"] + dr9["counts"]["max_cap"], dr9["counts"]["sram_pins"]) == (58, 28)
+assert len({d["pin"].split("/")[0] for d in dr9["max_cap"] if d["kind"] != "SRAM pin"}) == 7      # "seven buffers"
+assert max(d["value"] for d in dr9["max_slew"] if d["kind"] == "SRAM pin") < 0.065                 # "at the edge of their tables"
+assert round(max(ird["VDD"]["worst_mv"], ird["VSS"]["worst_mv"]), 1) == 3.5
+assert gl9["pin_mismatches"] == 0 and gl9["real_x"] == 0 and gl9["flop_mismatches"] == 2 * 559 and "zero-delay" in gl9["method"]
+mA_ = json.loads((ROOT/"results/fullchip/summary.json").read_text())["orfs_metrics"]
+assert mA_["finish__timing__drv__max_slew"] + mA_["finish__timing__drv__max_cap"] == 26                # "26 in revision A"
+assert round(max(d["value"] for d in dr9["max_slew"] if d["kind"] != "SRAM pin"), 1) == 2.1 and {round(d["limit"], 1) for d in dr9["max_slew"] if d["kind"] != "SRAM pin" and d["value"] > 2} == {1.5}
+from PIL import Image as PImage
+im_ = PImage.open(ROOT/"figures/fullchip_layout_rev_b.jpg").convert("L").point(lambda v: 255 if v < 245 else 0)
+bb_ = im_.getbbox()                                                                 # the die, without the white margin
+assert abs(fc["orfs_metrics"]["finish__design__die__area"] ** 0.5 / (bb_[2] - bb_[0]) - 2.5) < 0.1   # "about 2.5 µm per pixel"
+assert s_["layout_devices"] == s_["reference_devices"] and s_["layout_nets"] == s_["reference_nets"]
+assert len(s_["truth_table_verified_cells"]) == 5 and "match uniquely" not in s_["negative_control_result"]
 """)
 
 md(r"""
@@ -2728,7 +2837,7 @@ the corrected chip passes all FEOL rules, as do all 28 block-level layouts.
 """)
 
 code(r"""
-fd = json.loads((ROOT/"results/fullchip/feol_drc.json").read_text())
+fd = json.loads((R9/"feol_drc.json").read_text())                                 # revision B
 fb = json.loads((ROOT/"results/asic/feol_blocks.json").read_text())["layouts"]
 display(pd.DataFrame({"signed-off layout": fd["signed_off_gds"]["markers_by_rule"],
                       "after the implant fix": fd["after_implant_fix"]["markers_by_rule"]}).fillna(0).astype(int)
@@ -2808,7 +2917,7 @@ HSKEM block by its hierarchical name; combinational logic cannot be attributed t
 """)
 
 code(r"""
-blk = pd.read_csv(ROOT/"results/fullchip/blocks.csv").set_index("block")
+blk = pd.read_csv(R9/"blocks.csv").set_index("block")                              # revision B
 # the attribution must account for the whole chip
 assert abs(blk.flops.sum() - m["finish__design__instance__count__class:sequential_cell"]) <= 5
 assert abs(blk.sram_area_um2.sum() - m["finish__design__instance__area__macros"]) / m["finish__design__instance__area__macros"] < 0.001
@@ -2846,6 +2955,40 @@ md(r"""
 The two blocks that set the pace of a decapsulation are small: the NTT's two lanes and register banks
 take about a thousand flip-flops instead of HSKEM-1's 154, only 3 % of the chip's flip-flop area, and the
 Keccak sponge about a tenth, with fewer flip-flops than HSKEM-1's row-serialized one.
+
+Where the die area goes is shown below. Fill, decoupling and well-tap cells occupy three fifths of the
+11.2 mm² die, because the placement density was held at 41 % so that the wiring of 18 macros could be
+routed; the logic and the macros take about 2.2 mm² each. The largest register banks stay in flip-flops:
+the key vault and the HMAC and Keccak states are read and written in parallel every cycle or erased in
+one. Per bit, the chip's two smallest macros cost more than a flip-flop (43 and 27 µm² for 24 × 128 and
+12 × 256, against 26) and its 512- to 768-word macros only somewhat less (16 to 19 µm²), so moving a bank of
+a few thousand bits would save little even where its access pattern allowed it. ORFS counts the 120,858
+well-tap cells among its 358,152 standard cells; the table puts them with the fill.
+""")
+
+code(r"""
+ab = pd.DataFrame(fc["area_by_class"]).T
+ab["share of the die [%]"] = 100 * ab.area_mm2 / (m["finish__design__die__area"] / 1e6)
+nbd.show(ab.rename(columns={"instances": "instances", "area_mm2": "area [mm²]"}).round(3).rename_axis("cell class, revision B"), index=True)
+cells9 = pd.read_csv(R9/"cells.csv.gz")
+mac9 = cells9[cells9.is_macro == 1].assign(a=lambda d: (d.x1 - d.x0) * (d.y1 - d.y0))
+bits9 = {mm: int(w) * int(b) for mm, w, b in ((mm, *re.match(r"sky130_sram_1rw_(\d+)x(\d+)", mm).groups()) for mm in mac9.master.unique())}
+um2_bit = {mm: mac9[mac9.master == mm].a.iloc[0] / bits9[mm] for mm in bits9}
+ff_bit = ab.loc["flip-flops", "area_mm2"] * 1e6 / ab.loc["flip-flops", "instances"]
+print("SRAM macro area per bit [µm²]:", {re.sub(r"sky130_sram_1rw_", "", k): round(v, 1) for k, v in sorted(um2_bit.items(), key=lambda kv: kv[1])},
+      f"; flip-flop: {ff_bit:.1f} µm² per bit")
+# guards for the statements made in the text above
+die9 = m["finish__design__die__area"] / 1e6
+assert 0.58 < ab.loc["fill and tap", "area_mm2"] / die9 < 0.62                              # "three fifths"
+assert round(100 * m["finish__design__instance__utilization"]) == 41
+logic9 = ab.drop(["SRAM macros", "fill and tap"]).area_mm2.sum()
+assert 2.1 < logic9 < 2.3 and 2.1 < ab.loc["SRAM macros", "area_mm2"] < 2.3                 # "about 2.2 mm² each"
+u_ = {re.sub(r"sky130_sram_1rw_", "", k): v for k, v in um2_bit.items()}
+assert (round(u_["24x128"]), round(u_["12x256_wpr8"]), round(ff_bit)) == (43, 27, 26)
+big_ = [v for k, v in u_.items() if int(re.match(r"\d+x(\d+)", k)[1]) >= 512]
+assert 16 <= min(big_) and max(big_) < 19.5 and len(big_) == 4                             # "16 to 19 µm²"
+assert ab.loc["flip-flops", "instances"] == m["finish__design__instance__count__class:sequential_cell"]
+assert m["finish__design__instance__count__stdcell"] - ab.drop(["SRAM macros", "fill and tap"]).instances.sum() == 120858   # well-tap cells
 """)
 
 md(r"""
@@ -2917,7 +3060,9 @@ md(r"""
 
 Place-and-route takes eight minutes to three and a half hours per design point. `RUN_PNR = True`
 regenerates the committed results on Linux with ORFS at commit `6101364b`, and the README lists the
-commands behind every other result; only the chip-level ones need the unpublished routed database.
+commands behind every other result; revision B's chip-level results start from the routed database of the
+release `hskem2-rev-b` (`flow/chip_rev_b/README.md`), while those of HSKEM-1 and revision A need their private
+databases (Section 13).
 Without ORFS, `RUN_PNR_COLAB = True` downloads an archive of the very ORFS build used here, repeats the
 pipelined-NTT run and compares it with the committed one; in a clean Ubuntu 22.04 container the archive
 reproduced every final metric of three design points.
@@ -2971,7 +3116,7 @@ cov = json.loads((ROOT/"results/prose_number_coverage.json").read_text())      #
 print(f"numbers in the prose of the body: {cov['total']}; asserted {cov['asserted']}, shown in an executed output {cov['shown']}, "
       f"neither {cov['neither']} ({cov['covered_pct']} % covered)")
 print("not tied to the data (definitions, a download size, one figure from an uncommitted development log):",
-      "; ".join(f"{t.split('.')[0][:14]}: {', '.join(v)}" for t, v in cov["neither_by_section"].items()))
+      "; ".join(f"{', '.join(v)} ({t if not t.startswith('(') else 'a code-cell comment'})" for t, v in cov["neither_by_section"].items()))
 assert cov["covered_pct"] >= 95
 """)
 

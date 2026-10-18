@@ -843,6 +843,13 @@ DEC_DECL = """`ifdef TRUSTEDGE_DEC_STREAM
     reg         di_v;  reg [6:0] di_j;
     reg         da_v;  reg [6:0] da_j;  reg [11:0] da_p0, da_p1, da_p3, da_g;
     reg         db_v;  reg [6:0] db_j;  reg [11:0] db_p0, db_t, db_c1;
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+    reg         dx_v;  reg [6:0] dx_j;  reg [11:0] dx_p0, dx_r1, dx_r2, dx_r3, dx_g;
+    reg         dy_v;  reg [6:0] dy_j;  reg [11:0] dy_p0, dy_odd;  reg [23:0] dy_prod;
+    wire [6:0]  dk_prj = dy_j;             // the product RAM is read when the pair is two stages before stage R
+`else
+    wire [6:0]  dk_prj = da_j;
+`endif
     wire        dk_pwr = (state == ST_MUL2) && !poly_index && db_v;     // first polynomial: product RAM
     wire        dk_wr  = (state == ST_MUL2) && poly_index && db_v;      // second polynomial: into the NTT
     wire [11:0] dk_c0;                     // stage R: the finished even coefficient
@@ -874,7 +881,11 @@ DEC_DATAPATH = """`ifdef TRUSTEDGE_DEC_STREAM
     wire [11:0] dq0 = da_p0, dq1 = da_p1, dq3 = da_p3;
     wire [11:0] dk_odd = sub_mod_q(sub_mod_q(dq3, dq0), dq1);
 `endif
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+    wire [23:0] dk_prod4 = dy_prod;
+`else
     wire [23:0] dk_prod4 = dq1 * da_g;
+`endif
     wire [11:0] dk_red4;
     barrett_reduce u_dec_reduce4(.a(dk_prod4), .r(dk_red4));
     assign dk_c0 = add_mod_q(db_p0, db_t);
@@ -883,6 +894,10 @@ DEC_DATAPATH = """`ifdef TRUSTEDGE_DEC_STREAM
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             di_v <= 1'b0; da_v <= 1'b0; db_v <= 1'b0; di_j <= 7'd0; da_j <= 7'd0; db_j <= 7'd0;
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+            dx_v <= 1'b0; dx_j <= 7'd0; dx_p0 <= 12'd0; dx_r1 <= 12'd0; dx_r2 <= 12'd0; dx_r3 <= 12'd0; dx_g <= 12'd0;
+            dy_v <= 1'b0; dy_j <= 7'd0; dy_p0 <= 12'd0; dy_odd <= 12'd0; dy_prod <= 24'd0;
+`endif
             da_p0 <= 12'd0; da_p1 <= 12'd0; da_p3 <= 12'd0; da_g <= 12'd0;
             db_p0 <= 12'd0; db_t <= 12'd0; db_c1 <= 12'd0;
         end else begin
@@ -892,8 +907,17 @@ DEC_DATAPATH = """`ifdef TRUSTEDGE_DEC_STREAM
 `ifdef TRUSTEDGE_PMAC_RETIME
             da_r0 <= rt_d00; da_r1 <= rt_d11; da_r2 <= rt_d01; da_r3 <= rt_d10;
 `endif
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+            dx_v <= da_v; dx_j <= da_j;
+            dx_p0 <= dq0; dx_r1 <= dq1; dx_r2 <= dq2; dx_r3 <= dq3; dx_g <= da_g;
+            dy_v <= dx_v; dy_j <= dx_j;
+            dy_p0 <= dx_p0; dy_odd <= add_mod_q(dx_r2, dx_r3); dy_prod <= dx_r1 * dx_g;
+            db_v <= dy_v; db_j <= dy_j;
+            db_p0 <= dy_p0; db_t <= dk_red4; db_c1 <= dy_odd;
+`else
             db_v <= da_v; db_j <= da_j;
             db_p0 <= dq0; db_t <= dk_red4; db_c1 <= dk_odd;
+`endif
         end
     end
 `endif
@@ -938,7 +962,7 @@ def dec_stream(s: str) -> str:
 """, """`ifdef TRUSTEDGE_DEC_STREAM
     always @(posedge clk) begin
         if (dk_pwr) product_pair_ram[db_j] <= {db_c1, dk_c0};
-        product_pair_q <= product_pair_ram[(state == ST_MUL2) ? da_j : pair_index];
+        product_pair_q <= product_pair_ram[(state == ST_MUL2) ? dk_prj : pair_index];
     end
 `else
     always @(posedge clk)
@@ -962,7 +986,7 @@ def dec_stream(s: str) -> str:
         .WIDTH(24), .DEPTH(128), .ADDR_WIDTH(7)
     ) u_product_pair_sram (
         .clk(clk), .we(dk_pwr),
-        .addr(dk_pwr ? db_j : (state == ST_MUL2) ? da_j : pair_index),
+        .addr(dk_pwr ? db_j : (state == ST_MUL2) ? dk_prj : pair_index),
         .wdata({db_c1, dk_c0}), .rdata(product_pair_q)
     );
 `else
@@ -1600,6 +1624,12 @@ PMAC_DECL = """`ifdef TRUSTEDGE_PIPE_MAC
     reg         ma_v, ma_c;  reg [6:0] ma_p;  reg [11:0] ma_p0, ma_p1, ma_p3, ma_g;
     reg         mb_v, mb_c;  reg [6:0] mb_p;  reg [11:0] mb_p0, mb_t, mb_c1;
     reg         mr_v;        reg [6:0] mr_p;  reg [11:0] mr_r0, mr_r1, macc0, macc1;
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+    // two more pipeline stages between stage A and stage B (slow-corner timing): mx registers the reduced products,
+    // my registers the product of the reduced a1 b1 with gamma and the odd sum
+    reg         mx_v, mx_c;  reg [6:0] mx_p;  reg [11:0] mx_p0, mx_r1, mx_r2, mx_r3, mx_g;
+    reg         my_v, my_c;  reg [6:0] my_p;  reg [11:0] my_p0, my_odd;  reg [23:0] my_prod;
+`endif
     wire        pmac_wr = (state == S_MUL2) && mr_v;               // a finished pair goes to the NTT
 `endif
 """
@@ -1637,8 +1667,13 @@ PMAC_DATAPATH = """`ifdef TRUSTEDGE_PIPE_MAC
     wire [11:0] rp0 = ma_p0, rp1 = ma_p1, rp3 = ma_p3;
     wire [11:0] pm_odd = sub_mod_q(sub_mod_q(rp3, rp0), rp1);
 `endif
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+    // stage B2 registered the product of the reduced a1 b1 and gamma; stage B3 reduces it
+    wire [23:0] pm_prod4 = my_prod;
+`else
     // stage B
     wire [23:0] pm_prod4 = rp1 * ma_g;
+`endif
     wire [11:0] pm_red4;
     barrett_reduce u_reduce4(.a(pm_prod4), .r(pm_red4));
     // stage R
@@ -1646,6 +1681,10 @@ PMAC_DATAPATH = """`ifdef TRUSTEDGE_PIPE_MAC
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             mi_v <= 1'b0; ma_v <= 1'b0; mb_v <= 1'b0; mr_v <= 1'b0;
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+            mx_v <= 1'b0; mx_c <= 1'b0; mx_p <= 7'd0; mx_p0 <= 12'd0; mx_r1 <= 12'd0; mx_r2 <= 12'd0; mx_r3 <= 12'd0; mx_g <= 12'd0;
+            my_v <= 1'b0; my_c <= 1'b0; my_p <= 7'd0; my_p0 <= 12'd0; my_odd <= 12'd0; my_prod <= 24'd0;
+`endif
             mi_c <= 1'b0; mi_p <= 7'd0; ma_c <= 1'b0; ma_p <= 7'd0; mb_c <= 1'b0; mb_p <= 7'd0; mr_p <= 7'd0;
             ma_p0 <= 12'd0; ma_p1 <= 12'd0; ma_p3 <= 12'd0; ma_g <= 12'd0;
             mb_p0 <= 12'd0; mb_t <= 12'd0; mb_c1 <= 12'd0;
@@ -1657,8 +1696,17 @@ PMAC_DATAPATH = """`ifdef TRUSTEDGE_PIPE_MAC
 `ifdef TRUSTEDGE_PMAC_RETIME
             ma_r0 <= rt_p00; ma_r1 <= rt_p11; ma_r2 <= rt_p01; ma_r3 <= rt_p10;
 `endif
+`ifdef TRUSTEDGE_T3_MAC_DEEP
+            mx_v <= ma_v; mx_c <= ma_c; mx_p <= ma_p;
+            mx_p0 <= rp0; mx_r1 <= rp1; mx_r2 <= rp2; mx_r3 <= rp3; mx_g <= ma_g;
+            my_v <= mx_v; my_c <= mx_c; my_p <= mx_p;
+            my_p0 <= mx_p0; my_odd <= add_mod_q(mx_r2, mx_r3); my_prod <= mx_r1 * mx_g;
+            mb_v <= my_v; mb_c <= my_c; mb_p <= my_p;
+            mb_p0 <= my_p0; mb_t <= pm_red4; mb_c1 <= my_odd;
+`else
             mb_v <= ma_v; mb_c <= ma_c; mb_p <= ma_p;
             mb_p0 <= rp0; mb_t <= pm_red4; mb_c1 <= pm_odd;
+`endif
             mr_v <= mb_v && mb_c;
             mr_p <= mb_p;
             if (mb_v && !mb_c) begin macc0 <= pm_c0; macc1 <= mb_c1; end
@@ -3027,6 +3075,71 @@ def fast_basemul(s: str, st: str, a0: str, a1: str, b0: str, b1: str, gamma: str
             f"                {st}MUL0: begin p0_q<=mul_reduced;state<={st}MUL1;end\n"
             f"                {st}MUL1: begin p1_q<=mul_reduced;state<={st}MUL2;end\n"
             "`endif\n")
+    # TRUSTEDGE_T3_SA_PIPE (slow corner): the Karatsuba sums, and gamma when it is combinational, are formed in MUL0 and
+    # registered, so MUL1 multiplies registers; the operands and the pair index do not change between MUL0 and MUL1
+    if not gamma.endswith("_q"):
+        s = rep(s, "    reg [11:0] mul_lhs, mul_rhs;\n",
+                "`ifdef TRUSTEDGE_T3_SA_PIPE\n    reg [11:0] t3_gamma_q;\n`endif\n    reg [11:0] mul_lhs, mul_rhs;\n")
+        s = rep(s, f"            {st}MUL1: begin mul_lhs=p1_q; mul_rhs={gamma}; end\n",
+                "`ifdef TRUSTEDGE_T3_SA_PIPE\n"
+                f"            {st}MUL1: begin mul_lhs=p1_q; mul_rhs=t3_gamma_q; end\n"
+                "`else\n"
+                f"            {st}MUL1: begin mul_lhs=p1_q; mul_rhs={gamma}; end\n"
+                "`endif\n")
+    s = rep(s, f"        else if (state == {st}MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end\n",
+            "`ifdef TRUSTEDGE_T3_SA_PIPE\n"
+            f"        else if (state == {st}MUL1) begin mul2_lhs = fast_sa_q; mul2_rhs = fast_sb_q; end\n"
+            "`else\n"
+            f"        else if (state == {st}MUL1) begin mul2_lhs = fast_sa; mul2_rhs = fast_sb; end\n"
+            "`endif\n")
+    s = rep(s, f"    wire [11:0] fast_sb = add_mod_q({b0}, {b1});\n",
+            f"    wire [11:0] fast_sb = add_mod_q({b0}, {b1});\n"
+            "`ifdef TRUSTEDGE_T3_SA_PIPE\n"
+            "    reg  [11:0] fast_sa_q, fast_sb_q;\n"
+            "    always @(posedge clk) begin fast_sa_q <= fast_sa; fast_sb_q <= fast_sb;"
+            + ("" if gamma.endswith("_q") else f" t3_gamma_q <= {gamma};") + " end\n"
+            "`endif\n")
+    # TRUSTEDGE_T3_MUL_SEL (with T3_SA_PIPE, FAST_BASEMUL and PMAC_RETIME): the operands of the two pair multipliers are
+    # chosen by a registered flag (MUL1 always follows MUL0) instead of a decode of the state register, which sat at the
+    # head of the slow-corner path state -> multiplier -> Barrett -> p?_q. The products are latched in MUL0 and MUL1 only.
+    g1 = gamma if gamma.endswith("_q") else "t3_gamma_q"
+    s = rep(s, "    wire [23:0] mul_product=mul_lhs*mul_rhs;\n",
+            "`ifdef TRUSTEDGE_T3_MUL_SEL\n"
+            "    reg         t3_in_mul1_q;                 // this cycle is MUL1 (the last one was MUL0)\n"
+            f"    always @(posedge clk) t3_in_mul1_q <= (state == {st}MUL0);\n"
+            # TRUSTEDGE_T3_SEL_REP: the flag fans out to some 300 loads of the two multipliers' partial products (5 to 6 ns
+            # of buffering at ss), so each operand gets its own copy. Identical copies are merged by synthesis even with
+            # (* keep *), so the four differ in polarity and reset (the value at reset is irrelevant: the products are only
+            # latched in MUL0 and MUL1, and every copy is written each cycle).
+            "`ifdef TRUSTEDGE_T3_SEL_REP\n"
+            "    reg         t3_sel_ml, t3_sel_mr_n, t3_sel_m2l, t3_sel_m2r_n;\n"
+            f"    always @(posedge clk) begin t3_sel_ml <= (state == {st}MUL0); t3_sel_mr_n <= (state != {st}MUL0); end\n"
+            "    always @(posedge clk or negedge rst_n)\n"
+            "        if (!rst_n) begin t3_sel_m2l <= 1'b0; t3_sel_m2r_n <= 1'b1; end\n"
+            f"        else begin t3_sel_m2l <= (state == {st}MUL0); t3_sel_m2r_n <= (state != {st}MUL0); end\n"
+            f"    wire [11:0] t3_ml = t3_sel_ml ? p1_q : {a0};\n"
+            f"    wire [11:0] t3_mr = !t3_sel_mr_n ? {g1} : {b0};\n"
+            "`else\n"
+            f"    wire [11:0] t3_ml = t3_in_mul1_q ? p1_q : {a0};\n"
+            f"    wire [11:0] t3_mr = t3_in_mul1_q ? {g1} : {b0};\n"
+            "`endif\n"
+            "    wire [23:0] mul_product = t3_ml * t3_mr;\n"
+            "`else\n"
+            "    wire [23:0] mul_product=mul_lhs*mul_rhs;\n"
+            "`endif\n")
+    s = rep(s, "    wire [23:0] mul2_product = mul2_lhs * mul2_rhs;\n",
+            "`ifdef TRUSTEDGE_T3_MUL_SEL\n"
+            "`ifdef TRUSTEDGE_T3_SEL_REP\n"
+            f"    wire [11:0] t3_m2l = t3_sel_m2l ? fast_sa_q : {a1};\n"
+            f"    wire [11:0] t3_m2r = !t3_sel_m2r_n ? fast_sb_q : {b1};\n"
+            "`else\n"
+            f"    wire [11:0] t3_m2l = t3_in_mul1_q ? fast_sa_q : {a1};\n"
+            f"    wire [11:0] t3_m2r = t3_in_mul1_q ? fast_sb_q : {b1};\n"
+            "`endif\n"
+            "    wire [23:0] mul2_product = t3_m2l * t3_m2r;\n"
+            "`else\n"
+            "    wire [23:0] mul2_product = mul2_lhs * mul2_rhs;\n"
+            "`endif\n")
     return s
 
 
@@ -3364,11 +3477,25 @@ def edit_tb(s: str) -> str:
     return s.replace(x, "            mlkem_stage_cycles !== EXPECTED_DECAPS_CYCLES ||\n")
 
 
-EDITS = {"rtl/trustedge_top.v": edit_top,
-         "rtl/mlkem512/mlkem512_partial_kem_selftests.sv": edit_decaps,
-         "rtl/mlkem512/mlkem512_kpke_encrypt_selftest.sv": edit_encrypt,
-         "rtl/mlkem512/mlkem512_ciphertext_codec.sv": edit_codec,
-         "sim/tb/tb_trustedge_spi.sv": edit_tb}
+from t3_matrix_mac_edit import edit_matrix_mac
+from t3_bridge_edit import edit_bridge
+from t3_tb_edit import edit_tb_t3
+from t3_barrett_edit import edit_barrett
+from t3_pmac_raw_edit import edit_pmac_raw_encrypt, edit_pmac_raw_decaps
+from t3_codec_retime_edit import edit_codec_retime
+from t3_decaps_msg_edit import edit_decaps_msg
+from t3_load_pipe_edit import edit_load_pipe
+from t3_margin_edit import edit_margin_top, edit_margin_matrix
+from t3_ek_pref_edit import edit_ek_pref
+
+EDITS = {"rtl/mlkem512/mlkem512_matrix_mac_selftest.sv": lambda t: edit_margin_matrix(edit_matrix_mac(t)),
+         "rtl/math/barrett_reduce.v": edit_barrett,
+         "rtl/spi/spi_command_bridge.v": edit_bridge,
+         "rtl/trustedge_top.v": lambda t: edit_margin_top(edit_top(t)),
+         "rtl/mlkem512/mlkem512_partial_kem_selftests.sv": lambda t: edit_ek_pref(edit_decaps_msg(edit_pmac_raw_decaps(edit_decaps(t)))),
+         "rtl/mlkem512/mlkem512_kpke_encrypt_selftest.sv": lambda t: edit_load_pipe(edit_pmac_raw_encrypt(edit_encrypt(t))),
+         "rtl/mlkem512/mlkem512_ciphertext_codec.sv": lambda t: edit_codec_retime(edit_codec(t)),
+         "sim/tb/tb_trustedge_spi.sv": lambda t: edit_tb_t3(edit_tb(t))}
 
 
 def main(src: Path, dst: Path, cac_rtl: Path, diff_out: Path) -> None:
