@@ -15,7 +15,7 @@ correct, wrong and unresolved outcomes, and trace failures to their exact record
 Rank mean energy only after every included point qualifies. If none does, return NONE,
 not the best average.
 
-**Why NONE at 1 mV? (Section 9, later extension.)** Every wrong decision occurs when the input lies between zero and the static post-calibration residual offset (303/303, no misses), and sealed predictions for six new designs matched 97.9% of 10,584 held-out decisions. The limit is the trim, not latch speed: first the binary array's major-carry step, then, once unit elements remove it, the trim range (a 5-bit unit trim saturates in 11 of 49 conditions). A unit-element 6-bit trim with a doubled input pair, tested with sealed predictions over all 49 conditions, is the only design here that qualifies at +/-1 mV (at 1 and 2 ns), at about 3x mean core energy (760 vs 250 fJ); in paired mismatch Monte Carlo (40 seeds at each of two conditions) it keeps the residual within 0.59 mV. These are later schematic simulations; it has no layout of its own. See Notebook Section 9 and the [research extension](REPRODUCIBILITY.md#research-extension).
+**Why NONE at 1 mV? (Section 9, later extension.)** Every wrong decision occurs when the input lies between zero and the static post-calibration residual offset (303/303, no misses, four observed-correct false positives), and sealed predictions for six new designs matched 97.9% of 10,584 held-out decisions. The limit is the trim, not latch speed: first the binary array's major-carry step, then, once unit elements remove it, the trim range (a 5-bit unit trim saturates in 11 of 49 conditions). Among the designs tested in the finite 49-condition schematic atlas, `unit6_w6` (r15b: 6-bit unit trim, input W = 6 µm), tested with sealed predictions, is the only one that qualifies at ±1 mV at 1 and 2 ns (98/98 decisions at each), with 760 fJ mean core energy over that band. For context, the shipped design requires a ≥3 mV band and averages 250 fJ there; these are different specifications, not a same-specification energy comparison. In paired mismatch Monte Carlo (40 seeds at each of two conditions; not a yield estimate) it keeps the residual within 0.59 mV. These are later schematic simulations; it has no layout of its own. See Notebook Section 9 and the [research extension](REPRODUCIBILITY.md#research-extension).
 
 ## A three-minute route
 
@@ -23,7 +23,7 @@ not the best average.
 2. Inspect each design's qualification and exact failing keys, trim codes, latencies and CSV record locations. Only identity-matched retained traces get a waveform link; other keys show measurement records.
 3. Compare wrong with unresolved: the same 20 selected +/-1 mV wrong samples remain at 2 ns. Then read the separate b1/a1 layout example and its physical-fidelity warning.
 
-| 1 ns sampled band | Strict choice | Correct / included points | Mean core energy |
+| Original sealed three-design atlas: 1 ns sampled band | Strict choice | Correct / included points | Mean core energy |
 |---|---|---|---|
 | >=1 mV | NONE | No candidate qualifies at all points | null, not zero |
 | >=3 mV | lvt_balanced_4b | 294/294 | 249.655 fJ |

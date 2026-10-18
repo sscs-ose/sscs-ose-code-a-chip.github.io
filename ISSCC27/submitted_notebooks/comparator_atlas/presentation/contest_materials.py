@@ -23,6 +23,15 @@ OUTPUT = ROOT / "results" / "study"
 PRESENTATION_TITLE = "Comparator Atlas: correct before the deadline - or NONE?"
 INK, BLUE, MUTED, RULE = "#20252b", "#365d7d", "#505963", "#dce1e5"
 PAGE_INCHES = (24, 18)
+EXTENSION_CALLOUT = (
+    "Later extension (Notebook Section 9; not part of this sealed record): unit6_w6, a 6-bit "
+    "unit trim with input W = 6 um, qualifies at +/-1 mV at 1 and 2 ns over all 49 schematic "
+    "conditions, at 760 fJ mean core energy. No layout of its own.")
+EXTENSION_ABSTRACT = (
+    "Later schematic extension (Notebook Section 9; not part of the sealed three-design record): "
+    "unit6_w6, a 6-bit unit-element trim with input W = 6 um, qualifies across the 49-condition "
+    "atlas at +/-1 mV at 1 and 2 ns, at 760 fJ mean core energy. It has no dedicated layout; its "
+    "40-seed-per-condition threshold-mismatch study is not a yield estimate.")
 DESIGN_REFERENCES = [
     "https://mitcommlab.mit.edu/nse/commkit/poster/",
     "https://mitcommlab.mit.edu/nse/wp-content/uploads/sites/4/2019/07/PosterExampleJepeal.jpg",
@@ -108,9 +117,10 @@ def poster_figure(facts: dict):
          "expected polarity, before the deadline. "
          "Wrong polarity and unresolved outputs are separate outcomes.",
          width=column_width)
-    text(left, 0.218, "Read stored measurements, not new simulations. "
+    text(left, 0.240, "Read stored measurements, not new simulations. "
          "A later deadline changes the readout, not the "
-         "full 20-30 ns core-energy cycle.", 17, width=column_width)
+         "full 20-30 ns core-energy cycle.", 15, width=column_width)
+    text(left, 0.192, EXTENSION_CALLOUT, 15, BLUE, width=column_width, role="extension")
 
     text(center, 0.797, "Calibrated SCHEMATIC, not layout RC.\n"
          "local_boundary; all 49 controlled-width-stress conditions. "
@@ -264,7 +274,8 @@ def build() -> Path:
         "ranks designs; the original training selection is unchanged. The selected "
         f"design retains the same {facts['sampled_schematic']['selected_wrong']['count_1ns']} "
         "wrong keyed samples at 1 ns and 2 ns, all at +/-1 mV; "
-        "their locations do not establish a physical failure cause.\n\n"
+        "their locations do not establish a physical failure cause. "
+        + EXTENSION_ABSTRACT + "\n\n"
         "The adopted local-pitch b1 layout reduces all-material bbox area from "
         "matched adopted a1's 2074.254 to 1873.3 um2 (9.688013%), preserving 27 guarded MOS devices "
         "and 15 ports. A separate paired 45-PVT qualification at nominal geometry, "

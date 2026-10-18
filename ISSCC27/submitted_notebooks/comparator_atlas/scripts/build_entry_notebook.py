@@ -923,17 +923,26 @@ def main(support_digest: str | None = None) -> None:
         > loaded from a hash-checked archive; commands and runtimes are in
         > [Reproducibility](REPRODUCIBILITY.md#research-extension).
 
+        **Headline result.** The original three-design atlas returns NONE at
+        1 mV, but a later design, `unit6_w6` (r15b: 6-bit unit trim, input
+        W = 6 µm), qualifies at ±1 mV at 1 and 2 ns across all 49
+        deterministic conditions. Its cost is 760 fJ mean core energy, and it
+        remains schematic-only. The rest of this section explains why the
+        original designs stop short, and what failed along the way.
+
         **Question.** Section 4 finds *no feasible compared design* at
         input bands of 1 mV or below, at every deadline. Is that a latch-speed
         limit or a calibration limit?
 
         **A one-line law.** Calibration leaves each comparator with a static
         residual offset *m*, measured at the 3.5 ns calibration deadline.
-        A resolved decision on input *v* is wrong exactly when
+        In this dataset, a resolved decision on input *v* is flagged when
         0 < *v*/*m* < 1, i.e. when *v* lies between zero and *m*. Over the three
         atlas designs and six deadlines this flags all 303 wrong decisions
-        among 5,295 resolved ones, with no misses and 4 false alarms
-        (all lvt_base_3b). The selected design keeps |*m*| > 1 mV in 20 of
+        among 5,295 resolved ones, with no misses and four observed-correct
+        false positives (all lvt_base_3b). Every observed wrong decision lies
+        between zero and the residual offset, although the condition is not
+        sufficient in those four cases. The selected design keeps |*m*| > 1 mV in 20 of
         49 conditions (maximum 2.58 mV), so it cannot qualify at 1 mV however
         long it is given: the limit is the trim, not regeneration speed.
         """),
@@ -947,10 +956,11 @@ def main(support_digest: str | None = None) -> None:
         """),
         markdown("""
         **Prospective test.** For six designs never simulated before, the law
-        plus a decision-time model fitted only on |*v*| ≥ 3 mV predicted every
-        held-out outcome (±0.25 to ±1 mV) before those inputs were simulated;
-        the predictions were sealed by sha256. 10,359 of 10,584 decisions
-        (97.9%) and all 108 predictive atlas cells agreed. None of those six
+        plus a decision-time model fitted only on |*v*| ≥ 3 mV issued
+        predictions for all 10,584 held-out decisions (±0.25 to ±1 mV) before
+        those inputs were simulated; the predictions were sealed by SHA-256.
+        Of these, 10,359 (97.9%) matched, and all 108 predictive atlas-cell
+        classifications agreed. None of those six
         qualifies at 1 mV either. The atlas table also lists the three later
         trim designs discussed below (r13, r15).
 
@@ -988,13 +998,15 @@ def main(support_digest: str | None = None) -> None:
         below). Keeping the 5-bit unit trim with the original W = 3 µm input
         pair (coarser step) removes saturation but leaves |*m*| up to
         1.33 mV: ≥3 mV at 1 ns at 402 fJ, no better than the shipped design.
-        Keeping W = 6 µm and adding a sixth unit bit (±63 codes) keeps the
-        fine step *and* covers the skew: codes reach −52, |*m*| ≤ 0.55 mV in
-        all 49 conditions, and the design qualifies at **±1 mV at 1 ns and
-        2 ns** (98 of 98 ±1 mV decisions correct at each), at 760 fJ mean
-        core energy, about 3× the shipped design's 250 fJ at ±3 mV. It is the
-        only design in this study that answers Section 4's 1 mV question with
-        something other than NONE. At 0.75 ns it qualifies at ±3 mV: the
+        Keeping W = 6 µm and adding a sixth unit bit (±63 codes),
+        `unit6_w6`, keeps the fine step *and* covers the skew: codes reach
+        −52, |*m*| ≤ 0.55 mV in all 49 conditions, and the design qualifies
+        at **±1 mV at 1 ns and 2 ns** (98 of 98 ±1 mV decisions correct at
+        each), at 760 fJ mean core energy over that band. For context, the
+        shipped design requires a ≥3 mV band and averages 250 fJ there; these
+        are different specifications, not a same-specification energy
+        comparison. It is the only tested design in this finite 49-condition
+        schematic atlas that qualifies at ±1 mV. At 0.75 ns it qualifies at ±3 mV: the
         sealed ±1 mV prediction failed by one unresolved decision
         (SS 1.62 V 125 °C, +4% skew, *v* = −1 mV against *m* = −0.55 mV).
         Held-out agreement was 96.1% (5-bit) and 95.1% (6-bit). The shared
@@ -1043,6 +1055,10 @@ def main(support_digest: str | None = None) -> None:
         """),
         markdown("""
         ## 10. Discussion and limitations
+
+        This discussion summarizes the sealed Sections 1–8 record. Section 9
+        is a separate later schematic extension and reports the `unit6_w6`
+        result and its additional limitations.
 
         Under the same local calibration policy, the selected circuit
         increases 1 ns correct decisions from 310/392 to 372/392 across

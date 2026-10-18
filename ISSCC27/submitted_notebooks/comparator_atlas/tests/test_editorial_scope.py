@@ -71,3 +71,4 @@ def test_reproduction_and_abstract_keep_populations_separate():
     assert "24 unresolved" in abstract and "22 unresolved" in abstract and "2 ns primary deadline" in abstract
     assert "not uncertainty bounds" in abstract
     assert "post-hoc" in abstract and "not a robust PPA" in abstract
+    assert "not part of the sealed three-design record" in abstract and "not a yield estimate" in abstract

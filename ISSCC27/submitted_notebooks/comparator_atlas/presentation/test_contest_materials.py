@@ -75,6 +75,7 @@ def test_actual_poster_text_bounds_columns_contrast_and_semantics(facts):
             "2074.254", "1873.300", "9.69%", "421.04", "412.88", "1.760",
             "Local-pitch b1", "no signoff", "no lost correct keys",
             "GitHub Copilot assisted", "the author is responsible",
+            "Later extension (Notebook Section 9; not part of this sealed record)",
         ):
             assert required in text.replace("\n", " "), required
         assert "Archived RC-deck outcomes; model physical fidelity not yet qualified" in text
