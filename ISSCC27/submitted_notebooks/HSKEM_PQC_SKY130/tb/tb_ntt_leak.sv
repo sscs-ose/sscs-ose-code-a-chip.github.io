@@ -15,7 +15,17 @@ module tb_ntt_leak;
 
     always #5 clk = ~clk;
 
-`ifdef NTT_PACKED2
+`ifdef GLS_CAP
+    // gate-level trace (scripts/run_leakage_gls.sh): the routed netlist of the two-lane engine; each sample is the
+    // capacitance switched in the cycle, from leak_cap_mon (scripts/leak_cap_monitor.py), not a register distance
+    kyber_ntt_engine_packed2 dut (
+        .clk(clk), .rst_n(rst_n), .start(start), .inverse(1'b0),
+        .busy(busy), .done(done), .waddr(waddr), .wdata(wdata), .we(we),
+        .rdata(rdata), .raddr(8'd0),
+        .we_pair(1'b0), .wdata_odd(12'd0), .rdata_pair(), .stream(1'b0), .re(1'b0));
+    localparam integer W = 1;
+    wire [W-1:0] regs = 1'b0;
+`elsif NTT_PACKED2
     kyber_ntt_engine_packed2 #(.EXTRA_STAGE(1'b1)) dut (
         .clk(clk), .rst_n(rst_n), .start(start), .inverse(1'b0),
         .busy(busy), .done(done), .waddr(waddr), .wdata(wdata), .we(we),
@@ -75,9 +85,16 @@ module tb_ntt_leak;
             end
             @(negedge clk); we = 0; start = 1;
             prev = regs;
+`ifdef GLS_CAP
+            leak_cap_mon.acc = 0;
+`endif
             @(negedge clk); start = 0;
             while (!done) begin
+`ifdef GLS_CAP
+                hd = leak_cap_mon.acc; leak_cap_mon.acc = 0;
+`else
                 hd = $countones(regs ^ prev);
+`endif
                 $fwrite(fd, "%0d ", hd);
                 prev = regs;
                 @(negedge clk);

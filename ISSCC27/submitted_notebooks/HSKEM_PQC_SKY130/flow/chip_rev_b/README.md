@@ -1,4 +1,4 @@
-# HSKEM-2 revision B: RTL, flow and sign-off record
+# HSKEM-2, signed-off layout (release tag rev-b): RTL, flow and sign-off record
 
 This folder holds what built the signed-off chip of Section 9 and Appendix C: the RTL that the published sources do not
 carry, the flow scripts as they ran, and the sign-off and analysis scripts behind `results/fullchip/rev_b/`. The routed
@@ -30,14 +30,14 @@ the netlist with the scripts of `signoff/`.
 ## The RTL
 
 `rtl/make_root.sh <out dir>` rebuilds the synthesized RTL from the published sources: `hskem_rtl/`, the ASIC wrapper of
-this folder (`rtl/asic/rtl/`, which binds the 18 SRAM macros), `scripts/make_packed_system.py` with the revision-B edits
+this folder (`rtl/asic/rtl/`, which binds the 18 SRAM macros), `scripts/make_packed_system.py` with the edits of the signed-off layout
 (`scripts/t3_*_edit.py`) and the two chip edits (the NTT store bound to its 24 × 128 macro, the one-round Keccak as the
 core's default). Its output is identical, file for file, to the root the chip was synthesized from: the script checks
 every file against `results/fullchip/rev_b/root_sha256.txt` and prints `ROOT_MATCHES_CHIP`. The logic carries
 only the public placeholder provisioning credential.
 
-The chip was synthesized with the defines of `flow/config.mk` (the SRAM store, milestone H of Section 8 and revision A's
-two *(chip)* defines `TRUSTEDGE_PMAC_RETIME`, `TRUSTEDGE_SO_PIPE`) plus the fourteen of revision B, each documented at the
+The chip was synthesized with the defines of `flow/config.mk` (the SRAM store, the streamed system of Section 8 and the first layout's
+two *(chip)* defines `TRUSTEDGE_PMAC_RETIME`, `TRUSTEDGE_SO_PIPE`) plus the fourteen of the signed-off layout, each documented at the
 top of its edit script:
 
 | Define | Edit script | What it moves out of a half-cycle SRAM path |
@@ -55,7 +55,7 @@ top of its edit script:
 | `TRUSTEDGE_T3_EK_PREF` | `t3_ek_pref_edit.py` | the H(ek) feed from a register |
 
 `scripts/t3_tb_edit.py` updates the testbench's expected cycle counts; with every define off the generator builds
-milestone H unchanged.
+the streamed system of Section 8 unchanged.
 
 ## Tools
 
@@ -82,7 +82,9 @@ directories of the run, and are meant to be read and adapted, not run unchanged.
 4. Final stage, extraction and timing at three corners with SPICE macro views (`flow/final_t3.sh`, `final_sta_t3.sh`,
    `final_sta.tcl`, `t3_spice_views.py`).
 5. Sign-off (`signoff/signoff_t3e.sh`, `chain_20261017.sh`): KLayout DRC in eight part decks (`signoff_drc_split.sh`,
-   `drc_split/`), Netgen LVS (`lvs/`, `lvs_rest2_t3e.sh`) and the front-end rules (`feol_chipv2.sh`).
+   `drc_split/`), Netgen LVS (`lvs/`, `lvs_rest2_t3e.sh`) and the front-end rules (`feol_chipv2.sh`); then Magic's
+   SKY130 deck (`magic_drc_boxes.sh`, `classify_magic_drc.py` for markers inside and outside the macros,
+   `magic_cell_check.sh` for the stand-alone cell and macro checks).
 6. Analysis (`analysis/`): gate-level simulation over a decapsulation (`gls_t3e.sh`), energy (`fullchip_power_t3e.sh`,
    `sram_access_t3e.sh`; `power_t3e_restretch.sh` corrected a first run that had not stretched the activity file),
    IR drop (`ir_drop.tcl`, `ir_t3e_vcd.sh`), hold into the macros (`macro_hold_t3e.sh`) and the SPICE input-timing points
