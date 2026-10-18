@@ -27,6 +27,8 @@ The flow writes two files from its pick (notebook §9.4). Nothing in them is typ
 | `reports/pex/vga_core_12t_pex.spice` | Parasitic extraction, run natively: every transistor finger as drawn, dummies included, with its junction areas and perimeters, and every parasitic capacitor (C only) |
 | `reports/pex/vga_core_12t_pex_rc.spice`, `reports/pex/rc_report.txt` | The extraction with resistance (Magic `extresist`, run natively): the same transistor fingers and capacitance, plus the resistance of every wire, supply and ground meshes included; the report checks the capacitance against the capacitance-only extraction and gives each signal net's resistance and RC pole |
 | `reports/layout_analysis.txt` | Output of `analyze_layout.py` on the extraction |
+| `reports/antenna/` | Magic `antennacheck` on the flattened GDS, run natively (17 Oct), with its script `demo_antenna.sh`, tool versions, summary and raw logs. A control cell (a gate wired to a large metal plate) must be flagged, so a check that cannot flag anything is detected |
+| `reports/extra_drc/` | The official KLayout deck's checks that are off by default (off-grid shapes, floating metal), switched on and run natively (17 Oct) on the GDS, with controls that must be flagged, the script `demo_extra_drc.sh`, tool versions, the report databases (`*.lyrdb`) and logs. This is not an antenna check: no KLayout antenna deck was run |
 | `layout_report.json` | The sign-off verdicts the notebook reads (written by `tools/import_signoff.py` from the reports) |
 | `layout1/` | The first layout, drawn for an interim sizing. Its extraction feeds §9.3 |
 
@@ -37,9 +39,18 @@ Matching assumed by the flow and built by the generator:
 * M5, M10, M11, M12: one array of unit devices, with M10 and M11 on the same centroid (their mismatch moves the
   output DC level).
 
-The reports are as the author's scripts wrote them, except for two edits: absolute paths are shortened to `~/`,
-and the native proof's host name is replaced by "native (author machine, gLayout venv)". The fingerprints, verdicts
-and counts are unchanged.
+The reports are as the author's scripts wrote them, except for two edits: absolute paths are shortened to `~/`
+(this includes the antenna and extra-DRC logs and report databases, where the author's home directory name is replaced
+by `~`), and the native proof's host name is replaced by "native (author machine, gLayout venv)". The fingerprints,
+verdicts and counts are unchanged.
+
+**The 44 extraction warnings.** Magic's extraction of the layout prints 44 warnings, and the antenna check does not change
+that count (`reports/antenna/verify_demo_antenna/layout.log`: 44 before, 44 after). The layout has 44 dummy transistors,
+each with drain, gate and source on one rail, and Magic reports a device with fewer distinct connections than a normal one
+as a warning and connects the remainder to that rail (the author reports the message as `device missing 1 terminal`; the
+message text itself is not in the committed logs). The committed extracted netlist `reports/pex/vga_core_12t_pex.spice` has
+724 transistors, of which 44 have drain, gate and source on one net: 36 NMOS on `gnd` and 8 PMOS on `vdd`. LVS ignores these
+shorted devices by design; they are in the extraction used for the post-layout gate and add junction capacitance to the rails.
 
 ## Rerunning
 
@@ -50,6 +61,10 @@ and counts are unchanged.
 * **Sign-off verdicts**: `python tools/import_signoff.py` re-reads the reports into `layout_report.json`. It checks
   that the SHA-256 recorded in both proof files matches the committed GDS, netlist, sizes file and `verify12t.py`, and that all six
   negative controls ran and were rejected. The notebook repeats the hash check on every run.
+* **Antenna and extra deck checks**: `reports/antenna/demo_antenna.sh` and `reports/extra_drc/demo_extra_drc.sh` (Magic; KLayout
+  with the `sky130A_mr.drc` deck and `PDK_ROOT`). Both expect a folder whose `layout/` subfolder holds the GDS (set `GL12`).
+  `python tools/import_signoff.py` reads their raw logs and report databases into `layout_report.json` and checks that the
+  GDS fingerprint they print is the committed GDS.
 * **DRC, LVS and extraction**: the author's scripts, in IIC-OSIC-TOOLS (or any machine with KLayout, Magic and
   Netgen) with `PDK_ROOT` set:
   * `generator/prove_signoff.sh` writes the proof file. It expects a folder whose `layout/` subfolder holds the GDS,

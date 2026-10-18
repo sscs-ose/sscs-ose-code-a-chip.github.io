@@ -52,9 +52,10 @@ def main():
         changed the results, it shows the previous run's summary until the notebook runs once more."""
         import json as _j
         R_ = _j.loads((cwd / "cache" / "results.json").read_text()) if (cwd / "cache" / "results.json").exists() else {}
-        out = "".join("".join(o.get("data", {}).get("text/markdown", "")) for o in nb_.cells[1].get("outputs", []))
+        top_ = next((c for c in nb_.cells if c.cell_type == "code" and "first_md" in c.source and "display(Markdown" in c.source), None)
+        out = "".join("".join(o.get("data", {}).get("text/markdown", "")) for o in (top_.get("outputs", []) if top_ else []))
         norm = lambda t: re.sub(r"\s+", " ", t).strip()
-        return not R_.get("tldr_md") or norm(R_["tldr_md"]) in norm(out)
+        return not R_.get("first_md") or norm(R_["first_md"]) in norm(out)
     try:
         for i, (label, on) in enumerate(passes):
             nb = nbformat.read(path, 4); set_flags(nb, on)

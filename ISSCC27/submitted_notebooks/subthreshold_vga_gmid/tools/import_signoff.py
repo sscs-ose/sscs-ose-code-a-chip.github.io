@@ -67,6 +67,44 @@ def run(folder, proof_file, env_file=None):
     return out
 
 
+def extras():
+    """The Magic antenna check and the official KLayout deck's off-by-default checks (off-grid, floating metal).
+
+    Both were run natively by the layout author with a demo script that also runs a control (a layout that MUST be flagged),
+    so a check that cannot flag anything is detected. Read from the raw logs, not from the summaries: antenna violations are
+    the growth of Magic's feedback count over antennacheck; the deck's findings are the items in its report databases."""
+    import xml.etree.ElementTree as ET
+    gds = sha(ROOT / "layout" / "vga_core_12t.gds")
+    out = {}
+    d = REP / "antenna"
+    if (d / "verify_demo_antenna" / "layout.log").exists():
+        def cnt(f):
+            t = (d / "verify_demo_antenna" / f).read_text()
+            b, a = re.findall(r"^BEFORE=(\d+)", t, re.M), re.findall(r"^AFTER=(\d+)", t, re.M)
+            return int(a[-1]) - int(b[-1]), int(b[-1])
+        ctl, _ = cnt("control.log")
+        lay, pre = cnt("layout.log")
+        summ = next(d.glob("ANTENNA_SUMMARY_*.txt")).read_text()
+        m = re.search(r"layout ([0-9a-f]{16})", summ)
+        tv = dict(l.split(":", 1) for l in next(d.glob("TOOL_VERSIONS_*.txt")).read_text().splitlines() if ":" in l)
+        out["antenna"] = dict(control_flagged=ctl, violations=lay, extraction_warnings=pre,
+                              gds_matches=bool(m) and gds.startswith(m.group(1)), magic="Magic " + tv["magic"].strip(),
+                              valid=ctl > 0 and bool(m) and gds.startswith(m.group(1)),
+                              unknown_layer_reads=(d / "verify_demo_antenna" / "layout.log").read_text().count("layer=64 type=44"))
+    d = REP / "extra_drc"
+    if (d / "verify_demo_extra_drc" / "layout.lyrdb").exists():
+        def items(f):
+            return len(ET.parse(d / "verify_demo_extra_drc" / f).getroot().findall(".//item"))
+        summ = next(d.glob("EXTRA_DRC_SUMMARY_*.txt")).read_text()
+        m = re.search(r"layout ([0-9a-f]{16})", summ)
+        tv = dict(l.split(":", 1) for l in next(d.glob("TOOL_VERSIONS_*.txt")).read_text().splitlines() if ":" in l)
+        c1, c2, lay = items("ctl_offgrid.lyrdb"), items("ctl_floating.lyrdb"), items("layout.lyrdb")
+        out["extra_drc"] = dict(control_offgrid=c1, control_floating=c2, violations=lay, gds_matches=bool(m) and gds.startswith(m.group(1)),
+                                klayout=tv["klayout"].strip(), deck="sky130A_mr.drc",
+                                valid=c1 > 0 and c2 > 0 and bool(m) and gds.startswith(m.group(1)))
+    return out
+
+
 def main():
     native = run(REP, "signoff_proof_native.txt")
     native["environment"] = dict(where="layout author's machine, gLayout virtual environment")
@@ -96,12 +134,15 @@ def main():
                gds="layout/vga_core_12t.gds", container_tools=tools, extraction="native (generator's environment)",
                time=native["proof_time"], steps=steps, runs=dict(native=native, container=cont),
                ok=runs_ok and all(s["ok"] for s in steps))
+    rep.update(extras())
     lf.REPORT.write_text(json.dumps(rep, indent=1))
     for k, r in rep["runs"].items():
         print(f"{k}: DRC {'PASS' if r['drc']['passed'] else 'FAIL'} {r['drc']['violations']}; LVS "
               f"{'unique match' if r['lvs']['unique'] else 'NO MATCH'}{', property errors' if r['lvs']['property_errors'] else ''}; "
               f"negative controls rejected {sum(n['rejected'] for n in r['negative_controls'])}/{len(r['negative_controls'])}; "
               f"fingerprints of the committed files {'match' if r['fingerprints_match'] else 'DO NOT MATCH'}")
+    for k, v in extras().items():
+        print(f"{k}: " + ", ".join(f"{a}={b}" for a, b in v.items()))
     print("overall:", "PASS" if rep["ok"] else "FAIL", "->", lf.REPORT.relative_to(ROOT))
 
 

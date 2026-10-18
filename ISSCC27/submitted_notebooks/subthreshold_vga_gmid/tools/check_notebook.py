@@ -99,10 +99,14 @@ def main():
     if rjp.exists():
         R = json.loads(rjp.read_text())
         W.extend(prose_check(nb, R))
-        top = out_text(nb["cells"][1]) if nb["cells"][1]["cell_type"] == "code" else ""
+        top_i = next((i for i, c in enumerate(nb["cells"]) if c["cell_type"] == "code" and "first_md" in "".join(c["source"])
+                      and "display(Markdown" in "".join(c["source"])), None)
+        top = out_text(nb["cells"][top_i]) if top_i is not None else ""
         norm = lambda t: re.sub(r"\s+", " ", t).strip()
-        if R.get("tldr_md") and top and norm(R["tldr_md"]) not in norm(top):
-            E.append("cell 1: the TL;DR shown at the top differs from the one this run generated - run the notebook twice")
+        if R.get("first_md") and top_i is not None and norm(R["first_md"]) not in norm(top):
+            E.append(f"cell {top_i}: the first screen shown at the top differs from the one this run generated - run the notebook twice")
+        if R.get("first_md") and top_i is None:
+            E.append("the first-screen cell (first_md) is missing")
 
     md = "\n".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "markdown")
     if "**(A — layout completed)**" in md and "**(B — layout not included)**" in md:
