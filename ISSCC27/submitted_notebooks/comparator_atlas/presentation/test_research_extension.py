@@ -113,8 +113,31 @@ def test_cost_tables(data):
     assert energy.loc["Shipped: binary 4b, input W 3", "TT 1.8 V 27 C (fJ)"] == "244 / 252"
     assert energy.loc["Fix: unit 5b, input W 6", "TT 1.8 V 27 C (fJ)"] == "420 / 444"
     rc = ext.postlayout_table(data)
-    assert rc.loc["Fix, schematic", "correct @ 1.0 ns"] == "180/180"
-    assert rc.loc["Fix, estimated RC", "correct @ 1.0 ns"] == "178/180"
+    col = "+/-3, 10 mV correct @ 1.0 ns"
+    assert rc.loc["r11 fix, schematic (binary-sized netlist)", col] == "180/180"
+    assert rc.loc["r11 fix, estimated RC", col] == "178/180"
+
+
+def test_six_bit_post_layout_estimate(data):
+    rc = ext.postlayout_table(data)
+    assert rc.loc["r17 fix, schematic (unit-array netlist)", "+/-3, 10 mV correct @ 1.0 ns"] == "180/180"
+    six = rc.loc["r17 unit6_w6, schematic"]
+    assert [six[f"+/-1 mV correct @ {d} ns"] for d in ("0.75", "1.0", "2.0")] == ["90/90"] * 3
+    est = rc.loc["r17 unit6_w6, estimated RC"]
+    assert (est["+/-1 mV correct @ 1.0 ns"], est["+/-1 mV correct @ 2.0 ns"]) == ("69/90", "90/90")
+    assert rc.loc["r17 unit6_w6, estimated RC, half q-node wiring", "+/-1 mV correct @ 1.0 ns"] == "78/90"
+    report = ext._json("r17/r17_report.json")
+    assert all(v[f"all_wrong@{d}ns"] == 0 for v in report.values() for d in ("0.75", "1.0", "2.0"))
+
+
+def test_energy_screen(data):
+    screen = ext.energy_screen_table(data)
+    base = screen.loc["u6_w6_l1_s1 (= unit6_w6)"]
+    assert (base["energy code 0 / 63 (fJ)"], base["range, code 63 (mV)"]) == ("731 / 780", 44.4)
+    assert screen.loc["u6_w12_l05_s1", "energy code 0 / 63 (fJ)"] == "611 / 664"
+    assert screen.loc["u6_w12_l05_s1", "range, code 63 (mV)"] == 37.1
+    drain = screen[screen["switch side"].eq("drain")]
+    assert len(drain) == 2 and (drain["range, code 63 (mV)"] < 25).all()
 
 
 def test_no_unfilled_placeholders():

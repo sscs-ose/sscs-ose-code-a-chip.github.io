@@ -926,9 +926,11 @@ def main(support_digest: str | None = None) -> None:
         **Headline result.** The original three-design atlas returns NONE at
         1 mV, but a later design, `unit6_w6` (r15b: 6-bit unit trim, input
         W = 6 µm), qualifies at ±1 mV at 1 and 2 ns across all 49
-        deterministic conditions. Its cost is 760 fJ mean core energy, and it
-        remains schematic-only. The rest of this section explains why the
-        original designs stop short, and what failed along the way.
+        deterministic conditions. Its cost is 760 fJ mean core energy. It has
+        no layout of its own; an RC estimate on the archived extraction keeps
+        ±1 mV correct at 2 ns but not at 1 ns (r17). The rest of this section
+        explains why the original designs stop short, and what failed along
+        the way.
 
         **Question.** Section 4 finds *no feasible compared design* at
         input bands of 1 mV or below, at every deadline. Is that a latch-speed
@@ -1023,6 +1025,21 @@ def main(support_digest: str | None = None) -> None:
         64/80 (16 unresolved) at SS. Its nominal core energy is about 3× the
         shipped design's at all three corners (731, 460 and 1,065 fJ against
         244, 167 and 341 fJ at code 0; energy table below).
+
+        **The 6-bit design after layout parasitics: an estimate (r17).** It
+        has no drawn layout, so we reuse the archived b1 extraction with the
+        input pair doubled and every trim bit split into unit copies, and
+        place bits 4 and 5 on bit 3's extracted nodes with bit 3's wiring
+        capacitance scaled ×2 and ×4 (no added resistance). At code 0 with
+        nominal devices over the 45 PVT corners, ±1 mV is correct 90/90 at
+        2 ns but only 69/90 at 1 ns (78/90 with the latch-output wiring
+        halved), at 919–945 fJ; there are no wrong decisions, only
+        unresolved ones, and 34 of the 37 misses at 1 ns are at 1.62 V. The
+        unit-array schematic of the same design is 270/270 at 0.75 ns. So
+        after estimated parasitics the 1 mV result holds at 2 ns, not at
+        1 ns (post-layout table below). The same run also corrects a detail
+        of r11: its schematic row used a binary-sized netlist, and the
+        unit-array netlist gives the same 180/180 (worst decision 0.48 ns).
         """),
         code("""
         display(ext.mc_table(extension))
@@ -1030,6 +1047,7 @@ def main(support_digest: str | None = None) -> None:
         display(ext.range_table(extension))
         display(ext.energy_table(extension))
         display(ext.postlayout_table(extension))
+        display(ext.energy_screen_table(extension))
         figure = ext.figure(extension)
         display(figure)
         plt.close(figure)
@@ -1046,12 +1064,25 @@ def main(support_digest: str | None = None) -> None:
         at 1 ns, and 180/180 with the latch-output wiring halved, at
         579–605 fJ.
 
+        **Can the 6-bit design be made cheaper? Not in our screen (r18).**
+        Its energy follows the same rule: 731 fJ at TT against 244 fJ for the
+        shipped design. A nominal TT screen of six variants (wider input
+        pair, shorter trim L, narrower or drain-side switch; last table)
+        found none that keeps both its step and its range. Shortening the
+        trim devices with a wider input pair saves energy roughly in
+        proportion to the range it loses (input W 12 µm, L 0.5 µm: 611 fJ,
+        range 37 mV against 44 mV), while r15b already needed code −52 of
+        ±63. Moving the switch to the drain side costs more energy
+        (802 fJ) and range (16 mV) and is slower.
+
         **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
         bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
         The cost paragraph above refers to the r13 fix. The 6-bit design has
-        no layout, DRC/LVS or extraction of its own; its mismatch Monte Carlo
+        no layout, DRC/LVS or extraction of its own; its RC numbers are an
+        estimate at code 0 without mismatch, its mismatch Monte Carlo
         covers two conditions without width skew, and its 49-condition test
-        uses deterministic width skews, not random mismatch.
+        uses deterministic width skews, not random mismatch. The r18 screen
+        is nominal TT only.
         """),
         markdown("""
         ## 10. Discussion and limitations

@@ -17,7 +17,7 @@ from entry_tools import artifact_path, digest, verify_files
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "results" / "research"
-MANIFEST_SHA256 = "b053340d97c012e0ff7f7fff44c1e8a4ab86894c9096528ef058517dc8b49e0b"
+MANIFEST_SHA256 = "e48d6856fdaa56c65c622cbe6f86e61030752c06b5af8c6cf6e0e16d24bd7bc0"
 ATLAS_DESIGNS = ("baseline", "lvt_base_3b", "lvt_balanced_4b")
 PROSPECTIVE_DESIGNS = ("svt_fast_4b", "lvt_fine_3b", "lvt_fine_4b", "lvt_fast_4b", "lvt_fast_fine_4b", "lvt_wide_5b")
 FIX = "fix_x2_unit5b"
@@ -59,6 +59,11 @@ ENERGY_VARIANTS = {
     "unit6_w6": "6-bit: unit 6b, input W 6",
 }
 ENERGY_CONDITIONS = (("tt", 1.8, 27.0), ("ss", 1.62, -40.0), ("ff", 1.95, 125.0))
+POSTLAYOUT_R11 = {"schematic": "r11 fix, schematic (binary-sized netlist)", "rc_x2_unit5b": "r11 fix, estimated RC",
+                  "rc_x2_unit5b_half_q": "r11 fix, estimated RC, half q-node wiring"}
+POSTLAYOUT_R17 = {"schematic_unit5": "r17 fix, schematic (unit-array netlist)",
+                  "schematic_unit6": "r17 unit6_w6, schematic", "rc_unit6": "r17 unit6_w6, estimated RC",
+                  "rc_unit6_half_q": "r17 unit6_w6, estimated RC, half q-node wiring"}
 
 
 def load() -> dict:
@@ -222,16 +227,40 @@ def trim_steps(data: dict) -> pd.DataFrame:
 
 
 def postlayout_table(data: dict) -> pd.DataFrame:
-    report = _json("r11/r11_report.json")
-    labels = {"schematic": "Fix, schematic", "rc_x2_unit5b": "Fix, estimated RC",
-              "rc_x2_unit5b_half_q": "Fix, estimated RC, half q-node wiring"}
+    """r11 (5-bit fix) and r17 (6-bit unit6_w6): 45 PVT conditions, code 0, nominal devices."""
+    r11 = _json("r11/r11_report.json")
+    r17 = _json("r17/r17_report.json")
     rows = []
-    for key, label in labels.items():
-        r = report[key]
+    for key, label in POSTLAYOUT_R11.items():
+        r = r11[key]
         rows.append({"variant": label,
-                     **{f"correct @ {d} ns": f"{r[f'correct@{d}ns']}/{r['n']}" for d in ("0.75", "1.0", "2.0")},
-                     "worst decision (ns)": round(r["worst_t_ns"], 3), "mean energy (fJ)": round(r["energy_mean_fj"], 1)})
+                     **{f"+/-3, 10 mV correct @ {d} ns": f"{r[f'correct@{d}ns']}/{r['n']}" for d in ("0.75", "1.0", "2.0")},
+                     **{f"+/-1 mV correct @ {d} ns": "-" for d in ("0.75", "1.0", "2.0")},
+                     "worst decision, +/-3, 10 mV (ns)": round(r["worst_t_ns"], 3), "mean energy (fJ)": round(r["energy_mean_fj"], 1)})
+    for key, label in POSTLAYOUT_R17.items():
+        r = r17[key]
+        rows.append({"variant": label,
+                     **{f"+/-3, 10 mV correct @ {d} ns": r[f"3_10mv_correct@{d}ns"] for d in ("0.75", "1.0", "2.0")},
+                     **{f"+/-1 mV correct @ {d} ns": r.get(f"1mv_correct@{d}ns", "-") for d in ("0.75", "1.0", "2.0")},
+                     "worst decision, +/-3, 10 mV (ns)": round(r["3_10mv_worst_t_ns"], 3), "mean energy (fJ)": round(r["energy_mean_fj"], 1)})
     return pd.DataFrame(rows).set_index("variant")
+
+
+def energy_screen_table(data: dict) -> pd.DataFrame:
+    """r18: nominal TT screen of lower-energy 6-bit unit trims (all decisions at 3.5 ns)."""
+    rows = [r for r in _jsonl(data, "r18/screen.jsonl") if "boundaries_mv" in r]
+    out = []
+    for r in rows:
+        side = "drain" if r["variant"].startswith("d") else "source"
+        out.append({"variant": r["variant"] + (" (= unit6_w6)" if r["variant"] == "u6_w6_l1_s1" else ""),
+                    "input W (um)": r["input_w"], "trim L (um)": r["trim_l"], "switch W (um)": r["switch_w"],
+                    "switch side": side,
+                    "energy code 0 / 63 (fJ)": f"{r['energy_fj_code0']:.0f} / {r['energy_fj_code63']:.0f}",
+                    "mean step, codes 0-16 (mV)": round(abs(r["boundaries_mv"]["16"] - r["boundaries_mv"]["0"]) / 16, 2),
+                    "range, code 63 (mV)": round(abs(r["boundaries_mv"]["63"]), 1)})
+    if len(out) != 8:
+        raise RuntimeError("r18 screen rows missing")
+    return pd.DataFrame(out).set_index("variant")
 
 
 def energy_table(data: dict) -> pd.DataFrame:

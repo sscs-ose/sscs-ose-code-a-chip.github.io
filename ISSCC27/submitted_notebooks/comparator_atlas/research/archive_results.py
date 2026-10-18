@@ -37,6 +37,8 @@ STUDIES = {
     "r15b": ["r15b/registered_predictions_b.*", "r15b/r2_evaluation.json", "r15b/r2_atlas_new_designs.csv",
              "r15b/unit6_w6_residuals.csv"],
     "r16": ["r16/mc_unit6_*.jsonl", "r16/energy.json"],
+    "r17": ["r17/r17_pvt45.jsonl", "r17/r17_report.json"],
+    "r18": ["r18/screen.jsonl"],
 }
 
 

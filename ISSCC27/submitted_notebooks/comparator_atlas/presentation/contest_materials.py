@@ -26,11 +26,12 @@ PAGE_INCHES = (24, 18)
 EXTENSION_CALLOUT = (
     "Later extension (Notebook Section 9; not part of this sealed record): unit6_w6, a 6-bit "
     "unit trim with input W = 6 um, qualifies at +/-1 mV at 1 and 2 ns over all 49 schematic "
-    "conditions, at 760 fJ mean core energy. No layout of its own.")
+    "conditions, at 760 fJ mean core energy. No layout of its own; with estimated RC, 2 ns only.")
 EXTENSION_ABSTRACT = (
     "Later schematic extension (Notebook Section 9; not part of the sealed three-design record): "
     "unit6_w6, a 6-bit unit-element trim with input W = 6 um, qualifies across the 49-condition "
-    "atlas at +/-1 mV at 1 and 2 ns, at 760 fJ mean core energy. It has no dedicated layout; its "
+    "atlas at +/-1 mV at 1 and 2 ns, at 760 fJ mean core energy. It has no dedicated layout; an RC "
+    "estimate on the archived extraction keeps +/-1 mV correct at 2 ns but not at 1 ns, and its "
     "40-seed-per-condition threshold-mismatch study is not a yield estimate.")
 DESIGN_REFERENCES = [
     "https://mitcommlab.mit.edu/nse/commkit/poster/",
