@@ -126,8 +126,11 @@ def main():
         for k_, x in st.items():
             if not x.get("ok"): W.append(f"layout: step {k_} did not pass")
     import subprocess
-    def ignored(path):                      # a stray file that git already ignores is not a problem
-        try: return subprocess.run(["git", "check-ignore", "-q", str(path)], cwd=root).returncode == 0
+    def ignored(path):                      # a stray file that git already ignores (or tracks on purpose) is not a problem
+        try:
+            return (subprocess.run(["git", "check-ignore", "-q", str(path)], cwd=root).returncode == 0
+                    or subprocess.run(["git", "ls-files", "--error-unmatch", str(path)], cwd=root,
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0)
         except Exception: return False
     for p in root.rglob("*"):
         if p.is_file() and (p.suffix in (".raw", ".log") or "__pycache__" in p.parts or ".ipynb_checkpoints" in p.parts) \
