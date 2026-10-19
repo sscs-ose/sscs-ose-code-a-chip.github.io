@@ -47,7 +47,9 @@ EXTENSION_SUMMARY = (
     "(40 seeds at each of two conditions; not a yield estimate) the residual stays within "
     "0.59 mV and 0.82 mV respectively. These are later schematic simulations; neither has a "
     "layout of its own, and an RC estimate on the archived extraction keeps ±1 mV correct at 2 ns "
-    "but not at 1 ns (69/90 and 78/90 at code 0; misses are unresolved, none wrong).")
+    "but not at 1 ns (69/90 and 78/90 at code 0; misses are unresolved, none wrong). A later check "
+    "(r20, r21) found that the atlas width skew is not design-neutral under the PDK's width-binned "
+    "models; rerun with an exact 4% current skew, the three-design selection is unchanged.")
 
 
 def sha(path):

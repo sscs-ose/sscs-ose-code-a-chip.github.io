@@ -610,7 +610,7 @@ not part of the sealed decision record of Sections 1-8; nothing in the
 specification map, the 49-condition data or the layout example is changed.
 
 **Saved results.** `results/research/` holds the archived outputs of studies
-r1-r19 (JSON, JSONL and CSV, LF line endings).
+r1-r21 (JSON, JSONL and CSV, LF line endings).
 `results/research/manifest.json` lists the SHA256 of every archived file and
 of every `research/*.py` script. `presentation/research_extension.py` pins the
 manifest's own SHA256 and refuses to draw Section 9 if the manifest, any
@@ -638,6 +638,8 @@ command line.
 | r17 | `r17_post_layout_6b.py` | RC estimate for the 6-bit design on the b1 extraction (no drawn layout), and the unit-array schematic reference r11 should have used |
 | r18 | `r18_energy_screen.py` | Nominal TT screen of lower-energy 6-bit trims (input W, trim L, switch W and side) |
 | r19 | `r19_rc_wide.py`, `r19_atlas_wide.py`, `r19_mc_wide.py` | The r18 variant `u6_w12_l05` (6-bit unit trim at L 0.5, input W 12): RC estimate as r17, sealed 49-condition test as r15, paired mismatch MC as r16 |
+| r20 | `r20_offset_mechanism.py`, `r20_dc_skew.py`, `r20_bin_stress.py` | Why the wider pair needs less trim: untrimmed-offset decomposition, DC current skew of a 4% width skew under the width-binned models, and width skew against an exact current skew (instance `m`) for five designs on 45 conditions |
+| r21 | `r21_neutral_atlas.py` | The three sealed designs on all 49 conditions with width skew and with the exact current skew, every +/-1 mV, 1 ns point re-simulated at 0.625 ps |
 
 **Re-running.** Live studies use the same project-local ngspice 47 and pinned
 SKY130 models as the full campaign (`node scripts/setup.mjs` on Windows;
@@ -683,4 +685,17 @@ larger unit-element netlists. r16 and r19 likewise scale r3's 900 s per-deck gua
 4; two SS batches stopped on that guard under full machine load and were
 restarted, and the affected seeds then completed normally. Neither change
 alters a simulated result.
+r20 found that the SKY130 NMOS models are binned by width (low-Vt bin edges
+at 1.65, 3.0, 3.01, 5.0, 5.05 and 7.0 um), so the atlas's deterministic width
+skew is not an exact current skew and its strength depends on the design's
+input width and finger split. r20 and r21 replace it by an instance multiplier
+`m = 1 +/- skew` with nominal geometry; that stress is not random mismatch either.
+In r20, two baseline conditions (SS and FS 1.62 V -40 C) are unresolved at the
+3.5 ns calibration deadline under both stresses and are left out of its ratios.
+r21 reproduces the sealed validation rows exactly; the published counts also
+include the sealed record's numerical refinement, which re-simulated all +/-1 mV
+points of the selected design only, while r21 refines every +/-1 mV, 1 ns point
+of all three designs with one 0.625 ps run (no convergence ladder), so its
+width-skew counts differ from the published ones by one decision per design.
+The six r21 per-condition run files (about 12 MB) are not archived.
 None of these studies is silicon, Linux, Colab or external-human evidence.

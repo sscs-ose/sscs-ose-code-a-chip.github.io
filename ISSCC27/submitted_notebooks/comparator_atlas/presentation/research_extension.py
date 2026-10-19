@@ -17,7 +17,7 @@ from entry_tools import artifact_path, digest, verify_files
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "results" / "research"
-MANIFEST_SHA256 = "77760c1ee64bee3abda776898fb03dc981d767f3f6d0324e5137b0714f261ec2"
+MANIFEST_SHA256 = "3816966d168e9f5cd00938f0b8fa2e88c2bd3b50a97ccbb5d10610f2e9992552"
 ATLAS_DESIGNS = ("baseline", "lvt_base_3b", "lvt_balanced_4b")
 PROSPECTIVE_DESIGNS = ("svt_fast_4b", "lvt_fine_3b", "lvt_fine_4b", "lvt_fast_4b", "lvt_fast_fine_4b", "lvt_wide_5b")
 FIX = "fix_x2_unit5b"
@@ -77,6 +77,7 @@ WIDE_RC = (
     ("r19/r19_rc.jsonl", "rc_w12_l05_half_q", "u6_w12_l05, estimated RC, half q-node wiring"),
     ("r19/r19_rc.jsonl", "rc_unit6_no_q", "bound: input W 12, trim L 1, no q-node wiring"),
 )
+BIN_DESIGNS = (*ATLAS_DESIGNS, "unit6_w6", "u6_w12_l05")
 
 
 def load() -> dict:
@@ -277,6 +278,30 @@ def wide_rc_table(data: dict) -> pd.DataFrame:
         row["mean energy (fJ)"] = round(sum(r["energy_fj"] for r in records) / len(records))
         rows.append(row)
     return pd.DataFrame(rows).set_index("variant")
+
+
+def bin_stress_table(data: dict) -> pd.DataFrame:
+    """r20 and r21: atlas width skew against a bin-neutral current skew (instance m = 1 +/- 0.04)."""
+    summary = _json("r20/bin_stress_summary.json")
+    dc = _json("r20/eff_skew.json")
+    scores = _json("r21/r21_score_refined.json")
+    rows = []
+    for design in BIN_DESIGNS:
+        s = summary[design]
+        if s["validated"] != s["conditions"] or s["max_dev_from_archive_mv"] > 0.2:
+            raise RuntimeError(f"r20 {design}: width mode does not reproduce the archive")
+        skew = dc[f"{s['input_device']}|tt|{s['input_w_um']:g}"]
+        row = {"design": design, "input pair": f"{s['input_device']}, W {s['input_w_um']:g} um",
+               "DC current skew, TT (ideal 0.040)": f"{min(skew):.3f}-{max(skew):.3f}",
+               "median |offset|, width skew (mV)": round(s["width_abs_median_mv"], 1),
+               "median |offset|, m skew (mV)": round(s["mult_abs_median_mv"], 1),
+               "width / m (LSQ)": round(s["lsq_slope"], 2)}
+        for mode in ("width", "m"):
+            r = scores.get(f"{'mult' if mode == 'm' else 'width'}|{design}")
+            row[f"1 ns correct (fully passing), {mode} skew"] = \
+                f"{r['correct']}/392 ({r['fully_passing_conditions']}/49)" if r else "-"
+        rows.append(row)
+    return pd.DataFrame(rows).set_index("design")
 
 
 def energy_screen_table(data: dict) -> pd.DataFrame:

@@ -1051,6 +1051,7 @@ def main(support_digest: str | None = None) -> None:
         display(ext.postlayout_table(extension))
         display(ext.energy_screen_table(extension))
         display(ext.wide_rc_table(extension))
+        display(ext.bin_stress_table(extension))
         figure = ext.figure(extension)
         display(figure)
         plt.close(figure)
@@ -1086,9 +1087,9 @@ def main(support_digest: str | None = None) -> None:
         +32), no condition reaches the range end, and |*m*| ≤ 0.39 mV. It
         qualifies at ±1 mV at 0.75, 1 and 2 ns, at ±0.5 mV at 2 ns and at
         ±3 mV at 0.5 ns, at about 623 fJ: in every atlas cell at least as good
-        as `unit6_w6`, at 18% less energy. We have not isolated why the
-        offset to trim shrinks this much; a lower input overdrive is one
-        likely contributor. Held-out agreement was 94.9%, and 16 of 18
+        as `unit6_w6`, at 18% less energy. Most of the smaller offset to
+        trim turned out to be a model-binning effect rather than the circuit
+        (r20, next paragraph). Held-out agreement was 94.9%, and 16 of 18
         predictive atlas cells agreed; both misses predicted ±0.5 mV at
         0.75 and 1 ns, which it does not reach. In mismatch Monte Carlo
         paired with r16 (same 40 seeds per condition), the trim covers 80/80
@@ -1098,11 +1099,38 @@ def main(support_digest: str | None = None) -> None:
         RMS residual is similar (0.27/0.29 mV against 0.26/0.30 mV). At
         ±0.5 mV and 1 ns it is 79/80 and 78/80 correct (1 and 2 wrong)
         against 77/80 (3 wrong) and 64/80 (16 unresolved). With the r17 RC
-        estimate on the same ±1 and ±3 mV inputs (last table), ±1 mV is
+        estimate on the same ±1 and ±3 mV inputs (second-to-last table), ±1 mV is
         correct 78/90 at 1 ns (`unit6_w6`: 69/90) and ±3 mV 90/90 (78/90),
         at 827 fJ against 949 fJ; all 12 misses are unresolved, at 1.62 V.
         With the latch-output wiring halved, a layout assumption rather than
         an extraction, ±1 mV is 90/90 at 1 ns.
+
+        **Is the width-skew stress design-neutral? (r20, r21).** No. The
+        SKY130 transistor models are binned by width, so a ±4% width skew
+        does not give a 4% current skew: in DC at TT the low-Vt pair gives
+        0.048–0.072 at W = 6 µm, 0.031–0.038 at 3 µm and 0.040 at 12 µm
+        (last table). Splitting the 12 µm pair into two 6 µm fingers nearly
+        triples its untrimmed offset (2.7 to 7.6 mV at TT). With an exact 4%
+        current skew instead (instance multiplier *m* = 1 ± 0.04, nominal
+        geometry; 45 skewed PVT conditions), the median untrimmed offset of
+        `unit6_w6` falls from 16.1 to 10.2 mV while `u6_w12_l05` stays at
+        6.9/6.7 mV, so the r19 gap shrinks from 2.3× to 1.5×. For the sealed
+        comparison the width skew is 1.14–1.21× the exact skew for the two
+        2 µm designs and 0.81× for the selected 3 µm design, whose exact-skew
+        offset equals that of `lvt_base_3b` (median 11.6 mV each). We
+        therefore reran the three sealed designs on all 49 conditions with
+        both skews, re-simulating every ±1 mV point of every design at
+        0.625 ps (the sealed record refined all ±1 mV points only for the
+        selected design). The width-skew rerun matches the sealed validation
+        rows exactly and the published 1 ns counts to within one decision;
+        with the exact skew the counts are 310, 348 and 377 of 392, and the
+        strict-map selection does not change (no design at ≥1 mV,
+        `lvt_balanced_4b` at ≥3 and ≥10 mV, `lvt_base_3b` at ≥30 mV).
+        Calibration removes most of the stress, so the binning changes the
+        offset to be trimmed but not the comparison. One margin does shrink:
+        with the exact skew the selected design reaches the end of its trim
+        range (code −15 of ±15) at SF 1.95 V 125 °C, although all eight inputs
+        there are still correct.
 
         **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
         bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
@@ -1112,14 +1140,19 @@ def main(support_digest: str | None = None) -> None:
         covers two conditions without width skew, and their 49-condition
         tests use deterministic width skews, not random mismatch. The r18
         screen is nominal TT only, and `u6_w12_l05` was chosen after seeing
-        it; its own sealed test covers only that one design.
+        it; its own sealed test covers only that one design. Under the binned
+        models the atlas width skews are not design-neutral (r20); r21 reruns
+        only the three sealed designs with an exact current skew, and for the
+        6-bit designs only their untrimmed offsets.
         """),
         markdown("""
         ## 10. Discussion and limitations
 
         This discussion summarizes the sealed Sections 1–8 record. Section 9
         is a separate later schematic extension and reports the `unit6_w6`
-        and `u6_w12_l05` results and their additional limitations.
+        and `u6_w12_l05` results and their additional limitations. It also
+        reruns the comparison below with an exact, bin-neutral current skew
+        (r21); the selection does not change.
 
         Under the same local calibration policy, the selected circuit
         increases 1 ns correct decisions from 310/392 to 372/392 across

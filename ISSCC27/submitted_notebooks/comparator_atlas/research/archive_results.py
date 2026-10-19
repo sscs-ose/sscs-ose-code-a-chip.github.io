@@ -2,8 +2,8 @@
 
   python -B research/archive_results.py [source_out_dir]
 
-The source defaults to research/out. Raw SPICE caches and the per-condition r2/r13 phase files
-(about 25 MB, reproducible with r2_prospective.py and r13_fix_atlas.py) are not archived.
+The source defaults to research/out. Raw SPICE caches and the per-condition r2/r13/r21 phase files
+(about 37 MB, reproducible with r2_prospective.py, r13_fix_atlas.py and r21_neutral_atlas.py) are not archived.
 """
 import hashlib
 import json
@@ -42,6 +42,8 @@ STUDIES = {
     "r19": ["r19/r19_rc.jsonl", "r19/r19_rc_report.json", "r19/registered_predictions_w12.*",
             "r19/r2_evaluation.json", "r19/r2_atlas_new_designs.csv", "r19/u6_w12_l05_residuals.csv",
             "r19/mc_w12_*.jsonl"],
+    "r20": ["r20/offset.jsonl", "r20/eff_skew.json", "r20/bin_stress.jsonl", "r20/bin_stress_summary.json"],
+    "r21": ["r21/r21_score.json", "r21/r21_score_refined.json", "r21/refined.json"],
 }
 
 

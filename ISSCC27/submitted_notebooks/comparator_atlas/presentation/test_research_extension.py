@@ -165,6 +165,25 @@ def test_wide_input_six_bit(data):
     assert list(mc["max |m| (mV)"]) == [0.59, 0.82]
 
 
+def test_width_skew_is_not_design_neutral(data):
+    t = ext.bin_stress_table(data)
+    assert list(t.index) == list(ext.BIN_DESIGNS)
+    assert t.loc["lvt_balanced_4b", "DC current skew, TT (ideal 0.040)"] == "0.031-0.038"
+    assert t.loc["unit6_w6", "DC current skew, TT (ideal 0.040)"] == "0.048-0.072"
+    assert list(t["width / m (LSQ)"]) == [1.21, 1.14, 0.81, 1.58, 1.0]
+    assert (t.loc["unit6_w6", "median |offset|, width skew (mV)"], t.loc["unit6_w6", "median |offset|, m skew (mV)"]) == (16.1, 10.2)
+    assert t.loc["lvt_base_3b", "median |offset|, m skew (mV)"] == t.loc["lvt_balanced_4b", "median |offset|, m skew (mV)"] == 11.6
+    width = list(t["1 ns correct (fully passing), width skew"])
+    assert width == ["310/392 (16/49)", "350/392 (17/49)", "373/392 (30/49)", "-", "-"]
+    assert list(t["1 ns correct (fully passing), m skew"])[:3] == ["310/392 (20/49)", "348/392 (16/49)", "377/392 (34/49)"]
+    scores = ext._json("r21/r21_score_refined.json")
+    assert {k.split("|", 1)[1]: v for k, v in scores["selection"].items() if k.startswith("width")} == \
+           {k.split("|", 1)[1]: v for k, v in scores["selection"].items() if k.startswith("mult")} == \
+           {"1": None, "3": "lvt_balanced_4b", "10": "lvt_balanced_4b", "30": "lvt_base_3b"}
+    raw = ext._json("r21/r21_score.json")
+    assert [raw[f"width|{d}"]["correct"] for d in ext.ATLAS_DESIGNS] == [310, 351, 374]
+
+
 def test_no_unfilled_placeholders():
     texts = [(ROOT / n).read_text(encoding="utf-8") for n in
              ("Comparator_Atlas.ipynb", "README.md", "REVIEWER_GUIDE.md", "REPRODUCIBILITY.md")]
