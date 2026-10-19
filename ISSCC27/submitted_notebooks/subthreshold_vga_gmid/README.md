@@ -10,7 +10,7 @@ loop, so no compression behaviour is claimed.
 ## What this work adds to the flows it reuses
 **SKY130's device models depend on the width of each finger, so we build every transistor from whole 5 µm fingers. That makes a $g_m/I_D$ lookup table exact, and the flow built on it sized a subthreshold VGA core, showed where the hand-sized design fails, and was run again after the first layout broke its own pick.**
 
-1. **Exact tables, with measured error.** Current density at fixed bias differs by up to 1.6× (NMOS) and 4.6× (PMOS) between finger widths, so a table made at one width does not carry to another. With whole fingers it does. The model on the tables takes 7.4 ms per design and corner and is within **0.40 dB** (gain) and **1.3 %** (noise) of SPICE on 42 random designs. Its worst bandwidth over-estimate is 17 %, so SPICE decides every pick (§5–§6).
+1. **Exact tables, with measured error.** Current density at fixed bias differs by up to 1.6× (NMOS) and 4.6× (PMOS) between finger widths, so a table made at one width does not carry to another. With whole fingers it does. The model on the tables takes 7.4 ms per design and corner and is within **0.40 dB** (gain) and **1.3 %** (noise) of SPICE on 42 random designs. Its worst bandwidth over-estimate is 17 % (under-estimates reach 74 % and only make the screen stricter), so SPICE decides every pick (§5–§6).
 2. **The hand-sized nine-transistor core cannot reach the 30 dB control range, and the flow says why.** None of 12,164 sizings does (best 10.4 dB). The output devices starve as the gain falls (§3.4, §7).
 3. **A designer's three-transistor fix, then a design that meets every corner.** Two keep-alive sinks and a reference diode remove the starvation (§8). On the 12-transistor core, none of the 138,240 designs of the starting grid met all 24 corners; the search extension found the first one in round 5. The pick passes all 24 gate corners and 21 of 21 stress corners: control range ≥ **47.0 dB**, bandwidth ≥ **11.8 kHz**, headroom ≥ **173 mV**, supply **4.63–4.83 µA** (§9–§10).
 4. **Layout in the loop, then sign-off.** The first layout put 207 fF of wiring on the output and the first pick failed at 6 of 24 corners; the wiring went back into the flow and the new pick passes (§9.3). The final layout is DRC-clean on 3 rule decks natively and 2 in IIC-OSIC-TOOLS, LVS-clean with device sizes in both runs (6 of 6 deliberately altered netlists rejected), with 0 Magic antenna violations. Its extracted netlist passes all 24 corners (bandwidth ≥ 12.3 kHz); with resistance extracted too it passes the gate at the 3 corners that bound it (§13).
@@ -31,7 +31,7 @@ A **finger-exact $g_m/I_D$ lookup-table flow** that takes a specification to a S
 VGA core in open SKY130, and the core it produced. Every transistor is built from identical 5 µm fingers, so the
 device tables are exact. The circuit model on them runs in 7.4 ms per design and corner and stays within
 **0.40 dB** (gain) and **1.3 %** (noise) of SPICE on 42 random designs; its worst
-bandwidth over-estimate is 17 % (Table 9b), so SPICE decides every pick.
+bandwidth over-estimate is 17 % (under-estimates reach 74 % and only make the screen stricter; Table 9b), so SPICE decides every pick.
 
 **The hand-sized nine-transistor core cannot meet the specification:** none of 12,164 sizings reaches the 30 dB
 control range (best 10.4 dB), and the flow reports range as a limit no solved design meets. The analysis of
