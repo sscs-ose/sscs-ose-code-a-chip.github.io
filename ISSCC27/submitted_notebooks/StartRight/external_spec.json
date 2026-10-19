@@ -1,0 +1,124 @@
+{
+  "contract": {
+    "logic_high_fraction": 0.8,
+    "logic_low_fraction": 0.2,
+    "supply_ready_fraction": 0.95,
+    "reset_release_fraction": 0.95,
+    "logic_deadline_after_ramp_s": 0.001,
+    "release_deadline_after_ramp_s": 0.005,
+    "hold_s": 0.002,
+    "observation_after_ramp_s": 0.008
+  },
+  "settings": {
+    "gmin": 1e-15,
+    "method": "gear",
+    "max_step": 2e-06,
+    "reltol": 1e-06
+  },
+  "configurations": [
+    {
+      "index": 0,
+      "configuration": {
+        "id": "frozen_rc_sr",
+        "architecture": "direct",
+        "resistance_ohm": 75000000.0,
+        "capacitance_F": 9.066666666666667e-12,
+        "direct_width_um": 16.0,
+        "reset_n_width_um": 2.0,
+        "variant": "rc",
+        "load": "nand_sr_latch",
+        "input_driver_ohm": 1000.0,
+        "include_input_power": true
+      },
+      "scenario": {
+        "id": "normal_set_dip_tt_0.9",
+        "ramp_s": 0.00043,
+        "load_ohm": 100000.0,
+        "contacts": "native",
+        "corner": "tt",
+        "temperature_C": 27,
+        "supply_V": 1.8,
+        "resistor_scale": 1.0,
+        "capacitor_scale": 1.0,
+        "recovery": {
+          "fall_s": 1e-06,
+          "low_V": 0.9,
+          "low_hold_s": 1e-05,
+          "rise_s": 0.002
+        },
+        "normal_set": {
+          "delay_after_first_observation_s": 0.0001,
+          "duration_s": 2e-05,
+          "gap_before_fall_s": 0.001,
+          "edge_s": 1e-08,
+          "skip_command": true
+        }
+      },
+      "solver": "sparse",
+      "settings": {
+        "gmin": 1e-15,
+        "method": "gear",
+        "max_step": 2e-06,
+        "reltol": 1e-06
+      }
+    },
+    {
+      "index": 1,
+      "configuration": {
+        "id": "detector_10M_sr",
+        "architecture": "direct",
+        "resistance_ohm": 75000000.0,
+        "capacitance_F": 1e-12,
+        "direct_width_um": 16.0,
+        "reset_n_width_um": 2.0,
+        "variant": "supply_sensitive",
+        "detector_resistance_ohm": 10000000.0,
+        "detector_n_width_um": 0.42,
+        "inverter_p_width_um": 2.0,
+        "inverter_n_width_um": 0.42,
+        "load": "nand_sr_latch",
+        "input_driver_ohm": 1000.0,
+        "include_input_power": true
+      },
+      "scenario": {
+        "id": "normal_set_dip_tt_0.9",
+        "ramp_s": 0.00043,
+        "load_ohm": 100000.0,
+        "contacts": "native",
+        "corner": "tt",
+        "temperature_C": 27,
+        "supply_V": 1.8,
+        "resistor_scale": 1.0,
+        "capacitor_scale": 1.0,
+        "recovery": {
+          "fall_s": 1e-06,
+          "low_V": 0.9,
+          "low_hold_s": 1e-05,
+          "rise_s": 0.002
+        },
+        "normal_set": {
+          "delay_after_first_observation_s": 0.0001,
+          "duration_s": 2e-05,
+          "gap_before_fall_s": 0.001,
+          "edge_s": 1e-08,
+          "skip_command": true
+        }
+      },
+      "solver": "sparse",
+      "settings": {
+        "gmin": 1e-15,
+        "method": "gear",
+        "max_step": 2e-06,
+        "reltol": 1e-06
+      }
+    }
+  ],
+  "consumer": "sky130_fd_sc_hd__dfrtp_1",
+  "solver": "sparse",
+  "acquisition_budget_s": 180,
+  "scope": "One TT/27 C/1.8 V/10 fF consumer condition. Original zero-default diffusion geometry and NRD/NRS. Ideal reset R/C. No extracted, rated-supply, silicon or full numerical qualification.",
+  "absolute_tolerances": {
+    "abstol_A": 1e-15,
+    "vntol_V": 1e-07
+  }
+}

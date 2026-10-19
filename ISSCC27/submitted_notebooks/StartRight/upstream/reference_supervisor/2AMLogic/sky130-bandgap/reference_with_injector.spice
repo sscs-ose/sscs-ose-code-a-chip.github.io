@@ -1,0 +1,308 @@
+** sch_path: sim/psrr-dc-with-injector/testbench/tb_vref_psrr_injector.sch
+**.subckt tb_vref_psrr_injector
+V1 VDD 0 'vsup' ac 1
+.save i(v1)
+XBG VREF GDRV VDD 0 bandgap_core
+XSU GDRV VREF VDD 0 startup_injector
+**** begin user architecture code
+
+
+* DC-solver seed, not a forced solution: see the header note. Kept identical
+* to sim/psrr-dc/testbench/tb_vref_psrr.sch so the attached injector is the
+* only difference between the two benches.
+.nodeset v(vref)=1.2 v(gdrv)=2.2
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  design/bandgap_core.sym # of pins=4
+** sym_path: design/bandgap_core.sym
+** sch_path: design/bandgap_core.sch
+.subckt bandgap_core VOUT GDRV VDD VSS
+*.opin VOUT
+*.iopin GDRV
+*.iopin VDD
+*.iopin VSS
+**** begin user architecture code
+
+
+* ---- Kuijk core parameters (issue #8) ----
+* PNP emitter-area ratio N is built ONLY from paralleled unit devices:
+*   N = (n_pnp_ptat * 11.56 um2) / (n_pnp_ctat * 0.4624 um2)
+* Keep both counts equal to hold the pair's measured dVBE while lowering the
+* per-unit current and sigma(dVBE); raise n_pnp_ptat alone for more PTAT.
+.param n_pnp_ctat=8
+.param n_pnp_ptat=8
+* res_high_po unit segment: W = r_w um, L = r_lseg um (R ~ 380 + 325*L ohm)
+.param r_w=1
+.param r_lseg=5
+* segment counts. K = R2/R1. n_r2 history: 54 (issue #46, single-device
+* model) -> 50 (issue #99/DR-003, chained topology, single-device SCHEMATIC
+* left un-modelled) -> 51 (issue #178, chained topology modelled HERE and
+* re-centred against DR-005's ratified accuracy row). See CHAINED-ARRAY
+* MODEL and SIZING (issue #178) below.
+* HISTORY (issue #99 / DR-003, RESOLVED): n_r1/n_r2 are sized against the
+* ROUTED LAYOUT's real chained-array topology -- the ground truth the
+* fabricated part experiences. Issue #98/DR-003
+* (sim/res-array-head-resistance/) established that the routed layout draws
+* each leg as N separately-contacted unit instances in series
+* (layout/bin/gen_bandgap_routed.py's bus_res_series), paying real per-instance
+* head resistance: at the old n_r2=54 that made the REAL part's K=R2/R1 read
+* 8.1474 vs the single-device model's 7.4973, pushing VOUT(27 degC) to
+* ~1.233 V (outside the draft +/-1% window 1.188..1.212 V) at all 5
+* (process,supply) corners and collapsing regulation at ff/2.97 V and
+* fs/2.97 V. Resizing n_r2 54 -> 50 (n_r1 left at 7 so branch current -- and
+* therefore hot-corner headroom -- is not raised while K is corrected) brought
+* the real chained topology's K back to 7.576. Full PVT + trim
+* re-verification of that step: sim/res-array-resize/records/ (issue #99).
+* ---- CHAINED-ARRAY MODEL (issue #178) ----
+* DR-003 deliberately left the SCHEMATIC modelling each leg as ONE
+* res_high_po device, so simulating this cell as-drawn read VOUT(27 degC)
+* ~1.165 V -- ~36 mV below what the routed part builds. Issue #178 closes
+* that gap HERE rather than sizing around it: XR1/XR2A/XR2B are now the
+* *body* devices of an EXACT lumped equivalent of the routed N-instance
+* chain, completed by the per-leg replica + gain elements in the
+* RES_HEAD_MODEL block below. The identity used (exact, not an
+* approximation) follows from the PDK model card
+* (models_resistors.spice: rhead has a hardcoded l=1 independent of the
+* caller's drawn length; rbody is linear in leff = l + 0.247):
+*     R_chain(N units, total drawn length Ltot)
+*         = N*rhead + rbody(Ltot + 0.247*N)
+*         = R_res_high_po(L = Ltot - (N-1)*r_ov_seg)      <- the body device
+*           + (N-1) * R_res_high_po(L = r_ov_seg)          <- the replica
+* for ANY r_ov_seg, because both terms are affine in the drawn length. The
+* (N-1) copies are realized as ONE replica instance whose drop is multiplied
+* by (N-1) with an ideal VCVS, which is exact for the nominal value at every
+* temperature and process corner (rhead and rbody are re-evaluated by the
+* model card, not frozen) -- verified against an explicit 143-instance chain
+* of the same decomposition: identical to 7 significant figures on
+* vref_27 / vref_min / vref_max / tc_ppm over the whole -40..125 degC sweep.
+* The replica carries mult='n_*_ov' so the PDK's own AGAUSS mismatch term
+* (sigma ~ 1/sqrt(w*mult)) reproduces the 1/sqrt(N) averaging of N
+* independent series instances; `m` is deliberately pinned to 1 on those
+* lines (the stock res_high_po symbol ties m to mult, which would parallel
+* the subcircuit and divide the value -- that is why the replica/VCVS pair
+* lives in a code block instead of as drawn symbol instances).
+* ---- SIZING (issue #178) ----
+* With the chain modelled, n_r2 was re-derived against DR-005's ratified
+* untrimmed accuracy row (1.20 V +/-2% over -40..125 degC => 1.176..1.224 V),
+* not against the superseded draft +/-1% window:
+*   n_r2=50 (K = 7.630): vref_min 1.1744..1.1747 -- ~1.3 mV BELOW the 1.176 V
+*     floor at every corner. FAIL.
+*   n_r2=51 (K = 7.773): vref 1.18603..1.21780 at all 15 (process, supply)
+*     points -- inside the window with 10.0 mV bottom / 6.2 mV top margin,
+*     and box TC 142.4..159.0 ppm/degC (binding corner fs). ADOPTED.
+*   n_r2=52 (K = 7.917): vref_max 1.22394..1.22507 -- over the 1.224 V
+*     ceiling at 6 of 15 points. FAIL.
+* n_r1 is held at 7 for the same reason issue #99 held it: R1 sets the branch
+* current, and raising it raises the hot-corner headroom demand that the
+* ff/2.97 V and fs/2.97 V regulation collapse depends on. No collapse is seen
+* at n_r2=51 or 52 at those corners with the chained model.
+* The K figures above are the routed chain's own values, computed from the
+* per-instance terms DR-003 measured and klt extract independently reports
+* (head+end 379.705 ohm/instance, body 324.827 ohm/um):
+*   R1  = 7 * (379.705 + 324.827*5)                       = 14.027 kohm
+*   R2  = (n_r2-2) * (379.705 + 324.827*5)
+*         + 20 * (379.705 + 324.827*0.5)                  = 109.03 kohm at 51
+* i.e. K = 7.773 at n_r2=51 -- NOT the textbook n_r2/n_r1 = 7.286, and NOT
+* the single-device model's 7.087. The residual TC (142-159 ppm/degC, still
+* far above DR-005's < 50 ppm/degC row) is issue #46's device-level floor,
+* not a ratio error: design/device-characterization-summary.md section 1
+* measures Q1's nf = 1.028 vs Q2's nf = 1.000, so ~18.1 mV of the 62.3 mV
+* dVBE at 27 degC is a fraction of a CTAT quantity rather than true PTAT and
+* its shortfall grows with temperature. See sim/output-voltage-tc/records/
+* for the graded evidence and issue #179 for the spec-side routing.
+.param n_r1=7
+.param n_r2=51
+* PMOS mirror multiplicities (unit device W=8u L=2u)
+.param m_out=2
+.param m_ampbias=2
+* ---- Trim network (issue #13), DOWNWARD ONLY -- see DR-002 ----
+* Ladder-tap length added to R2A/R2B equally (metal option, no switches).
+* n_r2_trim: valid range 0..-16 only. r_lseg_trim: 1 um/code (~1.7 mV/code)
+* in DR-002's original SINGLE-DEVICE model. Positive codes are REJECTED:
+* this is the same R2/R1 ratio issue #46 found causes ff/2.97V, fs/2.97V
+* hot-corner (>~123C) operating-point collapse at even a +5 um increase
+* (n_r2=55). sim/trim-range-monotonicity/ reconfirms it for trim and finds
+* codes +1/+2 ALSO collapse (VOUT -> ~2.8V) while +3/+4 happen not to --
+* non-monotonic-in-code, i.e. no positive code is a certified-safe point,
+* not a safe zone at +3/+4. Only downward (R2 decrease) moves away from
+* that edge; confirmed monotonic, collapse-free to -16 across corners. See
+* DR-002 and the sim record for the full case.
+* LSB REVISION (issue #106, DR-002 revision): the routed layout's fine trim
+* chain does NOT draw one length-tapped device -- it chains N separately-
+* contacted res_high_po unit instances (layout/bin/gen_bandgap_routed.py's
+* bus_res_series), each paying a real per-instance head/fringe resistance
+* term this schematic's single-device XR2A/XR2B lines do not model (DR-003,
+* sim/res-array-head-resistance/). Re-deriving DR-002's <=3.000 mV/code LSB
+* comfort bound against that REAL chained topology at the adopted
+* n_r1=7/n_r2=50 sizing (sim/trim-lsb-chained/) found the shipped
+* r_lseg_trim=1 per-code step reads 3.12-3.15 mV/code across all 5 corners
+* -- a real, measured violation of the comfort bound (smaller than an
+* earlier, now-superseded estimate against an abandoned n_r1=6/n_r2=42
+* sizing, but still a violation). Halving the fine unit's drawn length to
+* 0.5 um fixes it: the per-instance head-resistance term (~379.7 ohm, the
+* DOMINANT piece of the per-code step) is a PDK-model-card constant
+* independent of the unit's drawn length, so only the smaller `rbody`
+* fringe term shrinks -- re-verified at r_lseg_trim=0.5 to read
+* 2.40-2.42 mV/code, PASS at all 5 corners, with the same certified 0..-16
+* code range and downward span still clearing DR-002's 1.5x-of-3sigma
+* coverage target. See sim/trim-lsb-chained/records/ for the full
+* re-derivation. NEXT INCREMENT (not done here, per one-lever-per-
+* increment): layout/bin/gen_bandgap_routed.py's
+* R_LSEG_TRIM_UM/SCH_R_LSEG_TRIM_UM (currently still transcribing 1 um)
+* must be re-transcribed to 0.5 um and the routed cell re-verified through
+* klayout DRC/LVS -- klayout's extraction backend is not available in this
+* run environment, so that is a follow-up issue, the same split issue #99
+* used for #107/#108.
+.param n_r2_trim=0
+.param r_lseg_trim=0.5
+* ---- Routed chained-array decomposition (issue #178) ----
+* Transcribed from layout/bin/gen_bandgap_routed.py's N_R1 / N_R2_COARSE /
+* N_R2_TRIM_UNITS: each leg is drawn as separately-contacted unit instances
+* in series, so the instance COUNT (not just the total drawn length) is an
+* electrical parameter -- every instance pays the model card's rhead term.
+*   R1        : n_r1 coarse units of r_lseg um.
+*   R2A/R2B   : n_r2_coarse coarse units of r_lseg um, plus the fixed
+*               n_r2_fine-unit fine ladder of r_lseg_trim um each, of which
+*               (n_r2_fine + n_r2_trim) are in circuit at a DOWNWARD-only
+*               trim code (code 0 = all of them = the untrimmed leg).
+* n_r2_coarse is derived, not transcribed twice: the fine ladder's drawn
+* length is held inside the specified r_lseg*n_r2 leg, which is exactly the
+* constraint gen_bandgap_routed.py's R2_LEG_SPEC_UM assertion enforces.
+.param n_r2_fine=20
+.param n_r2_coarse='n_r2-r_lseg_trim*n_r2_fine/r_lseg'
+.param n_r2_inst='n_r2_coarse+n_r2_fine+n_r2_trim'
+* Replica multiplicities: (N-1) per leg -- see CHAINED-ARRAY MODEL above.
+.param n_r2_ov='n_r2_inst-1'
+.param n_r1_ov='n_r1-1'
+* Replica unit drawn length. The lumped identity is exact for ANY value;
+* 0.5 um is chosen only so the body devices' remaining length stays well
+* positive (R2A/R2B body = 221.0 um, R1 body = 32.0 um at the shipped
+* sizing) and so the replica is a length the layout actually draws.
+.param r_ov_seg=0.5
+
+
+**** end user architecture code
+**** begin user architecture code
+
+
+* ---- Per-instance head-resistance replicas (issue #178) ----
+* These three (replica, VCVS) pairs complete the EXACT lumped equivalent of
+* the routed layout's N-instance series chains; the drawn XR1/XR2A/XR2B
+* symbols carry only the body length. See the CORE_PARAMS block's
+* CHAINED-ARRAY MODEL section for the identity, its exactness proof and the
+* explicit-chain cross-check.
+* Written as SPICE text rather than drawn symbols for one concrete reason:
+* the stock res_high_po symbol emits 'mult=@mult m=@mult', and an X-line's
+* `m` PARALLELS the subcircuit -- which would divide the replica's value by
+* N-1 instead of leaving it alone. These lines set mult (mismatch sigma,
+* 1/sqrt(w*mult), reproducing N-1 independent instances) while pinning m=1
+* (nominal value untouched). The VCVS then multiplies the replica's own
+* drop by (N-1), so the leg's total series resistance is exactly
+* (N-1) * R_unit(r_ov_seg) + R_body -- at every temperature and corner,
+* because the replica is a real model-card evaluation, not a frozen number.
+XR2A_HD VA R2A_HD1 VSS sky130_fd_pr__res_high_po W='r_w' L='r_ov_seg' mult='n_r2_ov' m=1
+ER2A_HD R2A_HD1 R2A_HD2 VA R2A_HD1 'n_r2_ov-1'
+XR2B_HD VB R2B_HD1 VSS sky130_fd_pr__res_high_po W='r_w' L='r_ov_seg' mult='n_r2_ov' m=1
+ER2B_HD R2B_HD1 R2B_HD2 VB R2B_HD1 'n_r2_ov-1'
+XR1_HD VBQ R1_HD1 VSS sky130_fd_pr__res_high_po W='r_w' L='r_ov_seg' mult='n_r1_ov' m=1
+ER1_HD R1_HD1 R1_HD2 VBQ R1_HD1 'n_r1_ov-1'
+
+
+**** end user architecture code
+XMPOUT VOUT GDRV VDD VDD sky130_fd_pr__pfet_g5v0d10v5 L=2 W=8 nf=1 ad=2.32 as=2.32 pd=16.58 ps=16.58 nrd=0.03625 nrs=0.03625 sa=0 sb=0 sd=0 mult='m_out' m='m_out'
+XMPAMP TAIL GDRV VDD VDD sky130_fd_pr__pfet_g5v0d10v5 L=2 W=8 nf=1 ad=2.32 as=2.32 pd=16.58 ps=16.58 nrd=0.03625 nrs=0.03625 sa=0 sb=0 sd=0 mult='m_ampbias' m='m_ampbias'
+XAMP VB VA GDRV TAIL VDD VSS error_amp
+XR2A R2A_HD2 VOUT VSS sky130_fd_pr__res_high_po W='r_w' L='r_lseg*n_r2+r_lseg_trim*n_r2_trim-n_r2_ov*r_ov_seg' mult=1 m=1
+XR2B R2B_HD2 VOUT VSS sky130_fd_pr__res_high_po W='r_w' L='r_lseg*n_r2+r_lseg_trim*n_r2_trim-n_r2_ov*r_ov_seg' mult=1 m=1
+XQ1 VSS VSS VA sky130_fd_pr__pnp_05v5_W0p68L0p68 m='n_pnp_ctat' mult='n_pnp_ctat'
+XR1 R1_HD2 VB VSS sky130_fd_pr__res_high_po W='r_w' L='r_lseg*n_r1-n_r1_ov*r_ov_seg' mult=1 m=1
+XQ2 VSS VSS VBQ sky130_fd_pr__pnp_05v5_W3p40L3p40 m='n_pnp_ptat' mult='n_pnp_ptat'
+.ends
+
+
+* expanding   symbol:  design/startup_injector.sym # of pins=4
+** sym_path: design/startup_injector.sym
+** sch_path: design/startup_injector.sch
+.subckt startup_injector GDRV VSENSE VDD VSS
+*.iopin GDRV
+*.ipin VSENSE
+*.iopin VDD
+*.iopin VSS
+**** begin user architecture code
+
+
+* ---- startup injector parameters (issue #10) ----
+* m_ref  : units of the (W=1 L=20) diode-connected reference PMOS. Raising it
+*          raises BOTH the release threshold and the residual current the cell
+*          draws from GDRV once disengaged -- the two are the same current.
+* m_sense: units of the (W=48 L=0.5) sense NMOS. Raising it lowers the release
+*          threshold (better disengage, less traverse margin).
+* m_pnp  : unit PNPs in the threshold reference. Raising it lowers VBE at the
+*          sense current, i.e. lowers the release threshold.
+* m_inj  : units of the (W=10 L=0.5) injector NMOS. Scales the eviction
+*          current and the disengaged residual in the same proportion.
+* m_clamp: units of the (W=4 L=1) railed-branch clamp NMOS MNC. Scales only
+*          how hard the railed branch is evicted; MNC is off by more than a
+*          threshold at every legitimate operating point, so this knob does
+*          NOT trade against the disengaged residual the way m_ref does.
+.param m_ref=1
+.param m_sense=1
+.param m_pnp=8
+.param m_inj=1
+.param m_clamp=1
+
+
+**** end user architecture code
+XMPC1 NC1 NC1 GDRV VDD sky130_fd_pr__pfet_g5v0d10v5 L=20 W=1 nf=1 ad=0.29 as=0.29 pd=2.58 ps=2.58 nrd=0.29 nrs=0.29 sa=0 sb=0 sd=0 mult='m_ref' m='m_ref'
+XMPC2 NG NG NC1 VDD sky130_fd_pr__pfet_g5v0d10v5 L=20 W=1 nf=1 ad=0.29 as=0.29 pd=2.58 ps=2.58 nrd=0.29 nrs=0.29 sa=0 sb=0 sd=0 mult='m_ref' m='m_ref'
+XMNS NG VSENSE NE VSS sky130_fd_pr__nfet_g5v0d10v5 L=0.5 W=48 nf=1 ad=13.92 as=13.92 pd=96.58 ps=96.58 nrd=0.00604166666666667 nrs=0.00604166666666667 sa=0 sb=0 sd=0 mult='m_sense' m='m_sense'
+XQS VSS VSS NE sky130_fd_pr__pnp_05v5_W0p68L0p68 m='m_pnp' mult='m_pnp'
+XMNI GDRV NG VSS VSS sky130_fd_pr__nfet_g5v0d10v5 L=0.5 W=10 nf=1 ad=2.9 as=2.9 pd=20.58 ps=20.58 nrd=0.029 nrs=0.029 sa=0 sb=0 sd=0 mult='m_inj' m='m_inj'
+XMNC VDD VSENSE GDRV VSS sky130_fd_pr__nfet_g5v0d10v5 L=1 W=4 nf=1 ad=1.16 as=1.16 pd=8.58 ps=8.58 nrd=0.0725 nrs=0.0725 sa=0 sb=0 sd=0 mult='m_clamp' m='m_clamp'
+.ends
+
+
+* expanding   symbol:  design/error_amp.sym # of pins=6
+** sym_path: design/error_amp.sym
+** sch_path: design/error_amp.sch
+.subckt error_amp VINP VINN AOUT ITAIL VDD VSS
+*.ipin VINP
+*.ipin VINN
+*.opin AOUT
+*.iopin ITAIL
+*.iopin VDD
+*.iopin VSS
+**** begin user architecture code
+
+
+* ---- error-amp device multiplicities (issue #9 sizing, amp_m_in revised by #170) ----
+* Unit geometry is fixed on the instances below; mult is the matching axis
+* (sigma(Vth) scales as 1/sqrt(W*L*mult) in the PDK's own model).
+* amp_m_in    : input-pair PMOS units   (W=20u L=10u each -> 1600 um^2 total;
+*               16 -> 8 by issue #170, DR-008 Option B PSRR margin increase
+*               -- see the header's amp_m_in: 16 -> 8 section)
+* amp_m_nmirr : NMOS load/mirror units  (W=8u  L=20u each ->  640 um^2 total)
+* amp_m_pmirr : PMOS mirror units       (W=6u  L=20u each ->  960 um^2 total)
+* amp_m_cc    : MOS-capacitor units     (W=30u L=20u each -> 9600 um^2 total)
+.param amp_m_in=8
+.param amp_m_nmirr=4
+.param amp_m_pmirr=8
+.param amp_m_cc=16
+
+
+**** end user architecture code
+XMP1 D1 VINP ITAIL VDD sky130_fd_pr__pfet_g5v0d10v5 L=10 W=20 nf=1 ad=5.8 as=5.8 pd=40.58 ps=40.58 nrd=0.0145 nrs=0.0145 sa=0 sb=0 sd=0 mult='amp_m_in' m='amp_m_in'
+XMP2 D2 VINN ITAIL VDD sky130_fd_pr__pfet_g5v0d10v5 L=10 W=20 nf=1 ad=5.8 as=5.8 pd=40.58 ps=40.58 nrd=0.0145 nrs=0.0145 sa=0 sb=0 sd=0 mult='amp_m_in' m='amp_m_in'
+XMN1 D1 D1 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 L=20 W=8 nf=1 ad=2.32 as=2.32 pd=16.58 ps=16.58 nrd=0.03625 nrs=0.03625 sa=0 sb=0 sd=0 mult='amp_m_nmirr' m='amp_m_nmirr'
+XMN2 D2 D2 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 L=20 W=8 nf=1 ad=2.32 as=2.32 pd=16.58 ps=16.58 nrd=0.03625 nrs=0.03625 sa=0 sb=0 sd=0 mult='amp_m_nmirr' m='amp_m_nmirr'
+XMN3 AOUT D1 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 L=20 W=8 nf=1 ad=2.32 as=2.32 pd=16.58 ps=16.58 nrd=0.03625 nrs=0.03625 sa=0 sb=0 sd=0 mult='amp_m_nmirr' m='amp_m_nmirr'
+XMN4 PN D2 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 L=20 W=8 nf=1 ad=2.32 as=2.32 pd=16.58 ps=16.58 nrd=0.03625 nrs=0.03625 sa=0 sb=0 sd=0 mult='amp_m_nmirr' m='amp_m_nmirr'
+XMP4 AOUT PN VDD VDD sky130_fd_pr__pfet_g5v0d10v5 L=20 W=6 nf=1 ad=1.74 as=1.74 pd=12.58 ps=12.58 nrd=0.0483333333333333 nrs=0.0483333333333333 sa=0 sb=0 sd=0 mult='amp_m_pmirr' m='amp_m_pmirr'
+XMP3 PN PN VDD VDD sky130_fd_pr__pfet_g5v0d10v5 L=20 W=6 nf=1 ad=1.74 as=1.74 pd=12.58 ps=12.58 nrd=0.0483333333333333 nrs=0.0483333333333333 sa=0 sb=0 sd=0 mult='amp_m_pmirr' m='amp_m_pmirr'
+XMCC VDD AOUT VDD VDD sky130_fd_pr__pfet_g5v0d10v5 L=20 W=30 nf=1 ad=8.7 as=8.7 pd=60.58 ps=60.58 nrd=0.00966666666666667 nrs=0.00966666666666667 sa=0 sb=0 sd=0 mult='amp_m_cc' m='amp_m_cc'
+.ends
+
+.end
