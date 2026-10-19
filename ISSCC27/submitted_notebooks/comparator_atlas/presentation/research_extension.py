@@ -17,21 +17,22 @@ from entry_tools import artifact_path, digest, verify_files
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "results" / "research"
-MANIFEST_SHA256 = "e48d6856fdaa56c65c622cbe6f86e61030752c06b5af8c6cf6e0e16d24bd7bc0"
+MANIFEST_SHA256 = "77760c1ee64bee3abda776898fb03dc981d767f3f6d0324e5137b0714f261ec2"
 ATLAS_DESIGNS = ("baseline", "lvt_base_3b", "lvt_balanced_4b")
 PROSPECTIVE_DESIGNS = ("svt_fast_4b", "lvt_fine_3b", "lvt_fine_4b", "lvt_fast_4b", "lvt_fast_fine_4b", "lvt_wide_5b")
 FIX = "fix_x2_unit5b"
 FIX_CODE_LIMIT = 31
-RANGE_DESIGNS = ("unit5_w3", "unit6_w6")
+RANGE_DESIGNS = ("unit5_w3", "unit6_w6", "u6_w12_l05")
 RANGE_VARIANTS = (
     # design, label, residual file, code limit
     ("lvt_balanced_4b", "Shipped: binary 4b, input W 3", "r1/r1_residuals.csv", 15),
     (FIX, "r13 fix: unit 5b, input W 6", "r13/fix_residuals.csv", 31),
     ("unit5_w3", "r15a: unit 5b, input W 3", "r15a/unit5_w3_residuals.csv", 31),
     ("unit6_w6", "r15b: unit 6b, input W 6", "r15b/unit6_w6_residuals.csv", 63),
+    ("u6_w12_l05", "r19: unit 6b at L 0.5, input W 12", "r19/u6_w12_l05_residuals.csv", 63),
 )
 PROSPECTIVE_STUDIES = (("r2", "prospective"), ("r13", "prospective fix"),
-                       ("r15a", "prospective range"), ("r15b", "prospective range"))
+                       ("r15a", "prospective range"), ("r15b", "prospective range"), ("r19", "prospective range"))
 BANDS_MV = (0.5, 1.0, 3.0, 10.0, 30.0)
 TABLE_DEADLINES_NS = (0.75, 1.0, 2.0)
 SCOPE_LABEL = "Extension: later local schematic simulations, not part of the sealed decision record"
@@ -47,6 +48,8 @@ MC_VARIANTS = (
     ("Rejected: gate-switched 5b trim", "SS 1.62 V -40 C", "r12/mc_gate5b_ss1.62V-40C_*.jsonl", 40),
     ("6-bit: unit 6b trim, input W 6", "TT 1.8 V 27 C", "r16/mc_unit6_tt1.8V27C_*.jsonl", 40),
     ("6-bit: unit 6b trim, input W 6", "SS 1.62 V -40 C", "r16/mc_unit6_ss1.62V-40C_*.jsonl", 40),
+    ("r19: unit 6b trim at L 0.5, input W 12", "TT 1.8 V 27 C", "r19/mc_w12_tt1.8V27C_*.jsonl", 40),
+    ("r19: unit 6b trim at L 0.5, input W 12", "SS 1.62 V -40 C", "r19/mc_w12_ss1.62V-40C_*.jsonl", 40),
 )
 MC_CHECKS = ((3.0, 1.0), (1.0, 0.75), (1.0, 1.0), (0.5, 1.0))
 ENERGY_VARIANTS = {
@@ -64,6 +67,16 @@ POSTLAYOUT_R11 = {"schematic": "r11 fix, schematic (binary-sized netlist)", "rc_
 POSTLAYOUT_R17 = {"schematic_unit5": "r17 fix, schematic (unit-array netlist)",
                   "schematic_unit6": "r17 unit6_w6, schematic", "rc_unit6": "r17 unit6_w6, estimated RC",
                   "rc_unit6_half_q": "r17 unit6_w6, estimated RC, half q-node wiring"}
+WIDE_RC = (
+    # archive file, variant key, label
+    ("r17/r17_pvt45.jsonl", "schematic_unit6", "unit6_w6, schematic"),
+    ("r17/r17_pvt45.jsonl", "rc_unit6", "unit6_w6, estimated RC"),
+    ("r17/r17_pvt45.jsonl", "rc_unit6_half_q", "unit6_w6, estimated RC, half q-node wiring"),
+    ("r19/r19_rc.jsonl", "schematic_w12_l05", "u6_w12_l05, schematic"),
+    ("r19/r19_rc.jsonl", "rc_w12_l05", "u6_w12_l05, estimated RC"),
+    ("r19/r19_rc.jsonl", "rc_w12_l05_half_q", "u6_w12_l05, estimated RC, half q-node wiring"),
+    ("r19/r19_rc.jsonl", "rc_unit6_no_q", "bound: input W 12, trim L 1, no q-node wiring"),
+)
 
 
 def load() -> dict:
@@ -243,6 +256,26 @@ def postlayout_table(data: dict) -> pd.DataFrame:
                      **{f"+/-3, 10 mV correct @ {d} ns": r[f"3_10mv_correct@{d}ns"] for d in ("0.75", "1.0", "2.0")},
                      **{f"+/-1 mV correct @ {d} ns": r.get(f"1mv_correct@{d}ns", "-") for d in ("0.75", "1.0", "2.0")},
                      "worst decision, +/-3, 10 mV (ns)": round(r["3_10mv_worst_t_ns"], 3), "mean energy (fJ)": round(r["energy_mean_fj"], 1)})
+    return pd.DataFrame(rows).set_index("variant")
+
+
+def wide_rc_table(data: dict) -> pd.DataFrame:
+    """r17 against r19 on the same inputs (+/-1, +/-3 mV): 45 PVT conditions, code 0, nominal devices."""
+    rows = []
+    for name, key, label in WIDE_RC:
+        records = [r for r in _jsonl(data, name) if r["variant"] == key and abs(r["v_mv"]) in (1.0, 3.0)]
+        if len(records) != 180:
+            raise RuntimeError(f"{name} {key}: expected 180 rows")
+        ones = [r for r in records if abs(r["v_mv"]) == 1.0]
+        threes = [r for r in records if abs(r["v_mv"]) == 3.0]
+        row = {"variant": label}
+        for d in ("0.75", "1.0", "2.0"):
+            row[f"+/-1 mV correct @ {d} ns"] = f"{sum(r['at'][d] == 'correct' for r in ones)}/90"
+        row["+/-3 mV correct @ 1.0 ns"] = f"{sum(r['at']['1.0'] == 'correct' for r in threes)}/90"
+        row["wrong decisions"] = sum(v == "wrong" for r in records for v in r["at"].values())
+        row["worst decision, +/-1 mV (ns)"] = round(max(r["t_ns"] or math.inf for r in ones), 2)
+        row["mean energy (fJ)"] = round(sum(r["energy_fj"] for r in records) / len(records))
+        rows.append(row)
     return pd.DataFrame(rows).set_index("variant")
 
 

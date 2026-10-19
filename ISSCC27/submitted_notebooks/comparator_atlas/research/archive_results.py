@@ -39,6 +39,9 @@ STUDIES = {
     "r16": ["r16/mc_unit6_*.jsonl", "r16/energy.json"],
     "r17": ["r17/r17_pvt45.jsonl", "r17/r17_report.json"],
     "r18": ["r18/screen.jsonl"],
+    "r19": ["r19/r19_rc.jsonl", "r19/r19_rc_report.json", "r19/registered_predictions_w12.*",
+            "r19/r2_evaluation.json", "r19/r2_atlas_new_designs.csv", "r19/u6_w12_l05_residuals.csv",
+            "r19/mc_w12_*.jsonl"],
 }
 
 

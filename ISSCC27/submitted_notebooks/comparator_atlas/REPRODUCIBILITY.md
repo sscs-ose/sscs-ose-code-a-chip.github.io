@@ -610,7 +610,7 @@ not part of the sealed decision record of Sections 1-8; nothing in the
 specification map, the 49-condition data or the layout example is changed.
 
 **Saved results.** `results/research/` holds the archived outputs of studies
-r1-r18 (JSON, JSONL and CSV, LF line endings).
+r1-r19 (JSON, JSONL and CSV, LF line endings).
 `results/research/manifest.json` lists the SHA256 of every archived file and
 of every `research/*.py` script. `presentation/research_extension.py` pins the
 manifest's own SHA256 and refuses to draw Section 9 if the manifest, any
@@ -637,6 +637,7 @@ command line.
 | r16 | `r16_six_bit.py` | The r15b 6-bit design: paired mismatch MC (TT and SS, 40 seeds each, same draws as r10) and nominal energy at three corners |
 | r17 | `r17_post_layout_6b.py` | RC estimate for the 6-bit design on the b1 extraction (no drawn layout), and the unit-array schematic reference r11 should have used |
 | r18 | `r18_energy_screen.py` | Nominal TT screen of lower-energy 6-bit trims (input W, trim L, switch W and side) |
+| r19 | `r19_rc_wide.py`, `r19_atlas_wide.py`, `r19_mc_wide.py` | The r18 variant `u6_w12_l05` (6-bit unit trim at L 0.5, input W 12): RC estimate as r17, sealed 49-condition test as r15, paired mismatch MC as r16 |
 
 **Re-running.** Live studies use the same project-local ngspice 47 and pinned
 SKY130 models as the full campaign (`node scripts/setup.mjs` on Windows;
@@ -669,11 +670,16 @@ estimates its RC on the b1 extraction as r11 does, with bits 4 and 5 placed on
 bit 3's extracted nodes and bit 3's wiring capacitance scaled by 2 and 4; at
 code 0 that estimate keeps +/-1 mV correct at 2 ns but not at 1 ns. During r17
 one ngspice deck stalled with no CPU use under full load; it was stopped and
-the run resumed from its saved rows. r18 is a nominal TT screen only. The
+the run resumed from its saved rows. r18 is a nominal TT screen only. r19
+tests the r18 variant `u6_w12_l05`, chosen after that screen, with the r15
+sealed protocol (same 63-code deviation), the r17 RC estimate and the r16
+paired seeds; it qualifies at 1 mV at 0.75, 1 and 2 ns using codes -16 to +15,
+and like the other 6-bit design it has no layout. Its RC rows halving the
+latch-output wiring are a layout assumption, not an extraction. The
 shared calibration routine checks `max_code <= 31`;
-r15b uses a local copy of `select_trim` with only that check raised to 63,
-and r15 scales ngspice's wall-clock guard (15 s per point) by 4 for the
-larger unit-element netlists. r16 likewise scales r3's 900 s per-deck guard by
+r15b and r19 use a local copy of `select_trim` with only that check raised to 63,
+and r15 and r19 scale ngspice's wall-clock guard (15 s per point) by 4 for the
+larger unit-element netlists. r16 and r19 likewise scale r3's 900 s per-deck guard by
 4; two SS batches stopped on that guard under full machine load and were
 restarted, and the affected seeds then completed normally. Neither change
 alters a simulated result.

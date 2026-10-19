@@ -924,13 +924,15 @@ def main(support_digest: str | None = None) -> None:
         > [Reproducibility](REPRODUCIBILITY.md#research-extension).
 
         **Headline result.** The original three-design atlas returns NONE at
-        1 mV, but a later design, `unit6_w6` (r15b: 6-bit unit trim, input
-        W = 6 µm), qualifies at ±1 mV at 1 and 2 ns across all 49
-        deterministic conditions. Its cost is 760 fJ mean core energy. It has
-        no layout of its own; an RC estimate on the archived extraction keeps
-        ±1 mV correct at 2 ns but not at 1 ns (r17). The rest of this section
-        explains why the original designs stop short, and what failed along
-        the way.
+        1 mV, but two later designs qualify at ±1 mV across all 49
+        deterministic conditions. `unit6_w6` (r15b: 6-bit unit trim, input
+        W = 6 µm) does so at 1 and 2 ns at 760 fJ mean core energy;
+        `u6_w12_l05` (r19: the same trim built from 0.5 µm-long units, input
+        W = 12 µm) does so at 0.75, 1 and 2 ns at 623 fJ. Neither has a layout
+        of its own. On an RC estimate from the archived extraction both keep
+        ±1 mV correct at 2 ns; at 1 ns `u6_w12_l05` gets 78/90 and
+        `unit6_w6` 69/90 (r17, r19). The rest of this section explains why
+        the original designs stop short, and what failed along the way.
 
         **Question.** Section 4 finds *no feasible compared design* at
         input bands of 1 mV or below, at every deadline. Is that a latch-speed
@@ -963,8 +965,8 @@ def main(support_digest: str | None = None) -> None:
         those inputs were simulated; the predictions were sealed by SHA-256.
         Of these, 10,359 (97.9%) matched, and all 108 predictive atlas-cell
         classifications agreed. None of those six
-        qualifies at 1 mV either. The atlas table also lists the three later
-        trim designs discussed below (r13, r15).
+        qualifies at 1 mV either. The atlas table also lists the four later
+        trim designs discussed below (r13, r15, r19).
 
         **Cause: the binary trim array.** Bit 0 is a single minimum-width
         (0.42 µm) device and the larger bits are wider single devices, so the
@@ -1007,8 +1009,8 @@ def main(support_digest: str | None = None) -> None:
         each), at 760 fJ mean core energy over that band. For context, the
         shipped design requires a ≥3 mV band and averages 250 fJ there; these
         are different specifications, not a same-specification energy
-        comparison. It is the only tested design in this finite 49-condition
-        schematic atlas that qualifies at ±1 mV. At 0.75 ns it qualifies at ±3 mV: the
+        comparison. It was the first tested design in this finite 49-condition
+        schematic atlas to qualify at ±1 mV (r19 below adds a second). At 0.75 ns it qualifies at ±3 mV: the
         sealed ±1 mV prediction failed by one unresolved decision
         (SS 1.62 V 125 °C, +4% skew, *v* = −1 mV against *m* = −0.55 mV).
         Held-out agreement was 96.1% (5-bit) and 95.1% (6-bit). The shared
@@ -1048,6 +1050,7 @@ def main(support_digest: str | None = None) -> None:
         display(ext.energy_table(extension))
         display(ext.postlayout_table(extension))
         display(ext.energy_screen_table(extension))
+        display(ext.wide_rc_table(extension))
         figure = ext.figure(extension)
         display(figure)
         plt.close(figure)
@@ -1064,32 +1067,59 @@ def main(support_digest: str | None = None) -> None:
         at 1 ns, and 180/180 with the latch-output wiring halved, at
         579–605 fJ.
 
-        **Can the 6-bit design be made cheaper? Not in our screen (r18).**
+        **Can the 6-bit design be made cheaper? The screen (r18).**
         Its energy follows the same rule: 731 fJ at TT against 244 fJ for the
         shipped design. A nominal TT screen of six variants (wider input
-        pair, shorter trim L, narrower or drain-side switch; last table)
-        found none that keeps both its step and its range. Shortening the
-        trim devices with a wider input pair saves energy roughly in
-        proportion to the range it loses (input W 12 µm, L 0.5 µm: 611 fJ,
-        range 37 mV against 44 mV), while r15b already needed code −52 of
-        ±63. Moving the switch to the drain side costs more energy
+        pair, shorter trim L, narrower or drain-side switch; energy-screen
+        table) changes energy roughly in proportion to trim range
+        (input W 12 µm, L 0.5 µm: 611 fJ, range 37 mV against 44 mV). Judged
+        against the code −52 of ±63 that r15b needed, we first read this as
+        no margin; r19 tested that reading and it was wrong for the wider
+        input pair. Moving the switch to the drain side costs more energy
         (802 fJ) and range (16 mV) and is slower.
+
+        **A wider input pair: cheaper and faster (r19).** The wider pair also
+        needs far less trim. In a sealed 49-condition test of the r18 variant
+        with input W = 12 µm and 0.5 µm-long trim units (`u6_w12_l05`;
+        predictions registered by SHA-256 before the held-out inputs, same
+        local 63-code deviation), codes stay within −16 to +15 (r15b: −52 to
+        +32), no condition reaches the range end, and |*m*| ≤ 0.39 mV. It
+        qualifies at ±1 mV at 0.75, 1 and 2 ns, at ±0.5 mV at 2 ns and at
+        ±3 mV at 0.5 ns, at about 623 fJ: in every atlas cell at least as good
+        as `unit6_w6`, at 18% less energy. We have not isolated why the
+        offset to trim shrinks this much; a lower input overdrive is one
+        likely contributor. Held-out agreement was 94.9%, and 16 of 18
+        predictive atlas cells agreed; both misses predicted ±0.5 mV at
+        0.75 and 1 ns, which it does not reach. In mismatch Monte Carlo
+        paired with r16 (same 40 seeds per condition), the trim covers 80/80
+        and ±1 mV is 80/80 correct at 0.75 and 1 ns at both conditions. The
+        largest residual is higher, 0.82 mV against 0.59 mV (one SS −40 °C
+        seed at code 31, where the step to code 32 measured 1.9 mV), while the
+        RMS residual is similar (0.27/0.29 mV against 0.26/0.30 mV). At
+        ±0.5 mV and 1 ns it is 79/80 and 78/80 correct (1 and 2 wrong)
+        against 77/80 (3 wrong) and 64/80 (16 unresolved). With the r17 RC
+        estimate on the same ±1 and ±3 mV inputs (last table), ±1 mV is
+        correct 78/90 at 1 ns (`unit6_w6`: 69/90) and ±3 mV 90/90 (78/90),
+        at 827 fJ against 949 fJ; all 12 misses are unresolved, at 1.62 V.
+        With the latch-output wiring halved, a layout assumption rather than
+        an extraction, ±1 mV is 90/90 at 1 ns.
 
         **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
         bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
-        The cost paragraph above refers to the r13 fix. The 6-bit design has
-        no layout, DRC/LVS or extraction of its own; its RC numbers are an
-        estimate at code 0 without mismatch, its mismatch Monte Carlo
-        covers two conditions without width skew, and its 49-condition test
-        uses deterministic width skews, not random mismatch. The r18 screen
-        is nominal TT only.
+        The cost paragraph above refers to the r13 fix. The 6-bit designs have
+        no layout, DRC/LVS or extraction of their own; their RC numbers are
+        estimates at code 0 without mismatch, their mismatch Monte Carlo
+        covers two conditions without width skew, and their 49-condition
+        tests use deterministic width skews, not random mismatch. The r18
+        screen is nominal TT only, and `u6_w12_l05` was chosen after seeing
+        it; its own sealed test covers only that one design.
         """),
         markdown("""
         ## 10. Discussion and limitations
 
         This discussion summarizes the sealed Sections 1–8 record. Section 9
         is a separate later schematic extension and reports the `unit6_w6`
-        result and its additional limitations.
+        and `u6_w12_l05` results and their additional limitations.
 
         Under the same local calibration policy, the selected circuit
         increases 1 ns correct decisions from 310/392 to 372/392 across

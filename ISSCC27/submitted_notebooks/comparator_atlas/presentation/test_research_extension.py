@@ -140,11 +140,36 @@ def test_energy_screen(data):
     assert len(drain) == 2 and (drain["range, code 63 (mV)"] < 25).all()
 
 
+def test_wide_input_six_bit(data):
+    atlas = ext.atlas_table(data)
+    w12 = atlas.loc["u6_w12_l05"]
+    assert w12["0.75 ns"].startswith(">= 1 mV") and w12["1 ns"].startswith(">= 1 mV")
+    assert w12["2 ns"].startswith(">= 0.5 mV")
+    assert atlas.loc["unit6_w6", "0.75 ns"].startswith(">= 3 mV")
+    table = ext.prospective_table(data)
+    assert table.loc["u6_w12_l05", "held-out decisions predicted"] == "1674/1764"
+    assert table.loc["all r19", "held-out decisions predicted"] == "atlas cells 16/18"
+    rng = ext.range_table(data).loc["r19: unit 6b at L 0.5, input W 12"]
+    assert (rng["codes used"], rng["conditions at range end"], rng["max |m| (mV)"]) == ("-16 to 15", 0, 0.39)
+    rc = ext.wide_rc_table(data)
+    assert rc.loc["unit6_w6, estimated RC", "+/-1 mV correct @ 1.0 ns"] == "69/90"
+    est = rc.loc["u6_w12_l05, estimated RC"]
+    assert (est["+/-1 mV correct @ 1.0 ns"], est["+/-3 mV correct @ 1.0 ns"], est["mean energy (fJ)"]) == ("78/90", "90/90", 827)
+    assert rc.loc["u6_w12_l05, estimated RC, half q-node wiring", "+/-1 mV correct @ 1.0 ns"] == "90/90"
+    assert rc["wrong decisions"].sum() == 0
+    mc = ext.mc_table(data).loc["r19: unit 6b trim at L 0.5, input W 12"]
+    assert list(mc["trim range covers offset"]) == ["40/40", "40/40"]
+    assert list(mc["+/-1 mV @ 0.75 ns"]) == ["80/80", "80/80"]
+    assert list(mc["+/-1 mV @ 1 ns"]) == ["80/80", "80/80"]
+    assert list(mc["+/-0.5 mV @ 1 ns"]) == ["79/80 (1 wrong)", "78/80 (2 wrong)"]
+    assert list(mc["max |m| (mV)"]) == [0.59, 0.82]
+
+
 def test_no_unfilled_placeholders():
     texts = [(ROOT / n).read_text(encoding="utf-8") for n in
              ("Comparator_Atlas.ipynb", "README.md", "REVIEWER_GUIDE.md", "REPRODUCIBILITY.md")]
     for text in texts:
-        assert "R13_" not in text
+        assert "R13_" not in text and "R19_MC" not in text and "R19MCMAX" not in text
     assert len(ext.MANIFEST_SHA256) == 64
 
 

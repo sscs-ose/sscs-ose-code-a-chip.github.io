@@ -37,15 +37,17 @@ EXTENSION_SUMMARY = (
     "sealed predictions for six new designs matched 97.9% of 10,584 held-out decisions. The limit is "
     "the trim, not latch speed: first the binary array's major-carry step, then, once unit elements "
     "remove it, the trim range (a 5-bit unit trim saturates in 11 of 49 conditions). Among the "
-    "designs tested in the finite 49-condition schematic atlas, `unit6_w6` (r15b: 6-bit unit trim, "
-    "input W = 6 µm), tested with sealed predictions, is the only one that qualifies at ±1 mV at 1 "
-    "and 2 ns (98/98 decisions at each), with 760 fJ mean core energy over that band. For context, "
+    "designs tested in the finite 49-condition schematic atlas, two 6-bit unit-trim designs, each "
+    "tested with sealed predictions, qualify at ±1 mV (98/98 decisions per deadline): `unit6_w6` "
+    "(r15b, input W = 6 µm) at 1 and 2 ns with 760 fJ mean core energy, and `u6_w12_l05` (r19, "
+    "input W = 12 µm, half-length trim elements, chosen after an energy screen) at 0.75, 1 and "
+    "2 ns with 623 fJ. For context, "
     "the shipped design requires a ≥3 mV band and averages 250 fJ there; these are different "
     "specifications, not a same-specification energy comparison. In paired mismatch Monte Carlo "
-    "(40 seeds at each of two conditions; not a yield estimate) it keeps the residual within "
-    "0.59 mV. These are later schematic simulations; it has no layout of its own, and an RC estimate "
-    "on the archived extraction keeps ±1 mV correct at 2 ns but not at 1 ns (69/90 at code 0; "
-    "misses are unresolved, none wrong).")
+    "(40 seeds at each of two conditions; not a yield estimate) the residual stays within "
+    "0.59 mV and 0.82 mV respectively. These are later schematic simulations; neither has a "
+    "layout of its own, and an RC estimate on the archived extraction keeps ±1 mV correct at 2 ns "
+    "but not at 1 ns (69/90 and 78/90 at code 0; misses are unresolved, none wrong).")
 
 
 def sha(path):

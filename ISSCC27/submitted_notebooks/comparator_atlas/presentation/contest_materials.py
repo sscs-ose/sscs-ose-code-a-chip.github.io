@@ -24,15 +24,17 @@ PRESENTATION_TITLE = "Comparator Atlas: correct before the deadline - or NONE?"
 INK, BLUE, MUTED, RULE = "#20252b", "#365d7d", "#505963", "#dce1e5"
 PAGE_INCHES = (24, 18)
 EXTENSION_CALLOUT = (
-    "Later extension (Notebook Section 9; not part of this sealed record): unit6_w6, a 6-bit "
-    "unit trim with input W = 6 um, qualifies at +/-1 mV at 1 and 2 ns over all 49 schematic "
-    "conditions, at 760 fJ mean core energy. No layout of its own; with estimated RC, 2 ns only.")
+    "Later extension (Notebook Section 9; not part of this sealed record): u6_w12_l05, a 6-bit "
+    "unit trim with input W = 12 um, qualifies at +/-1 mV at 0.75-2 ns over all 49 schematic "
+    "conditions, at 623 fJ mean core energy. No layout of its own; with estimated RC, 2 ns only.")
 EXTENSION_ABSTRACT = (
     "Later schematic extension (Notebook Section 9; not part of the sealed three-design record): "
-    "unit6_w6, a 6-bit unit-element trim with input W = 6 um, qualifies across the 49-condition "
-    "atlas at +/-1 mV at 1 and 2 ns, at 760 fJ mean core energy. It has no dedicated layout; an RC "
-    "estimate on the archived extraction keeps +/-1 mV correct at 2 ns but not at 1 ns, and its "
-    "40-seed-per-condition threshold-mismatch study is not a yield estimate.")
+    "two 6-bit unit-element trim designs qualify across the 49-condition atlas at +/-1 mV - "
+    "unit6_w6 (input W = 6 um) at 1 and 2 ns at 760 fJ, and u6_w12_l05 (input W = 12 um, "
+    "half-length trim elements) at 0.75, 1 and 2 ns at 623 fJ mean core energy. Neither has a "
+    "dedicated layout; an RC estimate on the archived extraction keeps +/-1 mV correct at 2 ns but "
+    "not at 1 ns, and their paired 40-seed-per-condition threshold-mismatch study is not a yield "
+    "estimate.")
 DESIGN_REFERENCES = [
     "https://mitcommlab.mit.edu/nse/commkit/poster/",
     "https://mitcommlab.mit.edu/nse/wp-content/uploads/sites/4/2019/07/PosterExampleJepeal.jpg",
