@@ -4,6 +4,18 @@ Submissions to the IEEE SSCS Open-Source Ecosystem **"Code-a-Chip" Travel Grant 
 ISSCC 2027. Joyce Berdkan, The George Washington University — `j.berdkan@gwu.edu`.
 Apache-2.0.
 
+## What it does
+
+![One SAR conversion, traced from the RTL](sar_conversion.gif)
+
+*Successive approximation is a binary search in hardware: the DAC proposes a voltage, the
+comparator says higher or lower, and the answer halves the remaining range. Eight trials, MSB
+first. Above: one conversion of 1.1340 V landing on code 161, 0.28 LSB from ideal.*
+
+The animation is **traced from the RTL in this submission**, not drawn to illustrate it —
+`rtl/tb_trace.v` instruments the same sequencer that goes through synthesis and place-and-route,
+and `anim/make_gif.py` animates whatever that trace contains.
+
 ## Which to read
 
 **`SAR_digital_sky130.ipynb` — the digital half, and an OpenLayout replication.**
