@@ -862,7 +862,10 @@ def nominal_check(res, spec, base, n=8, procs=None, cache=None):
         v = judge(json.loads(json.dumps(c[json.dumps(p_, sort_keys=True)])), ev.materialise(base, p_), spec)
         row = df.loc[(df[list(p_)] == pd.Series(p_)).all(axis=1)].iloc[0]
         out.append(dict(point=p_, lut_vrms=float(row["vrms"]), vrms=v["vrms"], passed=v["passed"], fails=v["fails"],
-                        tt_pass="tt/27" not in v["fails"], lut_corner=bool(row["feas_corner"]), area=gate_area(p_)))
+                        tt_pass="tt/27" not in v["fails"], lut_corner=bool(row["feas_corner"]), area=gate_area(p_),
+                        fails_spec=sum(not corner_pass(r, spec, margin=False)[0] for r in v["corners"]),
+                        corners=[dict(corner=r["corner"], vds_min=r["vds_min"], monotonic=bool(r["monotonic"]),
+                                      range_db=r["range_db"], bw_min=r["bw_min"]) for r in v["corners"]]))
     return dict(n_tt=len(tt), n_corner=int(df["feas_corner"].astype(bool).sum()), verified=out,
                 n_fail=sum(not o["passed"] for o in out), n_corners=len(_need(spec)))
 
