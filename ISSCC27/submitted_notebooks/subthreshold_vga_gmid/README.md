@@ -1,4 +1,4 @@
-# Subthreshold current-steering VGA core + finger-exact gm/ID lookup-table flow (SKY130)
+# Every-corner gm/ID sizing with layout in the loop: a subthreshold current-steering VGA core (SKY130)
 
 IEEE SSCS Code-a-Chip, ISSCC 2027. Notebook: `notebook.ipynb`. License: Apache-2.0.
 
@@ -7,12 +7,12 @@ IEEE SSCS Code-a-Chip, ISSCC 2027. Notebook: `notebook.ipynb`. License: Apache-2
 **Scope:** the gain core of a hearing-aid compressor and the flow that sizes it. No envelope detector or gain-control
 loop, so no compression behaviour is claimed.
 
-## What this work adds to the flows it reuses
-**SKY130's device models depend on the width of each finger, so we build every transistor from whole 5 µm fingers. That makes a $g_m/I_D$ lookup table exact, and the flow built on it sized a subthreshold VGA core, showed where the hand-sized design fails, and was run again after the first layout broke its own pick.**
+## What this work adds to the earlier Code-a-Chip lookup-table flows (ISSCC'25, ISSCC'26)
+**Those flows showed that tables can size a circuit from its specification. This one sizes for all 24 process, temperature and supply corners at once, with one sizing and one layout: it shows that the hand-sized core cannot meet the specification, sizes a designer's fix, and sizes it again after its own first layout broke the pick. Its tables are exact because every transistor is built from whole 5 µm fingers.**
 
 1. **Exact tables, with measured error.** Current density at fixed bias differs by up to 1.6× (NMOS) and 4.6× (PMOS) between finger widths, so a table made at one width does not carry to another. With whole fingers it does. The model on the tables takes 7.4 ms per design and corner and is within **0.40 dB** (gain) and **1.3 %** (noise) of SPICE on 42 random designs. Its worst bandwidth over-estimate is 17 % (under-estimates reach 74 % and only make the screen stricter), so SPICE decides every pick (§5–§6).
 2. **The hand-sized nine-transistor core cannot reach the 30 dB control range, and the flow says why.** None of 12,164 sizings does (best 10.4 dB). The output devices starve as the gain falls (§3.4, §7).
-3. **A designer's three-transistor fix, then a design that meets every corner.** Two keep-alive sinks and a reference diode remove the starvation (§8). On the 12-transistor core, none of the 138,240 designs of the starting grid met all 24 corners; the search extension found the first one in round 5. The pick passes all 24 gate corners and 21 of 21 stress corners: control range ≥ **47.0 dB**, bandwidth ≥ **11.8 kHz**, headroom ≥ **173 mV**, supply **4.63–4.83 µA** (§9–§10).
+3. **A designer's three-transistor fix, then a design that meets every corner.** Two keep-alive sinks and a reference diode remove the starvation (§8). On the 12-transistor core, none of the 138,240 designs of the starting grid met all 24 corners; the search extension found the first one in round 5. Sized at tt alone, the same grid's pick passes at tt but fails 11 of 24 corners in SPICE (Table 14b). The pick passes all 24 gate corners and 21 of 21 stress corners: control range ≥ **47.0 dB**, bandwidth ≥ **11.8 kHz**, headroom ≥ **173 mV**, supply **4.63–4.83 µA** (§9–§10).
 4. **Layout in the loop, then sign-off.** The first layout put 207 fF of wiring on the output and the first pick failed at 6 of 24 corners; the wiring went back into the flow and the new pick passes (§9.3). The final layout is DRC-clean on 3 rule decks natively and 2 in IIC-OSIC-TOOLS, LVS-clean with device sizes in both runs (6 of 6 deliberately altered netlists rejected), with 0 Magic antenna violations. Its extracted netlist passes all 24 corners (bandwidth ≥ 12.3 kHz); with resistance extracted too it passes the gate at the 3 corners that bound it (§13).
 5. **What does not hold.** The pick misses the noise-density target: 60 against 50 nV/√Hz at 1 kHz. Its 6.88 µV of integrated noise meets the 7 µV target at tt, which is the target's condition; it is above 7 µV at 13 of 24 corners (8.4 µV at the noisiest). Supply is 4.95 µA with 3σ mismatch against a 5 µA limit. Monte Carlo, the control port, PSRR and CMRR are schematic-level, and Monte Carlo passes behind an ideal output DC servo that is not built. There is no envelope detector or gain loop: this is a gain core, not a compressor (§14).
 
@@ -36,7 +36,7 @@ bandwidth over-estimate is 17 % (under-estimates reach 74 % and only make the sc
 **The hand-sized nine-transistor core cannot meet the specification:** none of 12,164 sizings reaches the 30 dB
 control range (best 10.4 dB), and the flow reports range as a limit no solved design meets. The analysis of
 §3.4 explains why (the output devices starve as the gain falls), and a designer added **two keep-alive sinks and a reference
-diode**. On that 12-transistor core, **none** of the 138,240 designs of the starting grid met all 24 corners;  the search extension grew the grid for 32 rounds (5,874 more designs), found the first design meeting every corner in round 5 and lowered the best noise to 6.72 µV (LUT).
+diode**. On that 12-transistor core, **none** of the 138,240 designs of the starting grid met all 24 corners;  the search extension grew the grid for 32 rounds (5,874 more designs), found the first design meeting every corner in round 5 and lowered the best noise to 6.72 µV (LUT). Sized at tt alone, the same grid's pick passes at tt but fails 11 of 24 corners in SPICE (Table 14b). 
 
 **Layout in the loop:** a first layout (drawn for an interim sizing) puts 207 fF of wiring on the output; with it, the first pass's pick fails at 6 of 24 corners (bandwidth at the lowest gain step), and every design of that pass sits too close to the bandwidth margin to absorb it. The fitted equivalent, 0.3 pF, becomes part of the load and the flow runs again: 35 of 35 verified designs pass, and the new pick passes every corner with that layout's extracted capacitors added (and with them scaled ×1.5).
 
