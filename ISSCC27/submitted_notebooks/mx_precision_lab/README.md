@@ -166,3 +166,5 @@ Kuan-Yu Liu, "MX Precision Lab: Error-Budgeted Accumulator Width for MX Dot-Prod
 ## 📬 Contact
 
 Kuan-Yu Liu: ana.liu@mail.utoronto.ca
+
+**AI assistance:** Developed with assistance from Claude (Anthropic).
