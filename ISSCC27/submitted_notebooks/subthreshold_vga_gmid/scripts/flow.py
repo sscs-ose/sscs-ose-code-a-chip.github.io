@@ -836,6 +836,37 @@ def margin_check(res, spec, base, n=8, procs=None, cache=None):
                 beats_pick=sum(1 for o in out if o["passed"] and pk and o["vrms"] < pk["vrms"] * (1 - NOISE_TIE)))
 
 
+def nominal_check(res, spec, base, n=8, procs=None, cache=None):
+    """What sizing at tt alone would ship: the same starting grid, evaluator, LUT margins and pick rule, applied to the
+    grid designs that meet every limit at tt (a flow that sizes at the nominal corner needs no extension: its grid
+    already has feasible designs). Its pick and the next quietest such designs are simulated at every corner."""
+    import tempfile
+    df = res["df"]; keys = res["keys"]
+    df = df[df["ext_axis"].isna()] if "ext_axis" in df else df
+    tt = df[df["ok"].astype(bool) & df["feas_tt"].astype(bool)]
+    if not len(tt):
+        return dict(n_tt=0, verified=[])
+    t = np.array([n_targets_met(float(r["vrms"]), float(r["vn_1k"]), float(r["i_tot"]), spec) for _, r in tt.iterrows()])
+    f2 = tt[t == t.max()]
+    tie = f2[f2["vrms"] <= f2["vrms"].min() * (1 + NOISE_TIE)]
+    tp = [_point(r, keys) for _, r in tie.iterrows()]
+    ar = np.array([gate_area(p_) for p_ in tp]); band = np.where(ar <= ar.min() * (1 + AREA_TIE))[0]
+    pick = tp[int(band[np.argmax(tie["vds_min"].values[band])])]
+    pts = [pick] + [q for q in (_point(r, keys) for _, r in f2.nsmallest(4 * n, "vrms").iterrows()) if q != pick]
+    pts = list({json.dumps(q, sort_keys=True): q for q in pts}.values())[:n]
+    f = Path(cache or tempfile.mkdtemp()) / "nominal_check_spice.json"
+    c = json.loads(f.read_text()) if f.exists() else {}
+    verify_many(pts, c, f, spec, base, procs)
+    out = []
+    for p_ in pts:
+        v = judge(json.loads(json.dumps(c[json.dumps(p_, sort_keys=True)])), ev.materialise(base, p_), spec)
+        row = df.loc[(df[list(p_)] == pd.Series(p_)).all(axis=1)].iloc[0]
+        out.append(dict(point=p_, lut_vrms=float(row["vrms"]), vrms=v["vrms"], passed=v["passed"], fails=v["fails"],
+                        tt_pass="tt/27" not in v["fails"], lut_corner=bool(row["feas_corner"]), area=gate_area(p_)))
+    return dict(n_tt=len(tt), n_corner=int(df["feas_corner"].astype(bool).sum()), verified=out,
+                n_fail=sum(not o["passed"] for o in out), n_corners=len(_need(spec)))
+
+
 def lut_choice(res, spec):
     """The pick rule applied to the LUT estimates of every corner-feasible design of a run: most targets met, lowest
     noise, then least area within NOISE_TIE. Used to compare searches without simulating each."""
