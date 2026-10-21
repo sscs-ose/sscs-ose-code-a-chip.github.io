@@ -58,12 +58,12 @@ $$
 
 the accumulation is exact **relative to the quantized MX inputs**, provided the accumulator does not overflow.
 
-The tool finds the smallest $F$ that meets **both error budgets** and has a **qualified routed core**.
-
+The tool selects the minimum-area routed candidate that meets **both error budgets** and **passes physical qualification**.
 ***
 
 ## 📊 Results Summary
 
+[//]: # (results table start)
 | Metric | Value |
 |:-|:-|
 | Selected core (MNIST fc2, 0.1 % and 12 % budgets) | W18 (F2), 58,071.8 µm² routed standard-cell area |
@@ -84,6 +84,7 @@ The tool finds the smallest $F$ that meets **both error budgets** and has a **qu
 | 8 | 24 | 64,027.4 | +11.911 | +0.173 | 0 / 0 | 0 / 0 | yes |
 | 12 | 28 | 61,757.6 | +12.073 | +0.130 | 0 / 0 | 0 / 0 | yes |
 | 24 | 40 | 67,695.6 | +12.521 | +0.142 | 0 / 1 | 0 / 0 | no: slew/cap/parasitic-coverage checks not qualified |
+[//]: # (results table end)
 
 ***
 
