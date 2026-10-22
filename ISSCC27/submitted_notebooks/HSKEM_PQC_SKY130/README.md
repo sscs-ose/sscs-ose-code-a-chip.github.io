@@ -3,7 +3,8 @@
 **Measuring the Design Decisions of an Open-Source Post-Quantum HSM Chip: ML-KEM-512 NTT and Keccak from Python Golden Model to SKY130 Layout**
 
 - **Author:** Nguyen Tan Dat — University of Science, VNU-HCM (HCMUS) · nguyentandat08052007@gmail.com
-- **License:** Apache-2.0 (see `LICENSE` and `NOTICE`)
+- **License:** Apache-2.0 (see `LICENSE` and `NOTICE`); to cite this work, see `CITATION.cff`
+- **AI assistance:** Claude (Anthropic) assisted with debugging, scripting and editing; see the end of the notebook.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tandat08052007/sscs-ose-code-a-chip.github.io/blob/isscc27-hskem-pqc-sky130/ISSCC27/submitted_notebooks/HSKEM_PQC_SKY130/HSKEM_PQC_SKY130.ipynb)
 
@@ -34,9 +35,12 @@ text are guarded by assertions against the data, so the prose cannot silently dr
 
 1. Open the notebook in Colab with the badge above and choose *Runtime → Run all*. The first cell
    fetches this folder and the YosysHQ OSS CAD Suite; nothing else needs to be installed.
+   Until the pull request is merged, the setup cell clones this fork's branch; if that fails, it falls back to
+   the upstream repository, where the submission will live. The releases named below stay on the fork.
 2. In Colab the notebook re-runs the golden-model checks, the NIST ACVP vectors, the RTL simulations,
    the SKY130 synthesis, the design iteration, a gate-level simulation of a routed netlist and the
-   leakage assessment. A complete run took about 30 minutes on a free Colab instance; the last cell
+   leakage assessment. A complete run took 15 minutes in a clean Ubuntu 22.04 container with Colab's settings and four
+   cores; on a free Colab instance with two cores, expect up to half an hour. The last cell
    reports the measured time of every section.
 3. Place-and-route and the full-system simulation take longer than a default run should; their
    committed results are read from `results/`. Both can be repeated from the notebook, also in Colab,
@@ -71,6 +75,8 @@ text are guarded by assertions against the data, so the prose cannot silently dr
 | `flow/chip_rev_b/` | The signed-off chip, HSKEM-2 revision B: the ASIC wrapper RTL and `rtl/make_root.sh`, which rebuilds the synthesized RTL from the published sources, and the flow, sign-off and analysis scripts as they ran (`README.md`) |
 | `board/` | Measurement scripts for the DE25-Nano and ESP32: UART console, repeated two-role ML-KEM flow, repeated HSM-invariant scenario |
 | `scripts/` | Simulation, Colab synthesis, place-and-route, gate-level simulation and power, corner analysis, front-end design-rule check, system-level profiling, chip-level energy (logic and SRAM), metric collection, the layout renders (`render_gds.py`, `make_layout_figures.py`, and `layout_zoom_figure.py` for the three-scale view of the released macro-store GDS) and notebook generation |
+| `toolkit/` | Measurement tools first written for HSKEM, made independent of it, tested, and run on a design that is not HSKEM; each directory has its own README |
+| `CITATION.cff` | Citation metadata for this work |
 | `third_party/` | SKY130 HD functional cell models (Apache-2.0), so that routed netlists can be simulated without downloading the PDK |
 | `results/` | Simulation logs, controller traces, synthesis and post-route metrics with routed netlists of the compared design points, per-block chip statistics, system-level profiles, the signoff summary, three-corner timing, front-end DRC and energy of HSKEM-2 (with HSKEM-1's summaries in `results/fullchip/first_chip/`), TVLA data, and FPGA measurements with SHA-256 checksums |
 
@@ -126,7 +132,7 @@ demonstration board, rotated out of the board before publication.
 The committed results were produced with Icarus Verilog 12.0; the YosysHQ OSS CAD Suite 2026-09-28
 (Icarus Verilog 14-devel, Yosys with the `slang` front end); OpenROAD-flow-scripts commit `6101364b`
 (OpenROAD `f5522624`, with its OpenSTA); KLayout 0.30.7; Netgen 6.2 for the LVS of revision B; Magic 8.3.629 and ngspice 41 (conda-forge build)
-for the SRAM energy; and Python 3 with NumPy, pandas, Matplotlib
+for the SRAM energy; and Python 3.10 (local runs; Colab's default Python in Colab) with NumPy, pandas, Matplotlib
 and `kyber-py` 1.2.0. The FPGA bitstream used for the hardware cross-check was
 built with Quartus Prime Pro 26.1; it is the only non-open-source tool involved.
 

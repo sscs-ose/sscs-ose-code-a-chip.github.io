@@ -1,4 +1,4 @@
-# HSKEM-2, signed-off layout (release tag rev-b): RTL, flow and sign-off record
+# HSKEM-2, signed-off layout (release tag hskem2-rev-b): RTL, flow and sign-off record
 
 This folder holds what built the signed-off chip of Section 9 and Appendix C: the RTL that the published sources do not
 carry, the flow scripts as they ran, and the sign-off and analysis scripts behind `results/fullchip/rev_b/`. The routed
@@ -21,7 +21,9 @@ RUN=rev_b/results CORNER=ss_100C_1v60 SC_LIB=$PDK/sky130_fd_sc_hd__ss_100C_1v60.
 
 `views/{ss,tt,ff}/` are the macro timing views used in sign-off: OpenRAM's views with every clock-to-output time
 replaced by the value measured in SPICE at that corner (`views.log`, `flow/t3_spice_views.py`); input setup and hold
-times are OpenRAM's typical-corner values. `final_sta.tcl` also takes `IO_MODE=sdc` (the constraints as written),
+times are OpenRAM's typical-corner values. The rebuilt views also keep OpenRAM's analytical `minimum_period` on the
+macro clock pins (1.62 to 1.91 ns, the largest being 1.913 ns for `24x128` and 1.899 ns for `24x256`); at the 40 ns
+sign-off clock this check cannot bind, so the attribute was left unchanged. `final_sta.tcl` also takes `IO_MODE=sdc` (the constraints as written),
 `DERATE=0.05`, `MACRO_HOLD=1` (hold paths into the macros) and `FMAX_SEARCH=1` (shortest period by bisection). Set
 `SC_LIB` to the `sky130_fd_sc_hd` Liberty file of the corner.
 `6_final_concat.cdl` (hashed in `summary.json`, the LVS netlist) is not in the release; LVS can be rerun from the GDS and

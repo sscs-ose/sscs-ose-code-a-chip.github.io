@@ -88,11 +88,12 @@ The answers redesigned the chip. Their main lesson is that a block's price depen
 Keccak, nine times slower on its own, barely lengthened a decapsulation of HSKEM-1 but would add about a
 third once everything else was fast, while the single-port store, the cheaper block, set most of HSKEM-1's
 latency. Two coefficients per SRAM word, two butterfly lanes and a streamed datapath that removes no check
-became **HSKEM-2**, which needs 14.5 times fewer cycles and thirteen times less energy per decapsulation.
+became **HSKEM-2**, which needs 14.5 times fewer cycles and almost thirteen times less energy per decapsulation.
 The FPGA board reproduces the RTL cycle count, and HSKEM-2's re-timed layout meets timing at three corners and
 passes layout-versus-schematic (LVS) and the complete KLayout design-rule (DRC) deck of SKY130 within the limits of Section 13;
 its routed database is published. Both chips are pre-silicon, and every number below is recomputed from
-committed results and guarded by an assertion, except a few development-log figures marked as such.
+committed results and guarded by an assertion, except a few development-log figures marked as such. The
+statement on reuse and AI assistance and the references close the notebook.
 
 **What is new here** (each point is worked out in the section named):
 
@@ -142,6 +143,7 @@ IN_COLAB = "google.colab" in sys.modules or os.environ.get("CAC_EMULATE_COLAB") 
 # afterwards REPO_URL = "https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io", REPO_BRANCH = "main".
 REPO_URL = "https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io"
 REPO_BRANCH = "isscc27-hskem-pqc-sky130"
+UPSTREAM_URL = "https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io"      # the submission lives here after the merge
 SUBDIR = "ISSCC27/submitted_notebooks/HSKEM_PQC_SKY130"
 OSS_CAD_TAG = "2026-09-28"
 RUN_PNR = False          # True = rerun OpenROAD-flow-scripts (Linux + ORFS install required)
@@ -150,7 +152,16 @@ if pathlib.Path("golden/mlkem_ref.py").exists():
     ROOT = pathlib.Path.cwd()
 else:
     if not pathlib.Path("cac").exists():
-        subprocess.run(["git", "clone", "--depth", "1", "--filter=blob:none", "--sparse", "--branch", REPO_BRANCH, REPO_URL, "cac"], check=True)
+        for src_url, src_branch in ((REPO_URL, REPO_BRANCH), (UPSTREAM_URL, "main")):
+            r = subprocess.run(["git", "clone", "--depth", "1", "--filter=blob:none", "--sparse", "--branch", src_branch, src_url, "cac"],
+                               capture_output=True, text=True)
+            if r.returncode == 0:
+                print("source   ", src_url.split("github.com/")[1], "branch", src_branch)
+                break
+            shutil.rmtree("cac", ignore_errors=True)
+            print(f"could not clone {src_url} branch {src_branch}: {r.stderr.strip()[-200:]}")
+        else:
+            raise RuntimeError("Neither the fork branch nor the upstream repository could be cloned; check the network and the URLs above.")
         subprocess.run(["git", "-C", "cac", "sparse-checkout", "set", SUBDIR], check=True)
     ROOT = pathlib.Path("cac", SUBDIR).resolve()
 os.chdir(ROOT)
@@ -161,16 +172,24 @@ if not (have("yosys") and have("iverilog")):
     tgz = f"oss-cad-suite-linux-x64-{OSS_CAD_TAG.replace('-', '')}.tgz"
     url = f"https://github.com/YosysHQ/oss-cad-suite-build/releases/download/{OSS_CAD_TAG}/{tgz}"
     if not pathlib.Path("/content/oss-cad-suite").exists() and IN_COLAB:
-        subprocess.run(f"curl -sL {url} | tar xz -C /content", shell=True, check=True)
+        got = subprocess.run(["curl", "-fsSL", "-o", f"/content/{tgz}", url])
+        if got.returncode:
+            raise RuntimeError(f"Download of the OSS CAD Suite failed (curl exit status {got.returncode}): {url}")
+        if subprocess.run(["tar", "xzf", f"/content/{tgz}", "-C", "/content"]).returncode:
+            raise RuntimeError(f"The OSS CAD Suite archive /content/{tgz} could not be extracted; delete it and run the cell again.")
+        os.remove(f"/content/{tgz}")
+        print("OSS CAD Suite", OSS_CAD_TAG, "downloaded and unpacked")
     os.environ["PATH"] = "/content/oss-cad-suite/bin:" + os.environ["PATH"]
-subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--disable-pip-version-check", "kyber-py==1.2.0"],
-               check=False, capture_output=True)
+_pip = subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--disable-pip-version-check", "kyber-py==1.2.0", "pytest"],
+                      capture_output=True, text=True)
+if _pip.returncode:
+    print("pip install of kyber-py and pytest failed; Section 2's cross-check and Appendix A's tests will fail:\n", _pip.stderr[-800:])
 
 for t, flag in (("yosys", "-V"), ("iverilog", "-V")):
     v = subprocess.run([t, flag], capture_output=True, text=True).stdout.splitlines()
     print(f"{t:9s}", shutil.which(t), "|", v[0] if v else "?")
 print("python   ", sys.version.split()[0])
-print("root     ", ROOT)
+print("root     ", ROOT.name, "(Colab)" if IN_COLAB else "(local)")
 """)
 
 code(r"""
@@ -1650,7 +1669,7 @@ them only the other half.
 
 The second layout therefore adds fourteen changes to the chip's RTL, each behind a compile-time switch that
 only the chip uses and each registering such a read or shortening the logic behind it (Appendix C).
-Together they cost 19 cycles per decapsulation and 2 % more flip-flops and leave the shared keys unchanged;
+Together they cost 19 cycles per decapsulation and 2 % more flip-flops than the first layout, and leave the shared keys unchanged;
 the standard-cell area of the result is 16 % above HSKEM-1's. This re-timed layout, called the signed-off chip below, is built from the published RTL and meets setup and hold at the slow, typical
 and fast corners with the macros' clock-to-output times measured in SPICE, which OpenRAM's views understate
 tenfold at the slow corner. It passes LVS and the complete KLayout DRC deck of SKY130 within the limits of
@@ -1737,7 +1756,7 @@ plt.show()
 """)
 
 md(r"""
-### Energy: thirteen times less per decapsulation
+### Energy: almost thirteen times less per decapsulation
 
 Both chips are priced alike: a shadow of the routed netlist, with the layout's combinational cells and the
 RTL simulation's flip-flops, replays the profiled decapsulation on the extracted parasitics
@@ -1786,7 +1805,7 @@ axes[0].legend(ncol=3, loc="lower left", bbox_to_anchor=(0, 1.22), frameon=False
 import warnings
 with warnings.catch_warnings():          # tight_layout cannot place the legend above (a); the layout is set by hand
     warnings.simplefilter("ignore", UserWarning)
-    ps.finish(fig, title="HSKEM-2 spends thirteen times less energy per decapsulation than HSKEM-1")
+    ps.finish(fig, title="HSKEM-2 spends almost thirteen times less energy per decapsulation than HSKEM-1")
 fig.text(0.01, -0.02, "Lower bars of (b) are projections from the measured activity, not changes to HSKEM-2. "
          "Typical corner; logic from zero-delay activity.", fontsize=8.5, color=ps.MUTED)
 ps.save_pdf(fig, "decaps_energy"); plt.show()
@@ -1810,10 +1829,15 @@ assert 0.7 < 1 - gate / sram < 0.78                                            #
 assert 31.5 < 100 * (sram - gate + saved_lo) / (logic + sram) < 32.5           # "roughly 32 to 48 %"
 assert 47.5 < 100 * (sram - gate + saved_hi) / (logic + sram) < 48.5
 assert cg["idle_flip_flops"] == 13405
+pct_lo, pct_hi = (100 * (sram - gate + x) / (logic + sram) for x in (saved_lo, saved_hi))
+assert (round(pct_lo), round(pct_hi)) == (32, 48)                              # "32 to 48 %"
 print(f"remedies: gate the clock of the {len(cg['idle_blocks'])} blocks idle during a decapsulation (PUF root and key vault, "
       f"PUF interface, HSM policy shell, HMAC, SHAKE DRBG; {cg['idle_flip_flops']:,} flip-flops) and drive every chip select "
       f"from the block's own requests, as HSKEM-2 does only for the NTT store; across all 18 macros this removes "
-      f"{1 - gate / sram:.0%} of the SRAM energy")
+      f"{1 - gate / sram:.0%} of the SRAM energy; gating the clocks of the idle blocks saves "
+      f"{cg['saved_by_gating_idle_blocks_mw']:.1f} mW (conservative) to {cg['saved_upper_estimate_mw']:.1f} mW (upper estimate) "
+      f"of the {cg['clock_and_register_power_mw']:.1f} mW in clock and registers, and both remedies together save "
+      f"{pct_lo:.0f} to {pct_hi:.0f} % of the energy of a decapsulation")
 assert useful / built < 0.2 and len(tied) == 17 and "u_shared_ntt.u_sram" not in tied   # "fewer than one in five"
 assert cg["idle_blocks"] == ["g_qualification_puf_vault", "u_hsm_shell", "u_security_hmac", "u_c2_shake_drbg", "u_puf"]
 assert 0.2 < cg["saved_fraction"] and cg["saved_upper_fraction"] < 0.5
@@ -1828,7 +1852,7 @@ assert round(100 * un_["HSKEM-2"]) == 15 and round(100 * un_["HSKEM-1"]) == 18  
 """)
 
 md(r"""
-HSKEM-2 spends about 27 µJ per decapsulation at 25 MHz, thirteen times less than the 344 µJ of HSKEM-1
+HSKEM-2 spends about 27 µJ per decapsulation at 25 MHz, almost thirteen times less than the 344 µJ of HSKEM-1
 (panel a). It finishes 14.5 times sooner, while its mean power is about a seventh higher because
 more logic works every cycle. The energy thus tracks the cycle count, because on HSKEM-1 the clock
 network and the registers drew 99 % of the logic power whether or not they computed.
@@ -1946,6 +1970,7 @@ redesign therefore takes exactly the predicted time (Appendix D.3).
 code(r"""
 pb = pd.read_csv(ROOT/"results/fpga/packed_c3_repeat.csv")
 pkb = json.loads((ROOT/"results/fpga/packed_build.json").read_text())
+assert round(20 - 1000 / pkb["fmax_clock1_50_mhz"], 2) == 1.75   # Appendix D.3: step D's setup slack at 50 MHz
 sim_fcd = json.loads((ROOT/"results/system_sim/packed_system.json").read_text())["configs"]["fpga_sysFCD"]
 display(pb[["run", "result_pass", "keygen_cycles", "encaps_cycles", "ciphertext_final_cycles", "decaps_cycles"]])
 alm = [float(x["alms_needed"].split()[0]) for x in (fr["kyber_ntt_engine (u_shared_ntt)"],
@@ -2024,7 +2049,7 @@ for ax, tag, (title, t, colour) in zip(axes, "abc", series):
     ax.set_title(f"({tag}) {title}  —  peak |t| = {np.abs(t).max():.1f}, {over:,} of {len(t):,} cycles above the threshold",
                  fontsize=10.5, loc="left")
 axes[-1].set_xlabel("clock cycle (masked traces span the two share transforms)")
-fig.suptitle("TVLA on the original NTT engine (FPGA configuration): the shaded band is |t| ≤ 4.5, no detectable leakage",
+fig.suptitle("TVLA on the original NTT engine (FPGA configuration); a cycle inside the shaded band (|t| ≤ 4.5) shows no detectable leakage",
              x=0.01, ha="left", fontsize=12, fontweight="bold")
 fig.tight_layout(); plt.show()
 S = pd.DataFrame(summ).T[["traces", "runs_per_trace", "max_abs_t", "cycles_over_4p5",
@@ -2277,7 +2302,7 @@ The results hold within the following boundaries.
   (CAVP) or module (CMVP) certificate, which only an accredited laboratory can obtain.
 * **Physical verification.** The complete KLayout DRC deck passes only after a script closes implant gaps
   inside the OpenRAM macros (Appendix C.3), and Magic's deck, run as a cross-check, still flags 349
-  poly-contact markers in two standard-cell types and 23.8 million inside the OpenRAM macros, whose cells the
+  poly-contact markers, which sit in 300 instances of two standard-cell types, and 23.8 million inside the OpenRAM macros, whose cells the
   KLayout deck accepts; the cause of the disagreement is not established (Appendix C.2). LVS abstracts the SRAMs, verified separately at transistor level, and
   five multi-finger cells, each proven by a switch-level truth table. In addition, 58 transition and
   capacitance violations remain, 28 of them at SRAM pins (Appendix C.2).
@@ -2307,44 +2332,6 @@ The results hold within the following boundaries.
   first-order attacks on the NTT only, not higher-order attacks or glitches. The PUF
   and entropy sources are ring
   oscillators on the FPGA and service interfaces on the ASIC, and the FPGA measurements come from a single board.
-
-**Reuse and AI assistance.** No existing notebook was reused, and apart from the third-party material in
-`NOTICE` (SKY130 cell models, NIST ACVP vectors) and the OpenRAM views and netlists of the SRAM macros,
-all code was written for this project. Claude (Anthropic) assisted with debugging, with launching and
-monitoring long runs and with bookkeeping; the design, the measurements and every claim are the
-author's responsibility.
-
-### References
-1. NIST, FIPS 203, *Module-Lattice-Based Key-Encapsulation Mechanism Standard*, 2024. doi:10.6028/NIST.FIPS.203.
-2. NIST, FIPS 202, *SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions*, 2015.
-   doi:10.6028/NIST.FIPS.202.
-3. NIST, ACVP-Server test vectors for ML-KEM, https://github.com/usnistgov/ACVP-Server.
-4. G. Bertoni, J. Daemen, M. Peeters, G. Van Assche, *The Keccak reference*, version 3.0, 2011.
-5. P. Barrett, "Implementing the Rivest Shamir and Adleman public key encryption algorithm on a standard
-   digital signal processor", *Advances in Cryptology — CRYPTO '86*, Springer, 1987.
-   doi:10.1007/3-540-47721-7_24.
-6. G. Goodwill, B. Jun, J. Jaffe, P. Rohatgi, "A testing methodology for side-channel resistance
-   validation", NIST Non-Invasive Attack Testing Workshop, 2011.
-7. O. Reparaz, S. Sinha Roy, F. Vercauteren, I. Verbauwhede, "A masked ring-LWE implementation",
-   *Cryptographic Hardware and Embedded Systems — CHES 2015*, Springer, 2015. doi:10.1007/978-3-662-48324-4_34.
-8. T. Ajayi et al., "Toward an open-source digital flow: first learnings from the OpenROAD project",
-   *Design Automation Conference (DAC)*, 2019, doi:10.1145/3316781.3326334; OpenROAD-flow-scripts,
-   https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.
-9. M. R. Guthaus et al., "OpenRAM: an open-source memory compiler", *International Conference on
-   Computer-Aided Design (ICCAD)*, 2016. doi:10.1145/2966986.2980098.
-10. SkyWater Technology and Google, SKY130 open-source PDK, https://github.com/google/skywater-pdk.
-11. YosysHQ, Yosys and the OSS CAD Suite, https://github.com/YosysHQ/oss-cad-suite-build; the `slang`
-    front end, https://github.com/povik/yosys-slang; Icarus Verilog, https://github.com/steveicarus/iverilog.
-12. G. Pope, `kyber-py`, https://github.com/GiacomoPope/kyber-py.
-13. Y. Xing, S. Li, "A compact hardware implementation of CCA-secure key exchange mechanism
-    CRYSTALS-KYBER on FPGA", *IACR Transactions on Cryptographic Hardware and Embedded Systems*,
-    2021(2), pp. 328–356. doi:10.46586/tches.v2021.i2.328-356.
-14. U. Banerjee, T. S. Ukyab, A. P. Chandrakasan, "Sapphire: a configurable crypto-processor for
-    post-quantum lattice-based protocols", *IACR Transactions on Cryptographic Hardware and Embedded
-    Systems*, 2019(4), pp. 17–61. doi:10.46586/tches.v2019.i4.17-61.
-15. L. Botros, M. J. Kannwischer, P. Schwabe, "Memory-efficient high-speed implementation of Kyber on
-    Cortex-M4", *Progress in Cryptology — AFRICACRYPT 2019*, Springer, 2019, pp. 209–228.
-    doi:10.1007/978-3-030-23696-0_11.
 """)
 
 # ---------------------------------------------------------- appendices
@@ -2855,7 +2842,7 @@ implant fix of Appendix C.3, is attached to the release
 [`hskem2-rev-b`](https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/releases/tag/hskem2-rev-b)
 of the author's fork with the hashes below; it contains no secret, because the provisioning credential in
 its logic is the public placeholder of Appendix E.3. Magic's SKY130 deck flags nothing outside the macros
-except 349 poly-contact markers in the instances of two standard cells whose GDS in ORFS differs from the PDK's
+except 349 poly-contact markers, which sit in 300 instances of two standard cells (251 of one type with one marker each and 49 of the other with two) whose GDS in ORFS differs from the PDK's
 current version, which Magic passes. Of the 58 transition and capacitance violations, the 28 at SRAM pins lie at the edge of
 the macros' characterization tables and the other 30 come from seven buffers that drive long wires; timing
 uses the actual transitions.
@@ -2900,6 +2887,9 @@ assert (dr9["counts"]["max_slew"] + dr9["counts"]["max_cap"], dr9["counts"]["sra
 assert len({d["pin"].split("/")[0] for d in dr9["max_cap"] if d["kind"] != "SRAM pin"}) == 7      # "seven buffers"
 assert max(d["value"] for d in dr9["max_slew"] if d["kind"] == "SRAM pin") < 0.065                 # "at the edge of their tables"
 assert round(max(ird["VDD"]["worst_mv"], ird["VSS"]["worst_mv"]), 1) == 3.5
+assert sum(mg9["instances_of_outside_cells"].values()) == 300 and sorted(mg9["instances_of_outside_cells"].values()) == [49, 251]   # "300 instances"
+assert sorted(mg9["outside_by_rule_and_cell"].values()) == [98, 251]                                   # 251 x 1 and 49 x 2 markers
+assert mg9["instances_of_outside_cells"] == {"sky130_fd_sc_hd__a2111oi_0": 251, "sky130_fd_sc_hd__buf_16": 49}
 assert mg9["macros"] == 18 and mg9["outside_macros"] == 349 and set(mg9["outside_by_rule"]) == {k for k in mg9["outside_by_rule"] if "licon.8a" in k}
 li_ = lambda d: sum(v for k, v in d.items() if "licon.8a" in k)
 per_ = {c: li_(mc9["orfs_gds"][c]) for c in mc9["orfs_gds"]}                       # markers per stand-alone ORFS cell
@@ -3114,8 +3104,8 @@ md(r"""
 |:---|---:|---:|
 | encapsulation [cycles] | about 32,200 | about 7,200 |
 | final ciphertext check [cycles] | 5,380 | 908 |
-| ALMs | | about 3,100 more than the original FPGA configuration, 90 % of the device |
-| setup slack at 50 MHz [ns] | 1.7 | 0.68 |
+| ALMs | not recorded | about 3,100 more than the original FPGA configuration, 90 % of the device |
+| setup slack at 50 MHz [ns] | 1.75 (from its 54.8 MHz fmax) | 0.68 |
 
 An intermediate streamed build, with J moved into the re-encryption, read 13,098 cycles per decapsulation.
 The final build's first compilation missed timing because functions that supply the self-test's fixed
@@ -3128,7 +3118,7 @@ md(r"""
 
 ### E.1 Run time in Colab
 
-A `Run all` takes about half an hour on a free Colab instance, mostly in Sections 4 and 5 and Appendix B.6;
+A `Run all` took 15 minutes in a clean Ubuntu 22.04 container with Colab's settings and four cores, mostly in Sections 4, 5 and 7 and Appendix B; a free Colab instance has two cores, so expect up to half an hour;
 the last cell reports the time per section (the stored table is from a local run). Cells marked `RUN_…` repeat the long runs and are off by default, except
 `RUN_ACVP_RTL` and `RUN_GLS`, which run in Colab only.
 """)
@@ -3166,7 +3156,17 @@ BUNDLE_URL = ("https://github.com/tandat08052007/sscs-ose-code-a-chip.github.io/
 if RUN_PNR_COLAB:
     bdir = pathlib.Path("/content" if IN_COLAB else pathlib.Path.home())
     if not (bdir/"orfs").exists():
-        sh(f"curl -sL {BUNDLE_URL} | tar xJ -C {bdir}")
+        import hashlib
+        arc = bdir/"orfs-6101364b-sky130hd.tar.xz"
+        got = subprocess.run(["curl", "-fsSL", "-o", str(arc), BUNDLE_URL])
+        if got.returncode:
+            raise RuntimeError(f"Download of the ORFS bundle failed (curl exit status {got.returncode}): {BUNDLE_URL}")
+        if hashlib.sha256(arc.read_bytes()).hexdigest() != bundle["bundle_sha256"]:
+            raise RuntimeError(f"The downloaded ORFS bundle does not match the recorded SHA-256 {bundle['bundle_sha256']}; delete {arc.name} and try again.")
+        print("ORFS bundle downloaded; SHA-256 matches results/asic/bundle_reproduction.json")
+        if subprocess.run(["tar", "xJf", str(arc), "-C", str(bdir)]).returncode:
+            raise RuntimeError(f"The ORFS bundle {arc.name} could not be extracted.")
+        arc.unlink()
     work = bdir/"cac_runs"
     target = work/"ntt_opt_pipe_w12_20ns_colab/logs/sky130hd/cac_ntt_opt_pipe_w12_20ns/base/6_report.log"
     sh(f"ORFS_ROOT={bdir}/orfs OPENROAD_EXE={bdir}/orfs/bin/openroad YOSYS_EXE={bdir}/orfs/bin/yosys "
@@ -3206,6 +3206,47 @@ print("not tied to the data (definitions, a download size, one figure from an un
 assert cov["covered_pct"] >= 95
 """)
 
+
+# ---------------------------------------- reuse, AI assistance and references (end of the notebook)
+md(r"""
+**Reuse and AI assistance.** No existing notebook was reused, and apart from the third-party material in
+`NOTICE` (SKY130 cell models, NIST ACVP vectors) and the OpenRAM views and netlists of the SRAM macros,
+all code was written for this project. Claude (Anthropic) assisted with debugging, with launching and
+monitoring long runs and with bookkeeping; the design, the measurements and every claim are the
+author's responsibility.
+
+### References
+1. NIST, FIPS 203, *Module-Lattice-Based Key-Encapsulation Mechanism Standard*, 2024. doi:10.6028/NIST.FIPS.203.
+2. NIST, FIPS 202, *SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions*, 2015.
+   doi:10.6028/NIST.FIPS.202.
+3. NIST, ACVP-Server test vectors for ML-KEM, https://github.com/usnistgov/ACVP-Server.
+4. G. Bertoni, J. Daemen, M. Peeters, G. Van Assche, *The Keccak reference*, version 3.0, 2011.
+5. P. Barrett, "Implementing the Rivest Shamir and Adleman public key encryption algorithm on a standard
+   digital signal processor", *Advances in Cryptology — CRYPTO '86*, Springer, 1987.
+   doi:10.1007/3-540-47721-7_24.
+6. G. Goodwill, B. Jun, J. Jaffe, P. Rohatgi, "A testing methodology for side-channel resistance
+   validation", NIST Non-Invasive Attack Testing Workshop, 2011.
+7. O. Reparaz, S. Sinha Roy, F. Vercauteren, I. Verbauwhede, "A masked ring-LWE implementation",
+   *Cryptographic Hardware and Embedded Systems — CHES 2015*, Springer, 2015. doi:10.1007/978-3-662-48324-4_34.
+8. T. Ajayi et al., "Toward an open-source digital flow: first learnings from the OpenROAD project",
+   *Design Automation Conference (DAC)*, 2019, doi:10.1145/3316781.3326334; OpenROAD-flow-scripts,
+   https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.
+9. M. R. Guthaus et al., "OpenRAM: an open-source memory compiler", *International Conference on
+   Computer-Aided Design (ICCAD)*, 2016. doi:10.1145/2966986.2980098.
+10. SkyWater Technology and Google, SKY130 open-source PDK, https://github.com/google/skywater-pdk.
+11. YosysHQ, Yosys and the OSS CAD Suite, https://github.com/YosysHQ/oss-cad-suite-build; the `slang`
+    front end, https://github.com/povik/yosys-slang; Icarus Verilog, https://github.com/steveicarus/iverilog.
+12. G. Pope, `kyber-py`, https://github.com/GiacomoPope/kyber-py.
+13. Y. Xing, S. Li, "A compact hardware implementation of CCA-secure key exchange mechanism
+    CRYSTALS-KYBER on FPGA", *IACR Transactions on Cryptographic Hardware and Embedded Systems*,
+    2021(2), pp. 328–356. doi:10.46586/tches.v2021.i2.328-356.
+14. U. Banerjee, T. S. Ukyab, A. P. Chandrakasan, "Sapphire: a configurable crypto-processor for
+    post-quantum lattice-based protocols", *IACR Transactions on Cryptographic Hardware and Embedded
+    Systems*, 2019(4), pp. 17–61. doi:10.46586/tches.v2019.i4.17-61.
+15. L. Botros, M. J. Kannwischer, P. Schwabe, "Memory-efficient high-speed implementation of Kyber on
+    Cortex-M4", *Progress in Cryptology — AFRICACRYPT 2019*, Springer, 2019, pp. 209–228.
+    doi:10.1007/978-3-030-23696-0_11.
+""")
 
 # ------------------------------------------------------------ run time
 code(r"""

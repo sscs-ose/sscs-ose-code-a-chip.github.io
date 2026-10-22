@@ -64,7 +64,7 @@ def simulate(rtl: pathlib.Path, vec: pathlib.Path, cfg) -> dict:
     errors = int(re.search(r"errors=(\d+)", line)[1]) if line else None
     passed = "PASS" in r.stdout.split() and errors == 0
     return {"compiled": True, "result": line, "errors": errors, "caught": not passed,
-            "how": f"{errors} mismatching vectors" if errors else ("no result line" if errors is None else "passes")}
+            "how": f"{errors} mismatching {'coefficients' if tag == 'NTT_RESULT' else 'permutations'}" if errors else ("no result line" if errors is None else "passes")}
 
 
 def formal(rtl: pathlib.Path) -> dict:
