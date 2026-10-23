@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=67.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neurosar"
+version = "0.1.0"
+description = "PINN-Based Metastability-Aware SAR ADC Waveform Engine in Sky130"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "NeuroSAR Contributors"}
+]
+keywords = [
+    "SAR ADC",
+    "physics-informed neural network",
+    "mixed-signal",
+    "Sky130",
+    "metastability",
+    "open-source EDA"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "torch>=2.0.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "h5py>=3.8.0",
+    "scipy>=1.10.0",
+    "matplotlib>=3.7.0",
+    "plotly>=5.14.0",
+    "kaleido>=0.2.1",
+    "ipywidgets>=8.0.0",
+    "tqdm>=4.65.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.3.0", "jupyter>=1.0.0", "jupyterlab>=4.0.0"]
+spice = ["PySpice>=1.5"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
