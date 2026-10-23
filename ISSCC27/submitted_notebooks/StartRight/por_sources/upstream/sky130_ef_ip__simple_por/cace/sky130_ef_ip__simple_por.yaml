@@ -1,0 +1,213 @@
+#--------------------------------------------------------------
+# CACE circuit characterization file
+#--------------------------------------------------------------
+
+name:           sky130_ef_ip__simple_por
+description:    Simple PoR based on an RC filter 
+PDK:            sky130A
+
+cace_format:    5.2
+
+authorship:
+  designer:         Tim Edwards
+  company:          Efabless
+  creation_date:    February 19, 2025
+  license:          Apache 2.0
+
+paths:
+  root:             ..
+  schematic:        xschem
+  magic:            mag
+  layout:           gds
+  netlist:          netlist
+  documentation:    docs
+
+pins:
+  vdd3v3:
+    description: Analog power supply
+    type: power
+    direction: inout
+    Vmin: 3.2
+    Vmax: 3.4
+  vss3v3:
+    description: Analog ground
+    type: ground
+    direction: inout
+  vdd1v8:
+    description: Digital power supply
+    type: power
+    direction: inout
+    Vmin: 1.7
+    Vmax: 1.9
+  vss1v8:
+    description: Digital ground
+    type: ground
+    direction: inout
+  porb_h:
+    description: Power on reset, inverted (3.3V)
+    type: signal
+    direction: output
+  porb_l:
+    description: Power on reset, inverted (1.8V)
+    type: signal
+    direction: output
+  por_l:
+    description: Power on reset, non-inverted (1.8V)
+    type: signal
+    direction: output
+
+default_conditions:
+  avdd:
+    description: Analog power supply voltage
+    display: Avdd
+    unit: V
+    typical: 3.3
+  dvdd:
+    description: Digital power supply voltage
+    display: Dvdd
+    unit: V
+    typical: 1.8
+  corner:
+    description: Process corner
+    display: Corner
+    typical: tt
+  temperature:
+    description: Ambient temperature
+    display: Temp
+    unit: °C
+    typical: 27
+
+parameters:
+
+  transient_response:
+    description: Large signal transient response
+    display: Large signal transient response
+    status: skip
+    unit: mV
+    tool:
+      ngspice:
+        template: transient_tb.sch
+        format: ascii
+        suffix: .data
+        variables: [time, porb_h, porb_l, por_l]
+    plot:
+      transient:
+        suffix: .svg
+        xaxis: time
+        yaxis: [porb_h]
+    variables:
+      time:
+        display: Time
+        unit: ms
+      porb_h:
+        display: porb_h
+        unit: V
+      porb_l:
+        display: porb_l
+        unit: V
+      por_l:
+        display: por_l
+        unit: V
+    conditions:
+      Tmax:
+        display: Simulation time
+        unit: ms
+        typical: 20
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 130
+      corner:
+        minimum: ss
+        typical: tt
+        maximum: ff
+
+  magic_area:
+    spec:
+      area:
+        display: Area
+        description: Total circuit layout area
+        unit: µm²
+        maximum:
+          value: any
+      width:
+        display: Width
+        description: Total circuit layout width
+        unit: µm
+        maximum:
+          value: any
+      height:
+        display: Height
+        description: Total circuit layout height
+        unit: µm
+        maximum:
+          value: any
+    tool:
+      magic_area
+
+  magic_drc:
+    description: Magic DRC
+    display: Magic DRC
+    spec:
+      drc_errors:
+        maximum:
+          value: 0
+    tool:
+      magic_drc:
+        gds_flatten: true
+
+  netgen_lvs:
+    description: Netgen LVS
+    display: Netgen LVS
+    spec:
+      lvs_errors:
+        maximum:
+          value: 0
+    tool:
+      netgen_lvs
+
+  klayout_drc_feol:
+    description: KLayout DRC feol
+    display: KLayout DRC feol
+    spec:
+      drc_errors:
+        maximum:
+          value: 0
+    tool:
+        klayout_drc:
+            jobs: max
+            args: ['-rd', 'feol=true']
+
+  klayout_drc_beol:
+    description: KLayout DRC beol
+    display: KLayout DRC beol
+    spec:
+      drc_errors:
+        maximum:
+          value: 0
+    tool:
+        klayout_drc:
+            jobs: max
+            args: ['-rd', 'beol=true']
+
+  klayout_drc_full:
+    description: KLayout DRC full
+    display: KLayout DRC full
+    spec:
+      drc_errors:
+        maximum:
+          value: 0
+    tool:
+        klayout_drc:
+            jobs: max
+            args: ['-rd', 'feol=true', '-rd', 'beol=true', '-rd', 'offgrid=true']
+
+  magic_antenna_check:
+    description: Run antenna violation check using magic
+    display: Antenna Checks
+    spec:
+      antenna_violations:
+        maximum:
+          value: 0
+    tool:
+        magic_antenna_check
