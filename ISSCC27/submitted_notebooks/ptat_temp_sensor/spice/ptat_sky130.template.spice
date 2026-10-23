@@ -1,0 +1,25 @@
+* SKY130 PTAT sensing-core temperature sweep.
+* Placeholders are replaced by run_sky130.py.
+.lib "__MODEL_LIB__" __CORNER__
+.param VDDVAL=__VDDVAL__ IBIAS=__IBIAS__ LCH=__LCH__ W1=__W1__ W2=__W2__ PTEMP=-40
+.temp {PTEMP}
+VDD vdd 0 DC {VDDVAL}
+I1 vdd v1 DC {IBIAS}
+I2 vdd v2 DC {IBIAS}
+X1 v1 v1 0 0 sky130_fd_pr__nfet_01v8 L={LCH} W={W1}
+X2 v2 v2 0 0 sky130_fd_pr__nfet_01v8 L={LCH} W={W2}
+.control
+set noaskquit
+echo "temp_c,vgs_small_v,vgs_large_v,dvgs_v,supply_current_a,power_w" > results/__OUTPUT_CSV__
+foreach t -40 -20 0 25 50 75 100 125
+  alterparam PTEMP = $t
+  reset
+  op
+  let dvgs = v(v1)-v(v2)
+  let isupply = -i(VDD)
+  let psupply = v(vdd)*isupply
+  echo $t',' $&v(v1)',' $&v(v2)',' $&dvgs',' $&isupply',' $&psupply >> results/__OUTPUT_CSV__
+end
+quit
+.endc
+.end

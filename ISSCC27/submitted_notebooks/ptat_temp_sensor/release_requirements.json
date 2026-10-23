@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "project": "ISSCC 2027 Code-a-Chip Open-Source CMOS PTAT Temperature Sensor with Digital Calibration",
+  "evidence_policy": {
+    "retained_run_221_is_immutable": true,
+    "new_results_must_name_tool_and_pdk_provenance": true,
+    "no_silicon_claim_without_measurement": true,
+    "no_layout_pass_claim_without_retained_drc_lvs_evidence": true
+  },
+  "release_architecture": {
+    "analog_core": "SKY130 PTAT sensing pair with PMOS mirror distribution and externally supplied IREF",
+    "calibration": "five_point_piecewise_linear",
+    "calibration_anchors_c": [
+      -40,
+      -20,
+      0,
+      50,
+      125
+    ],
+    "readout": "behavioral/external 12-bit, 1.8-V ADC model with analog gain 10; no transistor-level ADC claim",
+    "power_claim_scope": "characterized PTAT core and mirror network only; no whole-chip power claim",
+    "analog_gain": 10
+  },
+  "release_targets": {
+    "sampled_grid_pwl_max_abs_error_c_max": 0.5,
+    "dense_grid_pwl_max_abs_error_c_max": 0.5,
+    "dense_grid_step_c_max": 5,
+    "mismatch_min_samples": 100,
+    "mismatch_target_yield_percent": 95,
+    "adc_quantization_rms_c_max": 0.1,
+    "adc_full_scale_utilization_max": 0.9,
+    "quantized_sampled_grid_pwl_max_abs_error_c_max": 0.5
+  },
+  "known_evidence": {
+    "retained_run": 221,
+    "retained_temperature_samples_c": [
+      -40,
+      -20,
+      0,
+      25,
+      50,
+      75,
+      100,
+      125
+    ],
+    "two_point_endpoint_worst_sampled_error_c": 4.599966611715104,
+    "two_point_release_target_met": false,
+    "five_point_pwl_worst_sampled_error_c": 0.4715682224975808,
+    "five_point_pwl_release_target_met": true,
+    "layout_required_for_code_a_chip_submission": false,
+    "layout_status": "NOT_CLAIMED",
+    "silicon_status": "NOT_AVAILABLE",
+    "dense_grid_20260926": {
+      "status": "PASS",
+      "temperature_step_c": 5,
+      "worst_five_point_pwl_max_abs_error_c": 0.4715682224975808,
+      "source_workflow_run_id": 36256551286
+    },
+    "local_mismatch_20260926": {
+      "status": "FAIL",
+      "samples": 100,
+      "error_yield_percent": 66,
+      "branch_mismatch_yield_percent_at_1pct": 4,
+      "p95_max_abs_error_c": 0.9617475052761478,
+      "worst_max_abs_error_c": 1.1239702498082238,
+      "source_workflow_run_id": 36256551286
+    },
+    "six_point_candidate_20260926": {
+      "status": "RETROSPECTIVE_SPLIT_ROBUSTNESS_PASS_NOT_RELEASE_VALIDATED",
+      "calibration_anchors_c": [
+        -40,
+        -25,
+        -5,
+        25,
+        65,
+        125
+      ],
+      "fold_a_train_seeds": [
+        1001,
+        1050
+      ],
+      "fold_b_holdout_seeds": [
+        1051,
+        1100
+      ],
+      "fold_a_selected_same_schedule": true,
+      "fold_b_selected_same_schedule": true,
+      "fold_a_to_b_holdout_yield_percent": 98,
+      "fold_b_to_a_holdout_yield_percent": 98,
+      "combined_point_yield_percent": 98,
+      "combined_wilson_95_percent_ci": [
+        92.9988209271456,
+        99.44980324498376
+      ],
+      "evidence_boundary": "Retrospective two-fold study from one retained 100-seed run; not a new independent Monte-Carlo confirmation and does not validate the separate branch-mismatch target."
+    }
+  }
+}
