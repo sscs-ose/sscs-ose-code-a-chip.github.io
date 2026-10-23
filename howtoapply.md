@@ -1,5 +1,5 @@
 ## How to Apply
-Participants are required to send their [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to this repository by November 27, 2025, 11:59 AM Pacific Time. 
+Participants are required to send their [GitHub Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to this repository. 
 
 **_Note_:** Please do not make any modifications to your Pull Request after the above deadline. All PRs will be merged after the deadline is passed.
 
