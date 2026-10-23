@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" width="960" height="430" font-family="Helvetica, Arial, sans-serif">
+  <!-- SPDX-License-Identifier: Apache-2.0 -->
+  <!-- Colours follow scripts/plotstyle.py: ink #0b0b0b / #44546a, critical #d03b3b, redesign green #1baf7a -->
+  <defs>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#44546a"/>
+    </marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d03b3b"/>
+    </marker>
+  </defs>
+  <rect width="960" height="430" fill="#ffffff"/>
+  <text x="24" y="32" font-size="18" font-weight="bold" fill="#0b0b0b">NTT butterfly datapath: one butterfly at a time, one multiplier</text>
+  <text x="24" y="53" font-size="12.5" fill="#44546a">The red path is the single combinational stage that limits the original engine below 50 MHz; green marks the redesign of Section 7.</text>
+
+  <!-- coefficient store -->
+  <rect x="24" y="86" width="150" height="176" rx="6" fill="#f2f4f7" stroke="#8a97a8" stroke-width="1.5"/>
+  <text x="99" y="114" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0b0b0b">Coefficient store</text>
+  <text x="99" y="136" text-anchor="middle" font-size="11.5" fill="#44546a">256 coefficients × 16 bit</text>
+  <text x="99" y="168" text-anchor="middle" font-size="11.5" fill="#44546a">FPGA: dual-port M20K</text>
+  <text x="99" y="186" text-anchor="middle" font-size="11.5" fill="#44546a">ASIC: single-port SRAM</text>
+  <text x="99" y="222" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#138a5f">redesign: 12 bit</text>
+  <text x="99" y="240" text-anchor="middle" font-size="10.5" fill="#138a5f">(q &lt; 2¹², lossless)</text>
+
+  <!-- operand registers and twiddle ROM -->
+  <rect x="214" y="86" width="92" height="42" rx="4" fill="#ffffff" stroke="#44546a" stroke-width="1.3"/>
+  <text x="260" y="112" text-anchor="middle" font-size="13" fill="#0b0b0b">reg a[j]</text>
+  <rect x="214" y="160" width="92" height="42" rx="4" fill="#ffffff" stroke="#44546a" stroke-width="1.3"/>
+  <text x="260" y="186" text-anchor="middle" font-size="13" fill="#0b0b0b">reg a[j+len]</text>
+  <rect x="214" y="236" width="92" height="42" rx="4" fill="#ffffff" stroke="#44546a" stroke-width="1.3"/>
+  <text x="260" y="262" text-anchor="middle" font-size="13" fill="#0b0b0b">ζ ROM</text>
+  <line x1="176" y1="118" x2="212" y2="108" stroke="#44546a" stroke-width="1.5" marker-end="url(#g)"/>
+  <line x1="176" y1="181" x2="212" y2="181" stroke="#44546a" stroke-width="1.5" marker-end="url(#g)"/>
+
+  <!-- inverse-butterfly operand: b - a mod q -->
+  <rect x="340" y="150" width="104" height="62" rx="5" fill="#ffffff" stroke="#d03b3b" stroke-width="1.6"/>
+  <text x="392" y="175" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#0b0b0b">b − a mod q</text>
+  <text x="392" y="195" text-anchor="middle" font-size="10.5" fill="#44546a">inverse only (mux)</text>
+  <line x1="306" y1="181" x2="338" y2="181" stroke="#d03b3b" stroke-width="3" marker-end="url(#r)"/>
+  <line x1="306" y1="120" x2="340" y2="156" stroke="#d03b3b" stroke-width="1.8" marker-end="url(#r)"/>
+
+  <!-- multiplier -->
+  <rect x="478" y="150" width="104" height="104" rx="6" fill="#fdecea" stroke="#d03b3b" stroke-width="1.6"/>
+  <text x="530" y="198" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0b0b0b">multiplier</text>
+  <text x="530" y="217" text-anchor="middle" font-size="11" fill="#44546a">12 × 12 bit</text>
+  <line x1="444" y1="181" x2="476" y2="181" stroke="#d03b3b" stroke-width="3" marker-end="url(#r)"/>
+  <line x1="306" y1="257" x2="476" y2="236" stroke="#44546a" stroke-width="1.5" marker-end="url(#g)"/>
+
+  <!-- pipeline register of the redesign -->
+  <rect x="606" y="160" width="26" height="84" rx="3" fill="#e3f5ec" stroke="#1baf7a" stroke-width="2" stroke-dasharray="5,3"/>
+  <line x1="584" y1="202" x2="604" y2="202" stroke="#d03b3b" stroke-width="3" marker-end="url(#r)"/>
+  <text x="619" y="264" text-anchor="middle" font-size="11" font-weight="bold" fill="#138a5f">pipeline</text>
+  <text x="619" y="278" text-anchor="middle" font-size="11" font-weight="bold" fill="#138a5f">register</text>
+
+  <!-- Barrett reducer -->
+  <rect x="656" y="140" width="160" height="124" rx="6" fill="#fdecea" stroke="#d03b3b" stroke-width="1.6"/>
+  <text x="736" y="166" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0b0b0b">Barrett mod q</text>
+  <text x="736" y="190" text-anchor="middle" font-size="11.5" fill="#44546a">t = (x · 5039) &gt;&gt; 24</text>
+  <text x="736" y="208" text-anchor="middle" font-size="11.5" fill="#44546a">r = x − t · q</text>
+  <text x="736" y="232" text-anchor="middle" font-size="11" fill="#44546a">original: up to 3 subtractions</text>
+  <text x="736" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#138a5f">redesign: 1 (proven, §4)</text>
+  <line x1="634" y1="202" x2="654" y2="202" stroke="#d03b3b" stroke-width="3" marker-end="url(#r)"/>
+
+  <!-- reduced product register -->
+  <rect x="846" y="181" width="82" height="42" rx="4" fill="#ffffff" stroke="#d03b3b" stroke-width="1.6"/>
+  <text x="887" y="207" text-anchor="middle" font-size="13" fill="#0b0b0b">reg ζ·b</text>
+  <line x1="818" y1="202" x2="844" y2="202" stroke="#d03b3b" stroke-width="3" marker-end="url(#r)"/>
+
+  <!-- add / subtract and write back -->
+  <rect x="640" y="316" width="288" height="52" rx="6" fill="#f2f4f7" stroke="#8a97a8" stroke-width="1.5"/>
+  <text x="784" y="338" text-anchor="middle" font-size="13" font-weight="bold" fill="#0b0b0b">add / subtract mod q</text>
+  <text x="784" y="357" text-anchor="middle" font-size="11.5" fill="#44546a">a ← a + ζb,  b ← a − ζb</text>
+  <line x1="887" y1="225" x2="887" y2="314" stroke="#44546a" stroke-width="1.5" marker-end="url(#g)"/>
+  <polyline points="306,98 946,98 946,342 930,342" fill="none" stroke="#44546a" stroke-width="1.5" marker-end="url(#g)"/>
+  <polyline points="638,342 99,342 99,264" fill="none" stroke="#44546a" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#g)"/>
+  <text x="368" y="335" text-anchor="middle" font-size="11.5" fill="#44546a">write back a, b (single port: one after the other, +1 cycle)</text>
+
+  <!-- legend -->
+  <line x1="24" y1="402" x2="58" y2="402" stroke="#d03b3b" stroke-width="3"/>
+  <text x="66" y="406" font-size="11.5" fill="#0b0b0b">critical path of the original engine: subtract, multiply, reduce in one clock</text>
+  <rect x="520" y="394" width="16" height="16" rx="2" fill="#e3f5ec" stroke="#1baf7a" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="544" y="406" font-size="11.5" fill="#0b0b0b">redesign (Section 7): one register cuts the path in two</text>
+</svg>
