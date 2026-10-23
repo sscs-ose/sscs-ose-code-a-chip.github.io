@@ -1,0 +1,1401 @@
+* Copyright 2022 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+******* SkyWater sky130 model library *********
+*
+* This file is for use by ngspice using the ".lib" statement to select
+* a simulation type or corner.  The defined sections are as follows:
+*
+* Basic corners:
+*
+* tt  --- Typical N/P device, nominal resistance, nominal capacitance
+* ss  --- Slow  N/P device, nominal resistance, nominal capacitance
+* sf  --- Slow N/Fast P device, nominal resistance, nominal capacitance
+* fs  --- Fast N/Slow P device, nominal resistance, nominal capacitance
+* ff  --- Fast N/Fast P device, nominal resistance, nominal capacitance
+* ll  --- Typical N/P device, low resistance, low capacitance
+* hl  --- Typical N/P device, high resistance, low capacitance
+* lh  --- Typical N/P device, low resistance, high capacitance
+* hh  --- Typical N/P device, high resistance, high capacitance
+* ss_ll  --- Slow N/P device, low resistance, low capacitance
+* ss_hl  --- Slow N/P device, high resistance, low capacitance
+* ss_lh  --- Slow N/P device, low resistance, high capacitance
+* ss_hh  --- Slow N/P device, high resistance, high capacitance
+* sf_ll  --- Slow N/Fast P device, low resistance, low capacitance
+* sf_hl  --- Slow N/Fast P device, high resistance, low capacitance
+* sf_lh  --- Slow N/Fast P device, low resistance, high capacitance
+* sf_ll  --- Slow N/Fast P device, high resistance, high capacitance
+* fs_ll  --- Fast N/Slow P device, low resistance, low capacitance
+* fs_hl  --- Fast N/Slow P device, high resistance, low capacitance
+* fs_lh  --- Fast N/Slow P device, low resistance, high capacitance
+* fs_hh  --- Fast N/Slow P device, high resistance, high capacitance
+* ff_ll  --- Fast N/Fast P device, low resistance, low capacitance
+* ff_hl  --- Fast N/Fast P device, high resistance, low capacitance
+* ff_lh  --- Fast N/Fast P device, low resistance, high capacitance
+* ff_hh  --- Fast N/Fast P device, high resistance, high capacitance
+*
+* Corners with mismatch analysis:
+*
+* tt_mm  --- Typical N/P device, nominal resistance, nominal capacitance
+* ss_mm  --- Slow  N/P device, nominal resistance, nominal capacitance
+* sf_mm  --- Slow N/Fast P device, nominal resistance, nominal capacitance
+* fs_mm  --- Fast N/Slow P device, nominal resistance, nominal capacitance
+* ll_mm  --- Typical N/P device, low resistance, low capacitance
+* hl_mm  --- Typical N/P device, high resistance, low capacitance
+* lh_mm  --- Typical N/P device, low resistance, high capacitance
+* hh_mm  --- Typical N/P device, high resistance, high capacitance
+* ss_ll_mm  --- Slow N/P device, low resistance, low capacitance
+* ss_hl_mm  --- Slow N/P device, high resistance, low capacitance
+* ss_lh_mm  --- Slow N/P device, low resistance, high capacitance
+* ss_hh_mm  --- Slow N/P device, high resistance, high capacitance
+* sf_ll_mm  --- Slow N/Fast P device, low resistance, low capacitance
+* sf_hl_mm  --- Slow N/Fast P device, high resistance, low capacitance
+* sf_lh_mm  --- Slow N/Fast P device, low resistance, high capacitance
+* sf_ll_mm  --- Slow N/Fast P device, high resistance, high capacitance
+* fs_ll_mm  --- Fast N/Slow P device, low resistance, low capacitance
+* fs_hl_mm  --- Fast N/Slow P device, high resistance, low capacitance
+* fs_lh_mm  --- Fast N/Slow P device, low resistance, high capacitance
+* fs_hh_mm  --- Fast N/Slow P device, high resistance, high capacitance
+* ff_ll_mm  --- Fast N/Fast P device, low resistance, low capacitance
+* ff_hl_mm  --- Fast N/Fast P device, high resistance, low capacitance
+* ff_lh_mm  --- Fast N/Fast P device, low resistance, high capacitance
+* ff_hh_mm  --- Fast N/Fast P device, high resistance, high capacitance
+*
+* Monte carlo analysis (process variation):
+*
+* mc  --- Process Monte Carlo models
+*
+***********************************************
+
+* Typical corner (tt)
+.lib tt
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl tt
+
+* Slow-Fast corner (sf)
+.lib sf
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl sf
+
+* Fast-Fast corner (ff)
+.lib ff
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl ff
+
+* Slow-Slow corner (ss)
+.lib ss
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl ss
+
+* Fast-Slow corner (fs)
+.lib fs
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl fs
+
+* Low-Low corner (ll)
+.lib ll
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl ll
+
+* High-High corner (hh)
+.lib hh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl hh
+
+* High-Low corner (hl)
+.lib hl
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl hl
+
+* Low-High corner (lh)
+.lib lh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl lh
+
+* Slow-Slow-Low-Low corner (ss_ll)
+.lib ss_ll
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl ss_ll
+
+* Slow-Slow-High-Low corner (ss_hl)
+.lib ss_hl
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl ss_hl
+
+* Slow-Slow-Low-High corner (ss_lh)
+.lib ss_lh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl ss_lh
+
+* Slow-Slow-High-High corner (ss_hh)
+.lib ss_hh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl ss_hh
+
+* Slow-Fast-Low-Low corner (sf_ll)
+.lib sf_ll
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl sf_ll
+
+* Slow-Fast-High-Low corner (sf_hl)
+.lib sf_hl
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl sf_hl
+
+* Slow-Fast-High-High corner (sf_hh)
+.lib sf_hh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl sf_hh
+
+* Fast-Slow-Low-Low corner (fs_ll)
+.lib fs_ll
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl fs_ll
+
+* Fast-Slow-High-Low corner (fs_hl)
+.lib fs_hl
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl fs_hl
+
+* Fast-Slow-Low-High corner (fs_lh)
+.lib fs_lh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl fs_lh
+
+* Fast-Slow-High-High corner (fs_hh)
+.lib fs_hh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl fs_hh
+
+* Fast-Fast-Low-Low corner (ff_ll)
+.lib ff_ll
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl ff_ll
+
+* Fast-Fast-High-Low corner (ff_hl)
+.lib ff_hl
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl ff_hl
+
+* Fast-Fast-Low-High corner (ff_lh)
+.lib ff_lh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl ff_lh
+
+* Fast-Fast-High-High corner (ff_hh)
+.lib ff_hh
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl ff_hh
+
+* Typical corner with mismatch (tt_mm)
+.lib tt_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl tt_mm
+
+* Slow-Fast corner with mismatch (sf_mm)
+.lib sf_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl sf_mm
+
+* Fast-Fast corner with mismatch (ff_mm)
+.lib ff_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl ff_mm
+
+* Slow-Slow corner with mismatch (ss_mm)
+.lib ss_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl ss_mm
+
+* Fast-Slow corner with mismatch (fs_mm)
+.lib fs_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_typical__cap_typical.spice
+.include rescap/res_typical__cap_typical__lin.spice
+.endl fs_mm
+
+* Low-Low corner with mismatch (ll_mm)
+.lib ll_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl ll_mm
+
+* High-High corner with mismatch (hh_mm)
+.lib hh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl hh_mm
+
+* High-Low corner with mismatch (hl_mm)
+.lib hl_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl hl_mm
+
+* Low-High corner with mismatch (lh_mm)
+.lib lh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/tt.spice
+.include corners/tt/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl lh_mm
+
+* Slow-Slow-Low-Low corner with mismatch (ss_ll_mm)
+.lib ss_ll_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl ss_ll_mm
+
+* Slow-Slow-High-Low corner with mismatch (ss_hl_mm)
+.lib ss_hl_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl ss_hl_mm
+
+* Slow-Slow-Low-High corner with mismatch (ss_lh_mm)
+.lib ss_lh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl ss_lh_mm
+
+* Slow-Slow-High-High corner with mismatch (ss_hh_mm)
+.lib ss_hh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ss.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ss.spice
+.include corners/ss/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl ss_hh_mm
+
+* Slow-Fast-Low-Low corner with mismatch (sf_ll_mm)
+.lib sf_ll_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl sf_ll_mm
+
+* Slow-Fast-High-Low corner with mismatch (sf_hl_mm)
+.lib sf_hl_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl sf_hl_mm
+
+* Slow-Fast-High-High corner with mismatch (sf_hh_mm)
+.lib sf_hh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_sf.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/sf.spice
+.include corners/sf/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl sf_hh_mm
+
+* Fast-Slow-Low-Low corner with mismatch (fs_ll_mm)
+.lib fs_ll_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl fs_ll_mm
+
+* Fast-Slow-High-Low corner with mismatch (fs_hl_mm)
+.lib fs_hl_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl fs_hl_mm
+
+* Fast-Slow-Low-High corner with mismatch (fs_lh_mm)
+.lib fs_lh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl fs_lh_mm
+
+* Fast-Slow-High-High corner with mismatch (fs_hh_mm)
+.lib fs_hh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_fs.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/fs.spice
+.include corners/fs/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl fs_hh_mm
+
+* Fast-Fast-Low-Low corner with mismatch (ff_ll_mm)
+.lib ff_ll_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_low__cap_low.spice
+.include rescap/res_low__cap_low__lin.spice
+.endl ff_ll_mm
+
+* Fast-Fast-High-Low corner with mismatch (ff_hl_mm)
+.lib ff_hl_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_low.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_high__cap_low.spice
+.include rescap/res_high__cap_low__lin.spice
+.endl ff_hl_mm
+
+* Fast-Fast-Low-High corner with mismatch (ff_lh_mm)
+.lib ff_lh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_low.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_low__cap_high.spice
+.include rescap/res_low__cap_high__lin.spice
+.endl ff_lh_mm
+
+* Fast-Fast-High-High corner with mismatch (ff_hh_mm)
+.lib ff_hh_mm
+.param MC_MM_SWITCH=1
+.param MC_PR_SWITCH=0
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_ff.spice
+.include continuous/parameters_res_high.spice
+.include continuous/parameters_cap_high.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include corners/ff.spice
+.include corners/ff/specialized_cells.spice
+.include rescap/res_high__cap_high.spice
+.include rescap/res_high__cap_high__lin.spice
+.endl ff_hh_mm
+
+* Monte Carlo process variation
+.lib mc
+.param MC_MM_SWITCH=0
+.param MC_PR_SWITCH=1
+.param corner_factor=1
+.param process_mc_factor=1
+.param mismatch_factor=1
+
+.include continuous/parameters_fet_tt.spice
+.include continuous/parameters_res_nom.spice
+.include continuous/parameters_cap_nom.spice
+
+* Include the model files
+.include continuous/models_global.spice
+.include continuous/models_fet.spice
+.include continuous/models_bjt.spice
+.include continuous/models_diodes.spice
+.include continuous/models_resistors.spice
+.include continuous/models_capacitors.spice
+
+* Legacy discrete models (RF, vpp caps, SONOS, and SRAM)
+.include parameters/critical.spice
+.include parameters/montecarlo.spice
+.endl mc
+

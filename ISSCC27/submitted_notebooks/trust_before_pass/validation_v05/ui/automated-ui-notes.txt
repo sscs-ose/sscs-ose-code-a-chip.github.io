@@ -1,0 +1,42 @@
+Trust Before Pass — my investigation
+0.5.0-rc1
+Saved locally. Share only if you choose.
+
+ATTEMPT 1 — Does a missing edge mean failure?
+Old HVL, nonlinear resistor, 2 ms supply ramp. Observe only through 4 ms. Gray space is unobserved; no future signal is drawn.
+Prediction: Delay measurement: undefined or invalid measurement; Response under T1: not enough evidence
+Reason: AUTOMATED UI TEST: deliberately predict insufficient evidence to verify corrective feedback at 4 ms.
+Observation: AUTOMATED UI TEST: the deadline is before 4 ms and no new POR response follows the supply trigger.
+Feedback: Recorded execution: COMPLETE. Selected-window measurement: INVALID (no POR rising crossing of 0.9 V in the selected 1.5–4 ms window). Scalar bounds: NOT_EVALUATED. T1 function: FAIL. AVDD crosses 3.0 V at 1.818 ms, so the T1 deadline is 3.818 ms. The record covers that deadline while the supply stays valid, but no new POR rising edge appears after the trigger. An earlier high POR level does not satisfy this edge-based requirement. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance.
+
+ATTEMPT 2 — Choose evidence that can challenge your explanation
+Change only the HVL dependency in this matched comparison. The SECOND case is the prediction target. The upstream correction is not our fix.
+Prediction: Delay measurement: valid measurement; Response under T1: requirement met
+Reason: AUTOMATED UI TEST: a matching anomaly after changing only the library would contradict this explanation.
+Observation: AUTOMATED UI TEST: the second trace shows the new response after the supply trigger with the same resistor representation.
+Feedback: Recorded execution: COMPLETE. Selected-window measurement: VALID (required ordered events observed). Scalar bounds: PASS. T1 function: PASS. AVDD crosses 3.0 V at 1.818 ms, so the T1 deadline is 3.818 ms. A new POR edge is observed at 2.861 ms, within the deadline. This witnesses the narrow T1 response. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance.
+
+ATTEMPT 3 — Which judgment changes when a limit changes?
+Same corrected nonlinear record. Extraction starts 1.5 ms at 0.9 V; scalar range 0.5–1 ms. T1 independently remains 3 V / 0.9 V / 2 ms.
+Prediction: Delay measurement: valid measurement; Response under T1: requirement met; Numerical delay limits: requirement failed
+Reason: AUTOMATED UI TEST: the numerical bound changes, but the waveform and T1 rule stay the same.
+Observation: AUTOMATED UI TEST: measured delay exceeds 1 ms, while the new response occurs before the T1 deadline.
+Feedback: Recorded execution: COMPLETE. Selected-window measurement: VALID (required ordered events observed). Scalar bounds: FAIL. T1 function: PASS. AVDD crosses 3.0 V at 1.818 ms, so the T1 deadline is 3.818 ms. A new POR edge is observed at 2.862 ms, within the deadline. This witnesses the narrow T1 response. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance.
+
+ATTEMPT 4 — An unfamiliar observation — what would you request next?
+Corrected HVL, nonlinear resistor, 4 ms AVDD ramp. Selected observation ends at 4.4 ms. This is a held-out view of a real record, not a new defect.
+Prediction: Delay measurement: undefined or invalid measurement; Response under T1: not enough evidence
+Reason: AUTOMATED UI TEST: the initial observation ends before the response deadline.
+Observation: AUTOMATED UI TEST: supply crosses late; the record does not cover the entire allowed response interval.
+Feedback: Recorded execution: COMPLETE. Selected-window measurement: INVALID (no POR rising crossing of 0.9 V in the selected 1.5–4.4 ms window). Scalar bounds: NOT_EVALUATED. T1 function: INSUFFICIENT_EVIDENCE. AVDD crosses 3.0 V at 3.636 ms, so the T1 deadline is 5.636 ms. This view ends at 4.400 ms, before the deadline. Observe through the deadline before calling the missing response a failure. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance.
+Next evidence requested: AUTOMATED UI TEST: observe through the deadline relative to the supply crossing.
+Proposed check: AUTOMATED UI TEST: require a new POR rise after supply crossing; abstain when the record ends too soon.
+Additional evidence: Recorded execution: COMPLETE. Selected-window measurement: VALID (required ordered events observed). Scalar bounds: PASS. T1 function: PASS. AVDD crosses 3.0 V at 3.636 ms, so the T1 deadline is 5.636 ms. A new POR edge is observed at 4.552 ms, within the deadline. This witnesses the narrow T1 response. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance.
+
+UNFINISHED NOTES — Does a missing edge mean failure?
+Old HVL, nonlinear resistor, 2 ms supply ramp. Observe only through 2.5 ms. Gray space is unobserved; no future signal is drawn.
+Prediction: 
+Reason: AUTOMATED UI TEST: 中文草稿 retained before running.
+Observation: 
+Next evidence: 
+Proposed check: 

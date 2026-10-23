@@ -1,0 +1,53 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+******************************************************************
+******************************************************************
+*  *****************************************************
+*  04/24/2021 Usman Suriono
+*      Why     : New scalable sky130_fd_pr__pfet_01v8 VHV model
+*      What    : Converted from discrete pvhv models
+*                Changed the parasitic Drain/Body diode from Deep Nwell-Sub to Pwell-Deep Nwell
+*                based on the layout
+*                Add process Monte Carlo
+*                Changed the parasitic diode from internal dimension calculation
+*                to receive it from PDK
+*
+*  *****************************************************
+*
+*  Pmos 12V VHV DE Model
+*  -----------------------------------------------------
+
+.subckt  sky130_fd_pr__pfet_g5v0d16v0 d g s b mult=1
++ 
+.param  nf = 1 w = 5 l = 0.7 sa = 0 sb = 0 sd = 0
+*** only estimated, the real values supplied and overwritten by PDK netlist
++ ad = {3.17*(w+1.72)}
++ pd = {2*(3.17+w+1.72)}
++ as = {0.28*w}
++ ps = {2*(0.28+w)}
+*** preserve values, the resistance is dominated by "rldd" resistor
+*** these values will be overwritten by PDK netlist
++ nrd = {0.13*nf/w}
++ nrs = {0.14*nf/w}
+
+
+rldd  d d1  r = {(1/w)*8900*(sw_sky130_fd_pr__pfet_01v8_de_rd_mult*sw_pw_rs_mc**3)*1.02} tc1 = 2.5e-3 tc2 = 2.2e-6
+xdnw1 d b sky130_fd_pr__model__parasitic__diode_pw2dn area = {ad} perim = {pd} m = 0.5
+xdnw2 d1 b sky130_fd_pr__model__parasitic__diode_pw2dn area = {ad} perim = {pd} m = 0.5
+Xsky130_fd_pr__pfet_g5v0d16v0 d1 g s b sky130_fd_pr__pfet_g5v0d16v0_base l = {l} w = {w} ad = 0 as = {as} pd = 0 ps = {ps} nrd = {nrd} nrs = {nrs} sa = {sa} sb = {sb} sd = {sd} nf = {nf}
+
+
+
+.ends sky130_fd_pr__pfet_g5v0d16v0

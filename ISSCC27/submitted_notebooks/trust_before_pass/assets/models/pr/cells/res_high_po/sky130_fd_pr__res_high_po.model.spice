@@ -1,0 +1,54 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+* statistics {
+* 	mismatch {
+*     	}
+*         process {
+* 		vary sky130_fd_pr__res_xhigh_po__var_mult dist=gauss std=0.025
+* 		vary sky130_fd_pr__res_high_po__var       dist=gauss std=0.025
+*         }
+* }
+.subckt  sky130_fd_pr__res_high_po r0 r1 b
++ w=1 l=1
+.param  mult = 1.0
++ rsheet = 317.3885
++ rbody_dw = -0.001
++ rhead_ps = 345.8312
++ mm_const = {(w<0.69)?0.1:0.2}
++ body_pelgrom = 0.03552
++ head_pelgrom = 0.0761
++ num_con_row = {max(floor(0.5+(w-0.33)/0.36),1)}
++ rbody_match = {body_pelgrom/sqrt(w*l*mult)*sky130_fd_pr__res_high_po__slope_spectre}
++ rend_match = {head_pelgrom/sqrt((w+0.525)*num_con_row*mult)*sky130_fd_pr__res_high_po__con_slope_spectre}
++ weff = {w+rbody_dw-0.0672*max(0.69-w,0)}
++ leff = {l+0.247}
++ res_match = {(body_pelgrom/sqrt(w*l*mult))*sky130_fd_pr__res_high_po__slope_spectre}
+rhead r0 rb rhead_model w = {weff+0.1558} l = 1.0
+rbody rb r1 rbody_model w = {weff} l = {leff}
+xc0 r0 r1 b sky130_fd_pr__model__parasitic__res_po w = {w} l = {l}
+.model rhead_model r sw_et=0 isnoisy=0
++ rsh = {345.8312*(1+sky130_fd_pr__res_high_po__var)*(1+rend_match)}
++ p2 = {-80.87e-3/cosh(6.34e-3*weff*weff)*(1-exp(-1.554/leff))}
++ q2 = {10.13/cosh(0.0898*weff*weff)}
++ tc1 = -4.3e-4 tc2 = 12e-6 tnom = 30.0
+.model rbody_model r sw_et=0 isnoisy=0
++ rsh = {rsheet*(1+sky130_fd_pr__res_high_po__var)*(1+res_match)}
++ p2 = {(w>0.6)?130.8e3*(1-exp(-1.818e-3*leff/weff))-867.4/weff+2236*weff/leff:300*(1-exp(-0.1124*leff/weff))+304.8*weff/leff}
++ q2 = {(w>0.6)?6.11*(1-exp(-852.8e-6*leff/weff))+1.375e-3*weff:0.5*0.3155*(1-exp(-0.05518*leff/weff))+1.19E-05*weff}
++ p3 = {(w>0.6)?380.3*weff/leff:0}
++ q3 = {(w>0.6)?42.62e-3*weff/leff:0}
++ tc1 = {tc1rpolybody} tc2 = {tc2rpolybody} tnom = 30.0
+.ends sky130_fd_pr__res_high_po

@@ -1,0 +1,335 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+******************************************************************
+******************************************************************
+*  *****************************************************
+*  05/04/2021 Usman Suriono
+*      Why     : Update process Monte Carlo
+*      What    : Adjusted to 4 sigma VT process monte carlo
+*  03/08/2021 Usman Suriono
+*      Why     : New infrastructure of the ESD sky130_fd_pr__pfet_01v8 5V model.
+*      What    : Converted from phvesd model into a continuous model.
+*                Replaced rsh from 1 to calculated rsh from the original model.
+*                PDK netlist nrd/nrs = ratio of distance the middle of the contact to Gate.
+*
+*  *****************************************************
+*
+*  ESD Pmos 5V Model
+*  -----------------------------------------------------
+
+.subckt  sky130_fd_pr__esd_pfet_g5v0d10v5 d g s b mult=1
++ 
+.param  l = 1 w = 1 nf = 1 ad = 0 as = 0 pd = 0 ps = 0 nrd = {0.14/w} nrs = {0.14/w} sa = 0 sb = 0 sd = 0
++ swx_nrds = {361*nf/w+1489}
+*   Legacy fitting parameters
++ sky130_fd_pr__esd_pfet_g5v0d10v5_voff_diff_5 = 0.022334
++ sky130_fd_pr__esd_pfet_g5v0d10v5_k2_diff_5 = 0.0026099
++ sky130_fd_pr__esd_pfet_g5v0d10v5_u0_diff_5 = 0.0013654
++ sky130_fd_pr__esd_pfet_g5v0d10v5_ua_diff_5 = 1.3711e-11
++ sky130_fd_pr__esd_pfet_g5v0d10v5_vsat_diff_5 = -2378.6
++ sky130_fd_pr__esd_pfet_g5v0d10v5_nfactor_diff_5 = -0.060725
++ sky130_fd_pr__esd_pfet_g5v0d10v5_ub_diff_5 = 3.6247e-19
+*
+
+
+Msky130_fd_pr__esd_pfet_g5v0d10v5 d g s b sky130_fd_pr__esd_pfet_g5v0d10v5_model l = {l} w = {w} ad = {ad} as = {as} pd = {pd} ps = {ps} nrd = {nrd} nrs = {nrs} sa = {sa} sb = {sb} sd = {sd} nf = {nf}
+* + deltox = 0.3*(sw_tox_hv_corner - sw_tox_hv_nom) + sw_tox_hv_mc + sw_mm_tox_hv * mismatch_factor*MC_MM_SWITCH*AGAUSS(0,1.0,1)/sqrt(l*w*mult)
++ delvto = {0.004+sw_vth0_sky130_fd_pr__pfet_g5v0d10v5*1.25+sw_vth0_sky130_fd_pr__pfet_g5v0d10v5_mc*1.25+sw_mm_vth0_sky130_fd_pr__pfet_g5v0d10v5*mismatch_factor*MC_MM_SWITCH*AGAUSS(0,1.0,1)/sqrt(l*w*mult)}
+* + mulu0  = sw_u0_sky130_fd_pr__pfet_g5v0d10v5
+* + mulvsat = 0.9
+
+
+
+.model sky130_fd_pr__esd_pfet_g5v0d10v5_model pmos 
+*
+* DC IV MOS PARAMETERS
+*
++ lmin = 5.45e-07 lmax = 5.55e-07 wmin = 1.4495e-05 wmax = 1.05e-03
++ level = 54
++ tnom = 30
++ version = 4.5
++ toxm = 1.175e-008
++ xj = 1.5e-007
++ lln = 1
++ lwn = 1
++ wln = 1
++ wwn = 1
++ lint = {1e-008-sw_polycd}
++ ll = 0
++ lw = 0
++ lwl = 0
++ wint = {sw_activecd}
++ wl = 0
++ ww = 0
++ wwl = 0
++ xl = 0
++ xw = 0
++ mobmod = 0
++ binunit = 2
++ dwg = -1.53e-008
++ dwb = -1e-008
+* NEW BSIM4 Parameters(Model Selectors)
++ igcmod = 0
++ igbmod = 0
++ rgatemod = 0
++ rbodymod = 1
++ trnqsmod = 0
++ acnqsmod = 0
++ fnoimod = 1
++ tnoimod = 1
++ permod = 1
++ geomod = 0
++ rdsmod = 0
++ tempmod = 0
+* ******
+* NEW BSIM4 Parameters(4.4 Version)
++ lintnoi = 0
++ vfbsdoff = 0
++ lambda = 0
++ vtl = 200000
++ lc = 5e-009
++ xn = 3
++ rnoia = 0.577
++ rnoib = 0.37
++ tnoia = 1.5
++ tnoib = 3.5
+* NEW BSIM4 Parameters(Process Parameters)
++ epsrox = 3.9
++ toxe = 1.175e-008
++ dtox = 0
++ ndep = 1.7e+017
++ nsd = 1e+020
++ rshg = 0.1
+* ***
++ rsh = {swx_nrds}
+*
+*  THRESHOLD VOLTAGE PARAMETERS
+*
++ vth0 = -1.01218
++ k1 = 0.64397
++ k2 = {0.0012758+sky130_fd_pr__esd_pfet_g5v0d10v5_k2_diff_5}
++ k3 = -1.584
++ dvt0 = 4
++ dvt1 = 0.39618
++ dvt2 = -0.05
++ dvt0w = 0
++ dvt1w = 5300000
++ dvt2w = -0.032
++ w0 = 1e-009
++ k3b = 0.24
+* NEW BSIM4 Parameters for Level 54
++ phin = 0
++ lpe0 = 0
++ lpeb = 0
++ vbm = -3
++ dvtp0 = 0
++ dvtp1 = 0
+*
+*  MOBILITY PARAMETERS
+*
++ vsat = {150260+sky130_fd_pr__esd_pfet_g5v0d10v5_vsat_diff_5}
++ ua = {2.718e-009+sky130_fd_pr__esd_pfet_g5v0d10v5_ua_diff_5}
++ ub = {1.5031e-018+sky130_fd_pr__esd_pfet_g5v0d10v5_ub_diff_5}
++ uc = 2.5114e-011
++ rdsw = 329.4
++ prwb = 0
++ prwg = 0
++ wr = 1
++ u0 = {0.0219+sky130_fd_pr__esd_pfet_g5v0d10v5_u0_diff_5}
++ a0 = 0.71809
++ keta = -0.01188
++ a1 = 0
++ a2 = 0.5
++ ags = 0.097232
++ b0 = 0
++ b1 = 0
+* NEW BSIM4 Parameters(Mobility Parameters)
++ eu = 1.67
++ rdswmin = 0
++ rdw = 0
++ rdwmin = 0
++ rsw = 0
++ rswmin = 0
+* ****
+*
+*  SUBTHRESHOLD CURRENT PARAMETERS
+*
++ voff = {-0.15351+sky130_fd_pr__esd_pfet_g5v0d10v5_voff_diff_5}
++ nfactor = {1.1792+sky130_fd_pr__esd_pfet_g5v0d10v5_nfactor_diff_5}
++ up = 0.0
++ ud = 0.0
++ lp = 1.0
++ tvfbsdoff = 0.0
++ tvoff = 0
++ cit = 1e-005
++ cdsc = 1e-005
++ cdscb = -0.00030725687
++ cdscd = 7.8783957e-011
++ eta0 = 0.0154
++ etab = -6.956e-005
++ dsub = 0.10478
+* NEW BSIM4 Parameters(Sub-threshold parameters)
++ voffl = 0
++ minv = 0
+* ****
+*
+*  ROUT PARAMETERS
+*
++ pclm = 0.46878
++ pdiblc1 = 0
++ pdiblc2 = 0
++ pdiblcb = -0.5
++ drout = 0.46464
++ pscbe1 = 4.24e+009
++ pscbe2 = 1e-008
++ pvag = 0
++ delta = 0.01
++ alpha0 = 3.561e-006
++ alpha1 = 1e-010
++ beta0 = 36
+* NEW BSIM4 Parameters(ROUT Parameters)
++ fprout = 10.125
++ pdits = 1.1249e-012
++ pditsl = 0
++ pditsd = 0
+* ***
+* NEW BSIM4 Parameters(GATE INDUCED DRAIN LEAKAGE MODEL PARAMTERS)
++ agidl = 7.25e-010
++ bgidl = 1.334e+009
++ cgidl = 650
++ egidl = 0.8
+* ***
+* NEW BSIM4 Parameters(Gate Leakage Current Parameters)
++ aigbacc = 0.43
++ bigbacc = 0.054
++ cigbacc = 0.075
++ nigbacc = 1
++ aigbinv = 0.35
++ bigbinv = 0.03
++ cigbinv = 0.006
++ eigbinv = 1.1
++ nigbinv = 3
++ aigc = 0.43
++ bigc = 0.054
++ cigc = 0.075
++ nigc = 1
++ aigsd = 0.43
++ bigsd = 0.054
++ cigsd = 0.075
++ dlcig = 0
++ poxedge = 1
++ pigcd = 1
++ ntox = 1
++ toxref = 1.175e-008
+* ****
+*
+*  TEMPERATURE EFFECTS PARAMETERS
+*
++ kt1 = -0.538
++ kt2 = 0.02
++ at = 0
++ ute = -1.115
++ ua1 = 5.9616e-010
++ ub1 = -2.0736e-018
++ uc1 = -1.3393e-010
++ kt1l = 0
++ prt = 0
+* NEW BSIM4 Parameters(HIGH SPEED RF MODEL PARAMETERS)
++ xrcrg1 = 12
++ xrcrg2 = 1
++ rbpb = 50
++ rbpd = 50
++ rbps = 50
++ rbdb = 50
++ rbsb = 50
++ gbmin = 1e-012
+* ***
+* NEW BSIM4 Parameters(FLICKER and THERMAL NOISE PARAMETERS)
++ noia = 3.0000000E+40
++ noib = 8.5300000E+24
++ noic = 8.4000000E+07
++ em = 4.1000000E+07
++ af = 1
++ ef = 0.88
++ kf = 0
++ ntnoi = 1
+* ****
+* NEW BSIM4 Parameters(LAYOUT DEPENDENT PARASITIC MODEL PARAMETERS)
++ dmcg = 0
++ dmcgt = 0
++ dmdg = 0
++ xgw = 0
++ xgl = 0
++ ngcon = 1
+* ***
+*
+* DIODE DC IV PARAMTERS
+*
+* NEW BSIM4 Parameters(DIODE DC IV parameters)
++ diomod = 1
++ njs = 1.3632
++ jss = 2.1483e-05
++ jsws = 4.02e-12
++ xtis = 10
++ bvs = 12.69
++ xjbvs = 1
++ ijthsrev = 0.1
++ ijthsfwd = 0.1
+*
+*  DIODE and FET CAPACITANCE PARAMETERS
+*
++ tpb = 0.001671
++ tpbsw = 0
++ tpbswg = 0
++ tcj = 0.00096
++ tcjsw = 3e-005
++ tcjswg = 0
++ cgdo = {1.9771e-010/sw_func_tox_hv_ratio}
++ cgso = {1.9771e-010/sw_func_tox_hv_ratio}
++ cgbo = 0
++ capmod = 2
++ xpart = 0
++ cgsl = {1.0005e-011/sw_func_tox_hv_ratio}
++ cgdl = {1.0005e-011/sw_func_tox_hv_ratio}
++ cf = 1.2e-011
++ clc = 1e-007
++ cle = 0.6
++ dlc = {4.4983e-008-sw_polycd}
++ dwc = {sw_activecd}
++ vfbcv = -0.1446893
++ acde = 0.401
++ moin = 15.773
++ noff = 4
++ voffcv = 0
++ ngate = 1e+023
++ lwc = 0
++ llc = 0
++ lwlc = 0
++ wlc = 0
++ wwc = 0
++ wwlc = 0
+* NEW BSIM4 Parameters(FET and DIODE capacitance parameters)
++ ckappas = 0.6
++ cjs = {0.00077547*sw_func_psd_nw_cj}
++ mjs = 0.33956
++ pbs = 0.6587
++ cjsws = {9.8717e-011*sw_func_psd_nw_cj}
++ mjsws = 0.24676
++ pbsws = 1
++ cjswgs = {1.46e-010*sw_func_psd_nw_cj}
++ mjswgs = 0.81
++ pbswgs = 3
+
+.ends sky130_fd_pr__esd_pfet_g5v0d10v5
