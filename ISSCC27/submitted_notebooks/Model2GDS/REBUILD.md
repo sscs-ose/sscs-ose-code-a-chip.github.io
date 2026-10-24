@@ -48,3 +48,27 @@ The sole transformation above relocates the input path; it changes no RTL or
 backend setting. OpenLane writes reports and the layout under the fresh output
 mount. Preserve failures as well as successful outputs. These optional commands
 are supplied for reproduction; they are not run by package generation.
+
+## Later 20 ns accelerator evidence
+
+The original three-size submission results above are unchanged. The later
+DAC Round 2 records use a different `DAC27Classic` backend recipe and represent
+two qualified engineering members of a failed three-size family. They do not
+turn the original 4×4 failure into a pass, or qualify 8×8.
+
+```bash
+python supplement/physical20/verify.py --check
+python scripts/build_submission.py --check-presentation
+```
+
+These commands only reparse included records and check generated presentation
+sources. See `supplement/physical20/README.md` for the original run commands,
+recipe, repair implementation, source hashes and omitted large artifacts.
+The package can reproduce the new numbers from saved raw output. It cannot
+repeat physical signoff or regenerate the two layout PNGs without the omitted
+GDS/SPEF/netlist inputs. No new EDA run was performed for this update.
+
+For an explicitly editable local copy, `--refresh-presentation --execute`
+regenerates the notebook/README/REBUILD/NOTICE, runs the notebook and reseals
+the manifest. It leaves the original models, RTL, tests and historical records
+unchanged. Ordinary reviewers should use the read-only commands above.

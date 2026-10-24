@@ -396,6 +396,15 @@ Apache License 2.0: third_party/open_pdks/LICENSE
 Exact upstream license/source URLs, hashes and installed revision metadata are
 preserved in {LICENSE_EVIDENCE}/query.stdout.log and its captured inputs.
 Project additions use the root LICENSE. This notice does not alter upstream terms.
+
+The later accelerator routing images in supplement/physical20/layouts/ are
+project-generated views of composed SKY130 layouts, using the same pinned PDK
+and standard-cell library. They retain the above upstream attribution. Their
+source GDS identities, rendering selection and project renderer are recorded in
+supplement/physical20/provenance.json and
+supplement/physical20/raw/layout_manifest.json.
+Supplementary project scripts and documentation use the root Apache-2.0 LICENSE.
+No additional PDK source distribution or third-party notebook is included.
 '''
     materials['NOTICE'] = notice.encode('utf-8')
     return materials
@@ -442,8 +451,12 @@ def verify_package(root, *, replay=True):
     team = read(root / 'TEAM.json')
     require(team == read(root / 'docs/submission_authors.json') and team.get('status') == 'OWNER_CONFIRMED'
             and team.get('members') and team.get('representative'), 'Owner-confirmed team identity missing')
+    later = load_module(root, 'supplement/physical20/verify.py', '_physical20').verify(root / 'supplement/physical20')
+    presentation = check_presentation(root)
     return {'status': 'PASS', 'analysis_mode': analysis['analysis_mode'], 'files_verified': len(included),
             'functional_case_executions': total, 'counter_raw_parser': 'PASS', 'functional_replay': replay_result,
+            'later_20ns_evidence': later['status'], 'later_family_status': later['family_status'],
+            'generated_presentation': presentation['status'],
             'team_identity': 'OWNER_CONFIRMED', 'public_submission': 'NOT_SUBMITTED'}
 
 
@@ -614,7 +627,7 @@ display(Markdown('Margin transformations use natural-log ratios; every pair and 
     else:
         cells += [cell('markdown', '''## 5. What physical qualification taught us
 
-The model-to-RTL workflow is verified, while accelerator physical qualification remains incomplete. A complete qualified set of implementations is needed to compare performance across array sizes. This notebook therefore makes no claim about whether cycle-based configuration choices survive post-route timing.
+The model-to-RTL workflow is verified, while the original submission's three-size physical family remains incomplete. The table below retains that original FINAL experiment: 2×2 qualified, 4×4 failed final antenna signoff, and 8×8 was not run after that stop. A complete qualified set is needed for the frozen three-size performance study. This notebook therefore makes no claim about whether cycle-based configuration choices survive post-route timing. Section 6 separately audits later 20 ns engineering implementations under a changed recipe; it does not replace these historical outcomes.
 
 Completing a route or writing a GDS file is not enough. Mapped compute state must be retained, routing and enabled signoff checks must pass, and the timing query must refer to the same routed artifacts. Historical work exposed both evidence-tooling defects and antenna signoff failures. Those classes are kept separate: repairing a parser does not repair a circuit, and an unsuccessful recipe does not establish universal design infeasibility.
 
@@ -672,12 +685,13 @@ The harness observes completion from the RTL's result-valid behavior and counts 
 
 ### Evidence levels remain separate
 
-Functional correctness, successful tool execution, generated physical artifacts and qualified physical evidence answer different questions. The accepted functional result stands on its own; the incomplete accelerator physical family supports no comparative performance or ranking claim.'''),
-        cell('markdown', '''## 6. Reproduce and extend responsibly
+Functional correctness, successful tool execution, generated physical artifacts and qualified physical evidence answer different questions. The accepted functional result stands on its own; the incomplete original three-size accelerator physical family supports no comparative performance or ranking claim. The later records below add implementation evidence, without changing that experiment's eligibility.'''),
+        cell('markdown', '''## 7. Reproduce and extend responsibly
 
 1. Create a Python environment and install `requirements.txt`.
 2. Run `python scripts/build_submission.py --verify-package` from this directory. This verifies bundled hashes, reparses the counter evidence, regenerates GEMM/token results and checks captured RTL observations.
 3. Run `python scripts/reproduce_figures.py --root . --portable --check` to verify figure regeneration, then execute this notebook top to bottom.
+4. Run `python supplement/physical20/verify.py --check` for the later evidence audit, and `python scripts/build_submission.py --check-presentation` to compare this notebook's sources with its generator.
 
 The package supports offline replay of the recorded observations. Optional fresh tool runs are described in `REBUILD.md`; the development repository retains the complete run history and qualification records.
 
@@ -693,11 +707,102 @@ Boundaries: idealized streaming compute core; no external-memory system, applica
 - [Verilator documentation](https://verilator.org/guide/latest/): compiled RTL simulation.
 
 Project source is licensed under Apache-2.0; see `LICENSE`. Bundled GDS contains upstream standard-cell geometry; its attribution and license copies are in `NOTICE` and `third_party/`. Third-party tools/PDKs retain their own licenses. No external notebook was copied into this notebook. `REFERENCES.md` distinguishes external tools from original project material.''')]
+    cells[-1:-1] = physical20_cells()
     for index, item in enumerate(cells):
         item['id'] = 'model2gds-' + str(index).zfill(2)
     return {'nbformat': 4, 'nbformat_minor': 5, 'metadata': {'kernelspec': {'display_name': 'Python 3', 'language': 'python', 'name': 'python3'},
             'language_info': {'name': 'python', 'version': '3.12'},
             'model2gds': {'analysis_mode': analysis['analysis_mode'], 'evidence_replay': 'offline; no EDA invocation'}}, 'cells': cells}
+
+
+def physical20_cells():
+    """Small, separate later-record audit; never changes the original analysis."""
+    return [cell('markdown', '''## 6. Later 20 ns accelerator implementations
+
+**Separate evidence, changed recipe.** DAC Round 2 `FINAL_002`, frozen at `5239290e91f789d68fd8e4b282b54fdb086f6285` and delivered at `aa91495f728e456eb6d8cf27bb372879e6fcdcd4`, reran the accelerator from RTL. Its 2×2 and 4×4 members met that protocol's physical research gates. They are two qualified engineering members selected from an **unsuccessful three-size family**, not a newly preregistered two-size study. The later 8×8 retained an antenna failure and did not complete downstream qualification. The original 4×4 failure above remains a failure.
+
+The RTL, wrapper semantics, SKY130 library and pinned tool stack were retained; the backend recipe changed from `Classic` to `DAC27Classic`. A generic post-detailed-route stage checks all nets, applies at most two diode-repair/reroute passes with margin 15 and seed 42, then performs fresh extraction and downstream checks. Detailed routing is explicitly fixed at `DRT_THREADS=2`. Within the later flow's development, the redundant extra post-repair detailed-placement/mirroring call used in rejected DAC Round 2 `FINAL_001` was removed; native repair legalization and downstream checks were retained. These are new runs under a changed recipe, not an isolated causal experiment proving that repair alone explains every difference. The repair trace below shows why the later 4×4 can qualify without rewriting the old failed record.
+
+**Read the limits with the numbers.** The table is rebuilt from native final-state counters and a dedicated internal register-to-register STA transcript at `max_ss_100C_1v60`. At a 20 ns constraint, the fixed-layout period estimate is `20 − R2R setup slack`; it is not measured silicon Fmax, an all-path frequency limit, workload latency or a performance winner. Core area is floorplan core area; cell area is placed-instance area. They are different cost definitions. No 16 ns result or cross-recipe ranking is mixed into this view.'''),
+        cell('code', '''from scripts.build_submission import load_module
+supplement_root = ROOT / 'supplement/physical20'
+physical20 = load_module(ROOT, 'supplement/physical20/verify.py', '_notebook_physical20').verify(supplement_root)
+assert physical20['status'] == 'PASS' and physical20['family_status'] == 'FAIL'
+later_rows = physical20['configurations']
+table = '| Array | Core area (µm²) | Cell area (µm²) | Internal R2R slack (ns) | STA period estimate (ns) |\\n|---|---:|---:|---:|---:|\\n'
+for row in later_rows:
+    table += (f"| {row['array_size']}×{row['array_size']} | {row['core_area_um2']:,.0f} | "
+              f"{row['cell_area_um2']:,.1f} | {row['r2r_setup_slack_ns']:.6f} | {row['sta_period_ns']:.6f} |\\n")
+display(Markdown(table))
+gates = '| Array | Native physical error counters | All-path setup worst (ns) / violations | Hold worst (ns) / violations | Slew / cap violations | Repair antenna trace |\\n|---|---|---|---|---|---|\\n'
+for row in later_rows:
+    assert all(value == 0 for value in row['physical_checks'].values())
+    hold_violations = sum(corner['violations'] for corner in row['hold_corners'].values())
+    trace = ' → '.join(str(value) for value in row['repair_antenna_counts'])
+    gates += (f"| {row['array_size']}×{row['array_size']} | all listed counters = 0 | "
+              f"{row['setup_all_worst_slack_ns']:.6f} / {row['setup_all_violations']:g} | "
+              f"{row['worst_hold_slack_ns']:.6f} / {hold_violations:g} | "
+              f"{row['max_slew_violations']:g} / {row['max_capacitance_violations']:g} | {trace} |\\n")
+display(Markdown(gates))
+show_details('Recomputed later records, nine hold corners and explicit limitations', physical20)'''),
+        cell('markdown', '''The listed native counters cover routing/Magic/KLayout DRC, LVS, antenna, layout XOR, connectivity and hold. The saved native all-path setup and hold summaries report zero violations across nine corner combinations. **Slew violations remain for both arrays, and 2×2 retains a capacitance violation.** Slew/cap columns are the native aggregate counters, not sums of repeated per-corner observations. Qualification here means the declared research gates; it does **not** mean every STA/electrical rule passed or a tapeout-ready design.
+
+### Actual accelerator routing views
+
+These two images come from the corresponding final accelerator GDS files. Both use the same top-cell routing selection: layers 67–72, datatype 20; cell references are not expanded, and internal cell geometry, labels and cuts are omitted. They are routing overviews, not a new signoff check. The source path, GDS hash, PNG hash and rendering method are in `supplement/physical20/raw/layout_manifest.json`.'''),
+        cell('code', '''for row in later_rows:
+    size = row['array_size']
+    display(Image(filename=str(supplement_root / row['layout']),
+                  alt=f'{size}×{size} accelerator: selected top-cell routing geometry from the later 20 ns FINAL_002 GDS.'))
+    suffix = 'a' if size == 2 else 'b'
+    display(Markdown(f'*Figure 5{suffix} — Later {size}×{size} accelerator routing view.* Separate from the original tiny-counter illustration.'))
+show_details('Accelerator layout source identities', json.loads((supplement_root / 'raw/layout_manifest.json').read_text()))'''),
+        cell('markdown', '''**What can be replayed here.** `supplement/physical20/verify.py --check` validates the included provenance, reparses raw timing and native final-state data, checks repair sequences, and reproduces `metrics.json`. The source recipe, repair flow and layout renderer are included. Large GDS/SPEF/netlist inputs remain outside this small package, indexed by original path, size and SHA256; their recorded identities were checked during candidate preparation. Thus this offline audit does not repeat extraction, physical signoff or GDS-to-image rendering. See the [supplement source guide](supplement/physical20/README.md) for the evidence boundary and retrieval requirements.
+
+The teaching addition is the distinction between a historical failure, a changed implementation recipe, qualification gates and remaining electrical warnings. Neither this subset nor the original incomplete family establishes a hardware winner or a three-size decision-fidelity result.''')]
+
+
+def check_presentation(root):
+    """Check generated cell sources without mistaking saved outputs for source."""
+    root = Path(root).resolve()
+    analysis = read(root / ANALYSIS)
+    expected = notebook(analysis, read(root / 'TEAM.json'))
+    actual = read(root / 'Model2GDS.ipynb')
+    def sources(node):
+        return [(c['cell_type'], c['id'], ''.join(c['source'])) for c in node['cells']]
+    require(sources(actual) == sources(expected), 'Notebook source differs from generator')
+    require(actual['metadata']['model2gds'] == expected['metadata']['model2gds'], 'Notebook evidence metadata differs')
+    require((root / 'README.md').read_bytes() == readme(analysis).encode('utf-8'), 'README differs from generator')
+    return {'status': 'PASS', 'cells': len(expected['cells']),
+            'code_cells': sum(c['cell_type'] == 'code' for c in expected['cells'])}
+
+
+def refresh_presentation(root, *, execute=False):
+    """Explicit local refresh of an existing isolated package; no source/EDA build."""
+    root = Path(root).resolve()
+    require((root / 'file_manifest.json').is_file(), 'Refresh requires an existing isolated package')
+    analysis, functional, frozen = (read(root / p) for p in (ANALYSIS, FUNCTIONAL, 'PROJECT_FREEZE.json'))
+    validate_analysis(analysis, functional, frozen)
+    require(analysis['analysis_mode'] != 'PRIMARY_RESEARCH', 'This supplement preserves the original fallback experiment')
+    load_module(root, 'supplement/physical20/verify.py', '_refresh_physical20').verify(root / 'supplement/physical20')
+    write_asset(root / 'README.md', readme(analysis))
+    write_rebuild_support(root, root, analysis)
+    for name, content in third_party_material(root).items():
+        write_asset(root / name, content)
+    nb = notebook(analysis, read(root / 'TEAM.json'))
+    write_asset(root / 'Model2GDS.ipynb', canonical(nb))
+    seal_package(root)
+    if execute:
+        import nbformat
+        from nbclient import NotebookClient
+        node = nbformat.from_dict(nb)
+        NotebookClient(node, timeout=900, kernel_name='python3', resources={'metadata': {'path': str(root)}}).execute()
+        for item in node.cells:
+            item.metadata.pop('execution', None)
+        write_asset(root / 'Model2GDS.ipynb', canonical(json.loads(nbformat.writes(node))))
+        seal_package(root)
+    return {**verify_package(root), 'notebook_executed': execute,
+            'refresh_scope': 'presentation, NOTICE and manifest only; no new EDA'}
 
 
 def copy_inputs(root, destination, analysis):
@@ -718,6 +823,9 @@ def copy_inputs(root, destination, analysis):
     paths.update(p.relative_to(root).as_posix() for folder, pattern in [('model', '*.py'), ('rtl', '*.sv')]
                  for p in (root / folder).glob(pattern))
     paths.update(p.relative_to(root).as_posix() for p in (root / 'figures/final').glob('*') if p.is_file())
+    require((root / 'supplement/physical20/verify.py').is_file(), 'Later supplement is required; use the isolated update package')
+    paths.update(p.relative_to(root).as_posix() for p in (root / 'supplement/physical20').rglob('*')
+                 if p.is_file() and '__pycache__' not in p.parts)
     rules_directory = root / 'results/raw/phase2/sprint/SUBMISSION_RULES_001'
     require(rules_directory.is_dir(), 'Missing captured official-rule verification')
     paths.update(p.relative_to(root).as_posix() for p in rules_directory.iterdir() if p.is_file())
@@ -750,7 +858,8 @@ def write_asset(path, content):
 
 def seal_package(root):
     files = [descriptor(root, p.relative_to(root).as_posix()) for p in sorted(root.rglob('*')) if p.is_file()
-             and '__pycache__' not in p.parts and '.ipynb_checkpoints' not in p.parts and p != root / 'file_manifest.json']
+             and not {'__pycache__', '.ipynb_checkpoints', '.venv'} & set(p.relative_to(root).parts)
+             and p != root / 'file_manifest.json']
     manifest = {'schema_version': 1, 'algorithm': 'sha256', 'self_exclusion': 'file_manifest.json', 'files': files}
     write_asset(root / 'file_manifest.json', canonical(manifest))
     return manifest
@@ -916,6 +1025,31 @@ PDK/image and common recipe. Routing, signoff, compute retention and internal
 post-route timing must be independently checked before treating a fresh run as
 qualified; the original accepted measurements remain unchanged.
 '''
+    text += '''
+## Later 20 ns accelerator evidence
+
+The original three-size submission results above are unchanged. The later
+DAC Round 2 records use a different `DAC27Classic` backend recipe and represent
+two qualified engineering members of a failed three-size family. They do not
+turn the original 4×4 failure into a pass, or qualify 8×8.
+
+```bash
+python supplement/physical20/verify.py --check
+python scripts/build_submission.py --check-presentation
+```
+
+These commands only reparse included records and check generated presentation
+sources. See `supplement/physical20/README.md` for the original run commands,
+recipe, repair implementation, source hashes and omitted large artifacts.
+The package can reproduce the new numbers from saved raw output. It cannot
+repeat physical signoff or regenerate the two layout PNGs without the omitted
+GDS/SPEF/netlist inputs. No new EDA run was performed for this update.
+
+For an explicitly editable local copy, `--refresh-presentation --execute`
+regenerates the notebook/README/REBUILD/NOTICE, runs the notebook and reseals
+the manifest. It leaves the original models, RTL, tests and historical records
+unchanged. Ordinary reviewers should use the read-only commands above.
+'''
     write_asset(destination / 'REBUILD.md', text)
 
 
@@ -937,6 +1071,8 @@ the models and captured RTL agree exactly on numerical results and cycle counts.
 replay the verification, and follow the reproducible
 **raw evidence → parser → structured result → figure** workflow.
 A separate tiny-counter design proves the open-source RTL-to-GDS toolchain.
+Section 6 adds a compact audit of two later 20 ns accelerator implementations
+and their actual routing views, with their distinct recipe and limits explicit.
 
 ## Key results
 
@@ -968,6 +1104,8 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 python scripts/build_submission.py --verify-package
 python scripts/reproduce_figures.py --root . --portable --check
+python supplement/physical20/verify.py --check
+python scripts/build_submission.py --check-presentation
 python scripts/build_submission.py --execute-notebook
 ```
 
@@ -990,6 +1128,7 @@ Raw command records retain historical machine paths solely as provenance.
 - `results/processed/`: immutable accepted functional/counter data and final analysis.
 - `results/raw/`: captured simulation and counter RTL-to-GDS sources for displayed claims.
 - `figures/final/`: deterministic figures and their source manifest.
+- `supplement/physical20/`: later 20 ns raw records, recipe, parser and routing views.
 - `file_manifest.json`: exact SHA256 and byte size of every package file, excluding itself.
 - `environment/toolchain.lock.json`: recorded tool, PDK and library versions.
 - `docs/`: arithmetic, cycle, workload and final-analysis contracts.
@@ -1002,12 +1141,33 @@ development history and qualification records are available from the author.
 ## Scope and submission
 
 The tiny counter proves the ASIC toolchain; it is never an accelerator result.
-Accelerator physical qualification is incomplete: the final 2×2 implementation
+The original submission's physical family is incomplete: its final 2×2 implementation
 qualified, 4×4 did not pass final antenna signoff, and 8×8 was therefore not run.
 Incomplete physical families and rejected physical metrics are excluded from
 comparative performance and ranking claims. No silicon Fmax, power/energy or
 process-variation result is claimed. The notebook retains the qualification
 summary and expandable provenance.
+
+## Later 20 ns implementation evidence
+
+DAC Round 2 `FINAL_002` supplies two engineering-qualified members, 2×2 and 4×4,
+under a changed common `DAC27Classic` recipe with generic post-DRT antenna repair.
+The original 4×4 antenna failure remains a historical failure. The later
+three-size family also failed because 8×8 did not complete qualification; it is
+not a new preregistered two-size comparison. No hardware winner is claimed.
+
+Notebook tables are regenerated from native final-state data and dedicated
+internal R2R STA output. They disclose Core/Cell area, fixed-layout R2R period
+estimates, physical error counters, all-path setup/hold summaries, and nonzero
+slew/cap diagnostics. These research gates do not establish all-electrical
+closure or tapeout readiness. The two actual accelerator routing PNGs retain
+source GDS hashes and rendering selection.
+
+The [supplement guide](supplement/physical20/README.md) identifies the exact
+freeze, raw sources, recipe changes and reproduction boundary. The small package
+recomputes metrics from saved records; large GDS/SPEF/netlist artifacts are indexed
+but omitted, so fresh signoff and image regeneration require those originals.
+The original 441-case inputs, models, RTL, authors and historical data are preserved.
 
 Apache-2.0 project license: `LICENSE`. GDS cell attribution: `NOTICE` and
 `third_party/`. Primary references: `REFERENCES.md`.
@@ -1084,13 +1244,19 @@ def main(argv=None):
     parser.add_argument('--execute', action='store_true')
     parser.add_argument('--verify-package', action='store_true')
     parser.add_argument('--execute-notebook', action='store_true')
+    parser.add_argument('--refresh-presentation', action='store_true', help='Regenerate only an existing isolated update package')
+    parser.add_argument('--check-presentation', action='store_true', help='Compare notebook sources and README with their generator')
     parser.add_argument('--rerun-rtl', action='store_true', help='Explicit optional real Verilator compilation/simulation')
     parser.add_argument('--array-size', type=int, choices=(2, 4, 8))
     parser.add_argument('--work-dir', type=Path)
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args(argv)
     root = args.root.resolve()
-    if args.rerun_rtl:
+    if args.refresh_presentation:
+        result = refresh_presentation(root, execute=args.execute)
+    elif args.check_presentation:
+        result = check_presentation(root)
+    elif args.rerun_rtl:
         require(args.array_size is not None and args.work_dir is not None, 'RTL rebuild requires --array-size and --work-dir')
         target = root if (root / 'file_manifest.json').is_file() else root / PACKAGE
         result = rerun_rtl(target, args.work_dir, args.array_size)

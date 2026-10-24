@@ -10,6 +10,8 @@ the models and captured RTL agree exactly on numerical results and cycle counts.
 replay the verification, and follow the reproducible
 **raw evidence → parser → structured result → figure** workflow.
 A separate tiny-counter design proves the open-source RTL-to-GDS toolchain.
+Section 6 adds a compact audit of two later 20 ns accelerator implementations
+and their actual routing views, with their distinct recipe and limits explicit.
 
 ## Key results
 
@@ -41,6 +43,8 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 python scripts/build_submission.py --verify-package
 python scripts/reproduce_figures.py --root . --portable --check
+python supplement/physical20/verify.py --check
+python scripts/build_submission.py --check-presentation
 python scripts/build_submission.py --execute-notebook
 ```
 
@@ -63,6 +67,7 @@ Raw command records retain historical machine paths solely as provenance.
 - `results/processed/`: immutable accepted functional/counter data and final analysis.
 - `results/raw/`: captured simulation and counter RTL-to-GDS sources for displayed claims.
 - `figures/final/`: deterministic figures and their source manifest.
+- `supplement/physical20/`: later 20 ns raw records, recipe, parser and routing views.
 - `file_manifest.json`: exact SHA256 and byte size of every package file, excluding itself.
 - `environment/toolchain.lock.json`: recorded tool, PDK and library versions.
 - `docs/`: arithmetic, cycle, workload and final-analysis contracts.
@@ -75,12 +80,33 @@ development history and qualification records are available from the author.
 ## Scope and submission
 
 The tiny counter proves the ASIC toolchain; it is never an accelerator result.
-Accelerator physical qualification is incomplete: the final 2×2 implementation
+The original submission's physical family is incomplete: its final 2×2 implementation
 qualified, 4×4 did not pass final antenna signoff, and 8×8 was therefore not run.
 Incomplete physical families and rejected physical metrics are excluded from
 comparative performance and ranking claims. No silicon Fmax, power/energy or
 process-variation result is claimed. The notebook retains the qualification
 summary and expandable provenance.
+
+## Later 20 ns implementation evidence
+
+DAC Round 2 `FINAL_002` supplies two engineering-qualified members, 2×2 and 4×4,
+under a changed common `DAC27Classic` recipe with generic post-DRT antenna repair.
+The original 4×4 antenna failure remains a historical failure. The later
+three-size family also failed because 8×8 did not complete qualification; it is
+not a new preregistered two-size comparison. No hardware winner is claimed.
+
+Notebook tables are regenerated from native final-state data and dedicated
+internal R2R STA output. They disclose Core/Cell area, fixed-layout R2R period
+estimates, physical error counters, all-path setup/hold summaries, and nonzero
+slew/cap diagnostics. These research gates do not establish all-electrical
+closure or tapeout readiness. The two actual accelerator routing PNGs retain
+source GDS hashes and rendering selection.
+
+The [supplement guide](supplement/physical20/README.md) identifies the exact
+freeze, raw sources, recipe changes and reproduction boundary. The small package
+recomputes metrics from saved records; large GDS/SPEF/netlist artifacts are indexed
+but omitted, so fresh signoff and image regeneration require those originals.
+The original 441-case inputs, models, RTL, authors and historical data are preserved.
 
 Apache-2.0 project license: `LICENSE`. GDS cell attribution: `NOTICE` and
 `third_party/`. Primary references: `REFERENCES.md`.
