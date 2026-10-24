@@ -9,7 +9,7 @@
 
 ***
 
-## 📌 Overview
+## Overview
 
 Microscaling (MX) formats share one 8-bit scale per block of 32 elements. An MX dot product therefore adds block sums that sit at different exponents. The accumulator aligns them and keeps a fixed number of fractional bits. That width **W** sets both the numerical error and the silicon cost.
 
@@ -19,20 +19,20 @@ Microscaling (MX) formats share one 8-bit scale per block of 32 elements. An MX 
 
 ***
 
-## 🚀 Key Contributions
+## Key Contributions
 
-- 🎯 **Error-budgeted width selection:** input quantization and accumulation error are kept apart. A candidate must meet both budgets, and the smallest qualified routed core wins.
-- 🧱 **Physical evidence per candidate:** LibreLane place and route on GF180MCU, nine STA corners, Magic DRC and Netgen LVS. The raw reports of the selected F2 core and its F4 alternative are included and checked again.
-- 🔁 **Two backends:** the routed MXFP4 core, and a generic core for six OCP MX encodings (MXFP4 example: W18 maps to 1.82 % less area than W20).
-- 📈 **Workload study:** 14 layers × 6 budgets. A fixed F4 misses the budget in 27 of 84 cases, while F0 or F2 suffice in 32.
-- ✅ **Verified RTL:** 17,527 regression transactions with 0 mismatches.
-- ❌ **Measured negative result:** selective exact recompute is 40.7 % larger than four fixed F6 cores, so it is rejected.
-- ⏱️ **Cycle-exact C++ model:** 64 cases and 424,232 events with zero cycle error against the RTL.
-- 🛑 **Fails loudly:** if any evidence check fails, the run stops and no submission bundle is written.
+- **Error-budgeted width selection:** input quantization and accumulation error are kept apart. A candidate must meet both budgets, and the smallest qualified routed core wins.
+- **Physical evidence per candidate:** LibreLane place and route on GF180MCU, nine STA corners, Magic DRC and Netgen LVS. The raw reports of the selected F2 core and its F4 alternative are included and checked again.
+- **Two backends:** the routed MXFP4 core, and a generic core for six OCP MX encodings (MXFP4 example: W18 maps to 1.82 % less area than W20).
+- **Workload study:** 14 layers × 6 budgets. A fixed F4 misses the budget in 27 of 84 cases, while F0 or F2 suffice in 32.
+- **Verified RTL:** 17,527 regression transactions with 0 mismatches.
+- **Measured negative result:** selective exact recompute is 40.7 % larger than four fixed F6 cores, so it is rejected.
+- **Cycle-exact C++ model:** 64 cases and 424,232 events with zero cycle error against the RTL.
+- **Fails loudly:** if any evidence check fails, the run stops and no submission bundle is written.
 
 ***
 
-## 🧠 Concept
+## Concept
 
 For the MXFP4 backend, let $B = K/32$ be the number of blocks, with exact block sums $S_g$ and block exponents $E_g$. Define $E_{\max} = \max_g E_g$.
 
@@ -61,7 +61,7 @@ the accumulation is exact **relative to the quantized MX inputs**, provided the 
 The tool selects the minimum-area routed candidate that meets **both error budgets** and **passes physical qualification**.
 ***
 
-## 📊 Results Summary
+## Results Summary
 
 | Metric | Value |
 |:-|:-|
@@ -86,7 +86,7 @@ The tool selects the minimum-area routed candidate that meets **both error budge
 
 ***
 
-## ⚙️ Setup
+## Setup
 
 | File | Content |
 |:-|:-|
@@ -100,7 +100,7 @@ GitHub shows a static HTML preview of the notebook. Open it in Colab to use the 
 
 ***
 
-## 📂 What the Support ZIP Holds
+## What the Support ZIP Holds
 
 The support ZIP holds the code, RTL, C++ model, flow configuration, records, evidence views and layer data the notebook runs on. Section 1 checks its SHA-256, unpacks it and checks every file.
 
@@ -111,7 +111,7 @@ The support ZIP holds the code, RTL, C++ model, flow configuration, records, evi
 
 ***
 
-## 🛠️ Tools & Technologies
+## Tools & Technologies
 
 - GF180MCU PDK · LibreLane 3.0.16 (OpenROAD, Magic, Netgen, KLayout)
 - Icarus Verilog · Yosys and ABC · Graphviz
@@ -119,7 +119,7 @@ The support ZIP holds the code, RTL, C++ model, flow configuration, records, evi
 
 ***
 
-## 🔁 Reproducibility
+## Reproducibility
 
 Click **Runtime → Run all** (after the first-run setup). All tools are open-source. The GF180MCU PDK is publicly available. Apache 2.0 licensed.
 
@@ -151,7 +151,7 @@ SHA256SUMS        the hash of every file in the package
 
 ***
 
-## ⚠️ Scope
+## Scope
 
 - The generic MX core has mapped-synthesis evidence only. It has no layout yet.
 - Power is the flow's vectorless estimate, not an activity-based measurement.
@@ -159,11 +159,11 @@ SHA256SUMS        the hash of every file in the package
 
 ***
 
-## 📎 Citation
+## Citation
 
 Kuan-Yu Liu, "MX Precision Lab: Error-Budgeted Accumulator Width for MX Dot-Product Cores," IEEE SSCS Code-a-Chip, ISSCC 2027.
 
-## 📬 Contact
+## Contact
 
 Kuan-Yu Liu: ana.liu@mail.utoronto.ca
 
