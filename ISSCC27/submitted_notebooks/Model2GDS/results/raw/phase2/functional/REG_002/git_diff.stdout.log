@@ -1,0 +1,44 @@
+diff --git a/docs/DECISIONS.md b/docs/DECISIONS.md
+index a125ffa..fce4aed 100644
+--- a/docs/DECISIONS.md
++++ b/docs/DECISIONS.md
+@@ -52,3 +52,39 @@ seed 20260927, 128 random cases) are separate from the unchanged six
+ preregistered workload dimensions, which receive 2x2 functional sanity checks
+ only. Phase 2 and accelerator physical evaluation remain unauthorized. Previous
+ decisions, the research question, and Phase 0 evidence remain unchanged.
++
++## D008 - Authorized parameterization and physical observation boundary
++
++**Decision:** Following independent human review of Phase 1 commit
++`ae309e3183608a52efb3b7feb4813c4942b03637`, qualify exactly S=2,4,8 using one
++generic output-stationary PE fabric and explicit token model. Preserve the
++Phase 1 arithmetic/clear/last/masked-completion/cycle contract and all 147
++audited input cases, including exact S=2 output and tile-cycle compatibility.
++Functional wrappers expose C for verification; physical wrappers keep C and
++MAC cones internal with Yosys keep semantics and empirical structural audits.
++No result serializer, memory interface or large result pin bus is added.
++
++**Reason:** Qualify the compute fabric without artificial chip-edge result
++fanout; maintain one matched architecture at the three authorized sizes.
++The root pytest.ini restricts discovery to tests as a repository hygiene fix;
++old Phase 1 snapshots and test evidence are not rewritten.
++
++## D009 - Pre-physical backend and timing methodology freeze
++
++**Decision:** Before accelerator synthesis/P&R, commit the pinned recipe in
++flow/phase2_backend_recipe.json, its document, the physical view, RTL/wrappers,
++and docs/PHASE2_TIMING_METHODOLOGY.md with the explicit post-route R2R Tcl.
++Use OpenLane 2.3.10 Classic, the authorized digest-pinned image, sky130A
++revision 0fe599b2afb6708d281543108caf8310912f54af and sky130_fd_sc_hd; clk,
++20.0 ns, FP_CORE_UTIL=30, pinned defaults and identical jobs/settings.
++No unsupported seed key is invented. The explicit maximum/setup query uses
++final routed artifacts and max_ss_100C_1v60; P_sta_est=20-S_r2r must be positive
++and F_sta=1000/P_sta_est MHz is parser-derived. This is a post-route fixed-layout
++STA-derived frequency estimate, not a silicon measurement or a clock sweep.
++
++**Reason:** Fix the measurement method before results exist. After first
++accelerator physical metrics, recipe/timing changes require STOP and human
++review. Preserve negative setup evidence without retuning, but block on missing
++compute logic, invalid provenance/timing, hold or enabled signoff failure.
++Phase 2 contains per-configuration qualification only; Phase 3 research ranking
++and interpretation remain unauthorized.

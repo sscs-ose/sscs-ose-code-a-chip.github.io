@@ -1,0 +1,100 @@
+{
+  "array_sizes": [
+    2,
+    4,
+    8
+  ],
+  "common_config": {
+    "CLOCK_PERIOD": 20.0,
+    "CLOCK_PORT": "clk",
+    "DPL_CELL_PADDING": 2,
+    "FP_CORE_UTIL": 30,
+    "GPL_CELL_PADDING": 2,
+    "GRT_ANTENNA_ITERS": 10,
+    "GRT_ANTENNA_MARGIN": 15,
+    "RUN_ANTENNA_REPAIR": true,
+    "RUN_HEURISTIC_DIODE_INSERTION": true,
+    "DRT_THREADS": 2
+  },
+  "configurations": {
+    "2": {
+      "design_name": "phase2_core_2",
+      "verilog_files": [
+        "/work/rtl/gemm_pe.sv",
+        "/work/rtl/systolic_array.sv",
+        "/work/results/raw/phase2/WRAPPERS_002/s2/physical/phase2_core_2.sv"
+      ]
+    },
+    "4": {
+      "design_name": "phase2_core_4",
+      "verilog_files": [
+        "/work/rtl/gemm_pe.sv",
+        "/work/rtl/systolic_array.sv",
+        "/work/results/raw/phase2/WRAPPERS_002/s4/physical/phase2_core_4.sv"
+      ]
+    },
+    "8": {
+      "design_name": "phase2_core_8",
+      "verilog_files": [
+        "/work/rtl/gemm_pe.sv",
+        "/work/rtl/systolic_array.sv",
+        "/work/results/raw/phase2/WRAPPERS_002/s8/physical/phase2_core_8.sv"
+      ]
+    }
+  },
+  "defaults_policy": "Pinned Classic and PDK defaults plus bounded generic post-DRT repair; no per-configuration tuning.",
+  "docker_image": "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e",
+  "flow": "DAC27Classic",
+  "jobs": 2,
+  "metric_units": {
+    "design__core__area": "um^2",
+    "design__die__area": "um^2",
+    "design__instance__area": "um^2",
+    "design__instance__count": "count",
+    "design__instance__count__stdcell": "count",
+    "design__instance__utilization": "fraction"
+  },
+  "openlane_version": "2.3.10",
+  "pdk": "sky130A",
+  "pdk_revision": "0fe599b2afb6708d281543108caf8310912f54af",
+  "pinned_internal_seeds": {
+    "detailed_routing_or_seed": 42,
+    "optional_io_annealing_random_seed": 42
+  },
+  "resolved_geometry_keys": [],
+  "resolved_identity_keys": [
+    "DESIGN_NAME",
+    "DESIGN_DIR",
+    "VERILOG_FILES"
+  ],
+  "schema_version": 1,
+  "seed_controls": [],
+  "standard_cell_library": "sky130_fd_sc_hd",
+  "timing": {
+    "constraint_period_ns": 20.0,
+    "corner": "max_ss_100C_1v60",
+    "frequency_formula": "1000 / sta_estimated_period_ns",
+    "methodology": "docs/PHASE2_TIMING_METHODOLOGY.md",
+    "period_formula": "constraint_period_ns - r2r_setup_slack_ns",
+    "quantity": "post-route fixed-layout STA-derived frequency estimate",
+    "query_script": "scripts/phase2_r2r_sta.tcl"
+  },
+  "post_drt_repair": {
+    "max_passes": 2,
+    "iterations_per_pass": 1,
+    "ratio_margin": 15,
+    "threads": 2,
+    "route_seed": 42,
+    "driver": "scripts/dac27_openlane.py",
+    "script": "scripts/dac27_post_drt.tcl",
+    "legalization": "native repair_antennas protected internal legalization; no extra post-route DPL or mirroring"
+  },
+  "dac_sources": [
+    "scripts/dac27_post_drt.tcl",
+    "scripts/freeze_dac27.py",
+    "scripts/analyze_dac27_results.py",
+    "docs/DAC27_ROUND2_PROTOCOL.md",
+    "scripts/analyze_final_results.py",
+    "scripts/collect_phase2_functional.py"
+  ]
+}
