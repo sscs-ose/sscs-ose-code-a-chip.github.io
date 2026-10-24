@@ -610,7 +610,7 @@ not part of the sealed decision record of Sections 1-8; nothing in the
 specification map, the 49-condition data or the layout example is changed.
 
 **Saved results.** `results/research/` holds the archived outputs of studies
-r1-r22 (JSON, JSONL and CSV, LF line endings).
+r1-r23 (JSON, JSONL and CSV, LF line endings).
 `results/research/manifest.json` lists the SHA256 of every archived file and
 of every `research/*.py` script. `presentation/research_extension.py` pins the
 manifest's own SHA256 and refuses to draw Section 9 if the manifest, any
@@ -641,6 +641,7 @@ command line.
 | r20 | `r20_offset_mechanism.py`, `r20_dc_skew.py`, `r20_bin_stress.py` | Why the wider pair needs less trim: untrimmed-offset decomposition, DC current skew of a 4% width skew under the width-binned models, and width skew against an exact current skew (instance `m`) for five designs on 45 conditions |
 | r21 | `r21_neutral_atlas.py` | The three sealed designs on all 49 conditions with width skew and with the exact current skew, every +/-1 mV, 1 ns point re-simulated at 0.625 ps |
 | r22 | `r22_range_mc.py` | Nominal trim range of the three sealed designs on the 45 r20 conditions, and paired mismatch MC (40 seeds, as r3) of the selected design at SF and FF 1.95 V 125 C and of `lvt_base_3b` at SF 1.95 V 125 C |
+| r23 | `r23_noise.py` | Transient thermal (white BSIM4) noise: input-referred noise of five designs at TT and of the selected design at SS 1.62 V -40 C and SF 1.95 V 125 C (40 paired realizations each), its split by device group, and the error rate it gives the r3/r16/r19/r22 MC residuals |
 
 **Re-running.** Live studies use the same project-local ngspice 47 and pinned
 SKY130 models as the full campaign (`node scripts/setup.mjs` on Windows;
@@ -701,4 +702,13 @@ width-skew counts differ from the published ones by one decision per design.
 The six r21 per-condition run files (about 12 MB) are not archived.
 r22 measures the trim range at 3.5 ns without skew or mismatch; its Monte Carlo
 covers three hot, high-supply corner runs only and, like r3, is not a yield estimate.
+r23 adds each transistor's white drain-current noise as a bias-dependent current
+source (density from per-device `.noise` tables in `research/cache/r23`, about
+0.6 MB each and not archived), sampled every 2 ps from 2 ns before the clock edge,
+and bisects the 3.5 ns switching input per realization at trim code 0 on nominal
+devices. It has no flicker or induced gate noise and does not include the noise of
+switched-on trim branches at a calibrated code; in the trimmed designs the
+switched-off branches are kept noiseless (checked against all-noisy runs). Its
+error rates assume Gaussian noise added to the noiseless MC residual. Unpruned
+6-bit decks exceed r3's 900 s guard, so r23 runs them with a 7200 s guard.
 None of these studies is silicon, Linux, Colab or external-human evidence.

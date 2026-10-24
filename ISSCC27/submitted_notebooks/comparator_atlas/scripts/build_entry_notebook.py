@@ -1053,6 +1053,7 @@ def main(support_digest: str | None = None) -> None:
         display(ext.wide_rc_table(extension))
         display(ext.bin_stress_table(extension))
         display(ext.trim_range_table(extension))
+        display(ext.noise_table(extension))
         figure = ext.figure(extension)
         display(figure)
         plt.close(figure)
@@ -1100,7 +1101,7 @@ def main(support_digest: str | None = None) -> None:
         RMS residual is similar (0.27/0.29 mV against 0.26/0.30 mV). At
         ±0.5 mV and 1 ns it is 79/80 and 78/80 correct (1 and 2 wrong)
         against 77/80 (3 wrong) and 64/80 (16 unresolved). With the r17 RC
-        estimate on the same ±1 and ±3 mV inputs (third-to-last table), ±1 mV is
+        estimate on the same ±1 and ±3 mV inputs (fourth-to-last table), ±1 mV is
         correct 78/90 at 1 ns (`unit6_w6`: 69/90) and ±3 mV 90/90 (78/90),
         at 827 fJ against 949 fJ; all 12 misses are unresolved, at 1.62 V.
         With the latch-output wiring halved, a layout assumption rather than
@@ -1110,7 +1111,7 @@ def main(support_digest: str | None = None) -> None:
         SKY130 transistor models are binned by width, so a ±4% width skew
         does not give a 4% current skew: in DC at TT the low-Vt pair gives
         0.048–0.072 at W = 6 µm, 0.031–0.038 at 3 µm and 0.040 at 12 µm
-        (second-to-last table). Splitting the 12 µm pair into two 6 µm fingers nearly
+        (third-to-last table). Splitting the 12 µm pair into two 6 µm fingers nearly
         triples its untrimmed offset (2.7 to 7.6 mV at TT). With an exact 4%
         current skew instead (instance multiplier *m* = 1 ± 0.04, nominal
         geometry; 45 skewed PVT conditions), the median untrimmed offset of
@@ -1140,7 +1141,7 @@ def main(support_digest: str | None = None) -> None:
         median of 37.8 mV over the 45 PVT conditions but only 18.5 mV at
         SF 1.95 V 125 °C and 19.0 mV at FF 1.95 V 125 °C, the narrowest of
         the three sealed designs (`baseline` 24.3 mV, `lvt_base_3b` 28.4 mV;
-        last table): its finer step costs range where a code moves the
+        second-to-last table): its finer step costs range where a code moves the
         offset least. On the same 40 paired seeds at those two corners, the
         untrimmed offset spreads more than at TT (standard deviation 14.2–15.1 mV
         against 11.2 mV), yet the trim covers 38/40 at each, because every
@@ -1157,6 +1158,46 @@ def main(support_digest: str | None = None) -> None:
         corners; with 40 seeds the coverage is only loosely bounded (95%
         interval 84–99%).
 
+        **How much of this is noise? Transient thermal noise (r23).** Every
+        result above is noiseless: a seed counts as correct at ±1 mV when its
+        residual |*m*| is below 1 mV. To turn that into an error rate we
+        added the BSIM4 white (thermal) drain-current noise of every
+        transistor to the transient run. A table built with ngspice `.noise`
+        gives each device's noise density at its instantaneous bias (read
+        back to within 0.03%), and it scales a Gaussian current sampled
+        every 2 ps, switched on 2 ns before the clock edge. For 40 noise
+        realizations (the same draws for every design, so comparisons are
+        paired), bisection finds the input at which the 3.5 ns decision
+        flips; the spread of that input is the input-referred noise σn. On
+        a single switch charging a capacitor the noise is 0.97 (NMOS) and
+        1.03 (PMOS) times the integrated `.noise` result at a 0.5 ps step
+        (0.85 and 0.96 at 2 ps, where that faster test circuit outruns the
+        grid); in the comparator a 1 ps step changes the mean-square noise by
+        +1% (16 paired realizations) and 0.5 ps by −5% (4 realizations).
+        For the selected design at TT, σn is 0.71 mV (95% interval
+        0.55–0.87 mV; last table), the same as `lvt_base_3b` (0.72 mV; a
+        paired variance test gives t = 0.4) and 1.5× the untrimmed
+        `baseline` (0.46 mV; t = 3.6). It grows from 0.36 mV at
+        SS 1.62 V −40 °C to 1.32 mV at SF 1.95 V 125 °C, 3.7× where
+        √T alone gives 1.3×. The input pair carries 82% of
+        the noise variance, the NMOS latch pair 11% and the reset switches
+        7%; runs with one group noisy at a time add up, realization by
+        realization, to the full run within 0.016 mV rms (24 realizations).
+        With P(wrong) = Φ(−(1 mV − |*m*|)/σn) for the ±1 mV input whose sign
+        opposes the residual, the Monte Carlo residuals give the selected
+        design a median error probability of 0.28 at TT and 0.31 and 0.38
+        at the SS and SF corners. Its ±1 mV counts are therefore
+        deterministic statements about *m*, not low error rates: its
+        residual (rms 0.78 mV at TT) is as large as σn. A 10⁻⁶ error rate
+        needs 4.0 mV at TT (median seed; 4.4 mV at the 90th percentile) and
+        6.9 mV (7.4 mV) at SF 1.95 V 125 °C. The 6-bit designs have
+        residuals of 0.5–0.7σn and less noise (0.52 and 0.39 mV; the wider
+        input pair lowers σn by a quarter, t = 9.6), so they need 2.6 and
+        2.0 mV at TT. In the trimmed rows the switched-off trim branches are
+        kept noiseless; with every device noisy the selected design gives
+        0.70 mV (paired rms difference 0.05 mV), and the 6-bit designs move
+        by at most 0.04 mV in 5 and 3 checked realizations.
+
         **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
         bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
         The cost paragraph above refers to the r13 fix. The 6-bit designs have
@@ -1170,6 +1211,11 @@ def main(support_digest: str | None = None) -> None:
         only the three sealed designs with an exact current skew, and for the
         6-bit designs only their untrimmed offsets. The r22 Monte Carlo adds
         two hot corners for the selected design and one for `lvt_base_3b`.
+        The r23 noise model has no flicker or induced gate noise. σn is
+        measured at trim code 0 on nominal devices, so noise from switched-on
+        trim branches at the calibrated code is not included, and it is
+        combined with the Monte Carlo residuals under a Gaussian assumption
+        that 40 realizations cannot check at 10⁻⁶.
         """),
         markdown("""
         ## 10. Discussion and limitations
@@ -1180,7 +1226,9 @@ def main(support_digest: str | None = None) -> None:
         reruns the comparison below with an exact, bin-neutral current skew
         (r21); the selection does not change. Its r22 Monte Carlo shows that
         the selected design's trim does not cover two ~3σ seeds at
-        1.95 V 125 °C, which `lvt_base_3b` also misses.
+        1.95 V 125 °C, which `lvt_base_3b` also misses. Its r23 noise runs
+        show that the ±1 mV counts are noiseless: with transient thermal
+        noise (σn ≈ 0.7 mV at TT) a 10⁻⁶ error rate needs about 4 mV.
 
         Under the same local calibration policy, the selected circuit
         increases 1 ns correct decisions from 310/392 to 372/392 across

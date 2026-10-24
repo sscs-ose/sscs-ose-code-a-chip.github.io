@@ -17,7 +17,7 @@ from entry_tools import artifact_path, digest, verify_files
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "results" / "research"
-MANIFEST_SHA256 = "3c146a9f4f7f9b59a7582c6edff65aa267da089cb669cc31e770f24b19a3d96e"
+MANIFEST_SHA256 = "8222ff36dcd0dd6b4257a27f7a4421bd416e75bb39124fd5da8f21a29534b6f4"
 ATLAS_DESIGNS = ("baseline", "lvt_base_3b", "lvt_balanced_4b")
 PROSPECTIVE_DESIGNS = ("svt_fast_4b", "lvt_fine_3b", "lvt_fine_4b", "lvt_fast_4b", "lvt_fast_fine_4b", "lvt_wide_5b")
 FIX = "fix_x2_unit5b"
@@ -82,6 +82,29 @@ WIDE_RC = (
     ("r19/r19_rc.jsonl", "rc_unit6_no_q", "bound: input W 12, trim L 1, no q-node wiring"),
 )
 BIN_DESIGNS = (*ATLAS_DESIGNS, "unit6_w6", "u6_w12_l05")
+NOISE_REALIZATIONS = 40
+NOISE_Z_1E6 = 4.753
+NOISE_VARIANTS = (
+    # label, condition, r23 run pattern (dt 2 ps), noisy devices, Monte Carlo pattern for the trim residual m
+    ("Sealed baseline: no trim, input W 2", "TT 1.8 V 27 C", "r23/run_baseline_tt_1.8V_27C_dt2ps_s*.jsonl",
+     "all", None),
+    ("Sealed lvt_base_3b: binary 3b trim, input W 2", "TT 1.8 V 27 C",
+     "r23/run_lvt_base_3b_tt_1.8V_27C_dt2ps_s*.jsonl", "all", "r3/mc_lvt_base_3b_*.jsonl"),
+    ("Shipped: binary 4b trim, input W 3", "SS 1.62 V -40 C",
+     "r23/run_lvt_balanced_4b_ss_1.62V_-40C_dt2ps_pruned_s*.jsonl", "off trim branches quiet",
+     "r3/mc_ss1.62V-40C_lvt_balanced_4b_*.jsonl"),
+    ("Shipped: binary 4b trim, input W 3", "TT 1.8 V 27 C",
+     "r23/run_lvt_balanced_4b_tt_1.8V_27C_dt2ps_pruned_s*.jsonl", "off trim branches quiet",
+     "r3/mc_lvt_balanced_4b_*.jsonl"),
+    ("Shipped: binary 4b trim, input W 3", "SF 1.95 V 125 C",
+     "r23/run_lvt_balanced_4b_sf_1.95V_125C_dt2ps_pruned_s*.jsonl", "off trim branches quiet",
+     "r22/mc_sf1.95V125C_lvt_balanced_4b_*.jsonl"),
+    ("6-bit: unit 6b trim, input W 6", "TT 1.8 V 27 C", "r23/run_unit6_w6_tt_1.8V_27C_dt2ps_pruned_s*.jsonl",
+     "off trim branches quiet", "r16/mc_unit6_tt1.8V27C_*.jsonl"),
+    ("r19: unit 6b trim at L 0.5, input W 12", "TT 1.8 V 27 C",
+     "r23/run_u6_w12_l05_tt_1.8V_27C_dt2ps_pruned_s*.jsonl", "off trim branches quiet",
+     "r19/mc_w12_tt1.8V27C_*.jsonl"),
+)
 
 
 def load() -> dict:
@@ -324,6 +347,42 @@ def trim_range_table(data: dict) -> pd.DataFrame:
                      "narrowest condition": f"{corner.upper()} {vdd:g} V {temp:g} C",
                      "conditions below 25 mV": sum(h < 25 for h in half)})
     return pd.DataFrame(rows).set_index("design")
+
+
+def noise_sigma(data: dict, pattern: str) -> tuple[float, float, float]:
+    """r23: input-referred thermal-noise sigma (mV) with its 95% chi-square-normal interval."""
+    records = _jsonl(data, pattern)
+    if sorted(r["realization"] for r in records) != list(range(NOISE_REALIZATIONS)) or any(r["edge"] for r in records):
+        raise RuntimeError(f"{pattern}: expected {NOISE_REALIZATIONS} interior noise realizations")
+    sigma = float(np.std([r["noise_mv"] for r in records], ddof=1))
+    half = 1.96 / math.sqrt(2 * (len(records) - 1))
+    return sigma, sigma * (1 - half), sigma * (1 + half)
+
+
+def noise_table(data: dict) -> pd.DataFrame:
+    """r23: transient thermal noise turns a residual m into an error rate P = Phi(-(v - |m|) / sigma_n)."""
+    rows = []
+    for label, condition, pattern, noisy, mc_pattern in NOISE_VARIANTS:
+        sigma, low, high = noise_sigma(data, pattern)
+        row = {"variant": label, "condition": condition, "noisy devices": noisy,
+               "sigma_n (mV, 95% CI)": f"{sigma:.2f} ({low:.2f}-{high:.2f})",
+               "trim residual rms (mV, covered)": "-", "rms |m| / sigma_n": "-",
+               "median P(wrong) at +/-1 mV": "-", "input for 1e-6 errors, median / p90 (mV)": "-"}
+        if mc_pattern:
+            records = _jsonl(data, mc_pattern)
+            if sorted(r["seed"] for r in records) != list(range(len(records))):
+                raise RuntimeError(f"{mc_pattern}: Monte Carlo seeds are incomplete or duplicated")
+            m = np.array([abs(r["m_mv"]) for r in records if r["covered"]])
+            rms = float(np.sqrt(np.mean(m ** 2)))
+            p_wrong = [0.5 * math.erfc((1.0 - x) / sigma / math.sqrt(2)) for x in m]
+            need = m + NOISE_Z_1E6 * sigma
+            row.update({"trim residual rms (mV, covered)": f"{rms:.2f} ({len(m)}/{len(records)})",
+                        "rms |m| / sigma_n": round(rms / sigma, 2),
+                        "median P(wrong) at +/-1 mV": f"{float(np.median(p_wrong)):.3f}",
+                        "input for 1e-6 errors, median / p90 (mV)":
+                            f"{np.percentile(need, 50):.1f} / {np.percentile(need, 90):.1f}"})
+        rows.append(row)
+    return pd.DataFrame(rows).set_index(["variant", "condition"])
 
 
 def energy_screen_table(data: dict) -> pd.DataFrame:

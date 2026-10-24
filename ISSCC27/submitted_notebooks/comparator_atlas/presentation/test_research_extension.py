@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 import matplotlib
+import numpy as np
 import pytest
 
 from presentation import research_extension as ext
@@ -199,6 +200,50 @@ def test_selected_trim_range_is_narrowest_when_hot(data):
     uncovered = {d: sorted(r["seed"] for r in ext._jsonl(data, f"r22/mc_sf1.95V125C_{d}_*.jsonl")
                            if not r["covered"]) for d in ("lvt_balanced_4b", "lvt_base_3b")}
     assert uncovered == {"lvt_balanced_4b": [3, 13], "lvt_base_3b": [3, 13]}
+
+
+def test_thermal_noise_sets_the_error_rate_of_the_residual(data):
+    t = ext.noise_table(data)
+    assert [float(s.split()[0]) for s in t["sigma_n (mV, 95% CI)"]] == [0.46, 0.72, 0.36, 0.71, 1.32, 0.52, 0.39]
+    assert list(t["median P(wrong) at +/-1 mV"])[1:] == ["0.767", "0.307", "0.279", "0.377", "0.044", "0.011"]
+    shipped = t.loc["Shipped: binary 4b trim, input W 3"]
+    assert list(shipped["input for 1e-6 errors, median / p90 (mV)"]) == ["2.5 / 3.7", "4.0 / 4.4", "6.9 / 7.4"]
+    assert list(t["rms |m| / sigma_n"])[-2:] == [0.5, 0.7]
+    report = ext._json("r23/r23_report.json")
+    for _, _, pattern, _, _ in ext.NOISE_VARIANTS:
+        key = pattern[len("r23/run_"):pattern.rindex("_s*")]
+        assert ext.noise_sigma(data, pattern)[0] == pytest.approx(report["sigma"][key]["sigma_mv"], abs=1e-12)
+    full = ext.noise_sigma(data, "r23/run_lvt_balanced_4b_tt_1.8V_27C_dt2ps_s*.jsonl")[0]
+    assert round(full, 2) == 0.70
+    assert {k.split("_tt")[0]: (v["n"], round(v["rms_diff_mv"], 2)) for k, v in report["pruning"].items()} == \
+           {"lvt_balanced_4b": (40, 0.05), "unit6_w6": (5, 0.03), "u6_w12_l05": (3, 0.01)}
+    for name, ratios in (("validate_dt0.5ps", (0.972, 1.032)), ("validate_dt2ps", (0.85, 0.964))):
+        checks = report["validation"][name]
+        assert tuple(round(checks[d]["ratio_to_dotnoise"], 3) for d in ("nfet_01v8", "pfet_01v8")) == ratios
+        assert all(abs(c["S_table"] / c["S_direct_at_vds0"] - 1) < 1e-3 for c in checks.values())
+    groups = report["groups"]["lvt_balanced_4b_tt_1.8V_27C_dt2ps"]
+    share = {k: round(groups[k]["sigma_mv"] ** 2 / groups["sum_of_variances_mv2"], 2)
+             for k in ("input", "latchn", "reset", "latchp", "tail")}
+    assert share == {"input": 0.82, "latchn": 0.11, "reset": 0.07, "latchp": 0.0, "tail": 0.0}
+    assert groups["superposition"]["n"] == 24 and groups["superposition"]["rms_total_minus_sum_mv"] < 0.02
+    two = {r["realization"]: r["noise_mv"] for r in ext._jsonl(data, "r23/run_lvt_balanced_4b_tt_1.8V_27C_dt2ps_s*")}
+    one = {r["realization"]: r["noise_mv"] for r in ext._jsonl(data, "r23/run_lvt_balanced_4b_tt_1.8V_27C_dt1ps_s*")}
+    a, b = [one[i] for i in sorted(one)], [two[i] for i in sorted(one)]
+    assert len(a) == 16 and sum(x * x for x in a) / sum(x * x for x in b) == pytest.approx(1.013, abs=5e-4)
+    half = {r["realization"]: r["noise_mv"] for r in ext._jsonl(data, "r23/run_lvt_balanced_4b_tt_1.8V_27C_dt0.5ps_s*")}
+    assert sorted(half) == [0, 4, 8, 12]
+    assert sum(v * v for v in half.values()) / sum(two[i] ** 2 for i in half) == pytest.approx(0.955, abs=5e-4)
+
+    def paired_t(first, second):
+        x, y = (np.array([r["noise_mv"] for r in sorted(ext._jsonl(data, f"r23/run_{k}_s*"),
+                                                         key=lambda r: r["realization"])]) for k in (first, second))
+        rho = np.corrcoef(x + y, x - y)[0, 1]
+        return round(float(abs(rho) * np.sqrt((len(x) - 2) / (1 - rho ** 2))), 1)
+
+    tt = "tt_1.8V_27C_dt2ps"
+    assert paired_t(f"baseline_{tt}", f"lvt_balanced_4b_{tt}_pruned") == 3.6
+    assert paired_t(f"lvt_base_3b_{tt}", f"lvt_balanced_4b_{tt}") == 0.4
+    assert paired_t(f"unit6_w6_{tt}_pruned", f"u6_w12_l05_{tt}_pruned") == 9.6
 
 
 def test_no_unfilled_placeholders():

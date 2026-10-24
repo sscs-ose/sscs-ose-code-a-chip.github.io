@@ -51,7 +51,10 @@ EXTENSION_SUMMARY = (
     "(r20, r21) found that the atlas width skew is not design-neutral under the PDK's width-binned "
     "models; rerun with an exact 4% current skew, the three-design selection is unchanged. At "
     "1.95 V 125 °C the shipped trim covers 38/40 mismatch seeds (r22); the two ~3σ seeds it misses "
-    "are also missed by `lvt_base_3b`.")
+    "are also missed by `lvt_base_3b`. With transient thermal noise (r23; white BSIM4 noise, no "
+    "flicker) the shipped design has 0.71 mV input-referred noise at TT, so its ±1 mV results are "
+    "noiseless counts rather than low error rates; a 10⁻⁶ error rate needs about 4 mV at TT and "
+    "7 mV at SF 1.95 V 125 °C.")
 
 
 def sha(path):
