@@ -44,6 +44,7 @@ STUDIES = {
             "r19/mc_w12_*.jsonl"],
     "r20": ["r20/offset.jsonl", "r20/eff_skew.json", "r20/bin_stress.jsonl", "r20/bin_stress_summary.json"],
     "r21": ["r21/r21_score.json", "r21/r21_score_refined.json", "r21/refined.json"],
+    "r22": ["r22/range.jsonl", "r22/mc_*.jsonl", "r22/sigma_*.json", "r22/r22_report.json"],
 }
 
 

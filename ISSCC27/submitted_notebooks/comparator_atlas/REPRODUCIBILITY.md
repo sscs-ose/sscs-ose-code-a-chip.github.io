@@ -610,7 +610,7 @@ not part of the sealed decision record of Sections 1-8; nothing in the
 specification map, the 49-condition data or the layout example is changed.
 
 **Saved results.** `results/research/` holds the archived outputs of studies
-r1-r21 (JSON, JSONL and CSV, LF line endings).
+r1-r22 (JSON, JSONL and CSV, LF line endings).
 `results/research/manifest.json` lists the SHA256 of every archived file and
 of every `research/*.py` script. `presentation/research_extension.py` pins the
 manifest's own SHA256 and refuses to draw Section 9 if the manifest, any
@@ -640,6 +640,7 @@ command line.
 | r19 | `r19_rc_wide.py`, `r19_atlas_wide.py`, `r19_mc_wide.py` | The r18 variant `u6_w12_l05` (6-bit unit trim at L 0.5, input W 12): RC estimate as r17, sealed 49-condition test as r15, paired mismatch MC as r16 |
 | r20 | `r20_offset_mechanism.py`, `r20_dc_skew.py`, `r20_bin_stress.py` | Why the wider pair needs less trim: untrimmed-offset decomposition, DC current skew of a 4% width skew under the width-binned models, and width skew against an exact current skew (instance `m`) for five designs on 45 conditions |
 | r21 | `r21_neutral_atlas.py` | The three sealed designs on all 49 conditions with width skew and with the exact current skew, every +/-1 mV, 1 ns point re-simulated at 0.625 ps |
+| r22 | `r22_range_mc.py` | Nominal trim range of the three sealed designs on the 45 r20 conditions, and paired mismatch MC (40 seeds, as r3) of the selected design at SF and FF 1.95 V 125 C and of `lvt_base_3b` at SF 1.95 V 125 C |
 
 **Re-running.** Live studies use the same project-local ngspice 47 and pinned
 SKY130 models as the full campaign (`node scripts/setup.mjs` on Windows;
@@ -698,4 +699,6 @@ points of the selected design only, while r21 refines every +/-1 mV, 1 ns point
 of all three designs with one 0.625 ps run (no convergence ladder), so its
 width-skew counts differ from the published ones by one decision per design.
 The six r21 per-condition run files (about 12 MB) are not archived.
+r22 measures the trim range at 3.5 ns without skew or mismatch; its Monte Carlo
+covers three hot, high-supply corner runs only and, like r3, is not a yield estimate.
 None of these studies is silicon, Linux, Colab or external-human evidence.

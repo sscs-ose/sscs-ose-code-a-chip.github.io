@@ -49,7 +49,9 @@ EXTENSION_SUMMARY = (
     "layout of its own, and an RC estimate on the archived extraction keeps ±1 mV correct at 2 ns "
     "but not at 1 ns (69/90 and 78/90 at code 0; misses are unresolved, none wrong). A later check "
     "(r20, r21) found that the atlas width skew is not design-neutral under the PDK's width-binned "
-    "models; rerun with an exact 4% current skew, the three-design selection is unchanged.")
+    "models; rerun with an exact 4% current skew, the three-design selection is unchanged. At "
+    "1.95 V 125 °C the shipped trim covers 38/40 mismatch seeds (r22); the two ~3σ seeds it misses "
+    "are also missed by `lvt_base_3b`.")
 
 
 def sha(path):

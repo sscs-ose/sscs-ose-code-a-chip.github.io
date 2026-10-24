@@ -1052,6 +1052,7 @@ def main(support_digest: str | None = None) -> None:
         display(ext.energy_screen_table(extension))
         display(ext.wide_rc_table(extension))
         display(ext.bin_stress_table(extension))
+        display(ext.trim_range_table(extension))
         figure = ext.figure(extension)
         display(figure)
         plt.close(figure)
@@ -1099,7 +1100,7 @@ def main(support_digest: str | None = None) -> None:
         RMS residual is similar (0.27/0.29 mV against 0.26/0.30 mV). At
         ±0.5 mV and 1 ns it is 79/80 and 78/80 correct (1 and 2 wrong)
         against 77/80 (3 wrong) and 64/80 (16 unresolved). With the r17 RC
-        estimate on the same ±1 and ±3 mV inputs (second-to-last table), ±1 mV is
+        estimate on the same ±1 and ±3 mV inputs (third-to-last table), ±1 mV is
         correct 78/90 at 1 ns (`unit6_w6`: 69/90) and ±3 mV 90/90 (78/90),
         at 827 fJ against 949 fJ; all 12 misses are unresolved, at 1.62 V.
         With the latch-output wiring halved, a layout assumption rather than
@@ -1109,7 +1110,7 @@ def main(support_digest: str | None = None) -> None:
         SKY130 transistor models are binned by width, so a ±4% width skew
         does not give a 4% current skew: in DC at TT the low-Vt pair gives
         0.048–0.072 at W = 6 µm, 0.031–0.038 at 3 µm and 0.040 at 12 µm
-        (last table). Splitting the 12 µm pair into two 6 µm fingers nearly
+        (second-to-last table). Splitting the 12 µm pair into two 6 µm fingers nearly
         triples its untrimmed offset (2.7 to 7.6 mV at TT). With an exact 4%
         current skew instead (instance multiplier *m* = 1 ± 0.04, nominal
         geometry; 45 skewed PVT conditions), the median untrimmed offset of
@@ -1132,6 +1133,30 @@ def main(support_digest: str | None = None) -> None:
         range (code −15 of ±15) at SF 1.95 V 125 °C, although all eight inputs
         there are still correct.
 
+        **Does that trim range cover random mismatch at its narrowest corners?
+        (r22).** The earlier Monte Carlo of the selected design covered only
+        TT and SS. Without skew or mismatch, its trim range (the distance from
+        the code-0 switching input to that of code ±15, at 3.5 ns) has a
+        median of 37.8 mV over the 45 PVT conditions but only 18.5 mV at
+        SF 1.95 V 125 °C and 19.0 mV at FF 1.95 V 125 °C, the narrowest of
+        the three sealed designs (`baseline` 24.3 mV, `lvt_base_3b` 28.4 mV;
+        last table): its finer step costs range where a code moves the
+        offset least. On the same 40 paired seeds at those two corners, the
+        untrimmed offset spreads more than at TT (standard deviation 14.2–15.1 mV
+        against 11.2 mV), yet the trim covers 38/40 at each, because every
+        sample's trim transfer shifts with its own mismatch (at SF, seeds with
+        |offset| 20.5 and 22.4 mV, beyond the nominal 18.5 mV, are covered).
+        The two uncovered seeds, 3 and 13 (untrimmed offset +38.8 to
+        +42.5 mV), carry the
+        largest input-pair mismatch in this seed set (about 3.3σ), and
+        `lvt_base_3b` misses the same two at SF 1.95 V 125 °C. For the
+        selected design every other seed decides ±3 mV correctly at 1 ns
+        (78/80 at both corners; `lvt_base_3b` 76/80), and ±1 mV is 71/80 and
+        69/80 against 57/80 (Monte Carlo table). So the comparison holds, but
+        neither sealed trim covers about 3σ offsets at hot, high-supply
+        corners; with 40 seeds the coverage is only loosely bounded (95%
+        interval 84–99%).
+
         **Limits.** Only Vth mismatch is modelled, and |*m*| is found by
         bisection to 0.2 mV; 40 seeds per condition are not a yield estimate.
         The cost paragraph above refers to the r13 fix. The 6-bit designs have
@@ -1143,7 +1168,8 @@ def main(support_digest: str | None = None) -> None:
         it; its own sealed test covers only that one design. Under the binned
         models the atlas width skews are not design-neutral (r20); r21 reruns
         only the three sealed designs with an exact current skew, and for the
-        6-bit designs only their untrimmed offsets.
+        6-bit designs only their untrimmed offsets. The r22 Monte Carlo adds
+        two hot corners for the selected design and one for `lvt_base_3b`.
         """),
         markdown("""
         ## 10. Discussion and limitations
@@ -1152,7 +1178,9 @@ def main(support_digest: str | None = None) -> None:
         is a separate later schematic extension and reports the `unit6_w6`
         and `u6_w12_l05` results and their additional limitations. It also
         reruns the comparison below with an exact, bin-neutral current skew
-        (r21); the selection does not change.
+        (r21); the selection does not change. Its r22 Monte Carlo shows that
+        the selected design's trim does not cover two ~3σ seeds at
+        1.95 V 125 °C, which `lvt_base_3b` also misses.
 
         Under the same local calibration policy, the selected circuit
         increases 1 ns correct decisions from 310/392 to 372/392 across

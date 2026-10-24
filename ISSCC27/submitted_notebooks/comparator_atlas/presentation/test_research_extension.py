@@ -184,6 +184,23 @@ def test_width_skew_is_not_design_neutral(data):
     assert [raw[f"width|{d}"]["correct"] for d in ext.ATLAS_DESIGNS] == [310, 351, 374]
 
 
+def test_selected_trim_range_is_narrowest_when_hot(data):
+    t = ext.trim_range_table(data)
+    assert list(t["half-range, narrowest (mV)"]) == [24.3, 28.4, 18.5]
+    assert t.loc["lvt_balanced_4b", "narrowest condition"] == "SF 1.95 V 125 C"
+    mc = ext.mc_table(data)
+    for condition in ("SF 1.95 V 125 C", "FF 1.95 V 125 C"):
+        hot = mc.loc[("Shipped: binary 4b trim, input W 3", condition)]
+        assert hot["trim range covers offset"] == "38/40"
+        assert hot["+/-3 mV @ 1 ns"].startswith("78/80")
+    other = mc.loc[("Sealed lvt_base_3b: binary 3b trim, input W 2", "SF 1.95 V 125 C")]
+    assert other["trim range covers offset"] == "38/40"
+    assert other["+/-3 mV @ 1 ns"].startswith("76/80")
+    uncovered = {d: sorted(r["seed"] for r in ext._jsonl(data, f"r22/mc_sf1.95V125C_{d}_*.jsonl")
+                           if not r["covered"]) for d in ("lvt_balanced_4b", "lvt_base_3b")}
+    assert uncovered == {"lvt_balanced_4b": [3, 13], "lvt_base_3b": [3, 13]}
+
+
 def test_no_unfilled_placeholders():
     texts = [(ROOT / n).read_text(encoding="utf-8") for n in
              ("Comparator_Atlas.ipynb", "README.md", "REVIEWER_GUIDE.md", "REPRODUCIBILITY.md")]
