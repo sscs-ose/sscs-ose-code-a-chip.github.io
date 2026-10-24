@@ -1,0 +1,56 @@
+name: Experimental compact comparator repair
+
+on:
+  push:
+    branches: ["verify/comparator-atlas-layout-repair-compact"]
+    paths:
+      - ".github/workflows/comparator-atlas-layout-repair-compact.yml"
+      - "ISSCC27/submitted_notebooks/comparator_atlas/layout_compact_repair/**"
+
+permissions:
+  contents: read
+
+jobs:
+  compact-repair:
+    if: github.repository == 'WLHsu0827/sscs-ose-code-a-chip.github.io'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      ENTRY: ISSCC27/submitted_notebooks/comparator_atlas
+      REPAIR: ISSCC27/submitted_notebooks/comparator_atlas/layout_compact_repair
+    steps:
+      - name: Exact public shallow sparse checkout without historical submodules
+        run: |
+          git init -q .
+          git config core.autocrlf false
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git config remote.origin.promisor true
+          git config remote.origin.partialclonefilter blob:none
+          git sparse-checkout init --cone
+          git sparse-checkout set "$REPAIR" "$ENTRY/layout_nominal27" \
+            "$ENTRY/layout_preflight" "$ENTRY/comparator_atlas" "$ENTRY/results/study"
+          git fetch -q --depth=1 --filter=blob:none origin "$GITHUB_SHA"
+          git checkout -q --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Pinned tool packages on the disposable runner only
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            $(cat "$ENTRY/layout_preflight/apt-packages.txt") \
+            ngspice=42+ds-3build1 python3-venv
+      - name: Frozen source and physical-repair regression controls
+        run: |
+          bash -n "$REPAIR/run.sh" "$ENTRY/layout_preflight/build_toolchain.sh"
+          python3 -m unittest discover -s "$ENTRY/layout_nominal27" -p test_nominal27.py -v
+          python3 -m unittest discover -s "$REPAIR" -p test_repair.py -v
+      - name: Actual full DRC LVS PEX then matched fixed-contract simulations
+        run: timeout --signal=TERM --kill-after=30s 24m bash "$REPAIR/run.sh"
+      - name: Retain actual evidence including failures and gated stages
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sky130-layout-compact-repair
+          path: ISSCC27/submitted_notebooks/comparator_atlas/layout_compact_repair/out
+          if-no-files-found: warn
+          retention-days: 14
+          include-hidden-files: true

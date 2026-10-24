@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "execution_variant": "pvt45-repaired-windows47-execution-v1",
+  "release_date": "2026-09-25",
+  "author": "Wei-Lun Hsu",
+  "affiliation": "National Tsing Hua University",
+  "release": "Explicit local-only execution release following the sealed Windows feasibility assessment; no publication or parent-file changes.",
+  "sealed_inputs": {
+    "feasibility_commit": "4b4e142be2226470367343ea94600220d4ee1bbb",
+    "feasibility_protocol_sha256": "c5c57f7855ebfc113b90437996fd27c0dcd93b43de4b33a7d4e5d07ff6ffcf87",
+    "remote_proposal_commit": "26d279ecd054f6fa23d4f18e61ecd6614c51be88",
+    "remote_protocol_sha256": "14243f1002a207f7bfdde7a0512dabaddd31c9e0d645a379d70cd0b6545919c9",
+    "matrix_sha256": "ddc489f9a930b863ddcf26cafa29ffce5452f09b1bbf1c5503895441a5b755d3",
+    "runtime_pins_sha256": "ce529a9d3e6dfbb2e9899c692e6b5a8edeab2093b76bdee242ea82ebdb48286c",
+    "raw_model_manifest_sha256": "57c5e2599a64e60d2c8407d70c1203531d76ff4813e5cd7e8fdd259d24d91fbe",
+    "static_deck_plan_sha256": "80503d520b5f53c9b11596489df0dbbf4611d50a400a90b7ad9cbea3eed8d5ed"
+  },
+  "scientific_scope": {
+    "inherit_exact_matrix_stimulus_measurement_and_numerics_read_only": true,
+    "points": 360,
+    "rc_points": 180,
+    "schematic_points": 180,
+    "conditions": 45,
+    "signed_inputs_mv": [-10, -3, 3, 10],
+    "code": 0,
+    "pair_skew": 0,
+    "primary_deadline_ns": 2,
+    "parallel_deadline_ns": 1,
+    "new_layout_or_drc_or_extraction": false,
+    "no_equivalence_claim_to_ngspice42": true
+  },
+  "hard_limits": {
+    "total_charged_attempts": 900,
+    "initial_attempts_before_adaptive": 720,
+    "additional_attempts": 180,
+    "maximum_workers": 2,
+    "ngspice_threads": 1,
+    "maximum_execution_windows": 2,
+    "window_seconds": 1800,
+    "no_new_attempt_with_less_than_seconds": 150,
+    "per_attempt_timeout_seconds": 120,
+    "compressed_complete_archive_target_bytes": 524288000,
+    "conservative_transient_compressed_admission_bytes": 471859200,
+    "charged_failures_interrupted_and_uncertain_launches": true,
+    "no_retry_or_reset_of_budget": true
+  },
+  "startup": {
+    "first_scheduled_point_id": "c01-schematic-m10",
+    "first_step_ps": 10,
+    "first_attempt_serial_and_counted": true,
+    "pool_requires_verified_first_attempt_runtime_gate": true,
+    "required_markers": ["PVT45W47_NUM_THREADS 1", "PVT45W47_COMPAT hsa"],
+    "required_actual_mos_si_audits": 27,
+    "require_waveform_reset_identity_and_measurement_integrity": true,
+    "functional_wrong_or_late_result_does_not_invalidate_runtime_gate": true,
+    "global_parse_or_startup_integrity_failure_stops_without_retry": true
+  },
+  "child_execution": {
+    "arguments": ["-b", "-o", "ngspice.log", "circuit.cir"],
+    "local_spiceinit": "set ngbehavior=hsa\nset noaskquit\nset num_threads=1\n",
+    "control_only_lines_before_tran": [
+      "set num_threads=1",
+      "echo PVT45W47_NUM_THREADS $num_threads",
+      "echo PVT45W47_COMPAT $ngbehavior"
+    ],
+    "model_includes_relative": "../../model-source",
+    "thread_environment": {"OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"},
+    "bytecode_disabled": true,
+    "owned_cwd_home_userprofile_tmp_temp_only": true,
+    "termination": "Terminate or kill only the owned Popen child PID; no process-name or parent-environment operations."
+  },
+  "identity": {
+    "pin_before_first_data": [
+      "all executor source hashes",
+      "execution and sealed scientific protocols",
+      "actual Python launcher/base/DLL and NumPy PYD hashes",
+      "actual ngspice binary/DLL/startup/codemodel hashes",
+      "raw Windows and canonical Git model identities",
+      "native netlist mode and bytes",
+      "every permitted point-step executed deck and local startup hashes"
+    ],
+    "run_id": "SHA256 of the versioned runtime identity, physical point, numerical step and exact executed deck; sequence prefix only distinguishes charged attempts.",
+    "no_old_trace_or_ngspice42_run_identity_reuse": true
+  },
+  "checkpoint": {
+    "atomic_fsynced_reservation_before_launch": true,
+    "monotonic_time_with_preserved_window_wall_start": true,
+    "verified_same_source_runtime_and_all_file_hashes_before_continue": true,
+    "global_integrity_error_blocks_all_automatic_continuation": true,
+    "unconfirmed_numerics_at_floor_budget_or_interruption": "UNKNOWN",
+    "all_functional_failures_remain_in_fixed_denominator": true
+  },
+  "privacy_cost_and_scope": {
+    "remote_jobs_pushes_workflows_downloads_installs_paid_services": false,
+    "parent_files_tools_models_environment_changes": false,
+    "outputs": "Owned local session/worktree storage only.",
+    "public_candidate_records": "Relative component labels and model includes; no parent user-profile/employer paths.",
+    "private_raw_diagnostics": "Retain exact path-bearing diagnostics privately; do not silently redact and claim byte identity.",
+    "archive": "Complete local manifest/ZIP including bad and partial cases; report actual compressed size before any sharing. No automatic publication."
+  }
+}

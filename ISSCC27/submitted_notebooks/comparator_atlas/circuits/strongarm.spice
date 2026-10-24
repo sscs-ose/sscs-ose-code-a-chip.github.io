@@ -1,0 +1,63 @@
+* Comparator Atlas. Original test circuit; conventional StrongARM topology.
+* Geometry is in micrometres under .option scale=1u.
+* pair_skew is deterministic input-pair width stress, NOT a foundry MC model.
+.subckt atlas vinp vinn clk vdd vss qp qn tp0 tp1 tp2 tn0 tn1 tn2
++ params: pair_skew=0 input_w=2 input_l=0.15 trim_l=1
+
+Xinp xp vinp tail vss sky130_fd_pr__nfet_01v8
++ w={input_w*(1+pair_skew)} l={input_l}
++ ad={0.29*input_w*(1+pair_skew)} as={0.29*input_w*(1+pair_skew)}
++ pd={2*(0.29+input_w*(1+pair_skew))} ps={2*(0.29+input_w*(1+pair_skew))}
+Xinn xn vinn tail vss sky130_fd_pr__nfet_01v8
++ w={input_w*(1-pair_skew)} l={input_l}
++ ad={0.29*input_w*(1-pair_skew)} as={0.29*input_w*(1-pair_skew)}
++ pd={2*(0.29+input_w*(1-pair_skew))} ps={2*(0.29+input_w*(1-pair_skew))}
+Xtail tail clk vss vss sky130_fd_pr__nfet_01v8
++ w=5 l=0.15 ad=1.45 as=1.45 pd=10.58 ps=10.58
+
+* qn is discharged by the vinp branch; positive input means qp is high.
+Xln qn qp xp vss sky130_fd_pr__nfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+Xlp qp qn xn vss sky130_fd_pr__nfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+Xpn qn qp vdd vdd sky130_fd_pr__pfet_01v8
++ w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+Xpp qp qn vdd vdd sky130_fd_pr__pfet_01v8
++ w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+Xrxp xp clk vdd vdd sky130_fd_pr__pfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+Xrxn xn clk vdd vdd sky130_fd_pr__pfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+Xrqp qp clk vdd vdd sky130_fd_pr__pfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+Xrqn qn clk vdd vdd sky130_fd_pr__pfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+
+* Signed-magnitude trim: source-gated, binary-weighted auxiliary input NFETs.
+* The analog gates track their corresponding input; digital bits drive switches.
+* All devices remain present in the code-zero baseline (fair parasitic load).
+Xtp0 xp vinp sp0 vss sky130_fd_pr__nfet_01v8
++ w=0.42 l={trim_l} ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+Xtp1 xp vinp sp1 vss sky130_fd_pr__nfet_01v8
++ w=0.84 l={trim_l} ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+Xtp2 xp vinp sp2 vss sky130_fd_pr__nfet_01v8
++ w=1.68 l={trim_l} ad=0.4872 as=0.4872 pd=3.94 ps=3.94
+Xtn0 xn vinn sn0 vss sky130_fd_pr__nfet_01v8
++ w=0.42 l={trim_l} ad=0.1218 as=0.1218 pd=1.42 ps=1.42
+Xtn1 xn vinn sn1 vss sky130_fd_pr__nfet_01v8
++ w=0.84 l={trim_l} ad=0.2436 as=0.2436 pd=2.26 ps=2.26
+Xtn2 xn vinn sn2 vss sky130_fd_pr__nfet_01v8
++ w=1.68 l={trim_l} ad=0.4872 as=0.4872 pd=3.94 ps=3.94
+Xsp0 sp0 tp0 tail vss sky130_fd_pr__nfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+Xsp1 sp1 tp1 tail vss sky130_fd_pr__nfet_01v8
++ w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+Xsp2 sp2 tp2 tail vss sky130_fd_pr__nfet_01v8
++ w=4 l=0.15 ad=1.16 as=1.16 pd=8.58 ps=8.58
+Xsn0 sn0 tn0 tail vss sky130_fd_pr__nfet_01v8
++ w=1 l=0.15 ad=0.29 as=0.29 pd=2.58 ps=2.58
+Xsn1 sn1 tn1 tail vss sky130_fd_pr__nfet_01v8
++ w=2 l=0.15 ad=0.58 as=0.58 pd=4.58 ps=4.58
+Xsn2 sn2 tn2 tail vss sky130_fd_pr__nfet_01v8
++ w=4 l=0.15 ad=1.16 as=1.16 pd=8.58 ps=8.58
+.ends atlas

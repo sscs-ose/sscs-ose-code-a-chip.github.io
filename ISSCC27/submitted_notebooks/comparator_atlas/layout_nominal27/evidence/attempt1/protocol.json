@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "phase": "nominal_published_27_device_layout",
+  "author": "Wei-Lun Hsu",
+  "affiliation": "National Tsing Hua University",
+  "source": {
+    "repository": "sscs-ose/sscs-ose-code-a-chip.github.io",
+    "commit": "2ad1c4c2058060abdfdd42c35aa784c018f6fa67",
+    "path": "ISSCC27/submitted_notebooks/comparator_atlas/results/study/selected_circuit.spice",
+    "sha256": "7ca76515baa6ceff22d4b3e59aa88f12dd319ba5901a913e87f6b5884611588e",
+    "bytes": 4076,
+    "line_endings": "Preserve exact CRLF bytes of the immutable published Git blob, without canonicalization.",
+    "design": "lvt_balanced_4b",
+    "top": "atlas",
+    "pair_skew": 0,
+    "device_count": 27,
+    "model_counts": {
+      "sky130_fd_pr__nfet_01v8_lvt": 10,
+      "sky130_fd_pr__nfet_01v8": 11,
+      "sky130_fd_pr__pfet_01v8": 6
+    },
+    "ordered_ports": ["vinp", "vinn", "clk", "vdd", "vss", "qp", "qn", "tp0", "tp1", "tp2", "tp3", "tn0", "tn1", "tn2", "tn3"],
+    "device_table": "devices.json",
+    "nominal_resolution": "Resolve only pair_skew=0; preserve every D/G/S/B, model, W/L, and m=1. The coarse-bank L is 1 um, not the prospective fine-bank lengths."
+  },
+  "budget": {
+    "repository": "WLHsu0827/sscs-ose-code-a-chip.github.io",
+    "experimental_branch": "verify/comparator-atlas-layout-nominal27",
+    "maximum_new_jobs": 4,
+    "maximum_job_minutes": 30,
+    "prior_preflight_runs": [35808864758, 35809175154, 35811055218, 35819766445],
+    "preflight_runs_remaining": 0,
+    "preflight_receipt_commit": "21936fa1ccc5bc97966ca71d62fa5fc1fb8b8174",
+    "no_dispatch_or_rerun_without_counting": true,
+    "protected": ["PR195", "upstream/main", "fork/main", "wlhsu0827-comparator-atlas-isscc27", "verify/comparator-atlas-layout-preflight"]
+  },
+  "tools": {
+    "magic": {"repository": "RTimothyEdwards/magic", "commit": "4f53bb3091d1e4a9b2009a58f157a8a4331d4c84", "version": "8.3.684"},
+    "netgen": {"repository": "RTimothyEdwards/netgen", "commit": "e1528a797cdb155d6ebf8d91c5a55ed7d1713156", "version": "1.5.323"},
+    "open_pdks": {"repository": "RTimothyEdwards/open_pdks", "commit": "aa3fc215a80d32437b8cca1cb3fdee819d18c4c9", "targets": ["magic-A", "netgen-A"]},
+    "models": {"repository": "google/skywater-pdk-libs-sky130_fd_pr", "commit": "f62031a1be9aefe902d6d54cddd6f59b57627436", "unmodified": true},
+    "ngspice": {"distribution": "Ubuntu 24.04", "package": "ngspice", "package_version": "42+ds-3build1", "binary_hash_required": true},
+    "numpy": "2.2.6",
+    "no_system_install_on_shared_windows": true,
+    "no_full_pdk_or_historical_corpus": true
+  },
+  "layout": {
+    "method": "Generate each real open_pdks PCell, transform its exact native rectangles into one flat Magic cell, then route with native Magic metal and open_pdks via generators.",
+    "pcell": {"nf": 1, "m": 1, "guard": 1, "doports": 1, "topc": 1, "botc": 0, "reject_dimension_clamping": true},
+    "gate_landing_um": [-0.15, -0.11, 0.15, 0.29],
+    "minimum_connected_gate_m1_area_um2": 0.10,
+    "placement_pitch_um": 4.8,
+    "center_device": "Xtail",
+    "mirror_pairs": [
+      ["Xinp", "Xinn"], ["Xln", "Xlp"], ["Xpn", "Xpp"], ["Xrxp", "Xrxn"],
+      ["Xrqp", "Xrqn"], ["Xtp0", "Xtn0"], ["Xsp0", "Xsn0"], ["Xtp1", "Xtn1"],
+      ["Xsp1", "Xsn1"], ["Xtp2", "Xtn2"], ["Xsp2", "Xsn2"], ["Xtp3", "Xtn3"], ["Xsp3", "Xsn3"]
+    ],
+    "routing": {
+      "metal1_escape_width_um": 0.36,
+      "metal2_width_um": 0.36,
+      "metal3_width_um": 0.40,
+      "bus_base_y_um": 8.0,
+      "bus_pitch_um": 0.8,
+      "bus_order": ["vss", "vdd", "clk", "tail", "xp", "xn", "qp", "qn", "vinp", "vinn", "sp0", "sn0", "sp1", "sn1", "sp2", "sn2", "sp3", "sn3", "tp0", "tn0", "tp1", "tn1", "tp2", "tn2", "tp3", "tn3"],
+      "description": "M1 pin escapes to distinct M2 vertical lanes; distinct M3 horizontal buses. Real LI-to-M1 body contacts, via1 and via2. Opposite halves use reflected PCell geometry. Adjacent paired bus tracks are not claimed perfectly symmetric.",
+      "report_per_net_and_pair_route_lengths": true
+    },
+    "report_actual_geometric_bbox_and_area": true,
+    "no_common_centroid_or_signoff_claim": true,
+    "output_loads": "The two ideal 5 fF loads belong only to the common simulation testbench, not GDS."
+  },
+  "structural_gates": {
+    "drc": {"technology": "sky130A", "version": "1.0.608", "style": "drc(full)", "euclidean": true, "positive_errors": 0, "spacing_negative_gap_um": 0.07, "spacing_negative_rule": "met1.2", "raw_style_evidence_required": true},
+    "geometry": {"require_nonempty_mag_gds": true, "require_active_poly_m1_m2_m3_lvt_nwell": true, "require_27_devices": true},
+    "lvs": {"native_top": "atlas", "ordered_ports_required": true, "reference_from_declared_source_table_not_extraction": true, "positive_equivalent_unique": [1, 1], "negative_controls": ["connection", "bulk", "width", "flavor"], "preserve_threshold_flavors": true, "check_w_l_m_and_bulk": true, "allow_physical_source_drain_permutation": true, "no_fake_wrapper_or_all_device_blackboxing": true},
+    "handoff": "Report full 27-device DRC/LVS success or the first fundamental blocker to the coordinator before claiming simulation qualification."
+  },
+  "extraction": {
+    "style": "ngspice()",
+    "modes": ["schematic", "lvs", "c", "rc"],
+    "lvs": {"cthresh": "infinite", "rthresh": "infinite", "merge": "none", "subcircuit_top": true, "scale": "off"},
+    "c": {"extresist": false, "cthresh": 0, "expected_resistors": 0},
+    "rc": {"extract_resistance": true, "extresist": true, "threshold_milliohm": 0, "minresist_milliohm": 0, "mindelay_ps": 0, "simplify": false, "cthresh": 0, "rthresh": 0},
+    "retain_ext_res_ext_floating_and_internal_nodes": true,
+    "require_real_resistor_network_and_positive_capacitance": true,
+    "no_inserted_resistors_or_deleted_capacitances": true,
+    "check_device_connectivity_after_contracting_actual_resistors": true,
+    "units": "Native ngspice() exports use bare micrometre W/L and square-micrometre junction areas. The shared testbench sets scale=1u exactly once. Reject incompatible explicit-SI or extra scale declarations. Audit actual ngspice device W/L, not just deck text."
+  },
+  "simulation": {
+    "fresh_four_mode_comparison": true,
+    "nominal_only_not_published_mismatch_revalidation": true,
+    "measurement": "Published comparator_atlas/spice.py::measure and validate_waveform",
+    "stimulus": {"clock_period_ns": 10, "clock_delay_ns": 2, "clock_high_ns": 4, "edge_ps": 50, "load_ff_each": 5, "common_mode_ratio": 0.5, "trim_code": 0, "pair_skew": 0, "differentials_mv": [-10, -3, 3, 10], "source_resistance_ohm": 0, "primary_deadline_ns": 1, "rail_high_vdd": 0.8, "rail_low_vdd": 0.2},
+    "window": {"cycle_start_ns": 20, "evaluation_start_ns": 22.025, "reset_sample_ns": 21.925, "reset_minimum_vdd": 0.9, "stop_ns": 30},
+    "first_gate": ["tt", 1.8, 27],
+    "pilot": [["tt", 1.8, 27], ["ss", 1.62, -40], ["ss", 1.62, 125], ["ff", 1.95, -40], ["ff", 1.95, 125]],
+    "expand_only_after_credible_rc_pilot_and_numerics": {
+      "corners": ["tt", "ss", "ff", "sf", "fs"],
+      "vdd_v": [1.62, 1.8, 1.95],
+      "temperature_c": [-40, 27, 125],
+      "condition_count": 45
+    },
+    "retain_wrong_unresolved_reset_parse_and_convergence_failures": true,
+    "stop_on_clear_rc_failure_with_root_cause_not_retuning": true
+  },
+  "numerics": {
+    "initial_max_steps_ps": [10, 5],
+    "further_max_steps_ps": [2.5, 1.25, 0.625, 0.3125, 0.15625],
+    "reporting_deadlines_ns": [0.25, 0.35, 0.5, 0.75, 1.0, 2.0],
+    "same_decision_and_outcome": true,
+    "maximum_energy_relative_error_percent": 1.0,
+    "maximum_latency_error_ns": 0.02,
+    "sensitive_required_consecutive_passing_halvings": 2,
+    "sensitive_finest_endpoint_at_most_ps": 0.625,
+    "monotone_pending_trace_and_finest_evidence": true,
+    "no_coarse_restart_or_discarded_contrary_evidence": true,
+    "do_not_import_research_v2_confirmation": true,
+    "zero_differential_not_correctness_evidence": true
+  },
+  "artifacts": ["protocol", "source_and_model_hashes", "versions_and_binary_hashes", "device_and_placement_tables", "mag", "gds", "ext", "res.ext", "independent_references", "lvs_c_rc_netlists", "raw_tool_logs", "drc_lvs_negative_controls", "actual_simulator_geometry_audit", "simulation_decks_logs_waveforms", "all_measurements_and_refinements", "sha256_manifest", "exact_experimental_commit_and_run_urls"],
+  "limitations": ["Not a foundry signoff flow or a density/antenna coverage claim.", "Layout technology and simulation-model revisions are separately pinned; no unverified equivalence assertion.", "No 35-device candidate has qualified and none is laid out here.", "No changes to the published submission, source, PR195, upstream main, or fork main."]
+}

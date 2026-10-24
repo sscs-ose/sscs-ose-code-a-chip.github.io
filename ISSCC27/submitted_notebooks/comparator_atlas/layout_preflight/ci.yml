@@ -1,0 +1,49 @@
+name: Experimental SKY130 layout preflight
+
+on:
+  push:
+    branches: ["verify/comparator-atlas-layout-preflight"]
+    paths:
+      - ".github/workflows/comparator-atlas-layout-preflight.yml"
+      - "ISSCC27/submitted_notebooks/comparator_atlas/layout_preflight/**"
+
+permissions:
+  contents: read
+
+jobs:
+  layout-preflight:
+    if: github.repository == 'WLHsu0827/sscs-ose-code-a-chip.github.io'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PREFLIGHT: ISSCC27/submitted_notebooks/comparator_atlas/layout_preflight
+    steps:
+      - name: Fetch only this experiment without traversing historical submodules
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git config remote.origin.promisor true
+          git config remote.origin.partialclonefilter blob:none
+          git sparse-checkout init --cone
+          git sparse-checkout set "$PREFLIGHT"
+          git fetch -q --depth=1 --filter=blob:none origin "$GITHUB_SHA"
+          git checkout -q --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Install only the declared build dependencies on the disposable runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends $(cat "$PREFLIGHT/apt-packages.txt")
+      - name: Fail-closed evidence parser controls
+        run: |
+          bash -n "$PREFLIGHT/run.sh" "$PREFLIGHT/build_toolchain.sh"
+          python3 -m unittest discover -s "$PREFLIGHT" -p test_preflight.py -v
+      - name: Pinned tools, real PCells, DRC, strict LVS, and routed RC
+        run: timeout --signal=TERM --kill-after=30s 24m bash "$PREFLIGHT/run.sh"
+      - name: Preserve actual evidence even when a capability fails
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sky130-layout-preflight
+          path: ISSCC27/submitted_notebooks/comparator_atlas/layout_preflight/out
+          if-no-files-found: warn
+          retention-days: 14
