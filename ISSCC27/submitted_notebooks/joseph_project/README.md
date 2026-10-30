@@ -17,8 +17,8 @@
 
 | Name | Role | Affiliation | IEEE Member | SSCS Member | Contact |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| **Joseph** (Lead Author) | Circuit Design & Layout Automation | IIT / Open-Source Silicon Initiative | Yes | Yes | [joseph@ieee.org](mailto:joseph@ieee.org) |
-| **NeuroDyn-AFE Team** | Modeling & Verification | IEEE SSCS Student Branch Chapter | Yes | Yes | [contact@sscs-ose.org](mailto:contact@sscs-ose.org) |
+| **Joseph** (Lead Author) | Circuit Design & Layout Automation |  Open-Source Silicon Initiative | Yes | no |  |
+
 
 ---
 
