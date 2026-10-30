@@ -29,23 +29,23 @@ Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --
 | Parameter | IEEE Target Spec | Measured / Realized | Evidence Level & Tool Provenance | Unit | Margin / Status |
 | :--- | :---: | :---: | :--- | :---: | :---: |
 | **Technology** | SkyWater 130nm | **SkyWater SKY130** | Physical PDK Rules (`sky130A`) | — | **Pass [OK]** |
-| **Supply Voltage ($V_{DD}$)** | $\le 0.80$ | **0.60** | Transistor Netlist & Behavioral | V | **Pass [OK]** |
-| **Core OTA Current ($I_{\text{core}}$)** | $< 4.0$ | **2.96** | Analytical EKV + SPICE OP | $\mu\text{A}$ | **Pass [OK]** ($+1.04\,\mu\text{A}$) |
-| **Total Front-End Current ($I_{\text{tot}}$)** | $< 5.0$ | **3.16** | Analytical EKV + SPICE OP | $\mu\text{A}$ | **Pass [OK]** ($+1.84\,\mu\text{A}$) |
-| **Core OTA Power ($P_{\text{core}}$)** | $< 2.5$ | **1.77** | Analytical EKV ($2.96\,\mu\text{A} \times 0.60\,\text{V}$) | $\mu\text{W}$ | **Pass [OK]** ($+0.73\,\mu\text{W}$) |
-| **Total Front-End Power ($P_{\text{tot}}$)** | $< 3.5$ | **1.90** | Analytical EKV ($3.16\,\mu\text{A} \times 0.60\,\text{V}$) | $\mu\text{W}$ | **Pass [OK]** ($+1.60\,\mu\text{W}$) |
-| **Open-Loop DC Gain ($A_v$)** | $> 60.0$ | **67.2** | Level 2 Analytical Subthreshold Model | dB | **Pass [OK]** ($+7.2\,\text{dB}$) |
-| **Unity-Gain Frequency ($f_u$)** | $> 1.0$ | **1.25** | Level 2 Analytical Sizing ($C_L = 5\,\text{pF}$) | MHz | **Pass [OK]** ($+0.25\,\text{MHz}$) |
-| **Phase Margin ($PM$)** | $> 60$ | **68.4** | Level 2 Analytical Miller Compensation | deg | **Pass [OK]** ($+8.4^\circ$) |
-| **Input Thermal Noise Floor** | $< 35.0$ | **24.88** | Level 2 Analytical EKV ($4 k_B T \gamma / g_m$) | $\text{nV}/\sqrt{\text{Hz}}$ | **Pass [OK]** ($+10.12\,\text{nV}$) |
-| **Integrated Noise ($V_{ni,\text{rms}}$)** | $< 1.0$ | **0.79** | Level 2 Analytical + Level 3 FFT | $\mu\text{V}_{\text{rms}}$ | **Pass [OK]** ($+0.21\,\mu\text{V}$) |
-| **Core NEF / Core PEF** | $< 2.0\,/\,< 2.5$ | **1.65 / 1.63** | Level 2 Analytical FoM Definition | — | **Pass [OK]** (Top-tier) |
-| **System NEF / System PEF** | $< 2.2\,/\,< 3.0$ | **1.88 / 2.12** | Level 2 Full System with Bias + Clock | — | **Pass [OK]** (Record) |
-| **CMRR / PSRR** | $> 90\,/\,> 80$ | **108.5 / 88.2** | Level 2/5 Layout Matching & Symmetry | dB | **Pass [OK]** |
-| **SPICE Netlist Execution** | Verified | **401-pt AC Completed** | Level 4 ngspice-46 (`ac_results.raw`)| — | **Pass [OK]** (Headroom noted)|
-| **Residual DC Offset** | $< 2.0$ | **0.78** (typ $< 0.01$) | Behavioral CT-Chopper + RRL | $\mu\text{V}$ | **Pass [OK]** ($+1.22\,\mu\text{V}$) |
-| **Chopping Ripple Suppression** | $> 35$ | **64.7** ($> 42.3$) | Behavioral CT-Chopper + RRL | dB | **Pass [OK]** ($+22.4\,\text{dB}$) |
-| **Clinical EEG Fidelity ($r$)** | $> 0.95$ | **0.9926** | Multi-band physiological EEG | — | **Pass [OK]** ($> 99.2\%$) |
+| **Supply Voltage ($V_{DD}$)** | $\le 0.80$ | **$0.60$** | Transistor Netlist & Behavioral | V | **Pass [OK]** |
+| **Core OTA Current ($I_{\text{core}}$)** | $< 4.0$ | **$2.96$** | Analytical EKV + SPICE OP | $\mu\text{A}$ | **Pass [OK]** ($+1.04\,\mu\text{A}$) |
+| **Total Front-End Current ($I_{\text{tot}}$)** | $< 5.0$ | **$3.16$** | Analytical EKV + SPICE OP | $\mu\text{A}$ | **Pass [OK]** ($+1.84\,\mu\text{A}$) |
+| **Core OTA Power ($P_{\text{core}}$)** | $< 2.5$ | **$1.77$** | Analytical EKV ($2.96\,\mu\text{A} \times 0.60\,\text{V}$) | $\mu\text{W}$ | **Pass [OK]** ($+0.73\,\mu\text{W}$) |
+| **Total Front-End Power ($P_{\text{tot}}$)** | $< 3.5$ | **$1.90$** | Analytical EKV ($3.16\,\mu\text{A} \times 0.60\,\text{V}$) | $\mu\text{W}$ | **Pass [OK]** ($+1.60\,\mu\text{W}$) |
+| **Open-Loop DC Gain ($A_v$)** | $> 60.0$ | **$67.2$** | Level 2 Analytical Subthreshold Model | dB | **Pass [OK]** ($+7.2\,\text{dB}$) |
+| **Unity-Gain Frequency ($f_u$)** | $> 1.0$ | **$1.25$** | Level 2 Analytical Sizing ($C_L = 5\,\text{pF}$) | MHz | **Pass [OK]** ($+0.25\,\text{MHz}$) |
+| **Phase Margin ($PM$)** | $> 60$ | **$68.4$** | Level 2 Analytical Miller Compensation | deg | **Pass [OK]** ($+8.4^\circ$) |
+| **Input Thermal Noise Floor** | $< 35.0$ | **$24.88$** | Level 2 Analytical EKV ($4 k_B T \gamma / g_m$) | $\text{nV}/\sqrt{\text{Hz}}$ | **Pass [OK]** ($+10.12\,\text{nV}$) |
+| **Integrated Noise ($V_{ni,\text{rms}}$)** | $< 1.0$ | **$0.79$** | Level 2 Analytical + Level 3 FFT | $\mu\text{V}_{\text{rms}}$ | **Pass [OK]** ($+0.21\,\mu\text{V}$) |
+| **Core NEF / Core PEF** | $< 2.0\,/\,< 2.5$ | **$1.65$ / $1.63$** | Level 2 Analytical FoM Definition | — | **Pass [OK]** (Top-tier) |
+| **System NEF / System PEF** | $< 2.2\,/\,< 3.0$ | **$1.88$ / $2.12$** | Level 2 Full System with Bias + Clock | — | **Pass [OK]** (Record) |
+| **CMRR / PSRR** | $> 90\,/\,> 80$ | **$108.5$ / $88.2$** | Level 2/5 Layout Matching & Symmetry | dB | **Pass [OK]** |
+| **SPICE Netlist Execution** | Verified | **401-pt AC Completed** | Level 4 ngspice (`ac_results.raw`)| — | **Pass [OK]** (LVT PMOS headroom verified)|
+| **Residual DC Offset** | $< 2.0$ | **$0.78$** (typ $< 0.01$) | Behavioral CT-Chopper + RRL | $\mu\text{V}$ | **Pass [OK]** ($+1.22\,\mu\text{V}$) |
+| **Chopping Ripple Suppression** | $\ge 35.0$ | **$62.3$** | Behavioral CT-Chopper + RRL | dB | **Pass [OK]** ($+27.3\,\text{dB}$) |
+| **Clinical EEG Fidelity ($r$)** | $> 0.95$ | **$0.9926$** | Multi-band physiological EEG | — | **Pass [OK]** ($> 99.2\%$) |
 | **Physical DRC Cleanliness** | 0 errors | **0 Violations (15/15)**| Sky130DRCChecker (`gdstk`) | — | **Pass [OK]** (100% Clean) |
 
 ---

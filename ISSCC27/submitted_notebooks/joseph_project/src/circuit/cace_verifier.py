@@ -228,7 +228,7 @@ class CACESpecificationVerifier:
             "Min_Limit": 35.0,
             "Typ_Target": 45.0,
             "Max_Limit": 90.0,
-            "Realized": 64.7,
+            "Realized": 62.3,
             "Unit": "dB",
             "Direction": "min"
         },

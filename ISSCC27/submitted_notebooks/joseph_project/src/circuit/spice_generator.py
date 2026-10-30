@@ -178,9 +178,9 @@ XM2 noden inm tail vss sky130_fd_pr__nfet_01v8_lvt W={w_finger_n:.2f}u L={l_n:.2
 XM1_aux nodep vaux_p tail vss sky130_fd_pr__nfet_01v8_lvt W={w_aux:.2f}u L={l_n:.2f}u mult=1
 XM2_aux noden vaux_n tail vss sky130_fd_pr__nfet_01v8_lvt W={w_aux:.2f}u L={l_n:.2f}u mult=1
 
-* Active PMOS load controlled by Common-Mode Feedback (CMFB)
-XM3 nodep vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8 W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
-XM4 noden vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8 W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
+* Active PMOS load with Low-Vt to prevent headroom pinch-off under 0.60V VDD
+XM3 nodep vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8_lvt W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
+XM4 noden vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8_lvt W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
 
 * Continuous-Time Resistive Common-Mode Sensing Network
 R_cm1 nodep vcm_sense 10MEG
@@ -191,11 +191,11 @@ E_cmfb vbp_cmfb 0 VOL='V(vbp) + 15.0*(V(vcm_sense) - 0.30)'
 C_c1 noden outp 1.2p
 C_c2 nodep outm 1.2p
 
-* First gain stage (common-source output conversion)
-XM5 outp noden vdd vdd sky130_fd_pr__pfet_01v8 W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
+* First gain stage (common-source output conversion with Low-Vt PMOS)
+XM5 outp noden vdd vdd sky130_fd_pr__pfet_01v8_lvt W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
 XM6 outp vbn_out vss vss sky130_fd_pr__nfet_01v8 W={w_finger_n:.2f}u L=2.0u mult=2
 
-XM7 outm nodep vdd vdd sky130_fd_pr__pfet_01v8 W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
+XM7 outm nodep vdd vdd sky130_fd_pr__pfet_01v8_lvt W={w_finger_p:.2f}u L={l_p:.2f}u mult={m_p}
 XM8 outm vbn_out vss vss sky130_fd_pr__nfet_01v8 W={w_finger_n:.2f}u L=2.0u mult=2
 
 .ends neurodyn_ota
