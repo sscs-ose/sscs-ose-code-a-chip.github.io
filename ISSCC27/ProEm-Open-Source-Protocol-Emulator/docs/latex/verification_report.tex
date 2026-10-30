@@ -1,0 +1,265 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+
+\definecolor{codebg}{HTML}{F4F7F6}
+\definecolor{passc}{HTML}{1E7B34}
+\definecolor{fixc}{HTML}{B5520B}
+\newcommand{\sig}[1]{\texttt{#1}}
+\newcommand{\pass}{\textcolor{passc}{\textbf{pass}}}
+\newcommand{\fixed}{\textcolor{fixc}{\textbf{fixed}}}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{codebg},frame=none,xleftmargin=6pt,xrightmargin=6pt,aboveskip=6pt,belowskip=6pt,columns=fullflexible,keepspaces=true,showstringspaces=false}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Paul Vincent Bezzina \textbar{} ProEm - Open Source Protocol Emulator}
+\rhead{\small Verification report}
+\cfoot{\small\thepage}
+
+\title{ProEm: Verification Report\\\large Design frozen at ISA v0.7.1}
+\author{Paul Vincent Bezzina}
+\date{17 October 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\begin{abstract}
+The architecture is frozen at ISA v0.7. This report covers the checks run on that design before hardening: lint, synthesis and a full place and route with the Tiny Tapeout CMOS5L flow, gate-level simulation, a second simulator, an independent decode of the standards waveforms with sigrok, line coverage, and a formal proof of the line codec's entry accounting. Two real bugs came out of it, both in the line codec, both fixed with small local changes; nothing in the instruction set changed. The design is released as v0.7.1. The first layout missed the slow corner by 3.8\,ns; after a set of local timing changes (Section~\ref{sec:pnr}) the layout meets every corner, with 3.8\,ns to spare at the slow one and 9.8\,ns at typical. What is left is the GitHub run of the same flow and real hardware.
+\end{abstract}
+
+\section{Summary}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l L l@{}}
+\toprule
+Check & What was run & Result \\
+\midrule
+Freeze & v0.7 tagged as the baseline; the pulse-width work started on top of it was discarded & done \\
+Lint & Verilator 5.020 \sig{-Wall} on the whole design; 26 warnings, each reviewed; 13 waivers recorded in \sig{lint/waivers.vlt} & \pass \\
+Synthesis & Yosys and ABC to \sig{sg13cmos5l} cells, typical and slow corners (\sig{scripts/synth\_ihp.sh}) & 36\,\% of the 6x4 tile \\
+Place and route & LibreLane 3.1 with the Tiny Tapeout CMOS5L configuration, 6x4 tiles, 50\,MHz & \pass{} at all three corners \\
+Gate level & The cocotb suite on the synthesised and on the routed netlist, with the IHP cell models (Icarus) & \pass{} 6/6, both \\
+Second simulator & Every pin-level test rebuilt on Verilator instead of CXXRTL & \pass{} \\
+Independent decode & 30 waveforms from the standards tests decoded by sigrok's protocol decoders (\sig{scripts/sigrok\_check.py}) & \pass{} 30/30 \\
+Coverage & Verilator line and branch coverage over the whole regression (\sig{scripts/coverage.sh}) & 98.7\,\% \\
+New directed test & SPI controller in all four modes, both BRANCH rules, NOP (\sig{sim/t\_modes.cpp}) & bug, \fixed \\
+Formal & Unbounded proof of the line codec's entry accounting and output enables (\sig{formal/line\_codec.sby}) & bug, \fixed \\
+Regression & Full \sig{scripts/run.sh}, cocotb, all six formal proofs, on the fixed RTL & \pass \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Bugs found and fixed}
+
+\subsection{A lost \sig{tx\_done} after a cancel (found by the formal proof)}
+
+The codec answers every entry it accepts with exactly one \sig{tx\_done}; the frame chain counts entries in flight with it and only lets read blocks listen when the count is zero. When a frame is aborted, \sig{tx\_cancel} throws away the entry being sent and the one waiting, and \sig{dropCount} pays back one \sig{tx\_done} for each over the next two clocks.
+
+The proof found two ways to lose one of those pulses:
+\begin{itemize}
+\item a second \sig{tx\_cancel} within two clocks overwrote \sig{dropCount} instead of adding to it;
+\item a new entry accepted straight after the cancel could finish (a zero-length entry is answered at once) on the same clock as a pending drop pulse, and the two merged into one.
+\end{itemize}
+Either way the chain's count stays at one forever, \sig{line\_free} never returns, and the channel stops receiving until \sig{CLEAR}. Whether the frame chain can produce those exact sequences was not proven, but nothing in the codec prevented them.
+
+The fix is two lines in \sig{line\_codec.sv}: a cancel adds to \sig{dropCount} (less the pulse being sent that clock), and the state machine waits in \sig{T\_IDLE} while \sig{dropCount} is not zero, so no other \sig{tx\_done} can fall on the same clock. The cost is at most two clocks after an abort. The unfixed RTL fails the proof in 8 steps; the fixed RTL passes it unbounded.
+
+\subsection{No hold time in SPI modes 1 and 3 (found by the coverage gap)}
+
+Coverage showed that the generated-clock path for a trailing-edge sample had never run: every test used SPI mode 0, I\textsuperscript{2}C or MDIO. A new test drove the controller in all four modes into a device model that samples MOSI on its edge with no hold margin.
+
+In modes 1 and 3 (CPHA 1) the chip changed the data pin at the start of each bit, which is the same system clock on which the clock returns to idle, the device's sampling edge. The model read the next bit every time (\texttt{A55A} came back as \texttt{4AB4}). A real device would see a hold time of about 0\,ns plus whatever skew the board adds, so the result would depend on the board.
+
+The fix holds the previous bit (\sig{holdLevel}) through phase A when the codec generates the clock, samples on the trailing edge and is not in I\textsuperscript{2}C mode. The data now changes on the leading edge and is steady for a whole half period on either side of the sampling edge. Modes 0 and 2, I\textsuperscript{2}C, MDIO, SD card and 3-wire SPI do not take this path and are unchanged. All four modes now pass at 3 and 6 clocks per half period.
+
+Two smaller items were found on the way. \sig{docs/line\_codec.tex} said modes 0 and 3 sample on the leading edge; it is modes 0 and 2, and the RTL was already right. \sig{stuffBit}, a register nothing read, was removed.
+
+\section{Lint}
+
+\begin{lstlisting}
+bash scripts/lint.sh
+lint clean: verilator -Wall, 13 reviewed waivers
+\end{lstlisting}
+
+The 26 warnings fall into four groups, all harmless:
+\begin{itemize}
+\item width warnings where an integer parameter or a 1-bit increment is extended on purpose;
+\item per-channel status outputs (\sig{complete}, \sig{abort}, \sig{timeout} and others) that the top level does not route, the reserved \sig{OUT} bit 0, and the two fraction bits of \sig{blankSum};
+\item block 0 inputs of \sig{start\_router}, which are always 1;
+\item \sig{UNOPTFLAT} on \sig{start\_router}'s carry vector: a ripple from bit to bit, not a loop. Yosys \sig{check -assert} confirms there is no combinational loop after synthesis.
+\end{itemize}
+
+The inputs are synchronised before use: the eight pins through three flip-flops and the host UART input through three. The one design point worth knowing is that each channel's reset is \sig{rst\_n} AND NOT \sig{clear}, where \sig{clear} is a registered one-clock pulse. It is glitch free and releases just after a clock edge. The routed design's recovery and removal checks pass at every corner (worst recovery slack 9.2\,ns, worst removal slack 0.48\,ns).
+
+\section{Synthesis to the IHP cells}
+
+\sig{scripts/synth\_ihp.sh} maps the design the way LibreLane does (the same mux maps and excluded cells from the PDK's \sig{librelane} directory) and reports area and logic depth. It needs \sig{PDK\_ROOT} pointing at an IHP-Open-PDK checkout; the run below used revision \texttt{2bbec755}, the one the Tiny Tapeout tools pin.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}L r@{}}
+\toprule
+Measure & Value \\
+\midrule
+Standard cells & 19\,721 \\
+of which flip-flops (\sig{dfrbpq\_1}) & 2\,764 \\
+Cell area & 333\,138\,\textmu m$^2$ \\
+6x4 tile (1289.28 $\times$ 710.64\,\textmu m) & 916\,214\,\textmu m$^2$ \\
+Utilisation before placement & 36\,\% \\
+Longest register-to-register logic, typical 1.20\,V 25\,\textdegree C & 3.2\,ns \\
+Same, slow 1.08\,V 125\,\textdegree C & 5.1\,ns \\
+Clock period (50\,MHz) & 20\,ns \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The delays are ABC's estimate with no wires and ideal fanout, and the routed design shows how optimistic that is: in the first layout of v0.7.1 the real worst path was about 15\,ns at the typical corner and 23.8\,ns at the slow one. Use the script for area and for comparing two versions of the RTL, not for sign-off. The 36\,\% utilisation leaves room for the buffers, clock tree and fillers the flow adds (43\,\% after routing); earlier documents quoted a cell budget from generic synthesis, and these figures replace it.
+
+\section{Place and route}\label{sec:pnr}
+
+The design was hardened locally with the flow the \sig{gds} workflow runs: LibreLane 3.1.0.dev3, the template's \sig{src/config.json}, IHP-Open-PDK \texttt{2bbec755}, 6x4 tiles, a 20\,ns clock. The flow only fails on timing at the typical corner, but this layout meets all three.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}L r r r@{}}
+\toprule
+ & Typical & Slow & Fast \\
+ & 1.20\,V, 25\,\textdegree C & 1.08\,V, 125\,\textdegree C & 1.32\,V, $-$40\,\textdegree C \\
+\midrule
+Setup slack & +9.82\,ns & +3.84\,ns & +12.35\,ns \\
+Hold slack & +0.29\,ns & +0.61\,ns & +0.10\,ns \\
+Recovery and removal slack & +11.6 / +0.93\,ns & +9.2 / +1.69\,ns & +13.2 / +0.48\,ns \\
+Highest clock & 98\,MHz & 62\,MHz & 131\,MHz \\
+Power at 50\,MHz & 10.2\,mW & 8.1\,mW & 12.7\,mW \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}L r@{}}
+\toprule
+Measure & Value \\
+\midrule
+Cells after LibreLane synthesis & 18\,969 \\
+Cells after place and route, without fill & 25\,612 \\
+of which flip-flops & 2\,763 \\
+of which timing repair buffers & 6\,104 \\
+of which clock tree buffers and inverters & 362 \\
+Utilisation of the core & 43\,\% \\
+Detailed routing violations & 0 \\
+Antenna violations & 0 (51 diodes) \\
+Wire length & 1.15\,m \\
+Magic DRC & 0 errors \\
+LVS & clean \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Closing the slow corner}
+
+The first layout of v0.7.1 met the typical corner with 5.0\,ns to spare but missed the slow corner (1.08\,V, 125\,\textdegree C) by 3.8\,ns, where the September layout (ISA v0.5) had met it. The CRC unit, the reply and the v0.7 features had lengthened the paths that end in the CRC register and in the frame buffer. Three rounds of changes later the slow corner has 3.8\,ns to spare. Each change keeps the behaviour seen at the pins; all tests and all six proofs pass after each one.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}L r@{}}
+\toprule
+Change & Slow slack after \\
+\midrule
+Start: the path from \sig{in\_frame} through the branch rules and the abort decision into the 8-bit-per-clock CRC update & $-$3.78\,ns \\
+The CRC unit's input is registered, so it updates one clock after the bits are fed; the tail (CRC append, CRC result, reply) waits for that clock. The CRC data no longer passes through the abort logic & $-$1.06\,ns \\
+MAIN keeps the bits left in a register instead of subtracting the count every clock; the host FIFO's head entry is registered; the frame buffer keeps its fill level in a register and writes its memory one clock later, with a bypass on the read side; the flow repairs setup again after global routing, with 3\,ns margins (\sig{src/config.json}) & $-$0.88\,ns \\
+The CRC update steps through all 8 bits and picks the length once at the end, instead of a multiplexer at every bit; the polynomial is shifted into place when it is written, not every clock; the channel's send multiplexer is selected by the normal queue's valid signal instead of the late tail signal & +3.84\,ns \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The one visible effect is that a CRC result, a CRC append or a reply now starts one system clock (20\,ns) later after the last bit of a frame. Every standard in the guide, including the USB handshake and the CAN acknowledge slot, still lands where it should.
+
+\section{Gate-level simulation}
+
+The cocotb suite (\sig{test/test.py}) was run against the synthesised netlist with \sig{GATES=yes}, using \sig{sg13cmos5l\_stdcell.v} with \sig{FUNCTIONAL}: autobaud and errors, UART loopback, SPI loopback, I\textsuperscript{2}C target loopback, UART at 0x0000 and the CRC append and check. All 6 pass, on the netlist from \sig{synth\_ihp.sh} and again on the routed netlist from Section~\ref{sec:pnr} (with its 6\,104 repair buffers and clock tree). The \sig{gl\_test} job in the \sig{gds} workflow repeats the second run on GitHub.
+
+\section{A second simulator}
+
+Every pin-level test was compiled a second time against a Verilator model through a small adapter (\sig{sim/verilator/emu\_sim.h}), without changing the tests. After one testbench fix, every test passes on both simulators. The fix: Verilator starts \sig{rst\_n} at 0, so driving it to 0 is not a falling edge and the asynchronous reset never fired. The adapter now starts \sig{rst\_n} high, as a real power-on does. CXXRTL and the gate-level cell models treat the reset as a level, so they were not affected, and neither is the chip.
+
+\section{Independent decode with sigrok}
+
+The C++ device models and the RTL were written by the same person, so a misreading of a standard could pass both. \sig{scripts/sigrok\_check.py} records the pins of each standards test as a waveform (\sig{PROEM\_VCD}), decodes it with sigrok's protocol decoders, and checks the bytes against values computed separately (CRC-16 Modbus, NMEA checksum, LIN checksum and PID, SMBus PEC). Both directions are checked: what the chip sends and what the models send to it.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l L@{}}
+\toprule
+Decoder & Checked \\
+\midrule
+\sig{uart} & RS-485, MIDI, NMEA 0183, PROFIBUS (8E1), Modbus RTU with CRC, DMX512 slots, LIN frame, K-Line request and response, SDI-12 (7E1, inverted), each in both directions where the test has both \\
+\sig{dmx512} & Break, mark after break, start code \\
+\sig{i2c} & SMBus Write Word and Read Word with PEC \\
+\sig{mdio} & Clause 22 write and two reads \\
+\sig{spi} & SD card CMD0 and CMD8 with the chip's CRC-7; 3-wire SPI write and read \\
+\sig{dali} & Forward frame; both backward frames \\
+\sig{can} & CAN 2.0B extended frame, PGN 127250, eight data bytes \\
+\sig{ir\_rc5} & Address 5, command 0x35 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+All 30 checks pass. Two decoder quirks needed working around, and neither is a ProEm problem. sigrok's \sig{dmx512} decoder loses byte alignment when a slot's start bit follows the second stop bit with no gap (legal in DMX512), so the slots are decoded with \sig{uart} at 250\,kbit/s 8N2 and the break and start code with \sig{dmx512}. The \sig{dali} decoder reports one backward frame per capture, so the second frame is decoded from a window that starts just before it.
+
+\section{Coverage}
+
+\begin{lstlisting}
+bash scripts/coverage.sh
+Total coverage (1344/1361) 98.00%
+\end{lstlisting}
+
+That is 1,344 of 1,361 points, 98.7\,\% (Verilator rounds the percentage down). Of the 17 points never reached, 7 are \sig{default} branches of complete case statements, which cannot be reached. The other 10:
+\begin{itemize}
+\item the Manchester receive counter saturating at $2^{22}-1$ clocks (more than 84\,ms of idle at 50\,MHz);
+\item a wait entry that starts while a stuff bit is due;
+\item the reply step skipped because its condition is false (for example, a reply set to "only on good CRC" after a bad frame);
+\item the return path serving global flags right after channel B while channel B is idle.
+\end{itemize}
+None of them changes how the chip behaves for a standard in the guide. The first coverage run also flagged BRANCH rule 1, SPI modes 1 to 3 and NOP; \sig{t\_modes} now covers them, and that is how the hold-time bug above was found.
+
+\section{Formal proof of the line codec}
+
+\sig{formal/line\_codec\_formal.sv} wraps the unchanged codec with a reference count of accepted entries and proves, with every line, clock and output configuration left free and allowed to change at any time:
+\begin{itemize}
+\item \sig{tx\_done} never pulses with nothing outstanding, and at most four entries are ever outstanding;
+\item once the select output has been inactive for three clocks, every accepted entry has had exactly one \sig{tx\_done}, including entries dropped by any pattern of cancels;
+\item with \sig{DRIVE} = \texttt{00} no output enable is ever set; with open drain the data and clock outputs only pull low; the clock output is only enabled while the codec generates the clock.
+\end{itemize}
+\sig{abc pdr} proves this unbounded in about 20\,s; the cover task reaches a double drop, a Manchester entry and an I\textsuperscript{2}C entry. It joins the five earlier proofs: both FIFOs, the UART transmitter, the branch unit and the CRC unit.
+
+\section{What is left}
+
+\begin{itemize}
+\item \textbf{The GitHub run.} Push and let the \sig{gds} workflow repeat the hardening above and run the Tiny Tapeout precheck, which includes the full KLayout CMOS5L DRC that the local run skips.
+\item \textbf{Routed gate level.} The \sig{gl\_test} job runs the cocotb suite on the routed netlist. It should match the result above.
+\item \textbf{Hardware.} An FPGA build against real parts (an I\textsuperscript{2}C sensor, a CAN transceiver, a USB-UART adapter), with a logic analyser running the same sigrok decoders as \sig{sigrok\_check.py}.
+\item \textbf{Limits that stay.} A generated clock needs \sig{DIV} $\ge$ 4 (as the ISA says), because input pins arrive three clocks late. \sig{t\_modes} runs at 3 to show the margin; at 2, CPHA 1 reads fail as expected.
+\end{itemize}
+
+\section{Running it all}
+
+\begin{lstlisting}
+bash scripts/lint.sh                     # Verilator -Wall
+bash scripts/run.sh                      # every pin-level test, then synthesis
+cd test && make && cd ..                 # cocotb, RTL
+bash scripts/formal.sh                   # six proofs (OSS CAD Suite)
+bash scripts/coverage.sh                 # Verilator coverage, report in build/cov
+python3 scripts/sigrok_check.py          # needs sigrok-cli and build/t_standards
+PDK_ROOT=~/IHP-Open-PDK bash scripts/synth_ihp.sh typ_1p20V_25C
+\end{lstlisting}
+
+\end{document}

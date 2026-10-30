@@ -1,0 +1,34 @@
+// =============================================================================
+// Project: ProEm - Open Source Protocol Emulator
+// File: lint/waivers.vlt
+// Type: Verilator lint waivers (every waiver below was reviewed by hand)
+// Author: Paul Vincent Bezzina
+// Language: Verilator configuration
+// Description:
+// =============================================================================
+`verilator_config
+
+// Integer parameters assigned to sized localparams; values always fit.
+lint_off -rule WIDTHTRUNC -file "*/end_counter.sv" -match "*WIDTH_BITS*"
+lint_off -rule WIDTHTRUNC -file "*/frame_buffer.sv" -match "*DEPTH_COUNT*"
+
+// Unsized arithmetic that is zero-extended on purpose.
+lint_off -rule WIDTHEXPAND -file "*/end_counter.sv"
+lint_off -rule WIDTHEXPAND -file "*/main_counter.sv"
+lint_off -rule WIDTHEXPAND -file "*/frame_buffer.sv"
+lint_off -rule WIDTHEXPAND -file "*/frame_chain.sv"
+lint_off -rule WIDTHEXPAND -file "*/uart_rx.sv"
+
+// Per-channel status outputs that the top level does not route.
+lint_off -rule UNUSEDSIGNAL -file "*/emulator_channel.sv"
+// Upper bytes of the reply pattern selects; only the low byte is sent per entry.
+lint_off -rule UNUSEDSIGNAL -file "*/frame_chain.sv" -match "*reply_*"
+// OUT bit 0 is reserved; blankSum[1:0] are the fraction dropped by the divide by 4.
+lint_off -rule UNUSEDSIGNAL -file "*/line_codec.sv"
+// Block 0 (START) is always configured and active.
+lint_off -rule UNUSEDSIGNAL -file "*/start_router.sv"
+// Bit 8 of the 9-bit masks is the overflow guard.
+lint_off -rule UNUSEDSIGNAL -file "*/main_counter.sv"
+
+// Bit-to-bit ripple through a vector, not a combinational loop (Yosys check -assert passes).
+lint_off -rule UNOPTFLAT -file "*/start_router.sv"

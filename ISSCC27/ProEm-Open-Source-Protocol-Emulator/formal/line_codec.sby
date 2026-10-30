@@ -1,0 +1,23 @@
+[tasks]
+prove
+cover
+
+[options]
+prove: mode prove
+cover: mode cover
+cover: depth 40
+
+[engines]
+prove: abc pdr
+cover: smtbmc yices
+
+[script]
+read -formal line_codec.sv line_codec_formal.sv
+prep -top line_codec_formal
+flatten
+opt -fast
+setundef -anyseq
+
+[files]
+../src/core/line_codec.sv
+line_codec_formal.sv

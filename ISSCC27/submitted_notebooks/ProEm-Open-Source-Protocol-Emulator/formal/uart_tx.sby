@@ -1,0 +1,21 @@
+[tasks]
+prove
+cover
+
+[options]
+prove: mode prove
+cover: mode cover
+cover: depth 40
+
+[engines]
+prove: abc pdr
+cover: smtbmc yices
+
+[script]
+read -formal uart_tx.sv uart_tx_formal.sv
+prep -top uart_tx_formal
+memory_map
+
+[files]
+../src/primitives/uart_tx.sv
+uart_tx_formal.sv
