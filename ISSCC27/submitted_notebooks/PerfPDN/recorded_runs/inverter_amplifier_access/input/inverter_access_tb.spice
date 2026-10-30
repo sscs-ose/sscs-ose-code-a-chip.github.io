@@ -1,0 +1,50 @@
+** sch_path: /home/gokalp/projects/PerfPDN/output/submission/20261030_205357/PerfPDN/examples/inverter_amplifier/inverter_access_tb.sch
+**.subckt inverter_access_tb
+C1 out GND 100f m=1
+Vdd vdd GND 1.8
+Vin in GND dc 0.89 ac 1 sin(0.89 1m 10Meg)
+x1 vdd in out GND inv
+**** begin user architecture code
+
+.lib /home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+
+
+.option scale=1e-6
+.temp 27
+.control
+set wr_singlescale
+set wr_vecnames
+op
+print v(in) v(out) i(Vdd)
+ac dec 50 1k 100G
+let gain_db=db(v(out))
+wrdata analog_ac.txt gain_db
+tran 500p 600n
+let isupply=-i(Vdd)
+meas tran iavg AVG isupply from=400n to=600n
+wrdata analog_signal.txt v(in) v(out) isupply
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  inv.sym # of pins=4
+** sym_path: /home/gokalp/projects/PerfPDN/output/submission/20261030_205357/PerfPDN/examples/inverter_amplifier/inv.sym
+** sch_path: /home/gokalp/projects/PerfPDN/output/submission/20261030_205357/PerfPDN/examples/inverter_amplifier/inv.sch
+.subckt inv vdd in out vss
+*.ipin in
+*.opin out
+*.iopin vdd
+*.iopin vss
+XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'
++ as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'
++ nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1
+XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'
++ as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'
++ nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1
+.ends
+
+.GLOBAL GND
+.end

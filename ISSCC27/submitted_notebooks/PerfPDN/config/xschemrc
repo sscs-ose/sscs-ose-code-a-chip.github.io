@@ -1,0 +1,17 @@
+set perfpdn_pdk_dir [file join $env(PDK_ROOT) $env(PDK)]
+source [file join $perfpdn_pdk_dir libs.tech xschem xschemrc]
+set SKYWATER_MODELS [file join $perfpdn_pdk_dir libs.tech ngspice]
+set XSCHEM_START_WINDOW {}
+set enable_layer(15) 0
+set enable_layer(17) 0
+set netlist_type spice
+set netlist_dir [file join $env(PERFPDN_PROJECT_ROOT) output xschem]
+file mkdir $netlist_dir
+proc perfpdn_configure_ngspice {} {
+    global sim
+    set_sim_defaults
+    set sim(spice,0,cmd) {$terminal -e 'ngspice -n -D ngbehavior=hsa -i "$N" -a || sh'}
+    set sim(spice,1,cmd) {ngspice -n -D ngbehavior=hsa -b -r "$n.raw" -o "$n.out" "$N"}
+    set sim(spice,default) 0
+}
+append user_startup_commands "\nperfpdn_configure_ngspice\n"

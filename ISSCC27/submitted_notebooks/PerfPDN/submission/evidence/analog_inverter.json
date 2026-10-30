@@ -1,0 +1,1607 @@
+{
+  "conditions": {
+    "supply_V": 1.8,
+    "bias_V": 0.89284,
+    "analog": true,
+    "current_port": "m2_d",
+    "local_vdd_port": "m1_s",
+    "local_vss_port": "m2_s",
+    "small_signal": {
+      "amplitude_V": 0.001,
+      "frequency_Hz": 10000000.0
+    }
+  },
+  "study": {
+    "width_increments_um": [
+      0.01,
+      0.02,
+      0.04,
+      0.06
+    ],
+    "primary_increment_um": 0.02,
+    "area_budget_um2": 60.0,
+    "derivative_error_limit": 0.01,
+    "physical_prediction_error_limit": 0.1,
+    "benefit_mesh_change_limit": 0.01
+  },
+  "policy": {
+    "metrics": {
+      "vout_V": {
+        "label": "DC output voltage",
+        "display_unit": "V",
+        "display_scale": 1,
+        "target": 0.9,
+        "weight": 1,
+        "constraints": {
+          "no_worse_than_baseline": true,
+          "tolerance_percent": 0.001
+        }
+      },
+      "id_A": {
+        "label": "NMOS drain current",
+        "display_unit": "uA",
+        "display_scale": 1000000,
+        "target": 6.22531551e-05,
+        "weight": 1,
+        "constraints": {
+          "no_worse_than_baseline": true,
+          "tolerance_percent": 0.001
+        }
+      }
+    }
+  },
+  "cases": {
+    "ideal": {
+      "circuit": "inverter",
+      "ideal": true,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s",
+        "small_signal": {
+          "amplitude_V": 0.001,
+          "frequency_Hz": 10000000.0
+        }
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.8999999413838649,
+        "supply_current_A": 6.22531551014785e-05,
+        "supply_power_W": 0.0001120556791826613,
+        "id_A": 6.225315509578166e-05,
+        "local_vdd_V": 1.8,
+        "local_vss_V": 0.0,
+        "gain_dB": 20.7900459,
+        "bandwidth_Hz": 1026555617.3562213,
+        "unity_Hz": 11508154216.9505,
+        "supply_gain_V_per_V": 6.056001341215466,
+        "output_pp": 0.0219027,
+        "analog_iavg": 6.22528e-05,
+        "signal_gain_V_per_V": 10.95135
+      },
+      "KCL_residual_A": 2.6645352591003757e-15,
+      "power_residual_W": -2.398079022684907e-15,
+      "metal_contact_loss_W": 0.0,
+      "mesh_cells": 0,
+      "resistors": 0,
+      "local_step_um": 0.25,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "out"
+        ],
+        [
+          "m1_g",
+          "in"
+        ],
+        [
+          "m1_s",
+          "vdd"
+        ],
+        [
+          "m1_b",
+          "vdd"
+        ],
+        [
+          "m2_d",
+          "out"
+        ],
+        [
+          "m2_g",
+          "in"
+        ],
+        [
+          "m2_s",
+          "0"
+        ],
+        [
+          "m2_b",
+          "0"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/ideal",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/compact",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/compact/verification.json": "496493fdf0ba58eedb71e3683b3a52d53660c94b1729762863e5755484f6858c",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/compact/layout.gds": "65b4e79a13800c1518108f67ba90b0d8198fd3eede5ddb3a0fb2402b02f359df",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 2.1208981612172334e-15
+    },
+    "compact": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s"
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.9040239572736399,
+        "supply_current_A": 6.024674043013833e-05,
+        "supply_power_W": 0.000108444132774249,
+        "id_A": 6.024674129956331e-05,
+        "local_vdd_V": 1.797424370171451,
+        "local_vss_V": 0.003302405508637479,
+        "gain_dB": 20.7879396,
+        "bandwidth_Hz": 974847786.4639617,
+        "unity_Hz": 10862639114.762209,
+        "supply_gain_V_per_V": 6.065411288132772
+      },
+      "KCL_residual_A": 7.941788261467137e-14,
+      "power_residual_W": -7.823740193401644e-13,
+      "metal_contact_loss_W": 7.091068878919827e-07,
+      "mesh_cells": 8470,
+      "resistors": 16989,
+      "local_step_um": 0.25,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/compact",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/compact",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/compact/verification.json": "496493fdf0ba58eedb71e3683b3a52d53660c94b1729762863e5755484f6858c",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/compact/layout.gds": "65b4e79a13800c1518108f67ba90b0d8198fd3eede5ddb3a0fb2402b02f359df",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.0005293788653015704
+    },
+    "long": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s",
+        "small_signal": {
+          "amplitude_V": 0.001,
+          "frequency_Hz": 10000000.0
+        }
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.6291469692038545,
+        "supply_current_A": 5.197708999608748e-05,
+        "supply_power_W": 9.355876199295746e-05,
+        "id_A": 5.197709054374604e-05,
+        "local_vdd_V": 1.751223471144884,
+        "local_vss_V": 0.003685451207156182,
+        "gain_dB": 21.0078986,
+        "bandwidth_Hz": 783446381.0623437,
+        "unity_Hz": 8974992194.616274,
+        "supply_gain_V_per_V": 5.148375657441445,
+        "output_pp": 0.0224565,
+        "analog_iavg": 5.19767e-05,
+        "signal_gain_V_per_V": 11.228250000000001
+      },
+      "KCL_residual_A": 5.758063335117608e-14,
+      "power_residual_W": -2.0726157394824487e-13,
+      "metal_contact_loss_W": 2.991033852207804e-06,
+      "mesh_cells": 10851,
+      "resistors": 20163,
+      "local_step_um": 0.25,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/long",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/long",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/long/verification.json": "abcdccd49b4ea2ea6f6abe99f8b50657c30023e87ff971eaa0c797835144360a",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/long/layout.gds": "bdb18614e206f61ba62af6f4afcad5dc9d741530dd00336cc799f3ac87e65b79",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.05890867616782372
+    },
+    "width_150nm": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s"
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.64518394702918,
+        "supply_current_A": 5.243947372528482e-05,
+        "supply_power_W": 9.439105270551268e-05,
+        "id_A": 5.243947351522317e-05,
+        "local_vdd_V": 1.75390080381364,
+        "local_vss_V": 0.003718198652800053,
+        "gain_dB": 21.0118498,
+        "bandwidth_Hz": 791669379.3491974,
+        "unity_Hz": 9076580552.195305,
+        "supply_gain_V_per_V": 5.206614722921158
+      },
+      "KCL_residual_A": 9.392074113876922e-14,
+      "power_residual_W": 1.1512204950041077e-12,
+      "metal_contact_loss_W": 2.8813324760420013e-06,
+      "mesh_cells": 10952,
+      "resistors": 20357,
+      "local_step_um": 0.25,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/width_150nm",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_150nm",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_150nm/verification.json": "9a79b1f5156098134533e670e47483174666c1ac599e1e747b06b288b128bbea",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_150nm/layout.gds": "8b1d020adc8121f681b2ff0db8d68403e3e629ef9b1e67670e53ce9005533209",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.05250642390146572
+    },
+    "widened": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s",
+        "small_signal": {
+          "amplitude_V": 0.001,
+          "frequency_Hz": 10000000.0
+        }
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.659483876904631,
+        "supply_current_A": 5.28506282770679e-05,
+        "supply_power_W": 9.513113089872222e-05,
+        "id_A": 5.285061502922558e-05,
+        "local_vdd_V": 1.756283086111949,
+        "local_vss_V": 0.003747350467184496,
+        "gain_dB": 21.013353,
+        "bandwidth_Hz": 799094917.192405,
+        "unity_Hz": 9167871477.460606,
+        "supply_gain_V_per_V": 5.257962940240194,
+        "output_pp": 0.0224707,
+        "analog_iavg": 5.28503e-05,
+        "signal_gain_V_per_V": 11.23535
+      },
+      "KCL_residual_A": 1.1566984692557545e-12,
+      "power_residual_W": 2.4316018832198227e-11,
+      "metal_contact_loss_W": 2.7816839833261107e-06,
+      "mesh_cells": 11178,
+      "resistors": 20739,
+      "local_step_um": 0.25,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/widened",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/widened",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/widened/verification.json": "5be7eead80122547586cec090bf39b6d41b4b8e3c22862ebe402cce7f99a8bb9",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/widened/layout.gds": "c50cac88289e06e3826c1156029e0d5d783e3dd998e48dcb9f39fe472655476e",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.047114757986260976
+    },
+    "width_180nm": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s"
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.6838849798213907,
+        "supply_current_A": 5.354987973096941e-05,
+        "supply_power_W": 9.638978351574495e-05,
+        "id_A": 5.354987968676957e-05,
+        "local_vdd_V": 1.760338007430432,
+        "local_vss_V": 0.003796931530568981,
+        "gain_dB": 21.0117443,
+        "bandwidth_Hz": 812232863.1068014,
+        "unity_Hz": 9325054266.64385,
+        "supply_gain_V_per_V": 5.344386045630467
+      },
+      "KCL_residual_A": 5.627501301815751e-13,
+      "power_residual_W": 9.155600001998717e-13,
+      "metal_contact_loss_W": 2.6076646152638212e-06,
+      "mesh_cells": 11178,
+      "resistors": 20739,
+      "local_step_um": 0.25,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/width_180nm",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_180nm",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_180nm/verification.json": "fbcedf3f6aa28276a6605de6c37a383a320b101c1ba05ac2473cb5cd3d27e8a3",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_180nm/layout.gds": "2636ecef520ed485e2432f8ec5c6c4508eb0cc7f38ef89a0af6accf9f1505ec5",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.03860333873622265
+    },
+    "width_200nm": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s"
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.7039304240545287,
+        "supply_current_A": 5.412232251098634e-05,
+        "supply_power_W": 9.742018051977542e-05,
+        "id_A": 5.41223256295964e-05,
+        "local_vdd_V": 1.763660267485551,
+        "local_vss_V": 0.003837520566880439,
+        "gain_dB": 21.0066738,
+        "bandwidth_Hz": 823688904.8066131,
+        "unity_Hz": 9455199020.650974,
+        "supply_gain_V_per_V": 5.414322500452943
+      },
+      "KCL_residual_A": 2.474399638907176e-13,
+      "power_residual_W": -4.728570338833737e-12,
+      "metal_contact_loss_W": 2.460958716979184e-06,
+      "mesh_cells": 11178,
+      "resistors": 20739,
+      "local_step_um": 0.25,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/width_200nm",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_200nm",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_200nm/verification.json": "f57e46fd6f5ad4684ce4e11889680374cdc0a2a486856868fbbea1f4a4fcd96d",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_200nm/layout.gds": "21548673a7d2c6266a522d3ad5420d25c3555636addc44617787d7d10b9fc44c",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.03225978930788915
+    }
+  },
+  "actions": [
+    {
+      "id": "width_150nm",
+      "geometry": {
+        "box_um": [
+          -1000.0,
+          14.525,
+          -2.9999999999999996,
+          14.675000000000002
+        ],
+        "old_width_um": 0.1399999999999988,
+        "new_width_um": 0.1499999999999988,
+        "added_area_um2": 9.969999999999999
+      },
+      "prediction": {
+        "metric_changes": {
+          "vout_V": 0.015880642215688558,
+          "id_A": 4.5855992854945863e-07,
+          "objective": -0.006526178227275163
+        },
+        "values": {
+          "vout_V": 0.645027611419543,
+          "id_A": 5.2435650472295495e-05
+        },
+        "objective": 0.05256530309650449,
+        "benefit": 0.006343373071319228,
+        "benefit_per_um2": 0.000636246045267726,
+        "constraints": {
+          "passed": true,
+          "failures": []
+        }
+      },
+      "measured_benefit": 0.006402252266358002,
+      "measured_benefit_per_um2": 0.0006421516816808428,
+      "relative_prediction_error": 0.009196637775141703,
+      "constraints": {
+        "passed": true,
+        "failures": []
+      },
+      "within_budget": true
+    },
+    {
+      "id": "widened",
+      "geometry": {
+        "box_um": [
+          -1000.0,
+          14.520000000000001,
+          -2.9999999999999996,
+          14.680000000000001
+        ],
+        "old_width_um": 0.1399999999999988,
+        "new_width_um": 0.15999999999999878,
+        "added_area_um2": 19.939999999999998
+      },
+      "prediction": {
+        "metric_changes": {
+          "vout_V": 0.029776204154416015,
+          "id_A": 8.597998660302342e-07,
+          "objective": -0.012236584176140921
+        },
+        "values": {
+          "vout_V": 0.6589231733582706,
+          "id_A": 5.283689040977627e-05
+        },
+        "objective": 0.04731476636809033,
+        "benefit": 0.01159390979973339,
+        "benefit_per_um2": 0.0005814398094149143,
+        "constraints": {
+          "passed": true,
+          "failures": []
+        }
+      },
+      "measured_benefit": 0.011793918181562744,
+      "measured_benefit_per_um2": 0.0005914703200382521,
+      "relative_prediction_error": 0.016958603472595264,
+      "constraints": {
+        "passed": true,
+        "failures": []
+      },
+      "within_budget": true,
+      "refined_benefit": 0.01179507359540162,
+      "relative_mesh_change": 9.795732341390554e-05
+    },
+    {
+      "id": "width_180nm",
+      "geometry": {
+        "box_um": [
+          -1000.0,
+          14.510000000000002,
+          -2.9999999999999996,
+          14.690000000000001
+        ],
+        "old_width_um": 0.1399999999999988,
+        "new_width_um": 0.1799999999999988,
+        "added_area_um2": 39.879999999999995
+      },
+      "prediction": {
+        "metric_changes": {
+          "vout_V": 0.052935474052295116,
+          "id_A": 1.5285330951648603e-06,
+          "objective": -0.02175392742425052
+        },
+        "values": {
+          "vout_V": 0.6820824432561496,
+          "id_A": 5.3505623638910895e-05
+        },
+        "objective": 0.03918591714308348,
+        "benefit": 0.019722759024740237,
+        "benefit_per_um2": 0.0004945526335190632,
+        "constraints": {
+          "passed": true,
+          "failures": []
+        }
+      },
+      "measured_benefit": 0.020305337431601067,
+      "measured_benefit_per_um2": 0.0005091609185456637,
+      "relative_prediction_error": 0.028690900056364835,
+      "constraints": {
+        "passed": true,
+        "failures": []
+      },
+      "within_budget": true
+    },
+    {
+      "id": "width_200nm",
+      "geometry": {
+        "box_um": [
+          -1000.0,
+          14.500000000000002,
+          -2.9999999999999996,
+          14.700000000000001
+        ],
+        "old_width_um": 0.1399999999999988,
+        "new_width_um": 0.1999999999999988,
+        "added_area_um2": 59.82
+      },
+      "prediction": {
+        "metric_changes": {
+          "vout_V": 0.07146288997059835,
+          "id_A": 2.063519678472559e-06,
+          "objective": -0.029367802022738174
+        },
+        "values": {
+          "vout_V": 0.7006098591744528,
+          "id_A": 5.40406102222186e-05
+        },
+        "objective": 0.03324267855319303,
+        "benefit": 0.02566599761463069,
+        "benefit_per_um2": 0.0004290537882753375,
+        "constraints": {
+          "passed": true,
+          "failures": []
+        }
+      },
+      "measured_benefit": 0.02664888685993457,
+      "measured_benefit_per_um2": 0.0004454845680363519,
+      "relative_prediction_error": 0.03688293813058334,
+      "constraints": {
+        "passed": true,
+        "failures": []
+      },
+      "within_budget": true,
+      "refined_benefit": 0.02665106052052102,
+      "relative_mesh_change": 8.156000339176396e-05
+    }
+  ],
+  "refined": {
+    "long": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s"
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.6291563409625734,
+        "supply_current_A": 5.197829588922947e-05,
+        "supply_power_W": 9.356093260061305e-05,
+        "id_A": 5.197829736912352e-05,
+        "local_vdd_V": 1.751226907256023,
+        "local_vss_V": 0.00368368108495405,
+        "gain_dB": 21.0079019,
+        "bandwidth_Hz": 783472651.7759037,
+        "unity_Hz": 8975293375.192041,
+        "supply_gain_V_per_V": 5.148404623958573
+      },
+      "KCL_residual_A": 8.630105297383582e-14,
+      "power_residual_W": -1.3383460980689117e-12,
+      "metal_contact_loss_W": 2.9907961782305705e-06,
+      "mesh_cells": 16711,
+      "resistors": 28632,
+      "local_step_um": 0.125,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/refined_long",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/long",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/long/verification.json": "abcdccd49b4ea2ea6f6abe99f8b50657c30023e87ff971eaa0c797835144360a",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/long/layout.gds": "bdb18614e206f61ba62af6f4afcad5dc9d741530dd00336cc799f3ac87e65b79",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.05890234263146043
+    },
+    "widened": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s"
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.6594978835869081,
+        "supply_current_A": 5.285200171026998e-05,
+        "supply_power_W": 9.513360307848597e-05,
+        "id_A": 5.285198766674486e-05,
+        "local_vdd_V": 1.756287336219502,
+        "local_vss_V": 0.003745539940558242,
+        "gain_dB": 21.0133532,
+        "bandwidth_Hz": 799124069.4227444,
+        "unity_Hz": 9168212571.423077,
+        "supply_gain_V_per_V": 5.258008259706235
+      },
+      "KCL_residual_A": 9.357890367108098e-13,
+      "power_residual_W": 2.6266450748783183e-11,
+      "metal_contact_loss_W": 2.7813989488508456e-06,
+      "mesh_cells": 17265,
+      "resistors": 29592,
+      "local_step_um": 0.125,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/refined_widened",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/widened",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/widened/verification.json": "5be7eead80122547586cec090bf39b6d41b4b8e3c22862ebe402cce7f99a8bb9",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/widened/layout.gds": "c50cac88289e06e3826c1156029e0d5d783e3dd998e48dcb9f39fe472655476e",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.04710726903605881
+    },
+    "width_200nm": {
+      "circuit": "inverter",
+      "ideal": false,
+      "bias_V": 0.89284,
+      "supply_V": 1.8,
+      "conditions": {
+        "supply_V": 1.8,
+        "bias_V": 0.89284,
+        "analog": true,
+        "current_port": "m2_d",
+        "local_vdd_port": "m1_s",
+        "local_vss_port": "m2_s"
+      },
+      "current_port": "m2_d",
+      "load_F": 1e-14,
+      "temperature_C": 27,
+      "corner": "tt",
+      "metrics": {
+        "vout_V": 0.7039516085506234,
+        "supply_current_A": 5.412393432162423e-05,
+        "supply_power_W": 9.742308177892362e-05,
+        "id_A": 5.412393659838706e-05,
+        "local_vdd_V": 1.763665736933111,
+        "local_vss_V": 0.003835681024192667,
+        "gain_dB": 21.0066656,
+        "bandwidth_Hz": 823724894.5979251,
+        "unity_Hz": 9455597257.714018,
+        "supply_gain_V_per_V": 5.41439193825067
+      },
+      "KCL_residual_A": 3.010139668652308e-13,
+      "power_residual_W": -2.6694777751216686e-12,
+      "metal_contact_loss_W": 2.460598716253283e-06,
+      "mesh_cells": 17265,
+      "resistors": 29592,
+      "local_step_um": 0.125,
+      "devices": [
+        {
+          "name": "m1",
+          "model": "sky130_fd_pr__pfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VDD",
+            "b": "VDD"
+          },
+          "spice": "XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )'  nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            6.0
+          ],
+          "bounds_um": [
+            -0.92,
+            5.055,
+            1.67,
+            13.61
+          ],
+          "kind": "pfet"
+        },
+        {
+          "name": "m2",
+          "model": "sky130_fd_pr__nfet_01v8",
+          "pins": "dgsb",
+          "nets": {
+            "d": "OUT",
+            "g": "IN",
+            "s": "VSS",
+            "b": "VSS"
+          },
+          "spice": "XM2 out in vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29'  as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )'  nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1",
+          "origin_um": [
+            0.0,
+            0.0
+          ],
+          "bounds_um": [
+            -0.74,
+            -0.765,
+            1.49,
+            2.775
+          ],
+          "kind": "nfet"
+        }
+      ],
+      "ports": [
+        [
+          "m1_d",
+          "t_m1_d"
+        ],
+        [
+          "m1_g",
+          "t_m1_g"
+        ],
+        [
+          "m1_s",
+          "t_m1_s"
+        ],
+        [
+          "m1_b",
+          "t_m1_b"
+        ],
+        [
+          "m2_d",
+          "t_m2_d"
+        ],
+        [
+          "m2_g",
+          "t_m2_g"
+        ],
+        [
+          "m2_s",
+          "t_m2_s"
+        ],
+        [
+          "m2_b",
+          "t_m2_b"
+        ]
+      ],
+      "input_pulse": null,
+      "directory": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/refined_width_200nm",
+      "verification": "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_200nm",
+      "input_sha256": {
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_200nm/verification.json": "f57e46fd6f5ad4684ce4e11889680374cdc0a2a486856868fbbea1f4a4fcd96d",
+        "/home/gokalp/projects/PerfPDN/output/analog_inverter/20261029_025050_381834/verification/width_200nm/layout.gds": "21548673a7d2c6266a522d3ad5420d25c3555636addc44617787d7d10b9fc44c",
+        "/home/gokalp/projects/PerfPDN/examples/shared/simulate_pdn.py": "f3da7c615e63ea9bae03818fafd5f5d675d284697cb45b427e48f58d60f59945",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/magic/sky130A.tech": "fa399a252f332126862a4c789f3db50769631d501d35102d0231cc3fa54c2151",
+        "/home/gokalp/projects/PerfPDN/examples/shared/resistance_mesh.py": "f2a4170eb3ec17361304f281f804b5e48e4284cd6c2f67e135ed123b7eda3d44",
+        "/home/gokalp/projects/PerfPDN/examples/shared/circuit_adapter.py": "30becb3bc22c76998ff1cc0dbd1c72c99e6d01f8a3724b9beda41d5848847268",
+        "/home/gokalp/.local/share/perfpdn/tools/ngspice-47/bin/ngspice": "1ffef5c53952a59ae677422e9d2a8c656b95f6a27d876de33aacc0d55e198a9c",
+        "/home/gokalp/projects/PerfPDN/config/pdk.lock.json": "e19465f7932560e52351dad13dad68c316ba2d4d5454d9c88736fd55ebf40615",
+        "/home/gokalp/projects/PerfPDN/config/ngspice.lock.json": "3b1650c129b73ef4f5c123698557edd5459463e40e7cdf58abb1b1e50a61df87",
+        "/home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+      },
+      "objective": 0.03225128211093941
+    }
+  },
+  "derivative_check": {
+    "adjoint": [
+      0.2383952741734032,
+      6.883759384962914e-06,
+      -0.09796896288355175
+    ],
+    "ngspice_central": [
+      0.2383968126375054,
+      6.883806837922057e-06,
+      -0.09797023537068406
+    ],
+    "relative_error": [
+      6.453375299676529e-06,
+      6.893418171183288e-06,
+      1.298850745319424e-05
+    ]
+  },
+  "best_total_benefit": "width_200nm",
+  "best_benefit_per_area": "width_150nm",
+  "acceptance": {
+    "passed": true,
+    "failures": []
+  }
+}
