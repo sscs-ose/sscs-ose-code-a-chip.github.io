@@ -1,0 +1,53 @@
+NeuroDyn-AFE SKY130 reduced model bundle
+
+Source repository:
+https://github.com/google/skywater-pdk-libs-sky130_fd_pr
+
+Pinned commit:
+f62031a1be9aefe902d6d54cddd6f59b57627436
+
+Included devices:
+- sky130_fd_pr__nfet_01v8
+- sky130_fd_pr__pfet_01v8
+- sky130_fd_pr__nfet_01v8_lvt
+- sky130_fd_pr__pfet_01v8_lvt
+
+The nominal OTA input pair and tail now use the included
+sky130_fd_pr__nfet_01v8_lvt model so the 0.60 V, 0.30 V common-mode bias has
+usable headroom.
+
+Included corner:
+- TT
+
+Additional shared parameter deck:
+- models/parameters/critical.spice
+- models/parameters/typical.spice
+- models/parameters/lod.spice
+
+ngspice compatibility defaults:
+- The upstream TT files reference three absent zero-valued slope symbols in
+  their raw form. The reduced wrapper pre-binds those symbols to zero before
+  loading the official corner files. This is a compatibility workaround for
+  the reduced bundle, not a replacement for a complete open_pdks installation.
+
+The reduced wrapper includes only the four devices instantiated by the
+NeuroDyn-AFE netlist and the official shared parameter files needed by them.
+It is not a complete SKY130 PDK and must not be described as full PDK sign-off.
+
+Wrapper SHA256:
+37872A54851207BDC5F5972F0EFB75969D7508B4CB1F3D6D7FB622C3119B04F0
+
+Critical parameter deck SHA256:
+31DE05B0B6A6CD37B3B99779AF122C610E919A06BA143E3FEF6BCD14FCFC171A
+
+Nominal TT AC artifacts:
+- data/ac_results.raw
+  SHA256 B5BCC2029B1716983009A8993206158E45489A2344AE1B18A36E03775E14C24C
+- data/ngspice_ac_op.log
+  SHA256 07E85151E34B20B2D0DA59A264C21246C286AC1259B68639D648CF280267673C
+
+Updated nominal bias diagnostic artifacts:
+- data/op_results.raw
+  SHA256 1F92A714F7CCE0BD7298F7817F8B1263CCFAE07A75DDFBB8C42A9CD967B55982
+- data/neurodyn_op.log
+  SHA256 B4F5F5ADBF6A0A3D1B13B46CB522ECA4F7E51032906A7B95FA3DD936D311F29F

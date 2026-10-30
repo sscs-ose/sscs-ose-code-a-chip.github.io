@@ -5,6 +5,7 @@ Author: NeuroDyn-AFE Team (IEEE SSCS Code-a-Chip ISSCC 2027)
 """
 
 import os
+import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -96,13 +97,16 @@ class NeuroDynLayoutGenerator:
         gr_tap = gdstk.boolean(gr_outer, gr_inner, "not", layer=self.layers["tap"][0], datatype=self.layers["tap"][1])
         top.add(*gr_tap)
         
-        gr_m1 = gdstk.boolean(gr_outer, gr_inner, "not", layer=self.layers["met1"][0], datatype=self.layers["met1"][1])
+        m1_outer = gdstk.rectangle((-margin - 0.9, -margin - 0.9), (core_w + margin + 0.9, core_h + margin + 0.9))
+        m1_inner = gdstk.rectangle((-margin - 0.3, -margin - 0.3), (core_w + margin + 0.3, core_h + margin + 0.3))
+        gr_m1 = gdstk.boolean(m1_outer, m1_inner, "not", layer=self.layers["met1"][0], datatype=self.layers["met1"][1])
         top.add(*gr_m1)
         
-        # 2. Diffusion Active Region (diff layer 65/20)
-        # Symmetrically encloses all 10 gates with >= 0.6 um active overhang past outer dummy gates
-        active_rect = gdstk.rectangle((0.4, 1.2), (core_w - 0.4, core_h - 1.2), layer=self.layers["diff"][0], datatype=self.layers["diff"][1])
-        top.add(active_rect)
+        # 2. Split active diffusion islands to avoid a central A/B drain-source short.
+        mid_x = 1.2 + 4 * pitch_x + gate_l + 0.7
+        active_left = gdstk.rectangle((0.4, 1.2), (mid_x - 0.25, core_h - 1.2), layer=self.layers["diff"][0], datatype=self.layers["diff"][1])
+        active_right = gdstk.rectangle((mid_x + 0.25, 1.2), (core_w - 0.4, core_h - 1.2), layer=self.layers["diff"][0], datatype=self.layers["diff"][1])
+        top.add(active_left, active_right)
         
         # 3. Transistor Polysilicon Gates (poly layer 66/20)
         gate_positions = []
@@ -155,6 +159,9 @@ class NeuroDynLayoutGenerator:
                 via1_b = gdstk.rectangle((x_pos + 0.35, core_h + 1.95), (x_pos + 0.65, core_h + 2.25), layer=self.layers["via1"][0], datatype=self.layers["via1"][1])
                 met1_ext_b = gdstk.rectangle((x_pos + 0.2, core_h + 0.3), (x_pos + 0.8, core_h + 2.4), layer=self.layers["met1"][0], datatype=self.layers["met1"][1])
                 top.add(met1_ext_b, via1_b)
+            elif dev_id == 'D':
+                dummy_tie = gdstk.rectangle((x_pos + 0.2, -margin - 0.6), (x_pos + 0.8, 0.8), layer=self.layers["met1"][0], datatype=self.layers["met1"][1])
+                top.add(dummy_tie)
             
         # 4. Source/Drain Contacts & Routing: diff -> licon -> li1 -> mcon -> met1
         # Contacts placed cleanly in the diffusion gaps between gates (zero poly overlap)
@@ -190,6 +197,27 @@ class NeuroDynLayoutGenerator:
         lbl_inm = gdstk.Label("inm", (1.25, core_h + 2.1), layer=self.layers["met2_pin"][0], texttype=self.layers["met2_pin"][1])
         lbl_vss = gdstk.Label("vss", (-1.0, -1.0), layer=self.layers["met1_pin"][0], texttype=self.layers["met1_pin"][1])
         top.add(pin_inp, pin_inm, lbl_inp, lbl_inm, lbl_vss)
+
+        # Explicit extracted-net routes for the tail and differential outputs.
+        vtail_x = 1.2 + 4 * pitch_x + gate_l + 0.4
+        vtail_route = gdstk.rectangle(
+            (vtail_x, -margin), (vtail_x + 0.6, 1.6),
+            layer=self.layers["met1"][0], datatype=self.layers["met1"][1]
+        )
+        outp_route = gdstk.rectangle(
+            (core_w - 1.0, 2.0), (core_w + margin * 1.6, 2.6),
+            layer=self.layers["met2"][0], datatype=self.layers["met2"][1]
+        )
+        outm_route = gdstk.rectangle(
+            (core_w - 1.0, 3.4), (core_w + margin * 1.6, 4.0),
+            layer=self.layers["met2"][0], datatype=self.layers["met2"][1]
+        )
+        top.add(vtail_route, outp_route, outm_route)
+        top.add(
+            gdstk.Label("vtail", (vtail_x + 0.3, -margin + 0.3), layer=self.layers["met1_pin"][0], texttype=self.layers["met1_pin"][1]),
+            gdstk.Label("outp", (core_w + margin * 1.6 - 0.3, 2.3), layer=self.layers["met2_pin"][0], texttype=self.layers["met2_pin"][1]),
+            gdstk.Label("outm", (core_w + margin * 1.6 - 0.3, 3.7), layer=self.layers["met2_pin"][0], texttype=self.layers["met2_pin"][1]),
+        )
         
         # 6. Low-Vt CMOS Input Chopper Bridge Cell (Adjacent Block)
         chop_x = core_w + margin * 2.2
@@ -242,7 +270,17 @@ class NeuroDynLayoutGenerator:
             layer=self.layers["met3"][0],
             datatype=self.layers["met3"][1]
         )
-        top.add(cap_bottom, cap_mask, cap_top)
+        # Separate plate access points keep the MIM terminals distinct.
+        cap_bottom_via = gdstk.rectangle(
+            (cap_x + 1.2, 1.2), (cap_x + 1.6, 1.6),
+            layer=self.layers["via1"][0], datatype=self.layers["via1"][1]
+        )
+        cap_top_via = gdstk.rectangle(
+            (cap_x + cap_w - 1.6, cap_h - 1.6),
+            (cap_x + cap_w - 1.2, cap_h - 1.2),
+            layer=self.layers["via2"][0], datatype=self.layers["via2"][1]
+        )
+        top.add(cap_bottom, cap_mask, cap_top, cap_bottom_via, cap_top_via)
         
         # 8. Chip PR Boundary
         total_w = cap_x + cap_w + margin
@@ -255,27 +293,42 @@ class NeuroDynLayoutGenerator:
         )
         top.add(boundary)
         
-        # Write GDSII
+        # Write GDSII with deterministic timestamp for bit-exact reproducible builds
         gds_path = os.path.join(self.gds_dir, "neurodyn_afe_sky130.gds")
-        lib.write_gds(gds_path)
+        fixed_timestamp = datetime.datetime(2026, 10, 25, 0, 0, 0)
+        lib.write_gds(gds_path, timestamp=fixed_timestamp)
         
         # Render high-resolution PNG with transparent PR boundary and clear labels
         self.render_layout_png(top, os.path.join(self.img_dir, "layout_preview.png"), pattern, gate_positions)
         
         return gds_path
 
-    def render_layout_png(self, cell: gdstk.Cell, img_path: str, pattern: list = None, gate_positions: list = None):
+    def render_layout_png(self, cell: Optional[gdstk.Cell] = None, img_path: Optional[str] = None, pattern: list = None, gate_positions: list = None):
         """Renders the GDS layout geometry to a crisp, transparent-boundary publication PNG."""
+        if img_path is None:
+            img_path = os.path.join(self.img_dir, "layout_preview.png")
+            
+        if cell is None:
+            gds_path = os.path.join(self.gds_dir, "neurodyn_afe_sky130.gds")
+            if not os.path.exists(gds_path):
+                self.generate_full_layout()
+            lib = gdstk.read_gds(gds_path)
+            cell = [c for c in lib.cells if c.name == "neurodyn_afe_top"][0] if "neurodyn_afe_top" in [c.name for c in lib.cells] else lib.top_level()[0]
+
         fig, ax = plt.subplots(figsize=(13, 6.5), dpi=300)
         
         color_map = {
             (64, 20): ("#FFE0B2", 0.45, "N-Well (Chopper PMOS)"),
             (65, 20): ("#81C784", 0.75, "Active Diffusion (diff)"),
-            (65, 44): ("#388E3C", 0.85, "P+ Tap Guard Ring"),
+            (65, 44): ("#2E7D32", 0.85, "P+ Tap Guard Ring"),
             (66, 20): ("#E57373", 0.90, "Poly Gate (poly)"),
+            (66, 44): ("#FFD54F", 0.95, "Local Contact (licon)"),
             (67, 20): ("#BA68C8", 0.80, "Local Interconnect (li1)"),
+            (67, 44): ("#FFD54F", 0.95, "Metal Contact (mcon)"),
             (68, 20): ("#64B5F6", 0.80, "Metal 1 (met1)"),
+            (68, 44): ("#FFD54F", 0.95, "Via1 / Contact Cuts (via1)"),
             (69, 20): ("#1E88E5", 0.85, "Metal 2 (met2 Buses & Cap Bottom)"),
+            (69, 44): ("#FFB300", 0.95, "Via2 (via2)"),
             (89, 44): ("#F48FB1", 0.70, "MIM Dielectric (capm)"),
             (70, 20): ("#0D47A1", 0.85, "Metal 3 (met3 / MIM Cap Top)"),
             (235, 4): ("#37474F", 0.0,  "PR Boundary"),
@@ -309,7 +362,7 @@ class NeuroDynLayoutGenerator:
             for x_pos, dev_id in gate_positions:
                 color = "#C62828" if dev_id == 'A' else ("#1565C0" if dev_id == 'B' else "#616161")
                 ax.text(
-                    x_pos + 0.5, 14.5, dev_id, ha='center', va='center',
+                    x_pos + 0.5, 3.2, dev_id, ha='center', va='center',
                     fontsize=8, fontweight='bold', color=color,
                     bbox=dict(boxstyle="circle,pad=0.22", facecolor="#FFFFFF", edgecolor=color, linewidth=1.0)
                 )
@@ -338,9 +391,9 @@ class NeuroDynLayoutGenerator:
         ax.text(41.0, -2.4, "10 µm Scale Bar", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#263238")
 
         # LVS Pin Callouts with Directed Arrows (placed outside layout with ha='right')
-        ax.annotate("INP (Met2)", xy=(0.5, 10.9), xytext=(-5.2, 10.9), ha="right", va="center",
+        ax.annotate("INP (Met2)", xy=(0.5, 14.05), xytext=(-5.2, 13.8), ha="right", va="center",
                     arrowprops=dict(arrowstyle="->", color="#1565C0", lw=1.2), fontsize=8, fontweight="bold", color="#1565C0")
-        ax.annotate("INM (Met2)", xy=(0.5, 12.1), xytext=(-5.2, 12.5), ha="right", va="center",
+        ax.annotate("INM (Met2)", xy=(0.5, 15.25), xytext=(-5.2, 15.5), ha="right", va="center",
                     arrowprops=dict(arrowstyle="->", color="#1565C0", lw=1.2), fontsize=8, fontweight="bold", color="#1565C0")
         ax.annotate("VSS Guard Ring", xy=(-4.0, 2.0), xytext=(-5.2, 2.0), ha="right", va="center",
                     arrowprops=dict(arrowstyle="->", color="#2E7D32", lw=1.2), fontsize=8, fontweight="bold", color="#2E7D32")
@@ -358,3 +411,4 @@ class NeuroDynLayoutGenerator:
         plt.tight_layout()
         plt.savefig(img_path, bbox_inches='tight')
         plt.close()
+        return img_path

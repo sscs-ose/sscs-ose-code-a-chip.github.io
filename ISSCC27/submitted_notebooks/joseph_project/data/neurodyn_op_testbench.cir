@@ -1,0 +1,61 @@
+* NeuroDyn-AFE operating-point diagnostic
+.include "models/sky130_fd_pr/models/sky130_neurodyn_tt.lib.spice"
+
+.option noacct
+.option method=gear
+
+* NeuroDyn-AFE Dynamic Operational Transconductance Amplifier (OTA)
+* SkyWater SKY130 130nm Process (sky130_fd_pr__nfet_01v8, sky130_fd_pr__pfet_01v8)
+.subckt neurodyn_ota inp inm outp outm vdd vss vbn_tail vbp vaux_p vaux_n vbn_out
+
+* Tail Current Source (I_tail = 2.76 uA, Vbn = 0.32V)
+XM_tail tail vbn_tail vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
+
+* Main Input Differential Pair (2nd-Order Optimal Common-Centroid [D,A,B,B,A,B,A,A,B,D])
+XM1 nodep inp tail vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=1.00u mult=4
+XM2 noden inm tail vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=1.00u mult=4
+
+* Auxiliary Differential Pair for Ripple Reduction Loop (RRL) (1/10th Sized for Fine Steering)
+XM1_aux nodep vaux_p tail vss sky130_fd_pr__nfet_01v8_lvt W=4.06u L=1.00u mult=1
+XM2_aux noden vaux_n tail vss sky130_fd_pr__nfet_01v8_lvt W=4.06u L=1.00u mult=1
+
+* Active PMOS load controlled by Common-Mode Feedback (CMFB)
+XM3 nodep vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8 W=3.15u L=2.00u mult=4
+XM4 noden vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8 W=3.15u L=2.00u mult=4
+
+* Continuous-Time Resistive Common-Mode Sensing Network
+R_cm1 nodep vcm_sense 10MEG
+R_cm2 noden vcm_sense 10MEG
+E_cmfb vbp_cmfb 0 VOL='V(vbp) + 15.0*(V(vcm_sense) - 0.30)'
+
+* Miller Frequency Compensation Capacitors
+C_c1 noden outp 1.2p
+C_c2 nodep outm 1.2p
+
+* First gain stage (common-source output conversion)
+XM5 outp noden vdd vdd sky130_fd_pr__pfet_01v8 W=3.15u L=2.00u mult=4
+XM6 outp vbn_out vss vss sky130_fd_pr__nfet_01v8 W=10.15u L=2.0u mult=2
+
+XM7 outm nodep vdd vdd sky130_fd_pr__pfet_01v8 W=3.15u L=2.00u mult=4
+XM8 outm vbn_out vss vss sky130_fd_pr__nfet_01v8 W=10.15u L=2.0u mult=2
+
+.ends neurodyn_ota
+
+Vdd vdd 0 DC 0.6
+Vss vss 0 DC 0
+Vbn_tail vbn_tail 0 DC 0.32
+Vbp vbp 0 DC 0.28
+Vbn_out vbn_out 0 DC 0.10
+Vcm_ref vcm 0 DC 0.3
+Vin_p inp 0 DC 0.3
+Vin_n inm 0 DC 0.3
+Vauxp vaux_p 0 DC 0
+Vauxn vaux_n 0 DC 0
+XDUT inp inm outp outm vdd vss vbn_tail vbp vaux_p vaux_n vbn_out neurodyn_ota
+
+.control
+op
+print v(vdd) v(vbn_tail) v(vbn_out) v(vbp) v(inp) v(inm) v(xdut.tail) v(xdut.nodep) v(xdut.noden) v(outp) v(outm) v(vcm_sense)
+write op_results.raw all
+.endc
+.end

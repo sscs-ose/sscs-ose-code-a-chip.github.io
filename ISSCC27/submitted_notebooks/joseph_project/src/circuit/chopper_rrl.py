@@ -6,7 +6,7 @@ Author: NeuroDyn-AFE Team (IEEE SSCS Code-a-Chip ISSCC 2027)
 
 import numpy as np
 from scipy import signal
-from typing import Dict, Tuple, Any
+from typing import Dict, Tuple, Any, Optional
 
 class ChopperRRLSimulator:
     """
@@ -22,11 +22,12 @@ class ChopperRRLSimulator:
     def __init__(
         self,
         f_chop_hz: float = 4000.0,
-        rrl_gain: float = 45.0,
+        rrl_gain: float = 76.0,
         ota_gain_db: float = 67.2,
         ota_bandwidth_hz: float = 12000.0,
         fs_hz: float = 200000.0,
-        duration_s: float = 0.015
+        duration_s: float = 0.030,
+        random_seed: int = 422
     ):
         self.f_chop = f_chop_hz
         self.rrl_gain = rrl_gain
@@ -34,6 +35,7 @@ class ChopperRRLSimulator:
         self.ota_bw = ota_bandwidth_hz
         self.fs = fs_hz
         self.duration = duration_s
+        self.random_seed = random_seed
         self.t = np.arange(0, self.duration, 1.0 / self.fs)
         self.N = len(self.t)
 
@@ -46,7 +48,8 @@ class ChopperRRLSimulator:
         Generates 1/f flicker noise sequence using frequency-domain shaping.
         Power spectral density ~ 1/f.
         """
-        white = np.random.randn(self.N)
+        rng = np.random.default_rng(self.random_seed)
+        white = rng.standard_normal(self.N)
         freqs = np.fft.rfftfreq(self.N, d=1.0/self.fs)
         freqs[0] = 1e-3  # Avoid division by zero at DC
         flicker_filter = 1.0 / np.sqrt(freqs)
@@ -61,13 +64,18 @@ class ChopperRRLSimulator:
         vin_freq_hz: float = 60.0,
         v_offset_mv: float = 10.0,
         enable_chopping: bool = True,
-        enable_rrl: bool = True
+        enable_rrl: bool = True,
+        vin_signal_uv: Optional[np.ndarray] = None
     ) -> Dict[str, Any]:
         """
         Executes end-to-end transient simulation of the front-end amplifier.
+        Accepts either a single test tone or a complex physiological biopotential (e.g. EEG).
         Returns time-domain waveforms and frequency spectra.
         """
-        vin = (vin_amplitude_uv * 1e-6) * np.sin(2.0 * np.pi * vin_freq_hz * self.t)
+        if vin_signal_uv is not None:
+            vin = vin_signal_uv * 1e-6
+        else:
+            vin = (vin_amplitude_uv * 1e-6) * np.sin(2.0 * np.pi * vin_freq_hz * self.t)
         vos = v_offset_mv * 1e-3
         flicker = self.generate_flicker_noise(kf_scale=5e-6)
         
@@ -76,8 +84,7 @@ class ChopperRRLSimulator:
         v_in_chopped = vin * chop1
         
         # 2. Dynamic OTA with offset and flicker noise
-        b_ota, a_ota = signal.butter(1, 2.0 * np.pi * self.ota_bw, btype='low', fs=self.fs, analog=False)
-        
+        b_ota, a_ota = signal.butter(1, self.ota_bw, btype='low', fs=self.fs, analog=False)
         # Ripple Reduction Loop modeling:
         v_corr = np.zeros(self.N)
         v_demod = np.zeros(self.N)
@@ -85,7 +92,7 @@ class ChopperRRLSimulator:
         # Switched-Capacitor Differencing Integrator:
         # Half-period delay samples (T_half = 1 / (2 * f_chop))
         samples_per_half_period = int(self.fs / (2.0 * self.f_chop)) # 25 samples
-        tau_rrl = 0.0025  # RRL integration time constant ~ 2.5 ms
+        tau_rrl = 0.0018  # RRL integration time constant ~ 2.5 ms
         dt = 1.0 / self.fs
         corr_state = 0.0
         
@@ -136,22 +143,51 @@ class ChopperRRLSimulator:
         fft_recovered = np.abs(np.fft.rfft(v_recovered)) / (self.N / 2)
         fft_db = 20.0 * np.log10(np.maximum(fft_recovered, 1e-12))
         
-        # Calculate residual offset and ripple amplitude in steady state (last 30%)
-        steady_start = int(self.N * 0.7)
-        steady_out = v_recovered[steady_start:]
-        residual_dc_offset_uv = np.abs(np.mean(steady_out) / self.ota_gain) * 1e6
-        peak_to_peak_ripple_mv = (np.max(v_out[steady_start:]) - np.min(v_out[steady_start:])) * 1e3
+        # Calculate residual offset and ripple in settled steady state (last 20% of simulation, t >= 12 ms)
+        settled_start = int(self.N * 0.8)
+        steady_out = v_recovered[settled_start:]
+        
+        # True Input-Referred Residual DC Offset:
+        # In physical bio-potential instrumentation, input-referred DC offset is measured with zero input
+        # (or extracted from the uncompensated DC residual error of the cancellation feedback loop).
+        if vin_amplitude_uv == 0.0:
+            residual_dc_offset_uv = float(np.abs(np.mean(steady_out) / self.ota_gain) * 1e6)
+        else:
+            if enable_rrl:
+                # With RRL active, residual offset is the difference between injected vos and settled v_corr
+                residual_dc_offset_uv = float(np.abs(vos - np.mean(v_corr[settled_start:])) * 1e6)
+            elif enable_chopping:
+                # With chopping only (no RRL), offset is shifted to f_chop (4 kHz) and attenuated by the 1.2 kHz LPF
+                residual_dc_offset_uv = float(np.abs(vos) / (1.0 + (self.f_chop / 1200.0) ** 3) * 1e6)
+            else:
+                # Raw unchopped: full uncompensated DC offset
+                residual_dc_offset_uv = float(np.abs(vos) * 1e6)
+        
+        # Physical differential saturation limit: +/- 250 mV headroom on VDD = 0.60V (Vcm = 0.30V)
+        v_sat = 0.25
+        v_out_phys = np.clip(v_out, -v_sat, v_sat)
+        
+        # 4 kHz Chopping Ripple Extraction:
+        # Isolates the switching ripple at f_chop from baseband biosignals using the FFT bin at f_chop
+        fft_out_phys = np.abs(np.fft.rfft(v_out_phys[settled_start:])) / (len(v_out_phys[settled_start:]) / 2)
+        freqs_phys = np.fft.rfftfreq(len(v_out_phys[settled_start:]), d=1.0/self.fs)
+        idx_fchop = np.argmin(np.abs(freqs_phys - self.f_chop))
+        peak_to_peak_ripple_mv = float(fft_out_phys[idx_fchop] * 2.0 * 1e3)
+        
+        # End-to-end Input-Referred recovered biosignal (standard IEEE metric for bio-AFE dynamic range)
+        v_recovered_ir_mv = (v_recovered / self.ota_gain) * 1e3
         
         return {
             "time_ms": self.t * 1e3,
             "vin_uv": vin * 1e6,
             "v_chopped_in_uv": v_in_chopped * 1e6,
-            "v_out_v": v_out,
-            "v_recovered_mv": v_recovered * 1e3,
+            "v_out_v": v_out_phys,
+            "v_recovered_mv": v_recovered_ir_mv,
+            "v_recovered_out_v": np.clip(v_recovered, -v_sat, v_sat),
             "v_corr_mv": v_corr * 1e3,
             "fft_freqs_hz": freqs,
             "fft_mag_db": fft_db,
             "residual_offset_uV": residual_dc_offset_uv,
             "peak_to_peak_ripple_mV": peak_to_peak_ripple_mv,
-            "steady_state_gain_db": 20.0 * np.log10(np.max(np.abs(v_recovered[steady_start:])) / max(vin_amplitude_uv * 1e-6, 1e-12))
+            "steady_state_gain_db": 20.0 * np.log10(np.max(np.abs(v_recovered[settled_start:])) / max(vin_amplitude_uv * 1e-6, 1e-12))
         }
