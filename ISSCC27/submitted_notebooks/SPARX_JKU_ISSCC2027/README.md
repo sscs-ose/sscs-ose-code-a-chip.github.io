@@ -54,8 +54,8 @@ The complete flow, including the EM simulations with AWS Palace, LVS, and parasi
 | File | Contents |
 |---|---|
 | `SPARX_JKU_ISSCC2027.ipynb` | the notebook, with the outputs of a complete run |
-| `SPARX_JKU_ISSCC2027.pdf`, `SPARX_JKU_ISSCC2027.html` | exports of the notebook |
-| `sparx_top.gds` | the 160 GHz layout that the notebook generates |
+| `SPARX_JKU_ISSCC2027.pdf` | the PDF export of the notebook |
+| `sparx_top.gds` | reference copy of the 160 GHz layout that Section 3.11 writes, to open in KLayout without running the notebook (the notebook does not read it) |
 | `assets/` | the figures of this README, and copies of the block diagram, the video, and the logo layouts, which the notebook downloads from the SPARX repository |
 | `LICENSE` | the Solderpad Hardware License v2.1 |
 
