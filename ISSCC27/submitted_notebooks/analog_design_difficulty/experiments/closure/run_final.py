@@ -16,7 +16,7 @@ stability   loop PM/GM and saturation margins, 45 conditions x {0.6, 0.9, 1.2} V
 noise       held-sample noise (switch exactly kT/C, 1 mHz-50 GHz), 45 conditions x {0.6, 1.2} V
 numerics    worst parent condition re-run with tmax 2 ps / reltol 1e-6 and with method=gear
 devlimits   terminal voltages of every sampling-switch device at all 1.95 V and 125 C conditions,
-            both timings, 0.1 ns edges
+            both timings, 0.1 ns edges, against each device class's published SPICE-model domain
 """
 from __future__ import annotations
 
@@ -29,6 +29,7 @@ from dataclasses import replace
 
 import numpy as np
 
+import bootstrap_domain as bd
 import designs
 import noise
 import parent_metric as pm
@@ -134,22 +135,37 @@ PMOS = {"MXP", "MGT"}
 PROBES = ("xsw.g", "xsw.t", "xsw.bt", "xsw.x", "xsw.z1", "xsw.z2", "xsw.n1", "phi", "phib", "vdd")
 
 
+def _switch_devices(des: sb.Design):
+    """(d, g, s, b, type, model) of every sampling-switch MOS as saved node names, and the probes to save."""
+    if des.switch.subckt_name == "sw_bootab":
+        devs = {k: (*v, "p" if k in PMOS else "n", f"sky130_fd_pr__{'p' if k in PMOS else 'n'}fet_01v8")
+                for k, v in BOOT_DEVICES.items()}
+        return devs, PROBES
+    devs = bd.devices_for(des)
+    return devs, bd.internal_nodes(devs)
+
+
 def _devlimit_one(des: sb.Design, p: sb.PVT, tm: sb.Timing) -> dict:
+    devs, probes = _switch_devices(des)
     d2 = replace(des, name=des.name + "_dl", edge=0.1e-9,
-                 switch=replace(des.switch, probes=PROBES))
+                 switch=replace(des.switch, probes=probes))
     w = sb.run_sequence(d2, p, pm.sequences()["cal_alt"], tm, sb.SimOpts(), "devlim")
     t = w["t"]
     sel = t >= 100e-9  # after the start-up cycle
     V = lambda n: np.zeros(sel.sum()) if n == "0" else w[n][sel]
     res = {}
-    for dev, (dn, gn, sn, bn) in BOOT_DEVICES.items():
+    for dev, (dn, gn, sn, bn, typ, model) in devs.items():
+        # published SPICE-model domain of the device class (A3): |VDS|, |VGS| max, reverse and forward VBS
+        vds_max, vgs_max, vbs_rev, vbs_fwd = bd.DOMAIN[model]
+        pmos = typ == "p"
         vd, vg, vs, vb = V(dn), V(gn), V(sn), V(bn)
-        if dev in PMOS:
+        if pmos:
             vsrc, vdrn = np.maximum(vd, vs), np.minimum(vd, vs)
         else:
             vsrc, vdrn = np.minimum(vd, vs), np.maximum(vd, vs)
         q = {"vgs": np.abs(vg - vsrc), "vgd": np.abs(vg - vdrn), "vds": np.abs(vd - vs), "vbs": vb - vsrc,
              "vgb": np.abs(vg - vb)}
+        lim = {"vgs": vgs_max, "vgd": vgs_max, "vds": vds_max, "vbs": vbs_rev, "vgb": None}
         dt = float(np.median(np.diff(t)))
         ncyc = len(w["levels"]) - 1
         # "steady state" (amendment A3): value 1 ns before the end of each clock phase
@@ -158,19 +174,29 @@ def _devlimit_one(des: sb.Design, p: sb.PVT, tm: sb.Timing) -> dict:
         ends = [k * T + ta - 1e-9 for k in range(1, ncyc + 1)] + [(k + 1) * T - 1e-9 for k in range(1, ncyc + 1)]
         idx = np.searchsorted(tt, ends)
         idx = idx[idx < len(tt)]
-        res[dev] = {}
-        for k, v in q.items():
+        res[dev] = {"model": model}
+        for k, v in list(q.items()):
             if k == "vbs":
-                sgn = -1.0 if dev not in PMOS else 1.0
+                sgn = -1.0 if not pmos else 1.0
                 worst = float((sgn * v).max() * sgn)
                 steady = float((sgn * v[idx]).max() * sgn)
                 over = (sgn * v) > 1.95 + 0.01
+                over_lim = (sgn * v) > vbs_rev + 0.01
+                # forward side of the A3 model range (1.8 V NMOS vb - vsrc <= +0.3 V, PMOS vsrc - vb <= +0.1 V)
+                fwd = -sgn * v
+                res[dev]["vbs_fwd"] = {
+                    "worst_V": float(fwd.max()), "steady_V": float(fwd[idx].max()), "limit_V": vbs_fwd,
+                    "time_over_limit_ns_per_cycle": float((fwd > vbs_fwd + 1e-3).sum() * dt * 1e9 / ncyc)}
             else:
                 worst = float(v.max())
                 steady = float(v[idx].max())
                 over = v > 1.95 + 0.01
+                over_lim = v > (lim[k] if lim[k] is not None else 1.95) + 0.01
             res[dev][k] = {"worst_V": worst, "steady_V": steady,
                            "time_over_1.96V_ns_per_cycle": float(over.sum() * dt * 1e9 / ncyc)}
+            if lim[k] is not None:
+                res[dev][k].update({"limit_V": lim[k],
+                                    "time_over_limit_ns_per_cycle": float(over_lim.sum() * dt * 1e9 / ncyc)})
     return {"tag": p.tag, "timing": "stress" if tm.t_in > -1e-9 else "primary", "devices": res}
 
 

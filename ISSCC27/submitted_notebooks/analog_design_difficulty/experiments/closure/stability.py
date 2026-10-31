@@ -28,7 +28,11 @@ def _load_lines(design: sb.Design, pvt: sb.PVT, level: float, on: bool, sfx: str
     sw = design.switch
     s = f"samp{sfx}"
     o = f"o{sfx}"
-    if sw.kind == "sub":  # bootstrapped NMOS (sw_bootab): main device W = WS*MS
+    if sw.kind == "sub" and sw.subckt_name == "sw_nvt":  # native NMOS, gate at the static clock level
+        p = dict(sw.subckt_params)
+        lines = [f"XMS{sfx} {o} g{sfx} {s} 0 sky130_fd_pr__nfet_03v3_nvt W={p['WS']} L=0.5 m={p['MS']}",
+                 f"VG{sfx} g{sfx} 0 {pvt.vdd if on else 0.0}"]
+    elif sw.kind == "sub":  # bootstrapped NMOS (sw_bootab): main device W = WS*MS
         p = dict(sw.subckt_params)
         g = level + pvt.vdd if on else 0.0
         cbp = 0.05 * float(str(p["CB"]).replace("p", "e-12"))

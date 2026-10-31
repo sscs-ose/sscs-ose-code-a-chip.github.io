@@ -36,8 +36,35 @@ add(Design("nf16a_boot2", switch=boot(ws=2, ms=1, cb="0.2p"), **NF16A))
 # R3 final bounded refinement of the A family (design-study record): drv_Q1
 Q1 = dict(driver_file="driver_drv_Q1.spice", driver_subckt="drv_Q1")
 add(Design("q1_boot5", switch=boot(), **Q1))
+# selected and frozen 2026-10-31, superseded 2026-11-01: its switch terminal voltages leave the documented
+# compact-model validity domain (completed A3 check; docs/restart/SWITCH_REDESIGN_DECISION.md)
 add(Design("q1_boot2", switch=boot(ws=2, ms=1, cb="0.2p"), **Q1))
 
 # switch isolation: behavioural reference driver (sw_drv_ideal.spice) with the selected switch
 add(Design("ideal_boot2", driver_file="sw_drv_ideal.spice", driver_subckt="drv_ideal",
            switch=boot(ws=2, ms=1, cb="0.2p")))
+
+# Bootstrap compact-model-domain investigation (docs/restart/BOOTSTRAP_MODEL_DOMAIN_HANDOFF.md): helper-circuit
+# variants of the selected switch (same main switch W 2 um, CB 0.2 pF, same driver drv_Q1).
+def bootv(subckt: str, ws: float = 2, ms: int = 1, cb: str = "0.2p", extra: tuple = ()) -> Switch:
+    return Switch(kind="sub", subckt_file=f"{subckt}.spice", subckt_name=subckt,
+                  subckt_params=(("WS", ws), ("MS", ms), ("CB", cb), ("CZ", "50f")) + extra, ic=AB_IC)
+
+
+add(Design("q1_bootac2", switch=bootv("sw_bootac"), **Q1))
+# investigation only: weaker bottom-plate device; reduced boost ratio (CB 65 fF) to test the main-switch turn-on mechanism
+add(Design("q1_bootac2_w042", switch=bootv("sw_bootac", extra=(("WBC", 0.42),)), **Q1))
+add(Design("q1_boot2_cb65", switch=bootv("sw_bootab", cb="0.065p"), **Q1))
+
+# Switch redesign study, Workstream N (docs/restart/SWITCH_REDESIGN_DECISION.md): native thick-oxide NMOS switch
+# without bootstrap, W = 4 um fingers x m, same driver drv_Q1 and Cs 1 pF.
+def nvt(ms: int, ws: float = 4) -> Switch:
+    return Switch(kind="sub", subckt_file="sw_nvt.spice", subckt_name="sw_nvt",
+                  subckt_params=(("WS", ws), ("MS", ms)))
+
+
+for _m in (1, 2, 4, 8):
+    add(Design(f"q1_nvt{_m}", switch=nvt(_m), **Q1))
+
+# the selected design: drv_Q1 + one native thick-oxide NMOS switch (W 4 um, L 0.5 um), Cs 1 pF
+SELECTED = "q1_nvt1"

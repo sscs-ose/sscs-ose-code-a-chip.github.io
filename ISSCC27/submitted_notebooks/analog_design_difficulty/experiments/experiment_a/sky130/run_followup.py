@@ -12,6 +12,9 @@ results/figures/.
 
 Usage (from the repository root, after run_sky130.py):
     python experiments/experiment_a/sky130/run_followup.py
+    python experiments/experiment_a/sky130/run_followup.py --replot
+The second form redraws the three figures from the saved summary and the small-step
+waveforms already under results/generated/sky130/, without running ngspice.
 """
 from __future__ import annotations
 
@@ -28,6 +31,7 @@ import numpy as np  # noqa: E402
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import spice_runner as sr  # noqa: E402
+from figure_sketches import bench, context_header  # noqa: E402
 from run_sky130 import (COMMAND_BLUE, DISTURB_ORANGE, EPS, GRID, INK, INK_2, MODEL_GREEN, RESULTS_DATA,  # noqa: E402
                         RESULTS_FIG, T_EVENT, base_tokens, grid_jobs, key, load, point_summary, style)
 
@@ -138,46 +142,67 @@ def small_step(main: dict) -> tuple[dict, dict]:
     return out, waves
 
 
-def figure_small_step(ss: dict, waves: dict, full: dict) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(10.4, 6.6), sharex=True, constrained_layout=True)
+def figure_small_step(ss: dict, waves: dict, full: dict | None = None) -> None:
+    fig = plt.figure(figsize=(10.4, 8.0))
+    gs = fig.add_gridspec(3, 2, height_ratios=[0.42, 1, 1], hspace=0.3, wspace=0.18,
+                          left=0.09, right=0.99, top=0.97, bottom=0.08)
+    rif = f"R_if = {ss['R_if_ohm']:.0f} Ω"
+    sketches = [("Input-port test: the input steps by ±20 mV", "input\nsteps", COMMAND_BLUE, True,
+                 "settled at the\nold value", INK, None),
+                ("Output-port test: a charged Cs is connected", "input\nheld", INK, False,
+                 "starts ±20 mV\naway", MODEL_GREEN, "connected at t = 0")]
+    for col, (title, lab, c_in, step, note, c_cs, arrow_label) in enumerate(sketches):
+        ax = fig.add_subplot(gs[0, col])
+        ax.set_xlim(-0.6, 5.2); ax.set_ylim(-1.05, 1.15); ax.set_aspect("equal"); ax.axis("off")
+        bench(ax, 0.9, 0.2, lab, "rif", note, in_color=c_in, step=step, link_color=MODEL_GREEN if not step else INK,
+              link_label=rif, cs_color=c_cs, arrow_label=arrow_label)
+        ax.set_title(title, fontsize=9.5, color=COMMAND_BLUE if step else MODEL_GREEN, loc="left")
+    ax0 = None
     for col, d in enumerate((20, -20)):
         tag = f"{'p' if d > 0 else 'm'}{abs(d)}"
         wi, wo = waves[f"ss_in_rif_{tag}"], waves[f"ss_out_rif_{tag}"]
         r = ss["per_step"][f"{d:+d}mV"]["rif"]
-        ax = axes[0, col]
-        ax.plot(wi["t"] * 1e9, wi["en"], color=COMMAND_BLUE, lw=2, label="input step, Cs behind R_if")
-        ax.plot(wo["t"] * 1e9, wo["en"], color=MODEL_GREEN, lw=2, label="charged Cs connected through R_if")
+        ax = fig.add_subplot(gs[1, col], sharex=ax0)
+        ax0 = ax0 or ax
+        ax.plot(wi["t"] * 1e9, wi["en"], color=COMMAND_BLUE, lw=2, label="input-port test")
+        ax.plot(wo["t"] * 1e9, wo["en"], color=MODEL_GREEN, lw=2, label="output-port test")
         ax.axhline(0, color=INK_2, lw=0.8)
         ax.set_ylim(-0.35, 1.1)
         side = "driver supplies charge" if d > 0 else "driver sinks charge"
-        ax.set_title(f"{abs(d)} mV step, {side}\nmax |difference| = {r['D']:.2f} at {r['D_at_ns']:.1f} ns",
-                     fontsize=9.5, color=INK)
+        ax.set_title(f"{abs(d)} mV step, {side}: max |difference| = {r['D']:.2f} at {r['D_at_ns']:.1f} ns",
+                     fontsize=9.2, color=INK)
         if col == 0:
-            ax.set_ylabel("Sampling-capacitor error\n/ initial error", color=INK)
+            ax.set_ylabel("Cs error / initial error", color=INK)
         ax.legend(fontsize=8, frameon=False, loc="upper right")
+        ax.tick_params(labelbottom=False)
         style(ax)
-        ax = axes[1, col]
-        ax.plot(wi["t"] * 1e9, 1e3 * (wi["xnode"] - wi["xnode"][-1]), color=COMMAND_BLUE, lw=2, label="input step")
+        ax = fig.add_subplot(gs[2, col], sharex=ax0)
+        ax.plot(wi["t"] * 1e9, 1e3 * (wi["xnode"] - wi["xnode"][-1]), color=COMMAND_BLUE, lw=2,
+                label="input-port test")
         ax.plot(wo["t"] * 1e9, 1e3 * (wo["xnode"] - wo["xnode"][-1]), color=MODEL_GREEN, lw=2,
-                label="output-port disturbance")
+                label="output-port test")
         ax.axhline(0, color=INK_2, lw=0.8)
         ax.set_xlabel("Time after the event (ns)", color=INK)
         if col == 0:
-            ax.set_ylabel("Internal node x − settled value (mV)", color=INK)
+            ax.set_ylabel("Internal node x of the driver\n− settled value (mV)", color=INK)
         ax.legend(fontsize=8, frameon=False, loc="upper right" if d > 0 else "lower right")
         style(ax)
-    axes[0, 0].set_xlim(-0.5, 25)
+    ax0.set_xlim(-0.5, 25)
     c = ss["linear_conditions"]
-    fig.suptitle("SKY130 driver, small steps at 0.9 V: input step versus output-port disturbance, switch as R_if",
-                 fontsize=11, color=INK)
-    fig.text(0.5, -0.02,
-             f"Matched in each column: Cs = 1 pF behind R_if = {ss['R_if_ohm']:.0f} Ω, same initial Cs error, same time axis. "
-             f"Largest first-stage current imbalance |iM1 − iM2| / (iM1 + iM2): "
-             f"{max(v['rif'][e]['max_first_stage_imbalance'] for v in ss['per_step'].values() for e in ('input_step', 'output_port')):.2f}"
-             f" (slewing would be ≥ 0.9).\nThe ±10 mV steps (not drawn) overlay the ±20 mV curves within "
-             f"{max(c['max_shape_difference'].values()):.3f}. tt, 27 °C. "
+    imb = max(v["rif"][e]["max_first_stage_imbalance"] for v in ss["per_step"].values()
+              for e in ("input_step", "output_port"))
+    context_header(fig, "Does the excitation port matter even without slewing?", [
+        ("Circuit", f"first-cut driver (unity-gain follower), switch represented by {rif}, Cs = 1 pF; tt, 27 °C"),
+        ("Test", "small step at 0.9 V applied at the driver input or at its output port; same Cs, same initial "
+                 "Cs error"),
+        ("Metric", f"normalized Cs error (top) and the driver's internal node (bottom); first-stage imbalance "
+                   f"≤ {imb:.2f}, slewing would be ≥ 0.9"),
+    ], top=0.995, line=0.026, key_x=0.09)
+    fig.text(0.5, 0.005,
+             f"Approximately linear regime: the ±10 mV steps (not drawn) overlay the ±20 mV curves within "
+             f"{max(c['max_shape_difference'].values()):.3f}. Not a full-scale slew comparison. "
              "(Testbenches: tb_s1_input_step_rif.spice, tb_s2_output_port_rif.spice.)",
-             ha="center", va="top", fontsize=8, color=INK_2)
+             ha="center", va="bottom", fontsize=8, color=INK_2)
     for ext in ("png", "svg"):
         fig.savefig(RESULTS_FIG / f"figure_sky130_small_step_ports.{ext}", dpi=180, bbox_inches="tight",
                     metadata={"Date": None} if ext == "svg" else {})
@@ -318,13 +343,31 @@ def acquisition_window(main: dict) -> dict:
 
 def figure_acquisition_window(win: dict, ss: dict) -> None:
     order = ["0.6/1.2", "0.9/1.2", "0.6/0.9", "1.2/0.6", "1.2/0.9", "0.9/0.6", "0.6/0.6", "0.9/0.9", "1.2/1.2"]
-    rows = [(k, win["per_point"][k]) for k in order]
-    rows += [("small steps ±10, ±20 mV at 0.9 V", {
+
+    def lab(k):
+        vt, vp = k.split("/")
+        return f"{vp} → {vt} V"
+    rows = [(lab(k), win["per_point"][k]) for k in order]
+    rows += [("small steps at 0.9 V", {
         "t_b_ns": max(v["composition"]["t_b_ns"] for v in ss["per_step"].values()),
         "t_c_ns": max(v["composition"]["t_c_ns"] for v in ss["per_step"].values())})]
-    rows += [(f"class: {n}", v) for n, v in win["classes"].items()]
-    fig, ax = plt.subplots(figsize=(10.6, 5.6), constrained_layout=True)
-    for i, (lab, v) in enumerate(rows):
+    names = {"any previous sample": "worst case, any previous sample", "zero steps only": "worst case, zero steps only"}
+    rows += [(names[n], v) for n, v in win["classes"].items()]
+    fig = plt.figure(figsize=(11.4, 5.9))
+    gs = fig.add_gridspec(2, 2, width_ratios=[0.78, 2.0], wspace=0.30, hspace=0.12,
+                          left=0.01, right=0.99, top=0.97, bottom=0.10)
+    rif = "R_if = 744 Ω"
+    for i, (title, link, color, label, arrow_label) in enumerate([
+            ("Block test: switch represented by R_if", "rif", MODEL_GREEN, rif, None),
+            ("Connected circuit: real transmission gate", "tg", DISTURB_ORANGE, "gate closes",
+             "charge kick\nat turn-on")]):
+        ax = fig.add_subplot(gs[i, 0])
+        ax.set_xlim(-0.9, 4.9); ax.set_ylim(-1.15, 1.35); ax.set_aspect("equal"); ax.axis("off")
+        bench(ax, 0.6, 0.15, "input\nheld at\ntarget", link, "starts at\nprevious", link_color=color,
+              link_label=None if arrow_label else label, cs_color=color, arrow_label=arrow_label)
+        ax.set_title(title, fontsize=9.2, color=color, loc="left")
+    ax = fig.add_subplot(gs[:, 1])
+    for i, (lab_, v) in enumerate(rows):
         y = len(rows) - 1 - i
         tb, tc = v["t_b_ns"], v["t_c_ns"]
         if tb < tc:
@@ -335,24 +378,31 @@ def figure_acquisition_window(win: dict, ss: dict) -> None:
         ax.plot([tc], [y], marker="D", color=DISTURB_ORANGE, ms=6, ls="none")
     ax.set_yticks(range(len(rows)), [r[0] for r in rows][::-1], fontsize=8.5)
     ax.axhline(2.5, color=INK_2, lw=0.6)
+    ax.axhline(5.5, color=INK_2, lw=0.6, ls=":")
+    ax.text(45.6, 9.0, "transitions\n(previous → target)", fontsize=8, color=INK_2, ha="right", va="center")
+    ax.text(45.6, 4.0, "zero steps:\nCs starts at\nthe target", fontsize=8, color=INK_2, ha="right", va="center")
     ax.axvline(40, color=INK_2, lw=0.8, ls=":")
-    ax.text(40.3, len(rows) - 0.6, "Tacq = 40 ns\n(teaching allocation)", fontsize=8, color=INK_2, va="top")
+    ax.text(39.6, len(rows) - 0.55, "declared\nTacq = 40 ns", fontsize=8, color=INK_2, va="top", ha="right")
     ax.set_xlim(0, 46)
-    ax.set_xlabel("Acquisition allocation T (ns)", color=INK)
-    ax.plot([], [], marker="o", color=MODEL_GREEN, ls="none", label="(b) interface representation: shortest T meeting ε")
-    ax.plot([], [], marker="D", color=DISTURB_ORANGE, ls="none", label="(c) connected circuit: shortest T meeting ε")
+    ax.set_xlabel("Shortest acquisition time that brings Cs within ε = 0.29 mV (ns)", color=INK)
+    ax.plot([], [], marker="o", color=MODEL_GREEN, ls="none", label="block test with R_if")
+    ax.plot([], [], marker="D", color=DISTURB_ORANGE, ls="none", label="connected circuit")
     from matplotlib.patches import Patch
     h, _ = ax.get_legend_handles_labels()
-    h += [Patch(color=DISTURB_ORANGE, alpha=0.35, label="block test PASS, connected FAIL"),
-          Patch(color=INK_2, alpha=0.18, label="block test FAIL, connected PASS (conservative)")]
-    ax.legend(handles=h, fontsize=8, frameon=True, framealpha=0.95, edgecolor=GRID, loc="upper left")
+    h += [Patch(color=DISTURB_ORANGE, alpha=0.35, label="block test accepts, connected circuit fails"),
+          Patch(color=INK_2, alpha=0.18, label="block test is conservative")]
+    ax.legend(handles=h, fontsize=8, frameon=True, framealpha=0.95, edgecolor=GRID, loc="upper left",
+              bbox_to_anchor=(0.0, 1.0))
     style(ax)
-    fig.suptitle("SKY130: which acquisition allocations the interface representation would wrongly accept",
-                 fontsize=11, color=INK)
-    fig.text(0.5, -0.02, "Rows: operating points (target/previous), the small-step study, and two declared input classes "
-             "(worst case over the class). Read from the last crossings of ε in tests (b) and (c), chosen gate, tt, 27 °C; "
-             "no allocation\nother than 40 ns was simulated. (Testbenches: tb_t3_interface_model.spice, tb_t1_connected.spice, "
-             "tb_s2_output_port_rif.spice, tb_s4_connected_tg.spice.)", ha="center", va="top", fontsize=8, color=INK_2)
+    context_header(fig, "Does the R_if block test predict the connected acquisition time?", [
+        ("Circuit", "first-cut driver and Cs = 1 pF; the switch either as one resistance R_if or as the real "
+                    "transmission gate; tt, 27 °C"),
+        ("Test", "Cs starts at the previous sample, the input is held at the target, the switch closes at t = 0"),
+        ("Metric", "last time the Cs error exceeds ε, read as the shortest acquisition time that would pass"),
+    ], top=0.995, line=0.04, key_x=0.075)
+    fig.text(0.5, 0.0, "Only the 40 ns acquisition was simulated; other times are read from the last crossings of ε. "
+             "(Testbenches: tb_t3_interface_model.spice, tb_t1_connected.spice, tb_s2_output_port_rif.spice, "
+             "tb_s4_connected_tg.spice.)", ha="center", va="bottom", fontsize=8, color=INK_2)
     for ext in ("png", "svg"):
         fig.savefig(RESULTS_FIG / f"figure_sky130_acquisition_window.{ext}", dpi=180, bbox_inches="tight",
                     metadata={"Date": None} if ext == "svg" else {})
@@ -362,73 +412,91 @@ def figure_acquisition_window(win: dict, ss: dict) -> None:
 def figure_held_sample(hs: dict) -> None:
     V = hs["variants"]
     lv = HS_LEVELS
-    fig, axes = plt.subplots(1, 3, figsize=(13.4, 4.4), constrained_layout=True, gridspec_kw={"width_ratios": [1, 1, 1.15]})
-    styles = {"chosen": (DISTURB_ORANGE, "-", "o", "chosen gate (15 / 30 µm)"),
-              "dummy": (COMMAND_BLUE, "-", "s", "chosen gate + half-size dummies"),
+    fig, axes = plt.subplots(1, 3, figsize=(13.4, 4.5), gridspec_kw={"width_ratios": [1, 1, 1.15]})
+    fig.subplots_adjust(left=0.055, right=0.99, top=0.78, bottom=0.2, wspace=0.27)
+    styles = {"chosen": (DISTURB_ORANGE, "-", "o", "first-cut gate (15 / 30 µm)"),
+              "dummy": (COMMAND_BLUE, "-", "s", "first-cut gate + half-size dummies"),
               "eighth": (MODEL_GREEN, "--", "^", "one-eighth gate (1.9 / 3.8 µm)")}
     ax = axes[0]
     for n, (c, ls, mk, lab) in styles.items():
         ax.plot(lv, V[n]["hold_step_mV"], color=c, ls=ls, marker=mk, lw=1.8, ms=5, label=lab)
     ax.axhline(0, color=INK_2, lw=0.8)
     ax.axhspan(-hs["VLSB_mV"], hs["VLSB_mV"], color=GRID, alpha=0.6, lw=0)
-    ax.text(0.61, hs["VLSB_mV"] * 1.3, "±1 VLSB", fontsize=8, color=INK_2)
+    ax.text(0.61, hs["VLSB_mV"] * 1.3, "±1 LSB", fontsize=8, color=INK_2)
     ax.set_xlabel("Held level (V)", color=INK)
-    ax.set_ylabel("Hold step at turn-off (mV)", color=INK)
-    ax.set_title("1  Turn-off hold step, uncorrected", fontsize=9.5, color=INK)
+    ax.set_ylabel("Step at opening (mV)", color=INK)
+    ax.set_title("1  Step at opening, uncorrected", fontsize=9.5, color=INK)
     ax.legend(fontsize=7.4, frameon=False, loc="upper left")
     style(ax)
     ax = axes[1]
     for n, (c, ls, mk, lab) in styles.items():
         ax.plot(lv, V[n]["residual_hold_step_mV"], color=c, ls=ls, marker=mk, lw=1.8, ms=5, label=lab)
-    ax.plot(lv, V["chosen"]["residual_pre_opening_mV"], color=INK_2, ls=":", lw=1.6, label="driver before opening, R_S (all gates)")
+    ax.plot(lv, V["chosen"]["residual_pre_opening_mV"], color=INK_2, ls=":", lw=1.6,
+            label="driver error before opening (all gates)")
     ax.axhspan(-hs["share_mV"], hs["share_mV"], color=GRID, alpha=0.8, lw=0)
-    ax.text(0.61, hs["share_mV"] * 1.15, "±¼ VLSB share", fontsize=8, color=INK_2)
+    ax.text(0.61, hs["share_mV"] * 1.15, "±¼ LSB local share", fontsize=8, color=INK_2)
     ax.axhline(0, color=INK_2, lw=0.8)
     ax.set_xlabel("Held level (V)", color=INK)
-    ax.set_ylabel("Residual after two-point correction (mV)", color=INK)
-    ax.set_title("2  Turn-off residual after two-point correction (R_P)\nand driver pre-opening residual (R_S); not the total R_E",
-                 fontsize=9.5, color=INK)
+    ax.set_ylabel("After two-point correction (mV)", color=INK)
+    ax.set_title("2  Level-dependent part of the step,\nand the driver error it adds to", fontsize=9.5, color=INK)
     ax.set_ylim(-0.95, 0.95)
     ax.legend(fontsize=7.2, frameon=False, loc="upper right")
     style(ax)
     ax = axes[2]
     ladder = ["eighth", "quarter", "half", "chosen", "double"]
-    xs = [V[n]["worst_last_ge_eps_all_evaluated_ns"] for n in ladder]
-    ys = [V[n]["max_residual_hold_step_mV"] for n in ladder]
-    ax.add_patch(plt.Rectangle((0, 0.01), 40, hs["share_mV"] - 0.01, color=MODEL_GREEN, alpha=0.12, lw=0))
-    ax.text(1, hs["share_mV"] * 0.8, "meets ε at 40 ns and\nthe turn-off share", fontsize=8, color=MODEL_GREEN, va="top")
-    ax.plot(xs, ys, color=DISTURB_ORANGE, marker="o", lw=1.4)
-    labels = {"eighth": "1/8", "quarter": "1/4", "half": "1/2", "chosen": "chosen", "double": "2×"}
-    for n, x, y in zip(ladder, xs, ys):
-        pts = "" if len(V[n]["acquisition"]) == 9 else ", 3 points"
-        ax.annotate(f"{labels[n]}  ({V[n]['Ron_max_ohm'] / 1e3:.2g} kΩ{pts})", (x, y), textcoords="offset points",
-                    xytext=(-6, 6), ha="right", fontsize=7.6, color=INK)
+    names = {"eighth": "1/8", "quarter": "1/4", "half": "1/2", "chosen": "first\ncut", "double": "2×"}
+    xs = np.arange(len(ladder))
+    loc = [V[n]["max_residual_hold_step_mV"] for n in ladder]
+    par = [V[n]["max_residual_held_error_mV"] for n in ladder]
+    ax.plot(xs, loc, color=DISTURB_ORANGE, marker="o", lw=1.6, label="local switch metric: corrected step at opening")
+    ax.plot(xs, par, color=MODEL_GREEN, marker="s", lw=1.6, label="parent metric: corrected held-sample residual")
     d = V["dummy"]
-    ax.plot([d["worst_last_ge_eps_all_evaluated_ns"]], [d["max_residual_hold_step_mV"]], marker="s", color=COMMAND_BLUE,
-            ms=7, ls="none", label="chosen + dummies")
-    ax.annotate("chosen + dummies", (d["worst_last_ge_eps_all_evaluated_ns"], d["max_residual_hold_step_mV"]),
-                textcoords="offset points", xytext=(8, 2), fontsize=7.6, color=COMMAND_BLUE)
-    ax.axvline(40, color=INK_2, lw=0.8, ls=":")
+    ax.plot([3.18], [d["max_residual_hold_step_mV"]], marker="o", mfc="white", mec=DISTURB_ORANGE, ms=7, ls="none")
+    ax.plot([3.18], [d["max_residual_held_error_mV"]], marker="s", mfc="white", mec=MODEL_GREEN, ms=7, ls="none")
+    ax.annotate("open markers:\nfirst cut + dummies", (3.18, d["max_residual_hold_step_mV"]), textcoords="offset points", xytext=(7, -4),
+                fontsize=7.6, color=INK_2)
+    ib, pb = int(np.argmin(loc)), int(np.argmin(par))
+    ax.annotate("best by\nlocal metric", (xs[ib], loc[ib]), textcoords="offset points", xytext=(10, -2),
+                ha="left", va="top", fontsize=7.8, color=DISTURB_ORANGE)
+    ax.annotate("best by\nparent metric", (xs[pb], par[pb]), textcoords="offset points", xytext=(0, -12),
+                ha="center", va="top", fontsize=7.8, color=MODEL_GREEN)
+    ax.axhline(hs["VLSB_mV"], color=INK_2, lw=0.9, ls="--")
+    ax.text(-0.3, hs["VLSB_mV"] * 1.07, "1 LSB", fontsize=8, color=INK_2, ha="left", va="bottom")
     ax.set_yscale("log")
-    ax.set_ylim(0.05, 3)
-    ax.set_xlim(0, 45)
-    ax.set_xlabel("Worst connected settling over the evaluated points (last crossing of ε, ns)", color=INK)
-    ax.set_ylabel("Largest turn-off residual |R_P| (mV)", color=INK)
-    ax.set_title("3  Width ladder: acquisition against turn-off\n(labels: gate width, maximum on-resistance)",
-                 fontsize=9.5, color=INK)
+    ax.set_ylim(0.04, 4)
+    ax.set_xlim(-0.4, 4.4)
+    ticks = [f"{names[n]}\n{V[n]['Ron_max_ohm'] / 1e3:.2g} kΩ\n{V[n]['worst_last_ge_eps_all_evaluated_ns']:.1f} ns"
+             for n in ladder]
+    ax.set_xticks(xs, ticks, fontsize=7.6)
+    ax.set_xlabel("gate width (top), max Ron, worst settling to ε", color=INK, fontsize=8.6)
+    ax.set_ylabel("Largest residual (mV)", color=INK)
+    ax.set_title("3  Width ladder: the two metrics rank the widths differently", fontsize=9.5, color=INK)
+    ax.legend(fontsize=7.2, frameon=False, loc="upper left")
     style(ax)
-    fig.suptitle("SKY130 sample-and-hold: turn-off hold step and its corrected residual, dummy switches, and the width ladder",
-                 fontsize=11, color=INK)
-    fig.text(0.5, -0.02, "Zero-step hold bench: the gate closes at 25 ns and opens at 65 ns; hold step = mean Vsamp 10–20 ns "
-             "after opening minus its mean just before. VLSB = 0.6 V / 1024. tt, 27 °C, complementary 0.2 ns edges.\n"
-             "Panel 3: chosen, chosen + dummies, quarter, and eighth evaluated at nine operating points; half and double at the three points of the switch-width study. "
-             "The total residual R_E = R_S + R_P of each variant is stated in the text.\n"
-             "(Testbenches: tb_t4_hold.spice, tb_t6_hold_dummy.spice, tb_t1_connected.spice, tb_t5_connected_dummy.spice.)",
-             ha="center", va="top", fontsize=8, color=INK_2)
+    context_header(fig, "Does improving the local switch metric improve the parent result?", [
+        ("Circuit", "first-cut driver with the transmission gate at five widths, and with half-size dummy switches"),
+        ("Test", "zero-step hold bench (Cs starts at the target), seven held levels, tt, 27 °C, 0.2 ns edges"),
+        ("Metric", "local: level-dependent step at opening after correction; parent: corrected held-sample "
+                   "residual (driver error + step, signed)"),
+    ], top=0.86, line=0.05, key_x=0.06)
+    fig.text(0.5, 0.0, "Step = mean V(Cs) 10–20 ns after opening minus its mean just before. Settling: first cut, "
+             "dummies, 1/4 and 1/8 at nine operating points; 1/2 and 2× at three. "
+             "(Testbenches: tb_t4_hold.spice, tb_t6_hold_dummy.spice, tb_t1_connected.spice, "
+             "tb_t5_connected_dummy.spice.)", ha="center", va="bottom", fontsize=8, color=INK_2)
     for ext in ("png", "svg"):
         fig.savefig(RESULTS_FIG / f"figure_sky130_held_sample.{ext}", dpi=180, bbox_inches="tight",
                     metadata={"Date": None} if ext == "svg" else {})
     plt.close(fig)
+
+
+def replot() -> None:
+    """Redraw Figures 5-7 from the saved summary and saved small-step waveforms (no ngspice)."""
+    summary = json.loads(OUT.read_text())
+    ss = summary["small_step_ports"]
+    waves = {f"ss_{e}_rif_{t}": load8(sr.GENERATED / f"ss_{e}_rif_{t}") for e in ("in", "out") for t in ("p20", "m20")}
+    figure_small_step(ss, waves)
+    figure_held_sample(summary["held_sample"])
+    figure_acquisition_window(summary["acquisition_window"], ss)
 
 
 def main() -> None:
@@ -465,4 +533,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    replot() if "--replot" in sys.argv[1:] else main()

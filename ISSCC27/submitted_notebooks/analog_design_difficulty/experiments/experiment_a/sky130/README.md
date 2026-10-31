@@ -44,7 +44,7 @@ uv run python experiments/experiment_a/sky130/run_sky130.py     # brief, tests, 
 uv run python experiments/experiment_a/sky130/run_followup.py   # small-step and held-sample studies
 ```
 
-`run_followup.py` reads `results/data/sky130_summary.json`, so it runs second. Together they take about 12 minutes on 12 threads (each ngspice process spends most of its time loading the SKY130 library). `SKY130_REUSE=1` reuses completed cases whose resolved netlists are unchanged, which is useful for regenerating figures only.
+`run_followup.py` reads `results/data/sky130_summary.json`, so it runs second. Together they take about 12 minutes on 12 threads (each ngspice process spends most of its time loading the SKY130 library). `SKY130_REUSE=1` reuses completed cases whose resolved netlists are unchanged, which is useful for regenerating figures only. `run_followup.py --replot` redraws its three notebook figures from the saved summary and the small-step waveforms under `results/generated/sky130/` without starting ngspice.
 
 Outputs: `results/data/sky130_*.{csv,json}` and `results/figures/figure_sky130_*.{png,svg}`. In the JSON files tests are keyed `a`, `b`, `c`, `m` and operating points `target/previous` (for example `0.6/1.2`).
 

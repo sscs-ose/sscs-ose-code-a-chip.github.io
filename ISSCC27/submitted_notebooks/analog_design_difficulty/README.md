@@ -1,25 +1,29 @@
 # Why Analog Design Remains Difficult Even When the Equations Are Known
 
-*A reproducible SKY130 sample-and-hold case study in coupling, revision, verification, and design closure*
+*Coupled physics, provisional requirements, and engineering evidence, with a reproducible SKY130 sample-and-hold as
+the running example*
 
 Kazuki Fujita — Department of Electrical Engineering, Graduate School of Engineering, Tokyo University of Science (GitHub: 771-8bit)
 
-An educational Jupyter notebook for analog designers who know the canonical circuits. It explains why analog design
-remains difficult after the circuit equations are known: requirements can be written as a tree, while the physical
-quantities that must satisfy them are coupled, with cycles, and depend on operating point, stored state, timing, and
-process, supply, and temperature. It follows how engineers make that coupled problem tractable — provisional
-requirements and allocations, characterization over conditions, representations adequate for a decision, circuit
-changes that weaken a dependency, verification, and revision — and asks what changes as AI enters the development
-process and what a junior designer needs to learn beyond the equations.
-
-The running example is a single-ended SKY130 sample-and-hold (closed-loop driver, sampling switch, 1 pF hold capacitor,
-0.6–1.2 V, 40 ns acquisition, ±1 LSB of a 10-bit-equivalent step). A first cut meets its local acquisition allocation
-and fails the parent held-sample requirement; evidence leads to a bootstrapped sampling switch and a redesigned driver;
-the selected design closes the deterministic requirement and a separate random-noise budget over a declared
-schematic-level verification domain of repeated samples and 45 process/supply/temperature conditions. This is not
-production sign-off; the circuit closure is evidence for the notebook's engineering argument, not its main contribution.
-
 **Main notebook:** [`analog_design_difficulty.ipynb`](analog_design_difficulty.ipynb) (saved with the outputs of one complete run).
+
+An educational Jupyter notebook for analog designers who know the canonical circuits. It explains why analog design
+remains difficult after the circuit equations are known: the quantities those equations describe are physically
+coupled, and which interaction dominates changes with operating point, signal level, stored state, timing, and
+process, supply, and temperature. Requirements can be written as a tree for engineering management, while the
+physical and design dependencies that must satisfy them are coupled, with cycles.
+
+The notebook follows the established practices engineers use to make that coupled problem tractable — provisional
+requirements and allocations, characterization over conditions, models and tests adequate for a particular decision,
+circuit changes that weaken a dependency, choices of what to design jointly and where to place block boundaries,
+verification, and revision when evidence shows that an assumption no longer holds. It argues that optimization and
+search work inside a formulation that engineers choose and revise, asks what changes if AI lowers the cost of search,
+verification, and coordination, and closes with what a junior designer needs to learn beyond the equations. The
+practices are established; the notebook does not propose a new design methodology.
+
+A single-ended sample-and-hold front end in the open SKY130 process, simulated with ngspice, serves as the running
+example and as reproducible evidence for the argument. It is not the subject of the notebook, and its verification is
+schematic-level, not production sign-off.
 
 ## Toolchain
 
@@ -35,7 +39,7 @@ included; install them separately (for example with volare) and point `PDK_ROOT`
 | `analog_design_difficulty.ipynb` | the notebook |
 | `experiments/closure/` | the pre-registered parent metric, budget and verification sets (`CLOSURE_BRIEF.md`), the sequential sample-and-hold bench, the stability, noise, and device-voltage checks, the final-verification and assembly scripts, and the netlists of the selected design and of the compared candidates |
 | `experiments/experiment_a/` | the first-cut experiment: design brief, studies with their results, SKY130 netlists, scripts, and the reduced model |
-| `results/closure/` | the first cut on the sequential bench and the final verification of the selected design (`results/closure/final/q1_boot2/final_closure.json`) |
+| `results/closure/` | sequential-bench results: the first cut at the screening conditions, the compared candidates, and the final verification of the selected design |
 | `results/figures/`, `results/data/` | simulation figures and compact first-cut data read by the notebook |
 | `assets/diagrams/`, `scripts/draw_restart_diagrams.py`, `scripts/draw_diagrams.py` | explanatory diagrams and the scripts that draw them |
 | `references/` | bibliography and the support recorded for each source |

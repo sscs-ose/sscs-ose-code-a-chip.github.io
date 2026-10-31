@@ -323,7 +323,10 @@ def tg_symbol(ax, x_l, x_r, y, color=INK, label=True):
 
 
 def mini_network(ax, x0, yc):
-    """Driver (with feedback), transmission gate, Cs; returns x positions (out, gate centre, samp)."""
+    """Driver (with feedback), transmission gate, Cs.
+
+    Returns the x positions of the driver output node, the left and right ends of the gate symbol, and the
+    sampling node, so that scope boxes can be drawn between the actual circuit elements."""
     pin(ax, x0, yc + 0.22)
     wire(ax, (x0 + 0.09, yc + 0.22), (x0 + 0.4, yc + 0.22))
     ax.add_patch(Polygon([(x0 + 0.4, yc + 0.5), (x0 + 0.4, yc - 0.5), (x0 + 1.3, yc)], closed=True,
@@ -333,15 +336,16 @@ def mini_network(ax, x0, yc):
     dot(ax, xo, yc)
     wire(ax, (xo, yc), (xo, yc - 0.75), (x0 + 0.25, yc - 0.75), (x0 + 0.25, yc - 0.22), (x0 + 0.4, yc - 0.22),
          color=FB, lw=1.5)
-    tg_symbol(ax, xo, xo + 1.3, yc, color=CONN)
-    xs = xo + 1.75
-    wire(ax, (xo + 1.3, yc), (xs, yc), (xs, yc - 0.3))
+    tg_symbol(ax, xo, xo + 1.6, yc, color=CONN)
+    xs = xo + 2.15
+    wire(ax, (xo + 1.6, yc), (xs, yc), (xs, yc - 0.3))
     dot(ax, xs, yc)
     cap_v(ax, xs, yc - 0.37)
     wire(ax, (xs, yc - 0.44), (xs, yc - 0.6))
     gnd(ax, xs, yc - 0.6)
     text(ax, xs + 0.3, yc - 0.37, "Cs", size=8.5, ha="left")
-    return xo, xo + 0.65, xs
+    xm = xo + 0.8
+    return xo, xm - 0.28, xm + 0.28, xs
 
 
 def scope_box(ax, x0, y0, x1, y1, color, label):
@@ -371,15 +375,18 @@ def design_scopes() -> None:
         text(ax, -0.15, 1.8, title, size=11, ha="left", weight="bold")
         text(ax, -0.15, 1.45, sub, size=8.5, ha="left", color=MUTED, style="italic")
         yc = 0.25
-        xo, xg, xs = mini_network(ax, 0.35, yc)
+        xo, xg0, xg1, xs = mini_network(ax, 0.25, yc)
+        right = xs + 0.75  # leaves room for the "Cs" label
         if kind == "A":
-            scope_box(ax, 0.05, -0.85, 5.2, 0.95, CMD, "one design problem")
+            scope_box(ax, 0.0, -0.85, right, 0.95, CMD, "one design problem")
         elif kind == "B":
-            scope_box(ax, 0.05, -0.85, xo + 0.25, 0.95, CMD, "driver block")
-            scope_box(ax, xo + 0.4, -0.85, 5.2, 0.95, MODEL, "sampling network")
+            # boundary on the wire between the driver output node and the switch
+            scope_box(ax, 0.0, -0.85, xo + 0.2, 0.95, CMD, "driver block")
+            scope_box(ax, xo + 0.32, -0.85, right, 0.95, MODEL, "sampling network")
         else:
-            scope_box(ax, 0.05, -0.85, xg + 0.95, 0.95, CMD, "driver + switch block")
-            scope_box(ax, xg + 1.05, -0.85, 5.2, 0.95, MODEL, "Cs")
+            # boundary on the wire between the switch and the sampling node
+            scope_box(ax, 0.0, -0.85, xg1 + 0.2, 0.95, CMD, "driver + switch block")
+            scope_box(ax, xs - 0.4, -0.85, right, 0.95, MODEL, "Cs")
         ax.text(-0.15, -1.25, notes, fontsize=8.0, color=INK, ha="left", va="top", linespacing=1.5)
     fig.suptitle("Three possible design scopes for the same physically coupled network", fontsize=12, y=0.99)
     fig.subplots_adjust(left=0.01, right=0.99, top=0.9, bottom=0.01, wspace=0.08)

@@ -4,9 +4,13 @@
     uv run python experiments/closure/assemble_final.py [design]
 
 Reads results/closure/final/<design>/<part>.json written by run_final.py and writes
-results/closure/final/<design>/final_closure.json and results/figures/figure_closure_matrix.{svg,png}.
-Every criterion below is the one declared in CLOSURE_BRIEF.md (with amendments A1-A8); none is
-chosen here.
+results/closure/final/<design>/final_closure.json and the closure-matrix figure:
+results/figures/figure_closure_matrix.{svg,png} for the selected design (designs.SELECTED, the default),
+figure_closure_matrix_<design>.{svg,png} for any other design.
+Every criterion below is the one declared in CLOSURE_BRIEF.md (with amendments A1-A9); none is
+chosen here. Each check carries a role: "closure" (decides final_pass), "supporting" (a pre-registered
+criterion that also decides final_pass once the check has been run; under A9 its absence does not block),
+or "diagnostic" (reported, not pass/fail).
 """
 from __future__ import annotations
 
@@ -19,11 +23,17 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
 import numpy as np  # noqa: E402
 
 import designs  # noqa: E402
 import parent_metric as pm  # noqa: E402
 import shbench as sb  # noqa: E402
+
+sys.path.insert(0, str(sb.REPO / "experiments" / "experiment_a" / "sky130"))
+from figure_sketches import context_header  # noqa: E402
+
+plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9.5, "svg.hashsalt": "closure", "svg.fonttype": "path"})
 
 VLSB_MV = pm.VLSB * 1e3
 NOISE_BUDGET_UV = 146.0     # 0.25 VLSB rms (A2; A7 fallback not triggered)
@@ -76,50 +86,108 @@ def netlist_counts(des: sb.Design) -> dict:
             "switch_transistors": n_s}
 
 
-def closure_matrix_figure(parent: list[dict], noise: list[dict], stab: list[dict], name: str) -> None:
+def switch_summary(des: sb.Design) -> str:
+    p = dict(des.switch.subckt_params)
+    if des.switch.subckt_name == "sw_nvt":
+        return (f"native thick-oxide NMOS (sky130_fd_pr__nfet_03v3_nvt, W {float(p['WS']) * int(p['MS']):g} µm, "
+                f"L 0.5 µm), gate driven directly by the track clock; no bootstrap")
+    return (f"bootstrapped NMOS (W {float(p['WS']) * int(p['MS']):g} µm, L 0.15 µm), bootstrap capacitor "
+            f"{str(p['CB']).replace('p', ' pF')}, clock-boosted charging device")
+
+
+SUPPORTING = ("25 mV levels", "sensitivities", "numerics")
+
+
+def role(c: dict) -> str:
+    """closure: decides final_pass; supporting: pre-registered criterion, decides final_pass when run (A9);
+    diagnostic: reported only (A6 STRESS timing, A8 transient terminal-voltage peaks)."""
+    if c["verdict"] == "reported":
+        return "diagnostic"
+    return "supporting" if c["check"].startswith(SUPPORTING) else "closure"
+
+
+def closure_matrix_figure(parent: list[dict], noise: list[dict], stab: list[dict], des: sb.Design, wp: dict,
+                          nmax: dict, name: str) -> None:
+    """Figure 7: the three closure quantities per PVT condition in separate panels (different units; they never
+    add), each with its limit and its worst condition marked."""
     corners = ["tt", "ss", "ff", "sf", "fs"]
-    cols = [(v, t) for v in pm.SUPPLIES for t in (-40, 27, 125)]
-    def grid(fn):
-        g = np.full((len(corners), len(cols)), np.nan)
-        for i, c in enumerate(corners):
-            for j, (v, t) in enumerate(cols):
-                g[i, j] = fn(c, v, t)
-        return g
-    pr = {(r["pvt"]["corner"], r["pvt"]["vdd"], r["pvt"]["temp"]): r["max_abs_r_LSB"] for r in parent}
-    nz = {}
+    marks = {"tt": "o", "ss": "v", "ff": "^", "sf": "s", "fs": "D"}
+    groups = [(v, t) for v in pm.SUPPLIES for t in (-40, 27, 125)]
+    xpos = {(c, v, t): g * 6 + i for g, (v, t) in enumerate(groups) for i, c in enumerate(corners)}
+
+    def key(tag):
+        c, v, t = tag.split("_")
+        return c, float(v[:-1]), float(t[:-1])
+    pr = {key(r["tag"]): r["max_abs_r_LSB"] for r in parent}
+    mb = {key(r["tag"]): r["sum_component_max_mV"] / VLSB_MV for r in parent}
+    nz, pmg = {}, {}
     for r in noise:
-        c, v, t = r["tag"].split("_")
-        key = (c, float(v[:-1]), float(t[:-1]))
-        nz[key] = max(nz.get(key, 0), r["noise_uV_rms"])
-    pmg = {}
+        nz[key(r["tag"])] = max(nz.get(key(r["tag"]), 0), r["noise_uV_rms"])
     for r in stab:
-        c, v, t = r["tag"].split("_")
-        key = (c, float(v[:-1]), float(t[:-1]))
-        pmg[key] = min(pmg.get(key, 1e9), r["acq"]["pm_deg"], r["hold"]["pm_deg"])
-    G = [grid(lambda c, v, t: pr[(c, v, t)]), grid(lambda c, v, t: nz[(c, v, t)]),
-         grid(lambda c, v, t: pmg[(c, v, t)])]
-    titles = ["parent deterministic residual max|r| (LSB)\nlimit 1 LSB", "sampled noise (µV rms)\nbudget 146 µV",
-              "loop phase margin, worst load and level (°)\nlimit 45°"]
-    fmts = ["{:.2f}", "{:.0f}", "{:.0f}"]
-    lims = [(0, 1.0), (0, NOISE_BUDGET_UV), (45, 90)]
-    cmaps = ["Greens", "Blues", "Purples_r"]
-    fig, axs = plt.subplots(1, 3, figsize=(15.5, 3.6))
-    for ax, g, ttl, f, lim, cm in zip(axs, G, titles, fmts, lims, cmaps):
-        ax.imshow(g, cmap=cm, vmin=lim[0], vmax=lim[1], aspect="auto")
-        for i in range(g.shape[0]):
-            for j in range(g.shape[1]):
-                ax.text(j, i, f.format(g[i, j]), ha="center", va="center", fontsize=7.6)
-        ax.set_yticks(range(len(corners)), corners)
-        ax.set_xticks(range(len(cols)), [f"{v:.2f} V\n{t:+d} °C" for v, t in cols], fontsize=7)
-        ax.set_title(ttl, fontsize=9.5)
-    fig.tight_layout()
+        pmg[key(r["tag"])] = min(pmg.get(key(r["tag"]), 1e9), r["acq"]["pm_deg"], r["hold"]["pm_deg"])
+    wpm = min(pmg, key=pmg.get)
+    panels = [
+        (pr, "#1f7a4d", "parent residual\nmax |r| (LSB)", (0, 1.12), 1.0, "limit 1 LSB", key(wp["tag"]),
+         f"worst {wp['max_abs_r_LSB']:.2f} LSB", "{:.2f}"),
+        (nz, "#2f6690", "sampled noise\n(µV rms)", (0, 165), NOISE_BUDGET_UV, f"budget {NOISE_BUDGET_UV:.0f} µV",
+         key(nmax["tag"]), f"worst {nmax['noise_uV_rms']:.0f} µV", "{:.0f}"),
+        (pmg, "#6a4c93", "driver phase margin,\nworst load and level (°)", (40, 92), 45.0, "limit 45°", wpm,
+         f"lowest {pmg[wpm]:.1f}°", "{:.1f}"),
+    ]
+    fig, axs = plt.subplots(3, 1, figsize=(10.5, 7.4), sharex=True)
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.975, bottom=0.11, hspace=0.18)
+    for k, (ax, (vals, col, ylab, ylim, lim, limtxt, worst, wtxt, _)) in enumerate(zip(axs, panels)):
+        for g in range(1, len(groups)):
+            ax.axvline(g * 6 - 1, color="#dddddd", lw=0.8, zorder=0)
+        for c in corners:
+            ks = [q for q in vals if q[0] == c]
+            ax.scatter([xpos[q] for q in ks], [vals[q] for q in ks], marker=marks[c], s=26, color=col, zorder=3)
+        if k == 0:  # no-cancellation bound M per condition (sum of component maxima >= max|r|)
+            ks = sorted(mb)
+            ax.scatter([xpos[q] for q in ks], [mb[q] for q in ks], marker="_", s=60, color="#888888", zorder=2)
+        ax.axhline(lim, color="#222222", lw=1.2, ls="--", zorder=1)
+        ax.text(len(groups) * 6 - 1.6, lim, limtxt, ha="right", va="bottom" if k != 2 else "top", fontsize=8.5,
+                color="#222222")
+        ax.scatter([xpos[worst]], [vals[worst]], s=150, facecolors="none", edgecolors="#7a3010", lw=1.4, zorder=4)
+        c, v, t = worst
+        off, ha, va = [((-12, 8), "right", "bottom"), ((0, -42), "center", "top"), ((12, -4), "left", "top")][k]
+        ax.annotate(f"{wtxt}\n{c}, {v:.2f} V, {t:+.0f} °C", (xpos[worst], vals[worst]), xytext=off,
+                    textcoords="offset points", ha=ha, va=va, fontsize=8.2, color="#7a3010",
+                    arrowprops=dict(arrowstyle="-", color="#7a3010", lw=0.8, shrinkB=7) if k == 1 else None)
+        ax.set_ylim(*ylim)
+        ax.set_ylabel(ylab, fontsize=9)
+        for s_ in ("top", "right"):
+            ax.spines[s_].set_visible(False)
+    handles = [Line2D([], [], ls="", marker=marks[c], color="#555555", label=c) for c in corners]
+    handles.append(Line2D([], [], ls="", marker="_", ms=9, mew=1.6, color="#888888",
+                          label="top panel: no-cancellation bound M (sum of the component maxima)"))
+    axs[0].legend(handles=handles, frameon=False, fontsize=8, ncol=6, loc="lower left", bbox_to_anchor=(0.0, 1.0),
+                  title="process corner (marker shape)", title_fontsize=8, alignment="left")
+    axs[-1].set_xticks([g * 6 + 2 for g in range(len(groups))], [f"{v:.2f} V\n{t:+d} °C" for v, t in groups],
+                       fontsize=8.6)
+    axs[-1].set_xlim(-1.5, len(groups) * 6 - 0.5)
+    axs[-1].set_xlabel("PVT condition: supply and temperature, five process corners each", fontsize=9)
+    sw = dict(des.switch.subckt_params)
+    if des.switch.subckt_name == "sw_nvt":
+        sw_txt = f"one native thick-oxide NMOS switch (W {float(sw['WS']) * int(sw['MS']):g} µm, L 0.5 µm)"
+    else:
+        sw_txt = f"bootstrapped NMOS switch (W {float(sw['WS']) * int(sw['MS']):g} µm)"
+    context_header(fig, "Does the selected design close the declared verification domain?", [
+        ("Circuit", f"selected design: folded-cascode driver, {sw_txt}, Cs = {des.cs * 1e12:.0f} pF"),
+        ("Test", f"final verification: {len(parent)} PVT conditions, four sequences, two read windows, input "
+                 "changing during the hold"),
+        ("Metric", "three separate checks, never added: corrected held-sample residual, sampled noise, phase margin"),
+    ], top=1.03, line=0.026, key_x=0.105)
+    fig.text(0.01, 0.005, "Not shown: the full-scale step at switch closure (a reported diagnostic, Section 3.5). "
+             "Not covered: mismatch, layout extraction, silicon.", fontsize=8, color="#555555", ha="left",
+             va="bottom")
     out = sb.REPO / "results" / "figures"
     fig.savefig(out / f"{name}.svg", bbox_inches="tight", metadata={"Date": None})
     fig.savefig(out / f"{name}.png", bbox_inches="tight", dpi=150)
     plt.close(fig)
 
 
-def main(d: str = "q1_boot2") -> None:
+def main(d: str = designs.SELECTED) -> None:
     des = designs.DESIGNS[d]
     parent = load(d, "parent")
     stab = load(d, "stability")
@@ -163,10 +231,11 @@ def main(d: str = "q1_boot2") -> None:
         dmax = max(abs(num["delta_fine_mV"]), abs(num["delta_gear_mV"]))
         checks.append({"check": f"numerics at {num['condition']} ({num['sequence']}): tmax 2 ps/reltol 1e-6; gear",
                        "criterion": "|Δ| ≤ 0.02 mV and margin > |Δ|",
-                       "result": f"Δ {num['delta_fine_mV']:+.4f} / {num['delta_gear_mV']:+.4f} mV; margin {margin_mV:.3f} mV",
+                       "result": f"Δ {num['delta_fine_mV'] * 1e3:+.3f} / {num['delta_gear_mV'] * 1e3:+.3f} µV; margin {margin_mV:.3f} mV",
                        "verdict": verdict(dmax <= 0.02 and margin_mV > dmax)})
         prose_extra["numerics_note"] = (f"Rerunning the worst condition with a 2 ps step and tighter tolerances, and with "
-                                        f"Gear integration, changes the worst residual by at most {dmax * 1e3:.1f} µV.")
+                                        "Gear integration, changes the worst residual by "
+                                        + (f"at most {dmax * 1e3:.2f} µV." if dmax * 1e3 >= 0.01 else "less than 0.01 µV."))
     else:
         prose_extra["numerics_note"] = ("The final design was not rerun at finer settings; the 5 ps / 1e-5 default was chosen "
                                         "because it removed the 0.1 mV step artefacts that coarser settings produced with the "
@@ -209,7 +278,7 @@ def main(d: str = "q1_boot2") -> None:
     checks.append({"check": "ringing in the read windows (peak-to-peak)", "criterion": "≤ 0.1 LSB",
                    "result": f"{ppmax / VLSB_MV:.3f} LSB", "verdict": verdict(ppmax <= 0.1 * VLSB_MV)})
     nmax = max(noise, key=lambda r: r["noise_uV_rms"])
-    checks.append({"check": f"sampled noise, {len(noise)} condition/level points (switch exactly kT/C, 1 mHz–50 GHz)",
+    checks.append({"check": f"sampled noise, {len(noise)} condition/level points (switch at the kT/C floor, 1 mHz–50 GHz)",
                    "criterion": f"≤ {NOISE_BUDGET_UV:.0f} µV rms (unresolved within {NOISE_UNRESOLVED_UV:.0f} µV)",
                    "result": f"{nmax['noise_uV_rms']:.1f} µV ({nmax['noise_LSB_rms']:.3f} LSB) at {nmax['tag']}, {nmax['level']} V",
                    "verdict": verdict(nmax["noise_uV_rms"] <= NOISE_BUDGET_UV - NOISE_UNRESOLVED_UV)})
@@ -227,33 +296,84 @@ def main(d: str = "q1_boot2") -> None:
         ws = max(stress, key=lambda r: r["max_abs_r_LSB"])
         srange = f"{min(r['max_abs_r_LSB'] for r in stress):.1f}–{ws['max_abs_r_LSB']:.1f}"
         prose_extra["stress_source"] = ""
-        checks.append({"check": "STRESS timing (full-scale command step at switch closure)", "criterion": "diagnostic",
+        checks.append({"check": "STRESS timing (full-scale input step at switch closure)", "criterion": "diagnostic",
                        "result": f"{srange} LSB ({ws['tag']} worst)", "verdict": "reported"})
     else:  # screening values of the refinement study (design-study record), four conditions
         srange = "1.9–7.3"
         prose_extra["stress_source"] = (" (screening of the same driver with the 5 µm switch at four conditions; the "
                                         "selected design was not run in this timing)")
     prose_extra["stress_range_lsb"] = srange
+    # each device against its own class's published SPICE-model domain (1.8 V devices: 1.95 V); files written
+    # before the per-device limit field existed contain only 1.8 V devices
     steady, trans = [], []
+    multi = any(v.get("limit_V", 1.95) != 1.95 for r in dev for q in r["devices"].values()
+                for k, v in q.items() if k in ("vgs", "vgd", "vds"))
     for r in dev:
         for name, q in r["devices"].items():
             for k, v in q.items():
                 if k in ("vgs", "vgd", "vds"):
-                    steady.append((v["steady_V"], name, k, r["tag"]))
-                    trans.append((v["worst_V"], v["time_over_1.96V_ns_per_cycle"], name, k, r["tag"]))
+                    lim = v.get("limit_V", 1.95)
+                    steady.append((v["steady_V"] - lim, v["steady_V"], lim, name, k, r["tag"]))
+                    trans.append((v["worst_V"] - lim, v["worst_V"], lim,
+                                  v.get("time_over_limit_ns_per_cycle", v.get("time_over_1.96V_ns_per_cycle")),
+                                  name, k, r["tag"]))
     st = max(steady)
     tr = max(trans)
-    tlong = max(trans, key=lambda x: x[1])
-    checks.append({"check": "switch terminal voltages, steady (end of each clock phase)", "criterion": "|VGS|,|VGD|,|VDS| ≤ 1.95 V (model validity)",
-                   "result": f"max {st[0]:.3f} V ({st[1]} {st[2]}, {st[3]})", "verdict": verdict(st[0] <= 1.95 + 1e-3)})
-    vbs = min(q["vbs"]["worst_V"] for r in dev for n, q in r["devices"].items() if n not in ("MXP", "MGT"))
-    checks.append({"check": "switch NMOS body-source voltage", "criterion": "within the model range, ≥ −1.95 V",
-                   "result": f"min {vbs:.3f} V", "verdict": verdict(vbs >= -1.95 - 1e-3)})
-    checks.append({"check": "switch terminal voltages, transient", "criterion": "reported limitation",
-                   "result": f"peak {tr[0]:.2f} V ({tr[2]} {tr[3]}, {tr[4]}); longest above 1.96 V {tlong[1]:.2f} ns/cycle ({tlong[2]} {tlong[3]})",
-                   "verdict": "reported"})
+    tlong = max(trans, key=lambda x: x[3])
+    lim_txt = "each device's model-domain limit (1.8 V devices 1.95 V)" if multi else "1.95 V"
+    checks.append({"check": "switch terminal voltages, steady (end of each clock phase)",
+                   "criterion": f"|VGS|,|VGD|,|VDS| ≤ {lim_txt} (model validity)",
+                   "result": f"max {st[1]:.3f} V{f' of {st[2]:.2f} V' if multi else ''} ({st[3]} {st[4]}, {st[5]})",
+                   "verdict": verdict(st[0] <= 1e-3)})
+    rv = min((q["vbs"]["worst_V"] + q["vbs"].get("limit_V", 1.95), q["vbs"]["worst_V"], n)
+             for r in dev for n, q in r["devices"].items() if q.get("model", "nfet").split("__")[-1][0] != "p"
+             and n not in ("MXP", "MGT"))
+    checks.append({"check": "switch NMOS body-source voltage, reverse",
+                   "criterion": "within the model range, ≥ −1.95 V" if not multi else "within each device's model range (1.8 V devices ≥ −1.95 V)",
+                   "result": f"min {rv[1]:.3f} V" + (f" ({rv[2]})" if multi else ""), "verdict": verdict(rv[0] >= -1e-3)})
+    # reader-facing device classes of the switch devices, for device-specific limits in the criteria
+    cls_name = {"nfet_01v8": "1.8 V NMOS", "pfet_01v8": "1.8 V PMOS", "nfet_01v8_lvt": "1.8 V low-Vt NMOS",
+                "pfet_01v8_lvt": "1.8 V low-Vt PMOS", "nfet_03v3_nvt": "3.3 V native NMOS"}
+    fwd_limits = {}
+    for r in dev:
+        for q in r["devices"].values():
+            if "model" in q and "vbs_fwd" in q:
+                cls = q["model"].split("__")[-1]
+                fwd_limits[cls_name.get(cls, cls)] = q["vbs_fwd"]["limit_V"]
+    fwd_criterion = ("within each device class's documented body-source model-validity range ("
+                     + ", ".join(f"{c} ≤ {v:+.1f} V" for c, v in sorted(fwd_limits.items())) + ") (A3)"
+                     if fwd_limits else "within the model range, NMOS ≤ +0.3 V, PMOS ≤ +0.1 V (A3)")
+    # A3: "VBS must stay within the model range (+0.3 to -1.95 V)" -- the forward side, at every instant
+    # (not limited to steady state; amendment A8 covers only excursions above 1.95 V). PMOS mirrored (+0.1 V).
+    if all("vbs_fwd" in q for r in dev for q in r["devices"].values()):
+        fw = max(((q["vbs_fwd"]["worst_V"] - q["vbs_fwd"]["limit_V"], q["vbs_fwd"]["worst_V"], q["vbs_fwd"]["limit_V"],
+                   q["vbs_fwd"]["time_over_limit_ns_per_cycle"], n, r["tag"], r["timing"])
+                  for r in dev for n, q in r["devices"].items()))
+        checks.append({"check": "switch MOS body-source voltage, forward (all instants)",
+                       "criterion": fwd_criterion,
+                       "result": f"max {fw[1]:+.3f} V vs {fw[2]:+.1f} V ({fw[4]}, {fw[5]} {fw[6]}); "
+                                 f"{fw[3]:.3f} ns/cycle beyond the limit",
+                       "verdict": verdict(fw[0] <= 1e-3)})
+    else:
+        checks.append({"check": "switch MOS body-source voltage, forward (all instants)",
+                       "criterion": "within the model range, NMOS ≤ +0.3 V, PMOS ≤ +0.1 V (A3)",
+                       "result": "not evaluated (devlimits.json predates the forward-bias field)",
+                       "verdict": "UNRESOLVED"})
+    if multi:
+        checks.append({"check": "switch terminal voltages, transient (all instants)",
+                       "criterion": "reported (A8); each device against its published SPICE-model domain",
+                       "result": f"peak {tr[1]:.2f} V of {tr[2]:.2f} V ({tr[4]} {tr[5]}, {tr[6]}); "
+                                 f"{'inside the domain at every instant' if tr[0] <= 1e-3 else f'longest beyond the limit {tlong[3]:.2f} ns/cycle ({tlong[4]} {tlong[5]})'}",
+                       "verdict": "reported"})
+    else:
+        checks.append({"check": "switch terminal voltages, transient",
+                       "criterion": "reported (A8); a peak above 1.95 V lies outside the published SKY130 SPICE-model domain",
+                       "result": f"peak {tr[1]:.2f} V ({tr[4]} {tr[5]}, {tr[6]}); longest above 1.96 V {tlong[3]:.2f} ns/cycle ({tlong[4]} {tlong[5]})",
+                       "verdict": "reported"})
     i_tt = [r["supply_current_uA"] for r in parent if r["tag"] == "tt_1.80V_+27C"][0]
     i_max = max(r["supply_current_uA"] for r in parent)
+    for c in checks:
+        c["role"] = role(c)
     final_pass = all(c["verdict"].startswith("PASS") for c in checks if c["verdict"] not in ("reported",))
     counts = netlist_counts(des)
     offs = [r["offset_mV"]["yE"] for r in parent]
@@ -271,7 +391,7 @@ def main(d: str = "q1_boot2") -> None:
                  "Cs_pF": des.cs * 1e12, "clock_phases": 2},
         "design_summary": {
             "driver": "folded-cascode first stage (native-threshold NMOS pair), PMOS common-source second stage, Miller Cc + Rz, output capacitor; bias lines RC-filtered",
-            "sampling switch": "bootstrapped NMOS (W 2 µm, L 0.15 µm), bootstrap capacitor 0.2 pF, clock-boosted charging device",
+            "sampling switch": switch_summary(des),
             "Cs": f"{des.cs * 1e12:.0f} pF", "clock": "two complementary phases, 0.2 ns edges, 100 ns period, 40 ns acquisition",
             "supply current": f"{i_tt:.0f} µA at tt (max {i_max:.0f} µA over the declared set)",
             "devices": f"driver {counts['driver_transistors']} transistors, switch {counts['switch_transistors']}",
@@ -290,11 +410,13 @@ def main(d: str = "q1_boot2") -> None:
                   "sat_corner_r_lsb": f"{[r['max_abs_r_LSB'] for r in parent if r['tag'] == smin[2]][0]:.2f}",
                   "driver_transistors": str(counts["driver_transistors"]),
                   "switch_transistors": str(counts["switch_transistors"]),
-                  "dev_peak_v": f"{tr[0]:.2f}", **prose_extra},
+                  "dev_peak_v": f"{tr[1]:.2f}", **prose_extra},
     }
     out = sb.REPO / "results" / "closure" / "final" / d / "final_closure.json"
     out.write_text(json.dumps(result, indent=1, ensure_ascii=False))
-    closure_matrix_figure(parent, noise, stab, "figure_closure_matrix")
+    # the notebook's figure belongs to the design it currently presents; other designs get their own file
+    closure_matrix_figure(parent, noise, stab, des, wp, nmax,
+                          "figure_closure_matrix" if d == designs.SELECTED else f"figure_closure_matrix_{d}")
     print(json.dumps({"final_pass": final_pass, "checks": [(c["check"][:50], c["result"], c["verdict"]) for c in checks]},
                      indent=1, ensure_ascii=False))
 

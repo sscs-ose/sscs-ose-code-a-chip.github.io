@@ -1,6 +1,6 @@
 {
  "design": "q1_boot2",
- "final_pass": true,
+ "final_pass": false,
  "environment": {
   "ngspice": "ngspice-42",
   "sky130_sources": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b",
@@ -93,14 +93,20 @@
    "verdict": "PASS"
   },
   {
-   "check": "switch NMOS body-source voltage",
+   "check": "switch NMOS body-source voltage, reverse",
    "criterion": "within the model range, ≥ −1.95 V",
    "result": "min -1.950 V",
    "verdict": "PASS"
   },
   {
+   "check": "switch MOS body-source voltage, forward (all instants)",
+   "criterion": "within the model range, NMOS ≤ +0.3 V, PMOS ≤ +0.1 V (A3)",
+   "result": "max +0.465 V vs +0.3 V (MXS, fs_1.95V_+27C stress); 0.018 ns/cycle beyond the limit",
+   "verdict": "FAIL"
+  },
+  {
    "check": "switch terminal voltages, transient",
-   "criterion": "reported limitation",
+   "criterion": "reported (A8); a peak above 1.95 V lies outside the published SKY130 SPICE-model domain",
    "result": "peak 2.41 V (MXS vgs, fs_1.95V_+27C); longest above 1.96 V 0.20 ns/cycle (MTN vgs)",
    "verdict": "reported"
   }

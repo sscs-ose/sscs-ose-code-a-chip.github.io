@@ -167,6 +167,10 @@ Among candidates that pass 1–3 with margin, the cheaper one is preferred even 
 Machine-readable `results/closure/final/q1_boot2/final_closure.json` with, per condition: `max|r|` (both windows), `o`, `g`, component
 maxima, acquisition residual, read-window ripple, loop phase/gain margin, supply current, and PASS/FAIL; and a reader
 matrix (process × VDD × T heat map of `max|r|/VLSB`). A final PASS requires every condition of Section 5 to pass.
+*Note (2026-11-01, not an amendment): the design named here, `q1_boot2`, was superseded after the completed A3
+check (forward body-source voltage) failed. The selected design is `q1_nvt1`, verified against the same criteria;
+its result is `results/closure/final/q1_nvt1/final_closure.json` (same structure), and the reader matrix is drawn as
+separate per-condition panels for the residual, noise, and phase margin.*
 
 ## Amendments before final verification (2026-10-31, after the independent R3 midpoint audit)
 
@@ -194,6 +198,10 @@ condition. Transient exceedances above 1.95 V are reported with measured peak an
 range (+0.3 to −1.95 V) or the device's body is tied to its source in an isolated p-well (stated as such; the deep-n-well
 junction is not modelled). Gate-to-bulk above VDD is accepted only under an inverted channel and is stated as a limitation
 (no TDDB/HCI qualification). Checked over all 1.95 V and all 125 °C conditions, both timings, and 0.1 ns edges.
+*Implementation note (2026-10-31, bootstrap model-domain investigation): the original assembler evaluated only the
+reverse end of the VBS range; the forward end (NMOS +0.3 V, PMOS +0.1 V) is now evaluated at every instant. The
+criterion is unchanged. The investigation record (BOOTSTRAP_MODEL_DOMAIN_HANDOFF.md) is kept in the development
+repository.*
 
 **A4 — Current.** The 300/450/800 µA figures used during the driver iterations were exploration bounds, not requirements.
 Supply current is a selection cost (Section 9 item 4), reported at tt and as the maximum over the final set.

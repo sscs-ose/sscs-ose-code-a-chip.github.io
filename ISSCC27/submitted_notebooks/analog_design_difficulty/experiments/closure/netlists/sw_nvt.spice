@@ -1,0 +1,8 @@
+* Workstream N (switch redesign study): single thick-oxide native NMOS sampling switch, no bootstrap.
+* sky130_fd_pr__nfet_03v3_nvt (published SPICE-model domain VDS/VGS 0..3.3 V, VBS 0..-3.3 V), gate driven
+* directly by the 0..VDD track clock phi; body = p-substrate (vss). Binned sizes exist only at L = 0.5 um
+* (W 0.42/0.7/1/4/10 um), so the width is set with W = 4 um fingers.
+* Ports: in  - driver side      out - Cs side      phi - track clock (high = track)   phib, vdd unused
+.subckt sw_nvt in out phi phib vdd vss WS=4 MS=4
+XMS  in   phi  out  vss sky130_fd_pr__nfet_03v3_nvt W={WS} L=0.5 m={MS}
+.ends sw_nvt
