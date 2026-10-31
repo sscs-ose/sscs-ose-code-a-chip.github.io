@@ -2,6 +2,8 @@
 
 Code-a-Chip (CaC) notebook: equilibrium propagation (EP) on a 1T1R RRAM crossbar chip. One Jupyter notebook, [`ep_cim_loop.ipynb`](ep_cim_loop.ipynb), runs the whole design loop from top to bottom.
 
+**Run it with Docker** (`env/Dockerfile`): the flow uses many EDA tools whose versions must match, and the image pins all of them (see [How to run](#how-to-run)).
+
 ## Authors
 **Seokjin Oh, Jinzhan Li, and Suin Yi†**<br>
 Department of Electrical and Computer Engineering, Texas A&M University, College Station, TX 77843, USA<br>
@@ -67,10 +69,15 @@ ep_cim_loop/
 
 ## How to run
 
+> **Docker is strongly recommended — for QUICK and for FULL.**
+> The flow uses many EDA tools together (Yosys, OpenROAD, Magic, Netgen, Xyce, KLayout, Icarus Verilog), and the scripts depend on their exact versions.
+> The Docker image (`env/Dockerfile`) pins every tool, the PDK build and the Python packages to the versions that made the saved results; with it every cell of this notebook runs (QUICK and FULL tested, 0 failed).
+> Google Colab and Linux without Docker install other public builds. Known limit: their OpenROAD build (Dec. 2024) lacks a function used by the digital place-and-route script, so **section 8 (the four digital blocks) and the placement step fail there**; the later sections then use the saved digital blocks (chip LVS still matches).
+
 ### Which way to choose
 | What you want | Recommended way | Why |
 |---|---|---|
-| **Look through the flow** — QUICK mode (about 30 min) | any way below: Docker, Google Colab, or Linux without Docker | QUICK checks every step at block level; small tool-version differences do not change what you see |
+| **Look through the flow** — QUICK mode (about 30 min) | **Docker**; Google Colab or Linux without Docker also run it, except section 8 (see above) | QUICK checks every step at block level |
 | **Reproduce the full demo** — FULL mode, with or without training | **Docker (strongly recommended)** | the image pins every tool to the versions that made the saved results (table "Tool versions"). Other ways install other builds of Magic, Netgen, OpenROAD and Yosys, so DRC counts, the synthesized digital netlists and the chip-level LVS can differ from the saved ones |
 | **Only read** | open the notebook on GitHub | it is saved with all outputs and figures |
 
