@@ -183,6 +183,7 @@ The layout is verified using the automated `src/layout/drc_checker.py` verificat
 ## 📈 Multi-Corner PVT Sensitivity & Statistical Mismatch Analysis
 
 ### Multi-Corner Process, Voltage & Temperature (PVT) Model
+
 To evaluate performance robustness across fabrication and environmental shifts without proprietary EDA licenses, the repository incorporates an **Analytical EKV Process Sensitivity Matrix** calibrated against the physical parameter boundaries of the SkyWater SKY130 BSIM4 model. The analysis evaluates all 45 operational combinations across 5 process corners (**TT, FF, SS, SF, FS**), temperatures ($-40^\circ\text{C}, +27^\circ\text{C}, +85^\circ\text{C}$), and supply voltages ($0.55\,\text{V}, 0.60\,\text{V}, 0.65\,\text{V}$):
 
 | Process Corner | Temp ($^\circ\text{C}$) | $V_{DD}$ (V) | Gain (dB) | UGF (kHz) | Phase Margin ($^\circ$) | CMRR (dB) | Noise ($\text{nV}/\sqrt{\text{Hz}}$) | Total Power ($\mu\text{W}$) | NEF |
@@ -198,6 +199,7 @@ To evaluate performance robustness across fabrication and environmental shifts w
 *All 45 PVT combinations are stored in [`data/precomputed_pvt_results.csv`](data/precomputed_pvt_results.csv).*
 
 ### Statistical Pelgrom Mismatch Variance Analysis (500 Samples)
+
 Transistor threshold mismatch is evaluated using official SkyWater SKY130 Pelgrom mismatch coefficients ($A_{Vth} = 5.0\,\text{mV}\cdot\mu\text{m}$):
 $$\sigma_{Vth} = \frac{A_{Vth}}{\sqrt{W \cdot L}} = \frac{5.0\,\text{mV}\cdot\mu\text{m}}{\sqrt{40.6\,\mu\text{m} \cdot 1.0\,\mu\text{m}}} = 0.785\,\text{mV}$$
 
