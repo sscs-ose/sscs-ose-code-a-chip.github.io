@@ -25,7 +25,7 @@ class Sky130LVSChecker:
          - Passive Extraction: MIM Capacitors via capm (89/44), Resistors via Poly outside Diff
          - Pin Extraction: Terminal labels and coordinate mapping from Text/Pin layers
       2. Netlist Graph Isomorphism & Device Count Verification
-      3. Netgen-Compatible Sign-Off Report Generation
+      3. Detailed Device & Pin Match Report Generation
     """
     def __init__(self, project_dir: str):
         self.project_dir = Path(project_dir)

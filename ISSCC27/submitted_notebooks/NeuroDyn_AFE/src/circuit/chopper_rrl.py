@@ -23,7 +23,7 @@ class ChopperRRLSimulator:
         self,
         f_chop_hz: float = 4000.0,
         rrl_gain: float = 76.0,
-        ota_gain_db: float = 67.2,
+        ota_gain_db: float = 63.10,
         ota_bandwidth_hz: float = 12000.0,
         fs_hz: float = 200000.0,
         duration_s: float = 0.030,

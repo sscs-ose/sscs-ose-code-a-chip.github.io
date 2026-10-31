@@ -355,8 +355,6 @@ ISSCC27/submitted_notebooks/NeuroDyn_AFE/
 ├── EXECUTIVE_SUMMARY.md                   # 1-Page SSCS Jury Briefing & Architecture Datasheet
 ├── requirements.txt                       # Project Dependencies
 ├── NeuroDyn_AFE.ipynb                     # Master Interactive Jupyter Notebook
-├── run_lvs.sh                             # Netgen LVS sign-off script (Docker/Linux)
-├── run_pex.sh                             # Magic PEX extraction & post-layout SPICE (Docker/Linux)
 ├── verify_all.py                          # Automated 7-Stage Comprehensive Self-Test Suite
 ├── src/                                   # Source Package
 │   ├── __init__.py

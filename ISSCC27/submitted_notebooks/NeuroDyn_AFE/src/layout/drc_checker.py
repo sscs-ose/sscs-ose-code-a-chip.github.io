@@ -241,7 +241,7 @@ class Sky130DRCChecker:
         log_path = os.path.join(data_dir, "drc.log")
         with open(log_path, "w", encoding="utf-8") as f:
             f.write("==================================================================\n")
-            f.write("SkyWater SKY130 KLayout DRC Physical Sign-Off Report\n")
+            f.write("SkyWater SKY130 DRM Geometric Verification Report\n")
             f.write(f"Layout File: {self.gds_path}\n")
             f.write(f"Rule Deck:   SkyWater SKY130 Design Rule Manual (DRM Rev 2.0)\n")
             f.write("==================================================================\n\n")
@@ -259,7 +259,7 @@ class Sky130DRCChecker:
         """Prints a console summary of the DRC check results."""
         df = self.run_drc_check()
         violations = sum(1 for s in df["Status"] if s == "FAIL")
-        print(f"[DRC] SkyWater SKY130 Physical DRC Sign-Off:")
+        print(f"[DRC] SkyWater SKY130 DRM Geometric Verification:")
         print(f"   Checked Rules:   {len(df)}")
         print(f"   Violations:      {violations}")
         print(f"   Physical Status: {'100% CLEAN - ZERO (0) VIOLATIONS' if violations == 0 else 'VIOLATIONS DETECTED'}")
