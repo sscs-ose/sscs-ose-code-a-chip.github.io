@@ -1,0 +1,771 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69+ (git sha1 9f09efcdb-dirty, Release, GNU /home/conda/feedstock_root/build_artifacts/bld/rattler-build_yosys_1788957668/build_env/bin/x86_64-conda-linux-gnu-c++ 15.3.0) [github.com/conda-forge/yosys-feedstock at main]
+
+-- Running command `read_liberty -lib pdk/sky130hd_tt.lib; read_verilog -sv rtl/multiplier/conventional_multiplier.sv rtl/multiplier/karatsuba_recursive.sv; hierarchy -top karatsuba_recursive_multiplier -chparam N 8; proc; flatten; opt_expr; opt_clean; check; opt -nodffe -nosdff; fsm; opt; memory; opt_clean; wreduce; opt -purge; alumacc; share; opt; memory -nomap; opt_clean; techmap; opt -fast; dfflibmap -liberty pdk/sky130hd_tt.lib; abc -liberty pdk/sky130hd_tt.lib -script scripts/abc_area.script; setundef -zero; clean -purge; stat -liberty pdk/sky130hd_tt.lib; ltp' --
+
+1. Executing Liberty frontend: pdk/sky130hd_tt.lib
+Imported 428 cell types from liberty file.
+
+2. Executing Verilog-2005 frontend: rtl/multiplier/conventional_multiplier.sv
+Parsing SystemVerilog input from `rtl/multiplier/conventional_multiplier.sv' to AST representation.
+Generating RTLIL representation for module `\conventional_multiplier'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: rtl/multiplier/karatsuba_recursive.sv
+Parsing SystemVerilog input from `rtl/multiplier/karatsuba_recursive.sv' to AST representation.
+Generating RTLIL representation for module `\karatsuba_recursive_multiplier'.
+Successfully finished Verilog frontend.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \N = 8
+
+5. Executing AST frontend in derive mode using pre-parsed AST for module `\karatsuba_recursive_multiplier'.
+Parameter \N = 8
+Generating RTLIL representation for module `$paramod\karatsuba_recursive_multiplier\N=s32'00000000000000000000000000001000'.
+
+5.1. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     \conventional_multiplier
+Parameter \N = 8
+
+5.2. Executing AST frontend in derive mode using pre-parsed AST for module `\conventional_multiplier'.
+Parameter \N = 8
+Generating RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+
+5.3. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000
+
+5.4. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000
+Removing unused module `$paramod\karatsuba_recursive_multiplier\N=s32'00000000000000000000000000001000'.
+Removing unused module `\conventional_multiplier'.
+Removed 2 unused modules.
+
+6. Executing PROC pass (convert processes to netlists).
+
+6.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$46'.
+Removing empty process `karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$46'.
+Cleaned up 1 empty switch.
+
+6.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+6.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 18 assignments to connections.
+
+6.4. Executing PROC_INIT pass (extract init attributes).
+
+6.5. Executing PROC_ARST pass (detect async resets in processes).
+
+6.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+6.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$87'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$85'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$83'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$81'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$79'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$77'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$75'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$73'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$71'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$69'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$67'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$65'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$63'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$61'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$59'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$57'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$47'.
+
+6.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$87'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$85'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$83'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$81'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$79'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$77'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$75'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$73'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$71'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$69'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$67'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$65'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$63'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$61'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$59'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$57'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\P' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$47'.
+
+6.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+6.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+6.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$87'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$85'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$83'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$81'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$79'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$77'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$75'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$73'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$71'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$69'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$67'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$65'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$63'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$61'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$59'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$57'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$47'.
+Cleaned up 0 empty switches.
+
+6.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.
+<suppressed ~8 debug messages>
+Optimizing module karatsuba_recursive_multiplier.
+
+7. Executing FLATTEN pass (flatten design).
+Deleting now unused module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.
+<suppressed ~1 debug messages>
+
+8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+<suppressed ~1 debug messages>
+
+9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 0 unused cells and 37 unused wires.
+<suppressed ~2 debug messages>
+
+10. Executing CHECK pass (checking for obvious problems).
+Checking module karatsuba_recursive_multiplier...
+Found and reported 0 problems.
+
+11. Executing OPT pass (performing simple optimizations).
+
+11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 16 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+11.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+11.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+11.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 16 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+11.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+11.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+11.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+11.9. Finished fast OPT passes. (There is nothing left to do.)
+
+12. Executing FSM pass (extract and optimize FSM).
+
+12.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+12.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+12.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+12.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+12.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+12.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+12.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+12.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+13. Executing OPT pass (performing simple optimizations).
+
+13.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+13.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 16 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+13.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+13.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+13.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 16 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+13.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+13.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+13.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+13.9. Finished fast OPT passes. (There is nothing left to do.)
+
+14. Executing MEMORY pass.
+
+14.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+14.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+14.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+14.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+14.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+14.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+14.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+14.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+14.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+14.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+14.11. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+15. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+16. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56 ($add).
+Removed top 2 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$55 ($add).
+Removed top 3 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$54 ($add).
+Removed top 4 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$53 ($add).
+Removed top 5 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$52 ($add).
+Removed top 6 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$51 ($add).
+Removed top 8 bits (of 16) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+Removed top 7 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+Removed top 6 bits (of 16) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+Removed top 6 bits (of 16) from wire karatsuba_recursive_multiplier.$flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$50_Y.
+
+17. Executing OPT pass (performing simple optimizations).
+
+17.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+17.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 16 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+17.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+17.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+17.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 16 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+17.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+17.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 1 unused cells and 12 unused wires.
+<suppressed ~13 debug messages>
+
+17.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+17.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+17.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+17.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+17.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 15 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+17.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+17.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+17.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+17.16. Finished fast OPT passes. (There is nothing left to do.)
+
+18. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module karatsuba_recursive_multiplier:
+  creating $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$51 ($add).
+  creating $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$52 ($add).
+  creating $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$53 ($add).
+  creating $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$54 ($add).
+  creating $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$55 ($add).
+  creating $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56 ($add).
+  creating $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+  merging $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$55 into $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56.
+  merging $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$54 into $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56.
+  merging $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$53 into $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56.
+  merging $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$52 into $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56.
+  merging $macc model for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$51 into $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56.
+  creating $alu model for $macc $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$50.
+  creating $macc cell for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$56: $auto$alumacc.cc:399:replace_macc$91
+  creating $alu cell for $flatten\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$50: $auto$alumacc.cc:548:replace_alu$92
+  created 1 $alu and 1 $macc cells.
+
+19. Executing SHARE pass (SAT-based resource sharing).
+
+20. Executing OPT pass (performing simple optimizations).
+
+20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 15 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 15 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+20.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+20.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 5 unused cells and 5 unused wires.
+<suppressed ~6 debug messages>
+
+20.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+20.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+20.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+20.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+20.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 10 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+20.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+20.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+20.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+20.16. Finished fast OPT passes. (There is nothing left to do.)
+
+21. Executing MEMORY pass.
+
+21.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+21.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+21.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+21.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+21.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+21.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+21.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+21.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+21.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+21.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+22. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+23. Executing TECHMAP pass (map to technology primitives).
+
+23.1. Executing Verilog-2005 frontend: /home/z/.micromamba/eda/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/home/z/.micromamba/eda/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+23.2. Continuing TECHMAP pass.
+Using template $paramod$9befa12646ab1d64090f7cfa4f3c72972b2004e7\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add $auto$wreduce.cc:513:run$90 [9:0] (10 bits, unsigned)
+  add { \gen_base_case.u_base.partial_prod[7] 7'0000000 } (15 bits, unsigned)
+  add { \gen_base_case.u_base.partial_prod[6] 6'000000 } (14 bits, unsigned)
+  add { \gen_base_case.u_base.partial_prod[5] 5'00000 } (13 bits, unsigned)
+  add { \gen_base_case.u_base.partial_prod[4] 4'0000 } (12 bits, unsigned)
+  add { \gen_base_case.u_base.partial_prod[3] 3'000 } (11 bits, unsigned)
+  add { \gen_base_case.u_base.partial_prod[2] 2'00 } (10 bits, unsigned)
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001111 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010000 for cells of type $fa.
+Using template $paramod$6df0329addda9228fcc2546de2aaf14ad26c98e1\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001010 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $and.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010000 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~510 debug messages>
+
+24. Executing OPT pass (performing simple optimizations).
+
+24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+<suppressed ~332 debug messages>
+
+24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 397 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 35 unused cells and 163 unused wires.
+<suppressed ~36 debug messages>
+
+24.5. Finished fast OPT passes.
+
+25. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sky130_fd_sc_hd__dfxtp_1 (noninv, pins=3, area=20.02) is a direct match for cell type $_DFF_P_.
+  cell sky130_fd_sc_hd__dfrtn_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_NN0_.
+  cell sky130_fd_sc_hd__dfrtp_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_PN0_.
+  cell sky130_fd_sc_hd__dfstp_1 (noninv, pins=4, area=26.28) is a direct match for cell type $_DFF_PN1_.
+  cell sky130_fd_sc_hd__edfxtp_1 (noninv, pins=4, area=30.03) is a direct match for cell type $_DFFE_PP_.
+  cell sky130_fd_sc_hd__dfbbn_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_NNN_.
+  cell sky130_fd_sc_hd__dfbbp_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_PNN_.
+  cell sky130_fd_sc_hd__dlxtn_1 (noninv, pins=3, area=15.01) is a direct match for cell type $_DLATCH_N_.
+  cell sky130_fd_sc_hd__lpflow_inputisolatch_1 (noninv, pins=3, area=13.76) is a direct match for cell type $_DLATCH_P_.
+  cell sky130_fd_sc_hd__dlrtn_1 (noninv, pins=4, area=17.52) is a direct match for cell type $_DLATCH_NN0_.
+  cell sky130_fd_sc_hd__dlrtp_1 (noninv, pins=4, area=16.27) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    \sky130_fd_sc_hd__dfxtp_1 _DFF_P_ (.CLK( C), .D( D), .Q( Q));
+    \sky130_fd_sc_hd__dfrtn_1 _DFF_NN0_ (.CLK_N( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sky130_fd_sc_hd__dfrtp_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    \sky130_fd_sc_hd__dfstp_1 _DFF_PN1_ (.CLK( C), .D( D), .Q( Q), .SET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    \sky130_fd_sc_hd__edfxtp_1 _DFFE_PP_ (.CLK( C), .D( D), .DE( E), .Q( Q));
+    \sky130_fd_sc_hd__dfbbn_1 _DFFSR_NNN_ (.CLK_N( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    \sky130_fd_sc_hd__dfbbp_1 _DFFSR_PNN_ (.CLK( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    \sky130_fd_sc_hd__dlxtn_1 _DLATCH_N_ (.D( D), .GATE_N( E), .Q( Q));
+    \sky130_fd_sc_hd__lpflow_inputisolatch_1 _DLATCH_P_ (.D( D), .Q( Q), .SLEEP_B( E));
+    \sky130_fd_sc_hd__dlrtn_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sky130_fd_sc_hd__dlrtp_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+25.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~24 debug messages>
+Mapping DFF/DLATCH cells in module `\karatsuba_recursive_multiplier':
+
+26. Executing ABC pass (technology mapping using ABC).
+
+26.1. Extracting gate netlist of module `\karatsuba_recursive_multiplier' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache-1001/yosys_merged_931a5023.scl (1 files)
+
+26.1.1. Executed ABC.
+Extracted 362 gates and 379 wires to a netlist network with 16 inputs and 16 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep  9 2026 12:41:08)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache-1001/yosys_merged_931a5023.scl 
+ABC: Warning: Detected 9 multi-output cells (for example, "sky130_fd_sc_hd__fa_1").
+ABC: + source /home/z/my-project/repo-autoaccel/scripts/abc_area.script 
+ABC: WireLoad = "none"  Gates =    462 ( 11.9 %)   Cap =  5.9 ff (  1.7 %)   Area =     2862.75 ( 88.1 %)   Delay =  3629.06 ps  ( 11.7 %)               
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+26.1.2. Re-integrating ABC results.
+ABC RESULTS:   sky130_fd_sc_hd__a211oi_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__a21boi_0 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__a21o_2 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__a21oi_1 cells:       26
+ABC RESULTS:   sky130_fd_sc_hd__a22oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a31oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__and2_2 cells:        3
+ABC RESULTS:   sky130_fd_sc_hd__and3_2 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__clkinv_1 cells:       55
+ABC RESULTS:   sky130_fd_sc_hd__maj3_1 cells:       19
+ABC RESULTS:   sky130_fd_sc_hd__nand2_1 cells:      124
+ABC RESULTS:   sky130_fd_sc_hd__nand3_1 cells:       38
+ABC RESULTS:   sky130_fd_sc_hd__nand3b_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__nand4_1 cells:        3
+ABC RESULTS:   sky130_fd_sc_hd__nor2_1 cells:       58
+ABC RESULTS:   sky130_fd_sc_hd__nor3_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__o2111ai_1 cells:        3
+ABC RESULTS:   sky130_fd_sc_hd__o211a_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__o211ai_1 cells:        6
+ABC RESULTS:   sky130_fd_sc_hd__o21a_1 cells:        4
+ABC RESULTS:   sky130_fd_sc_hd__o21ai_0 cells:       18
+ABC RESULTS:   sky130_fd_sc_hd__o21bai_1 cells:        5
+ABC RESULTS:   sky130_fd_sc_hd__o22ai_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__o2bb2ai_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__or2_2 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__xnor2_1 cells:       19
+ABC RESULTS:   sky130_fd_sc_hd__xnor3_4 cells:       14
+ABC RESULTS:   sky130_fd_sc_hd__xor2_1 cells:       44
+ABC RESULTS:   sky130_fd_sc_hd__xor3_4 cells:        5
+ABC RESULTS:        internal signals:      347
+ABC RESULTS:           input signals:       16
+ABC RESULTS:          output signals:       16
+Removing temp directory.
+Removing global temp directory.
+
+27. Executing SETUNDEF pass (replace undef values with defined constants).
+Removed 0 unused cells and 110 unused wires.
+
+28. Printing statistics.
+
+=== karatsuba_recursive_multiplier ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      449        - wires
+      478        - wire bits
+        3        - public wires
+       32        - public wire bits
+        3        - ports
+       32        - port bits
+      462 2.86E+03 cells
+        2   15.014   sky130_fd_sc_hd__a211oi_1
+        2   15.014   sky130_fd_sc_hd__a21boi_0
+        2   17.517   sky130_fd_sc_hd__a21o_2
+       26  130.125   sky130_fd_sc_hd__a21oi_1
+        1    7.507   sky130_fd_sc_hd__a22oi_1
+        1    6.256   sky130_fd_sc_hd__a31oi_1
+        3   22.522   sky130_fd_sc_hd__and2_2
+        2   15.014   sky130_fd_sc_hd__and3_2
+       55  206.448   sky130_fd_sc_hd__clkinv_1
+       19  190.182   sky130_fd_sc_hd__maj3_1
+      124  465.446   sky130_fd_sc_hd__nand2_1
+       38  190.182   sky130_fd_sc_hd__nand3_1
+        1    7.507   sky130_fd_sc_hd__nand3b_1
+        3   18.768   sky130_fd_sc_hd__nand4_1
+       58  217.709   sky130_fd_sc_hd__nor2_1
+        1    5.005   sky130_fd_sc_hd__nor3_1
+        3   26.275   sky130_fd_sc_hd__o2111ai_1
+        1    10.01   sky130_fd_sc_hd__o211a_1
+        6   45.043   sky130_fd_sc_hd__o211ai_1
+        4   30.029   sky130_fd_sc_hd__o21a_1
+       18   90.086   sky130_fd_sc_hd__o21ai_0
+        5   37.536   sky130_fd_sc_hd__o21bai_1
+        1    6.256   sky130_fd_sc_hd__o22ai_1
+        2   17.517   sky130_fd_sc_hd__o2bb2ai_1
+        2   12.512   sky130_fd_sc_hd__or2_2
+       19   166.41   sky130_fd_sc_hd__xnor2_1
+       14  367.853   sky130_fd_sc_hd__xnor3_4
+       44   385.37   sky130_fd_sc_hd__xor2_1
+        5  137.632   sky130_fd_sc_hd__xor3_4
+
+   Chip area for module '\karatsuba_recursive_multiplier': 2862.745600
+     of which used for sequential elements: 0.000000 (0.00%)
+
+29. Executing LTP pass (find longest path).
+
+Longest topological path in karatsuba_recursive_multiplier (length=29):
+    0: \B [1]
+    1: $abc$1066$new_n81 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1115)
+    2: $abc$1066$new_n82 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1116)
+    3: $abc$1066$new_n83 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1117)
+    4: $abc$1066$new_n130 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1164)
+    5: $abc$1066$new_n131 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1165)
+    6: $abc$1066$new_n132 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1166)
+    7: $abc$1066$new_n136 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1170)
+    8: $abc$1066$new_n337 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1371)
+    9: $abc$1066$new_n340 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1374)
+   10: $abc$1066$new_n348 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1382)
+   11: $abc$1066$new_n351 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1385)
+   12: $abc$1066$new_n358 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1392)
+   13: $abc$1066$new_n359 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1393)
+   14: $abc$1066$new_n360 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1394)
+   15: $abc$1066$new_n361 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1395)
+   16: $abc$1066$new_n371 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1405)
+   17: $abc$1066$new_n374 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1408)
+   18: $abc$1066$new_n377 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1411)
+   19: $abc$1066$new_n380 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1414)
+   20: $abc$1066$new_n383 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1417)
+   21: $abc$1066$new_n399 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1433)
+   22: $abc$1066$new_n413 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1447)
+   23: $abc$1066$new_n438 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1472)
+   24: $abc$1066$new_n440 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1474)
+   25: $abc$1066$new_n441 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1475)
+   26: $abc$1066$new_n460 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1494)
+   27: $abc$1066$new_n484 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1518)
+   28: $abc$1066$new_n490 (via $abc$1066$auto$blifparse.cc:397:parse_blif$1524)
+   29: \P [15] (via $abc$1066$auto$blifparse.cc:397:parse_blif$1528)
+
+Warnings: 2 unique messages, 4 total
+End of script. Logfile hash: d9a0da1d01, time: 0.36s, user: 0.21s, system: 0.06s, MEM: 53.97 MB peak
+Yosys 0.69+ (git sha1 9f09efcdb-dirty, Release, GNU /home/conda/feedstock_root/build_artifacts/bld/rattler-build_yosys_1788957668/build_env/bin/x86_64-conda-linux-gnu-c++ 15.3.0) [github.com/conda-forge/yosys-feedstock at main]
+Time spent: 28% 1x abc (0 sec), 13% 1x stat (0 sec), ...
+
+=== STDERR ===

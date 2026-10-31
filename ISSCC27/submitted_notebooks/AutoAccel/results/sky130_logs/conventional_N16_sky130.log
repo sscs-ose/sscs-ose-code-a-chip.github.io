@@ -1,0 +1,896 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69+ (git sha1 9f09efcdb-dirty, Release, GNU /home/conda/feedstock_root/build_artifacts/bld/rattler-build_yosys_1788957668/build_env/bin/x86_64-conda-linux-gnu-c++ 15.3.0) [github.com/conda-forge/yosys-feedstock at main]
+
+-- Running command `read_liberty -lib pdk/sky130hd_tt.lib; read_verilog -sv rtl/multiplier/conventional_multiplier.sv; hierarchy -top conventional_multiplier -chparam N 16; proc; flatten; opt_expr; opt_clean; check; opt -nodffe -nosdff; fsm; opt; memory; opt_clean; wreduce; opt -purge; alumacc; share; opt; memory -nomap; opt_clean; techmap; opt -fast; dfflibmap -liberty pdk/sky130hd_tt.lib; abc -liberty pdk/sky130hd_tt.lib -script scripts/abc_area.script; setundef -zero; clean -purge; stat -liberty pdk/sky130hd_tt.lib; ltp' --
+
+1. Executing Liberty frontend: pdk/sky130hd_tt.lib
+Imported 428 cell types from liberty file.
+
+2. Executing Verilog-2005 frontend: rtl/multiplier/conventional_multiplier.sv
+Parsing SystemVerilog input from `rtl/multiplier/conventional_multiplier.sv' to AST representation.
+Generating RTLIL representation for module `\conventional_multiplier'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+Successfully finished Verilog frontend.
+
+3. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \N = 16
+
+4. Executing AST frontend in derive mode using pre-parsed AST for module `\conventional_multiplier'.
+Parameter \N = 16
+Generating RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010000'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+
+4.1. Analyzing design hierarchy..
+Top module:  \conventional_multiplier
+
+4.2. Analyzing design hierarchy..
+Top module:  \conventional_multiplier
+Removing unused module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010000'.
+Removed 1 unused modules.
+
+5. Executing PROC pass (convert processes to netlists).
+
+5.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+5.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+5.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 34 assignments to connections.
+
+5.4. Executing PROC_INIT pass (extract init attributes).
+
+5.5. Executing PROC_ARST pass (detect async resets in processes).
+
+5.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+5.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:25$45'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$63'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$65'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$67'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$69'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$71'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$73'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$75'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$77'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$79'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$81'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$83'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$85'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$87'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$89'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$91'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$93'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$95'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$97'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$99'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$101'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$103'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$105'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$107'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$109'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$111'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$113'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$115'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$117'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$119'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$121'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$123'.
+Creating decoders for process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$125'.
+
+5.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\conventional_multiplier.\P' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:25$45'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[0]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$63'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[0]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$65'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[1]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$67'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[1]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$69'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[2]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$71'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[2]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$73'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[3]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$75'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[3]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$77'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[4]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$79'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[4]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$81'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[5]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$83'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[5]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$85'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[6]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$87'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[6]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$89'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[7]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$91'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[7]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$93'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[8]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$95'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[8]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$97'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[9]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$99'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[9]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$101'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[10]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$103'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[10]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$105'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[11]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$107'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[11]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$109'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[12]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$111'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[12]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$113'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[13]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$115'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[13]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$117'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[14]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$119'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[14]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$121'.
+No latch inferred for signal `\conventional_multiplier.\partial_prod[15]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$123'.
+No latch inferred for signal `\conventional_multiplier.\shifted_prod[15]' from process `\conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$125'.
+
+5.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+5.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+5.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:25$45'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$63'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$65'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$67'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$69'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$71'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$73'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$75'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$77'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$79'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$81'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$83'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$85'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$87'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$89'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$91'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$93'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$95'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$97'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$99'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$101'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$103'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$105'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$107'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$109'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$111'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$113'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$115'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$117'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$119'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$121'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:17$123'.
+Removing empty process `conventional_multiplier.$proc$rtl/multiplier/conventional_multiplier.sv:19$125'.
+Cleaned up 0 empty switches.
+
+5.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+<suppressed ~16 debug messages>
+
+6. Executing FLATTEN pass (flatten design).
+
+7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+<suppressed ~1 debug messages>
+
+8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+Removed 0 unused cells and 69 unused wires.
+<suppressed ~2 debug messages>
+
+9. Executing CHECK pass (checking for obvious problems).
+Checking module conventional_multiplier...
+Found and reported 0 problems.
+
+10. Executing OPT pass (performing simple optimizations).
+
+10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \conventional_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \conventional_multiplier.
+Performed a total of 0 changes.
+
+10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+10.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+10.9. Finished fast OPT passes. (There is nothing left to do.)
+
+11. Executing FSM pass (extract and optimize FSM).
+
+11.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+11.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+11.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+11.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+11.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+11.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+11.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+11.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+12. Executing OPT pass (performing simple optimizations).
+
+12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+12.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \conventional_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+12.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \conventional_multiplier.
+Performed a total of 0 changes.
+
+12.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+12.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+12.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+12.9. Finished fast OPT passes. (There is nothing left to do.)
+
+13. Executing MEMORY pass.
+
+13.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+13.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+13.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+13.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+13.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+13.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+13.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+13.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+13.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+13.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+13.11. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+15. Executing WREDUCE pass (reducing word size of cells).
+Removed top 16 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$48 ($add).
+Removed top 15 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$48 ($add).
+Removed top 14 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$48 ($add).
+Removed top 14 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$49 ($add).
+Removed top 14 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$49 ($add).
+Removed top 13 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$49 ($add).
+Removed top 13 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+Removed top 13 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+Removed top 12 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+Removed top 12 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$51 ($add).
+Removed top 12 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$51 ($add).
+Removed top 11 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$51 ($add).
+Removed top 11 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$52 ($add).
+Removed top 11 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$52 ($add).
+Removed top 10 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$52 ($add).
+Removed top 10 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$53 ($add).
+Removed top 10 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$53 ($add).
+Removed top 9 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$53 ($add).
+Removed top 9 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$54 ($add).
+Removed top 9 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$54 ($add).
+Removed top 8 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$54 ($add).
+Removed top 8 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$55 ($add).
+Removed top 8 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$55 ($add).
+Removed top 7 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$55 ($add).
+Removed top 7 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$56 ($add).
+Removed top 7 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$56 ($add).
+Removed top 6 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$56 ($add).
+Removed top 6 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$57 ($add).
+Removed top 6 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$57 ($add).
+Removed top 5 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$57 ($add).
+Removed top 5 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$58 ($add).
+Removed top 5 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$58 ($add).
+Removed top 4 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$58 ($add).
+Removed top 4 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$59 ($add).
+Removed top 4 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$59 ($add).
+Removed top 3 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$59 ($add).
+Removed top 3 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$60 ($add).
+Removed top 3 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$60 ($add).
+Removed top 2 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$60 ($add).
+Removed top 2 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$61 ($add).
+Removed top 2 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$61 ($add).
+Removed top 1 bits (of 32) from port Y of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$61 ($add).
+Removed top 1 bits (of 32) from port A of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$62 ($add).
+Removed top 1 bits (of 32) from port B of cell conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$62 ($add).
+Removed top 5 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$57_Y.
+Removed top 6 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$56_Y.
+Removed top 7 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$55_Y.
+Removed top 8 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$54_Y.
+Removed top 9 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$53_Y.
+Removed top 10 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$52_Y.
+Removed top 11 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$51_Y.
+Removed top 12 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$50_Y.
+Removed top 13 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$49_Y.
+Removed top 14 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$48_Y.
+Removed top 1 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$61_Y.
+Removed top 2 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$60_Y.
+Removed top 3 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$59_Y.
+Removed top 1 bits (of 32) from wire conventional_multiplier.shifted_prod[15].
+Removed top 2 bits (of 32) from wire conventional_multiplier.shifted_prod[14].
+Removed top 3 bits (of 32) from wire conventional_multiplier.shifted_prod[13].
+Removed top 4 bits (of 32) from wire conventional_multiplier.shifted_prod[12].
+Removed top 5 bits (of 32) from wire conventional_multiplier.shifted_prod[11].
+Removed top 6 bits (of 32) from wire conventional_multiplier.shifted_prod[10].
+Removed top 7 bits (of 32) from wire conventional_multiplier.shifted_prod[9].
+Removed top 8 bits (of 32) from wire conventional_multiplier.shifted_prod[8].
+Removed top 9 bits (of 32) from wire conventional_multiplier.shifted_prod[7].
+Removed top 10 bits (of 32) from wire conventional_multiplier.shifted_prod[6].
+Removed top 11 bits (of 32) from wire conventional_multiplier.shifted_prod[5].
+Removed top 12 bits (of 32) from wire conventional_multiplier.shifted_prod[4].
+Removed top 13 bits (of 32) from wire conventional_multiplier.shifted_prod[3].
+Removed top 14 bits (of 32) from wire conventional_multiplier.shifted_prod[2].
+Removed top 15 bits (of 32) from wire conventional_multiplier.shifted_prod[1].
+Removed top 4 bits (of 32) from wire conventional_multiplier.$add$rtl/multiplier/conventional_multiplier.sv:30$58_Y.
+
+16. Executing OPT pass (performing simple optimizations).
+
+16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \conventional_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \conventional_multiplier.
+Performed a total of 0 changes.
+
+16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+Removed 0 unused cells and 45 unused wires.
+<suppressed ~17 debug messages>
+
+16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+16.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+16.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \conventional_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+16.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \conventional_multiplier.
+Performed a total of 0 changes.
+
+16.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+16.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+16.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+16.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+16.16. Finished fast OPT passes. (There is nothing left to do.)
+
+17. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module conventional_multiplier:
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$48 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$49 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$50 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$51 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$52 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$53 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$54 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$55 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$56 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$57 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$58 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$59 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$60 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$61 ($add).
+  creating $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$62 ($add).
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$61 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$60 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$59 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$58 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$57 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$56 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$55 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$54 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$53 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$52 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$51 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$50 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$49 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  merging $macc model for $add$rtl/multiplier/conventional_multiplier.sv:30$48 into $add$rtl/multiplier/conventional_multiplier.sv:30$62.
+  creating $macc cell for $add$rtl/multiplier/conventional_multiplier.sv:30$62: $auto$alumacc.cc:399:replace_macc$156
+  created 0 $alu and 1 $macc cells.
+
+18. Executing SHARE pass (SAT-based resource sharing).
+
+19. Executing OPT pass (performing simple optimizations).
+
+19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+19.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \conventional_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+19.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \conventional_multiplier.
+Performed a total of 0 changes.
+
+19.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 31 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+19.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+19.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+Removed 14 unused cells and 14 unused wires.
+<suppressed ~15 debug messages>
+
+19.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+19.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+19.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \conventional_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+19.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \conventional_multiplier.
+Performed a total of 0 changes.
+
+19.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 17 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+19.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+19.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+19.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+
+19.16. Finished fast OPT passes. (There is nothing left to do.)
+
+20. Executing MEMORY pass.
+
+20.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+20.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+20.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+20.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+20.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+20.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+20.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+20.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+20.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+20.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+
+22. Executing TECHMAP pass (map to technology primitives).
+
+22.1. Executing Verilog-2005 frontend: /home/z/.micromamba/eda/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/home/z/.micromamba/eda/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+22.2. Continuing TECHMAP pass.
+Using extmapper maccmap for cells of type $macc_v2.
+  add \partial_prod[0] (16 bits, unsigned)
+  add { \partial_prod[15] 15'000000000000000 } (31 bits, unsigned)
+  add { \partial_prod[14] 14'00000000000000 } (30 bits, unsigned)
+  add { \partial_prod[13] 13'0000000000000 } (29 bits, unsigned)
+  add { \partial_prod[12] 12'000000000000 } (28 bits, unsigned)
+  add { \partial_prod[11] 11'00000000000 } (27 bits, unsigned)
+  add { \partial_prod[10] 10'0000000000 } (26 bits, unsigned)
+  add { \partial_prod[9] 9'000000000 } (25 bits, unsigned)
+  add { \partial_prod[8] 8'00000000 } (24 bits, unsigned)
+  add { \partial_prod[7] 7'0000000 } (23 bits, unsigned)
+  add { \partial_prod[6] 6'000000 } (22 bits, unsigned)
+  add { \partial_prod[5] 5'00000 } (21 bits, unsigned)
+  add { \partial_prod[4] 4'0000 } (20 bits, unsigned)
+  add { \partial_prod[3] 3'000 } (19 bits, unsigned)
+  add { \partial_prod[2] 2'00 } (18 bits, unsigned)
+  add { \partial_prod[1] 1'0 } (17 bits, unsigned)
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000111 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001101 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001110 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010011 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000011001 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000011111 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000100000 for cells of type $fa.
+Using template $paramod$fbc7873bff55778c0b3173955b7e4bce1d9d6834\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000100000 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using extmapper simplemap for cells of type $not.
+No more expansions possible.
+<suppressed ~531 debug messages>
+
+23. Executing OPT pass (performing simple optimizations).
+
+23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module conventional_multiplier.
+<suppressed ~770 debug messages>
+
+23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\conventional_multiplier'.
+Computing hashes of 1605 cells of `\conventional_multiplier'.
+Finding duplicate cells in `\conventional_multiplier'.
+Removed a total of 0 cells.
+
+23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \conventional_multiplier..
+Removed 47 unused cells and 212 unused wires.
+<suppressed ~48 debug messages>
+
+23.5. Finished fast OPT passes.
+
+24. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sky130_fd_sc_hd__dfxtp_1 (noninv, pins=3, area=20.02) is a direct match for cell type $_DFF_P_.
+  cell sky130_fd_sc_hd__dfrtn_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_NN0_.
+  cell sky130_fd_sc_hd__dfrtp_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_PN0_.
+  cell sky130_fd_sc_hd__dfstp_1 (noninv, pins=4, area=26.28) is a direct match for cell type $_DFF_PN1_.
+  cell sky130_fd_sc_hd__edfxtp_1 (noninv, pins=4, area=30.03) is a direct match for cell type $_DFFE_PP_.
+  cell sky130_fd_sc_hd__dfbbn_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_NNN_.
+  cell sky130_fd_sc_hd__dfbbp_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_PNN_.
+  cell sky130_fd_sc_hd__dlxtn_1 (noninv, pins=3, area=15.01) is a direct match for cell type $_DLATCH_N_.
+  cell sky130_fd_sc_hd__lpflow_inputisolatch_1 (noninv, pins=3, area=13.76) is a direct match for cell type $_DLATCH_P_.
+  cell sky130_fd_sc_hd__dlrtn_1 (noninv, pins=4, area=17.52) is a direct match for cell type $_DLATCH_NN0_.
+  cell sky130_fd_sc_hd__dlrtp_1 (noninv, pins=4, area=16.27) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    \sky130_fd_sc_hd__dfxtp_1 _DFF_P_ (.CLK( C), .D( D), .Q( Q));
+    \sky130_fd_sc_hd__dfrtn_1 _DFF_NN0_ (.CLK_N( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sky130_fd_sc_hd__dfrtp_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    \sky130_fd_sc_hd__dfstp_1 _DFF_PN1_ (.CLK( C), .D( D), .Q( Q), .SET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    \sky130_fd_sc_hd__edfxtp_1 _DFFE_PP_ (.CLK( C), .D( D), .DE( E), .Q( Q));
+    \sky130_fd_sc_hd__dfbbn_1 _DFFSR_NNN_ (.CLK_N( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    \sky130_fd_sc_hd__dfbbp_1 _DFFSR_PNN_ (.CLK( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    \sky130_fd_sc_hd__dlxtn_1 _DLATCH_N_ (.D( D), .GATE_N( E), .Q( Q));
+    \sky130_fd_sc_hd__lpflow_inputisolatch_1 _DLATCH_P_ (.D( D), .Q( Q), .SLEEP_B( E));
+    \sky130_fd_sc_hd__dlrtn_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sky130_fd_sc_hd__dlrtp_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+24.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~24 debug messages>
+Mapping DFF/DLATCH cells in module `\conventional_multiplier':
+
+25. Executing ABC pass (technology mapping using ABC).
+
+25.1. Extracting gate netlist of module `\conventional_multiplier' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache-1001/yosys_merged_931a5023.scl (1 files)
+
+25.1.1. Executed ABC.
+Extracted 1558 gates and 1591 wires to a netlist network with 32 inputs and 32 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep  9 2026 12:41:08)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache-1001/yosys_merged_931a5023.scl 
+ABC: Warning: Detected 9 multi-output cells (for example, "sky130_fd_sc_hd__fa_1").
+ABC: + source /home/z/my-project/repo-autoaccel/scripts/abc_area.script 
+ABC: WireLoad = "none"  Gates =   2628 (  8.2 %)   Cap =  5.7 ff (  1.2 %)   Area =    13370.32 ( 91.8 %)   Delay =  3877.43 ps  (  4.4 %)               
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+25.1.2. Re-integrating ABC results.
+ABC RESULTS:   sky130_fd_sc_hd__a211oi_1 cells:        8
+ABC RESULTS:   sky130_fd_sc_hd__a21boi_0 cells:       16
+ABC RESULTS:   sky130_fd_sc_hd__a21o_2 cells:       19
+ABC RESULTS:   sky130_fd_sc_hd__a21oi_1 cells:      315
+ABC RESULTS:   sky130_fd_sc_hd__a221oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a22oi_1 cells:        4
+ABC RESULTS:   sky130_fd_sc_hd__a2bb2oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a31o_2 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a31oi_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__and2_2 cells:       18
+ABC RESULTS:   sky130_fd_sc_hd__and3_2 cells:       39
+ABC RESULTS:   sky130_fd_sc_hd__clkinv_1 cells:      216
+ABC RESULTS:   sky130_fd_sc_hd__lpflow_inputiso0p_1 cells:        4
+ABC RESULTS:   sky130_fd_sc_hd__maj3_1 cells:       82
+ABC RESULTS:   sky130_fd_sc_hd__nand2_1 cells:      853
+ABC RESULTS:   sky130_fd_sc_hd__nand3_1 cells:      382
+ABC RESULTS:   sky130_fd_sc_hd__nand3b_1 cells:       10
+ABC RESULTS:   sky130_fd_sc_hd__nand4_1 cells:       11
+ABC RESULTS:   sky130_fd_sc_hd__nor2_1 cells:      196
+ABC RESULTS:   sky130_fd_sc_hd__nor3_1 cells:        8
+ABC RESULTS:   sky130_fd_sc_hd__o2111a_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__o2111ai_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__o211a_1 cells:       28
+ABC RESULTS:   sky130_fd_sc_hd__o211ai_1 cells:       32
+ABC RESULTS:   sky130_fd_sc_hd__o21a_1 cells:       21
+ABC RESULTS:   sky130_fd_sc_hd__o21ai_0 cells:      167
+ABC RESULTS:   sky130_fd_sc_hd__o21bai_1 cells:        8
+ABC RESULTS:   sky130_fd_sc_hd__o22ai_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__o2bb2ai_1 cells:       17
+ABC RESULTS:   sky130_fd_sc_hd__or2_2 cells:       13
+ABC RESULTS:   sky130_fd_sc_hd__xnor2_1 cells:       49
+ABC RESULTS:   sky130_fd_sc_hd__xnor3_4 cells:        5
+ABC RESULTS:   sky130_fd_sc_hd__xor2_1 cells:       97
+ABC RESULTS:        internal signals:     1527
+ABC RESULTS:           input signals:       32
+ABC RESULTS:          output signals:       32
+Removing temp directory.
+Removing global temp directory.
+
+26. Executing SETUNDEF pass (replace undef values with defined constants).
+Removed 0 unused cells and 230 unused wires.
+
+27. Printing statistics.
+
+=== conventional_multiplier ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     2599        - wires
+     2660        - wire bits
+        3        - public wires
+       64        - public wire bits
+        3        - ports
+       64        - port bits
+     2628 1.34E+04 cells
+        8   60.058   sky130_fd_sc_hd__a211oi_1
+       16  120.115   sky130_fd_sc_hd__a21boi_0
+       19   166.41   sky130_fd_sc_hd__a21o_2
+      315 1.58E+03   sky130_fd_sc_hd__a21oi_1
+        1    8.758   sky130_fd_sc_hd__a221oi_1
+        4   30.029   sky130_fd_sc_hd__a22oi_1
+        1    8.758   sky130_fd_sc_hd__a2bb2oi_1
+        1    8.758   sky130_fd_sc_hd__a31o_2
+        2   12.512   sky130_fd_sc_hd__a31oi_1
+       18   135.13   sky130_fd_sc_hd__and2_2
+       39  292.781   sky130_fd_sc_hd__and3_2
+      216  810.778   sky130_fd_sc_hd__clkinv_1
+        4   30.029   sky130_fd_sc_hd__lpflow_inputiso0p_1
+       82  820.787   sky130_fd_sc_hd__maj3_1
+      853  3.2E+03   sky130_fd_sc_hd__nand2_1
+      382 1.91E+03   sky130_fd_sc_hd__nand3_1
+       10   75.072   sky130_fd_sc_hd__nand3b_1
+       11   68.816   sky130_fd_sc_hd__nand4_1
+      196  735.706   sky130_fd_sc_hd__nor2_1
+        8   40.038   sky130_fd_sc_hd__nor3_1
+        1   11.261   sky130_fd_sc_hd__o2111a_1
+        2   17.517   sky130_fd_sc_hd__o2111ai_1
+       28  280.269   sky130_fd_sc_hd__o211a_1
+       32   240.23   sky130_fd_sc_hd__o211ai_1
+       21  157.651   sky130_fd_sc_hd__o21a_1
+      167  835.802   sky130_fd_sc_hd__o21ai_0
+        8   60.058   sky130_fd_sc_hd__o21bai_1
+        2   12.512   sky130_fd_sc_hd__o22ai_1
+       17  148.893   sky130_fd_sc_hd__o2bb2ai_1
+       13   81.328   sky130_fd_sc_hd__or2_2
+       49  429.162   sky130_fd_sc_hd__xnor2_1
+        5  131.376   sky130_fd_sc_hd__xnor3_4
+       97  849.565   sky130_fd_sc_hd__xor2_1
+
+   Chip area for module '\conventional_multiplier': 13370.323200
+     of which used for sequential elements: 0.000000 (0.00%)
+
+28. Executing LTP pass (find longest path).
+
+Longest topological path in conventional_multiplier (length=32):
+    0: \A [15]
+    1: $abc$2861$new_n1944 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4741)
+    2: $abc$2861$new_n1945 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4742)
+    3: $abc$2861$new_n1951 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4748)
+    4: $abc$2861$new_n2017 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4814)
+    5: $abc$2861$new_n2021 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4818)
+    6: $abc$2861$new_n2022 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4819)
+    7: $abc$2861$new_n2042 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4839)
+    8: $abc$2861$new_n2044 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4841)
+    9: $abc$2861$new_n2045 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4842)
+   10: $abc$2861$new_n2046 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4843)
+   11: $abc$2861$new_n2067 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4864)
+   12: $abc$2861$new_n2070 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4867)
+   13: $abc$2861$new_n2074 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4871)
+   14: $abc$2861$new_n2076 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4873)
+   15: $abc$2861$new_n2082 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4879)
+   16: $abc$2861$new_n2195 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4992)
+   17: $abc$2861$new_n2196 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4993)
+   18: $abc$2861$new_n2202 (via $abc$2861$auto$blifparse.cc:397:parse_blif$4999)
+   19: $abc$2861$new_n2203 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5000)
+   20: $abc$2861$new_n2247 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5044)
+   21: $abc$2861$new_n2249 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5046)
+   22: $abc$2861$new_n2252 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5049)
+   23: $abc$2861$new_n2254 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5051)
+   24: $abc$2861$new_n2574 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5371)
+   25: $abc$2861$new_n2576 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5373)
+   26: $abc$2861$new_n2577 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5374)
+   27: $abc$2861$new_n2588 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5385)
+   28: $abc$2861$new_n2664 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5461)
+   29: $abc$2861$new_n2682 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5479)
+   30: $abc$2861$new_n2684 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5481)
+   31: $abc$2861$new_n2686 (via $abc$2861$auto$blifparse.cc:397:parse_blif$5483)
+   32: \P [31] (via $abc$2861$auto$blifparse.cc:397:parse_blif$5484)
+
+Warnings: 2 unique messages, 4 total
+End of script. Logfile hash: 7a21b70b06, time: 0.53s, user: 0.27s, system: 0.06s, MEM: 57.20 MB peak
+Yosys 0.69+ (git sha1 9f09efcdb-dirty, Release, GNU /home/conda/feedstock_root/build_artifacts/bld/rattler-build_yosys_1788957668/build_env/bin/x86_64-conda-linux-gnu-c++ 15.3.0) [github.com/conda-forge/yosys-feedstock at main]
+Time spent: 42% 1x abc (0 sec), 10% 1x stat (0 sec), ...
+
+=== STDERR ===

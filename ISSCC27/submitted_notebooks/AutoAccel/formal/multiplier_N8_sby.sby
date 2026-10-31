@@ -1,0 +1,16 @@
+[options]
+mode prove
+depth 1
+
+[engines]
+smtbmc bitwuzla
+
+[script]
+read -formal -sv conventional_multiplier.sv PARAMETERIZED_MULTIPLIER.sv multiplier_miter.sv
+chparam -set N 8 multiplier_miter
+prep -top multiplier_miter -flatten
+
+[files]
+../rtl/multiplier/conventional_multiplier.sv
+../rtl/multiplier/PARAMETERIZED_MULTIPLIER.sv
+multiplier_miter.sv

@@ -1,0 +1,288 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.70 (git sha1 28ba3cb92, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Running command `read_verilog -sv rtl/multiplier/conventional_multiplier.sv rtl/multiplier/karatsuba_recursive.sv formal/equiv_miter_recursive.sv; hierarchy -top equiv_miter_recursive -chparam N 8; proc; flatten; opt -full; sat -verify -prove P_conv P_rec -set-init-zero' --
+
+1. Executing Verilog-2005 frontend: rtl/multiplier/conventional_multiplier.sv
+Parsing SystemVerilog input from `rtl/multiplier/conventional_multiplier.sv' to AST representation.
+Generating RTLIL representation for module `\conventional_multiplier'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: rtl/multiplier/karatsuba_recursive.sv
+Parsing SystemVerilog input from `rtl/multiplier/karatsuba_recursive.sv' to AST representation.
+Generating RTLIL representation for module `\karatsuba_recursive_multiplier'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: formal/equiv_miter_recursive.sv
+Parsing SystemVerilog input from `formal/equiv_miter_recursive.sv' to AST representation.
+Generating RTLIL representation for module `\equiv_miter_recursive'.
+Successfully finished Verilog frontend.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \N = 8
+
+5. Executing AST frontend in derive mode using pre-parsed AST for module `\equiv_miter_recursive'.
+Parameter \N = 8
+Generating RTLIL representation for module `$paramod\equiv_miter_recursive\N=s32'00000000000000000000000000001000'.
+
+5.1. Analyzing design hierarchy..
+Top module:  \equiv_miter_recursive
+Used module:     \conventional_multiplier
+Used module:     \karatsuba_recursive_multiplier
+Parameter \N = 8
+
+5.2. Executing AST frontend in derive mode using pre-parsed AST for module `\conventional_multiplier'.
+Parameter \N = 8
+Generating RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+Parameter \N = 8
+Found cached RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000'.
+Parameter \N = 8
+Parameter \THRESHOLD = 8
+
+5.3. Executing AST frontend in derive mode using pre-parsed AST for module `\karatsuba_recursive_multiplier'.
+Parameter \N = 8
+Parameter \THRESHOLD = 8
+Generating RTLIL representation for module `$paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier'.
+
+5.4. Analyzing design hierarchy..
+Top module:  \equiv_miter_recursive
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000
+Used module:     $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier
+Used module:         \conventional_multiplier
+Parameter \N = 8
+Found cached RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000'.
+
+5.5. Analyzing design hierarchy..
+Top module:  \equiv_miter_recursive
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000
+Used module:     $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier
+
+5.6. Analyzing design hierarchy..
+Top module:  \equiv_miter_recursive
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000
+Used module:     $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier
+Removing unused module `$paramod\equiv_miter_recursive\N=s32'00000000000000000000000000001000'.
+Removing unused module `\karatsuba_recursive_multiplier'.
+Removing unused module `\conventional_multiplier'.
+Removed 3 unused modules.
+
+6. Executing PROC pass (convert processes to netlists).
+
+6.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `$paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$88'.
+Removing empty process `$paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$88'.
+Cleaned up 1 empty switch.
+
+6.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+6.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 18 assignments to connections.
+
+6.4. Executing PROC_INIT pass (extract init attributes).
+
+6.5. Executing PROC_ARST pass (detect async resets in processes).
+
+6.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+6.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$86'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$84'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$82'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$80'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$78'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$76'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$74'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$72'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$70'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$68'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$66'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$64'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$62'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$60'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$58'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$56'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$46'.
+
+6.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$86'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$84'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$82'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$80'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$78'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$76'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$74'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$72'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$70'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$68'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$66'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$64'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$62'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$60'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$58'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$56'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\P' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$46'.
+
+6.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+6.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+6.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$86'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$84'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$82'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$80'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$78'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$76'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$74'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$72'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$70'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$68'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$66'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$64'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$62'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$60'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$58'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$56'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$46'.
+Cleaned up 0 empty switches.
+
+6.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.
+Optimizing module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.
+<suppressed ~8 debug messages>
+Optimizing module equiv_miter_recursive.
+
+7. Executing FLATTEN pass (flatten design).
+Deleting now unused module $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.
+Deleting now unused module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.
+<suppressed ~3 debug messages>
+
+8. Executing OPT pass (performing simple optimizations).
+
+8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv_miter_recursive.
+<suppressed ~18 debug messages>
+
+8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv_miter_recursive'.
+Computing hashes of 33 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Removed a total of 0 cells.
+
+8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv_miter_recursive..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~32 debug messages>
+
+8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv_miter_recursive.
+Performed a total of 0 changes.
+
+8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv_miter_recursive'.
+Computing hashes of 33 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 25 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 24 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 23 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 22 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 21 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 20 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 19 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Computing hashes of 18 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+<suppressed ~45 debug messages>
+Removed a total of 15 cells.
+
+8.6. Executing OPT_SHARE pass.
+
+8.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv_miter_recursive..
+Removed 0 unused cells and 80 unused wires.
+<suppressed ~1 debug messages>
+
+8.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv_miter_recursive.
+
+8.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv_miter_recursive..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~16 debug messages>
+
+8.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv_miter_recursive.
+Performed a total of 0 changes.
+
+8.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv_miter_recursive'.
+Computing hashes of 18 cells of `\equiv_miter_recursive'.
+Finding duplicate cells in `\equiv_miter_recursive'.
+Removed a total of 0 cells.
+
+8.14. Executing OPT_SHARE pass.
+
+8.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv_miter_recursive..
+
+8.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv_miter_recursive.
+
+8.18. Finished fast OPT passes. (There is nothing left to do.)
+
+9. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 18 cells to SAT database.
+Import proof-constraint: \P_conv = \P_rec
+Final proof equation: \P_conv = \P_rec
+
+Solving problem with 1340 variables and 3674 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+
+Warnings: 2 unique messages, 4 total
+End of script. Logfile hash: c6da9a6a2e, time: 0.02s, user: 0.03s, system: 0.00s
+Yosys 0.70 (git sha1 28ba3cb92, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+Time spent: 22% 4x read_verilog (0 sec), 20% 1x sat (0 sec), ...
