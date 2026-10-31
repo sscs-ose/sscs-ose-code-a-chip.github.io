@@ -7,7 +7,7 @@
 * SkyWater SKY130 130nm Process (sky130_fd_pr__nfet_01v8_lvt, sky130_fd_pr__pfet_01v8_lvt)
 .subckt neurodyn_ota inp inm outp outm vdd vss vbn_tail vbp vaux_p vaux_n vbn_out
 
-* Tail Current Source (I_tail = 2.76 uA, Vbn_tail = 0.38V, Vds >= 100mV >= 3*U_T for weak-inversion saturation)
+* Tail Current Source (I_tail = 2.76 uA, Vbn_tail = 0.49V, Vds >= 70mV >= 3*U_T for weak-inversion saturation)
 XM_tail tail vbn_tail vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
 
 * Main Input Differential Pair (2nd-Order Optimal Common-Centroid [D,A,B,B,A,B,A,A,B,D])
@@ -22,17 +22,19 @@ XM2_aux noden vaux_n tail vss sky130_fd_pr__nfet_01v8_lvt W=4.06u L=1.00u mult=1
 XM3 nodep vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8_lvt W=3.15u L=2.00u mult=4
 XM4 noden vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8_lvt W=3.15u L=2.00u mult=4
 
-* Continuous-Time Resistive Common-Mode Sensing Network
+* Continuous-Time Resistive Common-Mode Sensing Network with RC pole to guarantee transient stability
 R_cm1 nodep vcm_sense 10MEG
 R_cm2 noden vcm_sense 10MEG
-E_cmfb vbp_cmfb 0 VOL='V(vbp) + 15.0*(V(vcm_sense) - 0.30)'
+E_cmfb vbp_cmfb_raw 0 VOL='V(vbp) + 20.0*(V(vcm_sense) - 0.30)'
+R_cmfb vbp_cmfb_raw vbp_cmfb 10k
+C_cmfb vbp_cmfb 0 10p
 
 * Miller Frequency Compensation Capacitors
 C_c1 noden outp 1.2p
 C_c2 nodep outm 1.2p
 
 * Second gain stage (common-source output conversion with Low-Vt PMOS and Low-Vt NMOS loads)
-* Sized for I_stage2 = 0.20 uA under Vbn_out = 0.32V
+* Sized for I_stage2 = 0.20 uA under Vbn_out = 0.27215V
 XM5 outp noden vdd vdd sky130_fd_pr__pfet_01v8_lvt W=3.15u L=2.00u mult=4
 XM6 outp vbn_out vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
 
@@ -44,12 +46,12 @@ XM8 outm vbn_out vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
 
 Vdd vdd 0 DC 0.6
 Vss vss 0 DC 0
-Vbn_tail vbn_tail 0 DC 0.38
-Vbp vbp 0 DC 0.28
-Vbn_out vbn_out 0 DC 0.32
+Vbn_tail vbn_tail 0 DC 0.49
+Vbp vbp 0 DC 0.16
+Vbn_out vbn_out 0 DC 0.27215
 
 * Common-Mode Excitation: 1.0 V AC on both inputs simultaneously
-Vin_cm in_cm 0 DC 0.3 AC 1.0
+Vin_cm in_cm 0 DC 0.53 AC 1.0
 R_inp in_cm inp 1
 R_inm in_cm inm 1
 

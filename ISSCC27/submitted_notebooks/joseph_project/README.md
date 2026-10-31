@@ -72,6 +72,7 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 | **Foundry SPICE Netlist Suite** | Verified | **Complete 6-Deck Suite** | Level 4 Automated Netlists (.op, .ac, .cmrr, .psrr, .noise, .tran) | — | SKY130 TT models (Tail $V_{ds} = 102.5\,\text{mV} \ge 3 U_T$, Saturation verified) |
 | **Active Silicon Area** | $< 0.025$ | **$0.0084$** | Level 5 Physical GDSII Layout (`gdstk`) | $\text{mm}^2$ | Matched diff-pair core macro with guard rings |
 | **Physical DRC Cleanliness** | Clean | **0 Violations (15/15 rules)** | Level 5 Automated DRM Audit (`klayout.db`/`gdstk`) | — | SkyWater SKY130 DRM Compliant |
+| **Physical LVS Sign-Off** | 100% Match | **15/15 Devices Matched** | Level 5 Netgen / GDSTK Topological Sign-Off | — | 11 MOSFETs, 2 Caps, 2 Resistors, 17 Pins (`lvs.log`) |
 
 ---
 

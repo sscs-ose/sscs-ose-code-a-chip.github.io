@@ -47,6 +47,7 @@ Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --
 | **Chopping Ripple Suppression** | $\ge 35.0$ | **$62.3$** | Behavioral CT-Chopper + RRL | dB | **Pass [OK]** ($+27.3\,\text{dB}$) |
 | **Clinical EEG Fidelity ($r$)** | $> 0.95$ | **$0.9926$** | Multi-band physiological EEG | — | **Pass [OK]** ($> 99.2\%$) |
 | **Physical DRC Cleanliness** | 0 errors | **0 Violations (15/15)**| Level 5 KLayout / gdstk DRM Audit (`klayout.db`) | — | **Pass [OK]** (100% Clean) |
+| **Physical LVS Sign-Off** | 100% Match | **15/15 Devices Matched**| Level 5 Netgen / GDSTK Topological Sign-Off (`lvs.log`) | — | **Pass [OK]** (100% Match) |
 
 ---
 
@@ -61,6 +62,6 @@ Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --
 
 ### 5. Reproducibility & Open-Source Ecosystem Integration
 * **One-Click Jupyter Execution**: Fully verified interactive notebook [`NeuroDyn_AFE.ipynb`](NeuroDyn_AFE.ipynb) runs out of the box on Google Colab or local Python 3.10–3.12.
-* **Automated Self-Test Suite**: Execute `python verify_all.py` to run all 6 unit and integration testbenches in under 10 seconds.
+* **Automated Self-Test Suite**: Execute `python verify_all.py` to run all 7 unit and integration testbenches in under 10 seconds.
 * **PDK Traceability**: Features native discovery of SkyWater SKY130 BSIM4 models with guaranteed transparent fallback for non-Linux hosts.
 * **Open-Source License**: Apache License 2.0.
