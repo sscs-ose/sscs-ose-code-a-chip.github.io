@@ -16,7 +16,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Rectangle  # noqa: E402
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch  # noqa: E402
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[1]
@@ -281,95 +281,127 @@ def sampling_cycle() -> None:
 # --------------------------------------------------------------------------- Figure 3
 
 def working_checks_cycle() -> None:
-    """Where the deterministic working checks of Table 2 act in one cycle, and the separate random-noise lane."""
+    """Where in one sampling waveform each deterministic working check of Table 2 is defined, as the voltage
+    difference it bounds; random sampled noise as uncertainty on V(Cs). Offsets are exaggerated, not to scale."""
     import numpy as np
     plt.rcParams.update(RC)
-    fig = plt.figure(figsize=(13.5, 7.4))
-    t = np.linspace(-12, 112, 4001)
+    fig = plt.figure(figsize=(13.5, 7.0))
+    t = np.linspace(-12, 112, 6201)
     phi = ((t >= 0) & (t < 40) | (t >= 100)).astype(float)
-    u = np.where(t < 1, 0.75, 1.05)
-    u = np.where(t >= 41, 0.85, u)
-    vt, vp = 1.05, 0.75
-    v = np.where(t < 0, vp, vt + (vp - vt) * np.exp(-np.clip(t, 0, None) / 4.0))
-    v = np.where(t >= 40, vt - 0.012, v)
-    v = np.where(t >= 100, (vt - 0.012) + (0.85 - vt + 0.012) * (1 - np.exp(-(t - 100) / 4.0)), v)
-    rng = np.random.default_rng(3)
-    nz = np.convolve(rng.normal(0, 1, t.size), np.ones(15) / 15, mode="same") * 0.032
-    ramp = np.clip((t - 38.8) / 1.2, 0, 1)
-    nz = nz + (0.028 - float(np.interp(40, t, nz))) * ramp   # make the frozen value visible
-    frozen = 0.028
-    vn = np.where((t >= 0) & (t < 40), nz, np.where((t >= 40) & (t < 100), frozen, np.nan))
-    x0, w = 0.20, 0.62
+    # zoomed view around the target level; offsets are exaggerated for legibility
+    d_trk, d_acq, d_step, d_hold = 0.15, 0.10, 0.15, 0.10
+    vin = np.where(t < 41, 0.0, -3.0)                              # next input level leaves the view 1 ns after opening
+    vdrv = np.where(t < 41, -d_trk, -d_trk + (-3.0 + d_trk) * (1 - np.exp(-(t - 41) / 1.5)))
+    v_pre = -d_trk - d_acq
+    vcs = np.where(t < 0, -3.0, -d_trk - 1.4 * np.exp(-np.clip(t, 0, None) / 3.0)
+                   - d_acq * np.exp(-(t - 40) / 40.0))
+    v_e = v_pre - d_step
+    v_l = v_e - d_hold
+    hold = (t >= 40) & (t < 100)
+    # hold: the step settles by E (55 ns), then droop and feedthrough carry V(Cs) down to L (96.5 ns)
+    th = np.clip((t - 55) / (96.5 - 55), 0, None)
+    vcs = np.where(hold, v_pre - d_step * (1 - np.exp(-(t - 40) / 1.2)) - d_hold * th, vcs)
+    vcs = np.where(t >= 100, -3.0, vcs)
+    x0, w = 0.07, 0.66
     a1 = fig.add_axes([x0, 0.86, w, 0.09])
-    a2 = fig.add_axes([x0, 0.62, w, 0.22], sharex=a1)
-    a3 = fig.add_axes([x0, 0.25, w, 0.35], sharex=a1)
-    a4 = fig.add_axes([x0, 0.06, w, 0.16], sharex=a1)
+    a2 = fig.add_axes([x0, 0.13, w, 0.71], sharex=a1)
     win = [(50, 60), (94, 99)]
-    for a in (a1, a2, a3, a4):
+    for a in (a1, a2):
         for s_ in ("top", "right", "left"):
             a.spines[s_].set_visible(False)
         a.set_yticks([])
         for lo, hi in win:
             a.axvspan(lo, hi, color=SUM, alpha=0.10, lw=0)
-        a.axvline(40, color=MUTED, lw=0.8, ls=":")
-        a.axvline(0, color=MUTED, lw=0.8, ls=":")
-        a.axvline(100, color=MUTED, lw=0.8, ls=":")
+        for xv in (0, 40, 100):
+            a.axvline(xv, color=MUTED, lw=0.8, ls=":")
     # 1 clock
     a1.plot(t, phi, color=STATE, lw=1.7)
     a1.set_ylim(-0.25, 1.9)
     a1.text(20, 1.45, "switch closed: acquire 40 ns", ha="center", va="center", fontsize=8.6)
     a1.text(70, 0.42, "switch open: hold 60 ns", ha="center", va="center", fontsize=8.6)
-    fig.text(x0 - 0.012, 0.905, "1  clock φ", ha="right", va="center", fontsize=9.5, color=STATE, weight="bold")
-    # 2 voltages
-    a2.plot(t, u, color=REQ, lw=1.4, ls="--")
-    a2.plot(t, v, color=PHYS, lw=2.0)
-    a2.set_ylim(0.66, 1.14)
-    a2.text(113, 0.85, "input u", fontsize=8.6, color=REQ, va="center")
-    a2.text(113, 1.03, "V(Cs)", fontsize=8.6, color=PHYS, va="center")
-    a2.text(-11, 0.80, "previous\nheld voltage", fontsize=8.0, color=PHYS, va="bottom")
-    a2.text(52, 1.06, "E", fontsize=10, color=SUM, weight="bold", ha="left")
-    a2.text(94, 1.06, "L", fontsize=10, color=SUM, weight="bold", ha="left")
-    a2.text(-11, 1.14, "illustrative waveforms, not simulation", fontsize=7.6, color=MUTED, style="italic", va="top")
-    fig.text(x0 - 0.012, 0.73, "2  voltages", ha="right", va="center", fontsize=9.5, color=INK, weight="bold")
-    # 3 deterministic working checks
-    a3.set_ylim(0, 5.2)
-    rows = [
-        (4.5, 0, 40, "acquisition left over, previous-sample history", "0.10 mV", "from closing through acquisition"),
-        (3.5, 34, 40, "driver static tracking", "0.15 mV", "evaluated just before opening"),
-        (2.5, 38.5, 46, "level-dependent step at opening", "0.15 mV", "switch opening, entry into hold"),
-        (1.5, 50, 99, "hold droop, feedthrough of the next input", "0.10 mV", "from the early to the late read"),
-    ]
-    for y, lo, hi, name, alloc, when in rows:
-        a3.add_patch(Rectangle((lo, y - 0.22), hi - lo, 0.44, facecolor=PHYS, alpha=0.75, lw=0))
-        lx = hi + 1.5 if hi < 60 else lo - 1.5
-        ha = "left" if hi < 60 else "right"
-        a3.text(lx, y + 0.06, f"{name}   {alloc}", ha=ha, va="bottom", fontsize=8.6, color=INK)
-        a3.text(lx, y - 0.06, when, ha=ha, va="top", fontsize=7.8, color=MUTED, style="italic")
-    a3.text(113, 0.55, "reserve 0.086 mV:\nPVT spread, model and\nnumerical uncertainty;\nnot tied to a time",
-            fontsize=8.0, color=INK, va="center", ha="left",
-            bbox=dict(boxstyle="round,pad=0.35", facecolor="white", edgecolor=MUTED, ls="--", lw=1.0))
-    a3.text(-11, 0.45, "magnitudes sum to 0.586 mV = 1 VLSB (conservative). The checks share causes; they are not\n"
-            "independent physical components. Only the parent residual, read at E and L, is pass/fail.",
-            fontsize=7.8, color=SUM, va="center")
-    fig.text(x0 - 0.012, 0.43, "3  deterministic\nworking checks\n(Table 2)", ha="right", va="center", fontsize=9.5,
-             color=PHYS, weight="bold")
-    # 4 random sampled noise, separate lane
-    a4.plot(t, vn, color=STATE, lw=1.1)
-    a4.axhline(0, color=MUTED, lw=0.6)
-    a4.plot([40], [frozen], "o", color=STATE, ms=5)
-    a4.set_ylim(-0.075, 0.075)
-    a4.text(20, 0.062, "switch and driver noise move V(Cs) while it tracks", ha="center", fontsize=8.0, color=STATE)
-    a4.text(42, frozen + 0.012, "opening freezes one random value", fontsize=8.0, color=STATE, va="bottom")
-    a4.text(70, -0.062, "sample uncertainty carried through the hold; evaluated as RMS (≤ 146 µV),\nnot added to the deterministic sum",
-            ha="center", va="bottom", fontsize=8.0, color=STATE)
-    a4.set_xlim(-12, 112)
-    a4.set_xlabel("time (ns)", fontsize=9, labelpad=1)
-    for a in (a1, a2, a3):
-        a.tick_params(labelbottom=False, bottom=False)
-    fig.text(x0 - 0.012, 0.14, "4  random sampled\nnoise (separate)", ha="right", va="center", fontsize=9.5,
-             color=STATE, weight="bold")
-    fig.text(x0 - 0.012, 0.075, "first cut: kT/C only", ha="right", va="center", fontsize=7.8, color=MUTED,
-             style="italic")
+    a1.text(40, 1.55, "opening", ha="center", va="bottom", fontsize=8.0, color=MUTED)
+    a1.text(-11.5, 1.45, "clock φ", ha="left", va="center", fontsize=9.0, color=STATE, weight="bold")
+    # 2 voltages near the target level
+    lo_y, hi_y = -0.86, 0.24
+    a2.set_ylim(lo_y, hi_y)
+    a2.set_xlim(-12, 112)
+    sig = 0.03
+    track = (t >= 0) & (t < 40)
+    band_t = track & (vcs > lo_y)
+    a2.fill_between(t[band_t], vcs[band_t] - sig, vcs[band_t] + sig, color=STATE, alpha=0.14, lw=0, zorder=1)
+    a2.fill_between(t[hold], vcs[hold] - sig, vcs[hold] + sig, facecolor="none", edgecolor=STATE, alpha=0.45,
+                    hatch="////", lw=0, zorder=1)
+    a2.plot(t, vin, color=REQ, lw=1.5, ls="--", zorder=3)
+    a2.plot(t, vdrv, color=KNOB, lw=1.5, ls="-.", zorder=3)
+    a2.plot(t, vcs, color=PHYS, lw=2.2, zorder=4)
+    a2.text(-11.5, 0.025, "Vin", fontsize=9.5, color=REQ, va="bottom", weight="bold")
+    a2.text(-11.5, -d_trk + 0.025, "Vdrv", fontsize=9.5, color=KNOB, va="bottom", weight="bold")
+    a2.text(101, v_l - 0.02, "V(Cs)", fontsize=9.5, color=PHYS, va="top", weight="bold")
+    a2.annotate("previous held voltage\n(off scale): start of\nthis acquisition", xy=(1.6, -0.80), xytext=(5.5, -0.80),
+                fontsize=8.0, color=PHYS, va="center", arrowprops=dict(arrowstyle="-|>", color=PHYS, lw=1))
+    a2.annotate("next input level, 1 ns after\nopening (off scale)", xy=(41.4, -0.80), xytext=(62, -0.80),
+                fontsize=8.0, color=REQ, va="center", arrowprops=dict(arrowstyle="-|>", color=REQ, lw=1))
+    a2.text(55, hi_y - 0.02, "E", fontsize=11, color=SUM, weight="bold", ha="center", va="top")
+    a2.text(96.5, hi_y - 0.02, "L", fontsize=11, color=SUM, weight="bold", ha="center", va="top")
+    a2.text(96.5, hi_y - 0.10, "early / late read", fontsize=7.6, color=SUM, ha="right", va="top")
+
+    def diff(x, y_a, y_b, label, alloc, where, tx, ty, ha="left"):
+        a2.annotate("", xy=(x, y_b), xytext=(x, y_a),
+                    arrowprops=dict(arrowstyle="<|-|>", color=INK, lw=1.4, mutation_scale=9, shrinkA=0, shrinkB=0),
+                    zorder=6)
+        a2.text(tx, ty, f"{label}  {alloc}", ha=ha, va="bottom", fontsize=8.8, color=INK, weight="bold", zorder=6)
+        a2.text(tx, ty - 0.008, where, ha=ha, va="top", fontsize=7.9, color=INK, style="italic", zorder=6)
+
+    # reference levels carried forward as thin dotted lines
+    a2.plot([37.6, 58.5], [v_pre, v_pre], color=INK, lw=0.8, ls=(0, (1, 2)), zorder=5)
+    a2.plot([55, 99], [v_e, v_e], color=INK, lw=0.8, ls=(0, (1, 2)), zorder=5)
+    diff(34.5, 0.0, -d_trk, "driver static tracking", "0.15 mV", "Vin − Vdrv just before opening",
+         33.3, -0.07, ha="right")
+    diff(38.2, -d_trk, v_pre, "acquisition left over,\nprevious-sample history", "0.10 mV",
+         "Vdrv − V(Cs) left just before opening", 37.0, -0.52, ha="right")
+    a2.plot([37.1, 38.2], [-0.46, v_pre - 0.045], color=INK, lw=0.6, zorder=6)
+    diff(58.5, v_pre, v_e, "level-dependent step at opening", "0.15 mV",
+         "change in V(Cs) from just before opening to E\n(includes first coupling of the next input)",
+         60.0, -0.06)
+    a2.plot([59.9, 58.6], [-0.065, v_pre - 0.01], color=INK, lw=0.6, zorder=6)
+    diff(97.5, v_e, v_l, "hold droop, feedthrough\nof the next input", "0.10 mV",
+         "change in V(Cs) from E to L", 96.2, -0.30, ha="right")
+    a2.plot([96.3, 97.4], [-0.335, v_e - 0.01], color=INK, lw=0.6, zorder=6)
+    # random sampled noise on V(Cs)
+    a2.annotate("random noise: spread of\nV(Cs) while it tracks", xy=(6, float(np.interp(6, t, vcs)) - sig),
+                xytext=(9, -0.66), fontsize=8.0, color=STATE, ha="left", va="top",
+                arrowprops=dict(arrowstyle="-|>", color=STATE, lw=0.9, shrinkA=1, shrinkB=1))
+    a2.plot([40], [v_pre + 0.018], "o", color=STATE, ms=5.5, zorder=7, mec="white", mew=0.8)
+    a2.text(42.8, v_pre - 0.065, "opening freezes\none random value", fontsize=8.0, color=STATE, ha="left",
+            va="center")
+    a2.annotate("same sampled spread carried\nwith the held value", xy=(70, -0.475), xytext=(62, -0.53),
+                fontsize=8.0, color=STATE, ha="left", va="top",
+                arrowprops=dict(arrowstyle="-|>", color=STATE, lw=0.9, shrinkA=1, shrinkB=1))
+    a2.set_xlabel("time (ns)", fontsize=9, labelpad=1)
+    a1.tick_params(labelbottom=False, bottom=False)
+    a2.text(-11.5, lo_y - 0.115, "Illustrative, not simulation. Zoomed view near the target level; offsets exaggerated and not "
+            "to scale.\nArrows mark the voltage difference each deterministic check bounds; the time axis only locates where "
+            "it is evaluated.", transform=a2.transData, fontsize=7.8, color=MUTED, style="italic", va="top")
+    # side notes, outside the waveform
+    nx = x0 + w + 0.02
+    fig.text(nx, 0.80, "Deterministic working checks (Table 2)\n"
+             "four voltage differences on the waveform;\n"
+             "magnitudes sum with the reserve to\n0.586 mV = 1 VLSB (conservative).\n"
+             "They share causes and are not\nindependent physical components.\n"
+             "Only the parent residual, read at\nE and L, is pass/fail.",
+             fontsize=8.3, color=INK, va="top", ha="left", linespacing=1.3,
+             bbox=dict(boxstyle="round,pad=0.5", facecolor="white", edgecolor=INK, lw=1.0))
+    fig.text(nx, 0.52, "Reserve 0.086 mV\n"
+             "budget margin for PVT, model and\nnumerical uncertainty; not a physical,\n"
+             "time-localized component, so it is\nnot drawn on the waveform.",
+             fontsize=8.3, color=INK, va="top", ha="left", linespacing=1.3,
+             bbox=dict(boxstyle="round,pad=0.5", facecolor="white", edgecolor=MUTED, ls="--", lw=1.0))
+    fig.text(nx, 0.30, "Random sampled noise (separate budget)\n"
+             "shaded: spread of V(Cs) while tracking;\nhatched: the frozen sample carried\nthrough the hold.\n"
+             "First cut: kT/C only. Final: RMS\nnoise ≤ 146 µV, evaluated separately,\n"
+             "never added linearly to the\ndeterministic checks.",
+             fontsize=8.3, color=STATE, va="top", ha="left", linespacing=1.3,
+             bbox=dict(boxstyle="round,pad=0.5", facecolor="white", edgecolor=STATE, lw=1.0))
     finish(fig, "working_checks_cycle")
 
 
