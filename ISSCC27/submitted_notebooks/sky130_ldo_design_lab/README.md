@@ -2,7 +2,7 @@
 
 **Author and travel representative: Christian Reivan**
 
-**Affiliation: Samsung Electronics**
+**Affiliation: Independent Researcher**
 
 **GitHub: [christianreivan](https://github.com/christianreivan)**
 
