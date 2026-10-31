@@ -77,7 +77,7 @@ def main() -> None:
     if builder.is_file():
         run("notebook build", ["notebook/" + builder.name])
     print("== notebook execution", flush=True)
-    nb_path = next(p for p in (ROOT / "code_a_chip.ipynb", ROOT / "notebook" / "code_a_chip.ipynb") if p.is_file())
+    nb_path = next(p for p in (ROOT / "analog_design_difficulty.ipynb", ROOT / "notebook" / "code_a_chip.ipynb") if p.is_file())
     execute_notebook_in_place(nb_path)
     print(f"executed {nb_path.relative_to(ROOT)} in place\n== done")
 

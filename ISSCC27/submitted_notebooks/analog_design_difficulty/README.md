@@ -19,7 +19,7 @@ the selected design closes the deterministic requirement and a separate random-n
 schematic-level verification domain of repeated samples and 45 process/supply/temperature conditions. This is not
 production sign-off; the circuit closure is evidence for the notebook's engineering argument, not its main contribution.
 
-**Main notebook:** [`code_a_chip.ipynb`](code_a_chip.ipynb) (saved with the outputs of one complete run).
+**Main notebook:** [`analog_design_difficulty.ipynb`](analog_design_difficulty.ipynb) (saved with the outputs of one complete run).
 
 ## Toolchain
 
@@ -32,7 +32,7 @@ included; install them separately (for example with volare) and point `PDK_ROOT`
 
 | Path | Contents |
 |---|---|
-| `code_a_chip.ipynb` | the notebook |
+| `analog_design_difficulty.ipynb` | the notebook |
 | `experiments/closure/` | the pre-registered parent metric, budget and verification sets (`CLOSURE_BRIEF.md`), the sequential sample-and-hold bench, the stability, noise, and device-voltage checks, the final-verification and assembly scripts, and the netlists of the selected design and of the compared candidates |
 | `experiments/experiment_a/` | the first-cut experiment: design brief, studies with their results, SKY130 netlists, scripts, and the reduced model |
 | `results/closure/` | the first cut on the sequential bench and the final verification of the selected design (`results/closure/final/q1_boot2/final_closure.json`) |
