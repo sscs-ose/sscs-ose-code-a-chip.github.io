@@ -38,8 +38,8 @@ to examine where its fingerprint comes from, how design choices change it, and h
 
 Our question is:
 
-> **How much can a circuit designer learn about a transmitter's RF fingerprint before fabrication, using an open PDK
-> and open-source tools?**
+> **Can a circuit designer predict, explain and control a transmitter's fingerprint at design time, using only the open
+> PDK, before any silicon exists?**
 
 We designed a transmitter core in **SkyWater SKY130**, checked its layout with DRC, LVS and parasitic extraction,
 and simulated hundreds of virtual chips using the PDK's mismatch models. A software receiver then attempts to
