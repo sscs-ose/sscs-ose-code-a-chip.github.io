@@ -1,0 +1,2173 @@
+
+ /----------------------------------------------------------------------------\
+ |                                                                            |
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |                                                                            |
+ |  Copyright (C) 2012 - 2020  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |                                                                            |
+ |  Permission to use, copy, modify, and/or distribute this software for any  |
+ |  purpose with or without fee is hereby granted, provided that the above    |
+ |  copyright notice and this permission notice appear in all copies.         |
+ |                                                                            |
+ |  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES  |
+ |  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF          |
+ |  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR   |
+ |  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    |
+ |  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN     |
+ |  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF   |
+ |  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            |
+ |                                                                            |
+ \----------------------------------------------------------------------------/
+
+ Yosys 0.33 (git sha1 2584903a060)
+
+
+-- Executing script file `synth/synth_run.ys' --
+
+1. Executing Verilog-2005 frontend: rtl/spi_master.v
+Parsing SystemVerilog input from `rtl/spi_master.v' to AST representation.
+Generating RTLIL representation for module `\spi_master'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: rtl/can_framer.v
+Parsing SystemVerilog input from `rtl/can_framer.v' to AST representation.
+Generating RTLIL representation for module `\can_framer'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: rtl/brick_sensor_if.v
+Parsing SystemVerilog input from `rtl/brick_sensor_if.v' to AST representation.
+Generating RTLIL representation for module `\brick_sensor_if'.
+Warning: Replacing memory \dbuf with list of registers. See rtl/brick_sensor_if.v:97
+Successfully finished Verilog frontend.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1. Analyzing design hierarchy..
+Top module:  \brick_sensor_if
+Used module:     \can_framer
+Used module:     \spi_master
+
+4.2. Analyzing design hierarchy..
+Top module:  \brick_sensor_if
+Used module:     \can_framer
+Used module:     \spi_master
+Removed 0 unused modules.
+
+5. Executing FLATTEN pass (flatten design).
+Deleting now unused module can_framer.
+Deleting now unused module spi_master.
+<suppressed ~2 debug messages>
+
+6. Executing PROC pass (convert processes to netlists).
+
+6.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+6.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 204 switch rules as full_case in process $flatten\u_can.$proc$rtl/can_framer.v:45$102 in module brick_sensor_if.
+Marked 8 switch rules as full_case in process $flatten\u_can.$proc$rtl/can_framer.v:81$1038 in module brick_sensor_if.
+Marked 6 switch rules as full_case in process $flatten\u_spi.$proc$rtl/spi_master.v:50$4 in module brick_sensor_if.
+Removed 1 dead cases from process $proc$rtl/brick_sensor_if.v:135$1081 in module brick_sensor_if.
+Marked 4 switch rules as full_case in process $proc$rtl/brick_sensor_if.v:135$1081 in module brick_sensor_if.
+Marked 5 switch rules as full_case in process $proc$rtl/brick_sensor_if.v:86$1063 in module brick_sensor_if.
+Removed a total of 1 dead cases.
+
+6.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 4 redundant assignments.
+Promoted 23 assignments to connections.
+
+6.4. Executing PROC_INIT pass (extract init attributes).
+
+6.5. Executing PROC_ARST pass (detect async resets in processes).
+Found async reset \u_can.rst_n in `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+Found async reset \u_spi.rst_n in `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+Found async reset \rst_n in `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:135$1081'.
+Found async reset \rst_n in `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+
+6.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~228 debug messages>
+
+6.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+     1/302: $flatten\u_can.$196\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1033
+     2/302: $flatten\u_can.$195\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1027
+     3/302: $flatten\u_can.$98\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$1028
+     4/302: $flatten\u_can.$194\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1024
+     5/302: $flatten\u_can.$193\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1018
+     6/302: $flatten\u_can.$97\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$1019
+     7/302: $flatten\u_can.$192\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1015
+     8/302: $flatten\u_can.$191\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1009
+     9/302: $flatten\u_can.$96\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$1010
+    10/302: $flatten\u_can.$190\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1006
+    11/302: $flatten\u_can.$189\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$1000
+    12/302: $flatten\u_can.$95\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$1001
+    13/302: $flatten\u_can.$188\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$997
+    14/302: $flatten\u_can.$187\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$991
+    15/302: $flatten\u_can.$94\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$992
+    16/302: $flatten\u_can.$186\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$988
+    17/302: $flatten\u_can.$185\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$982
+    18/302: $flatten\u_can.$93\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$983
+    19/302: $flatten\u_can.$184\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$979
+    20/302: $flatten\u_can.$183\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$973
+    21/302: $flatten\u_can.$92\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$974
+    22/302: $flatten\u_can.$182\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$970
+    23/302: $flatten\u_can.$181\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$964
+    24/302: $flatten\u_can.$91\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$965
+    25/302: $flatten\u_can.$180\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$961
+    26/302: $flatten\u_can.$179\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$955
+    27/302: $flatten\u_can.$90\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$956
+    28/302: $flatten\u_can.$178\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$952
+    29/302: $flatten\u_can.$177\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$946
+    30/302: $flatten\u_can.$89\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$947
+    31/302: $flatten\u_can.$176\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$943
+    32/302: $flatten\u_can.$175\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$937
+    33/302: $flatten\u_can.$88\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$938
+    34/302: $flatten\u_can.$174\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$934
+    35/302: $flatten\u_can.$173\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$928
+    36/302: $flatten\u_can.$87\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$929
+    37/302: $flatten\u_can.$172\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$925
+    38/302: $flatten\u_can.$171\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$919
+    39/302: $flatten\u_can.$86\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$920
+    40/302: $flatten\u_can.$170\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$916
+    41/302: $flatten\u_can.$169\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$910
+    42/302: $flatten\u_can.$85\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$911
+    43/302: $flatten\u_can.$168\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$907
+    44/302: $flatten\u_can.$167\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$901
+    45/302: $flatten\u_can.$84\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$902
+    46/302: $flatten\u_can.$166\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$898
+    47/302: $flatten\u_can.$165\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$892
+    48/302: $flatten\u_can.$83\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$893
+    49/302: $flatten\u_can.$164\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$889
+    50/302: $flatten\u_can.$163\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$883
+    51/302: $flatten\u_can.$82\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$884
+    52/302: $flatten\u_can.$162\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$880
+    53/302: $flatten\u_can.$161\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$874
+    54/302: $flatten\u_can.$81\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$875
+    55/302: $flatten\u_can.$160\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$871
+    56/302: $flatten\u_can.$159\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$865
+    57/302: $flatten\u_can.$80\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$866
+    58/302: $flatten\u_can.$158\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$862
+    59/302: $flatten\u_can.$157\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$856
+    60/302: $flatten\u_can.$79\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$857
+    61/302: $flatten\u_can.$156\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$853
+    62/302: $flatten\u_can.$155\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$847
+    63/302: $flatten\u_can.$78\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$848
+    64/302: $flatten\u_can.$154\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$844
+    65/302: $flatten\u_can.$153\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$838
+    66/302: $flatten\u_can.$77\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$839
+    67/302: $flatten\u_can.$152\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$835
+    68/302: $flatten\u_can.$151\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$829
+    69/302: $flatten\u_can.$76\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$830
+    70/302: $flatten\u_can.$150\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$826
+    71/302: $flatten\u_can.$149\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$820
+    72/302: $flatten\u_can.$75\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$821
+    73/302: $flatten\u_can.$148\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$817
+    74/302: $flatten\u_can.$147\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$811
+    75/302: $flatten\u_can.$74\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$812
+    76/302: $flatten\u_can.$146\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$808
+    77/302: $flatten\u_can.$145\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$802
+    78/302: $flatten\u_can.$73\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$803
+    79/302: $flatten\u_can.$144\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$799
+    80/302: $flatten\u_can.$143\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$793
+    81/302: $flatten\u_can.$72\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$794
+    82/302: $flatten\u_can.$142\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$790
+    83/302: $flatten\u_can.$141\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$784
+    84/302: $flatten\u_can.$71\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$785
+    85/302: $flatten\u_can.$140\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$781
+    86/302: $flatten\u_can.$139\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$775
+    87/302: $flatten\u_can.$70\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$776
+    88/302: $flatten\u_can.$138\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$772
+    89/302: $flatten\u_can.$137\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$766
+    90/302: $flatten\u_can.$69\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$767
+    91/302: $flatten\u_can.$136\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$763
+    92/302: $flatten\u_can.$135\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$757
+    93/302: $flatten\u_can.$68\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$758
+    94/302: $flatten\u_can.$134\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$754
+    95/302: $flatten\u_can.$133\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$748
+    96/302: $flatten\u_can.$67\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$749
+    97/302: $flatten\u_can.$132\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$745
+    98/302: $flatten\u_can.$131\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$739
+    99/302: $flatten\u_can.$66\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$740
+   100/302: $flatten\u_can.$130\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$736
+   101/302: $flatten\u_can.$129\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$730
+   102/302: $flatten\u_can.$65\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$731
+   103/302: $flatten\u_can.$128\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$727
+   104/302: $flatten\u_can.$127\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$721
+   105/302: $flatten\u_can.$64\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$722
+   106/302: $flatten\u_can.$126\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$718
+   107/302: $flatten\u_can.$125\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$712
+   108/302: $flatten\u_can.$63\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$713
+   109/302: $flatten\u_can.$124\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$709
+   110/302: $flatten\u_can.$123\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$703
+   111/302: $flatten\u_can.$62\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$704
+   112/302: $flatten\u_can.$122\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$700
+   113/302: $flatten\u_can.$121\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$694
+   114/302: $flatten\u_can.$61\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$695
+   115/302: $flatten\u_can.$120\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$691
+   116/302: $flatten\u_can.$119\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$685
+   117/302: $flatten\u_can.$60\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$686
+   118/302: $flatten\u_can.$118\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$682
+   119/302: $flatten\u_can.$117\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$676
+   120/302: $flatten\u_can.$59\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$677
+   121/302: $flatten\u_can.$116\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$673
+   122/302: $flatten\u_can.$115\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$667
+   123/302: $flatten\u_can.$58\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$668
+   124/302: $flatten\u_can.$114\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$664
+   125/302: $flatten\u_can.$113\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$658
+   126/302: $flatten\u_can.$57\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$659
+   127/302: $flatten\u_can.$112\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$655
+   128/302: $flatten\u_can.$111\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$649
+   129/302: $flatten\u_can.$56\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$650
+   130/302: $flatten\u_can.$110\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$646
+   131/302: $flatten\u_can.$109\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$640
+   132/302: $flatten\u_can.$55\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$641
+   133/302: $flatten\u_can.$108\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$637
+   134/302: $flatten\u_can.$107\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$631
+   135/302: $flatten\u_can.$54\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$632
+   136/302: $flatten\u_can.$106\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$628
+   137/302: $flatten\u_can.$105\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$622
+   138/302: $flatten\u_can.$53\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$623
+   139/302: $flatten\u_can.$104\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$619
+   140/302: $flatten\u_can.$103\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$613
+   141/302: $flatten\u_can.$52\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$614
+   142/302: $flatten\u_can.$102\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$610
+   143/302: $flatten\u_can.$101\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$604
+   144/302: $flatten\u_can.$51\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$605
+   145/302: $flatten\u_can.$100\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$601
+   146/302: $flatten\u_can.$99\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$595
+   147/302: $flatten\u_can.$50\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$596
+   148/302: $flatten\u_can.$98\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$592
+   149/302: $flatten\u_can.$97\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$586
+   150/302: $flatten\u_can.$49\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$587
+   151/302: $flatten\u_can.$96\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$583
+   152/302: $flatten\u_can.$95\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$577
+   153/302: $flatten\u_can.$48\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$578
+   154/302: $flatten\u_can.$94\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$574
+   155/302: $flatten\u_can.$93\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$568
+   156/302: $flatten\u_can.$47\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$569
+   157/302: $flatten\u_can.$92\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$565
+   158/302: $flatten\u_can.$91\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$559
+   159/302: $flatten\u_can.$46\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$560
+   160/302: $flatten\u_can.$90\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$556
+   161/302: $flatten\u_can.$89\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$550
+   162/302: $flatten\u_can.$45\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$551
+   163/302: $flatten\u_can.$88\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$547
+   164/302: $flatten\u_can.$87\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$541
+   165/302: $flatten\u_can.$44\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$542
+   166/302: $flatten\u_can.$86\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$538
+   167/302: $flatten\u_can.$85\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$532
+   168/302: $flatten\u_can.$43\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$533
+   169/302: $flatten\u_can.$84\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$529
+   170/302: $flatten\u_can.$83\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$523
+   171/302: $flatten\u_can.$42\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$524
+   172/302: $flatten\u_can.$82\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$520
+   173/302: $flatten\u_can.$81\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$514
+   174/302: $flatten\u_can.$41\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$515
+   175/302: $flatten\u_can.$80\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$511
+   176/302: $flatten\u_can.$79\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$505
+   177/302: $flatten\u_can.$40\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$506
+   178/302: $flatten\u_can.$78\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$502
+   179/302: $flatten\u_can.$77\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$496
+   180/302: $flatten\u_can.$39\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$497
+   181/302: $flatten\u_can.$76\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$493
+   182/302: $flatten\u_can.$75\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$487
+   183/302: $flatten\u_can.$38\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$488
+   184/302: $flatten\u_can.$74\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$484
+   185/302: $flatten\u_can.$73\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$478
+   186/302: $flatten\u_can.$37\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$479
+   187/302: $flatten\u_can.$72\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$475
+   188/302: $flatten\u_can.$71\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$469
+   189/302: $flatten\u_can.$36\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$470
+   190/302: $flatten\u_can.$70\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$466
+   191/302: $flatten\u_can.$69\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$460
+   192/302: $flatten\u_can.$35\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$461
+   193/302: $flatten\u_can.$68\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$457
+   194/302: $flatten\u_can.$67\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$451
+   195/302: $flatten\u_can.$34\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$452
+   196/302: $flatten\u_can.$66\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$448
+   197/302: $flatten\u_can.$65\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$442
+   198/302: $flatten\u_can.$33\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$443
+   199/302: $flatten\u_can.$64\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$439
+   200/302: $flatten\u_can.$63\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$433
+   201/302: $flatten\u_can.$32\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$434
+   202/302: $flatten\u_can.$62\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$430
+   203/302: $flatten\u_can.$61\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$424
+   204/302: $flatten\u_can.$31\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$425
+   205/302: $flatten\u_can.$60\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$421
+   206/302: $flatten\u_can.$59\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$415
+   207/302: $flatten\u_can.$30\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$416
+   208/302: $flatten\u_can.$58\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$412
+   209/302: $flatten\u_can.$57\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$406
+   210/302: $flatten\u_can.$29\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$407
+   211/302: $flatten\u_can.$56\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$403
+   212/302: $flatten\u_can.$55\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$397
+   213/302: $flatten\u_can.$28\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$398
+   214/302: $flatten\u_can.$54\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$394
+   215/302: $flatten\u_can.$53\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$388
+   216/302: $flatten\u_can.$27\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$389
+   217/302: $flatten\u_can.$52\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$385
+   218/302: $flatten\u_can.$51\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$379
+   219/302: $flatten\u_can.$26\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$380
+   220/302: $flatten\u_can.$50\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$376
+   221/302: $flatten\u_can.$49\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$370
+   222/302: $flatten\u_can.$25\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$371
+   223/302: $flatten\u_can.$48\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$367
+   224/302: $flatten\u_can.$47\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$361
+   225/302: $flatten\u_can.$24\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$362
+   226/302: $flatten\u_can.$46\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$358
+   227/302: $flatten\u_can.$45\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$352
+   228/302: $flatten\u_can.$23\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$353
+   229/302: $flatten\u_can.$44\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$349
+   230/302: $flatten\u_can.$43\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$343
+   231/302: $flatten\u_can.$22\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$344
+   232/302: $flatten\u_can.$42\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$340
+   233/302: $flatten\u_can.$41\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$334
+   234/302: $flatten\u_can.$21\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$335
+   235/302: $flatten\u_can.$40\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$331
+   236/302: $flatten\u_can.$39\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$325
+   237/302: $flatten\u_can.$20\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$326
+   238/302: $flatten\u_can.$38\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$322
+   239/302: $flatten\u_can.$37\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$316
+   240/302: $flatten\u_can.$19\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$317
+   241/302: $flatten\u_can.$36\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$313
+   242/302: $flatten\u_can.$35\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$307
+   243/302: $flatten\u_can.$18\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$308
+   244/302: $flatten\u_can.$34\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$304
+   245/302: $flatten\u_can.$33\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$298
+   246/302: $flatten\u_can.$17\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$299
+   247/302: $flatten\u_can.$32\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$295
+   248/302: $flatten\u_can.$31\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$289
+   249/302: $flatten\u_can.$16\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$290
+   250/302: $flatten\u_can.$30\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$286
+   251/302: $flatten\u_can.$29\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$280
+   252/302: $flatten\u_can.$15\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$281
+   253/302: $flatten\u_can.$28\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$277
+   254/302: $flatten\u_can.$27\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$271
+   255/302: $flatten\u_can.$14\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$272
+   256/302: $flatten\u_can.$26\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$268
+   257/302: $flatten\u_can.$25\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$262
+   258/302: $flatten\u_can.$13\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$263
+   259/302: $flatten\u_can.$24\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$259
+   260/302: $flatten\u_can.$23\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$253
+   261/302: $flatten\u_can.$12\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$254
+   262/302: $flatten\u_can.$22\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$250
+   263/302: $flatten\u_can.$21\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$244
+   264/302: $flatten\u_can.$11\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$245
+   265/302: $flatten\u_can.$20\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$241
+   266/302: $flatten\u_can.$19\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$235
+   267/302: $flatten\u_can.$10\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$236
+   268/302: $flatten\u_can.$18\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$232
+   269/302: $flatten\u_can.$17\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$226
+   270/302: $flatten\u_can.$9\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$227
+   271/302: $flatten\u_can.$16\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$223
+   272/302: $flatten\u_can.$15\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$217
+   273/302: $flatten\u_can.$8\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$218
+   274/302: $flatten\u_can.$14\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$214
+   275/302: $flatten\u_can.$13\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$208
+   276/302: $flatten\u_can.$7\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$209
+   277/302: $flatten\u_can.$12\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$205
+   278/302: $flatten\u_can.$11\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$199
+   279/302: $flatten\u_can.$6\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$200
+   280/302: $flatten\u_can.$10\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$196
+   281/302: $flatten\u_can.$9\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$190
+   282/302: $flatten\u_can.$5\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$191
+   283/302: $flatten\u_can.$8\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$187
+   284/302: $flatten\u_can.$7\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$181
+   285/302: $flatten\u_can.$4\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$182
+   286/302: $flatten\u_can.$6\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$178
+   287/302: $flatten\u_can.$5\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$172
+   288/302: $flatten\u_can.$3\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$173
+   289/302: $flatten\u_can.$4\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$169
+   290/302: $flatten\u_can.$3\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$163
+   291/302: $flatten\u_can.$2\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$164
+   292/302: $flatten\u_can.$2\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$160
+   293/302: $flatten\u_can.$1\crc15_calc$func$rtl/can_framer.v:54$101.crc[14:0]$154
+   294/302: $flatten\u_can.$1\crc15_calc$func$rtl/can_framer.v:54$101.bit_in[0:0]$155
+   295/302: $flatten\u_can.$8\tmp[97:0]
+   296/302: $flatten\u_can.$7\tmp[97:0]
+   297/302: $flatten\u_can.$6\tmp[97:0]
+   298/302: $flatten\u_can.$5\tmp[97:0]
+   299/302: $flatten\u_can.$4\tmp[97:0]
+   300/302: $flatten\u_can.$3\tmp[97:0]
+   301/302: $flatten\u_can.$2\tmp[97:0]
+   302/302: $flatten\u_can.$1\tmp[97:0]
+Creating decoders for process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+     1/15: $flatten\u_can.$4\b[0:0]
+     2/15: $flatten\u_can.$3\b[0:0]
+     3/15: $flatten\u_can.$2\b[0:0]
+     4/15: $flatten\u_can.$1\b[0:0]
+     5/15: $flatten\u_can.$0\done_o[0:0]
+     6/15: $flatten\u_can.$0\run[2:0]
+     7/15: $flatten\u_can.$0\last_bit[0:0]
+     8/15: $flatten\u_can.$0\trail[3:0]
+     9/15: $flatten\u_can.$0\ptr[6:0]
+    10/15: $flatten\u_can.$0\raw_len[6:0]
+    11/15: $flatten\u_can.$0\frame_raw[97:0]
+    12/15: $flatten\u_can.$0\tx_o[0:0]
+    13/15: $flatten\u_can.$0\div_cnt[7:0]
+    14/15: $flatten\u_can.$0\state[1:0]
+    15/15: $flatten\u_can.$0\busy_o[0:0]
+Creating decoders for process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+     1/27: $flatten\u_spi.$3\bytereverse$func$rtl/spi_master.v:69$2.i[31:0]$26
+     2/27: $flatten\u_spi.$3\bytereverse$func$rtl/spi_master.v:69$2.$result[63:0]$24
+     3/27: $flatten\u_spi.$3\bytereverse$func$rtl/spi_master.v:69$2.w[63:0]$25
+     4/27: $flatten\u_spi.$2\bytereverse$func$rtl/spi_master.v:69$2.i[31:0]$20
+     5/27: $flatten\u_spi.$2\bytereverse$func$rtl/spi_master.v:69$2.w[63:0]$19
+     6/27: $flatten\u_spi.$2\bytereverse$func$rtl/spi_master.v:69$2.$result[63:0]$18
+     7/27: $flatten\u_spi.$2\bytereverse$func$rtl/spi_master.v:111$3.i[31:0]$23
+     8/27: $flatten\u_spi.$2\bytereverse$func$rtl/spi_master.v:111$3.w[63:0]$22
+     9/27: $flatten\u_spi.$2\bytereverse$func$rtl/spi_master.v:111$3.$result[63:0]$21
+    10/27: $flatten\u_spi.$1\bytereverse$func$rtl/spi_master.v:111$3.i[31:0]$17
+    11/27: $flatten\u_spi.$1\bytereverse$func$rtl/spi_master.v:111$3.w[63:0]$16
+    12/27: $flatten\u_spi.$1\bytereverse$func$rtl/spi_master.v:111$3.$result[63:0]$15
+    13/27: $flatten\u_spi.$1\bytereverse$func$rtl/spi_master.v:69$2.i[31:0]$14
+    14/27: $flatten\u_spi.$1\bytereverse$func$rtl/spi_master.v:69$2.w[63:0]$13
+    15/27: $flatten\u_spi.$1\bytereverse$func$rtl/spi_master.v:69$2.$result[63:0]$12
+    16/27: $flatten\u_spi.$0\done_o[0:0]
+    17/27: $flatten\u_spi.$0\cs_n_r[0:0]
+    18/27: $flatten\u_spi.$0\sclk_r[0:0]
+    19/27: $flatten\u_spi.$0\len_r[3:0]
+    20/27: $flatten\u_spi.$0\rxreg[63:0]
+    21/27: $flatten\u_spi.$0\shreg[63:0]
+    22/27: $flatten\u_spi.$0\phase[0:0]
+    23/27: $flatten\u_spi.$0\div_cnt[7:0]
+    24/27: $flatten\u_spi.$0\bits_left[6:0]
+    25/27: $flatten\u_spi.$0\state[1:0]
+    26/27: $flatten\u_spi.$0\busy_o[0:0]
+    27/27: $flatten\u_spi.$0\rx_word_o[63:0]
+Creating decoders for process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:135$1081'.
+     1/8: $4$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_DATA[7:0]$1091
+     2/8: $3$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_DATA[7:0]$1090
+     3/8: $3$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_ADDR[2:0]$1089
+     4/8: $2$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_DATA[7:0]$1088
+     5/8: $2$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_ADDR[2:0]$1087
+     6/8: $1$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_DATA[7:0]$1086
+     7/8: $1$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_ADDR[2:0]$1085
+     8/8: $0\rdata_o[7:0]
+Creating decoders for process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+     1/26: $2\i[31:0]
+     2/26: $0\can_id[10:0] [10:8]
+     3/26: $0\can_id[10:0] [7:0]
+     4/26: $3$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_ADDR[2:0]$1071
+     5/26: $2$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_DATA[7:0]$1070
+     6/26: $2$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_ADDR[2:0]$1069
+     7/26: $1\i[31:0]
+     8/26: $1$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_DATA[7:0]$1068
+     9/26: $1$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_ADDR[2:0]$1067
+    10/26: $0\can_start[0:0]
+    11/26: $0\spi_start[0:0]
+    12/26: $0\dbuf[7][7:0]
+    13/26: $0\dbuf[6][7:0]
+    14/26: $0\dbuf[5][7:0]
+    15/26: $0\dbuf[4][7:0]
+    16/26: $0\dbuf[3][7:0]
+    17/26: $0\dbuf[2][7:0]
+    18/26: $0\dbuf[1][7:0]
+    19/26: $0\dbuf[0][7:0]
+    20/26: $0\can_done_st[0:0]
+    21/26: $0\spi_done_st[0:0]
+    22/26: $0\can_bitdiv[7:0]
+    23/26: $0\can_dlc[3:0]
+    24/26: $3$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_DATA[7:0]$1072
+    25/26: $0\spi_len[3:0]
+    26/26: $0\spi_clkdiv[7:0]
+
+6.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\brick_sensor_if.\u_can.tmp' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.crc' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.flen' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.dlc_c' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.k' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.crc15_calc$func$rtl/can_framer.v:54$101.$result' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.crc15_calc$func$rtl/can_framer.v:54$101.bits' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.crc15_calc$func$rtl/can_framer.v:54$101.flen' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.crc15_calc$func$rtl/can_framer.v:54$101.i' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.crc15_calc$func$rtl/can_framer.v:54$101.crc' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+No latch inferred for signal `\brick_sensor_if.\u_can.crc15_calc$func$rtl/can_framer.v:54$101.bit_in' from process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+
+6.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\brick_sensor_if.\u_can.busy_o' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3028' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.done_o' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3029' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.state' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3030' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.div_cnt' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3031' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.tx_o' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3032' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.frame_raw' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3033' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.raw_len' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3034' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.ptr' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3035' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.trail' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3036' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.last_bit' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3037' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.run' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3038' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_can.b' using process `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+  created $adff cell `$procdff$3039' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.rx_word_o' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3040' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.busy_o' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3041' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.done_o' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3042' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.state' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3043' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.bits_left' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3044' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.div_cnt' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3045' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.phase' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3046' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.shreg' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3047' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.rxreg' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3048' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.len_r' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3049' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.sclk_r' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3050' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.cs_n_r' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3051' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.bytereverse$func$rtl/spi_master.v:69$2.$result' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3052' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.bytereverse$func$rtl/spi_master.v:69$2.w' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3053' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.bytereverse$func$rtl/spi_master.v:69$2.i' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3054' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.bytereverse$func$rtl/spi_master.v:111$3.$result' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3055' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.bytereverse$func$rtl/spi_master.v:111$3.w' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3056' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\u_spi.bytereverse$func$rtl/spi_master.v:111$3.i' using process `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+  created $adff cell `$procdff$3057' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\rdata_o' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:135$1081'.
+  created $adff cell `$procdff$3058' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_ADDR' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:135$1081'.
+  created $adff cell `$procdff$3059' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.$mem2reg_rd$\dbuf$rtl/brick_sensor_if.v:148$1058_DATA' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:135$1081'.
+  created $adff cell `$procdff$3060' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\spi_clkdiv' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3061' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\spi_len' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3062' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\can_id' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3063' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\can_dlc' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3064' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\can_bitdiv' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3065' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\spi_done_st' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3066' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\can_done_st' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3067' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\spi_start' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3068' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\can_start' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3069' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\i' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3070' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[0]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3071' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[1]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3072' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[2]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3073' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[3]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3074' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[4]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3075' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[5]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3076' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[6]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3077' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.\dbuf[7]' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3078' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_ADDR' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3079' with positive edge clock and negative level reset.
+Creating register for signal `\brick_sensor_if.$mem2reg_wr$\dbuf$rtl/brick_sensor_if.v:121$1057_DATA' using process `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+  created $adff cell `$procdff$3080' with positive edge clock and negative level reset.
+
+6.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+6.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 204 empty switches in `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+Removing empty process `brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:45$102'.
+Found and cleaned up 8 empty switches in `\brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+Removing empty process `brick_sensor_if.$flatten\u_can.$proc$rtl/can_framer.v:81$1038'.
+Found and cleaned up 5 empty switches in `\brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+Removing empty process `brick_sensor_if.$flatten\u_spi.$proc$rtl/spi_master.v:50$4'.
+Found and cleaned up 3 empty switches in `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:135$1081'.
+Removing empty process `brick_sensor_if.$proc$rtl/brick_sensor_if.v:135$1081'.
+Found and cleaned up 8 empty switches in `\brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+Removing empty process `brick_sensor_if.$proc$rtl/brick_sensor_if.v:86$1063'.
+Cleaned up 228 empty switches.
+
+6.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+<suppressed ~224 debug messages>
+
+7. Executing OPT pass (performing simple optimizations).
+
+7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+<suppressed ~1 debug messages>
+
+7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+<suppressed ~840 debug messages>
+Removed a total of 280 cells.
+
+7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$2690.
+    dead port 2/2 on $mux $procmux$2690.
+    dead port 1/2 on $mux $procmux$2687.
+    dead port 2/2 on $mux $procmux$2687.
+    dead port 1/2 on $mux $procmux$2684.
+    dead port 2/2 on $mux $procmux$2684.
+    dead port 2/2 on $mux $procmux$2307.
+    dead port 2/2 on $mux $procmux$2300.
+    dead port 1/9 on $pmux $procmux$2675.
+    dead port 2/9 on $pmux $procmux$2675.
+    dead port 3/9 on $pmux $procmux$2675.
+    dead port 4/9 on $pmux $procmux$2675.
+    dead port 5/9 on $pmux $procmux$2675.
+    dead port 6/9 on $pmux $procmux$2675.
+    dead port 7/9 on $pmux $procmux$2675.
+    dead port 8/9 on $pmux $procmux$2675.
+    dead port 9/9 on $pmux $procmux$2675.
+    dead port 2/2 on $mux $procmux$2298.
+    dead port 1/2 on $mux $procmux$2266.
+    dead port 2/2 on $mux $procmux$2266.
+    dead port 2/2 on $mux $procmux$2260.
+    dead port 1/2 on $mux $procmux$2254.
+    dead port 2/2 on $mux $procmux$2254.
+    dead port 2/2 on $mux $procmux$2248.
+    dead port 1/2 on $mux $procmux$2242.
+    dead port 2/2 on $mux $procmux$2242.
+    dead port 2/2 on $mux $procmux$2236.
+    dead port 1/2 on $mux $procmux$2230.
+    dead port 2/2 on $mux $procmux$2230.
+    dead port 2/2 on $mux $procmux$2224.
+    dead port 1/2 on $mux $procmux$2218.
+    dead port 2/2 on $mux $procmux$2218.
+    dead port 2/2 on $mux $procmux$2212.
+    dead port 1/2 on $mux $procmux$2206.
+    dead port 2/2 on $mux $procmux$2206.
+    dead port 2/2 on $mux $procmux$2200.
+    dead port 1/2 on $mux $procmux$2194.
+    dead port 2/2 on $mux $procmux$2194.
+    dead port 2/2 on $mux $procmux$2188.
+    dead port 1/2 on $mux $procmux$2182.
+    dead port 2/2 on $mux $procmux$2182.
+    dead port 2/2 on $mux $procmux$2176.
+    dead port 1/2 on $mux $procmux$2170.
+    dead port 2/2 on $mux $procmux$2170.
+    dead port 2/2 on $mux $procmux$2164.
+    dead port 1/2 on $mux $procmux$2158.
+    dead port 2/2 on $mux $procmux$2158.
+    dead port 2/2 on $mux $procmux$2152.
+    dead port 1/2 on $mux $procmux$2146.
+    dead port 2/2 on $mux $procmux$2146.
+    dead port 2/2 on $mux $procmux$2140.
+    dead port 1/2 on $mux $procmux$2134.
+    dead port 2/2 on $mux $procmux$2134.
+    dead port 2/2 on $mux $procmux$2128.
+    dead port 1/2 on $mux $procmux$2122.
+    dead port 2/2 on $mux $procmux$2122.
+    dead port 2/2 on $mux $procmux$2116.
+    dead port 1/2 on $mux $procmux$2110.
+    dead port 2/2 on $mux $procmux$2110.
+    dead port 2/2 on $mux $procmux$2104.
+    dead port 1/2 on $mux $procmux$2098.
+    dead port 2/2 on $mux $procmux$2098.
+    dead port 2/2 on $mux $procmux$2092.
+    dead port 1/2 on $mux $procmux$2086.
+    dead port 2/2 on $mux $procmux$2086.
+    dead port 2/2 on $mux $procmux$2080.
+    dead port 1/2 on $mux $procmux$2074.
+    dead port 2/2 on $mux $procmux$2074.
+    dead port 2/2 on $mux $procmux$2068.
+    dead port 1/2 on $mux $procmux$2062.
+    dead port 2/2 on $mux $procmux$2062.
+    dead port 2/2 on $mux $procmux$2056.
+    dead port 1/2 on $mux $procmux$2050.
+    dead port 2/2 on $mux $procmux$2050.
+    dead port 2/2 on $mux $procmux$2044.
+    dead port 1/2 on $mux $procmux$2038.
+    dead port 2/2 on $mux $procmux$2038.
+    dead port 2/2 on $mux $procmux$2032.
+    dead port 1/2 on $mux $procmux$2026.
+    dead port 2/2 on $mux $procmux$2026.
+    dead port 2/2 on $mux $procmux$2020.
+    dead port 1/2 on $mux $procmux$2014.
+    dead port 2/2 on $mux $procmux$2014.
+    dead port 2/2 on $mux $procmux$2008.
+    dead port 1/2 on $mux $procmux$2002.
+    dead port 2/2 on $mux $procmux$2002.
+    dead port 2/2 on $mux $procmux$1996.
+    dead port 1/2 on $mux $procmux$1990.
+    dead port 2/2 on $mux $procmux$1990.
+    dead port 2/2 on $mux $procmux$1984.
+    dead port 1/2 on $mux $procmux$1978.
+    dead port 2/2 on $mux $procmux$1978.
+    dead port 2/2 on $mux $procmux$1972.
+    dead port 1/2 on $mux $procmux$1966.
+    dead port 2/2 on $mux $procmux$1966.
+    dead port 2/2 on $mux $procmux$1960.
+    dead port 1/2 on $mux $procmux$1954.
+    dead port 2/2 on $mux $procmux$1954.
+    dead port 2/2 on $mux $procmux$1948.
+    dead port 1/2 on $mux $procmux$1942.
+    dead port 2/2 on $mux $procmux$1942.
+    dead port 2/2 on $mux $procmux$1936.
+    dead port 1/2 on $mux $procmux$1930.
+    dead port 2/2 on $mux $procmux$1930.
+    dead port 2/2 on $mux $procmux$1924.
+    dead port 1/2 on $mux $procmux$1918.
+    dead port 2/2 on $mux $procmux$1918.
+    dead port 2/2 on $mux $procmux$1912.
+    dead port 1/2 on $mux $procmux$1906.
+    dead port 2/2 on $mux $procmux$1906.
+    dead port 2/2 on $mux $procmux$1900.
+    dead port 1/2 on $mux $procmux$1894.
+    dead port 2/2 on $mux $procmux$1894.
+    dead port 2/2 on $mux $procmux$1888.
+    dead port 1/2 on $mux $procmux$1882.
+    dead port 2/2 on $mux $procmux$1882.
+    dead port 2/2 on $mux $procmux$1876.
+    dead port 1/2 on $mux $procmux$1870.
+    dead port 2/2 on $mux $procmux$1870.
+    dead port 2/2 on $mux $procmux$1864.
+    dead port 1/2 on $mux $procmux$1858.
+    dead port 2/2 on $mux $procmux$1858.
+    dead port 2/2 on $mux $procmux$1852.
+    dead port 1/2 on $mux $procmux$1846.
+    dead port 2/2 on $mux $procmux$1846.
+    dead port 2/2 on $mux $procmux$1840.
+    dead port 1/2 on $mux $procmux$1834.
+    dead port 2/2 on $mux $procmux$1834.
+    dead port 2/2 on $mux $procmux$1828.
+    dead port 1/2 on $mux $procmux$1822.
+    dead port 2/2 on $mux $procmux$1822.
+    dead port 2/2 on $mux $procmux$1816.
+    dead port 1/2 on $mux $procmux$1810.
+    dead port 2/2 on $mux $procmux$1810.
+    dead port 2/2 on $mux $procmux$1804.
+    dead port 1/2 on $mux $procmux$1798.
+    dead port 2/2 on $mux $procmux$1798.
+    dead port 2/2 on $mux $procmux$1792.
+    dead port 1/2 on $mux $procmux$1786.
+    dead port 2/2 on $mux $procmux$1786.
+    dead port 2/2 on $mux $procmux$1780.
+    dead port 1/2 on $mux $procmux$1774.
+    dead port 2/2 on $mux $procmux$1774.
+    dead port 2/2 on $mux $procmux$1768.
+    dead port 1/2 on $mux $procmux$1762.
+    dead port 2/2 on $mux $procmux$1762.
+    dead port 2/2 on $mux $procmux$1756.
+    dead port 1/2 on $mux $procmux$1750.
+    dead port 2/2 on $mux $procmux$1750.
+    dead port 2/2 on $mux $procmux$1744.
+    dead port 1/2 on $mux $procmux$1738.
+    dead port 2/2 on $mux $procmux$1738.
+    dead port 2/2 on $mux $procmux$1732.
+    dead port 1/2 on $mux $procmux$1726.
+    dead port 2/2 on $mux $procmux$1726.
+    dead port 2/2 on $mux $procmux$1720.
+    dead port 1/2 on $mux $procmux$1714.
+    dead port 2/2 on $mux $procmux$1714.
+    dead port 2/2 on $mux $procmux$1708.
+    dead port 1/2 on $mux $procmux$1702.
+    dead port 2/2 on $mux $procmux$1702.
+    dead port 2/2 on $mux $procmux$1696.
+    dead port 1/2 on $mux $procmux$1690.
+    dead port 2/2 on $mux $procmux$1690.
+    dead port 2/2 on $mux $procmux$1684.
+    dead port 1/2 on $mux $procmux$1678.
+    dead port 2/2 on $mux $procmux$1678.
+    dead port 2/2 on $mux $procmux$1672.
+    dead port 1/2 on $mux $procmux$1666.
+    dead port 2/2 on $mux $procmux$1666.
+    dead port 2/2 on $mux $procmux$1660.
+    dead port 1/2 on $mux $procmux$1654.
+    dead port 2/2 on $mux $procmux$1654.
+    dead port 2/2 on $mux $procmux$1648.
+    dead port 1/2 on $mux $procmux$1642.
+    dead port 2/2 on $mux $procmux$1642.
+    dead port 2/2 on $mux $procmux$1636.
+    dead port 1/2 on $mux $procmux$1630.
+    dead port 2/2 on $mux $procmux$1630.
+    dead port 2/2 on $mux $procmux$1624.
+    dead port 1/2 on $mux $procmux$1618.
+    dead port 2/2 on $mux $procmux$1618.
+    dead port 2/2 on $mux $procmux$1612.
+    dead port 1/2 on $mux $procmux$1606.
+    dead port 2/2 on $mux $procmux$1606.
+    dead port 2/2 on $mux $procmux$1600.
+    dead port 1/2 on $mux $procmux$1594.
+    dead port 2/2 on $mux $procmux$1594.
+    dead port 2/2 on $mux $procmux$1588.
+    dead port 1/2 on $mux $procmux$1582.
+    dead port 2/2 on $mux $procmux$1582.
+    dead port 2/2 on $mux $procmux$1576.
+    dead port 1/2 on $mux $procmux$1570.
+    dead port 2/2 on $mux $procmux$1570.
+    dead port 2/2 on $mux $procmux$1564.
+    dead port 1/2 on $mux $procmux$1558.
+    dead port 2/2 on $mux $procmux$1558.
+    dead port 2/2 on $mux $procmux$1552.
+    dead port 1/2 on $mux $procmux$1546.
+    dead port 2/2 on $mux $procmux$1546.
+    dead port 2/2 on $mux $procmux$1540.
+    dead port 1/2 on $mux $procmux$1534.
+    dead port 2/2 on $mux $procmux$1534.
+    dead port 2/2 on $mux $procmux$1528.
+    dead port 1/2 on $mux $procmux$1522.
+    dead port 2/2 on $mux $procmux$1522.
+    dead port 2/2 on $mux $procmux$1516.
+    dead port 1/2 on $mux $procmux$1510.
+    dead port 2/2 on $mux $procmux$1510.
+    dead port 2/2 on $mux $procmux$1504.
+    dead port 1/2 on $mux $procmux$1498.
+    dead port 2/2 on $mux $procmux$1498.
+    dead port 2/2 on $mux $procmux$1492.
+    dead port 1/2 on $mux $procmux$1486.
+    dead port 2/2 on $mux $procmux$1486.
+    dead port 2/2 on $mux $procmux$1480.
+    dead port 1/2 on $mux $procmux$1474.
+    dead port 2/2 on $mux $procmux$1474.
+    dead port 2/2 on $mux $procmux$1468.
+    dead port 1/2 on $mux $procmux$1462.
+    dead port 2/2 on $mux $procmux$1462.
+    dead port 2/2 on $mux $procmux$1456.
+    dead port 1/2 on $mux $procmux$1450.
+    dead port 2/2 on $mux $procmux$1450.
+    dead port 2/2 on $mux $procmux$1444.
+    dead port 1/2 on $mux $procmux$1438.
+    dead port 2/2 on $mux $procmux$1438.
+    dead port 2/2 on $mux $procmux$1432.
+    dead port 1/2 on $mux $procmux$1426.
+    dead port 2/2 on $mux $procmux$1426.
+    dead port 2/2 on $mux $procmux$1420.
+    dead port 1/2 on $mux $procmux$1414.
+    dead port 2/2 on $mux $procmux$1414.
+    dead port 2/2 on $mux $procmux$1408.
+    dead port 1/2 on $mux $procmux$1402.
+    dead port 2/2 on $mux $procmux$1402.
+    dead port 2/2 on $mux $procmux$1396.
+    dead port 1/2 on $mux $procmux$1390.
+    dead port 2/2 on $mux $procmux$1390.
+    dead port 2/2 on $mux $procmux$1384.
+    dead port 1/2 on $mux $procmux$1378.
+    dead port 2/2 on $mux $procmux$1378.
+    dead port 2/2 on $mux $procmux$1372.
+    dead port 1/2 on $mux $procmux$1366.
+    dead port 2/2 on $mux $procmux$1366.
+    dead port 2/2 on $mux $procmux$1360.
+    dead port 1/2 on $mux $procmux$1354.
+    dead port 2/2 on $mux $procmux$1354.
+    dead port 2/2 on $mux $procmux$1348.
+    dead port 1/2 on $mux $procmux$1342.
+    dead port 2/2 on $mux $procmux$1342.
+    dead port 2/2 on $mux $procmux$1336.
+    dead port 1/2 on $mux $procmux$1330.
+    dead port 2/2 on $mux $procmux$1330.
+    dead port 2/2 on $mux $procmux$1324.
+    dead port 1/2 on $mux $procmux$1318.
+    dead port 2/2 on $mux $procmux$1318.
+    dead port 2/2 on $mux $procmux$1312.
+    dead port 1/2 on $mux $procmux$1306.
+    dead port 2/2 on $mux $procmux$1306.
+    dead port 2/2 on $mux $procmux$1300.
+    dead port 1/2 on $mux $procmux$1294.
+    dead port 2/2 on $mux $procmux$1294.
+    dead port 2/2 on $mux $procmux$1288.
+    dead port 1/2 on $mux $procmux$1282.
+    dead port 2/2 on $mux $procmux$1282.
+    dead port 2/2 on $mux $procmux$1276.
+    dead port 1/2 on $mux $procmux$1270.
+    dead port 2/2 on $mux $procmux$1270.
+    dead port 2/2 on $mux $procmux$1264.
+    dead port 1/2 on $mux $procmux$1258.
+    dead port 2/2 on $mux $procmux$1258.
+    dead port 2/2 on $mux $procmux$1252.
+    dead port 1/2 on $mux $procmux$1246.
+    dead port 2/2 on $mux $procmux$1246.
+    dead port 2/2 on $mux $procmux$1240.
+    dead port 1/2 on $mux $procmux$1234.
+    dead port 2/2 on $mux $procmux$1234.
+    dead port 2/2 on $mux $procmux$1228.
+    dead port 1/2 on $mux $procmux$1222.
+    dead port 2/2 on $mux $procmux$1222.
+    dead port 2/2 on $mux $procmux$1216.
+    dead port 1/2 on $mux $procmux$1210.
+    dead port 2/2 on $mux $procmux$1210.
+    dead port 2/2 on $mux $procmux$1204.
+    dead port 1/2 on $mux $procmux$1198.
+    dead port 2/2 on $mux $procmux$1198.
+    dead port 2/2 on $mux $procmux$1192.
+    dead port 1/2 on $mux $procmux$1186.
+    dead port 2/2 on $mux $procmux$1186.
+    dead port 2/2 on $mux $procmux$1180.
+    dead port 1/2 on $mux $procmux$1174.
+    dead port 2/2 on $mux $procmux$1174.
+    dead port 2/2 on $mux $procmux$1168.
+    dead port 1/2 on $mux $procmux$1162.
+    dead port 2/2 on $mux $procmux$1162.
+    dead port 2/2 on $mux $procmux$1156.
+    dead port 1/2 on $mux $procmux$1150.
+    dead port 2/2 on $mux $procmux$1150.
+    dead port 2/2 on $mux $procmux$1144.
+    dead port 1/2 on $mux $procmux$1138.
+    dead port 2/2 on $mux $procmux$1138.
+    dead port 2/2 on $mux $procmux$1132.
+    dead port 1/2 on $mux $procmux$1126.
+    dead port 2/2 on $mux $procmux$1126.
+    dead port 2/2 on $mux $procmux$1120.
+    dead port 1/2 on $mux $procmux$1114.
+    dead port 2/2 on $mux $procmux$1114.
+    dead port 2/2 on $mux $procmux$1108.
+    dead port 1/2 on $mux $procmux$1102.
+    dead port 2/2 on $mux $procmux$1102.
+    dead port 2/2 on $mux $procmux$1096.
+    dead port 1/2 on $mux $procmux$2671.
+    dead port 2/2 on $mux $procmux$2671.
+    dead port 1/9 on $pmux $procmux$2662.
+    dead port 2/9 on $pmux $procmux$2662.
+    dead port 3/9 on $pmux $procmux$2662.
+    dead port 4/9 on $pmux $procmux$2662.
+    dead port 5/9 on $pmux $procmux$2662.
+    dead port 6/9 on $pmux $procmux$2662.
+    dead port 7/9 on $pmux $procmux$2662.
+    dead port 8/9 on $pmux $procmux$2662.
+    dead port 9/9 on $pmux $procmux$2662.
+    dead port 2/2 on $mux $procmux$2658.
+    dead port 1/9 on $pmux $procmux$2649.
+    dead port 2/9 on $pmux $procmux$2649.
+    dead port 3/9 on $pmux $procmux$2649.
+    dead port 4/9 on $pmux $procmux$2649.
+    dead port 5/9 on $pmux $procmux$2649.
+    dead port 6/9 on $pmux $procmux$2649.
+    dead port 7/9 on $pmux $procmux$2649.
+    dead port 8/9 on $pmux $procmux$2649.
+    dead port 1/2 on $mux $procmux$2742.
+    dead port 2/2 on $mux $procmux$2742.
+    dead port 1/2 on $mux $procmux$2739.
+    dead port 2/2 on $mux $procmux$2739.
+    dead port 1/2 on $mux $procmux$2736.
+    dead port 2/2 on $mux $procmux$2736.
+    dead port 1/9 on $pmux $procmux$2727.
+    dead port 2/9 on $pmux $procmux$2727.
+    dead port 3/9 on $pmux $procmux$2727.
+    dead port 4/9 on $pmux $procmux$2727.
+    dead port 5/9 on $pmux $procmux$2727.
+    dead port 6/9 on $pmux $procmux$2727.
+    dead port 7/9 on $pmux $procmux$2727.
+    dead port 8/9 on $pmux $procmux$2727.
+    dead port 9/9 on $pmux $procmux$2727.
+    dead port 1/2 on $mux $procmux$2507.
+    dead port 2/2 on $mux $procmux$2507.
+    dead port 1/2 on $mux $procmux$2504.
+    dead port 2/2 on $mux $procmux$2504.
+    dead port 1/2 on $mux $procmux$2501.
+    dead port 2/2 on $mux $procmux$2501.
+    dead port 1/2 on $mux $procmux$2498.
+    dead port 2/2 on $mux $procmux$2498.
+    dead port 1/2 on $mux $procmux$2493.
+    dead port 2/2 on $mux $procmux$2493.
+    dead port 1/2 on $mux $procmux$2488.
+    dead port 2/2 on $mux $procmux$2488.
+    dead port 1/2 on $mux $procmux$2483.
+    dead port 2/2 on $mux $procmux$2483.
+    dead port 1/2 on $mux $procmux$2481.
+    dead port 2/2 on $mux $procmux$2481.
+    dead port 1/9 on $pmux $procmux$2996.
+    dead port 2/9 on $pmux $procmux$2996.
+    dead port 3/9 on $pmux $procmux$2996.
+    dead port 4/9 on $pmux $procmux$2996.
+    dead port 5/9 on $pmux $procmux$2996.
+    dead port 6/9 on $pmux $procmux$2996.
+    dead port 7/9 on $pmux $procmux$2996.
+    dead port 8/9 on $pmux $procmux$2996.
+    dead port 9/9 on $pmux $procmux$2996.
+    dead port 1/2 on $mux $procmux$2475.
+    dead port 2/2 on $mux $procmux$2475.
+    dead port 1/2 on $mux $procmux$2473.
+    dead port 2/2 on $mux $procmux$2473.
+    dead port 1/2 on $mux $procmux$2467.
+    dead port 2/2 on $mux $procmux$2467.
+    dead port 1/2 on $mux $procmux$2465.
+    dead port 2/2 on $mux $procmux$2465.
+    dead port 1/2 on $mux $procmux$3005.
+    dead port 2/2 on $mux $procmux$3005.
+Removed 382 multiplexer ports.
+<suppressed ~154 debug messages>
+
+7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+    New ctrl vector for $pmux cell $procmux$2407: { $procmux$2451_CMP $auto$opt_reduce.cc:134:opt_pmux$3276 }
+    New ctrl vector for $pmux cell $procmux$2932: $auto$opt_reduce.cc:134:opt_pmux$3278
+    New ctrl vector for $pmux cell $procmux$2817: $auto$opt_reduce.cc:134:opt_pmux$3280
+    New ctrl vector for $pmux cell $procmux$2883: $auto$opt_reduce.cc:134:opt_pmux$3282
+    New ctrl vector for $pmux cell $procmux$2797: $auto$opt_reduce.cc:134:opt_pmux$3284
+    New ctrl vector for $pmux cell $procmux$2860: $auto$opt_reduce.cc:134:opt_pmux$3286
+    New ctrl vector for $pmux cell $procmux$2778: $auto$opt_reduce.cc:134:opt_pmux$3288
+    New ctrl vector for $pmux cell $procmux$2907: $auto$opt_reduce.cc:134:opt_pmux$3290
+    New ctrl vector for $pmux cell $procmux$2838: $auto$opt_reduce.cc:134:opt_pmux$3292
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 9 changes.
+
+7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+<suppressed ~21 debug messages>
+Removed a total of 7 cells.
+
+7.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$3051 ($adff) from module brick_sensor_if (D = $procmux$2513_Y, Q = \u_spi.cs_n_r).
+Adding EN signal on $procdff$3049 ($adff) from module brick_sensor_if (D = $ternary$rtl/brick_sensor_if.v:60$1060_Y, Q = \u_spi.len_r).
+Adding EN signal on $procdff$3050 ($adff) from module brick_sensor_if (D = $procmux$2520_Y, Q = \u_spi.sclk_r).
+Adding EN signal on $procdff$3030 ($adff) from module brick_sensor_if (D = $procmux$2450_Y, Q = \u_can.state).
+Adding EN signal on $procdff$3047 ($adff) from module brick_sensor_if (D = $procmux$2563_Y, Q = \u_spi.shreg).
+Adding EN signal on $procdff$3048 ($adff) from module brick_sensor_if (D = $procmux$2549_Y, Q = \u_spi.rxreg).
+Adding EN signal on $procdff$3031 ($adff) from module brick_sensor_if (D = $procmux$2431_Y, Q = \u_can.div_cnt).
+Adding EN signal on $procdff$3045 ($adff) from module brick_sensor_if (D = $procmux$2588_Y, Q = \u_spi.div_cnt).
+Adding EN signal on $procdff$3046 ($adff) from module brick_sensor_if (D = $procmux$2577_Y, Q = \u_spi.phase).
+Adding EN signal on $procdff$3032 ($adff) from module brick_sensor_if (D = $procmux$2407_Y, Q = \u_can.tx_o).
+Adding EN signal on $procdff$3043 ($adff) from module brick_sensor_if (D = $procmux$2622_Y, Q = \u_spi.state).
+Adding EN signal on $procdff$3044 ($adff) from module brick_sensor_if (D = $procmux$2605_Y, Q = \u_spi.bits_left).
+Adding EN signal on $procdff$3033 ($adff) from module brick_sensor_if (D = $flatten\u_can.$or$rtl/can_framer.v:56$1036_Y, Q = \u_can.frame_raw).
+Adding EN signal on $procdff$3041 ($adff) from module brick_sensor_if (D = $procmux$2629_Y, Q = \u_spi.busy_o).
+Adding EN signal on $procdff$3034 ($adff) from module brick_sensor_if (D = $flatten\u_can.$add$rtl/can_framer.v:57$1037_Y [6:0], Q = \u_can.raw_len).
+Adding EN signal on $procdff$3039 ($adff) from module brick_sensor_if (D = $flatten\u_can.$3\b[0:0], Q = \u_can.b).
+Adding EN signal on $procdff$3040 ($adff) from module brick_sensor_if (D = $flatten\u_spi.$or$rtl/spi_master.v:42$98_Y, Q = \u_spi.rx_word_o).
+Adding EN signal on $procdff$3035 ($adff) from module brick_sensor_if (D = $procmux$2387_Y, Q = \u_can.ptr).
+Adding EN signal on $procdff$3037 ($adff) from module brick_sensor_if (D = $procmux$2352_Y, Q = \u_can.last_bit).
+Adding EN signal on $procdff$3038 ($adff) from module brick_sensor_if (D = $procmux$2333_Y, Q = \u_can.run).
+Adding EN signal on $procdff$3036 ($adff) from module brick_sensor_if (D = $procmux$2371_Y, Q = \u_can.trail).
+Adding EN signal on $procdff$3028 ($adff) from module brick_sensor_if (D = $procmux$2456_Y, Q = \u_can.busy_o).
+Adding EN signal on $procdff$3058 ($adff) from module brick_sensor_if (D = $procmux$2694_Y, Q = \rdata_o).
+Adding EN signal on $procdff$3061 ($adff) from module brick_sensor_if (D = \wdata_i, Q = \spi_clkdiv).
+Adding EN signal on $procdff$3062 ($adff) from module brick_sensor_if (D = \wdata_i [3:0], Q = \spi_len).
+Adding EN signal on $procdff$3064 ($adff) from module brick_sensor_if (D = \wdata_i [3:0], Q = \can_dlc).
+Adding EN signal on $procdff$3065 ($adff) from module brick_sensor_if (D = \wdata_i, Q = \can_bitdiv).
+Adding EN signal on $procdff$3063 ($adff) from module brick_sensor_if (D = \wdata_i, Q = \can_id [7:0]).
+Adding EN signal on $procdff$3063 ($adff) from module brick_sensor_if (D = \wdata_i [2:0], Q = \can_id [10:8]).
+Adding EN signal on $procdff$3067 ($adff) from module brick_sensor_if (D = $procmux$2961_Y, Q = \can_done_st).
+Adding EN signal on $procdff$3066 ($adff) from module brick_sensor_if (D = $procmux$2979_Y, Q = \spi_done_st).
+Adding EN signal on $procdff$3070 ($adff) from module brick_sensor_if (D = 8, Q = \i).
+Adding EN signal on $procdff$3071 ($adff) from module brick_sensor_if (D = $procmux$2944_Y, Q = \dbuf[0]).
+Adding EN signal on $procdff$3073 ($adff) from module brick_sensor_if (D = $procmux$2895_Y, Q = \dbuf[2]).
+Adding EN signal on $procdff$3074 ($adff) from module brick_sensor_if (D = $procmux$2872_Y, Q = \dbuf[3]).
+Adding EN signal on $procdff$3072 ($adff) from module brick_sensor_if (D = $procmux$2919_Y, Q = \dbuf[1]).
+Adding EN signal on $procdff$3076 ($adff) from module brick_sensor_if (D = $procmux$2829_Y, Q = \dbuf[5]).
+Adding EN signal on $procdff$3077 ($adff) from module brick_sensor_if (D = $procmux$2809_Y, Q = \dbuf[6]).
+Adding EN signal on $procdff$3075 ($adff) from module brick_sensor_if (D = $procmux$2850_Y, Q = \dbuf[4]).
+Adding EN signal on $procdff$3078 ($adff) from module brick_sensor_if (D = $procmux$2790_Y, Q = \dbuf[7]).
+Setting constant 1-bit at position 0 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 1 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 2 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 3 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 4 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 5 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 6 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 7 on $procdff$3080 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 0 on $procdff$3079 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 1 on $procdff$3079 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 2 on $procdff$3079 ($adff) from module brick_sensor_if.
+Setting constant 0-bit at position 0 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 1 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 2 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 1-bit at position 3 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 4 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 5 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 6 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 7 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 8 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 9 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 10 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 11 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 12 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 13 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 14 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 15 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 16 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 17 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 18 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 19 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 20 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 21 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 22 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 23 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 24 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 25 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 26 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 27 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 28 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 29 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 30 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 0-bit at position 31 on $auto$ff.cc:266:slice$3516 ($adffe) from module brick_sensor_if.
+Setting constant 1-bit at position 0 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 1 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 2 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 3 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 4 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 5 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 6 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 7 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 8 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 9 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 10 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 11 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 12 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 13 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 14 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 15 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 16 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 17 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 18 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 19 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 20 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 21 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 22 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 23 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 24 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 25 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 26 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 27 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 28 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 29 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 30 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 31 on $procdff$3057 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 0 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 1 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 2 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 3 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 4 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 5 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 6 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 7 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 8 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 9 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 10 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 11 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 12 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 13 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 14 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 15 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 16 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 17 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 18 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 19 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 20 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 21 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 22 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 23 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 24 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 25 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 26 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 27 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 28 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 29 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 30 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 31 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 32 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 33 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 34 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 35 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 36 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 37 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 38 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 39 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 40 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 41 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 42 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 43 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 44 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 45 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 46 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 47 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 48 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 49 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 50 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 51 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 52 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 53 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 54 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 55 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 56 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 57 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 58 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 59 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 60 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 61 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 62 on $procdff$3056 ($adff) from module brick_sensor_if.
+Setting constant 1-bit at position 63 on $procdff$3056 ($adff) from module brick_sensor_if.
+
+7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+Removed 26 unused cells and 1624 unused wires.
+<suppressed ~29 debug messages>
+
+7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+<suppressed ~25 debug messages>
+
+7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~141 debug messages>
+
+7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+<suppressed ~183 debug messages>
+Removed a total of 61 cells.
+
+7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+Removed 0 unused cells and 61 unused wires.
+<suppressed ~1 debug messages>
+
+7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+7.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~145 debug messages>
+
+7.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+7.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+7.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+7.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+7.23. Finished OPT passes. (There is nothing left to do.)
+
+8. Executing FSM pass (extract and optimize FSM).
+
+8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+9. Executing OPT pass (performing simple optimizations).
+
+9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~145 debug messages>
+
+9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+9.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+9.9. Finished OPT passes. (There is nothing left to do.)
+
+10. Executing MEMORY pass.
+
+10.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+10.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+10.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+10.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+10.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+10.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+10.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+10.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+10.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+10.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+10.11. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+11. Executing OPT pass (performing simple optimizations).
+
+11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+11.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~145 debug messages>
+
+11.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+11.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+11.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+11.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+11.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+11.9. Finished OPT passes. (There is nothing left to do.)
+
+12. Executing TECHMAP pass (map to technology primitives).
+
+12.1. Executing Verilog-2005 frontend: /usr/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/usr/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Successfully finished Verilog frontend.
+
+12.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $adffe.
+Using extmapper simplemap for cells of type $reduce_or.
+Using template $paramod$72f7795a18b8bd21d2def9f98cbb7d0e4ff65a7f\_90_pmux for cells of type $pmux.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$c5c783b17ab1d780abfad8cfe6563a0a7b47a3b0\_90_pmux for cells of type $pmux.
+Using template $paramod$521ce43182eecb9f60c72393a788160d2c356bf5\_90_pmux for cells of type $pmux.
+Using template $paramod$b756e651b7db7aeb455331d9a2df073db93fcc2e\_90_pmux for cells of type $pmux.
+Using template $paramod$fc16b9f758000d363d24f130038bd99b46b4fa1b\_90_pmux for cells of type $pmux.
+Using template $paramod$54a4503cc57b9df40b70c1899504d6aac2650719\_90_pmux for cells of type $pmux.
+Using template $paramod$d629d85c8826a74239b9178d1930215a43b0ceb0\_90_pmux for cells of type $pmux.
+Using template $paramod$bf2533632d512eac76dd186c0da49367e29b8e98\_90_pmux for cells of type $pmux.
+Using template $paramod$32e7c4d6f92ff4337599ece53082d2e88a82a9f2\_90_pmux for cells of type $pmux.
+Running "alumacc" on wrapper $extern:wrap:$gt:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$gt:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$gt:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using extmapper simplemap for cells of type $logic_and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod$constmap:3598e5b57c2ff1292fac31070bfeb71fe27f93fb$paramod$ba4683647da2a9c1dc978a7570c9df540bdc26c1\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shl.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=8:B_SIGNED=0:B_WIDTH=8:Y_WIDTH=8:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=8:B_SIGNED=0:B_WIDTH=8:Y_WIDTH=8:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=8:B_SIGNED=0:B_WIDTH=8:Y_WIDTH=8:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=7:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=7:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=7:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=4:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=4:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=4:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=7:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=7:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=7:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=3:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=3:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=3:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$constmap:7be5ddd7fb15d48a12901f0424479b8c7b07a4da$paramod$46cfce53ab554e26a423c7e8f4daab37fab27c95\_90_shift_shiftx for cells of type $shiftx.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=7:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using extmapper simplemap for cells of type $xor.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=7:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$lt:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using extmapper simplemap for cells of type $adff.
+Using template $paramod$740b056ede97228d3eae64ea2fdc81f0a33e0fe7\_90_alu for cells of type $alu.
+Using template $paramod$86918417b1d705351097c6e77e8f74c668cf6343\_90_alu for cells of type $alu.
+Using template $paramod$a1bc51c02ce12ac21eb18988e83292af48ed7d72\_90_alu for cells of type $alu.
+Using template $paramod$dbcdc7e8aa1a4080cea2deda6fdc8772064f4d90\_90_alu for cells of type $alu.
+Using template $paramod$a7817265ef3ab2ee43da53bbd8a90f6450d412d9\_90_alu for cells of type $alu.
+Using template $paramod$78e969f2586efcf3a5b0b0440bcca0db83d5cca2\_90_alu for cells of type $alu.
+Using template $paramod$fdd20cfde6eff5e426e814d02912ca76c51febc9\_90_alu for cells of type $alu.
+Using template $paramod$b7dbb4ea758f2402846a04a06dfe9e2cbfb47604\_90_alu for cells of type $alu.
+Using template $paramod$fbc7873bff55778c0b3173955b7e4bce1d9d6834\_90_alu for cells of type $alu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000000100 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000100000 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000000111 for cells of type $lcu.
+Using template $paramod\_90_lcu\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~36777 debug messages>
+
+13. Executing OPT pass (performing simple optimizations).
+
+13.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+<suppressed ~258947 debug messages>
+
+13.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+<suppressed ~408603 debug messages>
+Removed a total of 136201 cells.
+
+13.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+13.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+13.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+13.6. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 0 on $auto$ff.cc:266:slice$13191 ($_DFFE_PN0P_) from module brick_sensor_if.
+
+13.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+Removed 26370 unused cells and 39487 unused wires.
+<suppressed ~26371 debug messages>
+
+13.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+<suppressed ~136 debug messages>
+
+13.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+13.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+13.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+13.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+13.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+13.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+Removed 2 unused cells and 17 unused wires.
+<suppressed ~3 debug messages>
+
+13.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+13.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+13.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+13.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+13.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+13.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+13.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+13.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+13.23. Finished OPT passes. (There is nothing left to do.)
+
+14. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+  cell sky130_fd_sc_hd__dfxtp_1 (noninv, pins=3, area=20.02) is a direct match for cell type $_DFF_P_.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+  cell sky130_fd_sc_hd__dfrtn_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_NN0_.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+  cell sky130_fd_sc_hd__dfrtp_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_PN0_.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+  cell sky130_fd_sc_hd__dfstp_2 (noninv, pins=4, area=26.28) is a direct match for cell type $_DFF_PN1_.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+  cell sky130_fd_sc_hd__dfbbn_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_NNN_.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbn_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtn_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+  cell sky130_fd_sc_hd__dfbbp_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_PNN_.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE|IQ&!DE' in pin attribute of cell 'sky130_fd_sc_hd__edfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfbbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfrtp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfsbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfstp_4' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sdfxtp_4' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxbp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_1' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_2' - skipping.
+Warning: Found unsupported expression 'D&DE&!SCE|IQ&!DE&!SCE|SCD&SCE' in pin attribute of cell 'sky130_fd_sc_hd__sedfxtp_4' - skipping.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    \sky130_fd_sc_hd__dfxtp_1 _DFF_P_ (.CLK( C), .D( D), .Q( Q));
+    \sky130_fd_sc_hd__dfrtn_1 _DFF_NN0_ (.CLK_N( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sky130_fd_sc_hd__dfrtp_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    \sky130_fd_sc_hd__dfstp_2 _DFF_PN1_ (.CLK( C), .D( D), .Q( Q), .SET_B( R));
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    \sky130_fd_sc_hd__dfbbn_1 _DFFSR_NNN_ (.CLK_N( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    \sky130_fd_sc_hd__dfbbp_1 _DFFSR_PNN_ (.CLK( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+14.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+Mapping DFF cells in module `\brick_sensor_if':
+  mapped 444 $_DFF_PN0_ cells to \sky130_fd_sc_hd__dfrtp_1 cells.
+  mapped 15 $_DFF_PN1_ cells to \sky130_fd_sc_hd__dfstp_2 cells.
+
+15. Executing ABC pass (technology mapping using ABC).
+
+15.1. Extracting gate netlist of module `\brick_sensor_if' to `<abc-temp-dir>/input.blif'..
+Extracted 8585 gates and 9062 wires to a netlist network with 474 inputs and 459 outputs.
+
+15.1.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/hatch/.volare/volare/sky130/versions/c6d73a35f524070e85faff4a6a9eef49553ebc2b/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_100C_1v80.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.13 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__decap_12" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__decap_3" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__decap_4" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__decap_6" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__decap_8" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfbbn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfbbn_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfrtn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfrtp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfrtp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfrtp_4".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfsbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfsbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfstp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfstp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfstp_4".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfxbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfxbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfxtp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfxtp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dfxtp_4".
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__diode_2" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__dlclkp_1" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__dlclkp_2" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__dlclkp_4" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrbn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrbn_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrtn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrtn_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrtn_4".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrtp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrtp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlrtp_4".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlxbn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlxbn_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlxbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlxtn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlxtn_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlxtn_4".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__dlxtp_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__ebufn_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__edfxbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__edfxtp_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvn_0".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvn_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvp_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvp_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvp_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sky130_fd_sc_hd__einvp_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__lpflow_bleeder_1" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__lpflow_decapkapwr_12" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__lpflow_decapkapwr_3" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__lpflow_decapkapwr_4" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__lpflow_decapkapwr_6" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__lpflow_decapkapwr_8" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__lpflow_inputisolatch_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfbbn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfbbn_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfrtn_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfrtp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfrtp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfrtp_4".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfsbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfsbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfstp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfstp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfstp_4".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfxbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfxbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfxtp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfxtp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sdfxtp_4".
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__sdlclkp_1" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__sdlclkp_2" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped cell "sky130_fd_sc_hd__sdlclkp_4" without logic function.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sedfxbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sedfxbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sedfxtp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sedfxtp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sky130_fd_sc_hd__sedfxtp_4".
+ABC: Library "sky130_fd_sc_hd__tt_100C_1v80" from "/home/hatch/.volare/volare/sky130/versions/c6d73a35f524070e85faff4a6a9eef49553ebc2b/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_100C_1v80.lib" has 334 cells (94 skipped: 63 seq; 13 tri-state; 18 no func; 0 dont_use).  Time =     0.18 sec
+ABC: Memory =   19.85 MB. Time =     0.18 sec
+ABC: Warning: Detected 9 multi-output gates (for example, "sky130_fd_sc_hd__fa_1").
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + retime -o -D 10000 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf -D 10000 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+15.1.2. Re-integrating ABC results.
+ABC RESULTS:   sky130_fd_sc_hd__nor3b_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a222oi_1 cells:       77
+ABC RESULTS:   sky130_fd_sc_hd__nor4b_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__maj3_1 cells:        4
+ABC RESULTS:   sky130_fd_sc_hd__nor4bb_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__mux4_2 cells:       30
+ABC RESULTS:   sky130_fd_sc_hd__nand4bb_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__nand3b_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__o21ba_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__and4_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a311oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a211o_1 cells:        3
+ABC RESULTS:   sky130_fd_sc_hd__xor3_1 cells:        6
+ABC RESULTS:   sky130_fd_sc_hd__o211a_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__o31a_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__nor2b_1 cells:        5
+ABC RESULTS:   sky130_fd_sc_hd__xnor3_1 cells:       35
+ABC RESULTS:   sky130_fd_sc_hd__xor2_1 cells:      108
+ABC RESULTS:   sky130_fd_sc_hd__xnor2_1 cells:      263
+ABC RESULTS:   sky130_fd_sc_hd__a21boi_0 cells:       22
+ABC RESULTS:   sky130_fd_sc_hd__o221a_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a2bb2oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__and3_1 cells:        6
+ABC RESULTS:   sky130_fd_sc_hd__o22ai_1 cells:       10
+ABC RESULTS:   sky130_fd_sc_hd__o21bai_1 cells:        3
+ABC RESULTS:   sky130_fd_sc_hd__o32a_1 cells:        4
+ABC RESULTS:   sky130_fd_sc_hd__o22a_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__clkinv_1 cells:       91
+ABC RESULTS:   sky130_fd_sc_hd__o32ai_1 cells:        4
+ABC RESULTS:   sky130_fd_sc_hd__mux2i_1 cells:       31
+ABC RESULTS:   sky130_fd_sc_hd__a221oi_1 cells:       10
+ABC RESULTS:   sky130_fd_sc_hd__a211oi_1 cells:       18
+ABC RESULTS:   sky130_fd_sc_hd__o211ai_1 cells:       11
+ABC RESULTS:   sky130_fd_sc_hd__o21a_1 cells:       22
+ABC RESULTS:   sky130_fd_sc_hd__or3_1 cells:       19
+ABC RESULTS:   sky130_fd_sc_hd__a32oi_1 cells:       10
+ABC RESULTS:   sky130_fd_sc_hd__a32o_1 cells:       20
+ABC RESULTS:   sky130_fd_sc_hd__o221ai_1 cells:        6
+ABC RESULTS:   sky130_fd_sc_hd__a21o_1 cells:       22
+ABC RESULTS:   sky130_fd_sc_hd__a22o_1 cells:      101
+ABC RESULTS:   sky130_fd_sc_hd__o31ai_1 cells:       17
+ABC RESULTS:   sky130_fd_sc_hd__nand4_1 cells:       15
+ABC RESULTS:   sky130_fd_sc_hd__a22oi_1 cells:       46
+ABC RESULTS:   sky130_fd_sc_hd__a31oi_1 cells:       20
+ABC RESULTS:   sky130_fd_sc_hd__nor3_1 cells:       39
+ABC RESULTS:   sky130_fd_sc_hd__nand3_1 cells:       70
+ABC RESULTS:   sky130_fd_sc_hd__o21ai_0 cells:      349
+ABC RESULTS:   sky130_fd_sc_hd__nor4_1 cells:       12
+ABC RESULTS:   sky130_fd_sc_hd__o2111ai_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a41oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__lpflow_inputiso1p_1 cells:       36
+ABC RESULTS:   sky130_fd_sc_hd__and2_0 cells:       25
+ABC RESULTS:   sky130_fd_sc_hd__nand2b_1 cells:       18
+ABC RESULTS:   sky130_fd_sc_hd__a21oi_1 cells:      434
+ABC RESULTS:   sky130_fd_sc_hd__nor2_1 cells:      370
+ABC RESULTS:   sky130_fd_sc_hd__a221o_1 cells:       74
+ABC RESULTS:   sky130_fd_sc_hd__mux2_1 cells:       43
+ABC RESULTS:   sky130_fd_sc_hd__nand2_1 cells:      463
+ABC RESULTS:   sky130_fd_sc_hd__lpflow_isobufsrc_1 cells:       10
+ABC RESULTS:   sky130_fd_sc_hd__and4b_1 cells:        2
+ABC RESULTS:        internal signals:     8129
+ABC RESULTS:           input signals:      474
+ABC RESULTS:          output signals:      459
+Removing temp directory.
+Removed 0 unused cells and 2409 unused wires.
+
+16. Executing OPT pass (performing simple optimizations).
+
+16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \brick_sensor_if..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \brick_sensor_if.
+Performed a total of 0 changes.
+
+16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\brick_sensor_if'.
+Removed a total of 0 cells.
+
+16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \brick_sensor_if..
+
+16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module brick_sensor_if.
+
+16.9. Finished OPT passes. (There is nothing left to do.)
+
+17. Printing statistics.
+
+=== brick_sensor_if ===
+
+   Number of wires:               3091
+   Number of wire bits:           4404
+   Number of public wires:          89
+   Number of public wire bits:    1400
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               3461
+     sky130_fd_sc_hd__a211o_1        3
+     sky130_fd_sc_hd__a211oi_1      18
+     sky130_fd_sc_hd__a21boi_0      22
+     sky130_fd_sc_hd__a21o_1        22
+     sky130_fd_sc_hd__a21oi_1      434
+     sky130_fd_sc_hd__a221o_1       74
+     sky130_fd_sc_hd__a221oi_1      10
+     sky130_fd_sc_hd__a222oi_1      77
+     sky130_fd_sc_hd__a22o_1       101
+     sky130_fd_sc_hd__a22oi_1       46
+     sky130_fd_sc_hd__a2bb2oi_1      1
+     sky130_fd_sc_hd__a311oi_1       1
+     sky130_fd_sc_hd__a31oi_1       20
+     sky130_fd_sc_hd__a32o_1        20
+     sky130_fd_sc_hd__a32oi_1       10
+     sky130_fd_sc_hd__a41oi_1        1
+     sky130_fd_sc_hd__and2_0        25
+     sky130_fd_sc_hd__and3_1         6
+     sky130_fd_sc_hd__and4_1         1
+     sky130_fd_sc_hd__and4b_1        2
+     sky130_fd_sc_hd__clkinv_1      91
+     sky130_fd_sc_hd__dfrtp_1      444
+     sky130_fd_sc_hd__dfstp_2       15
+     sky130_fd_sc_hd__lpflow_inputiso1p_1     36
+     sky130_fd_sc_hd__lpflow_isobufsrc_1     10
+     sky130_fd_sc_hd__maj3_1         4
+     sky130_fd_sc_hd__mux2_1        43
+     sky130_fd_sc_hd__mux2i_1       31
+     sky130_fd_sc_hd__mux4_2        30
+     sky130_fd_sc_hd__nand2_1      463
+     sky130_fd_sc_hd__nand2b_1      18
+     sky130_fd_sc_hd__nand3_1       70
+     sky130_fd_sc_hd__nand3b_1       2
+     sky130_fd_sc_hd__nand4_1       15
+     sky130_fd_sc_hd__nand4bb_1      1
+     sky130_fd_sc_hd__nor2_1       370
+     sky130_fd_sc_hd__nor2b_1        5
+     sky130_fd_sc_hd__nor3_1        39
+     sky130_fd_sc_hd__nor3b_1        1
+     sky130_fd_sc_hd__nor4_1        12
+     sky130_fd_sc_hd__nor4b_1        2
+     sky130_fd_sc_hd__nor4bb_1       1
+     sky130_fd_sc_hd__o2111ai_1      1
+     sky130_fd_sc_hd__o211a_1        1
+     sky130_fd_sc_hd__o211ai_1      11
+     sky130_fd_sc_hd__o21a_1        22
+     sky130_fd_sc_hd__o21ai_0      349
+     sky130_fd_sc_hd__o21ba_1        1
+     sky130_fd_sc_hd__o21bai_1       3
+     sky130_fd_sc_hd__o221a_1        1
+     sky130_fd_sc_hd__o221ai_1       6
+     sky130_fd_sc_hd__o22a_1         1
+     sky130_fd_sc_hd__o22ai_1       10
+     sky130_fd_sc_hd__o31a_1         2
+     sky130_fd_sc_hd__o31ai_1       17
+     sky130_fd_sc_hd__o32a_1         4
+     sky130_fd_sc_hd__o32ai_1        4
+     sky130_fd_sc_hd__or3_1         19
+     sky130_fd_sc_hd__xnor2_1      263
+     sky130_fd_sc_hd__xnor3_1       35
+     sky130_fd_sc_hd__xor2_1       108
+     sky130_fd_sc_hd__xor3_1         6
+
+18. Executing Verilog backend.
+
+18.1. Executing BMUXMAP pass.
+
+18.2. Executing DEMUXMAP pass.
+Dumping module `\brick_sensor_if'.
+
+Warnings: 27 unique messages, 235 total
+End of script. Logfile hash: 134be87b3d, CPU: user 57.46s system 1.49s, MEM: 1274.82 MB peak
+Yosys 0.33 (git sha1 2584903a060)
+Time spent: 48% 29x opt_expr (29 sec), 20% 19x opt_merge (12 sec), ...
