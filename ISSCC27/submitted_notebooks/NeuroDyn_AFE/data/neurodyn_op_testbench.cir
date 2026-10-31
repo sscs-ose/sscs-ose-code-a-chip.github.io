@@ -1,7 +1,8 @@
-* CMRR Testbench for NeuroDyn OTA (Common-Mode AC Excitation)
-.include "C:/sscs-ose-code-a-chip.github.io/ISSCC27/submitted_notebooks/joseph_project/data/models/sky130_fd_pr/models/sky130_neurodyn_tt.lib.spice"
+* NeuroDyn-AFE operating-point diagnostic
+.include "C:/sscs-ose-code-a-chip.github.io/ISSCC27/submitted_notebooks/NeuroDyn_AFE/data/models/sky130_fd_pr/models/sky130_neurodyn_tt.lib.spice"
 
-.option noacct method=gear
+.option noacct
+.option method=gear
 
 * NeuroDyn-AFE Dynamic Operational Transconductance Amplifier (OTA)
 * SkyWater SKY130 130nm Process (sky130_fd_pr__nfet_01v8_lvt, sky130_fd_pr__pfet_01v8_lvt)
@@ -43,29 +44,21 @@ XM8 outm vbn_out vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
 
 .ends neurodyn_ota
 
-
 Vdd vdd 0 DC 0.6
 Vss vss 0 DC 0
 Vbn_tail vbn_tail 0 DC 0.36
 Vbp vbp 0 DC 0.24
 Vbn_out vbn_out 0 DC 0.2605
-
-* Common-Mode Excitation: 1.0 V AC on both inputs simultaneously
-Vin_cm in_cm 0 DC 0.4 AC 1.0
-R_inp in_cm inp 1
-R_inm in_cm inm 1
-
+Vcm_ref vcm 0 DC 0.40
+Vin_p inp 0 DC 0.40
+Vin_n inm 0 DC 0.40
 Vauxp vaux_p 0 DC 0
 Vauxn vaux_n 0 DC 0
-
 XDUT inp inm outp outm vdd vss vbn_tail vbp vaux_p vaux_n vbn_out neurodyn_ota
-E_outdiff outdiff 0 VOL='V(outp) - V(outm)'
-CL1 outp vss 5p
-CL2 outm vss 5p
 
 .control
-set filetype=ascii
-ac dec 20 1 10meg
-write cmrr_results.raw v(outdiff) v(outp) v(outm) v(in_cm)
+op
+print v(vdd) v(vbn_tail) v(vbn_out) v(vbp) v(inp) v(inm) v(xdut.tail) v(xdut.vbp_cmfb) v(xdut.nodep) v(xdut.noden) v(outp) v(outm) v(xdut.vcm_sense) i(vdd) i(vss)
+write op_results.raw all
 .endc
 .end
