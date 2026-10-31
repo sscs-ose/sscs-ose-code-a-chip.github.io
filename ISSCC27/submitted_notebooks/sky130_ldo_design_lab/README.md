@@ -1,4 +1,4 @@
-# A complete 50 mA SKY130 LDO with a local gate feedback loop
+# LDO with a Local Gate Feedback: Reproducible Design and Verification in SKY130
 
 **Author and travel representative: Christian Reivan**
 
