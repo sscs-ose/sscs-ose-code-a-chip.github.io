@@ -15,6 +15,22 @@ seokjindaveoh@tamu.edu, jl90@tamu.edu, yisuin@tamu.edu<br>
 - **J. Li** — verification of the automated design loop; data and loop verification of the network's inference and training.
 - **S. Yi** — supervision.
 
+## Start here (3 steps, Docker)
+1. **Build the image once**, in this folder (needs Docker; about 15 min, 18 GB):
+   `docker build -t ep_cim_loop -f env/Dockerfile .`
+2. **Start Jupyter:** `docker run --rm -p 127.0.0.1:8888:8888 ep_cim_loop`
+   Open <http://localhost:8888/lab/tree/ep_cim_loop.ipynb> — the notebook is already inside the image; nothing else to install.
+3. **Choose the mode in the first code cell (Parameters), then Run → Run All Cells.**
+   - First run: keep `MODE='quick'` (29 min) — every section runs at block level; use it to check that everything works.
+   - To reproduce all saved results: `MODE='full'` (112 min) — adds the chip-level simulation, the read circuit on all 3,097 test images and the full-chip DRC.
+   - To retrain the network as well: `TRAIN='full'` (+32 min) — the new weights are compared with the submitted ones.
+
+No Jupyter? One command runs the whole notebook and saves everything to `./out` (step 4b under [How to run](#how-to-run)).
+
+**Google Colab instead of Docker:** click the "Open in Colab" badge at the top of the notebook and choose *Run all*.
+You do not run any script by hand: the first cells take this folder from the official repository and install the tools themselves (`env/colab_setup.sh`, about 2 min).
+Use QUICK on Colab; section 8 (digital place-and-route) needs the Docker image (see the note at the start of [How to run](#how-to-run)).
+
 ## What this work is about
 - **Equilibrium propagation (EP)** trains a network with local rules: each weight changes from the voltages at its own two ends, measured once in a free phase and once in a slightly nudged phase [1, 2].
   Backpropagation needs a separate global backward pass through the whole network; EP does not, which makes it attractive for energy-efficient on-chip learning.
