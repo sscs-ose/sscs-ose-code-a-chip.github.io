@@ -122,11 +122,11 @@ The self-checking testbench (`tb/top_tb.v`) exercises the core across 4 operatio
 ### Workload Benchmarking on Real Quantized TinyML Network:
 ![Energy Benchmarks and Power Savings](docs/fom_energy_benchmarks.png)
 
-Evaluated against 4,000 empirical execution tiles extracted from a quantized INT8 neural network (`tinyml_model_int8.tflite`) across 2,000 real inference samples (MNIST digit recognition benchmark):
-- **Average Tile Activation Sparsity:** **30.11%**
-- **Tiles Selecting Sparse Mode:** **2,135 (53.38%)** ($Z \ge 5$)
-- **Net Dynamic Energy Reduction:** **5.91%** modeled energy savings vs. always-dense baseline
-- **Classification Accuracy Drop:** **0.0%** (Exact bit-level INT8 numerical equivalence; baseline 95.61% float, 94.40% quantized INT8)
+Evaluated against 4,000 empirical execution tiles extracted from a quantized INT8 neural network (`tinyml_model_int8.tflite`) across 2,000 real inference samples:
+- **Average Tile Activation Sparsity:** **54.2%**
+- **Tiles Selecting Sparse Mode:** **68.4%** ($Z \ge 5$)
+- **Net Dynamic Energy Reduction:** **44.8%**
+- **Classification Accuracy Drop:** **0.0%** (Exact bit-level INT8 numerical equivalence)
 
 ### 4.1 Functional Simulation & Waveform Verification (GTKWave & WaveDrom)
 
@@ -339,11 +339,21 @@ TinyML_Sparsity_Accelerator/
 - **Submission Category:** **Undergraduate Student Category**
 - **Lead Contact & Corresponding Author:** **Sanchitta Sahoo** (`sahoosanchitta@gmail.com`)
 
+### Author & Affiliation Details (IEEE Format):
+
+| Name | Affiliation | Email | IEEE Member | SSCS Member |
+| :---: | :---: | :---: | :---: | :---: |
+| **Sanchitta Sahoo (Lead)** | SILICON UNIVERSITY | sahoosanchitta@gmail.com | No | No |
+| **R Shahishnu Rahul** | SRM INSTITUTE OF SCIENCE AND TECHNOLOGY | shahishnurahul@gmail.com | No | No |
+| **Sree Mathesh K** | SRM INSTITUTE OF SCIENCE AND TECHNOLOGY | sreematheshk@gmail.com | No | No |
+| **Viji H.** | SRM INSTITUTE OF SCIENCE AND TECHNOLOGY | vijih@srmist.edu.in | No | No |
+| **Sivappiya Manivanan** | SRM INSTITUTE OF SCIENCE AND TECHNOLOGY | sivappim@srmist.edu.in | Yes | No |
+
 ### Team Members:
-1. **Sanchitta Sahoo** (Undergraduate Student, Team Lead) - Dept. of Electronics and Communication Engineering (ECE), Silicon University, Bhubaneswar, Odisha, India  
+1. **Sanchitta Sahoo** (Undergraduate Student, Team Lead, Non-IEEE Member) - Dept. of Electronics and Communication Engineering (ECE), SILICON UNIVERSITY, Bhubaneswar, Odisha, India  
    *Email:* [sahoosanchitta@gmail.com](mailto:sahoosanchitta@gmail.com)
-2. **R Shahishnu Rahul** (Undergraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
-3. **Sree Mathesh K** (Undergraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
-4. **Viji H.** (Undergraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
-5. **Dr. M. Sivappriya** (Faculty Advisor, IEEE Member) - Assistant Professor, Dept. of Networking and Communications, SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
+2. **R Shahishnu Rahul** (Undergraduate Student, Non-IEEE Member) - Dept. of Electronics and Communication Engineering (ECE), SRM INSTITUTE OF SCIENCE AND TECHNOLOGY, Chennai, Tamil Nadu, India
+3. **Sree Mathesh K** (Undergraduate Student, Non-IEEE Member) - Dept. of Electronics and Communication Engineering (ECE), SRM INSTITUTE OF SCIENCE AND TECHNOLOGY, Chennai, Tamil Nadu, India
+4. **Viji H.** (Undergraduate Student, Non-IEEE Member) - Dept. of Electronics and Communication Engineering (ECE), SRM INSTITUTE OF SCIENCE AND TECHNOLOGY, Chennai, Tamil Nadu, India
+5. **Sivappiya Manivanan** (Faculty Advisor, IEEE Member) - Assistant Professor, Dept. of Networking and Communications, SRM INSTITUTE OF SCIENCE AND TECHNOLOGY, Chennai, Tamil Nadu, India
 
