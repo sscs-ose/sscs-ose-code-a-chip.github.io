@@ -5,7 +5,8 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![PDK](https://img.shields.io/badge/PDK-SkyWater%20SKY130%20130nm-orange.svg)](https://github.com/google/skywater-pdk)
 [![Conference](https://img.shields.io/badge/IEEE%20SSCS-ISSCC%202027%20Code--a--Chip-red.svg)](https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-awards/)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/joseph_project/NeuroDyn_AFE.ipynb)
+[![Open In Colab (Author Preview)](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Joseph-30/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/joseph_project/NeuroDyn_AFE.ipynb)
+[![Open In Colab (Upstream SSCS PR)](https://img.shields.io/badge/Colab-Upstream%20SSCS%20PR-F9AB00?logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/joseph_project/NeuroDyn_AFE.ipynb)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://www.python.org/)
 [![Layout](https://img.shields.io/badge/Layout-DRC--Clean%20GDSII-success.svg)](data/gds/neurodyn_afe_sky130.gds)
 
