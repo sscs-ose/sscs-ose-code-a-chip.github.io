@@ -23,10 +23,12 @@ TritFlow is a design flow from ternary HDL to GDS, built on CMOS cells that hand
 
 | Notebook | Language | Open in Colab |
 |---|---|---|
-| [tritflow_en.ipynb](tritflow_en.ipynb) | English | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/53a9d26715709a543095e25cc410ee43183fe209/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) |
-| [tritflow_ja.ipynb](tritflow_ja.ipynb) | Japanese | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/53a9d26715709a543095e25cc410ee43183fe209/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) |
+| [tritflow_en.ipynb](tritflow_en.ipynb) | English | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/8a9a46c90898f1f2358dc982892d3a5233a06071/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) |
+| [tritflow_ja.ipynb](tritflow_ja.ipynb) | Japanese | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/8a9a46c90898f1f2358dc982892d3a5233a06071/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) |
 
 Both notebooks are saved with their outputs.
+
+**Source code:** [github.com/PenguinEino/tritflow](https://github.com/PenguinEino/tritflow) (cell library, synthesis, place and route, verification and the notebook generator; the notebooks fetch commit [`092d3df`](https://github.com/PenguinEino/tritflow/tree/092d3df1be15959bece78eb8f8dc759880d1545d)).
 
 ## Running
 
