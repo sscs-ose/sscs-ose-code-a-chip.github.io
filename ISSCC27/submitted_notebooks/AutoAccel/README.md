@@ -183,9 +183,9 @@ Interpretation and caveats:
 - The Karatsuba bench currently exercises only the Karatsuba implementation, not both architectures under one simulator test. The recursive design is not yet covered by a SystemVerilog testbench; it is verified by formal N=8 equivalence and a bit-accurate software model.
 - Add a delay-targeted sky130 mapping pass (`map -D`) and an activity-annotated dynamic power estimate to complete the PPA picture.
 - Add cross-platform tool setup instructions.
-- The repository is licensed under Apache-2.0 and includes an analysis notebook in `notebooks/` reading the audited result CSVs. Confirm both meet the current Code-a-Chip submission instructions before submitting.
+- The repository is licensed under Apache-2.0 and includes an analysis notebook in `notebooks/` reading the audited result CSVs.The submission package is organized for the IEEE SSCS Open-Source Ecosystem Code-a-Chip program and includes an Apache-2.0 license and an analysis notebook reading the checked-in result CSVs.
 - Physical implementation (place-and-route) and dynamic power are not measured by the current flow; mapped cell area, static timing, and static leakage are reported instead.
 
 ## Project team
 
-Two-person undergraduate ECE/VLSI team.
+SIDDHESH SINGH AND ANSHIKA SINGH - IIIT GUWAHATI undergraduate ECE team.
