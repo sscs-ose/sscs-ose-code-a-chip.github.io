@@ -320,20 +320,39 @@ def main(d: str = designs.SELECTED) -> None:
     st = max(steady)
     tr = max(trans)
     tlong = max(trans, key=lambda x: x[3])
-    lim_txt = "each device's model-domain limit (1.8 V devices 1.95 V)" if multi else "1.95 V"
+    # reader-facing device classes of the switch devices, for device-specific limits in the criteria
+    cls_name = {"nfet_01v8": "1.8 V NMOS", "pfet_01v8": "1.8 V PMOS", "nfet_01v8_lvt": "1.8 V low-Vt NMOS",
+                "pfet_01v8_lvt": "1.8 V low-Vt PMOS", "nfet_03v3_nvt": "3.3 V native NMOS"}
+
+    def class_limits(keys):
+        out = {}
+        for r in dev:
+            for q in r["devices"].values():
+                if "model" not in q:
+                    continue
+                c = cls_name.get(q["model"].split("__")[-1], q["model"].split("__")[-1])
+                for k in keys:
+                    if k in q and "limit_V" in q[k]:
+                        out[c] = q[k]["limit_V"]
+        return out
+
+    term_lims = class_limits(("vgs", "vgd", "vds"))
+    term_txt = ", ".join(f"{c} ≤ {v:.2f} V" for c, v in sorted(term_lims.items()))
+    lim_txt = ("each device class's documented model-validity range (" + term_txt + ")") if multi else "1.95 V"
     checks.append({"check": "switch terminal voltages, steady (end of each clock phase)",
-                   "criterion": f"|VGS|,|VGD|,|VDS| ≤ {lim_txt} (model validity)",
+                   "criterion": f"|VGS|,|VGD|,|VDS| ≤ {lim_txt} (model validity)" if not multi
+                   else f"|VGS|,|VGD|,|VDS| within {lim_txt} (model validity)",
                    "result": f"max {st[1]:.3f} V{f' of {st[2]:.2f} V' if multi else ''} ({st[3]} {st[4]}, {st[5]})",
                    "verdict": verdict(st[0] <= 1e-3)})
     rv = min((q["vbs"]["worst_V"] + q["vbs"].get("limit_V", 1.95), q["vbs"]["worst_V"], n)
              for r in dev for n, q in r["devices"].items() if q.get("model", "nfet").split("__")[-1][0] != "p"
              and n not in ("MXP", "MGT"))
     checks.append({"check": "switch NMOS body-source voltage, reverse",
-                   "criterion": "within the model range, ≥ −1.95 V" if not multi else "within each device's model range (1.8 V devices ≥ −1.95 V)",
+                   "criterion": "within the model range, ≥ −1.95 V" if not multi else
+                   "within each device class's documented model-validity range ("
+                   + ", ".join(f"{c} ≥ −{v:.2f} V" for c, v in sorted(class_limits(("vbs",)).items())
+                               if "NMOS" in c) + ")",
                    "result": f"min {rv[1]:.3f} V" + (f" ({rv[2]})" if multi else ""), "verdict": verdict(rv[0] >= -1e-3)})
-    # reader-facing device classes of the switch devices, for device-specific limits in the criteria
-    cls_name = {"nfet_01v8": "1.8 V NMOS", "pfet_01v8": "1.8 V PMOS", "nfet_01v8_lvt": "1.8 V low-Vt NMOS",
-                "pfet_01v8_lvt": "1.8 V low-Vt PMOS", "nfet_03v3_nvt": "3.3 V native NMOS"}
     fwd_limits = {}
     for r in dev:
         for q in r["devices"].values():
@@ -361,7 +380,8 @@ def main(d: str = designs.SELECTED) -> None:
                        "verdict": "UNRESOLVED"})
     if multi:
         checks.append({"check": "switch terminal voltages, transient (all instants)",
-                       "criterion": "reported (A8); each device against its published SPICE-model domain",
+                       "criterion": "reported (A8); |VGS|,|VGD|,|VDS| against each device class's documented "
+                                    f"model-validity range ({term_txt})",
                        "result": f"peak {tr[1]:.2f} V of {tr[2]:.2f} V ({tr[4]} {tr[5]}, {tr[6]}); "
                                  f"{'inside the domain at every instant' if tr[0] <= 1e-3 else f'longest beyond the limit {tlong[3]:.2f} ns/cycle ({tlong[4]} {tlong[5]})'}",
                        "verdict": "reported"})
