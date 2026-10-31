@@ -1,0 +1,52 @@
+{
+  "format": "automx-cim-sky130-wrapper-2p2-prototype-v1",
+  "status": "LOGICAL_ARCHITECTURE_CANDIDATE_PHYSICAL_ADC_PENDING",
+  "scope": "Two independently precharged row-pair reads; 820 fF TT passive-core diagnostic only. Not an ADC/PVT/STA or wrapper sign-off specification.",
+  "module": "automx_ternary_cim_4x4",
+  "external_contract": "rtl/automx_ternary_cim_4x4_blackbox.sv",
+  "passive_core": "automx_ternary_cim_4x4_core",
+  "row_pairs": [[0, 1], [2, 3]],
+  "read_sequence": [
+    "latch_four_ternary_weight_rows_and_activations",
+    "precharge_all_eight_bitlines_for_phase_a",
+    "drive_only_rows_0_and_1_then_sample_four_differential_columns",
+    "convert_and_decode_four_signed_partial_sums_for_phase_a",
+    "precharge_all_eight_bitlines_for_phase_b",
+    "drive_only_rows_2_and_3_then_sample_four_differential_columns",
+    "convert_and_decode_four_signed_partial_sums_for_phase_b",
+    "add_signed_partial_sums_and_hold_result_valid_until_ready"
+  ],
+  "candidate_stimulus": {
+    "bitline_load_ff": 820,
+    "pwm_unit_ps_per_activation_x2": 50,
+    "sample_aperture_ns_after_each_precharge": [1.9, 2.1],
+    "source": "results/sky130/wrapper_idle_augmented_tt/c820ff/measured.json",
+    "source_report_sha256_from_server": "ececf55079788014a46980bbed25715cb69272b4d906a3b1c4cbf884a86dceb3",
+    "status": "TT_PASSIVE_CORE_LOAD_CANDIDATE_ONLY"
+  },
+  "decoder": {
+    "feature": "differential_v=BLN-BLP",
+    "signed_partial_sum_range": [-24, 24],
+    "reachable_partial_sum_levels_per_phase": 39,
+    "thresholds": "frozen from 4.12e training only; no retuning on 4.12f holdout",
+    "logical_regression": "results/receipts/stage7_2p2_regression.json",
+    "physical_implementation": "MISSING",
+    "adc_architecture": "UNSELECTED",
+    "sample_hold_and_reference": "MISSING",
+    "nominal_resolution_bits": null,
+    "error_budget_v_target": 0.0008,
+    "tt_holdout": "At 820 fF, fresh MHA 96..127: 0 combined/partial ideal decode errors and 0 samples below 0.8 mV threshold budget; 91/512 common-mode samples outside training; conclusion remains BLOCKED_HOLDOUT_DECODE_OR_MARGIN"
+  },
+  "timing": {
+    "clock_period_ns_target": 20.0,
+    "conversion_latency_cycles": null,
+    "note": "Two precharge/drive/sample/conversion phases and a real ADC must be timed and measured; Stage-7 model cycles do not prove 20 ns throughput."
+  },
+  "physical_blocks_required": [
+    "passive_core", "weight_storage", "signed_pwm", "precharge",
+    "sample_hold", "sense_adc", "reference_calibration", "two_phase_control",
+    "signed_partial_accumulation"
+  ],
+  "physical_views_required": ["GDS", "LEF", "Liberty", "SPEF"],
+  "prohibited_claims": ["ADC_PASS", "PVT_PASS", "WRAPPER_SIGNOFF_PASS", "STAGE8_PASS"]
+}

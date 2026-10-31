@@ -1,0 +1,54 @@
+{
+    "format":  "automx-cim-sky130-macro-contract-v2",
+    "pdk":  "sky130A",
+    "physical_core":  {
+                          "macro":  "automx_ternary_cim_4x4_core",
+                          "geometry":  {
+                                           "rows":  4,
+                                           "columns":  4,
+                                           "differential":  true
+                                       },
+                          "operation":  "sum(ACT_X2[row] * (WPOS[row,column] - WNEG[row,column]))",
+                          "physical_mode":  "ternary_base_only",
+                          "power_pins":  [
+                                             "VGND",
+                                             "VSUBS"
+                                         ],
+                          "interface":  "analog_bitlines_and_row_controls",
+                          "views":  {
+                                        "blackbox_rtl":  "../../../rtl/automx_ternary_cim_4x4_core_blackbox.sv",
+                                        "spice":  "../../../generated/sky130/spice/macro/automx_ternary_cim_4x4_core.spice",
+                                        "extracted_spice":  "automx_ternary_cim_4x4_core.pex.spice",
+                                        "gds":  "automx_ternary_cim_4x4_core.gds",
+                                        "lef":  "automx_ternary_cim_4x4_core.lef"
+                                    },
+                          "required_receipts":  [
+                                                    "ngspice",
+                                                    "magic_drc",
+                                                    "klayout_drc",
+                                                    "netgen_lvs",
+                                                    "pex",
+                                                    "post_layout"
+                                                ]
+                      },
+    "digital_wrapper":  {
+                            "module":  "automx_ternary_cim_4x4",
+                            "interface":  "clocked_configuration_and_result_handshake",
+                            "blackbox_rtl":  "../../../rtl/automx_ternary_cim_4x4_blackbox.sv",
+                            "behavioral_rtl":  "../../../rtl/automx_ternary_cim_4x4_model.sv",
+                            "status":  "PENDING_PERIPHERY",
+                            "required_blocks":  [
+                                                    "weight_latches",
+                                                    "signed_pwm_drivers",
+                                                    "precharge",
+                                                    "sense_quantizer",
+                                                    "result_handshake"
+                                                ],
+                            "required_views":  [
+                                                   "gds",
+                                                   "lef",
+                                                   "liberty",
+                                                   "spef"
+                                               ]
+                        }
+}

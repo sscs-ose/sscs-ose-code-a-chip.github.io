@@ -1,0 +1,56 @@
+{
+  "format": "automx-cim-post49-requirements-v1",
+  "status": "DESIGN_BASELINE_FROZEN_UNVERIFIED",
+  "purpose": "Chosen engineering baseline for the clocked 4x4 sense/ADC wrapper. Numeric limits are targets, not measured ADC/PVT or sign-off results.",
+  "candidate_core_stimulus": {
+    "load_ff": 800,
+    "pwm_unit_ps": 50,
+    "source": "Cell 4.9: 101/101 TT PEX; cell 4.10: 16/16 held-out TT PEX; combined minimum pooled adjacent gap 0.0020125 V"
+  },
+  "decoder": {
+    "architecture": "four_parallel_sampled_differential_nonuniform_threshold_search",
+    "output_encoding": "signed_twos_complement",
+    "output_bits": 7,
+    "integer_sum_min": -48,
+    "integer_sum_max": 48,
+    "uses_common_mode": true,
+    "calibration_method": "per-column auto-zero plus common-mode-binned monotone threshold table; calibrate with physical reference patterns at each supported PVT point; reject out-of-range common mode",
+    "note": "Seven bits encode the signed integer output, not seven bits of demonstrated analog precision. Threshold DAC/reference and comparator must resolve the measured ~2 mV nearest-level gap; common-mode sensing is a design choice, not a proven cure."
+  },
+  "timing": {
+    "sample_time_ns": 2.1,
+    "aperture_start_ns": 1.9,
+    "aperture_end_ns": 2.1,
+    "cycle_time_ns": 20.0,
+    "note": "Targets only. 1.9 and 2.1 ns are isolated PEX samples, not a proven continuous aperture. Twenty ns matches the existing digital clock target; converter latency and throughput are unmeasured."
+  },
+  "acceptance": {
+    "minimum_adjacent_code_margin_v": 0.002,
+    "maximum_input_referred_offset_abs_v": 0.00015,
+    "maximum_input_referred_noise_rms_v": 0.00008,
+    "maximum_decode_error_rate": 0.000001,
+    "minimum_holdout_patterns": 16,
+    "maximum_reference_threshold_error_abs_v": 0.00015,
+    "maximum_aperture_induced_shift_abs_v": 0.0001,
+    "budget_note": "At a 2 mV adjacent gap, midpoint allowance is ~1 mV. Offset 0.15 mV + reference error 0.15 mV + aperture shift 0.10 mV + 5 sigma noise 0.40 mV = 0.80 mV target. This is a stringent unverified feasibility gate; 117 deterministic patterns cannot establish a 1e-6 error rate."
+  },
+  "pvt_plan": {
+    "proposed_corners": ["tt", "ss", "ff"],
+    "proposed_vdd_v": [1.62, 1.8, 1.98],
+    "proposed_temperature_c": [-40, 25, 125],
+    "pdk_model_support_verified": false,
+    "approved_matrix": null,
+    "first_screen_matrix": [
+      {"corner": "tt", "vdd_v": 1.8, "temperature_c": 25},
+      {"corner": "ss", "vdd_v": 1.8, "temperature_c": 25},
+      {"corner": "ff", "vdd_v": 1.8, "temperature_c": 25}
+    ],
+    "note": "Three-point screen is a debug step only. The proposed 27-point matrix requires server PDK/model verification and review before sign-off."
+  },
+  "review": {
+    "cell49_report": "results/sky130/core_candidate_full_tt/measured.json",
+    "heldout_report": "results/sky130/post49_holdout_tt/measured.json",
+    "approved_by": null,
+    "approval_date": null
+  }
+}

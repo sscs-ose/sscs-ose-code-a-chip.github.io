@@ -1,0 +1,99 @@
+{
+  "name": "edabk:automx:mha:0.1.0",
+  "copyright": "Copyright 2026 EDABK Laboratory",
+  "license": "Apache-2.0",
+  "configuration": {
+    "sequence_length": 2,
+    "d_model": 4,
+    "n_heads": 2,
+    "d_head": 2,
+    "shared_activation_scale": 1
+  },
+  "formats": {
+    "activation": "8 signed 5-bit X2 lanes; magnitude 0,1,2,3,4,6,8,12",
+    "weight": "four 4x4 ternary matrices in positive/negative masks",
+    "probability": "unsigned Q0.15; 1=32768",
+    "output": "two rows of four signed 12-bit X2 lanes"
+  },
+  "digital_top": "automx_mha_ip",
+  "integrated_top": "automx_cim_mixed_signal_proto",
+  "rtl": [
+    "rtl/automx_mha_ip.sv",
+    "rtl/automx_cim_readout_seq.sv",
+    "rtl/automx_cim_mixed_signal_proto.sv",
+    "rtl/wrapper_blackboxes.sv"
+  ],
+  "hard_macros": {
+    "core_i": {
+      "top": "automx_cim_core_acquisition_proto",
+      "lef": "../../inputs/core.lef",
+      "gds": "../../inputs/core.gds"
+    },
+    "condition_i": {
+      "top": "automx_cim_condition_mux_proto",
+      "lef": "../../inputs/conditioner.lef",
+      "gds": "../../inputs/conditioner.gds"
+    },
+    "adc_i": {
+      "top": "adc_top",
+      "lef": "../../inputs/adc.lef",
+      "gds": "../../inputs/adc.gds",
+      "credit": "SKY130_SAR-ADC1"
+    },
+    "mha_i": {
+      "top": "automx_mha_ip",
+      "lef": "../../inputs/digital_blocks/mha/automx_mha_ip.lef",
+      "gds": "../../inputs/digital_blocks/mha/automx_mha_ip.gds",
+      "index": "../../inputs/digital_blocks/source_library.json"
+    },
+    "seq_i": {
+      "top": "automx_cim_readout_seq",
+      "lef": "../../inputs/digital_blocks/readout/automx_cim_readout_seq.lef",
+      "gds": "../../inputs/digital_blocks/readout/automx_cim_readout_seq.gds",
+      "index": "../../inputs/digital_blocks/source_library.json"
+    }
+  },
+  "host_interfaces": [
+    "cfg_ready/valid weight port",
+    "req_ready/valid frame port",
+    "rsp_ready/valid row port",
+    "busy/fault"
+  ],
+  "backend_interfaces": [
+    "weight config ready/valid",
+    "vector evaluation ready/valid",
+    "calibrated result ready/valid",
+    "availability/fault"
+  ],
+  "reset": "asynchronous active low; aborts frame and clears weight-loaded flags",
+  "verification_command": "python ip/automx_mha/verify.py --root . --work diagnostics/mha_ip_check",
+  "descriptor": "automx_mha.core",
+  "physical_blackbox_files": [
+    "rtl/digital_blackboxes.sv",
+    "rtl/wrapper_blackboxes.sv",
+    "rtl/automx_cim_mixed_signal_proto.sv"
+  ],
+  "physical_target": "physical_blackbox",
+  "functional_rtl_preserved": true,
+  "digital_baseline": {
+    "top": "automx_mha_digital_top",
+    "target": "digital_baseline",
+    "rtl": [
+      "rtl/automx_mha_ip.sv",
+      "rtl/automx_ternary_projection_digital.sv"
+    ],
+    "projector": "serial conditional sign/add, resident ternary masks",
+    "clocks_per_vector_terms": 16
+  },
+  "calibrated_readout": {
+    "binary_decode_default": true,
+    "threshold_banks": 8,
+    "thresholds_per_bank": 38,
+    "reachable_levels": 39,
+    "comparison_clocks": [
+      5,
+      6
+    ],
+    "adc_polarity": "AINP -> inn_analog; AINN -> inp_analog"
+  }
+}

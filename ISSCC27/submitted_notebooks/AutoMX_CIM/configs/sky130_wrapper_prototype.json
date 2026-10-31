@@ -1,0 +1,55 @@
+{
+  "format": "automx-cim-sky130-wrapper-prototype-v1",
+  "status": "INTERFACE_FROZEN_DECODER_AND_PHYSICAL_BLOCKS_PENDING",
+  "scope": "GDS prototype architecture only; no ADC, PVT, 20 ns conversion, or Stage-8 sign-off claim",
+  "clocked_module": "automx_ternary_cim_4x4",
+  "rtl_contract": "rtl/automx_ternary_cim_4x4_blackbox.sv",
+  "passive_core": "automx_ternary_cim_4x4_core",
+  "passive_core_contract": "physical/sky130/macro/macro_contract.json",
+  "stimulus_candidate": {"load_ff": 800, "pwm_unit_ps": 50, "sample_time_ns": 2.1},
+  "sampling": {
+    "architecture": "eight_simultaneous_single_ended_sample_and_hold",
+    "channels": ["BLP0", "BLN0", "BLP1", "BLN1", "BLP2", "BLN2", "BLP3", "BLN3"],
+    "count": 8,
+    "sample_aperture_ns": [1.9, 2.1],
+    "hold_droop_and_loading": "UNMEASURED"
+  },
+  "conversion": {
+    "architecture": "one_time_multiplexed_single_ended_sar_candidate",
+    "nominal_bits": 12,
+    "conversion_count_per_eval": 8,
+    "sampled_input_range_v": [0.0, 1.8],
+    "adc_ip": null,
+    "adc_pin_map": null,
+    "clock_period_ns_target": 20.0,
+    "latency": "variable; result_valid_o only after all eight conversions and decode",
+    "note": "12 nominal bits and sample/hold do not establish 2 mV effective precision. An available 1.2 MS/s SAR IP cannot meet one conversion per 20 ns clock."
+  },
+  "digital_decode": {
+    "observables": ["diff_v=BLN-BLP", "common_mode_v=(BLP+BLN)/2"],
+    "primary_candidate": null,
+    "evaluated_two_dimensional_candidate": "differential_cm_0p05_nearest_neighbour; worse than differential-only on current TT screen",
+    "evaluated_digital_activity_candidate": "differential_unsigned_activity_nearest_neighbour; worse than differential-only on current TT screen",
+    "best_screened_but_still_incorrect": "differential_only_nearest_neighbour",
+    "fallback_if_not_separable": "two_plus_two_row_partition_then_digital_accumulation",
+    "training_report": "results/sky130/post49_decoder_architecture/offline.json",
+    "lut_coefficients": null,
+    "output_encoding": "four_signed_12_bit_lanes_in_result_acc_o",
+    "valid_sum_range": [-48, 48],
+    "calibration_status": "BLOCKED_KNOWN_LEVEL_ERRORS; no exact-sum decoder selected"
+  },
+  "core_control": {
+    "weight_storage": "4x4 ternary latches from cfg_row_i/cfg_wpos_i/cfg_wneg_i",
+    "activation_encoding": "four_signed_five_bit_E2M1_x2_values",
+    "pwm": "signed_WLP/WLN_row_pulses; 50 ps per magnitude-x2 unit is an unverified timing target",
+    "precharge": "all eight bitlines to the verified initial condition before eval",
+    "substrate": "VSUBS must be physically connected to the wrapper ground domain and LVS-checked"
+  },
+  "required_physical_inputs": [
+    "passive_core_GDS_and_LEF",
+    "sample_hold_mux_ADC_GDS_LEF_SPICE_pinout",
+    "digital_control_RTL_and_synthesis_constraints",
+    "SKY130_PDK_and_OpenLane_flow"
+  ],
+  "prohibited_claims": ["ADC_PASS", "PVT_PASS", "WRAPPER_SIGNOFF_PASS", "STAGE8_PASS"]
+}
