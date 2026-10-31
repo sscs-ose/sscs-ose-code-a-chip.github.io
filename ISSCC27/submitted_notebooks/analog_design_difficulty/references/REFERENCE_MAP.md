@@ -27,8 +27,6 @@ design) are the notebook's Interpretation or Reflection, not claims of the sourc
 | `Steward1981DSM` | seminal paper | coupled design parameters forming cycles that no sequential order resolves (1) | that the S&H network has this structure (Interpretation) |
 | `SmithEppinger1997Iteration` | peer-reviewed paper | coupled design tasks converge by iteration (1) | analog specifics |
 | `KeatingBricaud2002Reuse` | book | reuse delivers specifications, models and verification material with the design (3.6) | — |
-| `Conway1968Committees` | seminal article | organization structure mirrors system structure (3.6) | analog consequences (Reflection) |
-| `MacCormackBaldwinRusnak2012Mirroring` | empirical paper | mirroring in product development (3.6) | analog consequences (Reflection) |
 | `SkyWater2020SKY130PDK` | official PDK documentation | SKY130 1.8 V device model validity to 1.95 V; standard-cell characterization supplies (3.5) | silicon behaviour of this circuit |
 | `Ngspice42Manual` | official manual | simulator options and integration methods (3.5) | — |
 | `ChenEtAl2024Artisan` | peer-reviewed (DAC 2024) | LLM-based op-amp design on a benchmark (4) | general analog design capability |
