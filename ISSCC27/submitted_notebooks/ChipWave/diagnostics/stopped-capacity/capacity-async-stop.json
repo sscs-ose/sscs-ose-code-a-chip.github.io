@@ -1,0 +1,63 @@
+{
+  "recorded_at": "2026-10-21T15:51:18.223208+00:00",
+  "defect": "PostToolUse tried to rediscover an open parent model call after the original asynchronous exec had yielded. No unique open parent existed; capture raised and left ToolRouter.active occupied.",
+  "evidence": [
+    {
+      "path": "trials/pilot/pilot-r1-sol-A2/runtime/tools/router-error.json",
+      "sha256": "00fc0eec8abfba1b727b1c89e1d1b2a2e683312ea41dbff38cc62db2bc49c1fd",
+      "data": {
+        "error": "ValueError: Ambiguous concurrent parent calls"
+      }
+    },
+    {
+      "path": "trials/pilot/pilot-r1-sol-A2/result.json",
+      "sha256": "0686f7ba4cfe35851ad2d268c75f63bbab610141f651a1c82895e58677ca8adf",
+      "original_measurement_valid": true
+    }
+  ],
+  "native_sequence": [
+    {
+      "time_utc": "06:41:33.345",
+      "event": "functions.wait returned Script completed; all three stress seeds passed"
+    },
+    {
+      "time_utc": "06:41:39.702",
+      "event": "capacity-check physical denied: Finish the current tool before starting another"
+    },
+    {
+      "time_utc": "06:42:21.996",
+      "event": "capacity-check status still denied"
+    }
+  ],
+  "secondary_issue": "capacity-check only matched an exact standalone command; compound shell use misleadingly reported command not found. Public contract did not clearly explain that restriction.",
+  "affected_entry_examples": [
+    "pilot-r1-luna-A2",
+    "pilot-r1-luna-B1",
+    "pilot-r1-luna-B2"
+  ],
+  "interpretation": "Tool lifecycle validity failed despite consistent Token arithmetic. The pilot decision omitted this error; formal admission is withdrawn. Recorded task outcomes remain immutable and are not a qualified completed-cohort comparison.",
+  "official_docs": "https://learn.chatgpt.com/docs/hooks",
+  "documented_boundary": "PostToolUse continue:false changes model-visible feedback; it does not reject the nested tool promise or guarantee session termination.",
+  "repair": "Host-side completed commands seal source evidence and release ownership before the native immutable-result read. Usage is conservatively associated after the sealed completion prefix. Runtime explicitly invalidates recorded router errors. A read-only shell helper explains standalone broker calls.",
+  "tests_completed": [
+    "probe-workspace/checks/async-owner-reproduction.json",
+    "probe-workspace/checks/completion-boundaries.json",
+    "probe-workspace/checks/lifecycle-errors.json",
+    "probe-workspace/checks/stale-invocation-receipt.json",
+    "probe-workspace/checks/workflow-budget-stop.json",
+    "probe-workspace/checks/runtime-boundaries.json",
+    "probe-workspace/checks/tool-router.json",
+    "probe-workspace/checks/interrupted-source-prefix.json",
+    "probe-workspace/checks/response-admission.json",
+    "probe-workspace/checks/shared-source-association.json",
+    "probe-workspace/checks/native-async-completion-v1/result.json",
+    "probe-workspace/checks/live-protected-context-v3/result.json",
+    "probe-workspace/checks/native-physical-wait/result.json"
+  ],
+  "live_requalification": "passed",
+  "new_design_sessions": 0,
+  "new_physical_attempts": 0,
+  "live_qualification_tokens": 243131,
+  "live_model_invocations": 5,
+  "all_inflight_work_terminal": true
+}

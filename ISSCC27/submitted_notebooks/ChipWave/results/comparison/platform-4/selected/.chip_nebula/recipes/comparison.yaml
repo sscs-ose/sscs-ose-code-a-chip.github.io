@@ -1,0 +1,99 @@
+name: controlled-npu-pilot
+version: 2
+planner:
+  framework: codex
+  model: gpt-6.1-sol
+parameters:
+  source: specification.source
+tasks:
+  design:
+    role: comparison-npu
+    intent: 'Implement spec/npu.md under rtl/ only. Develop and repair using
+
+      python3 tools/smoke.py; the checker is immutable. Write only rtl/** and build/**.
+
+      Do not read other trials, supplied implementations, evaluator references or
+
+      parent projects. Do not spawn agents or make subordinate model calls.
+
+      Use the installed Icarus/Verilator and Python. No external IP is permitted in
+
+      either treatment. The total trial budget, including planning and checking,
+
+      is 600 seconds. Finish with NEBULA_OUTPUT: {"rtl":{"module":"nebula_npu_dot4"}}.
+
+      '
+    permission:
+      read:
+      - spec/**
+      - tb/**
+      - tools/smoke.py
+      - rtl/**
+      - build/**
+      write:
+      - rtl/**
+      - build/**
+      tools:
+      - python3
+      - git
+      - iverilog
+      - vvp
+      - verilator
+    inputs:
+      source:
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      rtl:
+        type: rtl.snapshot
+        paths:
+        - rtl/**
+    max_attempts: 1
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 600
+    gates:
+    - name: common-public-smoke
+      template: script-check
+      version: 1
+      on_failure: report
+      parameters:
+        script: python3
+        arguments:
+        - tools/smoke.py
+        expected: NPU_SMOKE_PASS
+        timeout: 120
+        level: L1
+        error_class: public_smoke_failed
+  audit:
+    role: comparison-public-auditor
+    intent: Independently replay public checks on the selected design Delivery. Report
+      genuine passed or failed; no RTL/checker changes.
+    permission:
+      read:
+      - rtl/**
+      - tb/**
+      - tools/**
+      write:
+      - build/**
+      tools:
+      - python3
+      - iverilog
+      - vvp
+    inputs:
+      rtl:
+        type: rtl.snapshot
+        from: $tasks.design.outputs.rtl
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - build/audit.json
+        - build/audit.log
+    max_attempts: 1
+    execution:
+      executor: tool
+      command: python3 tools/audit.py
+      timeout_seconds: 120

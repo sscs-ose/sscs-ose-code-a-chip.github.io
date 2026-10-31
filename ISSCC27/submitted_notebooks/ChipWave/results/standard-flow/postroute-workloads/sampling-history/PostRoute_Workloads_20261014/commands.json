@@ -1,0 +1,95 @@
+[
+  {
+    "name": "models",
+    "argv": [
+      "yosys",
+      "-Q",
+      "-T",
+      "-p",
+      "read_liberty -ignore_miss_func \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib\"; write_verilog -noattr \"/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/cell_models.v\""
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 2.981005754088983,
+    "log": "models.log"
+  },
+  {
+    "name": "model_hierarchy",
+    "argv": [
+      "yosys",
+      "-Q",
+      "-T",
+      "-p",
+      "read_verilog \"/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/cell_models.v\" \"/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/postroute.v\"; hierarchy -check -top nebula_cpu_npu_top"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 4.177164346212521,
+    "log": "model_hierarchy.log"
+  },
+  {
+    "name": "compile",
+    "argv": [
+      "verilator",
+      "--binary",
+      "--timing",
+      "--assert",
+      "--trace",
+      "--trace-depth",
+      "2",
+      "-Wno-fatal",
+      "-j",
+      "2",
+      "--top-module",
+      "tb_cpu_elf",
+      "--Mdir",
+      "/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/obj",
+      "/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/cell_models.v",
+      "/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/postroute.v",
+      "/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/gate_tb.sv"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 73.34702025796287,
+    "log": "compile.log"
+  },
+  {
+    "name": "DOT64",
+    "argv": [
+      "/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/obj/Vtb_cpu_elf",
+      "+IMAGE=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/DOT64/memory.hex",
+      "+TRACE=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/DOT64/trace.jsonl",
+      "+VCD=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/DOT64/activity-full.vcd",
+      "+SEED=20260925",
+      "+MAX_CYCLES=2000000"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.11449275189079344,
+    "log": "DOT64.log"
+  },
+  {
+    "name": "GEMM8",
+    "argv": [
+      "/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/obj/Vtb_cpu_elf",
+      "+IMAGE=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/GEMM8/memory.hex",
+      "+TRACE=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/GEMM8/trace.jsonl",
+      "+VCD=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/GEMM8/activity-full.vcd",
+      "+SEED=20260925",
+      "+MAX_CYCLES=2000000"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.4152473888825625,
+    "log": "GEMM8.log"
+  },
+  {
+    "name": "CONV3",
+    "argv": [
+      "/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/obj/Vtb_cpu_elf",
+      "+IMAGE=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/CONV3/memory.hex",
+      "+TRACE=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/CONV3/trace.jsonl",
+      "+VCD=/home/asic03/project/user37/CodeAChip_Experiments/PostRoute_Workloads_20261014/CONV3/activity-full.vcd",
+      "+SEED=20260925",
+      "+MAX_CYCLES=2000000"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.2648600230459124,
+    "log": "CONV3.log"
+  }
+]

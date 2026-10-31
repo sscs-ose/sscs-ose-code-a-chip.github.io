@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "physical_qualified": false,
+  "rank_eligible": false,
+  "configuration": {
+    "utilization": 40,
+    "density": 0.55,
+    "abc_area": 0,
+    "repair_margin": 0
+  },
+  "period_ps": 10526,
+  "physical_wall_seconds": 4226.930922063009,
+  "failure_classes": [
+    "electrical"
+  ],
+  "candidate_index": 2,
+  "cell_area_um2": 161973,
+  "die_area_um2": 378736,
+  "setup_slack_ns": 0.105414,
+  "hold_slack_ns": 0.122652,
+  "electrical_violations": {
+    "max_slew": 16,
+    "max_cap": 6,
+    "max_fanout": 0
+  },
+  "energy_j": {},
+  "estimated_power_w": {},
+  "postprocessing_commands": [],
+  "physical_manifest": {
+    "schema_version": 1,
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 0
+    },
+    "period_ps": 10526,
+    "rtl_sha256": {
+      "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+      "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+      "rtl/npu/nebula_npu_dot4.sv": "27bbbc14c9f89d9734fdf02d2b984aaaa7bc24f322f5398d3589ce3d9f8ef81c"
+    },
+    "source_design_delivery": "shared-rtl-actions-01",
+    "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+    "config_sha256": "66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff",
+    "physical_timeout_seconds": 14400,
+    "threads": 2,
+    "scope": "One fixed-RTL physical implementation; historical records are unchanged"
+  },
+  "postprocess_wall_seconds": 4.0902523323893547e-07,
+  "total_wall_seconds": 4226.930922472035,
+  "rtl_actions": {
+    "operand_isolation": false,
+    "reduce_width": true
+  },
+  "candidate_artifact": "artifact-298630ebfae045d2a1c2bc967c01cdca",
+  "proposal_rationale": "Captured evaluation feedback requests continued search after candidate 1 failed. The baseline is qualified with cell_area_um2=161954, setup_slack_ns=0.19292, hold_slack_ns=0.114491, zero electrical violations and Q=1.0 at period_ps=10526. Candidate 1 enabled both actions at the same physical settings: cell_area_um2=160081 (area_ratio=0.988435), setup_slack_ns=-0.0262439, hold_slack_ns=0.0945523 and zero electrical violations; physical_qualified=false, rank_eligible=false, failure_classes=[physical_execution,timing], and no energy_j measurements. Its 1.16% area reduction does not establish an improvement in qualified Q. Its physical_wall_seconds=3614.690173311974 and negligible postprocess time remain recorded; elapsed_search_seconds=3698.313130289025 includes execution and must not be treated as pure agent time because EDA wait is separate. One new candidate has been evaluated out of the common maximum of three. Choose the unseen joint tuple with baseline utilization=40, density=0.55, abc_area=0, repair_margin=0 and only reduce_width=true. The proved exact signed 18-bit reduction with 32-bit sign extension targets arithmetic area and capacitance while retaining the cycle contract. Removing operand isolation avoids its added input masking gates and may recover setup margin, but the captured report does not identify the failing path or prove which action caused the regression. This controlled comparison keeps the physical settings fixed; disabling isolation may forgo switching savings, and synthesis may already optimize redundant width. Retain timing-oriented abc_area=0; zero electrical violations give no measured reason to add repair margin. No die-area reduction is counted as objective improvement. Optimize Q=(cell_area_um2/161954)*geometric_mean(E_DOT64/2.293945631906608e-07,E_GEMM8/1.7792685987008622e-06,E_CONV3/1.1542462882162743e-06). Protected evaluation must report physical_qualified, measurement_qualified, rank_eligible, failure_classes, cell_area_um2, die_area_um2, setup_slack_ns, hold_slack_ns, electrical_violations, energy_j and estimated_power_w for all three workloads, area_ratio, energy_ratio, score, activity_and_parasitic_annotation, physical_manifest and execution/postprocess/search costs. Only qualified measurements determine Q; compare against incumbent 1.0 and threshold 0.98, retaining the best qualified result and all failures and costs. Candidate benefits remain hypotheses pending protected execution. Energy evidence uses Liberty-model estimates from zero-delay post-route activity and extracted SPEF, without SDF-delay/glitch or silicon-energy claims.",
+  "review_required": false,
+  "source_delivery_sha256": "a978787b199e44a35f72e754aa7a3e3889b13825d2ab3efbbfdc4383b27c29e1",
+  "elapsed_search_seconds": 8011.624283344019,
+  "normalization_baseline_sha256": "ed31b28f25797e86ee7143ca2742654179f6095fd1942a3765d9188113b0a344"
+}

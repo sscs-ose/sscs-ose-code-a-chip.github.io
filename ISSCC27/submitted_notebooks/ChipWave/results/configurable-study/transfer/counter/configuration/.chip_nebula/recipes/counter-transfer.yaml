@@ -1,0 +1,153 @@
+name: counter-transfer
+version: 2
+parameters:
+  source: specification.source
+tasks:
+  designer:
+    role: study-designer
+    intent: 'Read spec/counter.md and implement the complete counter in rtl/.
+
+      Develop with python3 tools/smoke.py and optional tests/designer/ tests.
+
+      Write only rtl/, tests/designer/ and build/. Preserve the supplied contract,
+
+      checker and workflow. Do not access other projects, credentials or final
+
+      evaluators, and do not invoke additional agents/models. Repair actionable
+
+      feedback within your original task. End with NEBULA_OUTPUT: {"rtl":{"module":"counter"}}.
+
+      '
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - tb/**
+      - tools/**
+      - tests/**
+      - reports/**
+      - build/**
+      write:
+      - rtl/**
+      - tests/designer/**
+      - build/**
+      tools: &id001
+      - python3
+      - iverilog
+      - vvp
+      - verilator
+      - git
+      - make
+    inputs:
+      source: &id002
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      rtl:
+        type: rtl.snapshot
+        paths:
+        - rtl/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1200
+  verifier:
+    role: study-verifier
+    intent: 'Independently review and test the delivered counter against spec/counter.md.
+
+      Run python3 tools/smoke.py, inspect boundary behavior, and optionally add tests
+
+      under tests/reviewer/. Do not change RTL, the contract or supplied checker,
+
+      read other projects/final evaluators, access credentials, or invoke extra
+
+      agents/models. Write reports/review.json with subject, passed/failed verdict
+
+      and actionable repair_summary. Return those same fields in
+
+      NEBULA_OUTPUT: {"report":{"subject":"counter-rtl","verdict":"passed or failed","repair_summary":"findings"}}.
+
+      Choose an actual verdict; your budget is shared with the designer.
+
+      '
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - tb/**
+      - tools/**
+      - tests/**
+      - reports/**
+      - build/**
+      write:
+      - tests/reviewer/**
+      - reports/**
+      - build/**
+      tools: *id001
+    inputs:
+      source: *id002
+      rtl: &id003
+        type: rtl.snapshot
+        from: $tasks.designer.outputs.rtl
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - reports/**
+        - tests/reviewer/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1200
+  audit:
+    role: study-auditor
+    intent: Replay unchanged public counter tests.
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - tb/**
+      - tools/**
+      - tests/**
+      - reports/**
+      - build/**
+      write:
+      - build/**
+      tools: *id001
+    inputs:
+      rtl: *id003
+      review:
+        type: verification.report
+        from: $tasks.verifier.outputs.report
+        release:
+          field: verdict
+          equals: passed
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - build/audit/**
+    max_attempts: 8
+    execution:
+      executor: tool
+      command: python3 tools/audit.py
+      timeout_seconds: 120
+feedback:
+- source: verifier
+  verdict: fail
+  target: designer
+  kind: feedback
+  summary: Repair the reported counter defect.
+  summary_field: report.repair_summary
+  propagate: true
+- source: audit
+  verdict: fail
+  target: designer
+  kind: feedback
+  summary: Repair the reported counter defect.
+  summary_field: report.repair_summary
+  propagate: true

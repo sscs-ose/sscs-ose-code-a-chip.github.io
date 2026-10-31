@@ -1,0 +1,109 @@
+schema_version: 1
+profile: rtl-to-gds
+description: Pinned open-source RTL simulation, synthesis and Sky130 physical-flow baseline.
+
+layout:
+  toolchain_root_env: CHIP_NEBULA_RTL2GDS_TOOL_ROOT
+  orfs_root_env: ORFS_ROOT
+  executable_directories: [bin, oss-cad-suite/bin]
+
+orfs:
+  repository: https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.git
+  revision: 3a964e13f11a4e435aac01ffa14db0a7d2853720
+  revision_file: ORFS_REVISION
+  fetch_strategy: partial-sparse
+  runtime_paths:
+    - flow/Makefile
+    - flow/scripts
+    - flow/util
+    - flow/platforms/common
+    - flow/platforms/sky130hd
+    - flow/platforms/sky130hs/rcx_patterns.rules
+  required_paths:
+    - flow/Makefile
+    - flow/platforms/sky130hd/config.mk
+    - flow/platforms/sky130hd/gds/sky130_fd_sc_hd.gds
+    - flow/platforms/sky130hd/drc/sky130hd.lydrc
+    - flow/platforms/sky130hd/lvs/sky130hd.lylvs
+    - flow/platforms/sky130hd/cdl/sky130hd.cdl
+
+platforms:
+  sky130hd:
+    corners: [tt_025C_1v80]
+    required_tools: [yosys, openroad]
+    required_paths:
+      - flow/platforms/sky130hd/config.mk
+      - flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+      - flow/platforms/sky130hd/lef/sky130_fd_sc_hd_merged.lef
+      - flow/platforms/sky130hd/gds/sky130_fd_sc_hd.gds
+      - flow/platforms/sky130hd/drc/sky130hd.lydrc
+      - flow/platforms/sky130hd/lvs/sky130hd.lylvs
+      - flow/platforms/sky130hd/cdl/sky130hd.cdl
+
+tools:
+  verilator:
+    executable: verilator
+    environment: VERILATOR_EXE
+    version_args: [--version]
+    version: {kind: contains, value: "5.048"}
+  iverilog:
+    executable: iverilog
+    environment: IVERILOG_EXE
+    version_args: [-V]
+    version: {kind: contains, value: "13.0"}
+  vvp:
+    executable: vvp
+    environment: VVP_EXE
+    version_args: [-V]
+    version: {kind: contains, value: "13.0"}
+  yosys:
+    executable: yosys
+    environment: YOSYS_EXE
+    version_args: [-V]
+    version: {kind: contains, value: "0.69"}
+    capabilities:
+      - id: read_slang
+        any_probe:
+          - arguments: [-Q, -p, "help read_slang"]
+            output_contains: [read_slang]
+            output_excludes: ["No such command"]
+          - arguments: [-m, slang, -p, slang_version]
+            output_contains: [slang]
+            output_excludes: ["Can't load module", "No such command"]
+  openroad:
+    executable: openroad
+    environment: OPENROAD_EXE
+    version_args: [-version]
+    version: {kind: contains, value: "4a7cf9b"}
+  opensta:
+    executable: opensta
+    environment: OPENSTA_EXE
+    version_args: [-version]
+    version: {kind: contains, value: "4a7cf9b"}
+  klayout:
+    executable: klayout
+    environment: KLAYOUT_CMD
+    version_args: [-b, -v]
+    version: {kind: contains, value: "0.30.12"}
+
+optional_components:
+  sky130-demo-ram512:
+    description: ORFS Microwatt example macro plus Chip Nebula behavioral wrapper; required only when frozen project constraints select RAM512.
+    required_paths:
+      - flow/designs/sky130hd/microwatt/lib/RAM512.lib
+      - flow/designs/sky130hd/microwatt/lef/RAM512.lef
+      - flow/designs/sky130hd/microwatt/gds/RAM512.gds.gz
+    memory_macro:
+      name: RAM512
+      platform: sky130hd
+      source: orfs-microwatt-demo
+      behavioral_model: models/sky130hd/RAM512.v
+      geometry: {depth: 512, width_bits: 64, capacity_bytes: 4096, byte_write_mask_bits: 8}
+      behavior: {clock_edge: rising, read_latency_cycles: 1, read_during_write: read_first, power_on_contents: unknown}
+      views:
+        liberty: [flow/designs/sky130hd/microwatt/lib/RAM512.lib]
+        lef: [flow/designs/sky130hd/microwatt/lef/RAM512.lef]
+        gds: [flow/designs/sky130hd/microwatt/gds/RAM512.gds, flow/designs/sky130hd/microwatt/gds/RAM512.gds.gz]
+      view_sha256:
+        liberty: 6a53a420dac803f8bf4deb4f2d5ac511d0660c80f717308968403d1d552bb6b0
+        lef: cc77c987ab1ca5dfab43544cb57201d4af69b15afc927b76d1b5035d8e1cc26a

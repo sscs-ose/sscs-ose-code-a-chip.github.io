@@ -1,0 +1,214 @@
+name: cpu-npu-generation
+version: 2
+planner:
+  framework: codex
+  model: gpt-6.1-sol
+parameters:
+  source: specification.source
+tasks:
+  classify:
+    role: case-classifier
+    intent: Classify the complete immutable detailed CPU/NPU engineering contract.
+    permission:
+      read:
+      - spec/**
+      - tools/**
+      write: []
+      tools:
+      - python3
+    inputs:
+      source: &id001
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      analysis: specification.source-analysis
+    execution:
+      executor: tool
+      command: python3 tools/classify_source.py
+      timeout_seconds: 120
+  architecture:
+    role: case-architect
+    intent: Produce a complete detailed architecture preserving every frozen contract.
+    permission:
+      read:
+      - spec/**
+      - tb/**
+      - tools/**
+      write:
+      - spec/design_doc.md
+      tools:
+      - git
+      - python3
+      - iverilog
+      - vvp
+      - verilator
+    inputs:
+      source: *id001
+      analysis:
+        type: specification.source-analysis
+        from: $tasks.classify.outputs.analysis
+    outputs:
+      design:
+        type: design.specification
+        paths:
+        - spec/design_doc.md
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1800
+    gates: []
+  npu:
+    role: case-npu-designer
+    intent: Implement and public-smoke-qualify the signed four-lane INT8 NPU contract.
+    permission:
+      read:
+      - spec/**
+      - tb/**
+      - tools/**
+      - rtl/npu/**
+      - build/npu/**
+      write:
+      - rtl/npu/**
+      - build/npu/**
+      tools:
+      - git
+      - python3
+      - iverilog
+      - vvp
+      - verilator
+    inputs:
+      source: *id001
+      design: &id002
+        type: design.specification
+        from: $tasks.architecture.outputs.design
+    outputs:
+      npu:
+        type: rtl.snapshot
+        paths:
+        - rtl/npu/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 3600
+    gates:
+    - name: npu-frozen-smoke
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: python3
+        arguments:
+        - tools/run_smoke.py
+        - npu
+        expected: NPU_SMOKE_PASS
+        timeout: 360
+        level: L1
+        error_class: npu_smoke_failed
+  cpu:
+    role: case-cpu-designer
+    intent: Implement a complete five-stage CPU with optional Xnebula, preserving
+      the base timing/ISA.
+    permission:
+      read:
+      - spec/**
+      - tb/**
+      - tools/**
+      - rtl/cpu/**
+      - build/cpu/**
+      write:
+      - rtl/cpu/**
+      - build/cpu/**
+      tools:
+      - git
+      - python3
+      - iverilog
+      - vvp
+      - verilator
+    inputs:
+      source: *id001
+      design: *id002
+    outputs:
+      cpu:
+        type: rtl.snapshot
+        paths:
+        - rtl/cpu/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 5400
+    gates:
+    - name: cpu-frozen-smoke
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: python3
+        arguments:
+        - tools/run_smoke.py
+        - cpu
+        expected: CPU_SMOKE_PASS
+        timeout: 360
+        level: L1
+        error_class: cpu_smoke_failed
+  integration:
+    role: case-integrator
+    intent: Assemble fixed qualified CPU/NPU sources into the declared core boundary.
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - integration/**
+      - tools/**
+      - tb/**
+      - build/integration/**
+      write:
+      - rtl/integration/**
+      - integration/**
+      - build/integration/**
+      tools:
+      - git
+      - python3
+      - iverilog
+      - vvp
+      - verilator
+    inputs:
+      source: *id001
+      design: *id002
+      cpu:
+        type: rtl.snapshot
+        from: $tasks.cpu.outputs.cpu
+      npu:
+        type: rtl.snapshot
+        from: $tasks.npu.outputs.npu
+    outputs:
+      integration:
+        type: rtl.integration
+        paths:
+        - rtl/**
+        - integration/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1800
+    gates:
+    - name: integration-frozen-smoke
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: python3
+        arguments:
+        - tools/run_smoke.py
+        - integration
+        expected: INTEGRATION_SMOKE_PASS
+        timeout: 360
+        level: L1
+        error_class: integration_smoke_failed

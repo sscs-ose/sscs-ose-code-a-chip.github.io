@@ -1,0 +1,655 @@
+{
+  "schema_version": 1,
+  "design_artifact_id": "artifact-6892c9f0c47b491c8ac8c08778634f0d",
+  "specification_artifact_id": "artifact-971f6c7042664af69515024a25a72bc2",
+  "spec_digest": "sha256:9e2e4dc1c876bda98921b4d26ccea97cad53efc9e5064966c16cbc6a8f2ecec5",
+  "requirements_count": 443,
+  "notice": "Implementation bindings and owner boundaries only; no requirements-ledger review status or independent common acceptance PASS is assigned.",
+  "groups": {
+    "spec.authority": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-AB306F4AA831"
+      ]
+    },
+    "cpu.interface": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: public declarations; rtl/integration/nebula_cpu_npu_top.sv: one-to-one core binding",
+      "requirement_ids": [
+        "REQ-19FAECECF72B",
+        "REQ-30A1A8DECA35",
+        "REQ-B27BE9BD6285",
+        "REQ-FAC9A0F0E0BF",
+        "REQ-143CDF1DFBC8",
+        "REQ-11AF5B483862",
+        "REQ-D02A0AE3A2DB",
+        "REQ-0C7C339A0296",
+        "REQ-10E0F94E468C",
+        "REQ-6417D601B63D",
+        "REQ-30AD2C4048CF",
+        "REQ-068D962F5231",
+        "REQ-AC1AC629C70C",
+        "REQ-3E85D730A8FA",
+        "REQ-69E61BF1BC08",
+        "REQ-9EC2373BAC9D",
+        "REQ-30C1DFAE7EA0",
+        "REQ-57EC775000EC",
+        "REQ-B3A20700BE16",
+        "REQ-E6DDE0AC0E54",
+        "REQ-26ED58355F60",
+        "REQ-9F4CF352B4DC",
+        "REQ-9D645EA89DE9",
+        "REQ-54492583756F",
+        "REQ-A1CE7C077C49",
+        "REQ-C6D3D50DFCDB",
+        "REQ-B10CAB222D48",
+        "REQ-6EE114D5A075",
+        "REQ-4F68440231C9",
+        "REQ-307479DB8518",
+        "REQ-500FBFC04817",
+        "REQ-858FB2D8D1B2",
+        "REQ-4C17FDB4FCDB",
+        "REQ-FF0087FC5863"
+      ]
+    },
+    "project.scope": {
+      "binding": "Original RTL only; frozen inputs and checker retained",
+      "requirement_ids": [
+        "REQ-FDDBC67C954F",
+        "REQ-CC6F59551A30",
+        "REQ-3E3CE6190291",
+        "REQ-8E067BBEC910"
+      ]
+    },
+    "cpu.structure": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: if_*/ex/mem/wb groups, rf[0:31], enabled_npu generate",
+      "requirement_ids": [
+        "REQ-269A92199F57",
+        "REQ-5A63794D81A1",
+        "REQ-009CFCC955AD",
+        "REQ-AD938E4C7993",
+        "REQ-260B7A7590D6",
+        "REQ-BFED1ACF2799",
+        "REQ-FB0A4C73634E",
+        "REQ-08F22F52719B",
+        "REQ-B6574FECD558",
+        "REQ-3EA8205B2DC9"
+      ]
+    },
+    "npu.interface": {
+      "binding": "rtl/nebula_npu_dot4.sv: exact public ports",
+      "requirement_ids": [
+        "REQ-B78161A158A3",
+        "REQ-C02E6748BCF7",
+        "REQ-71538667A027",
+        "REQ-EFAAE7C0F481"
+      ]
+    },
+    "npu.arithmetic": {
+      "binding": "rtl/nebula_npu_dot4.sv: signed products, 17-bit pairs, 18-bit total, 32-bit result",
+      "requirement_ids": [
+        "REQ-8C1BEBF4607E",
+        "REQ-A69B163641AD",
+        "REQ-1B798F455119",
+        "REQ-24BC3958C44C",
+        "REQ-36D9A3F0A48F",
+        "REQ-5CF3F62C3E34"
+      ]
+    },
+    "npu.protocol": {
+      "binding": "rtl/nebula_npu_dot4.sv: IDLE/P0/P1/RSP phase and ready/valid equations",
+      "requirement_ids": [
+        "REQ-F3718CC6C576",
+        "REQ-FE226BF78160",
+        "REQ-67BAF3B834D3",
+        "REQ-198A287E1CCB"
+      ]
+    },
+    "npu.cancel": {
+      "binding": "rtl/nebula_npu_dot4.sv: kill/reset priority and handshake suppression",
+      "requirement_ids": [
+        "REQ-47B47DDA5109",
+        "REQ-4187B6DAEA66"
+      ]
+    },
+    "cpu.xdot4": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: enabled_npu, xdot_issued, npu_kill, response-to-ex_to_mem",
+      "requirement_ids": [
+        "REQ-8C5A3CD2F539",
+        "REQ-118353E38607",
+        "REQ-E932851C3BC1",
+        "REQ-A23073562299",
+        "REQ-1659214BE95D",
+        "REQ-F89BABF3940C",
+        "REQ-6A23FA86F904",
+        "REQ-56C709B438F4",
+        "REQ-8D733FBB8902",
+        "REQ-73CFAA00F0B0",
+        "REQ-AF6A7C357E25",
+        "REQ-CE1DED6EF6ED",
+        "REQ-5A9FA832F2F3",
+        "REQ-043365985E5F"
+      ]
+    },
+    "integration.boundary": {
+      "binding": "rtl/integration/nebula_cpu_npu_top.sv supplies top; compilation/lock manifests remain integration-owner outputs",
+      "requirement_ids": [
+        "REQ-2EFF5B9CB3EB",
+        "REQ-26835CBACE92",
+        "REQ-DBB27F6C2D3C"
+      ]
+    },
+    "physical.scope": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ]
+    },
+    "system.workloads": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-9BBBD834A83C",
+        "REQ-F332169E266A",
+        "REQ-5EAE3E313E75",
+        "REQ-5006BB8FC9D7",
+        "REQ-46BF76FC1DFC",
+        "REQ-B151009B056E"
+      ]
+    },
+    "cpu.pipeline": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: id_advance/ex_advance/mem_advance and WB consumption",
+      "requirement_ids": [
+        "REQ-89D3BA17833E",
+        "REQ-FD64F59A9F1A",
+        "REQ-B39614D719F0",
+        "REQ-0C348358645A",
+        "REQ-D58FD55E7FD3",
+        "REQ-E2998F12B044",
+        "REQ-0F7329FEEA6B",
+        "REQ-27179AE580E7",
+        "REQ-D0755E26A106",
+        "REQ-3F6DE7EF1AC6",
+        "REQ-56CE793251EE"
+      ]
+    },
+    "cpu.decode": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: decode(), imm_*, alu_result, branch_taken and target",
+      "requirement_ids": [
+        "REQ-4B1E823D24A4",
+        "REQ-921715D8B2AF",
+        "REQ-89EDFB48B800",
+        "REQ-B59DA4519DD0",
+        "REQ-96DC594C97E2",
+        "REQ-566FB24D26E1",
+        "REQ-6D1464E99D6A",
+        "REQ-D3AB11D19072",
+        "REQ-E5694BFF2E04",
+        "REQ-A2D47806D5E6",
+        "REQ-B6E898125B0C",
+        "REQ-04D39DB4975F",
+        "REQ-28F20098C3A9",
+        "REQ-E50EA77579AB",
+        "REQ-04B19A02D3C3",
+        "REQ-E4EC71EEA384",
+        "REQ-C33AA043CC12",
+        "REQ-5D7FE0139BE5",
+        "REQ-EAFD9F729329",
+        "REQ-146C35547C54"
+      ]
+    },
+    "cpu.exceptions": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: token fault descriptors, front_flush, wb_trap and CSR entry",
+      "requirement_ids": [
+        "REQ-337FF384F441",
+        "REQ-8F118A19392A",
+        "REQ-2A5B83FE5927",
+        "REQ-9286F4C274D2",
+        "REQ-271F9AAFC83A",
+        "REQ-AD49D324C64D",
+        "REQ-21315BABC6AC",
+        "REQ-1F2267160B22",
+        "REQ-B3CB51F9E330",
+        "REQ-E77C44483B33",
+        "REQ-737329EE7EAD",
+        "REQ-8A10CFB2386A",
+        "REQ-CB7CB45CEA41",
+        "REQ-537924B76D1B",
+        "REQ-843F67C8CA73",
+        "REQ-F9210FF2ABC9",
+        "REQ-C6B4DA5C12B8",
+        "REQ-F34E2E0A153C",
+        "REQ-602F477BB0C1",
+        "REQ-E23AA97A838B",
+        "REQ-15BED143CDD8",
+        "REQ-9092BC87EC32",
+        "REQ-E568FB7F5AF1",
+        "REQ-26EE8020D91F"
+      ]
+    },
+    "cpu.reset": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: asynchronous reset and port qualification",
+      "requirement_ids": [
+        "REQ-D78B93943C97",
+        "REQ-6C39607BFF86",
+        "REQ-079A812CDD10"
+      ]
+    },
+    "cpu.fetch": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: fetch_pc, if_pc/if_v/if_word/if_held/if_fault",
+      "requirement_ids": [
+        "REQ-0392322ACD1C",
+        "REQ-2345EA643433",
+        "REQ-E6D7C96EB441",
+        "REQ-F4E79D888F4E",
+        "REQ-FCE03CABF728",
+        "REQ-4384ABA79FF2",
+        "REQ-CF49BA0213E9",
+        "REQ-3521529EFA27",
+        "REQ-17A77E0DD17F",
+        "REQ-A4D3EB46112F"
+      ]
+    },
+    "cpu.memory": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: EX bus fields, mem_sent/request/response ownership, load_result and mem_to_wb",
+      "requirement_ids": [
+        "REQ-4D966719537C",
+        "REQ-0E3A6660BAD4",
+        "REQ-59AA63F02D48",
+        "REQ-E2490F44D4FE",
+        "REQ-6501DAE7C4FE",
+        "REQ-72865D64F290",
+        "REQ-469EDAA52B62",
+        "REQ-1784087D048A",
+        "REQ-BB13DC472AB4",
+        "REQ-7D6D658EA3CB",
+        "REQ-F3C9EF972C06",
+        "REQ-7C1169296FCF",
+        "REQ-C8E4CE003793",
+        "REQ-7895FFDD0093",
+        "REQ-5A8034DC909A"
+      ]
+    },
+    "integration.memory_environment": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-1E1A1B96688F",
+        "REQ-1C86CC4C72D3",
+        "REQ-089C02F7655B",
+        "REQ-4A2B99BF2D4F",
+        "REQ-21D8E2024152",
+        "REQ-E5670A9E5233",
+        "REQ-FA20AA6E8F43",
+        "REQ-9067CD0E4AE7",
+        "REQ-392B59B6AF74",
+        "REQ-208698025E30",
+        "REQ-1494293713A7",
+        "REQ-10F9AEEE784D",
+        "REQ-4C6546ED46FD",
+        "REQ-E293DAA3EDCD",
+        "REQ-3F8F3008E7A1",
+        "REQ-322390401491",
+        "REQ-0364A64A3126",
+        "REQ-131729937901",
+        "REQ-ADE22725FB6F",
+        "REQ-0F5272F9CC16"
+      ]
+    },
+    "cpu.csr": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: decode CSR legality/write intent, serialization, csr_old/new and WB CSR update",
+      "requirement_ids": [
+        "REQ-8F60562C2372",
+        "REQ-E788EC39CBE4",
+        "REQ-B608E3CF8AA3",
+        "REQ-E91316DDE27F",
+        "REQ-6CF3405389C1",
+        "REQ-B719BE12CB31",
+        "REQ-7343B805DC84",
+        "REQ-D8A2CC7C8F53",
+        "REQ-8F2402C2FFF7",
+        "REQ-E8377268435D",
+        "REQ-78F670666B6D",
+        "REQ-6E408BD8CB60",
+        "REQ-0CEB9F126856",
+        "REQ-0B54DE06AEAC",
+        "REQ-A75F216EF6B9",
+        "REQ-D4F27EA9D2DF",
+        "REQ-94C010A2C5A1",
+        "REQ-38D57823D8BF",
+        "REQ-DF4622E245CC",
+        "REQ-CAC576682593",
+        "REQ-59E128C8F48E",
+        "REQ-06E2CF5F45F5",
+        "REQ-D8EAA8DAA33D",
+        "REQ-A70472E9A2F7",
+        "REQ-2B1C919C61DD",
+        "REQ-5E9C42E5E0AC"
+      ]
+    },
+    "cpu.retirement": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: WB RF/CSR updates and registered commit/trap events",
+      "requirement_ids": [
+        "REQ-E9119CE5C2CE",
+        "REQ-A8BF7C0F30A9",
+        "REQ-50A6C0331733",
+        "REQ-661B4B6071E7",
+        "REQ-080C908DD5DB",
+        "REQ-A0360E64E01A",
+        "REQ-32F76BF9D4D8",
+        "REQ-2636FF3C7C71",
+        "REQ-D447E2E7E8CF"
+      ]
+    },
+    "verification.cycles": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-B7BD505096AE",
+        "REQ-24B3FA3021E3",
+        "REQ-8E39D58A91B1",
+        "REQ-E1CF5533FD24",
+        "REQ-AC5DDC407906",
+        "REQ-D39019A3CFD8",
+        "REQ-5A631995F829",
+        "REQ-DD6D31288599",
+        "REQ-280D2A05F8AA",
+        "REQ-211D4C0B5236",
+        "REQ-5D1EB7BD76E1",
+        "REQ-BB9D0FFCA5D1",
+        "REQ-206267FD77CA",
+        "REQ-67D68C429EA8",
+        "REQ-2CD55DE58324",
+        "REQ-5F5F8E53BDA2",
+        "REQ-F7C63D530051",
+        "REQ-930A831E80DB",
+        "REQ-D8097CE0B9F1",
+        "REQ-ADDBCB23196D",
+        "REQ-E060B588934B",
+        "REQ-D391679F8906",
+        "REQ-22DDCC807C2F",
+        "REQ-D5301BBC4D00",
+        "REQ-65E7A16DB29B",
+        "REQ-A7F234D7A57F",
+        "REQ-06A20B213C24",
+        "REQ-47A8A62333AB",
+        "REQ-083131ED5BCB"
+      ]
+    },
+    "cpu.hazards": {
+      "binding": "rtl/rv32i_five_stage_cpu.sv: mem_can_forward, a_match/b_match, id_a/id_b, snapshot refresh and id_load_use",
+      "requirement_ids": [
+        "REQ-C5A7D192B104",
+        "REQ-6922321A4B55",
+        "REQ-703BD08FBBAC",
+        "REQ-F6E424892CA2"
+      ]
+    },
+    "verification.reproducibility": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-ABAEDC5E100A",
+        "REQ-EA7B625ABEF0",
+        "REQ-D7E53423C050",
+        "REQ-DB8C2F370500",
+        "REQ-7C0B10687090",
+        "REQ-AB6D9B607E01",
+        "REQ-6A9CBCEDE20F",
+        "REQ-A4C9D314C614",
+        "REQ-D48B8A0A8BE7",
+        "REQ-66B1B136E39A",
+        "REQ-48D00D23F954",
+        "REQ-F356AFEF1518",
+        "REQ-507F3C986C6D",
+        "REQ-61E0F6BEFED4",
+        "REQ-0A79A337A5B8",
+        "REQ-6065C85E0ACD",
+        "REQ-1CB708E30983"
+      ]
+    },
+    "project.resources": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-83E61D370EBF",
+        "REQ-264F9B513D18",
+        "REQ-2FC06D942B8A",
+        "REQ-6AC755A84F95",
+        "REQ-919A9AD6965D"
+      ]
+    },
+    "verification.scoring": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-5CFE1A7E01C1",
+        "REQ-14B6323ACB58",
+        "REQ-D56878A6A0EE",
+        "REQ-FB4B5BD37A8E",
+        "REQ-3369FF765E84",
+        "REQ-B581DB3F8A88",
+        "REQ-852029C93A29",
+        "REQ-1D0F0F7D3C62",
+        "REQ-1BC693FD835E",
+        "REQ-B154AE2CD880",
+        "REQ-422D1343D955",
+        "REQ-F0896C3C07C7",
+        "REQ-723FE432B3F3",
+        "REQ-74D63A25028B",
+        "REQ-BA9341D346D0",
+        "REQ-92139E24D912",
+        "REQ-99BE0C5F2E94",
+        "REQ-50311EBBD9DE",
+        "REQ-C52A2184393E",
+        "REQ-1D32C7AE14BA",
+        "REQ-9572AA12B1C9",
+        "REQ-C7E41A5AB030",
+        "REQ-58A1A115ABDC",
+        "REQ-EA6253E37CC9",
+        "REQ-BC3B040D1D56",
+        "REQ-EBFDF6FD9EF7",
+        "REQ-C2AEB83F6EB0",
+        "REQ-DA5EE6429873"
+      ]
+    },
+    "verification.functional": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-E26D8D5FC2DE",
+        "REQ-DE2140A3B69D",
+        "REQ-50A82E9483D9",
+        "REQ-87962DDCB1B7",
+        "REQ-40857E12BFE6",
+        "REQ-08B8869F79AB",
+        "REQ-18BD9E1F9704",
+        "REQ-763603461F33",
+        "REQ-4D90424F7EFA",
+        "REQ-CFC8007861A0",
+        "REQ-DB908DF98081",
+        "REQ-A31DFEFC1259",
+        "REQ-A3876C9F628F",
+        "REQ-693267807090",
+        "REQ-495F708C14A0",
+        "REQ-0D51F220D6E6",
+        "REQ-9DF2BA15A118",
+        "REQ-11E8B8E83E3B",
+        "REQ-062FCDE66532",
+        "REQ-AD34FCA99747"
+      ]
+    },
+    "verification.directed": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-3888E9316EBC",
+        "REQ-F5119EF273ED",
+        "REQ-048B3610BE8D",
+        "REQ-0D35C0A5BD94",
+        "REQ-637A2C479BEE",
+        "REQ-E81B683539C8",
+        "REQ-46BFAE5AFC54",
+        "REQ-614D839A79C6",
+        "REQ-0A994E4E4F71",
+        "REQ-F0537F10247E",
+        "REQ-F9A5E46E627B",
+        "REQ-0B2A29BBC15C",
+        "REQ-7DE264240EC3",
+        "REQ-92BEA226669F",
+        "REQ-AF85A21FF988",
+        "REQ-5195A0ABC39B",
+        "REQ-D9130B2FA9F8",
+        "REQ-F1179F710B95",
+        "REQ-A7964968680B",
+        "REQ-5AC2AEA7626F",
+        "REQ-3D89EE290160",
+        "REQ-EB7F0D9F2CB7",
+        "REQ-F21CF4FCB931",
+        "REQ-68462EEFDEE0",
+        "REQ-9813F33887C5",
+        "REQ-4DC150E33BBD",
+        "REQ-6EBD97F59D93",
+        "REQ-A621CA5BC558",
+        "REQ-5AC64A8A9515",
+        "REQ-7525E5D6F64B",
+        "REQ-80DA52A06F33",
+        "REQ-1ED25FC13901",
+        "REQ-E82638145341",
+        "REQ-F6F0DAAE5FAF",
+        "REQ-2DD16DFA622F",
+        "REQ-1F76B21A3E76",
+        "REQ-345683224B61",
+        "REQ-3D2CE3573FA4",
+        "REQ-DBC595716C57",
+        "REQ-F6175E6EA689",
+        "REQ-8953929DBC9F",
+        "REQ-F6ED37F83E19",
+        "REQ-F46202F44F24",
+        "REQ-967538B0F376"
+      ]
+    },
+    "verification.differential": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-531A036BA724",
+        "REQ-B16900DB78E1",
+        "REQ-61EFF1B90AE2",
+        "REQ-9BDA4375093B",
+        "REQ-AC347C5C9A4D",
+        "REQ-E205DAA96DF2",
+        "REQ-7F673DF52686",
+        "REQ-3D763A14A85C",
+        "REQ-AFE5CBAF7519",
+        "REQ-FF9C94EF4446",
+        "REQ-94F8AA34E74F",
+        "REQ-E0133AEBAE8D",
+        "REQ-1D122929046F",
+        "REQ-C7FDC834D595",
+        "REQ-2AD4DE23D819",
+        "REQ-5D4302C35CEA",
+        "REQ-B783BFD32988",
+        "REQ-168298291FF1",
+        "REQ-1B18F657413D"
+      ]
+    },
+    "verification.bus": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-3CDB8C846B5E",
+        "REQ-16B9755F52FA",
+        "REQ-92BB4D8D5CAB",
+        "REQ-43AC93F82BCD",
+        "REQ-36405729B89B",
+        "REQ-530267985156",
+        "REQ-EE0CDA11C2F3",
+        "REQ-71D3B024FC98"
+      ]
+    },
+    "verification.flush": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-C6D95B0FEBF4"
+      ]
+    },
+    "verification.reset": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-90E5A2708BE1",
+        "REQ-DEFCE26371DA",
+        "REQ-5711801822DF",
+        "REQ-0C97378EE39C"
+      ]
+    },
+    "verification.boundaries": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-07F76FB404FE",
+        "REQ-04EAF62B38AA",
+        "REQ-2CE871394711"
+      ]
+    },
+    "verification.structure": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-12E4D8BD2FF9",
+        "REQ-79DCC08E60B9",
+        "REQ-DDA492CBD6C0",
+        "REQ-B327A59BB1D2",
+        "REQ-F7DB76DFE7F3"
+      ]
+    },
+    "verification.timeouts": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-58D073B3CDED",
+        "REQ-2A3DFA57F39A",
+        "REQ-ACFD27A4DF2E",
+        "REQ-2BFE93C224C5"
+      ]
+    },
+    "verification.release": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-C48756C1830E",
+        "REQ-7EF5617E7736",
+        "REQ-578522414F8D",
+        "REQ-342AE06A54B4",
+        "REQ-3F57C0C9E7A2",
+        "REQ-054A022C992E",
+        "REQ-77818D8F0881"
+      ]
+    },
+    "verification.public_smoke": {
+      "binding": "External verification/project/physical obligation; hardware exposes specified ports and effects for the responsible downstream owner.",
+      "requirement_ids": [
+        "REQ-EE14DCD82F9D",
+        "REQ-0632F6E72529",
+        "REQ-14BFDDB3D9C0",
+        "REQ-E8652C149296",
+        "REQ-E7E7139855C9",
+        "REQ-7A81F1545181",
+        "REQ-227DE65963DC",
+        "REQ-A03E7F8EA91E",
+        "REQ-F154E7C95684",
+        "REQ-121328341A54",
+        "REQ-58B097F931C5",
+        "REQ-13B6671CEE13"
+      ]
+    }
+  },
+  "resolved_historical_conflict": {
+    "id": "IF-UNOWNED-CSR-SERIALIZATION",
+    "signed_rule": "id_serial_wait = if_v && (id_csr || id_mret) && (ex_v || mem_v || wb_v)",
+    "rtl_binding": "rtl/rv32i_five_stage_cpu.sv:262"
+  },
+  "common_runtime_boundary": {
+    "local_common_contribution": 0,
+    "common_coverage_eligible": false,
+    "requirements": [
+      "REQ-61E0F6BEFED4",
+      "REQ-0A79A337A5B8",
+      "REQ-6065C85E0ACD",
+      "REQ-1CB708E30983",
+      "REQ-AD34FCA99747"
+    ],
+    "binding": "spec/design_doc.md#common-runtime; verification owner uses pinned Verilator5.048, both same-shell source receipts and an independent unchanged common checker. Historical5.052 local results are preserved in docs/implementation/history and build/rtl/history-verilator-5.052."
+  }
+}

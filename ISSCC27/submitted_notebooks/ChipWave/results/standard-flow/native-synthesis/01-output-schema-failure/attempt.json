@@ -1,0 +1,211 @@
+{
+  "id": "attempt-148657862513458dba28e71a66de4c52",
+  "task_id": "standard-cpu-npu:synthesize",
+  "ordinal": 1,
+  "status": "failed",
+  "work_item_ids": [
+    "work-9c93504fde474b40806736df54e69930"
+  ],
+  "input_deliveries": {
+    "acceptance": "artifact-478b595695d0419e81e4d77e864a23d7",
+    "constraints": "artifact-e8950ffbafd54dd0b6512b9cf536b9c2",
+    "integration": "artifact-2f225eabd33249d79dbc17a7b73ec146",
+    "verification": "artifact-210d9f6d592a4c08ae346ffd8e1d074a"
+  },
+  "role": "logic-synthesizer",
+  "role_version": 1,
+  "role_instruction": "\u6309 Task \u7684 result-summary Gate \u8f93\u51fa EDA result summary v1\uff1bLiberty \u5355\u5143\u9762\u79ef\u548c LEF\n\u5360\u5730\u9762\u79ef\u4f7f\u7528\u4e0d\u540c\u6807\u51c6\u6307\u6807\u3002\u65f6\u5e8f\u8bf4\u660e corner\u3001clock \u548c pre-layout/RC \u6761\u4ef6\uff0c\u4fdd\u7559\u8d1f slack\u3002\n\u4f60\u662f\u903b\u8f91\u7efc\u5408\u5de5\u7a0b\u5e08\u3002\u4f7f\u7528 Yosys\uff08\u53ca\u9879\u76ee\u7ea6\u5b9a\u5e93\uff09\u628a\u56fa\u5b9a\u5feb\u7167\u4e2d\u7684 RTL \u7efc\u5408\u4e3a\n\u95e8\u7ea7\u7f51\u8868\uff0c\u68c0\u67e5\u7efc\u5408\u544a\u8b66\uff0c\u4ea7\u51fa\u7f51\u8868\u6587\u4ef6\u4e0e\u9762\u79ef/\u5173\u952e\u8def\u5f84\u6982\u89c8\u3002\n\u5982\u679c\u4efb\u52a1\u63d0\u4f9b verification.report\uff0c\u5fc5\u987b\u5148\u786e\u8ba4 verdict=passed\uff1b\u5931\u8d25\u62a5\u544a\u4e0d\u80fd\u88ab\u7efc\u5408\u4ea7\u7269\u63a9\u76d6\u3002\nFrozen memory.policy=standard_cell_bank with a human-confirmed logical_bank explicitly authorizes\nonly that named, size-matched addressed standard-cell bank; allow_flop_memory=false still forbids\nsilently replacing other SRAMs. Preserve and prove its limb/refinement contract.\n\u4ea4\u4ed8\u6807\u51c6\uff1a\n1. \u7f51\u8868\u4e0e\u7efc\u5408\u65e5\u5fd7\u5199\u5165\u6388\u6743\u8def\u5f84\uff0c\u7efc\u5408\u547d\u4ee4\u53ef\u590d\u73b0\uff1b\n2. \u7efc\u5408\u544a\u8b66\uff08\u9501\u5b58\u5668\u3001\u672a\u9a71\u52a8\u3001\u4f4d\u5bbd\uff09\u5fc5\u987b\u9010\u6761\u5217\u51fa\u5e76\u8bf4\u660e\u5904\u7f6e\uff1b\n3. \u5de5\u5177\u7f3a\u5931\u6216\u5e93\u4e0d\u53ef\u7528\u65f6\u5982\u5b9e\u62a5\u544a\uff0c\u4e0d\u5f97\u4f2a\u9020\u7f51\u8868\u3002\n4. \u672c Role \u4ea7\u751f\u7efc\u5408\u7f51\u8868\u4e0e\u539f\u59cb\u7efc\u5408\u8bc1\u636e\uff1b\u5b8c\u6574\u6d41\u7a0b\u53ef\u7531\u72ec\u7acb synthesis-reviewer \u518d\u5ba1\u67e5\uff0c\n   \u4f46\u82e5\u5f53\u524d Task \u81ea\u5e26\u65f6\u5e8f\u6216\u5176\u4ed6\u5de5\u7a0b\u95e8\u7981\uff0c\u5fc5\u987b\u5148\u6ee1\u8db3\u95e8\u7981\u624d\u80fd\u53d1\u5e03 netlist\uff0c\u4e0d\u5f97\u628a\u5df2\u77e5\n   \u8d1f setup slack \u7559\u7ed9\u4e0d\u5b58\u5728\u7684 Reviewer\u3002netlist \u7684 commit/paths \u4e0e\u8f93\u5165\u8840\u7f18\u7531\u5e73\u53f0\u56fa\u5316\uff0c\n   \u4e0d\u5f97\u81ea\u884c\u7f16\u9020\u3002\n5. \u5fc5\u987b\u5728\u62a5\u544a\u4e2d\u5217\u51fa\u6bcf\u4e2a RTL memory array \u7684\u4f4d\u6570\u3001\u7aef\u53e3/\u8bfb\u5199\u65f6\u5e8f\u3001\u6700\u7ec8\u5b9e\u73b0\u5f62\u5f0f\n   \uff08memory macro \u6216 flip-flop\uff09\u4e0e\u5bf9\u5e94 macro \u578b\u53f7\u3002\u9762\u5411 ASIC \u7269\u7406\u4ea4\u4ed8\u65f6\uff0c\u5bf9\u672a\u83b7\u660e\u786e\n   `allow_flop_memory` \u51b3\u7b56\u7684\u5927\u5bb9\u91cf\u5b58\u50a8\u9635\u5217\uff08\u22654 Kib\uff09\uff0c\u4e0d\u5f97\u9ed8\u9ed8\u5c55\u5f00\u4e3a\u89e6\u53d1\u5668\u3002\u82e5\u7f3a\u5c11\n   \u51bb\u7ed3 implementation.constraints.memory.required_views \u6307\u5b9a\u7684 SRAM \u89c6\u56fe\uff0c\u5fc5\u987b\u5931\u8d25\u5e76\u62a5\u544a\n   unresolved memory-macro dependency\uff0c\u4e0d\u5f97\u4e3a\u7ee7\u7eed PnR \u800c\u964d\u7ea7\u5b9e\u73b0\u3002\n   \u5c06\u53ef\u673a\u68b0\u5ba1\u8ba1\u7684\u7ed3\u679c\u5199\u5165 `reports/synthesis/memory_mapping.json`\uff1a\u9876\u5c42 `memories`\n   \u4e3a\u6570\u7ec4\uff0c\u6bcf\u9879\u81f3\u5c11\u5305\u542b `name`\u3001`bits`\u3001`implementation`\u3002\u53ef\u5199\u5927\u5bb9\u91cf\u5b58\u50a8\u7684\n   `implementation` \u5fc5\u987b\u4e3a `memory_macro`\uff0c\u5e76\u5305\u542b\u975e\u7a7a `macro` \u548c `views.behavioral/liberty/lef/gds/lvs`\n   \u8def\u5f84\uff1bPnR \u57fa\u7ebf\u81f3\u5c11\u9700\u8981 behavioral/liberty/lef/gds\uff0cLVS/signoff \u57fa\u7ebf\u8fd8\u5fc5\u987b\u8981\u6c42 lvs_spice\u3002\n   \u56fa\u5b9a\u5185\u5bb9\u7684\u53ea\u8bfb\u5b58\u50a8\u53ef\u6807\u4e3a `rom_logic`\u3002\u5e73\u53f0\u4f1a\u4f9d\u636e\u51bb\u7ed3\u7ea6\u675f\u72ec\u7acb\u590d\u6838\u8be5\u6587\u4ef6\u3002",
+  "role_skills": [],
+  "role_accepted_types": [
+    "acceptance.plan",
+    "rtl.integration",
+    "verification.report",
+    "design.release",
+    "implementation.constraints",
+    "netlist"
+  ],
+  "brief": {
+    "objective": "Deliver a reproducible mapped netlist for the verified integrated design under frozen constraints with closed pre-layout setup timing.",
+    "deliverables": [
+      "netlist: netlist@1 under build/synth/** and reports/synthesis/**.",
+      "Synthesis logs, warning dispositions, memory_mapping.json and EDA result summary v1 at reports/synthesis/result_summary.json."
+    ],
+    "responsibilities": [
+      "Confirm the supplied verification verdict is passed before synthesis.",
+      "Account for every RTL memory array, its size/ports/timing and final implementation while preserving the external-memory boundary.",
+      "Report cell counts, Liberty area and timing with explicit corner, clock and pre-layout/RC conditions."
+    ],
+    "exclusions": [
+      "No RTL or frozen-constraint edits, fabricated netlists, hidden negative slack or unauthorized SRAM-to-flop substitution."
+    ],
+    "completion_criteria": [
+      "The netlist and commands are reproducible; latch, undriven and width warnings have explicit dispositions.",
+      "synthesis-result-summary passes with declared area, cell/macro count and setup/hold metrics; required counts and cell area are measured.",
+      "setup-timing-closure establishes timing.setup_slack >= 0.",
+      "Memory mapping is mechanically auditable and consistent with frozen authorizations and required views."
+    ],
+    "collaboration": [
+      "task:standard-cpu-npu:failure-analysis",
+      "task:standard-cpu-npu:freeze-acceptance-plan",
+      "task:standard-cpu-npu:freeze-project-constraints",
+      "task:standard-cpu-npu:full-design-integration",
+      "task:standard-cpu-npu:functional-performance-verify",
+      "task:standard-cpu-npu:pnr"
+    ]
+  },
+  "brief_digest": "sha256:20d278279d95171352b51f86b7fb25849ed784d015b12ebd15baba638e2b4a9e",
+  "permission": {
+    "read_paths": [
+      "spec/**",
+      "rtl/**",
+      "chisel/**",
+      "integration/**",
+      "build/integration/**",
+      "vendor/**",
+      "ip/**",
+      "verification/**",
+      "reports/verification/**",
+      "reports/performance/**",
+      "build/synth/**",
+      "reports/synthesis/**",
+      "physical/chip-nebula/**"
+    ],
+    "write_paths": [
+      "build/synth/**",
+      "reports/synthesis/**"
+    ],
+    "tools": [
+      "git",
+      "make",
+      "python3",
+      "yosys",
+      "opensta"
+    ]
+  },
+  "framework": "codex",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "executor": "agent",
+  "command": "",
+  "timeout_seconds": 5400,
+  "session_id": "01a136f6-bd60-7632-88ab-9c76aa70768c",
+  "workspace_commit": "8e7b2780e45e0b3baa5739549915c9f971bbb11d",
+  "verdict": "",
+  "diagnostics": {
+    "changed_paths": [
+      "build/synth/README.txt",
+      "build/synth/abc.constr",
+      "build/synth/elaborated.json",
+      "build/synth/generic.json",
+      "build/synth/initial/mapped.json",
+      "build/synth/initial/nebula_cpu_npu_top.v",
+      "build/synth/initial/sta.tcl",
+      "build/synth/initial/synth.ys",
+      "build/synth/mapped.json",
+      "build/synth/nebula_cpu_npu_top.v",
+      "build/synth/preflight.py",
+      "build/synth/run.py",
+      "build/synth/sta.tcl",
+      "build/synth/synth.ys",
+      "build/synth/write_report.py",
+      "reports/synthesis/cell_audit.json",
+      "reports/synthesis/check_setup.rpt",
+      "reports/synthesis/commands.json",
+      "reports/synthesis/critical_paths.json",
+      "reports/synthesis/execution_status.json",
+      "reports/synthesis/fanout.json",
+      "reports/synthesis/gates.json",
+      "reports/synthesis/hold_paths.rpt",
+      "reports/synthesis/initial/check_setup.rpt",
+      "reports/synthesis/initial/hold_paths.rpt",
+      "reports/synthesis/initial/loaded_constraints.sdc",
+      "reports/synthesis/initial/setup_paths.rpt",
+      "reports/synthesis/initial/sta.log",
+      "reports/synthesis/initial/stat.json",
+      "reports/synthesis/initial/timing_violations.rpt",
+      "reports/synthesis/initial/unconstrained_paths.rpt",
+      "reports/synthesis/initial/yosys.log",
+      "reports/synthesis/initial/yosys_console.log",
+      "reports/synthesis/input_audit.json",
+      "reports/synthesis/liberty_cells.json",
+      "reports/synthesis/loaded_constraints.sdc",
+      "reports/synthesis/memory_mapping.json",
+      "reports/synthesis/preflight.log",
+      "reports/synthesis/replay.log",
+      "reports/synthesis/replay_reference.json",
+      "reports/synthesis/report.json",
+      "reports/synthesis/report_generation.log",
+      "reports/synthesis/reproducibility.json",
+      "reports/synthesis/result_summary.json",
+      "reports/synthesis/setup_paths.rpt",
+      "reports/synthesis/slang_diagnostics.json",
+      "reports/synthesis/sta.log",
+      "reports/synthesis/stat.json",
+      "reports/synthesis/structure_audit.json",
+      "reports/synthesis/summary_gate.log",
+      "reports/synthesis/timing_audit.json",
+      "reports/synthesis/timing_violations.rpt",
+      "reports/synthesis/tool_identity.json",
+      "reports/synthesis/unconstrained_paths.rpt",
+      "reports/synthesis/warnings.json",
+      "reports/synthesis/yosys.log",
+      "reports/synthesis/yosys_console.log"
+    ],
+    "execution_log": "NEBULA_OUTPUT: {\"netlist\":{\"type\":\"netlist\",\"schema_version\":1,\"verdict\":\"passed\",\"summary\":\"\u7efc\u5408\u7f51\u8868\u5df2\u751f\u6210\uff0c\u4e24\u9879\u51bb\u7ed3\u95e8\u7981\u901a\u8fc7\u300216,683 \u4e2a\u6807\u51c6\u5355\u5143\uff0c0 macro\u30010 latch\uff1bLiberty \u9762\u79ef\u4e0e\u72ec\u7acb\u8ba1\u7b97\u7684 LEF \u5360\u5730\u9762\u79ef\u5747\u4e3a 128016.528 um2\u3002tt_025C_1v80\u3001100 ns clock\u3001pre-layout Liberty Small wire-load \u6761\u4ef6\u4e0b\uff0csetup slack=+39.721889496 ns\uff0chold slack=+0.366578341 ns\u3002\",\"report\":\"reports/synthesis/report.json\",\"result_summary\":\"reports/synthesis/result_summary.json\",\"reproduce\":\"python3 -B build/synth/run.py\",\"not_checked\":\"\u672a\u8fd0\u884c\u5b8c\u6574\u5f62\u5f0f\u7b49\u4ef7\u3001\u5e03\u5c40\u5e03\u7ebf\u53ca DRC/LVS\uff1b\u5b89\u88c5\u76ee\u5f55\u7684 ORFS Git revision \u65e0\u6cd5\u72ec\u7acb\u6838\u9a8c\u3002\",\"risk\":\"Pre-layout \u6536\u655b\u4e0d\u4ee3\u8868 post-route \u6536\u655b\uff1bCTS\u3001\u63d0\u53d6 RC \u548c\u6700\u7ec8\u7535\u6c14\u68c0\u67e5\u4ecd\u987b\u5b8c\u6210\u3002\"}}\nTASK COMPLETED.",
+    "failure_reason": "Artifact output contract Gate failed: result_summary must be an object",
+    "gate_reports": [
+      {
+        "checked_at": "2026-10-14T04:44:05.517717",
+        "details": {},
+        "evidence": "STDOUT:\nEDA result summary v1: valid\n\nSTDERR:\n<frozen runpy>:128: RuntimeWarning: 'chip_nebula.taskgraph.result_summary' found in sys.modules after import of package 'chip_nebula.taskgraph', but prior to execution of 'chip_nebula.taskgraph.result_summary'; this may result in unpredictable behaviour\n",
+        "kind": "tool_check",
+        "name": "synthesis-result-summary",
+        "on_failure": "retry",
+        "passed": true,
+        "suggestion": ""
+      },
+      {
+        "checked_at": "2026-10-14T04:44:05.518219",
+        "details": {
+          "actual_value": 39.721889496,
+          "actual_values": [
+            39.721889496
+          ],
+          "threshold": 0.0
+        },
+        "evidence": "Metric timing.setup_slack: 39.721889496 >= 0.0",
+        "kind": "metric_check",
+        "name": "setup-timing-closure",
+        "on_failure": "retry",
+        "passed": true,
+        "suggestion": ""
+      },
+      {
+        "checked_at": "2026-10-13T20:44:05.518248+00:00",
+        "details": {
+          "error": "result_summary must be an object"
+        },
+        "evidence": "Artifact output contract Gate failed: result_summary must be an object",
+        "kind": "artifact_schema",
+        "name": "artifact-output-contract",
+        "on_failure": "retry",
+        "passed": false,
+        "suggestion": "Rewrite the final NEBULA_OUTPUT payload to match the declared Artifact schema; preserve valid workspace results."
+      }
+    ],
+    "recovery": {
+      "target_task_ids": [
+        "standard-cpu-npu:failure-analysis"
+      ],
+      "work_item_ids": [
+        "work-d168ef6f59d3468fba86e818d0b24d64"
+      ]
+    },
+    "runner_pid": 112088,
+    "runner_state": "executing",
+    "session_reusable": true,
+    "workspace_base_commit": "d1151eeb7266e28e9055d8b94c0367e0aa7ad5bb"
+  },
+  "created_at": "2026-10-13T20:31:39.733421+00:00",
+  "finished_at": "2026-10-13T20:44:05.757895+00:00"
+}

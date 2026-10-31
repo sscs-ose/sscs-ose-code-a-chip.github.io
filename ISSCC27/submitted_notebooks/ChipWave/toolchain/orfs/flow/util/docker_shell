@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+set -ex
+
+# docker_shell — unified launcher for AutoTuner / OpenROAD
+#
+# Usage: etc/docker_shell [OPTIONS] [-- CMD [ARGS...]]
+#
+# Options:
+#   -i, --image IMAGE Docker image (overrides $OR_IMAGE and default)
+#   --user            Map host UID/GID into the container via entrypoint.sh
+#   -p, --port SPEC   Forward a port, e.g. --port 8265:8265 (repeatable)
+#   --dry-run         Print the docker command without executing it
+#   -h|--help         Show this help and exit
+
+#
+# Method to use docker CLI to determine if we're using docker or podman
+#
+# Sets container_engine global variable with either "docker" or "podman"
+#
+get_container_engine () {
+    local DOCKER_VERSION_STRING=$(docker --version 2> /dev/null)
+
+    if [[ "$DOCKER_VERSION_STRING" == *"Docker"* ]]; then
+        container_engine="docker"
+    elif [[ "$DOCKER_VERSION_STRING" == *"podman"* ]]; then
+        container_engine="podman"
+    else
+        echo "Unable to determine container engine using docker CLI"
+        exit 1
+    fi
+}
+
+DEFAULT_IMAGE="openroad/orfs:latest"
+FLOW_DIR="/OpenROAD-flow-scripts/flow"
+USE_USER=false
+DRY_RUN=false
+PORTS=()
+IMAGE=""
+CMD_ARGS=()
+
+usage() {
+    grep '^#' "$0" | sed 's/^# \{0,1\}//'
+    exit 0
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -i|--image)  IMAGE="$2"; shift 2 ;;
+        --user)      USE_USER=true; shift ;;
+        -p|--port)   PORTS+=("$2"); shift 2 ;;
+        --dry-run)   DRY_RUN=true; shift ;;
+        -h|--help)   usage ;;
+        --)          shift; CMD_ARGS=("$@"); break ;;
+        -*)          echo "Unknown option: $1" >&2; exit 1 ;;
+        *)           CMD_ARGS=("$@"); break ;;
+    esac
+done
+
+# Image resolution: --image > $OR_IMAGE > default
+IMAGE="${IMAGE:-${OR_IMAGE:-$DEFAULT_IMAGE}}"
+
+get_container_engine
+
+WORKSPACE=$(pwd)
+YOSYS_EXE=${YOSYS_EXE:-/OpenROAD-flow-scripts/tools/install/yosys/bin/yosys}
+OPENROAD_EXE=${OPENROAD_EXE:-/OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad}
+KLAYOUT_CMD=${KLAYOUT_CMD:-/usr/bin/klayout}
+
+XSOCK=/tmp/.X11-unix
+XAUTH=/tmp/.docker.xauth
+if ! $DRY_RUN; then
+    xauth nlist ${DISPLAY:-:0} | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
+fi
+
+if test -t 0; then
+    DOCKER_INTERACTIVE=-ti
+else
+    DOCKER_INTERACTIVE=
+fi
+
+if $USE_USER; then
+    user_args="--entrypoint=entrypoint.sh --user=root"
+    user_env="-e CUSTOM_USER=$(id --user --name) -e CUSTOM_USER_ID=$(id --user) -e CUSTOM_GROUP_ID=$(id --group)"
+elif [[ $container_engine == "podman" ]]; then
+    user_args="--privileged --userns=keep-id --user $(id -u):$(id -g)"
+    user_env=
+else
+    user_args="-u $(id -u ${USER}):$(id -g ${USER})"
+    user_env=
+fi
+
+PORT_ARGS=()
+for port in "${PORTS[@]}"; do
+    PORT_ARGS+=(-p "$port")
+done
+
+CMD_STR=
+[[ ${#CMD_ARGS[@]} -gt 0 ]] && CMD_STR="${CMD_ARGS[*]}"
+
+ENV_SH_CMD='if [ -f ../env.sh ]; then . ../env.sh; fi;'
+
+# Build the command once; dry-run prints it, otherwise exec it.
+DOCKER_CMD=(
+    "$container_engine" run --rm -i
+    $DOCKER_INTERACTIVE
+    $user_env $user_args
+    -e LIBGL_ALWAYS_SOFTWARE=1
+    -e QT_X11_NO_MITSHM=1
+    -e XDG_RUNTIME_DIR=/tmp/xdg-run
+    -e "DISPLAY=${DISPLAY:-:0}"
+    -e QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb
+    -v "$XSOCK:$XSOCK"
+    -v "$XAUTH:$XAUTH"
+    -e "XAUTHORITY=$XAUTH"
+    -e FLOW_HOME=/OpenROAD-flow-scripts/flow/
+    -e WORK_HOME=/work
+    -e "YOSYS_EXE=$YOSYS_EXE"
+    -e "OPENROAD_EXE=$OPENROAD_EXE"
+    -e "KLAYOUT_CMD=$KLAYOUT_CMD"
+    -v "$WORKSPACE:/work:Z"
+    --network host
+    "${PORT_ARGS[@]}"
+    "$IMAGE"
+    bash -c "set -ex; mkdir /tmp/xdg-run; cd ${FLOW_DIR}; ${ENV_SH_CMD}$CMD_STR"
+)
+
+if $DRY_RUN; then
+    echo "${DOCKER_CMD[*]}"
+    exit 0
+fi
+
+exec "${DOCKER_CMD[@]}"

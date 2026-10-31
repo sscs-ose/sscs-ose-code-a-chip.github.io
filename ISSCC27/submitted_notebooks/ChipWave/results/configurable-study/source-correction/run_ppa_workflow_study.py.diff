@@ -1,0 +1,10 @@
+--- executed-v1/run_ppa_workflow_study.py
++++ corrected-v2/run_ppa_workflow_study.py
+@@ -312,6 +312,7 @@
+     if root.exists():raise ValueError('Existing session retained; inspect before recovery')
+     root.mkdir(parents=True);(root/'results').mkdir();(root/'candidates').mkdir()
+     metadata={'job':job,'baseline':str(baseline),'baseline_sha256':digest(baseline),
++              'source_bindings_sha256':digest(experiment/'ppa/source-bindings.json'),
+               'protocol':str(experiment/'protocol.json'),'rtl_source':str(CASE/'released_design'),
+               'started_monotonic':time.monotonic(),'started_at':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+     write_json(root/'session.json',metadata);prepare(root,metadata)

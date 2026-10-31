@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "physical_qualified": false,
+  "rank_eligible": false,
+  "configuration": {
+    "utilization": 40,
+    "density": 0.55,
+    "abc_area": 0,
+    "repair_margin": 0
+  },
+  "period_ps": 10526,
+  "physical_wall_seconds": 3834.5636487400043,
+  "failure_classes": [
+    "physical_execution",
+    "timing"
+  ],
+  "candidate_index": 1,
+  "cell_area_um2": 160081,
+  "die_area_um2": 374764,
+  "setup_slack_ns": -0.0262439,
+  "hold_slack_ns": 0.0945523,
+  "electrical_violations": {
+    "max_slew": 0,
+    "max_cap": 0,
+    "max_fanout": 0
+  },
+  "energy_j": {},
+  "estimated_power_w": {},
+  "postprocessing_commands": [],
+  "physical_manifest": {
+    "schema_version": 1,
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 0
+    },
+    "period_ps": 10526,
+    "rtl_sha256": {
+      "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+      "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+      "rtl/npu/nebula_npu_dot4.sv": "0d99676974d00ed542f04f16013d6af8cb2c2603ce48f5d18a729d4c728473ac"
+    },
+    "source_design_delivery": "shared-rtl-actions-11",
+    "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+    "config_sha256": "66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff",
+    "physical_timeout_seconds": 14400,
+    "threads": 2,
+    "scope": "One fixed-RTL physical implementation; historical records are unchanged"
+  },
+  "postprocess_wall_seconds": 6.589689292013645e-07,
+  "total_wall_seconds": 3834.563649398973,
+  "rtl_actions": {
+    "operand_isolation": true,
+    "reduce_width": true
+  },
+  "candidate_artifact": "artifact-33939232536e4876a69f7fce31107973",
+  "proposal_rationale": "Initial untried candidate; the captured history contains only the qualified baseline and no candidate feedback. Keep baseline physical settings because its setup slack is only 0.19292 ns, with hold slack 0.114491 ns and zero electrical violations. Enable both proved actions: exact signed 18-bit reduction targets arithmetic cell area and switching; request-qualified operand isolation targets unnecessary multiplier switching while preserving the registered cycle contract. Isolation adds gates, capacitance and possible delay, and synthesis may already remove redundant width, so benefits remain hypotheses. Retaining utilization 40, density 0.55, abc_area 0 and repair_margin 0 avoids adding unmeasured mapping or placement changes to this first test. Optimize Q=(cell_area_um2/161954)*geomean(E_DOT64/2.293945631906608e-7,E_GEMM8/1.7792685987008622e-6,E_CONV3/1.1542462882162743e-6), not die area or estimated timing. Protected evaluation must report physical_qualified, measurement_qualified, rank_eligible, failure_classes, cell_area_um2, die_area_um2, setup_slack_ns, hold_slack_ns, electrical_violations, per-workload energy_j and estimated_power_w, activity/parasitic annotation, area_ratio, energy_ratio, score and elapsed costs. Accept improvement only with all required functional, physical and measurement checks satisfied; retain failures and costs and preserve the best qualified result. Baseline Q is 1.0; this proposal has no measured Q yet. Energy comparisons retain the baseline Liberty-model, zero-delay post-route activity and extracted-SPEF scope; no glitch or silicon-power claim.",
+  "review_required": false,
+  "source_delivery_sha256": "4beb7e222be17df8d78085771890b198a41058325f843a6b6ff582d93ac5e5e7",
+  "elapsed_search_seconds": 4106.826947956986,
+  "normalization_baseline_sha256": "ed31b28f25797e86ee7143ca2742654179f6095fd1942a3765d9188113b0a344"
+}

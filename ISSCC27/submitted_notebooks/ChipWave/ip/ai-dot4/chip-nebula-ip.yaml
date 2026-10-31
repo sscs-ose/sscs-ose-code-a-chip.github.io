@@ -1,0 +1,73 @@
+schema_version: 1
+package:
+  vendor: chipnebula-case
+  library: int8
+  name: ai-dot4
+  version: 1.0.0
+source:
+  kind: first_party
+  origin: ChipNebula selected NPU Delivery
+  license: Apache-2.0
+  review:
+    status: approved
+    reviewed_by: Codex technical provenance and functional review; not a human signoff
+top_module: nebula_npu_dot4
+capabilities:
+- signed-int8-dot4
+parameters: []
+interfaces: []
+ports:
+- name: clk
+  direction: input
+  width: 1
+- name: rst_n
+  direction: input
+  width: 1
+- name: req_valid
+  direction: input
+  width: 1
+- name: req_ready
+  direction: output
+  width: 1
+- name: req_a
+  direction: input
+  width: 32
+- name: req_b
+  direction: input
+  width: 32
+- name: rsp_valid
+  direction: output
+  width: 1
+- name: rsp_ready
+  direction: input
+  width: 1
+- name: rsp_data
+  direction: output
+  width: 32
+- name: kill
+  direction: input
+  width: 1
+files:
+- path: rtl/nebula_npu_dot4.sv
+  type: systemVerilogSource
+- path: tb/npu_acceptance_tb.sv
+  type: systemVerilogTestbench
+- path: tools/qualify.py
+  type: script
+- path: LICENSE
+  type: data
+- path: provenance.json
+  type: data
+include_dirs: []
+defines: []
+dependencies: []
+generator:
+  kind: generic-named-port-v1
+verification:
+  timeout: 240
+  parameter_sets:
+  - {}
+  commands:
+  - name: independent-npu-acceptance
+    command: python3 tools/qualify.py
+    success_pattern: IP_QUALIFICATION_PASSED

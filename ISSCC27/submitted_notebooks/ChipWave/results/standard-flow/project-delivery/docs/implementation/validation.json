@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "engineering_verdict": "pass",
+  "validation_scope": "local_rtl_implementation_checks",
+  "design_artifact_id": "artifact-6892c9f0c47b491c8ac8c08778634f0d",
+  "specification_artifact_id": "artifact-971f6c7042664af69515024a25a72bc2",
+  "inputs": {
+    "design_digest": "sha256:3b2c475adbd277e410da4504911247bb3890d32ccb4fb3651d4003915274784f",
+    "spec_digest": "sha256:9e2e4dc1c876bda98921b4d26ccea97cad53efc9e5064966c16cbc6a8f2ecec5"
+  },
+  "top_module": "nebula_cpu_npu_top",
+  "base_module": "rv32i_five_stage_cpu",
+  "base_parameter_default": 0,
+  "top_parameter_value": 1,
+  "active_specification_blockers": [],
+  "change": "Qualify id_serial_wait with if_v, exactly as signed in the current design Section16.7 and CSIR line388.",
+  "resolved_conflict": {
+    "engineering_verdict": "pass_redirect_regression",
+    "historical_conflict_id": "IF-UNOWNED-CSR-SERIALIZATION",
+    "runs": [
+      {
+        "enable": 0,
+        "invalid_word": "deadbeef",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "enable": 0,
+        "invalid_word": "34002073",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "enable": 0,
+        "invalid_word": "30200073",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "enable": 0,
+        "invalid_word": "00000000",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "enable": 1,
+        "invalid_word": "deadbeef",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "enable": 1,
+        "invalid_word": "34002073",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "enable": 1,
+        "invalid_word": "30200073",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "enable": 1,
+        "invalid_word": "00000000",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      }
+    ],
+    "inputs": {
+      "design_digest": "sha256:3b2c475adbd277e410da4504911247bb3890d32ccb4fb3651d4003915274784f",
+      "spec_digest": "sha256:9e2e4dc1c876bda98921b4d26ccea97cad53efc9e5064966c16cbc6a8f2ecec5"
+    },
+    "run_scope": "local_selfcheck",
+    "common_coverage_eligible": false,
+    "local_common_contribution": 0,
+    "verilator_version": "Verilator 5.048 2026-04-26 rev vUNKNOWN-built20261009",
+    "rtl_sha256": {
+      "rtl/nebula_npu_dot4.sv": "2effa66b015cd3d70b832c06fc838826e7f8a7a61ac17a573deafa52b2269dd5",
+      "rtl/rv32i_five_stage_cpu.sv": "18dbf1f8c0c1e17176c4aec6c5d2dd04322c3a31313a95b4b8aad8ae6c6fb8e1",
+      "rtl/integration/nebula_cpu_npu_top.sv": "9b947a59ded11782b90a72269ec38c08f6fe8587b6adb7d42841aca7230cf2d5"
+    }
+  },
+  "local_checks": {
+    "verilator_version": "Verilator 5.048 2026-04-26 rev vUNKNOWN-built20261009",
+    "cpu_runs_passed": 148,
+    "cpu_events_compared": 26033,
+    "data_requests_compared": 8109,
+    "public_smoke": "PUBLIC_PASS T09 retired=64 seed=20260925",
+    "npu": "SELFCHECK_NPU_PASS dots=67546 cancellations=10",
+    "yosys_structure": {
+      "base": {
+        "multipliers": 0,
+        "modules": [
+          "rv32i_five_stage_cpu"
+        ]
+      },
+      "enabled": {
+        "multipliers": 4,
+        "modules": [
+          "$paramod\\rv32i_five_stage_cpu\\ENABLE_XNEBULA=s32'00000000000000000000000000000001",
+          "nebula_cpu_npu_top",
+          "nebula_npu_dot4"
+        ]
+      }
+    },
+    "verilator_lint_elaboration": "pass for both configurations; UNUSEDSIGNAL-only waiver",
+    "redirect_regression_runs_passed": 8
+  },
+  "common_acceptance": {
+    "engineering_verdict": "not_run",
+    "run_scope": "local_selfcheck",
+    "official_runtime_valid": false,
+    "common_coverage_eligible": false,
+    "local_common_contribution": 0,
+    "measured_common_coverage": "not_measured",
+    "required_verilator": "5.048",
+    "required_environment_sources": [
+      "/tmp/chipnebula-pinned-tools/env.sh",
+      "/opt/rh/gcc-toolset-13/enable"
+    ],
+    "owner": "downstream independent functional-performance-verification task"
+  },
+  "local_commands": [
+    "source /tmp/chipnebula-pinned-tools/env.sh && source /opt/rh/gcc-toolset-13/enable && python3 -B docs/implementation/check_rtl.py",
+    "source /tmp/chipnebula-pinned-tools/env.sh && source /opt/rh/gcc-toolset-13/enable && python3 -B docs/implementation/reproduce_spec_conflict.py"
+  ],
+  "history": {
+    "declared_local_version": "5.052",
+    "required_common_version": "5.048",
+    "history_manifest": "docs/implementation/history/manifest.json",
+    "earlier_blocker_report": "docs/implementation/history/validation.json",
+    "earlier_retry_report": "docs/implementation/history/retry_validation.json",
+    "old_build_evidence": "build/rtl/history-verilator-5.052",
+    "scope": "historical_local_selfcheck",
+    "common_coverage_eligible": false,
+    "local_common_contribution": 0
+  },
+  "tested_file_sha256": {
+    "rtl/nebula_npu_dot4.sv": "2effa66b015cd3d70b832c06fc838826e7f8a7a61ac17a573deafa52b2269dd5",
+    "rtl/rv32i_five_stage_cpu.sv": "18dbf1f8c0c1e17176c4aec6c5d2dd04322c3a31313a95b4b8aad8ae6c6fb8e1",
+    "rtl/integration/nebula_cpu_npu_top.sv": "9b947a59ded11782b90a72269ec38c08f6fe8587b6adb7d42841aca7230cf2d5",
+    "docs/implementation/check_rtl.py": "f57a732a07237b90b3fb927237fdea892a10618f8141d4452e985a3651507184",
+    "docs/implementation/selfcheck_cpu_tb.sv": "a61b29f0b7bd721512fe6d8b1dc24f771c2c7d3d8cf28347f38b14dff7205989",
+    "docs/implementation/selfcheck_npu_tb.sv": "d864d01ff35e8b62e1e45a6e1798b741534ec66cfbcbe7f63a1ae0f3db61e6ca",
+    "docs/implementation/reproduce_spec_conflict.py": "cdb5f5b4130ae57e9e5761e18d15d02fa824114f9f7d232aa2f553379f5421df"
+  },
+  "limitations": [
+    "No ACT4/Sail or frozen directed/random acceptance run; this local oracle is independently authored.",
+    "No formal proof, mapped timing, physical closure or benchmark scoring.",
+    "UNUSEDSIGNAL waived for unused shared decode/payload fields; no functional lint warnings waived.",
+    "Local memory model covers a 4KiB data region; physical core has no hardcoded image limit. Full 256KiB ELF/common acceptance is downstream.",
+    "No implementation.constraints input or external design.dependencies was supplied. No external IP selected."
+  ],
+  "frozen_inputs_modified": false
+}

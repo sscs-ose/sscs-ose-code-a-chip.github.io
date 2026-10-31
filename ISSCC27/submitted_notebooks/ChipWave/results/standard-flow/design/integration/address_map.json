@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "top_module": "nebula_cpu_npu_top",
+  "address_decode_owner": "external environment; CPU forwards addresses without an image-range decoder",
+  "targets": [
+    {
+      "name": "instruction_image",
+      "interface": "imem",
+      "base": "0x80000000",
+      "end_inclusive": "0x8003ffff",
+      "size_bytes": 262144,
+      "placement": "external",
+      "access": "read-only CPU port",
+      "response_cycles": 1
+    },
+    {
+      "name": "data_image",
+      "interface": "dmem",
+      "base": "0x80000000",
+      "end_inclusive": "0x8003ffff",
+      "size_bytes": 262144,
+      "placement": "external",
+      "access": "read/write",
+      "response_cycles": [
+        1,
+        8
+      ],
+      "byte_lanes": "little-endian; wstrb[i] writes bits 8*i +: 8"
+    },
+    {
+      "name": "tohost",
+      "interface": "dmem",
+      "base": "0x8003f000",
+      "size_bytes": 4,
+      "placement": "external environment within data_image",
+      "access": "ordinary CPU read/write; environment interprets writes 1=PASS, other nonzero=FAIL"
+    },
+    {
+      "name": "npu",
+      "interface": "core.enabled_npu.npu request/response",
+      "placement": "internal",
+      "access": "write operands via xdot4, read result via normal register writeback",
+      "address": null,
+      "encoding": {
+        "opcode": "0x0b",
+        "funct3": 0,
+        "funct7": 0
+      }
+    }
+  ],
+  "invalid_address": {
+    "interface": "dmem",
+    "response": "external responder asserts dmem_rsp_err with no write side effect; CPU traps with load cause 5 or store cause 7",
+    "smoke_address": "0x00000000"
+  },
+  "memory_macros": [],
+  "source": "spec/source-contract.md and spec/design_doc.md Section 8"
+}

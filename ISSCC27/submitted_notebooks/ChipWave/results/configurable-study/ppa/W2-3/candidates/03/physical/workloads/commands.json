@@ -1,0 +1,96 @@
+[
+  {
+    "name": "models",
+    "argv": [
+      "yosys",
+      "-Q",
+      "-T",
+      "-p",
+      "read_liberty -ignore_miss_func \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib\"; write_verilog -noattr \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/cell_models.v\""
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.4152809429942863,
+    "log": "models.log"
+  },
+  {
+    "name": "model_hierarchy",
+    "argv": [
+      "yosys",
+      "-Q",
+      "-T",
+      "-p",
+      "read_verilog \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/cell_models.v\" \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/postroute.v\"; hierarchy -check -top nebula_cpu_npu_top"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 2.371025875007035,
+    "log": "model_hierarchy.log"
+  },
+  {
+    "name": "compile",
+    "argv": [
+      "verilator",
+      "--binary",
+      "--timing",
+      "--assert",
+      "--trace",
+      "--trace-underscore",
+      "--trace-depth",
+      "3",
+      "-Wno-fatal",
+      "-j",
+      "2",
+      "--top-module",
+      "tb_cpu_elf",
+      "--Mdir",
+      "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/obj",
+      "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/cell_models.v",
+      "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/postroute.v",
+      "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/gate_tb.sv"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 170.61545809399104,
+    "log": "compile.log"
+  },
+  {
+    "name": "DOT64",
+    "argv": [
+      "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/obj/Vtb_cpu_elf",
+      "+IMAGE=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/DOT64/memory.hex",
+      "+TRACE=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/DOT64/trace.jsonl",
+      "+VCD=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/DOT64/activity-full.vcd",
+      "+SEED=20260925",
+      "+MAX_CYCLES=2000000"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.6663983210019069,
+    "log": "DOT64.log"
+  },
+  {
+    "name": "GEMM8",
+    "argv": [
+      "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/obj/Vtb_cpu_elf",
+      "+IMAGE=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/GEMM8/memory.hex",
+      "+TRACE=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/GEMM8/trace.jsonl",
+      "+VCD=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/GEMM8/activity-full.vcd",
+      "+SEED=20260925",
+      "+MAX_CYCLES=2000000"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 4.076891700999113,
+    "log": "GEMM8.log"
+  },
+  {
+    "name": "CONV3",
+    "argv": [
+      "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/obj/Vtb_cpu_elf",
+      "+IMAGE=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/CONV3/memory.hex",
+      "+TRACE=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/CONV3/trace.jsonl",
+      "+VCD=/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-3/candidates/03/physical/workloads/CONV3/activity-full.vcd",
+      "+SEED=20260925",
+      "+MAX_CYCLES=2000000"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 2.722186042999965,
+    "log": "CONV3.log"
+  }
+]

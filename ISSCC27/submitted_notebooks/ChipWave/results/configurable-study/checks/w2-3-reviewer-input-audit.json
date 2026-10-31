@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "scope": "Immutable captured WorkItem evidence proves availability to the real second reviewer; this does not prove model understanding. Successful workspaces may be reclaimed.",
+  "reviewer_attempt": "attempt-30869503b7484424ac97f90f0a2ab0bd",
+  "workspace_commit": "b1cc2d1956b31d390ef615f81d8dc3b0db0f3dbb",
+  "evidence": [
+    {
+      "work_item": "work-80dcaeafd74b40ba8ad2564711995005",
+      "artifact": "artifact-440e8dfed5104cb2a00f833855cac98e",
+      "type": "ppa.evaluation.report",
+      "history_length": 2,
+      "contains_exact_prior_evaluation": true
+    }
+  ],
+  "review_report": {
+    "schema_version": 1,
+    "subject": "candidate",
+    "verdict": "passed",
+    "repair_summary": "Permit measurement of (utilization=40, density=0.55, abc_area=1, repair_margin=10). This allowed, untried tuple is the second new candidate in the captured session. Raising only repair_margin from the electrically failing prior trial is supported as an experiment; margin 10 is not established to fix it. The rationale accurately distinguishes positive timing and 2.8644% lower cell area from failed electrical qualification and unavailable energy/score. Frozen inputs and acceptance are preserved. No proposal repair is required. The disclosed validator startup failure remains unverified; this verdict neither certifies that tool gate nor physical/measurement qualification.",
+    "candidate_artifact_id": "artifact-fb5c24de1f6641fbb0c57eeb1a78bb87",
+    "candidate_commit": "d99f6fb8d9df702c5fc332f4d629c6646afcebee",
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 1,
+      "repair_margin": 10
+    },
+    "checks": {
+      "artifact_integrity": "Read all three complete immutable artifact records, including inline source and full feedback history, and the attempt context. Candidate JSON matches the captured snapshot, Git blob, payload configuration and full rationale. All three Git tree IDs match their records. Source inline content digest verifies and its parsed protocol equals context/protocol.json. Protocol and baseline match all three captured snapshots and corresponding Git blobs. Captured evaluation report matches its Git blob and full artifact payload history; its baseline history entry equals context/baseline.json.",
+      "domain_and_history": "Exact configuration keys match protocol parameter_keys. Numeric tuple [40, 0.55, 1, 10] is in parameter_domains and differs from baseline [40, 0.55, 0, 0] and the sole captured prior new trial [40, 0.55, 1, 0]. This is proposed new candidate 2 of the permitted 3. Only repair_margin changes from trial 1, using the smallest permitted nonzero value. Novelty is established within the captured session evidence.",
+      "baseline": "Baseline candidate 0 is physical_qualified=true, measurement_qualified=true and rank_eligible=true, with score=1.0, cell_area_um2=161954, die_area_um2=377672, setup_slack_ns=0.19292, hold_slack_ns=0.114491, and zero max_slew/max_cap/max_fanout violations. It remains the only rank-eligible result in the captured history.",
+      "prior_trial": "Evaluation artifact artifact-440e8dfed5104cb2a00f833855cac98e at commit a60a4fa6547bf92384fd9edb5f9df6769886eaec records candidate 1 with cell_area_um2=157315, die_area_um2=371137, setup_slack_ns=0.423833 and hold_slack_ns=0.0655785. Cell area is 2.86439359324252% below baseline. Its 12 max_slew and 5 max_cap violations, with zero max_fanout violations, cause failure_classes=[electrical], physical_qualified=false and rank_eligible=false despite positive timing slacks. energy_j and estimated_power_w are empty and postprocessing_commands is empty; no measured energy ratio or qualified score improvement is supported. The feedback verdict is failed and continue_search=true.",
+      "experimental_support": "Increasing the allowed repair margin is a reasonable focused hypothesis in response to observed electrical failures. Counts provide no violation severity, and the capture does not prove margin 10 sufficient. Repair overhead can change area, setup/hold timing and energy. The proposal expressly leaves these outcomes uncertain; no candidate result is invented or inherited.",
+      "power_and_score": "Frozen score is normalized cell area times the geometric mean of DOT64/GEMM8/CONV3 energy ratios; die area is not a score term. Baseline energies are DOT64=2.293945631906608e-07 J, GEMM8=1.7792685987008622e-06 J and CONV3=1.1542462882162743e-06 J. Baseline power scope is Liberty-model estimation using zero-delay post-route gate activity and extracted SPEF, excluding SDF-delay/glitch and silicon-power claims. Reported activity coverage is 100% of the specified pin classes, excluding sequential internal/hierarchical pins; eligible unannotated parasitic drivers are zero after stated exemptions/exclusions. No new-tuple power or energy evidence exists yet.",
+      "frozen_scope": "The entire frozen-source-to-current-candidate Git diff contains only proposal/candidate.json; current tracked files match the candidate commit. No RTL, constraints, libraries, checker, baseline, protocol or acceptance changes are present in that diff. Prior trial manifests match baseline RTL hashes, SDC hash, source design delivery, period, threads and physical timeout. Frozen settings remain period 10526 ps, Sky130HD TT25C1.8V, I/O delay 0.5 ns, clock uncertainty 0.1 ns, workloads DOT64/GEMM8/CONV3 and two threads. No implementation manifest for the new tuple is yet captured, so its eventual implementation still requires checking.",
+      "budget": "Captured history contains the common baseline and one evaluated new candidate; the proposed second new candidate is within the three-candidate session limit. Retain the 1200-second aggregate agent budget, 14400-second physical timeout, 1800-second postprocess timeout and 22 physical launches including baseline maximum. Prior elapsed_search_seconds=4148.771685578002 includes physical_wall_seconds=4009.425745860004; it does not establish aggregate agent time usage. Remaining aggregate agent time and study-wide launch counts are not independently captured. This review used only Python/Git reads and report writing, with no EDA, models, validation launcher or agent delegation.",
+      "validation_limitation": "The full proposal discloses python3 tools/run_ppa.py validate exited 1 with ModuleNotFoundError for run_ppa_workflow_study. No successful gate result or diagnostic log is captured. Independent JSON shape, domain, novelty, artifact consistency and frozen-scope checks passed using Python/Git. They do not convert the unverified official validator gate into a success."
+    },
+    "evaluation_requirements": [
+      "Measure exactly (40, 0.55, 1, 10) using the frozen implementation and acceptance flow. Handle the disclosed validator availability issue through the authorized workflow before relying on its gate; do not weaken validation or acceptance.",
+      "Retain actual timing, electrical, workload completion, activity/parasitic annotation, energy and implementation-manifest evidence. Compare new RTL/SDC identity to the baseline and require actual physical and measurement qualification before ranking.",
+      "Use the frozen score and tie order, and enforce remaining shared agent and launch budgets through the workflow accounting. This verdict permits the proposed experiment and asserts no measured PPA improvement."
+    ],
+    "evidence_paths": [
+      ".nebula_inputs/artifact-fb5c24de1f6641fbb0c57eeb1a78bb87/artifact.json",
+      ".nebula_inputs/ppa-context/artifact.json",
+      ".nebula_inputs/artifact-440e8dfed5104cb2a00f833855cac98e/artifact.json",
+      ".nebula_inputs/artifact-440e8dfed5104cb2a00f833855cac98e/build/evaluation/report.json",
+      ".nebula_inputs/attempt-context.json",
+      "context/protocol.json",
+      "context/baseline.json",
+      "proposal/candidate.json"
+    ]
+  },
+  "model_calls_added": 0,
+  "physical_calls_added": 0
+}

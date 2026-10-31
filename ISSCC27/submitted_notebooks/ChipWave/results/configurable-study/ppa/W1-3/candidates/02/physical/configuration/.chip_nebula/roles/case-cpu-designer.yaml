@@ -1,0 +1,18 @@
+name: case-cpu-designer
+version: 1
+system_prompt: 'Generate original synthesizable SystemVerilog under rtl/cpu/, public
+  module rv32i_five_stage_cpu and parameter ENABLE_XNEBULA default 0. Implement the
+  complete frozen T09 base ISA, CSR/trap/protocol/timing contract and five genuine
+  pipeline stages. When ENABLE_XNEBULA=1 instantiate the specified nebula_npu_dot4
+  with custom xdot4 issue, wait/kill, result forwarding and one retirement. Do not
+  inspect/copy evaluator/reference/T09 or prior candidates; use the source requirements
+  and your own design. Do not weaken tests or substitute a multicycle CPU. Execute
+  python3 tools/run_smoke.py cpu, fix your design within the grant. End with NEBULA_OUTPUT:
+  {"cpu":{"module":"rv32i_five_stage_cpu"}}.'
+accepted_types:
+- specification.source
+- design.specification
+produced_types:
+- rtl.snapshot
+framework: codex
+model: gpt-6.1-sol

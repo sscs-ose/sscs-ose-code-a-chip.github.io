@@ -1,0 +1,70 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "build/synth/preflight.py"
+    ],
+    "log": "reports/synthesis/preflight.log",
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/yosys",
+      "-Q",
+      "-T",
+      "-l",
+      "reports/synthesis/yosys.log",
+      "build/synth/synth.ys"
+    ],
+    "log": "reports/synthesis/yosys_console.log",
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "/eda/opensource/openroad/26Q3/bin/sta",
+      "-no_init",
+      "-exit",
+      "build/synth/sta.tcl"
+    ],
+    "log": "reports/synthesis/sta.log",
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "build/synth/write_report.py"
+    ],
+    "log": "reports/synthesis/report_generation.log",
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "/tmp/chipnebula-public-repro-user37/bin/python",
+      "-m",
+      "chip_nebula.taskgraph.result_summary",
+      "reports/synthesis/result_summary.json",
+      "--profile",
+      "synthesis",
+      "--required",
+      "design.cell_area",
+      "--required",
+      "design.macro_count",
+      "--required",
+      "design.standard_cell_count",
+      "--required",
+      "timing.hold_slack",
+      "--required",
+      "timing.setup_slack",
+      "--measured",
+      "design.standard_cell_count",
+      "--measured",
+      "design.cell_area",
+      "--measured",
+      "design.macro_count"
+    ],
+    "log": "reports/synthesis/summary_gate.log",
+    "exit_code": 0
+  }
+]

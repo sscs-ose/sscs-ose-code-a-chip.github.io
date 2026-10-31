@@ -1,0 +1,38 @@
+--- executed-v1/evaluate_study_physical.py
++++ corrected-v2/evaluate_study_physical.py
+@@ -12,6 +12,7 @@
+ from pathlib import Path
+ 
+ from study_protocol import WORKLOADS, score, write_json
++from classify_study_failures import classify, read_reports
+ 
+ CASE = Path(__file__).resolve().parents[1]
+ 
+@@ -46,8 +47,7 @@
+         for key in ('rtl_sha256', 'period_ps', 'sdc_sha256', 'threads'):
+             if physical['manifest'][key] != reference['physical_manifest'][key]:
+                 raise ValueError('Candidate differs from the frozen baseline: ' + key)
+-    raw_files = list((run / 'evidence').glob('orfs-work/logs/**/6_report.json'))
+-    raw = json.loads(raw_files[0].read_text()) if len(raw_files) == 1 else {}
++    raw, native, report_errors = read_reports(run/'evidence')
+     result = {'schema_version': 1, 'physical_qualified': physical['physical_qualified'],
+               'rank_eligible': False, 'configuration': physical['configuration'],
+               'period_ps': physical['manifest']['period_ps'],
+@@ -61,13 +61,11 @@
+                                         for key in ('max_slew', 'max_cap', 'max_fanout')},
+               'energy_j': {}, 'estimated_power_w': {}, 'postprocessing_commands': [],
+               'physical_manifest': physical['manifest']}
+-    if raw:
+-        if any(raw.get('finish__timing__' + kind + '__ws', -1) < 0 for kind in ('setup', 'hold')):
+-            result['failure_classes'].append('timing')
+-        if any(value != 0 for value in result['electrical_violations'].values()):
+-            result['failure_classes'].append('electrical')
++    physical = dict(physical, failure_classes=[*physical.get('failure_classes', []), *report_errors])
++    result['failure_classes'] = classify(physical, raw, native)
++    result['physical_qualified'] = physical['physical_qualified'] and not result['failure_classes']
+     started = time.monotonic()
+-    if physical['physical_qualified']:
++    if result['physical_qualified']:
+         output = run / ('workloads'+suffix)
+         if output.exists():
+             raise ValueError('Partial workload evidence preserved; use an explicitly versioned evaluation recovery')

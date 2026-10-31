@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "engineering_verdict": "blocked_specification_conflict",
+  "completion_claim": false,
+  "conflict": {
+    "engineering_verdict": "blocked_specification_conflict",
+    "conflict_id": "IF-UNOWNED-CSR-SERIALIZATION",
+    "runs": [
+      {
+        "invalid_word": "deadbeef",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 5,
+        "design_rule_pass": true
+      },
+      {
+        "invalid_word": "34002073",
+        "first_fetch_edge": 2,
+        "expected_target_fetch_edge": 5,
+        "actual_target_fetch_edge": 7,
+        "design_rule_pass": false
+      }
+    ],
+    "rtl_sha256": {
+      "rtl/nebula_npu_dot4.sv": "2effa66b015cd3d70b832c06fc838826e7f8a7a61ac17a573deafa52b2269dd5",
+      "rtl/rv32i_five_stage_cpu.sv": "055d8b3f86cedd762e0b06a515f3dad2ff6642b551f54b7648b3e2a0ad4fe636",
+      "rtl/integration/nebula_cpu_npu_top.sv": "9b947a59ded11782b90a72269ec38c08f6fe8587b6adb7d42841aca7230cf2d5"
+    }
+  },
+  "inputs": {
+    "design_digest": "sha256:50b5573b1d1c6955de430690ef55a0ff3ccdc3d4aab991669094cab356ec7874",
+    "spec_digest": "sha256:b0d87b90baa827b87d5542fcbe7d60948825e13a7bd84b180d12fb85f7d73822"
+  },
+  "local_checks_before_conflict_detection": {
+    "cpu_runs_passed": 148,
+    "cpu_events_compared": 26033,
+    "data_requests_compared": 8109,
+    "public_smoke": "PUBLIC_PASS T09 retired=64 seed=20260925",
+    "npu": "SELFCHECK_NPU_PASS dots=67546 cancellations=10",
+    "structure": {
+      "base": {
+        "multipliers": 0,
+        "modules": [
+          "rv32i_five_stage_cpu"
+        ]
+      },
+      "enabled": {
+        "multipliers": 4,
+        "modules": [
+          "$paramod\\rv32i_five_stage_cpu\\ENABLE_XNEBULA=s32'00000000000000000000000000000001",
+          "nebula_cpu_npu_top",
+          "nebula_npu_dot4"
+        ]
+      }
+    },
+    "tested_file_sha256": {
+      "rtl/nebula_npu_dot4.sv": "2effa66b015cd3d70b832c06fc838826e7f8a7a61ac17a573deafa52b2269dd5",
+      "rtl/rv32i_five_stage_cpu.sv": "055d8b3f86cedd762e0b06a515f3dad2ff6642b551f54b7648b3e2a0ad4fe636",
+      "rtl/integration/nebula_cpu_npu_top.sv": "9b947a59ded11782b90a72269ec38c08f6fe8587b6adb7d42841aca7230cf2d5",
+      "docs/implementation/check_rtl.py": "063f0d023d4c9f22332915b92683ebb2fd89aaac972fcd70613e8ccab8c82d6e",
+      "docs/implementation/selfcheck_cpu_tb.sv": "c84c65c454c95fe8eae2715dd49d666a2c70232fe9a99076cc7f744d3ec43f28",
+      "docs/implementation/selfcheck_npu_tb.sv": "d864d01ff35e8b62e1e45a6e1798b741534ec66cfbcbe7f63a1ae0f3db61e6ca"
+    },
+    "testbench_update": "After the 148 passing runs, INVALID_WORD became a configurable stimulus with the original deadbeef default. The separate signed-rule reproducer used the updated bench and fails as documented."
+  },
+  "blocker_evidence": {
+    "design": [
+      "spec/design_doc.md:123",
+      "spec/design_doc.md:125",
+      "spec/design_doc.md:129"
+    ],
+    "csir": [
+      "spec/draft.specir:388",
+      "spec/draft.specir:504",
+      "spec/draft.specir:506"
+    ],
+    "rtl": [
+      "rtl/rv32i_five_stage_cpu.sv:262",
+      "rtl/rv32i_five_stage_cpu.sv:269"
+    ]
+  },
+  "reproduction_command": "python3 docs/implementation/reproduce_spec_conflict.py",
+  "reproduction_expected_exit_code": 1,
+  "frozen_specification_edits": false,
+  "limitations": [
+    "No ACT4/Sail or frozen directed/random acceptance run; this local oracle is independently authored.",
+    "No formal proof, mapped timing, physical closure or benchmark scoring.",
+    "UNUSEDSIGNAL waived for unused shared decode/payload fields; no functional lint warnings waived.",
+    "Current RTL retains the signed CSIR serialization equation; it cannot be certified against the conflicting detailed-design redirect rule."
+  ],
+  "required_next_action": "Specification baseline owner must synchronize and re-sign the design/CSIR fetch ownership and serialization rule before authorized RTL work resumes."
+}

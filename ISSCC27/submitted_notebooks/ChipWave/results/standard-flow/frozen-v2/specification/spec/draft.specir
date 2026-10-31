@@ -1,0 +1,3470 @@
+module nebula_npu_dot4 {
+  in clk: bit
+  in rst_n: bit
+  in req_valid: bit
+  out req_ready: bit
+  in req_a: u32
+  in req_b: u32
+  out rsp_valid: bit
+  in rsp_ready: bit
+  out rsp_data: u32
+  in kill: bit
+  domain core = posedge clk, async reset !rst_n
+  state phase: {IDLE,P0,P1,RSP} @core reset IDLE
+  state p0: s16 @core reset 0
+  state p1: s16 @core reset 0
+  state p2: s16 @core reset 0
+  state p3: s16 @core reset 0
+  state pair0: s17 @core reset 0
+  state pair1: s17 @core reset 0
+  state result: s32 @core reset 0
+  req_ready = rst_n && !kill && phase == IDLE
+  rsp_valid = rst_n && !kill && phase == RSP
+  rsp_data = rst_n ? as_u(result) : 0
+  let req_fire: bit = req_valid && req_ready
+  let rsp_fire: bit = rsp_valid && rsp_ready
+  phase' = priority {
+    kill -> IDLE
+    req_fire -> P0
+    phase == P0 -> P1
+    phase == P1 -> RSP
+    rsp_fire -> IDLE
+    else -> hold
+  }
+  p0' = priority {
+    kill -> 0
+    req_fire -> sext(as_s(req_a[7:0]), 16) * sext(as_s(req_b[7:0]), 16)
+    else -> hold
+  }
+  p1' = priority {
+    kill -> 0
+    req_fire -> sext(as_s(req_a[15:8]), 16) * sext(as_s(req_b[15:8]), 16)
+    else -> hold
+  }
+  p2' = priority {
+    kill -> 0
+    req_fire -> sext(as_s(req_a[23:16]), 16) * sext(as_s(req_b[23:16]), 16)
+    else -> hold
+  }
+  p3' = priority {
+    kill -> 0
+    req_fire -> sext(as_s(req_a[31:24]), 16) * sext(as_s(req_b[31:24]), 16)
+    else -> hold
+  }
+  pair0' = priority {
+    kill -> 0
+    phase == P0 -> sext(p0, 17) + sext(p1, 17)
+    else -> hold
+  }
+  pair1' = priority {
+    kill -> 0
+    phase == P0 -> sext(p2, 17) + sext(p3, 17)
+    else -> hold
+  }
+  result' = priority {
+    kill -> 0
+    phase == P1 -> sext(sext(pair0, 18) + sext(pair1, 18), 32)
+    else -> hold
+  }
+  assert @core req_fire |=> phase == P0 unless !rst_n || kill
+  assert @core phase == P0 |=> phase == P1 unless !rst_n || kill
+  assert @core phase == P1 |=> phase == RSP unless !rst_n || kill
+  assert @core rsp_valid && !rsp_ready |=> rsp_valid && rsp_data == past(rsp_data, 1) unless !rst_n || kill
+  assert @core always !(req_ready && rsp_valid) unless !rst_n || kill
+}
+
+module rv32i_five_stage_cpu(ENABLE_XNEBULA: int = 0) {
+  in clk: bit
+  in rst_n: bit
+  out imem_valid: bit
+  out imem_addr: u32
+  in imem_rdata: u32
+  out dmem_req_valid: bit
+  in dmem_req_ready: bit
+  out dmem_req_write: bit
+  out dmem_req_addr: u32
+  out dmem_req_wdata: u32
+  out dmem_req_wstrb: u4
+  in dmem_rsp_valid: bit
+  out dmem_rsp_ready: bit
+  in dmem_rsp_rdata: u32
+  in dmem_rsp_err: bit
+  out state commit_valid: bit @core reset 0
+  out state commit_pc: u32 @core reset 0
+  out state commit_insn: u32 @core reset 0
+  out state commit_rd: u5 @core reset 0
+  out state commit_wdata: u32 @core reset 0
+  out state commit_mem_addr: u32 @core reset 0
+  out state commit_mem_wstrb: u4 @core reset 0
+  out state commit_mem_wdata: u32 @core reset 0
+  out state trap_valid: bit @core reset 0
+  out state trap_pc: u32 @core reset 0
+  out state trap_cause: u32 @core reset 0
+  out state trap_tval: u32 @core reset 0
+  domain core = posedge clk, async reset !rst_n
+  state fetch_pc: u32 @core reset 32'h80000000
+  state if_v: bit @core reset 0
+  state if_pc: u32 @core reset 0
+  state if_held: bit @core reset 0
+  state if_word: u32 @core reset 0
+  state ex_v: bit @core reset 0
+  state ex_pc: u32 @core reset 0
+  state ex_insn: u32 @core reset 0
+  state ex_fault: bit @core reset 0
+  state ex_cause: u32 @core reset 0
+  state ex_tval: u32 @core reset 0
+  state mem_v: bit @core reset 0
+  state mem_pc: u32 @core reset 0
+  state mem_insn: u32 @core reset 0
+  state mem_fault: bit @core reset 0
+  state mem_cause: u32 @core reset 0
+  state mem_tval: u32 @core reset 0
+  state wb_v: bit @core reset 0
+  state wb_pc: u32 @core reset 0
+  state wb_insn: u32 @core reset 0
+  state wb_fault: bit @core reset 0
+  state wb_cause: u32 @core reset 0
+  state wb_tval: u32 @core reset 0
+  state ex_a_snap: u32 @core reset 0
+  state ex_b_snap: u32 @core reset 0
+  state mem_rd: u5 @core reset 0
+  state mem_rd_write: bit @core reset 0
+  state mem_result: u32 @core reset 0
+  state mem_store: bit @core reset 0
+  state mem_bus_addr: u32 @core reset 0
+  state mem_bus_data: u32 @core reset 0
+  state mem_bus_mask: u4 @core reset 0
+  state mem_csr_write: bit @core reset 0
+  state mem_csr_addr: u12 @core reset 0
+  state mem_csr_new: u32 @core reset 0
+  state mem_mret: bit @core reset 0
+  state wb_rd: u5 @core reset 0
+  state wb_rd_write: bit @core reset 0
+  state wb_result: u32 @core reset 0
+  state wb_store: bit @core reset 0
+  state wb_bus_addr: u32 @core reset 0
+  state wb_bus_data: u32 @core reset 0
+  state wb_bus_mask: u4 @core reset 0
+  state wb_csr_write: bit @core reset 0
+  state wb_csr_addr: u12 @core reset 0
+  state wb_csr_new: u32 @core reset 0
+  state wb_mret: bit @core reset 0
+  state mem_load: bit @core reset 0
+  state mem_ea: u32 @core reset 0
+  state mem_f3: u3 @core reset 0
+  state mem_sent: bit @core reset 0
+  state xdot_issued: bit @core reset 0
+  state rf0: u32 @core reset 0
+  state rf1: u32 @core reset 0
+  state rf2: u32 @core reset 0
+  state rf3: u32 @core reset 0
+  state rf4: u32 @core reset 0
+  state rf5: u32 @core reset 0
+  state rf6: u32 @core reset 0
+  state rf7: u32 @core reset 0
+  state rf8: u32 @core reset 0
+  state rf9: u32 @core reset 0
+  state rf10: u32 @core reset 0
+  state rf11: u32 @core reset 0
+  state rf12: u32 @core reset 0
+  state rf13: u32 @core reset 0
+  state rf14: u32 @core reset 0
+  state rf15: u32 @core reset 0
+  state rf16: u32 @core reset 0
+  state rf17: u32 @core reset 0
+  state rf18: u32 @core reset 0
+  state rf19: u32 @core reset 0
+  state rf20: u32 @core reset 0
+  state rf21: u32 @core reset 0
+  state rf22: u32 @core reset 0
+  state rf23: u32 @core reset 0
+  state rf24: u32 @core reset 0
+  state rf25: u32 @core reset 0
+  state rf26: u32 @core reset 0
+  state rf27: u32 @core reset 0
+  state rf28: u32 @core reset 0
+  state rf29: u32 @core reset 0
+  state rf30: u32 @core reset 0
+  state rf31: u32 @core reset 0
+  state mstatus: u32 @core reset 32'h1800
+  state mtvec: u32 @core reset 32'h80000000
+  state mscratch: u32 @core reset 0
+  state mepc: u32 @core reset 0
+  state mcause: u32 @core reset 0
+  state mtval: u32 @core reset 0
+  let id_word: u32 = if_held ? if_word : imem_rdata
+  let id_op: u7 = as_u(id_word[6:0])
+  let id_f3: u3 = as_u(id_word[14:12])
+  let id_f7: u7 = as_u(id_word[31:25])
+  let id_rs1: u5 = as_u(id_word[19:15])
+  let id_rs2: u5 = as_u(id_word[24:20])
+  let id_csr_addr: u12 = as_u(id_word[31:20])
+  let id_lui: bit = id_op == 55
+  let id_auipc: bit = id_op == 23
+  let id_jal: bit = id_op == 111
+  let id_jalr: bit = id_op == 103 && id_f3 == 0
+  let id_branch: bit = id_op == 99 && (id_f3 == 0 || id_f3 == 1 || id_f3 == 4 || id_f3 == 5 || id_f3 == 6 || id_f3 == 7)
+  let id_load: bit = id_op == 3 && (id_f3 == 0 || id_f3 == 1 || id_f3 == 2 || id_f3 == 4 || id_f3 == 5)
+  let id_store: bit = id_op == 35 && (id_f3 == 0 || id_f3 == 1 || id_f3 == 2)
+  let id_opimm: bit = id_op == 19 && (id_f3 == 0 || id_f3 == 2 || id_f3 == 3 || id_f3 == 4 || id_f3 == 6 || id_f3 == 7 || id_f3 == 1 && id_f7 == 0 || id_f3 == 5 && (id_f7 == 0 || id_f7 == 32))
+  let id_opreg: bit = id_op == 51 && (id_f7 == 0 || id_f7 == 32 && (id_f3 == 0 || id_f3 == 5))
+  let id_fence: bit = id_op == 15 && id_f3 == 0
+  let id_ecall: bit = id_word == 115
+  let id_ebreak: bit = id_word == 1048691
+  let id_mret: bit = id_word == 807403635
+  let id_csr: bit = id_op == 115 && (id_f3 == 1 || id_f3 == 2 || id_f3 == 3 || id_f3 == 5 || id_f3 == 6 || id_f3 == 7)
+  let id_xdot: bit = ENABLE_XNEBULA == 1 && id_op == 11 && id_f3 == 0 && id_f7 == 0
+  let id_uses_a: bit = id_opimm || id_opreg || id_load || id_store || id_branch || id_jalr || id_xdot || id_csr && !id_word[14]
+  let id_uses_b: bit = id_opreg || id_store || id_branch || id_xdot
+  let id_csr_known: bit = id_csr_addr == 768 || id_csr_addr == 769 || id_csr_addr == 773 || id_csr_addr == 832 || id_csr_addr == 833 || id_csr_addr == 834 || id_csr_addr == 835 || id_csr_addr == 3860
+  let id_csr_ro: bit = id_csr_addr == 769 || id_csr_addr == 3860
+  let id_csr_wintent: bit = id_csr && (id_f3 == 1 || id_f3 == 5 || id_rs1 != 0)
+  let id_csr_bad: bit = id_csr && (!id_csr_known || id_csr_ro && id_csr_wintent)
+  let id_legal: bit = (id_lui || id_auipc || id_jal || id_jalr || id_branch || id_load || id_store || id_opimm || id_opreg || id_fence || id_ecall || id_ebreak || id_mret || id_csr || id_xdot) && !id_csr_bad
+  let id_decode_fault: bit = !id_legal || id_ecall || id_ebreak
+  let id_decode_cause: u32 = !id_legal ? 2 : id_ebreak ? 3 : 11
+  let id_decode_tval: u32 = !id_legal ? id_word : 0
+  let ex_op: u7 = as_u(ex_insn[6:0])
+  let ex_f3: u3 = as_u(ex_insn[14:12])
+  let ex_f7: u7 = as_u(ex_insn[31:25])
+  let ex_rs1: u5 = as_u(ex_insn[19:15])
+  let ex_rs2: u5 = as_u(ex_insn[24:20])
+  let ex_rd: u5 = as_u(ex_insn[11:7])
+  let ex_csr_addr: u12 = as_u(ex_insn[31:20])
+  let ex_imm_i: u32 = as_u(sext(ex_insn[31:20], 32))
+  let ex_imm_s: u32 = as_u(sext({ex_insn[31:25], ex_insn[11:7]}, 32))
+  let ex_imm_b: u32 = as_u(sext({ex_insn[31], ex_insn[7], ex_insn[30:25], ex_insn[11:8], 1'b0}, 32))
+  let ex_imm_u: u32 = as_u({ex_insn[31:12], 12'h000})
+  let ex_imm_j: u32 = as_u(sext({ex_insn[31], ex_insn[19:12], ex_insn[20], ex_insn[30:21], 1'b0}, 32))
+  let ex_lui: bit = ex_op == 55
+  let ex_auipc: bit = ex_op == 23
+  let ex_jal: bit = ex_op == 111
+  let ex_jalr: bit = ex_op == 103 && ex_f3 == 0
+  let ex_branch: bit = ex_op == 99 && (ex_f3 == 0 || ex_f3 == 1 || ex_f3 == 4 || ex_f3 == 5 || ex_f3 == 6 || ex_f3 == 7)
+  let ex_load: bit = ex_op == 3 && (ex_f3 == 0 || ex_f3 == 1 || ex_f3 == 2 || ex_f3 == 4 || ex_f3 == 5)
+  let ex_store: bit = ex_op == 35 && (ex_f3 == 0 || ex_f3 == 1 || ex_f3 == 2)
+  let ex_opimm: bit = ex_op == 19 && (ex_f3 == 0 || ex_f3 == 2 || ex_f3 == 3 || ex_f3 == 4 || ex_f3 == 6 || ex_f3 == 7 || ex_f3 == 1 && ex_f7 == 0 || ex_f3 == 5 && (ex_f7 == 0 || ex_f7 == 32))
+  let ex_opreg: bit = ex_op == 51 && (ex_f7 == 0 || ex_f7 == 32 && (ex_f3 == 0 || ex_f3 == 5))
+  let ex_mret: bit = ex_insn == 807403635
+  let ex_csr: bit = ex_op == 115 && (ex_f3 == 1 || ex_f3 == 2 || ex_f3 == 3 || ex_f3 == 5 || ex_f3 == 6 || ex_f3 == 7)
+  let ex_xdot: bit = ENABLE_XNEBULA == 1 && ex_op == 11 && ex_f3 == 0 && ex_f7 == 0
+  let ex_uses_a: bit = ex_opimm || ex_opreg || ex_load || ex_store || ex_branch || ex_jalr || ex_xdot || ex_csr && !ex_insn[14]
+  let ex_uses_b: bit = ex_opreg || ex_store || ex_branch || ex_xdot
+  let ex_csr_wintent: bit = ex_csr && (ex_f3 == 1 || ex_f3 == 5 || ex_rs1 != 0)
+  let ex_rd_intent: bit = ex_lui || ex_auipc || ex_jal || ex_jalr || ex_load || ex_opimm || ex_opreg || ex_csr || ex_xdot
+  let wb_trap: bit = rst_n && wb_v && wb_fault
+  let wb_normal: bit = rst_n && wb_v && !wb_fault
+  let wb_return: bit = wb_normal && wb_mret
+  let wb_flush: bit = wb_trap || wb_return
+  let wb_rf_write: bit = wb_normal && wb_rd_write && wb_rd != 0
+  rf0' = 0
+  rf1' = priority {
+    wb_rf_write && wb_rd == 1 -> wb_result
+    else -> hold
+  }
+  rf2' = priority {
+    wb_rf_write && wb_rd == 2 -> wb_result
+    else -> hold
+  }
+  rf3' = priority {
+    wb_rf_write && wb_rd == 3 -> wb_result
+    else -> hold
+  }
+  rf4' = priority {
+    wb_rf_write && wb_rd == 4 -> wb_result
+    else -> hold
+  }
+  rf5' = priority {
+    wb_rf_write && wb_rd == 5 -> wb_result
+    else -> hold
+  }
+  rf6' = priority {
+    wb_rf_write && wb_rd == 6 -> wb_result
+    else -> hold
+  }
+  rf7' = priority {
+    wb_rf_write && wb_rd == 7 -> wb_result
+    else -> hold
+  }
+  rf8' = priority {
+    wb_rf_write && wb_rd == 8 -> wb_result
+    else -> hold
+  }
+  rf9' = priority {
+    wb_rf_write && wb_rd == 9 -> wb_result
+    else -> hold
+  }
+  rf10' = priority {
+    wb_rf_write && wb_rd == 10 -> wb_result
+    else -> hold
+  }
+  rf11' = priority {
+    wb_rf_write && wb_rd == 11 -> wb_result
+    else -> hold
+  }
+  rf12' = priority {
+    wb_rf_write && wb_rd == 12 -> wb_result
+    else -> hold
+  }
+  rf13' = priority {
+    wb_rf_write && wb_rd == 13 -> wb_result
+    else -> hold
+  }
+  rf14' = priority {
+    wb_rf_write && wb_rd == 14 -> wb_result
+    else -> hold
+  }
+  rf15' = priority {
+    wb_rf_write && wb_rd == 15 -> wb_result
+    else -> hold
+  }
+  rf16' = priority {
+    wb_rf_write && wb_rd == 16 -> wb_result
+    else -> hold
+  }
+  rf17' = priority {
+    wb_rf_write && wb_rd == 17 -> wb_result
+    else -> hold
+  }
+  rf18' = priority {
+    wb_rf_write && wb_rd == 18 -> wb_result
+    else -> hold
+  }
+  rf19' = priority {
+    wb_rf_write && wb_rd == 19 -> wb_result
+    else -> hold
+  }
+  rf20' = priority {
+    wb_rf_write && wb_rd == 20 -> wb_result
+    else -> hold
+  }
+  rf21' = priority {
+    wb_rf_write && wb_rd == 21 -> wb_result
+    else -> hold
+  }
+  rf22' = priority {
+    wb_rf_write && wb_rd == 22 -> wb_result
+    else -> hold
+  }
+  rf23' = priority {
+    wb_rf_write && wb_rd == 23 -> wb_result
+    else -> hold
+  }
+  rf24' = priority {
+    wb_rf_write && wb_rd == 24 -> wb_result
+    else -> hold
+  }
+  rf25' = priority {
+    wb_rf_write && wb_rd == 25 -> wb_result
+    else -> hold
+  }
+  rf26' = priority {
+    wb_rf_write && wb_rd == 26 -> wb_result
+    else -> hold
+  }
+  rf27' = priority {
+    wb_rf_write && wb_rd == 27 -> wb_result
+    else -> hold
+  }
+  rf28' = priority {
+    wb_rf_write && wb_rd == 28 -> wb_result
+    else -> hold
+  }
+  rf29' = priority {
+    wb_rf_write && wb_rd == 29 -> wb_result
+    else -> hold
+  }
+  rf30' = priority {
+    wb_rf_write && wb_rd == 30 -> wb_result
+    else -> hold
+  }
+  rf31' = priority {
+    wb_rf_write && wb_rd == 31 -> wb_result
+    else -> hold
+  }
+  let id_rf1: u32 = id_rs1 == 0 ? 0 : wb_rf_write && wb_rd == id_rs1 ? wb_result : id_rs1 == 1 ? rf1 : id_rs1 == 2 ? rf2 : id_rs1 == 3 ? rf3 : id_rs1 == 4 ? rf4 : id_rs1 == 5 ? rf5 : id_rs1 == 6 ? rf6 : id_rs1 == 7 ? rf7 : id_rs1 == 8 ? rf8 : id_rs1 == 9 ? rf9 : id_rs1 == 10 ? rf10 : id_rs1 == 11 ? rf11 : id_rs1 == 12 ? rf12 : id_rs1 == 13 ? rf13 : id_rs1 == 14 ? rf14 : id_rs1 == 15 ? rf15 : id_rs1 == 16 ? rf16 : id_rs1 == 17 ? rf17 : id_rs1 == 18 ? rf18 : id_rs1 == 19 ? rf19 : id_rs1 == 20 ? rf20 : id_rs1 == 21 ? rf21 : id_rs1 == 22 ? rf22 : id_rs1 == 23 ? rf23 : id_rs1 == 24 ? rf24 : id_rs1 == 25 ? rf25 : id_rs1 == 26 ? rf26 : id_rs1 == 27 ? rf27 : id_rs1 == 28 ? rf28 : id_rs1 == 29 ? rf29 : id_rs1 == 30 ? rf30 : id_rs1 == 31 ? rf31 : 0
+  let id_rf2: u32 = id_rs2 == 0 ? 0 : wb_rf_write && wb_rd == id_rs2 ? wb_result : id_rs2 == 1 ? rf1 : id_rs2 == 2 ? rf2 : id_rs2 == 3 ? rf3 : id_rs2 == 4 ? rf4 : id_rs2 == 5 ? rf5 : id_rs2 == 6 ? rf6 : id_rs2 == 7 ? rf7 : id_rs2 == 8 ? rf8 : id_rs2 == 9 ? rf9 : id_rs2 == 10 ? rf10 : id_rs2 == 11 ? rf11 : id_rs2 == 12 ? rf12 : id_rs2 == 13 ? rf13 : id_rs2 == 14 ? rf14 : id_rs2 == 15 ? rf15 : id_rs2 == 16 ? rf16 : id_rs2 == 17 ? rf17 : id_rs2 == 18 ? rf18 : id_rs2 == 19 ? rf19 : id_rs2 == 20 ? rf20 : id_rs2 == 21 ? rf21 : id_rs2 == 22 ? rf22 : id_rs2 == 23 ? rf23 : id_rs2 == 24 ? rf24 : id_rs2 == 25 ? rf25 : id_rs2 == 26 ? rf26 : id_rs2 == 27 ? rf27 : id_rs2 == 28 ? rf28 : id_rs2 == 29 ? rf29 : id_rs2 == 30 ? rf30 : id_rs2 == 31 ? rf31 : 0
+  let csr_serial_busy: bit = ex_v && (ex_csr || ex_mret) || mem_v && (mem_csr_write || mem_mret || mem_insn[6:0] == 7'h73) || wb_v && wb_insn[6:0] == 7'h73
+  let id_serial_wait: bit = if_v && (id_csr || id_mret) && (ex_v || mem_v || wb_v)
+  let mem_is_memory: bit = mem_load || mem_store
+  dmem_req_valid = rst_n && mem_v && mem_is_memory && !mem_fault && !mem_sent && !wb_flush
+  dmem_req_write = dmem_req_valid && mem_store
+  dmem_req_addr = rst_n ? mem_bus_addr : 0
+  dmem_req_wdata = rst_n ? mem_bus_data : 0
+  dmem_req_wstrb = rst_n ? mem_bus_mask : 0
+  dmem_rsp_ready = rst_n && mem_v && mem_is_memory && !mem_fault && mem_sent && !wb_flush
+  let mem_req_fire: bit = dmem_req_valid && dmem_req_ready
+  let mem_rsp_fire: bit = dmem_rsp_valid && dmem_rsp_ready
+  let mem_error: bit = mem_rsp_fire && dmem_rsp_err
+  let mem_advance: bit = rst_n && mem_v && !wb_flush && (!mem_is_memory || mem_fault || mem_rsp_fire)
+  let mem_available: bit = !mem_v || mem_advance
+  let mem_known_fault: bit = mem_v && mem_fault
+  let mem_lane_shift: u32 = zext(as_u(mem_ea[1:0]), 32) << 3
+  let mem_shifted: u32 = dmem_rsp_rdata >> mem_lane_shift
+  let mem_load_result: u32 = mem_f3 == 0 ? as_u(sext(mem_shifted[7:0], 32)) : mem_f3 == 1 ? as_u(sext(mem_shifted[15:0], 32)) : mem_f3 == 4 ? as_u(zext(mem_shifted[7:0], 32)) : mem_f3 == 5 ? as_u(zext(mem_shifted[15:0], 32)) : dmem_rsp_rdata
+  let mem_completed_result: u32 = mem_load ? mem_load_result : mem_result
+  let mem_can_forward: bit = mem_v && !mem_fault && !mem_error && mem_rd_write && mem_rd != 0 && (!mem_load || mem_rsp_fire)
+  let ex_a_mem_match: bit = ex_uses_a && ex_rs1 != 0 && mem_v && !mem_fault && mem_rd_write && mem_rd == ex_rs1
+  let ex_a_blocked: bit = ex_a_mem_match && !mem_can_forward
+  let ex_a: u32 = ex_rs1 == 0 ? 0 : ex_a_mem_match && mem_can_forward ? mem_completed_result : wb_rf_write && wb_rd == ex_rs1 ? wb_result : ex_a_snap
+  let ex_b_mem_match: bit = ex_uses_b && ex_rs2 != 0 && mem_v && !mem_fault && mem_rd_write && mem_rd == ex_rs2
+  let ex_b_blocked: bit = ex_b_mem_match && !mem_can_forward
+  let ex_b: u32 = ex_rs2 == 0 ? 0 : ex_b_mem_match && mem_can_forward ? mem_completed_result : wb_rf_write && wb_rd == ex_rs2 ? wb_result : ex_b_snap
+  let ex_operands_ready: bit = !ex_a_blocked && !ex_b_blocked
+  let ex_alu_b: u32 = ex_opimm ? ex_imm_i : ex_b
+  let ex_shamt: u5 = as_u(ex_alu_b[4:0])
+  let ex_alu: u32 = ex_f3 == 0 ? ex_opreg && ex_f7 == 32 ? ex_a - ex_alu_b : ex_a + ex_alu_b : ex_f3 == 1 ? ex_a << zext(ex_shamt, 32) : ex_f3 == 2 ? as_s(ex_a) < as_s(ex_alu_b) ? 32'd1 : 32'd0 : ex_f3 == 3 ? ex_a < ex_alu_b ? 32'd1 : 32'd0 : ex_f3 == 4 ? ex_a ^ ex_alu_b : ex_f3 == 5 ? ex_f7 == 32 ? as_u(as_s(ex_a) >> zext(ex_shamt, 32)) : ex_a >> zext(ex_shamt, 32) : ex_f3 == 6 ? ex_a | ex_alu_b : ex_a & ex_alu_b
+  let ex_ea: u32 = ex_a + (ex_store ? ex_imm_s : ex_imm_i)
+  let ex_lane_shift: u32 = zext(as_u(ex_ea[1:0]), 32) << 3
+  let ex_bus_addr: u32 = ex_ea & 32'hfffffffc
+  let ex_bus_mask: u4 = ex_store && ex_f3 == 0 ? as_u(4'h1) << zext(as_u(ex_ea[1:0]), 4) : ex_store && ex_f3 == 1 ? as_u(4'h3) << zext(as_u(ex_ea[1:0]), 4) : ex_store && ex_f3 == 2 ? 4'hf : 0
+  let ex_bus_data: u32 = ex_store && ex_f3 == 0 ? (ex_b & 32'hff) << ex_lane_shift : ex_store && ex_f3 == 1 ? (ex_b & 32'hffff) << ex_lane_shift : ex_store && ex_f3 == 2 ? ex_b : 0
+  let ex_mem_misaligned: bit = (ex_load || ex_store) && ((ex_f3 == 1 || ex_f3 == 5) && ex_ea[0] || ex_f3 == 2 && ex_ea[1:0] != 2'b00)
+  let ex_branch_taken: bit = ex_branch && (ex_f3 == 0 ? ex_a == ex_b : ex_f3 == 1 ? ex_a != ex_b : ex_f3 == 4 ? as_s(ex_a) < as_s(ex_b) : ex_f3 == 5 ? as_s(ex_a) >= as_s(ex_b) : ex_f3 == 6 ? ex_a < ex_b : ex_a >= ex_b)
+  let ex_control_taken: bit = ex_jal || ex_jalr || ex_branch_taken
+  let ex_target: u32 = ex_jalr ? ex_a + ex_imm_i & 32'hfffffffe : ex_pc + (ex_jal ? ex_imm_j : ex_imm_b)
+  let ex_target_bad: bit = ex_control_taken && ex_target[1:0] != 2'b00
+  let ex_final_fault: bit = ex_fault || ex_mem_misaligned || ex_target_bad
+  let ex_final_cause: u32 = ex_fault ? ex_cause : ex_mem_misaligned ? ex_store ? 6 : 4 : 0
+  let ex_final_tval: u32 = ex_fault ? ex_tval : ex_mem_misaligned ? ex_ea : ex_target
+  let ex_csr_old: u32 = ex_csr_addr == 768 ? mstatus : ex_csr_addr == 773 ? mtvec : ex_csr_addr == 832 ? mscratch : ex_csr_addr == 833 ? mepc : ex_csr_addr == 834 ? mcause : ex_csr_addr == 835 ? mtval : ex_csr_addr == 769 ? 32'h40000100 : 0
+  let ex_csr_source: u32 = ex_insn[14] ? zext(ex_rs1, 32) : ex_a
+  let ex_csr_new: u32 = ex_f3 == 1 || ex_f3 == 5 ? ex_csr_source : ex_f3 == 2 || ex_f3 == 6 ? ex_csr_old | ex_csr_source : ex_csr_old & ~ex_csr_source
+  let npu_kill: bit = !rst_n || wb_flush || mem_error || mem_known_fault
+  let ex_eligible: bit = rst_n && ex_v && !wb_flush && !mem_error && !mem_known_fault && mem_available && ex_operands_ready
+  let npu_req_valid: bit = ex_eligible && ex_xdot && !ex_final_fault && !xdot_issued && !npu_kill
+  let npu_rsp_ready: bit = ex_eligible && ex_xdot && xdot_issued && !ex_final_fault && !npu_kill
+  state np_phase: {IDLE,P0,P1,RSP} @core reset IDLE
+  state np_p0: s16 @core reset 0
+  state np_p1: s16 @core reset 0
+  state np_p2: s16 @core reset 0
+  state np_p3: s16 @core reset 0
+  state np_pair0: s17 @core reset 0
+  state np_pair1: s17 @core reset 0
+  state np_result: s32 @core reset 0
+  let np_req_ready: bit = rst_n && !npu_kill && np_phase == IDLE
+  let np_rsp_valid: bit = rst_n && !npu_kill && np_phase == RSP
+  let np_rsp_data: u32 = rst_n ? as_u(np_result) : 0
+  let np_req_fire: bit = npu_req_valid && np_req_ready
+  let np_rsp_fire: bit = np_rsp_valid && npu_rsp_ready
+  np_phase' = priority {
+    npu_kill -> IDLE
+    np_req_fire -> P0
+    np_phase == P0 -> P1
+    np_phase == P1 -> RSP
+    np_rsp_fire -> IDLE
+    else -> hold
+  }
+  np_p0' = priority {
+    npu_kill -> 0
+    np_req_fire -> sext(as_s(ex_a[7:0]), 16) * sext(as_s(ex_b[7:0]), 16)
+    else -> hold
+  }
+  np_p1' = priority {
+    npu_kill -> 0
+    np_req_fire -> sext(as_s(ex_a[15:8]), 16) * sext(as_s(ex_b[15:8]), 16)
+    else -> hold
+  }
+  np_p2' = priority {
+    npu_kill -> 0
+    np_req_fire -> sext(as_s(ex_a[23:16]), 16) * sext(as_s(ex_b[23:16]), 16)
+    else -> hold
+  }
+  np_p3' = priority {
+    npu_kill -> 0
+    np_req_fire -> sext(as_s(ex_a[31:24]), 16) * sext(as_s(ex_b[31:24]), 16)
+    else -> hold
+  }
+  np_pair0' = priority {
+    npu_kill -> 0
+    np_phase == P0 -> sext(np_p0, 17) + sext(np_p1, 17)
+    else -> hold
+  }
+  np_pair1' = priority {
+    npu_kill -> 0
+    np_phase == P0 -> sext(np_p2, 17) + sext(np_p3, 17)
+    else -> hold
+  }
+  np_result' = priority {
+    npu_kill -> 0
+    np_phase == P1 -> sext(sext(np_pair0, 18) + sext(np_pair1, 18), 32)
+    else -> hold
+  }
+  assert @core np_req_fire |=> np_phase == P0 unless !rst_n || npu_kill
+  assert @core np_phase == P0 |=> np_phase == P1 unless !rst_n || npu_kill
+  assert @core np_phase == P1 |=> np_phase == RSP unless !rst_n || npu_kill
+  assert @core np_rsp_valid && !npu_rsp_ready |=> np_rsp_valid && np_rsp_data == past(np_rsp_data, 1) unless !rst_n || npu_kill
+  assert @core always !(np_req_ready && np_rsp_valid) unless !rst_n || npu_kill
+  let ex_advance: bit = ex_eligible && (!ex_xdot || ex_final_fault || np_rsp_fire)
+  let ex_redirect: bit = ex_advance && !ex_final_fault && ex_control_taken
+  let ex_fault_selected: bit = ex_advance && ex_final_fault
+  let front_flush: bit = wb_flush || mem_error || mem_known_fault || ex_redirect || ex_fault_selected
+  let id_load_use: bit = if_v && ex_v && ex_load && !ex_fault && ex_rd != 0 && (id_uses_a && id_rs1 == ex_rd || id_uses_b && id_rs2 == ex_rd)
+  let id_advance: bit = rst_n && if_v && (!ex_v || ex_advance) && !front_flush && !id_load_use && !csr_serial_busy && !id_serial_wait
+  let fetch_block: bit = front_flush || csr_serial_busy || if_v && id_decode_fault || ex_v && ex_fault || ex_v && ex_xdot && !ex_advance || id_serial_wait
+  let fetch_room: bit = !if_v || id_advance
+  imem_valid = rst_n && fetch_room && !fetch_block && fetch_pc[1:0] == 2'b00
+  imem_addr = rst_n ? fetch_pc : 0
+  let fetch_fire: bit = imem_valid
+  let fetch_bad: bit = rst_n && fetch_room && !fetch_block && fetch_pc[1:0] != 2'b00
+  state if_fault: bit @core reset 0
+  fetch_pc' = priority {
+    wb_trap -> mtvec
+    wb_return -> mepc
+    ex_redirect -> ex_target
+    fetch_fire -> fetch_pc + 4
+    else -> hold
+  }
+  if_v' = priority {
+    front_flush -> 0
+    fetch_fire || fetch_bad -> 1
+    id_advance -> 0
+    else -> hold
+  }
+  if_pc' = priority {
+    front_flush -> 0
+    fetch_fire || fetch_bad -> fetch_pc
+    else -> hold
+  }
+  if_fault' = priority {
+    front_flush -> 0
+    fetch_fire || fetch_bad -> fetch_bad
+    id_advance -> 0
+    else -> hold
+  }
+  if_held' = priority {
+    front_flush || fetch_fire || fetch_bad || id_advance -> 0
+    if_v && !if_held -> 1
+    else -> hold
+  }
+  if_word' = priority {
+    front_flush -> 0
+    if_v && !if_held && !id_advance -> imem_rdata
+    else -> hold
+  }
+  ex_v' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> 1
+    ex_advance -> 0
+    else -> hold
+  }
+  ex_pc' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> if_pc
+    else -> hold
+  }
+  ex_insn' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> id_word
+    else -> hold
+  }
+  ex_fault' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> if_fault || id_decode_fault
+    else -> hold
+  }
+  ex_cause' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> if_fault ? 0 : id_decode_cause
+    else -> hold
+  }
+  ex_tval' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> if_fault ? if_pc : id_decode_tval
+    else -> hold
+  }
+  ex_a_snap' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> id_rf1
+    ex_v && ex_uses_a && wb_rf_write && ex_rs1 == wb_rd -> wb_result
+    else -> hold
+  }
+  ex_b_snap' = priority {
+    wb_flush || mem_error || mem_known_fault -> 0
+    id_advance -> id_rf2
+    ex_v && ex_uses_b && wb_rf_write && ex_rs2 == wb_rd -> wb_result
+    else -> hold
+  }
+  xdot_issued' = priority {
+    npu_kill || ex_advance -> 0
+    np_req_fire -> 1
+    else -> hold
+  }
+  let ex_result: u32 = ex_xdot ? np_rsp_data : ex_lui ? ex_imm_u : ex_auipc ? ex_pc + ex_imm_u : ex_jal || ex_jalr ? ex_pc + 4 : ex_csr ? ex_csr_old : ex_alu
+  mem_v' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> 1
+    mem_advance -> 0
+    else -> hold
+  }
+  mem_pc' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_pc
+    else -> hold
+  }
+  mem_insn' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_insn
+    else -> hold
+  }
+  mem_fault' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_final_fault
+    else -> hold
+  }
+  mem_cause' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_final_cause
+    else -> hold
+  }
+  mem_tval' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_final_tval
+    else -> hold
+  }
+  mem_rd' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_rd
+    else -> hold
+  }
+  mem_rd_write' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_rd_intent && !ex_final_fault
+    else -> hold
+  }
+  mem_result' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_result
+    else -> hold
+  }
+  mem_store' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_store && !ex_final_fault
+    else -> hold
+  }
+  mem_load' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_load && !ex_final_fault
+    else -> hold
+  }
+  mem_ea' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_ea
+    else -> hold
+  }
+  mem_f3' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_f3
+    else -> hold
+  }
+  mem_bus_addr' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_bus_addr
+    else -> hold
+  }
+  mem_bus_data' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_bus_data
+    else -> hold
+  }
+  mem_bus_mask' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_bus_mask
+    else -> hold
+  }
+  mem_csr_write' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_csr_wintent && !ex_final_fault
+    else -> hold
+  }
+  mem_csr_addr' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_csr_addr
+    else -> hold
+  }
+  mem_csr_new' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_csr_new
+    else -> hold
+  }
+  mem_mret' = priority {
+    wb_flush || mem_error -> 0
+    ex_advance -> ex_mret && !ex_final_fault
+    else -> hold
+  }
+  mem_sent' = priority {
+    wb_flush || mem_rsp_fire || ex_advance -> 0
+    mem_req_fire -> 1
+    else -> hold
+  }
+  wb_v' = mem_advance
+  wb_pc' = priority {
+    mem_advance -> mem_pc
+    else -> 0
+  }
+  wb_insn' = priority {
+    mem_advance -> mem_insn
+    else -> 0
+  }
+  wb_fault' = priority {
+    mem_advance -> mem_fault || mem_error
+    else -> 0
+  }
+  wb_cause' = priority {
+    mem_advance -> mem_error ? mem_store ? 7 : 5 : mem_cause
+    else -> 0
+  }
+  wb_tval' = priority {
+    mem_advance -> mem_error ? mem_ea : mem_tval
+    else -> 0
+  }
+  wb_rd' = priority {
+    mem_advance -> mem_rd
+    else -> 0
+  }
+  wb_rd_write' = priority {
+    mem_advance -> mem_rd_write && !mem_fault && !mem_error
+    else -> 0
+  }
+  wb_result' = priority {
+    mem_advance -> mem_completed_result
+    else -> 0
+  }
+  wb_store' = priority {
+    mem_advance -> mem_store && !mem_fault && !mem_error
+    else -> 0
+  }
+  wb_bus_addr' = priority {
+    mem_advance -> mem_bus_addr
+    else -> 0
+  }
+  wb_bus_data' = priority {
+    mem_advance -> mem_bus_data
+    else -> 0
+  }
+  wb_bus_mask' = priority {
+    mem_advance -> mem_bus_mask
+    else -> 0
+  }
+  wb_csr_write' = priority {
+    mem_advance -> mem_csr_write && !mem_fault && !mem_error
+    else -> 0
+  }
+  wb_csr_addr' = priority {
+    mem_advance -> mem_csr_addr
+    else -> 0
+  }
+  wb_csr_new' = priority {
+    mem_advance -> mem_csr_new
+    else -> 0
+  }
+  wb_mret' = priority {
+    mem_advance -> mem_mret && !mem_fault && !mem_error
+    else -> 0
+  }
+  let wb_csr_fire: bit = wb_normal && wb_csr_write
+  mstatus' = priority {
+    wb_trap -> 32'h1800 | (mstatus[3] ? 32'h80 : 32'h0)
+    wb_return -> 32'h1880 | (mstatus[7] ? 32'h8 : 32'h0)
+    wb_csr_fire && wb_csr_addr == 768 -> wb_csr_new & 32'h88 | 32'h1800
+    else -> hold
+  }
+  mtvec' = priority {
+    wb_csr_fire && wb_csr_addr == 773 -> wb_csr_new & 32'hfffffffc
+    else -> hold
+  }
+  mscratch' = priority {
+    wb_csr_fire && wb_csr_addr == 832 -> wb_csr_new
+    else -> hold
+  }
+  mepc' = priority {
+    wb_trap -> wb_pc & 32'hfffffffc
+    wb_csr_fire && wb_csr_addr == 833 -> wb_csr_new & 32'hfffffffc
+    else -> hold
+  }
+  mcause' = priority {
+    wb_trap -> wb_cause
+    wb_csr_fire && wb_csr_addr == 834 -> wb_csr_new
+    else -> hold
+  }
+  mtval' = priority {
+    wb_trap -> wb_tval
+    wb_csr_fire && wb_csr_addr == 835 -> wb_csr_new
+    else -> hold
+  }
+  commit_valid' = wb_normal
+  commit_pc' = wb_normal ? wb_pc : 0
+  commit_insn' = wb_normal ? wb_insn : 0
+  commit_rd' = wb_rf_write ? wb_rd : 0
+  commit_wdata' = wb_rf_write ? wb_result : 0
+  commit_mem_addr' = wb_normal && wb_store ? wb_bus_addr : 0
+  commit_mem_wstrb' = wb_normal && wb_store ? wb_bus_mask : 0
+  commit_mem_wdata' = wb_normal && wb_store ? wb_bus_data : 0
+  trap_valid' = wb_trap
+  trap_pc' = wb_trap ? wb_pc : 0
+  trap_cause' = wb_trap ? wb_cause : 0
+  trap_tval' = wb_trap ? wb_tval : 0
+  assert @core always !(commit_valid && trap_valid) unless !rst_n
+  assert @core always rf0 == 0 unless !rst_n
+  assert @core dmem_req_valid && !dmem_req_ready |=> dmem_req_valid && dmem_req_addr == past(dmem_req_addr, 1) && dmem_req_write == past(dmem_req_write, 1) && dmem_req_wstrb == past(dmem_req_wstrb, 1) && dmem_req_wdata == past(dmem_req_wdata, 1) unless !rst_n
+  assume @core mem_req_fire |-> ##[1:8] dmem_rsp_valid unless !rst_n
+  assume @core dmem_rsp_valid && !dmem_rsp_ready |=> dmem_rsp_valid && dmem_rsp_rdata == past(dmem_rsp_rdata, 1) && dmem_rsp_err == past(dmem_rsp_err, 1) unless !rst_n
+  apply CPU_STRUCTURE {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    if_v: if_v
+    ex_v: ex_v
+    mem_v: mem_v
+    wb_v: wb_v
+    mem_sent: mem_sent
+    xdot_issued: xdot_issued
+  }
+  apply PROJECT_SCOPE {
+  }
+  apply PHYSICAL_SCOPE {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+  }
+  apply SYSTEM_WORKLOADS {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+  }
+  apply PROJECT_RESOURCES {
+  }
+  apply VERIFICATION_STRUCTURE {
+  }
+}
+
+module nebula_cpu_npu_top {
+  in clk: bit
+  in rst_n: bit
+  abstract out imem_valid: bit
+  abstract out imem_addr: u32
+  in imem_rdata: u32
+  abstract out dmem_req_valid: bit
+  in dmem_req_ready: bit
+  abstract out dmem_req_write: bit
+  abstract out dmem_req_addr: u32
+  abstract out dmem_req_wdata: u32
+  abstract out dmem_req_wstrb: u4
+  in dmem_rsp_valid: bit
+  abstract out dmem_rsp_ready: bit
+  in dmem_rsp_rdata: u32
+  in dmem_rsp_err: bit
+  abstract out commit_valid: bit
+  abstract out commit_pc: u32
+  abstract out commit_insn: u32
+  abstract out commit_rd: u5
+  abstract out commit_wdata: u32
+  abstract out commit_mem_addr: u32
+  abstract out commit_mem_wstrb: u4
+  abstract out commit_mem_wdata: u32
+  abstract out trap_valid: bit
+  abstract out trap_pc: u32
+  abstract out trap_cause: u32
+  abstract out trap_tval: u32
+  domain core = posedge clk, async reset !rst_n
+  apply TOP_INSTANCE_BINDING {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+  }
+}
+
+module CPU_NPU_VERIFICATION_CONTEXT {
+  in clk: bit
+  in rst_n: bit
+  in imem_valid: bit
+  in imem_addr: u32
+  in imem_rdata: u32
+  in dmem_req_valid: bit
+  in dmem_req_ready: bit
+  in dmem_req_write: bit
+  in dmem_req_addr: u32
+  in dmem_req_wdata: u32
+  in dmem_req_wstrb: u4
+  in dmem_rsp_valid: bit
+  in dmem_rsp_ready: bit
+  in dmem_rsp_rdata: u32
+  in dmem_rsp_err: bit
+  in commit_valid: bit
+  in commit_pc: u32
+  in commit_insn: u32
+  in commit_rd: u5
+  in commit_wdata: u32
+  in commit_mem_addr: u32
+  in commit_mem_wstrb: u4
+  in commit_mem_wdata: u32
+  in trap_valid: bit
+  in trap_pc: u32
+  in trap_cause: u32
+  in trap_tval: u32
+  in rf0: u32
+  in rf1: u32
+  in rf2: u32
+  in rf3: u32
+  in rf4: u32
+  in rf5: u32
+  in rf6: u32
+  in rf7: u32
+  in rf8: u32
+  in rf9: u32
+  in rf10: u32
+  in rf11: u32
+  in rf12: u32
+  in rf13: u32
+  in rf14: u32
+  in rf15: u32
+  in rf16: u32
+  in rf17: u32
+  in rf18: u32
+  in rf19: u32
+  in rf20: u32
+  in rf21: u32
+  in rf22: u32
+  in rf23: u32
+  in rf24: u32
+  in rf25: u32
+  in rf26: u32
+  in rf27: u32
+  in rf28: u32
+  in rf29: u32
+  in rf30: u32
+  in rf31: u32
+  in mstatus: u32
+  in mtvec: u32
+  in mscratch: u32
+  in mepc: u32
+  in mcause: u32
+  in mtval: u32
+  in if_v: bit
+  in ex_v: bit
+  in mem_v: bit
+  in wb_v: bit
+  in mem_sent: bit
+  in xdot_issued: bit
+  in delivery_source_digest: u256
+  in delivery_expected_base_digest: u256
+  in delivery_actual_base_digest: u256
+  in delivery_actual_base_bytes: u64
+  in delivery_manifest_digest: u256
+  in delivery_base_exists: bit
+  in delivery_base_path_ok: bit
+  abstract out delivery_base_bytes_equal: bit
+  out delivery_base_pass: bit
+  in v_runtime_authority_digest: u256
+  in v_launch_record_digest: u256
+  in v_launch_shell_identity: u256
+  in v_launch_environment_digest: u256
+  in v_pinned_env_receipt_digest: u256
+  in v_gcc_env_receipt_digest: u256
+  in v_pinned_env_shell_identity: u256
+  in v_gcc_env_shell_identity: u256
+  in v_verilator_identity_digest: u256
+  in v_verilator_version_report_digest: u256
+  in v_build_run_lineage_digest: u256
+  in v_common_checker_identity_digest: u256
+  in v_checker_report_digest: u256
+  in v_local_tool_history_digest: u256
+  in v_local_result_inventory_digest: u256
+  in v_coverage_population_digest: u256
+  in v_measured_common_coverage_digest: u256
+  in v_run_scope: u8
+  in v_pinned_env_source_exit: s32
+  in v_gcc_env_source_exit: s32
+  in v_verilator_major: u16
+  in v_verilator_minor: u16
+  in v_verilator_probe_exit: s32
+  in v_checker_exit: s32
+  in v_checker_result: u8
+  abstract out v_runtime_records_joined: bit
+  abstract out v_pinned_env_loaded_ok: bit
+  abstract out v_gcc_env_loaded_ok: bit
+  abstract out v_pinned_verilator_ok: bit
+  abstract out v_independent_common_execution_ok: bit
+  abstract out v_local_deviation_preserved: bit
+  out v_official_runtime_valid: bit
+  out v_common_coverage_eligible: bit
+  out v_qualified_common_result: u8
+  out v_local_common_contribution: u64
+  in v_run_digest: u256
+  in v_corpus_digest: u256
+  in v_manifest_digest: u256
+  in v_elf_digest: u256
+  in v_loader_digest: u256
+  in v_configuration_digest: u256
+  in v_generator_digest: u256
+  in v_generator_config_digest: u256
+  in v_fixed_seed_groups_digest: u256
+  in v_tier_policy_digest: u256
+  in v_program_initial_state_digest: u256
+  in v_dut_initial_memory_digest: u256
+  in v_reference_initial_memory_digest: u256
+  in v_expected_events_digest: u256
+  in v_oracle_identity_digest: u256
+  in v_dut_events_digest: u256
+  in v_bus_transactions_digest: u256
+  in v_bus_schedule_digest: u256
+  in v_directed_expectations_digest: u256
+  in v_termination_expectation_digest: u256
+  in v_dut_final_memory_digest: u256
+  in v_reference_final_memory_digest: u256
+  in v_dut_final_registers_digest: u256
+  in v_expected_final_registers_digest: u256
+  in v_result_manifest_digest: u256
+  in v_replay_report_digest: u256
+  in v_active_manifest_digest: u256
+  in v_program_id: u64
+  in v_seed: u64
+  in v_reset_epoch: u64
+  in v_normal_retirements: u64
+  in v_corpus_retirements: u64
+  in v_accepted_request_count: u64
+  in v_response_count: u64
+  in v_store_effect_count: u64
+  in v_outstanding_count: u64
+  in v_sail_steps: u64
+  in v_elapsed_cycles: u64
+  in v_fixed_long_limit: u64
+  in v_limit_at_start: u64
+  in v_limit_at_finish: u64
+  in v_event_ordinal: u64
+  in v_expected_event_ordinal: u64
+  in v_expected_pc: u32
+  in v_expected_insn: u32
+  in v_expected_wdata: u32
+  in v_expected_store_addr: u32
+  in v_expected_store_wdata: u32
+  in v_expected_trap_pc: u32
+  in v_expected_trap_cause: u32
+  in v_expected_trap_tval: u32
+  in v_category: u8
+  in v_expected_event_kind: u8
+  in v_observed_run_result: u8
+  in v_exception_mode: bit
+  in v_has_fixed_long_limit: bit
+  in v_expected_rd: u5
+  in v_expected_store_wstrb: u4
+  abstract out v_expected_independent: bit
+  abstract out v_initial_images_equal: bit
+  abstract out v_ordered_events_equal: bit
+  abstract out v_unique_events_ok: bit
+  abstract out v_memory_protocol_ok: bit
+  abstract out v_final_images_equal: bit
+  abstract out v_replay_identity_ok: bit
+  abstract out v_replay_window_ok: bit
+  abstract out v_replay_bus_context_ok: bit
+  abstract out v_replay_report_valid: bit
+  out v_current_event_equal: bit
+  abstract out v_act4_total: u64
+  abstract out v_act4_passed: u64
+  abstract out v_act4_complete_set: bit
+  out v_act4_all_pass: bit
+  abstract out v_directed_initial_state_ok: bit
+  abstract out v_directed_events_equal: bit
+  abstract out v_directed_registers_equal: bit
+  abstract out v_directed_memory_equal: bit
+  abstract out v_directed_termination_ok: bit
+  abstract out v_directed_complete: bit
+  abstract out v_directed_protocol_ok: bit
+  abstract out v_directed_template_count: u64
+  abstract out v_directed_variant_count: u64
+  out v_directed_pass: bit
+  abstract out v_program_normal_retirements: u64
+  abstract out v_valid_program_count: u64
+  abstract out v_aggregate_normal_retirements: u64
+  abstract out v_category_total_INT: u64
+  abstract out v_category_passed_INT: u64
+  abstract out v_category_failed_INT: u64
+  abstract out v_category_timeout_INT: u64
+  abstract out v_category_invalid_INT: u64
+  abstract out v_category_total_MEM: u64
+  abstract out v_category_passed_MEM: u64
+  abstract out v_category_failed_MEM: u64
+  abstract out v_category_timeout_MEM: u64
+  abstract out v_category_invalid_MEM: u64
+  abstract out v_category_total_TRAP: u64
+  abstract out v_category_passed_TRAP: u64
+  abstract out v_category_failed_TRAP: u64
+  abstract out v_category_timeout_TRAP: u64
+  abstract out v_category_invalid_TRAP: u64
+  abstract out v_run_result: u8
+  in v_pair_digest: u256
+  in v_is_dependent: bit
+  in v_has_control_flow: bit
+  in v_is_load_to_branch: bit
+  in v_is_alu_pair: bit
+  in v_response_cycles: u8
+  in v_ready_delay: u8
+  in v_N: u64
+  in v_M: u64
+  in v_H: u64
+  in v_first_commit_cycle: u64
+  in v_last_commit_cycle: u64
+  in v_producer_commit_cycle: u64
+  in v_consumer_commit_cycle: u64
+  in v_independent_first_commit_cycle: u64
+  in v_independent_last_commit_cycle: u64
+  in v_independent_producer_commit_cycle: u64
+  in v_independent_consumer_commit_cycle: u64
+  abstract out v_cycle_function_ok: bit
+  abstract out v_cycle_protocol_ok: bit
+  abstract out v_cycle_final_images_equal: bit
+  out v_span_ok: bit
+  out v_dependency_delta_ok: bit
+  abstract out v_cycle_run_result: u8
+  abstract out v_bus_pass: bit
+  abstract out v_flush_pass: bit
+  abstract out v_reset_pass: bit
+  abstract out v_boundaries_pass: bit
+  abstract out v_public_smoke_pass: bit
+  in v_manifest_at_start_digest: u256
+  in v_manifest_at_finish_digest: u256
+  in v_limit_history_digest: u256
+  abstract out v_limit_immutable: bit
+  out v_derived_limit: u64
+  out v_timeout_arithmetic_ok: bit
+  out v_effective_limit: u64
+  out v_limit_endpoints_ok: bit
+  out v_timeout: bit
+  out v_timeout_result: u8
+  in v_reference_execution_report_digest: u256
+  in v_mutation_report_digest: u256
+  in v_scope_report_digest: u256
+  in v_source_lock_digest: u256
+  abstract out v_reproducibility_pass: bit
+  abstract out v_release_pass: bit
+  in score_policy_digest: u256
+  in score_version_digest: u256
+  in score_safety_report_digest: u256
+  in score_run_set_digest: u256
+  in group_id: u8
+  in group_results_digest: u256
+  in group_total: u64
+  in group_passed: u64
+  in group_failed: u64
+  in group_timeout: u64
+  in group_invalid: u64
+  in group_safety_defect: bit
+  in group_raw_before_safety_num: u64
+  in raw_den: u64
+  in cycle_results_digest: u256
+  in cycle_pass_mask: u22
+  in cycle_fail_mask: u22
+  in cycle_total: u8
+  in cycle_passed: u8
+  in cycle_safety_defect: bit
+  in score_policy_resolved: bit
+  in ppa_measurements_digest: u256
+  in time_measurements_digest: u256
+  in ppa_rating_num: u64
+  in ppa_rating_den: u64
+  in time_rating_num: u64
+  in time_rating_den: u64
+  abstract out old_raw_num: u64
+  abstract out score_inputs_complete: bit
+  abstract out score_report_digest: u256
+  out group_raw_after_safety_num: u64
+  out cycle_raw_num: u64
+  out functional_raw_num: u64
+  out old_normalized_num: u64
+  out cycle_normalized_num: u64
+  out functional_normalized_num: u64
+  out normalized_den: u64
+  out score_final_valid: bit
+  out ppa_enabled: bit
+  out time_enabled: bit
+  out ppa_awarded_num: u64
+  out time_awarded_num: u64
+  out ppa_awarded_den: u64
+  out time_awarded_den: u64
+  out cycle_mask_passed: u8
+  out score_count_fields_ok: bit
+  v_official_runtime_valid = v_runtime_records_joined && v_pinned_env_loaded_ok && v_gcc_env_loaded_ok && v_pinned_verilator_ok && v_independent_common_execution_ok && v_local_deviation_preserved && v_run_scope == 1
+  v_qualified_common_result = !v_official_runtime_valid ? 4 : v_checker_result
+  v_common_coverage_eligible = v_official_runtime_valid && v_local_deviation_preserved
+  v_local_common_contribution = 0
+  delivery_base_pass = delivery_base_exists && delivery_base_path_ok && delivery_source_digest == 256'hba307c2b5ee170ee22b621bd80e0df4196f7fbceeba329ca4e7eac8ad7ccd33b && delivery_expected_base_digest == 256'h1021e4b88446ed12c7b6a3cc6f46847f16a44c70a47660fff24f5f91ca778958 && delivery_actual_base_digest == delivery_expected_base_digest && delivery_actual_base_bytes == 6930 && delivery_base_bytes_equal
+  v_current_event_equal = v_event_ordinal == v_expected_event_ordinal && (v_expected_event_kind == 1 && commit_valid && !trap_valid && commit_pc == v_expected_pc && commit_insn == v_expected_insn && commit_rd == v_expected_rd && commit_wdata == v_expected_wdata && commit_mem_addr == v_expected_store_addr && commit_mem_wstrb == v_expected_store_wstrb && commit_mem_wdata == v_expected_store_wdata || v_expected_event_kind == 2 && trap_valid && !commit_valid && trap_pc == v_expected_trap_pc && trap_cause == v_expected_trap_cause && trap_tval == v_expected_trap_tval)
+  v_act4_all_pass = v_official_runtime_valid && v_common_coverage_eligible && v_act4_total == 45 && v_act4_passed == v_act4_total && v_act4_complete_set
+  v_directed_pass = v_directed_initial_state_ok && v_directed_events_equal && v_directed_registers_equal && v_directed_memory_equal && v_directed_termination_ok && v_directed_complete && v_directed_protocol_ok && !v_timeout
+  v_span_ok = v_has_control_flow || v_last_commit_cycle >= v_first_commit_cycle && zext(v_last_commit_cycle, 128) - zext(v_first_commit_cycle, 128) + 1 <= zext(v_N, 128) + zext(v_M, 128) * (zext(v_response_cycles, 128) + zext(v_ready_delay, 128)) + zext(v_H, 128)
+  v_dependency_delta_ok = !v_is_dependent || v_consumer_commit_cycle >= v_producer_commit_cycle && v_independent_consumer_commit_cycle >= v_independent_producer_commit_cycle && zext(v_consumer_commit_cycle, 128) - zext(v_producer_commit_cycle, 128) <= zext(v_independent_consumer_commit_cycle, 128) - zext(v_independent_producer_commit_cycle, 128) + (v_is_alu_pair ? 128'd0 : 128'd1) && (v_is_load_to_branch || v_last_commit_cycle >= v_first_commit_cycle && v_independent_last_commit_cycle >= v_independent_first_commit_cycle && zext(v_last_commit_cycle, 128) - zext(v_first_commit_cycle, 128) + 1 <= zext(v_independent_last_commit_cycle, 128) - zext(v_independent_first_commit_cycle, 128) + 1 + (v_is_alu_pair ? 128'd0 : 128'd1))
+  v_derived_limit = trunc(zext(v_sail_steps, 128) * 100 + 10000, 64)
+  v_timeout_arithmetic_ok = zext(v_sail_steps, 128) * 100 + 10000 <= 128'hffffffffffffffff
+  v_effective_limit = v_has_fixed_long_limit ? v_fixed_long_limit : v_derived_limit
+  v_limit_endpoints_ok = v_manifest_digest == v_manifest_at_start_digest && v_manifest_digest == v_manifest_at_finish_digest && v_manifest_digest == v_active_manifest_digest && v_limit_at_start == v_effective_limit && v_limit_at_finish == v_effective_limit
+  v_timeout = v_elapsed_cycles > v_effective_limit
+  v_timeout_result = !v_timeout_arithmetic_ok || !v_limit_immutable ? 4 : v_timeout ? 3 : v_observed_run_result
+  group_raw_after_safety_num = group_safety_defect ? 0 : group_raw_before_safety_num
+  cycle_raw_num = cycle_safety_defect ? 0 : cycle_passed == 22 ? raw_den * 15 : cycle_passed >= 11 ? raw_den * 15 / 2 : 0
+  functional_raw_num = old_raw_num + cycle_raw_num
+  old_normalized_num = old_raw_num * 2
+  cycle_normalized_num = cycle_raw_num * 2
+  functional_normalized_num = functional_raw_num * 2
+  normalized_den = raw_den * 3
+  score_final_valid = score_policy_resolved && score_inputs_complete
+  ppa_enabled = score_final_valid && functional_normalized_num == normalized_den * 50
+  time_enabled = score_final_valid && functional_normalized_num == normalized_den * 50
+  ppa_awarded_num = ppa_enabled ? ppa_rating_num : 0
+  time_awarded_num = time_enabled ? time_rating_num : 0
+  ppa_awarded_den = ppa_rating_den
+  time_awarded_den = time_rating_den
+  cycle_mask_passed = (cycle_pass_mask[0] ? 8'd1 : 8'd0) + (cycle_pass_mask[1] ? 8'd1 : 8'd0) + (cycle_pass_mask[2] ? 8'd1 : 8'd0) + (cycle_pass_mask[3] ? 8'd1 : 8'd0) + (cycle_pass_mask[4] ? 8'd1 : 8'd0) + (cycle_pass_mask[5] ? 8'd1 : 8'd0) + (cycle_pass_mask[6] ? 8'd1 : 8'd0) + (cycle_pass_mask[7] ? 8'd1 : 8'd0) + (cycle_pass_mask[8] ? 8'd1 : 8'd0) + (cycle_pass_mask[9] ? 8'd1 : 8'd0) + (cycle_pass_mask[10] ? 8'd1 : 8'd0) + (cycle_pass_mask[11] ? 8'd1 : 8'd0) + (cycle_pass_mask[12] ? 8'd1 : 8'd0) + (cycle_pass_mask[13] ? 8'd1 : 8'd0) + (cycle_pass_mask[14] ? 8'd1 : 8'd0) + (cycle_pass_mask[15] ? 8'd1 : 8'd0) + (cycle_pass_mask[16] ? 8'd1 : 8'd0) + (cycle_pass_mask[17] ? 8'd1 : 8'd0) + (cycle_pass_mask[18] ? 8'd1 : 8'd0) + (cycle_pass_mask[19] ? 8'd1 : 8'd0) + (cycle_pass_mask[20] ? 8'd1 : 8'd0) + (cycle_pass_mask[21] ? 8'd1 : 8'd0)
+  score_count_fields_ok = cycle_total == 22 && cycle_passed <= 22 && cycle_passed == cycle_mask_passed && (cycle_pass_mask & cycle_fail_mask) == 22'h000000 && (cycle_pass_mask | cycle_fail_mask) == 22'h3fffff && group_passed <= group_total && zext(group_passed, 128) + zext(group_failed, 128) + zext(group_timeout, 128) + zext(group_invalid, 128) == zext(group_total, 128) && raw_den > 0 && raw_den % 10 == 0
+  const ACT4_SCORE_WEIGHT: u8 = 8
+  const LOCKED_ISA_REVISION: u256 = 256'h33a4387f6101ee9c8bee65558ceb3a8be626e7a0cb3acdf86ea003d77415a7d5
+  const LOCKED_ACT4_IDENTITY: u256 = 256'hfa6807e302541ab7257207d2525ad0c955f719e8ef750451fec106f5a9bf8788
+  const APPROVED_SCORE_POLICY_DIGEST: u256 = 256'h6a4f7a55c8d9e679eb95345e4b829d533262100eb5ac2c374eb1358fd1bf5f2d
+  const REFERENCE_IDENTITIES_DIGEST: u256 = 256'he78e94a003e12de27d8db3f5d140d459b25c059af78fb308126cd48343380648
+  const PUBLISHED_ELF_MANIFEST_DIGEST: u256 = 256'h724532745cee6f8964f6eddcc72827b6df05e9d3b5248f0af6ca00716cb6db3b
+  const PUBLISHED_ORACLE_MANIFEST_DIGEST: u256 = 256'h7660059f4133389bec3781e79cfda794a06014567558b905d94b9e164b5a77e5
+  const ELF_GENERATION_UDB_DIGEST: u256 = 256'he926c3b25949ead6b85fc7fb883b85d39d9d01d26f87c8d246ca86bbe62a49a6
+  const BENCHMARK_FROZEN_UDB_DIGEST: u256 = 256'h665f7248e24afce4e513181fe01c83cf0b084d0ab92f3d00660cd1eacc481ba9
+  const SAIL_CONFIG_FILE_DIGEST: u256 = 256'hd69bb1e3c66ef2e4d4658b28dc908d60f6e9233a1130994b6afede26f021714d
+  const ORACLE_CONFIG_IDENTITY: u256 = 256'h91d9f183599ac72e939b1bc8530bb2d5590ead18e79923489860e06bde27b198
+  apply EXTERNAL_MEMORY {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+  }
+  apply CPU_EDGE_LATENCY {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    if_v: if_v
+    ex_v: ex_v
+    mem_v: mem_v
+    wb_v: wb_v
+    mem_sent: mem_sent
+    xdot_issued: xdot_issued
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    pair_digest: v_pair_digest
+    is_dependent: v_is_dependent
+    has_control_flow: v_has_control_flow
+    is_load_to_branch: v_is_load_to_branch
+    is_alu_pair: v_is_alu_pair
+    response_cycles: v_response_cycles
+    ready_delay: v_ready_delay
+    N: v_N
+    M: v_M
+    H: v_H
+    first_commit_cycle: v_first_commit_cycle
+    last_commit_cycle: v_last_commit_cycle
+    producer_commit_cycle: v_producer_commit_cycle
+    consumer_commit_cycle: v_consumer_commit_cycle
+    independent_first_commit_cycle: v_independent_first_commit_cycle
+    independent_last_commit_cycle: v_independent_last_commit_cycle
+    independent_producer_commit_cycle: v_independent_producer_commit_cycle
+    independent_consumer_commit_cycle: v_independent_consumer_commit_cycle
+    cycle_function_ok: v_cycle_function_ok
+    cycle_protocol_ok: v_cycle_protocol_ok
+    cycle_final_images_equal: v_cycle_final_images_equal
+    span_ok: v_span_ok
+    dependency_delta_ok: v_dependency_delta_ok
+    cycle_run_result: v_cycle_run_result
+  }
+  apply CPU_MEMORY_BUDGET {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    pair_digest: v_pair_digest
+    is_dependent: v_is_dependent
+    has_control_flow: v_has_control_flow
+    is_load_to_branch: v_is_load_to_branch
+    is_alu_pair: v_is_alu_pair
+    response_cycles: v_response_cycles
+    ready_delay: v_ready_delay
+    N: v_N
+    M: v_M
+    H: v_H
+    first_commit_cycle: v_first_commit_cycle
+    last_commit_cycle: v_last_commit_cycle
+    producer_commit_cycle: v_producer_commit_cycle
+    consumer_commit_cycle: v_consumer_commit_cycle
+    independent_first_commit_cycle: v_independent_first_commit_cycle
+    independent_last_commit_cycle: v_independent_last_commit_cycle
+    independent_producer_commit_cycle: v_independent_producer_commit_cycle
+    independent_consumer_commit_cycle: v_independent_consumer_commit_cycle
+    cycle_function_ok: v_cycle_function_ok
+    cycle_protocol_ok: v_cycle_protocol_ok
+    cycle_final_images_equal: v_cycle_final_images_equal
+    span_ok: v_span_ok
+    dependency_delta_ok: v_dependency_delta_ok
+    cycle_run_result: v_cycle_run_result
+  }
+  apply SPEC_AUTHORITY {
+    frozen_source_digest: delivery_source_digest
+    frozen_base_digest: delivery_expected_base_digest
+    delivered_file_digest: delivery_actual_base_digest
+    delivered_file_bytes: delivery_actual_base_bytes
+    delivery_manifest_digest: delivery_manifest_digest
+    delivered_file_exists: delivery_base_exists
+    correct_delivery_path: delivery_base_path_ok
+    base_bytes_equal: delivery_base_bytes_equal
+    base_delivery_pass: delivery_base_pass
+  }
+  apply VERIFICATION_CYCLES {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    pair_digest: v_pair_digest
+    is_dependent: v_is_dependent
+    has_control_flow: v_has_control_flow
+    is_load_to_branch: v_is_load_to_branch
+    is_alu_pair: v_is_alu_pair
+    response_cycles: v_response_cycles
+    ready_delay: v_ready_delay
+    N: v_N
+    M: v_M
+    H: v_H
+    first_commit_cycle: v_first_commit_cycle
+    last_commit_cycle: v_last_commit_cycle
+    producer_commit_cycle: v_producer_commit_cycle
+    consumer_commit_cycle: v_consumer_commit_cycle
+    independent_first_commit_cycle: v_independent_first_commit_cycle
+    independent_last_commit_cycle: v_independent_last_commit_cycle
+    independent_producer_commit_cycle: v_independent_producer_commit_cycle
+    independent_consumer_commit_cycle: v_independent_consumer_commit_cycle
+    cycle_function_ok: v_cycle_function_ok
+    cycle_protocol_ok: v_cycle_protocol_ok
+    cycle_final_images_equal: v_cycle_final_images_equal
+    span_ok: v_span_ok
+    dependency_delta_ok: v_dependency_delta_ok
+    cycle_run_result: v_cycle_run_result
+    official_runtime_valid: v_official_runtime_valid
+    qualified_common_result: v_qualified_common_result
+    common_coverage_eligible: v_common_coverage_eligible
+    checker_report_digest: v_checker_report_digest
+    coverage_population_digest: v_coverage_population_digest
+    measured_common_coverage_digest: v_measured_common_coverage_digest
+    local_common_contribution: v_local_common_contribution
+  }
+  apply VERIFICATION_REPRODUCIBILITY {
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    reference_execution_report_digest: v_reference_execution_report_digest
+    mutation_report_digest: v_mutation_report_digest
+    scope_report_digest: v_scope_report_digest
+    source_lock_digest: v_source_lock_digest
+    reproducibility_pass: v_reproducibility_pass
+    replay_report_valid: v_replay_report_valid
+    published_identities_digest: REFERENCE_IDENTITIES_DIGEST
+    published_elf_manifest_digest: PUBLISHED_ELF_MANIFEST_DIGEST
+    published_oracle_manifest_digest: PUBLISHED_ORACLE_MANIFEST_DIGEST
+    elf_generation_udb_digest: ELF_GENERATION_UDB_DIGEST
+    benchmark_frozen_udb_digest: BENCHMARK_FROZEN_UDB_DIGEST
+    sail_config_file_digest: SAIL_CONFIG_FILE_DIGEST
+    oracle_config_identity: ORACLE_CONFIG_IDENTITY
+    runtime_authority_digest: v_runtime_authority_digest
+    launch_record_digest: v_launch_record_digest
+    launch_shell_identity: v_launch_shell_identity
+    launch_environment_digest: v_launch_environment_digest
+    pinned_env_receipt_digest: v_pinned_env_receipt_digest
+    gcc_env_receipt_digest: v_gcc_env_receipt_digest
+    pinned_env_shell_identity: v_pinned_env_shell_identity
+    gcc_env_shell_identity: v_gcc_env_shell_identity
+    verilator_identity_digest: v_verilator_identity_digest
+    verilator_version_report_digest: v_verilator_version_report_digest
+    build_run_lineage_digest: v_build_run_lineage_digest
+    common_checker_identity_digest: v_common_checker_identity_digest
+    checker_report_digest: v_checker_report_digest
+    local_tool_history_digest: v_local_tool_history_digest
+    local_result_inventory_digest: v_local_result_inventory_digest
+    coverage_population_digest: v_coverage_population_digest
+    measured_common_coverage_digest: v_measured_common_coverage_digest
+    run_scope: v_run_scope
+    pinned_env_source_exit: v_pinned_env_source_exit
+    gcc_env_source_exit: v_gcc_env_source_exit
+    verilator_major: v_verilator_major
+    verilator_minor: v_verilator_minor
+    verilator_probe_exit: v_verilator_probe_exit
+    checker_exit: v_checker_exit
+    checker_result: v_checker_result
+    runtime_records_joined: v_runtime_records_joined
+    pinned_env_loaded_ok: v_pinned_env_loaded_ok
+    gcc_env_loaded_ok: v_gcc_env_loaded_ok
+    pinned_verilator_ok: v_pinned_verilator_ok
+    independent_common_execution_ok: v_independent_common_execution_ok
+    local_deviation_preserved: v_local_deviation_preserved
+    official_runtime_valid: v_official_runtime_valid
+    common_coverage_eligible: v_common_coverage_eligible
+    qualified_common_result: v_qualified_common_result
+    local_common_contribution: v_local_common_contribution
+  }
+  apply VERIFICATION_SCORING {
+    result_manifest_digest: v_result_manifest_digest
+    score_policy_digest: score_policy_digest
+    score_version_digest: score_version_digest
+    safety_report_digest: score_safety_report_digest
+    tier_policy_digest: v_tier_policy_digest
+    score_run_set_digest: score_run_set_digest
+    group_id: group_id
+    group_results_digest: group_results_digest
+    group_total: group_total
+    group_passed: group_passed
+    group_failed: group_failed
+    group_timeout: group_timeout
+    group_invalid: group_invalid
+    group_safety_defect: group_safety_defect
+    group_raw_before_safety_num: group_raw_before_safety_num
+    raw_den: raw_den
+    cycle_results_digest: cycle_results_digest
+    cycle_pass_mask: cycle_pass_mask
+    cycle_fail_mask: cycle_fail_mask
+    cycle_total: cycle_total
+    cycle_passed: cycle_passed
+    cycle_safety_defect: cycle_safety_defect
+    score_policy_resolved: score_policy_resolved
+    ppa_measurements_digest: ppa_measurements_digest
+    time_measurements_digest: time_measurements_digest
+    ppa_rating_num: ppa_rating_num
+    ppa_rating_den: ppa_rating_den
+    time_rating_num: time_rating_num
+    time_rating_den: time_rating_den
+    category_passed_INT: v_category_passed_INT
+    category_total_INT: v_category_total_INT
+    category_passed_MEM: v_category_passed_MEM
+    category_total_MEM: v_category_total_MEM
+    category_passed_TRAP: v_category_passed_TRAP
+    category_total_TRAP: v_category_total_TRAP
+    old_raw_num: old_raw_num
+    score_inputs_complete: score_inputs_complete
+    score_report_digest: score_report_digest
+    group_raw_after_safety_num: group_raw_after_safety_num
+    cycle_raw_num: cycle_raw_num
+    functional_raw_num: functional_raw_num
+    old_normalized_num: old_normalized_num
+    cycle_normalized_num: cycle_normalized_num
+    functional_normalized_num: functional_normalized_num
+    normalized_den: normalized_den
+    score_final_valid: score_final_valid
+    ppa_enabled: ppa_enabled
+    time_enabled: time_enabled
+    ppa_awarded_num: ppa_awarded_num
+    time_awarded_num: time_awarded_num
+    ppa_awarded_den: ppa_awarded_den
+    time_awarded_den: time_awarded_den
+    cycle_mask_passed: cycle_mask_passed
+    score_count_fields_ok: score_count_fields_ok
+    approved_policy_digest: APPROVED_SCORE_POLICY_DIGEST
+    official_runtime_valid: v_official_runtime_valid
+    qualified_common_result: v_qualified_common_result
+    common_coverage_eligible: v_common_coverage_eligible
+    checker_report_digest: v_checker_report_digest
+    coverage_population_digest: v_coverage_population_digest
+    measured_common_coverage_digest: v_measured_common_coverage_digest
+    local_common_contribution: v_local_common_contribution
+  }
+  apply VERIFICATION_FUNCTIONAL {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    act4_total: v_act4_total
+    act4_passed: v_act4_passed
+    act4_complete_set: v_act4_complete_set
+    act4_all_pass: v_act4_all_pass
+    official_runtime_valid: v_official_runtime_valid
+    qualified_common_result: v_qualified_common_result
+    common_coverage_eligible: v_common_coverage_eligible
+    checker_report_digest: v_checker_report_digest
+    coverage_population_digest: v_coverage_population_digest
+    measured_common_coverage_digest: v_measured_common_coverage_digest
+    local_common_contribution: v_local_common_contribution
+  }
+  apply VERIFICATION_DIRECTED {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    directed_initial_state_ok: v_directed_initial_state_ok
+    directed_events_equal: v_directed_events_equal
+    directed_registers_equal: v_directed_registers_equal
+    directed_memory_equal: v_directed_memory_equal
+    directed_termination_ok: v_directed_termination_ok
+    directed_complete: v_directed_complete
+    directed_protocol_ok: v_directed_protocol_ok
+    directed_template_count: v_directed_template_count
+    directed_variant_count: v_directed_variant_count
+    directed_pass: v_directed_pass
+  }
+  apply VERIFICATION_DIFFERENTIAL {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    program_normal_retirements: v_program_normal_retirements
+    valid_program_count: v_valid_program_count
+    aggregate_normal_retirements: v_aggregate_normal_retirements
+    category_total_INT: v_category_total_INT
+    category_passed_INT: v_category_passed_INT
+    category_failed_INT: v_category_failed_INT
+    category_timeout_INT: v_category_timeout_INT
+    category_invalid_INT: v_category_invalid_INT
+    category_total_MEM: v_category_total_MEM
+    category_passed_MEM: v_category_passed_MEM
+    category_failed_MEM: v_category_failed_MEM
+    category_timeout_MEM: v_category_timeout_MEM
+    category_invalid_MEM: v_category_invalid_MEM
+    category_total_TRAP: v_category_total_TRAP
+    category_passed_TRAP: v_category_passed_TRAP
+    category_failed_TRAP: v_category_failed_TRAP
+    category_timeout_TRAP: v_category_timeout_TRAP
+    category_invalid_TRAP: v_category_invalid_TRAP
+    run_result: v_run_result
+    official_runtime_valid: v_official_runtime_valid
+    qualified_common_result: v_qualified_common_result
+    common_coverage_eligible: v_common_coverage_eligible
+    checker_report_digest: v_checker_report_digest
+    coverage_population_digest: v_coverage_population_digest
+    measured_common_coverage_digest: v_measured_common_coverage_digest
+    local_common_contribution: v_local_common_contribution
+  }
+  apply VERIFICATION_BUS {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    bus_pass: v_bus_pass
+  }
+  apply VERIFICATION_FLUSH {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    flush_pass: v_flush_pass
+  }
+  apply VERIFICATION_RESET {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    reset_pass: v_reset_pass
+  }
+  apply VERIFICATION_BOUNDARIES {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    boundaries_pass: v_boundaries_pass
+  }
+  apply VERIFICATION_TIMEOUTS {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    manifest_at_start_digest: v_manifest_at_start_digest
+    manifest_at_finish_digest: v_manifest_at_finish_digest
+    limit_history_digest: v_limit_history_digest
+    limit_immutable: v_limit_immutable
+    derived_limit: v_derived_limit
+    timeout_arithmetic_ok: v_timeout_arithmetic_ok
+    effective_limit: v_effective_limit
+    limit_endpoints_ok: v_limit_endpoints_ok
+    timeout: v_timeout
+    timeout_result: v_timeout_result
+  }
+  apply VERIFICATION_RELEASE {
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    reference_execution_report_digest: v_reference_execution_report_digest
+    mutation_report_digest: v_mutation_report_digest
+    scope_report_digest: v_scope_report_digest
+    source_lock_digest: v_source_lock_digest
+    release_pass: v_release_pass
+    replay_report_valid: v_replay_report_valid
+  }
+  apply VERIFICATION_PUBLIC_SMOKE {
+    clk: clk
+    rst_n: rst_n
+    imem_valid: imem_valid
+    imem_addr: imem_addr
+    imem_rdata: imem_rdata
+    dmem_req_valid: dmem_req_valid
+    dmem_req_ready: dmem_req_ready
+    dmem_req_write: dmem_req_write
+    dmem_req_addr: dmem_req_addr
+    dmem_req_wdata: dmem_req_wdata
+    dmem_req_wstrb: dmem_req_wstrb
+    dmem_rsp_valid: dmem_rsp_valid
+    dmem_rsp_ready: dmem_rsp_ready
+    dmem_rsp_rdata: dmem_rsp_rdata
+    dmem_rsp_err: dmem_rsp_err
+    commit_valid: commit_valid
+    commit_pc: commit_pc
+    commit_insn: commit_insn
+    commit_rd: commit_rd
+    commit_wdata: commit_wdata
+    commit_mem_addr: commit_mem_addr
+    commit_mem_wstrb: commit_mem_wstrb
+    commit_mem_wdata: commit_mem_wdata
+    trap_valid: trap_valid
+    trap_pc: trap_pc
+    trap_cause: trap_cause
+    trap_tval: trap_tval
+    rf0: rf0
+    rf1: rf1
+    rf2: rf2
+    rf3: rf3
+    rf4: rf4
+    rf5: rf5
+    rf6: rf6
+    rf7: rf7
+    rf8: rf8
+    rf9: rf9
+    rf10: rf10
+    rf11: rf11
+    rf12: rf12
+    rf13: rf13
+    rf14: rf14
+    rf15: rf15
+    rf16: rf16
+    rf17: rf17
+    rf18: rf18
+    rf19: rf19
+    rf20: rf20
+    rf21: rf21
+    rf22: rf22
+    rf23: rf23
+    rf24: rf24
+    rf25: rf25
+    rf26: rf26
+    rf27: rf27
+    rf28: rf28
+    rf29: rf29
+    rf30: rf30
+    rf31: rf31
+    mstatus: mstatus
+    mtvec: mtvec
+    mscratch: mscratch
+    mepc: mepc
+    mcause: mcause
+    mtval: mtval
+    run_digest: v_run_digest
+    corpus_digest: v_corpus_digest
+    manifest_digest: v_manifest_digest
+    elf_digest: v_elf_digest
+    loader_digest: v_loader_digest
+    configuration_digest: v_configuration_digest
+    generator_digest: v_generator_digest
+    generator_config_digest: v_generator_config_digest
+    fixed_seed_groups_digest: v_fixed_seed_groups_digest
+    tier_policy_digest: v_tier_policy_digest
+    program_initial_state_digest: v_program_initial_state_digest
+    dut_initial_memory_digest: v_dut_initial_memory_digest
+    reference_initial_memory_digest: v_reference_initial_memory_digest
+    expected_events_digest: v_expected_events_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    dut_events_digest: v_dut_events_digest
+    bus_transactions_digest: v_bus_transactions_digest
+    bus_schedule_digest: v_bus_schedule_digest
+    directed_expectations_digest: v_directed_expectations_digest
+    termination_expectation_digest: v_termination_expectation_digest
+    dut_final_memory_digest: v_dut_final_memory_digest
+    reference_final_memory_digest: v_reference_final_memory_digest
+    dut_final_registers_digest: v_dut_final_registers_digest
+    expected_final_registers_digest: v_expected_final_registers_digest
+    result_manifest_digest: v_result_manifest_digest
+    replay_report_digest: v_replay_report_digest
+    active_manifest_digest: v_active_manifest_digest
+    program_id: v_program_id
+    seed: v_seed
+    reset_epoch: v_reset_epoch
+    normal_retirements: v_normal_retirements
+    corpus_retirements: v_corpus_retirements
+    accepted_request_count: v_accepted_request_count
+    response_count: v_response_count
+    store_effect_count: v_store_effect_count
+    outstanding_count: v_outstanding_count
+    sail_steps: v_sail_steps
+    elapsed_cycles: v_elapsed_cycles
+    fixed_long_limit: v_fixed_long_limit
+    limit_at_start: v_limit_at_start
+    limit_at_finish: v_limit_at_finish
+    event_ordinal: v_event_ordinal
+    expected_event_ordinal: v_expected_event_ordinal
+    expected_pc: v_expected_pc
+    expected_insn: v_expected_insn
+    expected_wdata: v_expected_wdata
+    expected_store_addr: v_expected_store_addr
+    expected_store_wdata: v_expected_store_wdata
+    expected_trap_pc: v_expected_trap_pc
+    expected_trap_cause: v_expected_trap_cause
+    expected_trap_tval: v_expected_trap_tval
+    category: v_category
+    expected_event_kind: v_expected_event_kind
+    observed_run_result: v_observed_run_result
+    exception_mode: v_exception_mode
+    has_fixed_long_limit: v_has_fixed_long_limit
+    expected_rd: v_expected_rd
+    expected_store_wstrb: v_expected_store_wstrb
+    expected_independent: v_expected_independent
+    initial_images_equal: v_initial_images_equal
+    ordered_events_equal: v_ordered_events_equal
+    unique_events_ok: v_unique_events_ok
+    memory_protocol_ok: v_memory_protocol_ok
+    final_images_equal: v_final_images_equal
+    replay_identity_ok: v_replay_identity_ok
+    replay_window_ok: v_replay_window_ok
+    replay_bus_context_ok: v_replay_bus_context_ok
+    replay_report_valid: v_replay_report_valid
+    current_event_equal: v_current_event_equal
+    public_smoke_pass: v_public_smoke_pass
+  }
+  apply OPEN_ACT4_SCORE_WEIGHT {
+    score_policy_digest: score_policy_digest
+    score_version_digest: score_version_digest
+    result_manifest_digest: v_result_manifest_digest
+    score_run_set_digest: score_run_set_digest
+    functional_raw_num: functional_raw_num
+    functional_normalized_num: functional_normalized_num
+    normalized_den: normalized_den
+    score_policy_resolved: score_policy_resolved
+    score_final_valid: score_final_valid
+    ppa_enabled: ppa_enabled
+    time_enabled: time_enabled
+    score_weight: ACT4_SCORE_WEIGHT
+    approved_policy_digest: APPROVED_SCORE_POLICY_DIGEST
+  }
+  apply OPEN_LOCKED_REFERENCE_IDENTITY {
+    manifest_digest: v_manifest_digest
+    configuration_digest: v_configuration_digest
+    source_lock_digest: v_source_lock_digest
+    oracle_identity_digest: v_oracle_identity_digest
+    isa_revision: LOCKED_ISA_REVISION
+    act4_identity: LOCKED_ACT4_IDENTITY
+    published_identities_digest: REFERENCE_IDENTITIES_DIGEST
+    published_elf_manifest_digest: PUBLISHED_ELF_MANIFEST_DIGEST
+    published_oracle_manifest_digest: PUBLISHED_ORACLE_MANIFEST_DIGEST
+    elf_generation_udb_digest: ELF_GENERATION_UDB_DIGEST
+    benchmark_frozen_udb_digest: BENCHMARK_FROZEN_UDB_DIGEST
+    sail_config_file_digest: SAIL_CONFIG_FILE_DIGEST
+    oracle_config_identity: ORACLE_CONFIG_IDENTITY
+  }
+}

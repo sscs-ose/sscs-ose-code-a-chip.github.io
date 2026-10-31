@@ -1,0 +1,167 @@
+[
+  {
+    "name": "klayout_version",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-v"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/klayout_version.log"
+  },
+  {
+    "name": "openroad_export",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/openroad",
+      "-no_init",
+      "-exit",
+      "-threads",
+      "2",
+      "build/gds/export.tcl"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/openroad_export.log"
+  },
+  {
+    "name": "stream_out",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-rd",
+      "design_name=nebula_cpu_npu_top",
+      "-rd",
+      "in_def=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/final.def",
+      "-rd",
+      "in_files=/home/asic03/project/user37/CodeAChip_Baselines/CPU_NPU_before_standard_flow_20261013/submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/gds/sky130_fd_sc_hd.gds",
+      "-rd",
+      "seal_file=",
+      "-rd",
+      "out_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/nebula_cpu_npu_top.gds",
+      "-rd",
+      "tech_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/streamout.lyt",
+      "-rd",
+      "layer_map=",
+      "-r",
+      "/home/asic03/project/user37/CodeAChip_Baselines/CPU_NPU_before_standard_flow_20261013/submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/util/def2stream.py"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/stream_out.log"
+  },
+  {
+    "name": "inspect_gds",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-r",
+      "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/inspect_gds.py"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/inspect_gds.log"
+  },
+  {
+    "name": "drc",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-rd",
+      "in_gds=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/nebula_cpu_npu_top.gds",
+      "-rd",
+      "report_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/drc.lyrdb",
+      "-r",
+      "/home/asic03/project/user37/CodeAChip_Baselines/CPU_NPU_before_standard_flow_20261013/submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/drc/sky130hd.lydrc"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/drc.log"
+  },
+  {
+    "name": "negative_drc",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-rd",
+      "in_gds=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/negative/drc_width.gds",
+      "-rd",
+      "report_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/negative/drc_width.lyrdb",
+      "-r",
+      "/home/asic03/project/user37/CodeAChip_Baselines/CPU_NPU_before_standard_flow_20261013/submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/drc/sky130hd.lydrc"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/negative_drc.log"
+  },
+  {
+    "name": "lvs",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-rd",
+      "in_gds=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/nebula_cpu_npu_top.gds",
+      "-rd",
+      "cdl_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/pnr/objects/6_final_concat.cdl",
+      "-rd",
+      "top_cell=nebula_cpu_npu_top",
+      "-rd",
+      "target_netlist=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/extracted.cir",
+      "-rd",
+      "report_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/lvs.lvsdb",
+      "-r",
+      "/home/asic03/project/user37/CodeAChip_Baselines/CPU_NPU_before_standard_flow_20261013/submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/lvs/sky130hd.lylvs"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/lvs.log"
+  },
+  {
+    "name": "negative_lvs",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-rd",
+      "in_gds=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/negative/lvs_missing_gate.gds",
+      "-rd",
+      "cdl_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/pnr/objects/6_final_concat.cdl",
+      "-rd",
+      "top_cell=nebula_cpu_npu_top",
+      "-rd",
+      "target_netlist=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/negative/extracted.cir",
+      "-rd",
+      "report_file=/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/negative/lvs_missing_gate.lvsdb",
+      "-r",
+      "/home/asic03/project/user37/CodeAChip_Baselines/CPU_NPU_before_standard_flow_20261013/submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/lvs/sky130hd.lylvs"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/negative_lvs.log"
+  },
+  {
+    "name": "read_checks",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-r",
+      "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/build/gds/read_checks.py"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/read_checks.log"
+  },
+  {
+    "name": "compare_geometry",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-r",
+      "build/gds/compare_geometry.py"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/compare_geometry.log",
+    "execution_origin": "Independent reader/probe executed during deck run; no layout mutation"
+  },
+  {
+    "name": "identity_probe",
+    "argv": [
+      "/tmp/chipnebula-pinned-tools/bin/klayout",
+      "-b",
+      "-r",
+      "build/gds/identity_probe.py"
+    ],
+    "exit_code": 0,
+    "log": "build/gds/identity_probe.log",
+    "execution_origin": "Independent reader/probe executed during deck run; no layout mutation"
+  }
+]

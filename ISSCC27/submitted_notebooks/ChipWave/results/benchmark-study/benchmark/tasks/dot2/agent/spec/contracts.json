@@ -1,0 +1,89 @@
+{
+  "schema_version": "0.1",
+  "contracts": [
+    {
+      "id": "behavior",
+      "requirements": [
+        "REQ-BEHAVIOR"
+      ],
+      "evidence": [
+        "task.md",
+        "../tb/development_tb.sv"
+      ],
+      "semantics": {
+        "language": "English plus executable SystemVerilog scoreboard",
+        "body": "Implement benchmark_dot, a 2-lane signed INT8 dot product with a signed 32-bit sum.\nLane i uses packed bits [8*i +: 8] of req_a/req_b. Each product and the complete\nsum are exact; sign-extend the result. Accept only when req_valid && req_ready.\nSingle outstanding request; req_ready stays low while busy. A request accepted\nat edge t produces rsp_valid immediately after edge t+2 (three rising edges\ncounting the accepting edge). Hold rsp_valid/rsp_data until response handshake.\nreq_ready is high again AFTER a response-accepting edge; no same-edge bypass.\nActive-low asynchronous reset or synchronous kill clears the outstanding work,\nrsp_data=0, and returns to idle; kill immediately masks req_ready/rsp_valid.\nNo response from cancelled work. Inputs may change while busy. Mask ready/valid\nwhile reset is low; rsp_data starts/reset-clears to zero and otherwise holds."
+      },
+      "interface": {
+        "clk": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "rst_n": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "req_valid": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "req_ready": {
+          "mode": "constrain",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "req_a": {
+          "mode": "observe",
+          "type": {
+            "kind": "uint",
+            "width": 16
+          }
+        },
+        "req_b": {
+          "mode": "observe",
+          "type": {
+            "kind": "uint",
+            "width": 16
+          }
+        },
+        "rsp_valid": {
+          "mode": "constrain",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "rsp_ready": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "rsp_data": {
+          "mode": "constrain",
+          "type": {
+            "kind": "uint",
+            "width": 32
+          }
+        },
+        "kill": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        }
+      },
+      "verification": {
+        "status": "executable",
+        "backend": "iverilog",
+        "adapter": "../tools/check.py"
+      }
+    }
+  ]
+}

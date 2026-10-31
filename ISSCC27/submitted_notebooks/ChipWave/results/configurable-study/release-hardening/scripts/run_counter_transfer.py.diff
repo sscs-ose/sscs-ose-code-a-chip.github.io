@@ -1,0 +1,19 @@
+--- run_counter_transfer.py
++++ release/run_counter_transfer.py
+@@ -14,6 +14,7 @@
+ from chip_nebula.taskgraph.static_store import StaticTaskGraphStore
+ from prepare_counter_transfer import prepare,bench
+ from study_budget import BudgetPool
++from study_portability import private_context
+ from study_isolation import prepare_credentials
+ from study_protocol import digest,write_json
+ 
+@@ -37,7 +38,7 @@
+     if folder.exists():raise ValueError('Existing counter experiment retained')
+     results=folder/'results';results.mkdir(parents=True)
+     root=folder/'project';prepare(root)
+-    private=Path('/tmp/chipnebula-counter-transfer-user37-20261016')
++    private=private_context(experiment,'counter')
+     if private.exists():raise ValueError('Prior model context retained; do not reuse')
+     started=time.monotonic();timed_out=False
+     cmd=[sys.executable,str(Path(__file__).resolve()),'--worker',str(root),'--private',str(private)]

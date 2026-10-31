@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "physical_qualified": false,
+  "rank_eligible": false,
+  "configuration": {
+    "abc_area": 1,
+    "density": 0.55,
+    "repair_margin": 0,
+    "utilization": 40
+  },
+  "period_ps": 10526,
+  "physical_wall_seconds": 4100.790586551011,
+  "failure_classes": [
+    "electrical"
+  ],
+  "candidate_index": 1,
+  "cell_area_um2": 157315,
+  "die_area_um2": 371137,
+  "setup_slack_ns": 0.423833,
+  "hold_slack_ns": 0.0655785,
+  "electrical_violations": {
+    "max_slew": 12,
+    "max_cap": 5,
+    "max_fanout": 0
+  },
+  "energy_j": {},
+  "estimated_power_w": {},
+  "postprocessing_commands": [],
+  "physical_manifest": {
+    "schema_version": 1,
+    "configuration": {
+      "abc_area": 1,
+      "density": 0.55,
+      "repair_margin": 0,
+      "utilization": 40
+    },
+    "period_ps": 10526,
+    "rtl_sha256": {
+      "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+      "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+      "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+    },
+    "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+    "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+    "config_sha256": "86c316a4ed7e354d2d284832e783a2870f10f438ab66e268949f233a266a31f5",
+    "physical_timeout_seconds": 14400,
+    "threads": 2,
+    "scope": "One fixed-RTL physical implementation; historical records are unchanged"
+  },
+  "postprocess_wall_seconds": 3.650202415883541e-07,
+  "total_wall_seconds": 4100.790586916031,
+  "candidate_artifact": "artifact-4b19a26aa087486c8d7b22eacbc561bc",
+  "proposal_rationale": "The only available implementation evidence is context/baseline.json; reports/ and build/ contain no feedback or candidate history. The qualified baseline (40, 0.55, 0, 0) has cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero slew/capacitance/fanout violations, and modeled workload energies DOT64 2.293945631906608e-7 J, GEMM8 1.7792685987008622e-6 J, CONV3 1.1542462882162743e-6 J, giving normalized score 1.0. This previously untried tuple changes only abc_area to 1 to test area-oriented mapping against the cell-area-times-geometric-mean-energy objective. Keeping utilization 40 and density 0.55 isolates that change; reducing die area alone would not directly improve the specified score. Keeping repair_margin 0 is supported by the baseline electrical checks and avoids requesting additional repair margin without evidence of need. The small positive setup slack makes timing loss a material risk. Area and modeled-energy improvement remain hypotheses requiring the independent evaluator; this proposal makes no qualification or improvement claim and preserves all frozen implementation inputs and thresholds. Local schema, domain, and available-history checks passed; the required validation command could not complete because the supplied wrapper cannot import run_ppa_workflow_study, so the official gate remains unverified.",
+  "elapsed_search_seconds": 4188.761038497993
+}

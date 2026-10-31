@@ -1,0 +1,931 @@
+{
+  "workflow": {
+    "id": "benchmark-generation",
+    "recipe": "benchmark-generation@2",
+    "goal": "Implement one generated task from requirements",
+    "status": "complete",
+    "paused_reason": "",
+    "definition_digest": "sha256:582d941a0f61106f40ccb60333b81b4b5ab0f14ba1de1872547d419285368652",
+    "metadata": {
+      "baseline_commit": "4e178cbca76788ad5454fcc521d365547468955e",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "source": "generated-task"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/demonstrations/fifo8x4/project/.chip_nebula/recipes/benchmark.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-18T17:22:21.340443+00:00"
+  },
+  "tasks": [
+    {
+      "id": "benchmark-generation:designer",
+      "workflow_id": "benchmark-generation",
+      "key": "designer",
+      "role": "benchmark-designer",
+      "role_version": 1,
+      "intent": "Read spec/task.md, interface.json and the typed CSIR behavioral contract.\nImplement the exact top-level interface and all behavior in rtl/. Develop with\npython3 tools/check.py and optional tests/designer/. Write only rtl/, tests/designer/\nand build/. Do not modify the task, checker, workflow or permissions, inspect\nother trials or final evaluators, or invoke extra models/agents. Repair actionable\nfeedback within the shared 1200-second frontend budget. Return\nNEBULA_OUTPUT: {\"rtl\":{\"module\":\"the exact requested top-level module\"}}.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "rtl/**",
+          "tests/designer/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "generated-task",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "rtl",
+          "artifact_type": "rtl.snapshot",
+          "schema_version": 1,
+          "paths": [
+            "rtl/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Read spec/task.md, interface.json and the typed CSIR behavioral contract.\nImplement the exact top-level interface and all behavior in rtl/. Develop with\npython3 tools/check.py and optional tests/designer/. Write only rtl/, tests/designer/\nand build/. Do not modify the task, checker, workflow or permissions, inspect\nother trials or final evaluators, or invoke extra models/agents. Repair actionable\nfeedback within the shared 1200-second frontend budget. Return\nNEBULA_OUTPUT: {\"rtl\":{\"module\":\"the exact requested top-level module\"}}.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Implement/review the fixed task with real test evidence."
+        ],
+        "exclusions": [
+          "No task/checker/permission changes or extra model calls."
+        ],
+        "completion_criteria": [
+          "Publish exact RTL or an honest verification verdict."
+        ],
+        "collaboration": [
+          "task:benchmark-generation:verifier",
+          "task:benchmark-generation:audit"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "benchmark-generation:verifier",
+      "workflow_id": "benchmark-generation",
+      "key": "verifier",
+      "role": "benchmark-verifier",
+      "role_version": 1,
+      "intent": "Independently inspect and test delivered RTL against spec/task.md and\ninterface.json. Run python3 tools/check.py; add focused boundary/reset/protocol\ntests under tests/reviewer/ if useful. Do not change RTL, task or public checker,\nread other projects/final evaluators, or invoke extra models/agents. Your time\nshares the original 1200-second frontend budget with the designer. Write\nreports/review.json and return NEBULA_OUTPUT: {\"report\":{\"subject\":\"benchmark-rtl\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete findings\"}}.\nUse an actual verdict. Failed findings go back to the original designer.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "tests/reviewer/**",
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "generated-task",
+          "optional": false
+        }
+      ],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "benchmark-generation:designer",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "reports/**",
+            "tests/reviewer/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Independently inspect and test delivered RTL against spec/task.md and\ninterface.json. Run python3 tools/check.py; add focused boundary/reset/protocol\ntests under tests/reviewer/ if useful. Do not change RTL, task or public checker,\nread other projects/final evaluators, or invoke extra models/agents. Your time\nshares the original 1200-second frontend budget with the designer. Write\nreports/review.json and return NEBULA_OUTPUT: {\"report\":{\"subject\":\"benchmark-rtl\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete findings\"}}.\nUse an actual verdict. Failed findings go back to the original designer.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Implement/review the fixed task with real test evidence."
+        ],
+        "exclusions": [
+          "No task/checker/permission changes or extra model calls."
+        ],
+        "completion_criteria": [
+          "Publish exact RTL or an honest verification verdict."
+        ],
+        "collaboration": [
+          "task:benchmark-generation:designer",
+          "task:benchmark-generation:audit"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "benchmark-generation:audit",
+      "workflow_id": "benchmark-generation",
+      "key": "audit",
+      "role": "benchmark-auditor",
+      "role_version": 1,
+      "intent": "Replay the unchanged public checker.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "benchmark-generation:designer",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        },
+        {
+          "input_name": "review",
+          "upstream_task_id": "benchmark-generation:verifier",
+          "output_name": "report",
+          "required_type": "verification.report",
+          "condition": {
+            "field": "verdict",
+            "equals": "passed"
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "build/smoke/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/check.py",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 120,
+      "brief": {
+        "objective": "Replay the unchanged public checker.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Implement/review the fixed task with real test evidence."
+        ],
+        "exclusions": [
+          "No task/checker/permission changes or extra model calls."
+        ],
+        "completion_criteria": [
+          "Publish exact RTL or an honest verification verdict."
+        ],
+        "collaboration": [
+          "task:benchmark-generation:designer",
+          "task:benchmark-generation:verifier"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    }
+  ],
+  "roles": [
+    {
+      "name": "benchmark-auditor",
+      "version": 1,
+      "instruction": "Execute the fixed public check.",
+      "accepted_types": [
+        "rtl.snapshot",
+        "verification.report"
+      ],
+      "produced_types": [
+        "verification.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "benchmark-designer",
+      "version": 1,
+      "instruction": "Read spec/task.md, interface.json and the typed CSIR behavioral contract.\nImplement the exact top-level interface and all behavior in rtl/. Develop with\npython3 tools/check.py and optional tests/designer/. Write only rtl/, tests/designer/\nand build/. Do not modify the task, checker, workflow or permissions, inspect\nother trials or final evaluators, or invoke extra models/agents. Repair actionable\nfeedback within the shared 1200-second frontend budget. Return\nNEBULA_OUTPUT: {\"rtl\":{\"module\":\"the exact requested top-level module\"}}.",
+      "accepted_types": [
+        "specification.source",
+        "verification.report"
+      ],
+      "produced_types": [
+        "rtl.snapshot"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "benchmark-verifier",
+      "version": 1,
+      "instruction": "Independently inspect and test delivered RTL against spec/task.md and\ninterface.json. Run python3 tools/check.py; add focused boundary/reset/protocol\ntests under tests/reviewer/ if useful. Do not change RTL, task or public checker,\nread other projects/final evaluators, or invoke extra models/agents. Your time\nshares the original 1200-second frontend budget with the designer. Write\nreports/review.json and return NEBULA_OUTPUT: {\"report\":{\"subject\":\"benchmark-rtl\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete findings\"}}.\nUse an actual verdict. Failed findings go back to the original designer.",
+      "accepted_types": [
+        "specification.source",
+        "rtl.snapshot"
+      ],
+      "produced_types": [
+        "verification.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    }
+  ],
+  "feedback": [
+    {
+      "source_task_id": "benchmark-generation:verifier",
+      "verdict": "fail",
+      "target_task_id": "benchmark-generation:designer",
+      "kind": "feedback",
+      "summary": "Repair the reported task defect.",
+      "propagate_to_dependents": true,
+      "payload_field": "",
+      "payload_equals": null,
+      "summary_field": "report.repair_summary"
+    },
+    {
+      "source_task_id": "benchmark-generation:audit",
+      "verdict": "fail",
+      "target_task_id": "benchmark-generation:designer",
+      "kind": "feedback",
+      "summary": "Repair the reported task defect.",
+      "propagate_to_dependents": true,
+      "payload_field": "",
+      "payload_equals": null,
+      "summary_field": "report.repair_summary"
+    }
+  ],
+  "attempts": [
+    {
+      "id": "attempt-050c065eb0534748bc59b7b4cf5f2232",
+      "task_id": "benchmark-generation:designer",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-c6de88a7554343f2a2ed4bdf655bf26b"
+      ],
+      "input_deliveries": {
+        "source": "generated-task"
+      },
+      "role": "benchmark-designer",
+      "role_version": 1,
+      "role_instruction": "Read spec/task.md, interface.json and the typed CSIR behavioral contract.\nImplement the exact top-level interface and all behavior in rtl/. Develop with\npython3 tools/check.py and optional tests/designer/. Write only rtl/, tests/designer/\nand build/. Do not modify the task, checker, workflow or permissions, inspect\nother trials or final evaluators, or invoke extra models/agents. Repair actionable\nfeedback within the shared 1200-second frontend budget. Return\nNEBULA_OUTPUT: {\"rtl\":{\"module\":\"the exact requested top-level module\"}}.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Read spec/task.md, interface.json and the typed CSIR behavioral contract.\nImplement the exact top-level interface and all behavior in rtl/. Develop with\npython3 tools/check.py and optional tests/designer/. Write only rtl/, tests/designer/\nand build/. Do not modify the task, checker, workflow or permissions, inspect\nother trials or final evaluators, or invoke extra models/agents. Repair actionable\nfeedback within the shared 1200-second frontend budget. Return\nNEBULA_OUTPUT: {\"rtl\":{\"module\":\"the exact requested top-level module\"}}.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Implement/review the fixed task with real test evidence."
+        ],
+        "exclusions": [
+          "No task/checker/permission changes or extra model calls."
+        ],
+        "completion_criteria": [
+          "Publish exact RTL or an honest verification verdict."
+        ],
+        "collaboration": [
+          "task:benchmark-generation:verifier",
+          "task:benchmark-generation:audit"
+        ]
+      },
+      "brief_digest": "sha256:d130d8ab8bbdb075850b4960b433941a1a94becfdf0fa317ce18c73ce3c332bd",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "rtl/**",
+          "tests/designer/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a15009-30ac-7763-b380-df70b979041d",
+      "workspace_commit": "bfc63b82b0313e93e96d8d64947cd60cea8be297",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "rtl/benchmark_fifo.sv",
+          "tests/designer/fifo_extended_tb.sv",
+          "build/fifo_extended_sim",
+          "build/smoke/report.json",
+          "build/smoke/sim",
+          "build/smoke/smoke.log"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"rtl\":{\"module\":\"benchmark_fifo\"}}\nTASK COMPLETED.",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-18T17:23:31.406300+00:00",
+            "details": {
+              "validated_outputs": [
+                "rtl:rtl.snapshot@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 25050,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "4e178cbca76788ad5454fcc521d365547468955e"
+      },
+      "created_at": "2026-10-18T17:22:21.532173+00:00",
+      "finished_at": "2026-10-18T17:23:31.440217+00:00"
+    },
+    {
+      "id": "attempt-3b54a31ce87e445cb1e69bd4d78b0ee0",
+      "task_id": "benchmark-generation:verifier",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-25af784d8975473b9b9da351e5135363"
+      ],
+      "input_deliveries": {
+        "rtl": "artifact-8960ff6bdaf246488821d461ac09e1a3",
+        "source": "generated-task"
+      },
+      "role": "benchmark-verifier",
+      "role_version": 1,
+      "role_instruction": "Independently inspect and test delivered RTL against spec/task.md and\ninterface.json. Run python3 tools/check.py; add focused boundary/reset/protocol\ntests under tests/reviewer/ if useful. Do not change RTL, task or public checker,\nread other projects/final evaluators, or invoke extra models/agents. Your time\nshares the original 1200-second frontend budget with the designer. Write\nreports/review.json and return NEBULA_OUTPUT: {\"report\":{\"subject\":\"benchmark-rtl\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete findings\"}}.\nUse an actual verdict. Failed findings go back to the original designer.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "rtl.snapshot"
+      ],
+      "brief": {
+        "objective": "Independently inspect and test delivered RTL against spec/task.md and\ninterface.json. Run python3 tools/check.py; add focused boundary/reset/protocol\ntests under tests/reviewer/ if useful. Do not change RTL, task or public checker,\nread other projects/final evaluators, or invoke extra models/agents. Your time\nshares the original 1200-second frontend budget with the designer. Write\nreports/review.json and return NEBULA_OUTPUT: {\"report\":{\"subject\":\"benchmark-rtl\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete findings\"}}.\nUse an actual verdict. Failed findings go back to the original designer.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Implement/review the fixed task with real test evidence."
+        ],
+        "exclusions": [
+          "No task/checker/permission changes or extra model calls."
+        ],
+        "completion_criteria": [
+          "Publish exact RTL or an honest verification verdict."
+        ],
+        "collaboration": [
+          "task:benchmark-generation:designer",
+          "task:benchmark-generation:audit"
+        ]
+      },
+      "brief_digest": "sha256:7386f24830b0a6804472d1ccc129b762b848d3c30d498f50eb4322c6e99b54bb",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "tests/reviewer/**",
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a1500a-41a9-7dc2-974f-4834ebcb176d",
+      "workspace_commit": "bc0f90e3cae84a3a4ad5b48afa783ca81565439c",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "reports/review.json",
+          "tests/reviewer/fifo_review_tb.sv",
+          "tests/reviewer/run.py",
+          "build/reviewer/lint.log",
+          "build/reviewer/results.json",
+          "build/reviewer/review.log",
+          "build/reviewer/sim",
+          "build/smoke/report.json",
+          "build/smoke/sim",
+          "build/smoke/smoke.log"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"report\":{\"subject\":\"benchmark-rtl\",\"verdict\":\"passed\",\"repair_summary\":\"No defects found. Public checker passed 144 checks. Independent tests passed 168084 cycles and 622700 checks covering boundaries, simultaneous operations, ordering, wraparound, and asynchronous reset. Verilator lint passed. Evidence: reports/review.json. RTL and protected inputs remain unchanged.\"}}\nTASK COMPLETED",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-18T17:25:17.000416+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:verification.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 25050,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "bd97b7e018cf87f79eac9669dff7f6b09878e049"
+      },
+      "created_at": "2026-10-18T17:23:31.451603+00:00",
+      "finished_at": "2026-10-18T17:25:17.542572+00:00"
+    },
+    {
+      "id": "attempt-1caffdb575454de7830299969701bc33",
+      "task_id": "benchmark-generation:audit",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-ebe8dd72272d49d28d67d9ab357cb796"
+      ],
+      "input_deliveries": {
+        "review": "artifact-9d26b9238a7545b1ac6ad0b64c148ae5",
+        "rtl": "artifact-8960ff6bdaf246488821d461ac09e1a3"
+      },
+      "role": "benchmark-auditor",
+      "role_version": 1,
+      "role_instruction": "Execute the fixed public check.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "rtl.snapshot",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Replay the unchanged public checker.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Implement/review the fixed task with real test evidence."
+        ],
+        "exclusions": [
+          "No task/checker/permission changes or extra model calls."
+        ],
+        "completion_criteria": [
+          "Publish exact RTL or an honest verification verdict."
+        ],
+        "collaboration": [
+          "task:benchmark-generation:designer",
+          "task:benchmark-generation:verifier"
+        ]
+      },
+      "brief_digest": "sha256:b231f5ffc6339c7d7735d72b24ff7d86293680a5dbac2e87bf3503c1f7ae7dac",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/check.py",
+      "timeout_seconds": 120,
+      "session_id": "",
+      "workspace_commit": "d42457b915cc4950cb2158d258c21dacb8fa7d28",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "build/smoke/report.json",
+          "build/smoke/sim",
+          "build/smoke/smoke.log"
+        ],
+        "execution_log": "$ [audit] python3 tools/check.py\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"benchmark-rtl\", \"verdict\": \"passed\", \"repair_summary\": \"BENCHMARK_PASS fifo checks=144\\ntb/development_tb.sv:44: $finish called at 7302000 (1ps)\\n\"}}\n",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-18T17:25:21.026247+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:verification.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 25050,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "7102d5dac37575a70b23b19e653ae63a891bf2e2"
+      },
+      "created_at": "2026-10-18T17:25:20.530390+00:00",
+      "finished_at": "2026-10-18T17:25:21.262452+00:00"
+    }
+  ],
+  "work_items": [
+    {
+      "id": "work-25af784d8975473b9b9da351e5135363",
+      "task_id": "benchmark-generation:verifier",
+      "kind": "initial",
+      "request_key": "initial:benchmark-generation:verifier",
+      "correlation_key": "initial",
+      "summary": "Independently inspect and test delivered RTL against spec/task.md and\ninterface.json. Run python3 tools/check.py; add focused boundary/reset/protocol\ntests under tests/reviewer/ if useful. Do not change RTL, task or public checker,\nread other projects/final evaluators, or invoke extra models/agents. Your time\nshares the original 1200-second frontend budget with the designer. Write\nreports/review.json and return NEBULA_OUTPUT: {\"report\":{\"subject\":\"benchmark-rtl\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete findings\"}}.\nUse an actual verdict. Failed findings go back to the original designer.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-3b54a31ce87e445cb1e69bd4d78b0ee0",
+      "resolved_attempt_id": "attempt-3b54a31ce87e445cb1e69bd4d78b0ee0",
+      "created_at": "2026-10-18T17:22:21.349525+00:00"
+    },
+    {
+      "id": "work-c6de88a7554343f2a2ed4bdf655bf26b",
+      "task_id": "benchmark-generation:designer",
+      "kind": "initial",
+      "request_key": "initial:benchmark-generation:designer",
+      "correlation_key": "initial",
+      "summary": "Read spec/task.md, interface.json and the typed CSIR behavioral contract.\nImplement the exact top-level interface and all behavior in rtl/. Develop with\npython3 tools/check.py and optional tests/designer/. Write only rtl/, tests/designer/\nand build/. Do not modify the task, checker, workflow or permissions, inspect\nother trials or final evaluators, or invoke extra models/agents. Repair actionable\nfeedback within the shared 1200-second frontend budget. Return\nNEBULA_OUTPUT: {\"rtl\":{\"module\":\"the exact requested top-level module\"}}.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-050c065eb0534748bc59b7b4cf5f2232",
+      "resolved_attempt_id": "attempt-050c065eb0534748bc59b7b4cf5f2232",
+      "created_at": "2026-10-18T17:22:21.349140+00:00"
+    },
+    {
+      "id": "work-ebe8dd72272d49d28d67d9ab357cb796",
+      "task_id": "benchmark-generation:audit",
+      "kind": "initial",
+      "request_key": "initial:benchmark-generation:audit",
+      "correlation_key": "initial",
+      "summary": "Replay the unchanged public checker.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-1caffdb575454de7830299969701bc33",
+      "resolved_attempt_id": "attempt-1caffdb575454de7830299969701bc33",
+      "created_at": "2026-10-18T17:22:21.349842+00:00"
+    }
+  ],
+  "deliveries": {
+    "benchmark-generation:designer": {
+      "rtl": {
+        "task_id": "benchmark-generation:designer",
+        "output_name": "rtl",
+        "artifact_id": "artifact-8960ff6bdaf246488821d461ac09e1a3",
+        "attempt_id": "attempt-050c065eb0534748bc59b7b4cf5f2232",
+        "accepted_at": "2026-10-18T17:23:31.439970+00:00"
+      }
+    },
+    "benchmark-generation:verifier": {
+      "report": {
+        "task_id": "benchmark-generation:verifier",
+        "output_name": "report",
+        "artifact_id": "artifact-9d26b9238a7545b1ac6ad0b64c148ae5",
+        "attempt_id": "attempt-3b54a31ce87e445cb1e69bd4d78b0ee0",
+        "accepted_at": "2026-10-18T17:25:17.542336+00:00"
+      }
+    },
+    "benchmark-generation:audit": {
+      "report": {
+        "task_id": "benchmark-generation:audit",
+        "output_name": "report",
+        "artifact_id": "artifact-3e78ddd7acba49baa10baf928d6383b2",
+        "attempt_id": "attempt-1caffdb575454de7830299969701bc33",
+        "accepted_at": "2026-10-18T17:25:21.262238+00:00"
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "id": "generated-task",
+      "type": "specification.source",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "external",
+        "task_id": "benchmark-contract",
+        "attempt_id": "frozen-input",
+        "role": "benchmark-author",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "4e178cbca76788ad5454fcc521d365547468955e",
+        "tree": "f1c206cd0867114f87c9278959ec9e55ec53b408",
+        "paths": [
+          "spec",
+          "tb",
+          "tools"
+        ]
+      },
+      "payload": {
+        "content": "# fifo8x4\n\nImplement benchmark_fifo, 4 entries of 8 bits, one rising-edge clock.\nActive-low asynchronous reset makes the FIFO empty. Read data is the current\nhead combinationally, and zero when empty. full/empty reflect current occupancy.\nAt an edge, accept push iff wr_en && !full; accept pop iff rd_en && !empty,\nusing flags BEFORE the edge. Thus simultaneous read/write on full accepts only\nthe read; on empty accepts only the write. No fall-through, overwrite or underflow.\nPreserve exact insertion order. Memory reset is not required; externally visible\noutputs after reset must meet the empty/zero contract.\n\nUse the fixed top-level port names and widths in interface.json. Develop with\n`python3 tools/check.py`. Deliver synthesizable RTL under rtl/. Independent\nfinal vectors/reference and scoring are outside your workspace. Do not alter\nthe task/checker, invoke extra models, or read other trials. The task's area\nlimit is installed after reference physical calibration, before evaluation.\n",
+        "content_digest": "sha256:338312192d9ceed9b4545ee55062f48e93a218520983eeae85dc7454789e01b9",
+        "media_type": "text/markdown",
+        "received_at": "2026-10-18T17:22:21.340749+00:00",
+        "source_name": "fifo8x4"
+      },
+      "input_artifact_ids": [],
+      "metadata": {},
+      "created_at": "2026-10-18T17:22:21.340762+00:00"
+    },
+    {
+      "id": "artifact-8960ff6bdaf246488821d461ac09e1a3",
+      "type": "rtl.snapshot",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "benchmark-generation",
+        "task_id": "benchmark-generation:designer",
+        "attempt_id": "attempt-050c065eb0534748bc59b7b4cf5f2232",
+        "role": "benchmark-designer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "bfc63b82b0313e93e96d8d64947cd60cea8be297",
+        "tree": "789736776225776041671d87988d4d739ec7b2d7",
+        "paths": [
+          "rtl/benchmark_fifo.sv"
+        ]
+      },
+      "payload": {
+        "commit": "bfc63b82b0313e93e96d8d64947cd60cea8be297",
+        "module": "benchmark_fifo",
+        "paths": [
+          "rtl/benchmark_fifo.sv"
+        ]
+      },
+      "input_artifact_ids": [
+        "generated-task"
+      ],
+      "metadata": {
+        "task_key": "designer",
+        "workflow_id": "benchmark-generation"
+      },
+      "created_at": "2026-10-18T17:23:31.437373+00:00"
+    },
+    {
+      "id": "artifact-9d26b9238a7545b1ac6ad0b64c148ae5",
+      "type": "verification.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "benchmark-generation",
+        "task_id": "benchmark-generation:verifier",
+        "attempt_id": "attempt-3b54a31ce87e445cb1e69bd4d78b0ee0",
+        "role": "benchmark-verifier",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "bc0f90e3cae84a3a4ad5b48afa783ca81565439c",
+        "tree": "cc9df852c7574e7453c7fad86c03cc156c92e382",
+        "paths": [
+          "reports/review.json",
+          "tests/reviewer/fifo_review_tb.sv",
+          "tests/reviewer/run.py"
+        ]
+      },
+      "payload": {
+        "commit": "bc0f90e3cae84a3a4ad5b48afa783ca81565439c",
+        "paths": [
+          "reports/review.json",
+          "tests/reviewer/fifo_review_tb.sv",
+          "tests/reviewer/run.py"
+        ],
+        "repair_summary": "No defects found. Public checker passed 144 checks. Independent tests passed 168084 cycles and 622700 checks covering boundaries, simultaneous operations, ordering, wraparound, and asynchronous reset. Verilator lint passed. Evidence: reports/review.json. RTL and protected inputs remain unchanged.",
+        "subject": "benchmark-rtl",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-8960ff6bdaf246488821d461ac09e1a3",
+        "generated-task"
+      ],
+      "metadata": {
+        "task_key": "verifier",
+        "workflow_id": "benchmark-generation"
+      },
+      "created_at": "2026-10-18T17:25:17.539297+00:00"
+    },
+    {
+      "id": "artifact-3e78ddd7acba49baa10baf928d6383b2",
+      "type": "verification.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "benchmark-generation",
+        "task_id": "benchmark-generation:audit",
+        "attempt_id": "attempt-1caffdb575454de7830299969701bc33",
+        "role": "benchmark-auditor",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "d42457b915cc4950cb2158d258c21dacb8fa7d28",
+        "tree": "5a7e6f983d95dfcdb22a5a8830868e00187d695b",
+        "paths": [
+          "build/smoke/report.json",
+          "build/smoke/sim",
+          "build/smoke/smoke.log"
+        ]
+      },
+      "payload": {
+        "commit": "d42457b915cc4950cb2158d258c21dacb8fa7d28",
+        "paths": [
+          "build/smoke/report.json",
+          "build/smoke/sim",
+          "build/smoke/smoke.log"
+        ],
+        "repair_summary": "BENCHMARK_PASS fifo checks=144\ntb/development_tb.sv:44: $finish called at 7302000 (1ps)\n",
+        "subject": "benchmark-rtl",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-9d26b9238a7545b1ac6ad0b64c148ae5",
+        "artifact-8960ff6bdaf246488821d461ac09e1a3"
+      ],
+      "metadata": {
+        "task_key": "audit",
+        "workflow_id": "benchmark-generation"
+      },
+      "created_at": "2026-10-18T17:25:21.259674+00:00"
+    }
+  ],
+  "scope": "Frozen contracts, attempt decisions, engineering states, deliveries and captured/pending feedback evidence. WorkItem states are their exported final states. Private model-home and credentials excluded."
+}

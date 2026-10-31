@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "passed": false,
+  "gates": [
+    {
+      "name": "gds-result-summary",
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "/tmp/chipnebula-public-repro-user37/bin/python",
+        "-m",
+        "chip_nebula.taskgraph.result_summary",
+        "build/gds/result_summary.json",
+        "--profile",
+        "gds",
+        "--required",
+        "gds.bytes",
+        "--required",
+        "gds.readable",
+        "--required",
+        "gds.top_cell",
+        "--measured",
+        "gds.bytes",
+        "--measured",
+        "gds.top_cell",
+        "--measured",
+        "gds.readable"
+      ],
+      "evidence": "build/gds/summary_gate.log"
+    },
+    {
+      "name": "project-acceptance-verdict",
+      "report": {
+        "level": "L1",
+        "check_type": "report_verdict",
+        "passed": false,
+        "evidence": "engineering report verdict failed: top-level verdict must be passed, got failed; checks[AC-RESOURCES] is failed; checks[AC-PROJECT-COMPLETION] is failed\nError-Class: project_acceptance_failed",
+        "details": {
+          "report": "build/gds/project_acceptance.json",
+          "verdict": "failed",
+          "failures": [
+            "top-level verdict must be passed, got failed",
+            "checks[AC-RESOURCES] is failed",
+            "checks[AC-PROJECT-COMPLETION] is failed"
+          ]
+        },
+        "suggestion": "Fix the reported engineering failures and publish a new passed report.",
+        "checked_at": "2026-10-14T13:06:37.265898"
+      }
+    }
+  ]
+}

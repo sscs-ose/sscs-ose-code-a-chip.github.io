@@ -1,0 +1,1103 @@
+{
+  "workflow": {
+    "id": "capacity",
+    "recipe": "capacity-C3@2",
+    "goal": "Execute the frozen workload-to-GDS protocol",
+    "status": "paused",
+    "paused_reason": "attempt budget or operator pause: implementation, verification, integration_ppa, revision",
+    "definition_digest": "sha256:4774948c283d54b3feffbec7b89bc806831dc63e8f9ee30366184505750d5c6d",
+    "metadata": {
+      "baseline_commit": "59b7b189ee7790ec1a9586de98ea143c8826844d",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "source": "capacity-task"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Experiments/SubmissionSprint_20261027/checks/live-c3-sprint/project/.chip_nebula/recipes/capacity.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-27T02:52:27.140408+00:00"
+  },
+  "tasks": [
+    {
+      "id": "capacity:implementation",
+      "workflow_id": "capacity",
+      "key": "implementation",
+      "role": "capacity-rtl",
+      "role_version": 1,
+      "intent": "Read inherited reports and rtl/fixture.sv if it exists. On the FIRST implementation create rtl/fixture.sv with module capacity_fixture(input a,output y);assign y=a;endmodule and // initial. Then run exactly python tests/delay.py with yield_time_ms 1000 and await its actual completion. On a FEEDBACK retry, read the physical fixture report and use apply_patch to replace // initial with // repaired without changing y=a. Do not invoke physical or other EDA. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "configuration/**",
+          "tools/**",
+          "tb/**",
+          "tests/**",
+          "reports/**",
+          "build/**",
+          "expert-checklist.json",
+          "workflow-definition.json"
+        ],
+        "write_paths": [
+          "tests/**",
+          "reports/**",
+          "build/**",
+          "rtl/**",
+          "configuration/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "capacity-task",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "rtl",
+          "artifact_type": "rtl.snapshot",
+          "schema_version": 1,
+          "paths": [
+            "rtl/**",
+            "configuration/**",
+            "reports/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6-luna",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 2,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Read inherited reports and rtl/fixture.sv if it exists. On the FIRST implementation create rtl/fixture.sv with module capacity_fixture(input a,output y);assign y=a;endmodule and // initial. Then run exactly python tests/delay.py with yield_time_ms 1000 and await its actual completion. On a FEEDBACK retry, read the physical fixture report and use apply_patch to replace // initial with // repaired without changing y=a. Do not invoke physical or other EDA. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Follow the common resource and tool contract; use actual captured reports."
+        ],
+        "exclusions": [
+          "Do not change hidden/frozen inputs or invoke other models."
+        ],
+        "completion_criteria": [
+          "Submit declared artifacts with truthful evidence and failure reports."
+        ],
+        "collaboration": [
+          "task:capacity:verification",
+          "task:capacity:integration_ppa",
+          "task:capacity:revision"
+        ]
+      },
+      "frozen": true,
+      "state": "paused",
+      "attempts": [
+        {
+          "id": "attempt-990c5b21e96f4b6d82d8f1bda1dd49c1",
+          "task_id": "capacity:implementation",
+          "ordinal": 1,
+          "status": "succeeded",
+          "work_item_ids": [
+            "work-6151d01ec5e34b03a9242f91ddbc10f9"
+          ],
+          "input_deliveries": {
+            "source": "capacity-task"
+          },
+          "role": "capacity-rtl",
+          "role_version": 1,
+          "role_instruction": "Tiny runtime qualification fixture, not a chip experiment. Follow only the current stage. Use scoped native tools, no extra models, network or credentials. Keep calls serial. Return the requested NEBULA_OUTPUT JSON.",
+          "role_skills": [],
+          "role_accepted_types": [
+            "specification.source",
+            "rtl.snapshot",
+            "verification.report"
+          ],
+          "brief": {
+            "objective": "Read inherited reports and rtl/fixture.sv if it exists. On the FIRST implementation create rtl/fixture.sv with module capacity_fixture(input a,output y);assign y=a;endmodule and // initial. Then run exactly python tests/delay.py with yield_time_ms 1000 and await its actual completion. On a FEEDBACK retry, read the physical fixture report and use apply_patch to replace // initial with // repaired without changing y=a. Do not invoke physical or other EDA. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}.",
+            "deliverables": [
+              "rtl: rtl.snapshot"
+            ],
+            "responsibilities": [
+              "Follow the common resource and tool contract; use actual captured reports."
+            ],
+            "exclusions": [
+              "Do not change hidden/frozen inputs or invoke other models."
+            ],
+            "completion_criteria": [
+              "Submit declared artifacts with truthful evidence and failure reports."
+            ],
+            "collaboration": [
+              "task:capacity:verification",
+              "task:capacity:integration_ppa",
+              "task:capacity:revision"
+            ]
+          },
+          "brief_digest": "sha256:e10d5679c237e97f1aa9e6ac1d284058ba2eb687c5ab52104ff18258e7b1adc0",
+          "permission": {
+            "read_paths": [
+              "spec/**",
+              "rtl/**",
+              "configuration/**",
+              "tools/**",
+              "tb/**",
+              "tests/**",
+              "reports/**",
+              "build/**",
+              "expert-checklist.json",
+              "workflow-definition.json"
+            ],
+            "write_paths": [
+              "tests/**",
+              "reports/**",
+              "build/**",
+              "rtl/**",
+              "configuration/**"
+            ],
+            "tools": [
+              "python3",
+              "git"
+            ]
+          },
+          "framework": "codex",
+          "model": "gpt-6-luna",
+          "reasoning_effort": "high",
+          "executor": "agent",
+          "command": "",
+          "timeout_seconds": 1200,
+          "session_id": "01a17b46-0047-75e1-9bb4-672ae0712ee4",
+          "workspace_commit": "38d51c01e2c278b1369c7d29f058285f6674aac9",
+          "verdict": "pass",
+          "diagnostics": {
+            "changed_paths": [
+              "rtl/fixture.sv"
+            ],
+            "execution_log": "NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}\n\nTASK COMPLETED",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-27T02:53:46.118774+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "rtl:rtl.snapshot@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 87489,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "59b7b189ee7790ec1a9586de98ea143c8826844d"
+          },
+          "created_at": "2026-10-27T02:52:27.156591+00:00",
+          "finished_at": "2026-10-27T02:53:46.156739+00:00"
+        },
+        {
+          "id": "attempt-9b6b9765978747fa8e358e6b8c747813",
+          "task_id": "capacity:implementation",
+          "ordinal": 2,
+          "status": "succeeded",
+          "work_item_ids": [
+            "work-14bab68796e848e6b8af83566489fcb7"
+          ],
+          "input_deliveries": {
+            "source": "capacity-task"
+          },
+          "role": "capacity-rtl",
+          "role_version": 1,
+          "role_instruction": "Tiny runtime qualification fixture, not a chip experiment. Follow only the current stage. Use scoped native tools, no extra models, network or credentials. Keep calls serial. Return the requested NEBULA_OUTPUT JSON.",
+          "role_skills": [],
+          "role_accepted_types": [
+            "specification.source",
+            "rtl.snapshot",
+            "verification.report"
+          ],
+          "brief": {
+            "objective": "Read inherited reports and rtl/fixture.sv if it exists. On the FIRST implementation create rtl/fixture.sv with module capacity_fixture(input a,output y);assign y=a;endmodule and // initial. Then run exactly python tests/delay.py with yield_time_ms 1000 and await its actual completion. On a FEEDBACK retry, read the physical fixture report and use apply_patch to replace // initial with // repaired without changing y=a. Do not invoke physical or other EDA. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}.",
+            "deliverables": [
+              "rtl: rtl.snapshot"
+            ],
+            "responsibilities": [
+              "Follow the common resource and tool contract; use actual captured reports."
+            ],
+            "exclusions": [
+              "Do not change hidden/frozen inputs or invoke other models."
+            ],
+            "completion_criteria": [
+              "Submit declared artifacts with truthful evidence and failure reports."
+            ],
+            "collaboration": [
+              "task:capacity:verification",
+              "task:capacity:integration_ppa",
+              "task:capacity:revision"
+            ]
+          },
+          "brief_digest": "sha256:e10d5679c237e97f1aa9e6ac1d284058ba2eb687c5ab52104ff18258e7b1adc0",
+          "permission": {
+            "read_paths": [
+              "spec/**",
+              "rtl/**",
+              "configuration/**",
+              "tools/**",
+              "tb/**",
+              "tests/**",
+              "reports/**",
+              "build/**",
+              "expert-checklist.json",
+              "workflow-definition.json"
+            ],
+            "write_paths": [
+              "tests/**",
+              "reports/**",
+              "build/**",
+              "rtl/**",
+              "configuration/**"
+            ],
+            "tools": [
+              "python3",
+              "git"
+            ]
+          },
+          "framework": "codex",
+          "model": "gpt-6-luna",
+          "reasoning_effort": "high",
+          "executor": "agent",
+          "command": "",
+          "timeout_seconds": 1200,
+          "session_id": "01a17b46-0047-75e1-9bb4-672ae0712ee4",
+          "workspace_commit": "cbdb44a88ac159bb826ab079bf32fd26610186c1",
+          "verdict": "pass",
+          "diagnostics": {
+            "changed_paths": [
+              "rtl/fixture.sv"
+            ],
+            "execution_log": "NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}\n\nTASK COMPLETED",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-27T02:55:59.450766+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "rtl:rtl.snapshot@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "resume_site": {
+              "attempt_id": "attempt-990c5b21e96f4b6d82d8f1bda1dd49c1",
+              "base_commit": "59b7b189ee7790ec1a9586de98ea143c8826844d",
+              "modified_path_count": 1,
+              "modified_paths_sample": [
+                "rtl/fixture.sv"
+              ],
+              "workspace_commit": "38d51c01e2c278b1369c7d29f058285f6674aac9"
+            },
+            "runner_pid": 87489,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "59b7b189ee7790ec1a9586de98ea143c8826844d"
+          },
+          "created_at": "2026-10-27T02:55:00.396740+00:00",
+          "finished_at": "2026-10-27T02:55:59.485956+00:00"
+        }
+      ],
+      "pending_work": [],
+      "deliveries": {
+        "rtl": {
+          "task_id": "capacity:implementation",
+          "output_name": "rtl",
+          "artifact_id": "artifact-7a3abdd7289840eb92232a9fb25d8cec",
+          "attempt_id": "attempt-9b6b9765978747fa8e358e6b8c747813",
+          "accepted_at": "2026-10-27T02:55:59.485748+00:00"
+        }
+      }
+    },
+    {
+      "id": "capacity:verification",
+      "workflow_id": "capacity",
+      "key": "verification",
+      "role": "capacity-verification",
+      "role_version": 1,
+      "intent": "Read rtl/fixture.sv. Confirm y=a regardless of its comment. Write reports/verification/report.json with subject capacity_fixture, verdict passed, repair_summary Identity wire verified. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}. Do not edit RTL or invoke physical.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "configuration/**",
+          "tools/**",
+          "tb/**",
+          "tests/**",
+          "reports/**",
+          "build/**",
+          "expert-checklist.json",
+          "workflow-definition.json"
+        ],
+        "write_paths": [
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "capacity-task",
+          "optional": false
+        }
+      ],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "capacity:implementation",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "reports/verification/**",
+            "tests/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6-luna",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 2,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Read rtl/fixture.sv. Confirm y=a regardless of its comment. Write reports/verification/report.json with subject capacity_fixture, verdict passed, repair_summary Identity wire verified. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}. Do not edit RTL or invoke physical.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Follow the common resource and tool contract; use actual captured reports."
+        ],
+        "exclusions": [
+          "Do not change hidden/frozen inputs or invoke other models."
+        ],
+        "completion_criteria": [
+          "Submit declared artifacts with truthful evidence and failure reports."
+        ],
+        "collaboration": [
+          "task:capacity:implementation",
+          "task:capacity:integration_ppa",
+          "task:capacity:revision"
+        ]
+      },
+      "frozen": true,
+      "state": "paused",
+      "attempts": [
+        {
+          "id": "attempt-1ef8edc5b0924f2588e2c2dab8609475",
+          "task_id": "capacity:verification",
+          "ordinal": 1,
+          "status": "succeeded",
+          "work_item_ids": [
+            "work-685bb12e2bf04ec5bbab9b7703547511"
+          ],
+          "input_deliveries": {
+            "rtl": "artifact-a908fb5e2e8e4319814a9ce9175dfb53",
+            "source": "capacity-task"
+          },
+          "role": "capacity-verification",
+          "role_version": 1,
+          "role_instruction": "Tiny runtime qualification fixture, not a chip experiment. Follow only the current stage. Use scoped native tools, no extra models, network or credentials. Keep calls serial. Return the requested NEBULA_OUTPUT JSON.",
+          "role_skills": [],
+          "role_accepted_types": [
+            "specification.source",
+            "rtl.snapshot",
+            "verification.report"
+          ],
+          "brief": {
+            "objective": "Read rtl/fixture.sv. Confirm y=a regardless of its comment. Write reports/verification/report.json with subject capacity_fixture, verdict passed, repair_summary Identity wire verified. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}. Do not edit RTL or invoke physical.",
+            "deliverables": [
+              "report: verification.report"
+            ],
+            "responsibilities": [
+              "Follow the common resource and tool contract; use actual captured reports."
+            ],
+            "exclusions": [
+              "Do not change hidden/frozen inputs or invoke other models."
+            ],
+            "completion_criteria": [
+              "Submit declared artifacts with truthful evidence and failure reports."
+            ],
+            "collaboration": [
+              "task:capacity:implementation",
+              "task:capacity:integration_ppa",
+              "task:capacity:revision"
+            ]
+          },
+          "brief_digest": "sha256:111a1be3064aa6198f130c269a7ba0f5d5937a56a1dd0905f35c6d50448a7254",
+          "permission": {
+            "read_paths": [
+              "spec/**",
+              "rtl/**",
+              "configuration/**",
+              "tools/**",
+              "tb/**",
+              "tests/**",
+              "reports/**",
+              "build/**",
+              "expert-checklist.json",
+              "workflow-definition.json"
+            ],
+            "write_paths": [
+              "tests/**",
+              "reports/**",
+              "build/**"
+            ],
+            "tools": [
+              "python3",
+              "git"
+            ]
+          },
+          "framework": "codex",
+          "model": "gpt-6-luna",
+          "reasoning_effort": "high",
+          "executor": "agent",
+          "command": "",
+          "timeout_seconds": 1200,
+          "session_id": "01a17b47-348c-7460-b5ca-87ca19a66b55",
+          "workspace_commit": "c038cb7a38d567ae41bc371dc64d97df855b8421",
+          "verdict": "pass",
+          "diagnostics": {
+            "changed_paths": [
+              "reports/verification/report.json"
+            ],
+            "execution_log": "NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}\nTASK COMPLETED",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-27T02:54:15.818706+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "report:verification.report@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 87489,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "180d3544ef94db023c27ad62658f0354a0f5dcf5"
+          },
+          "created_at": "2026-10-27T02:53:46.170819+00:00",
+          "finished_at": "2026-10-27T02:54:15.854618+00:00"
+        },
+        {
+          "id": "attempt-9b7a3a6bd7824318bba11ad6e4f68c65",
+          "task_id": "capacity:verification",
+          "ordinal": 2,
+          "status": "failed",
+          "work_item_ids": [
+            "work-28032021b51e4a5189c9c890df140ad4",
+            "work-14bab68796e848e6b8af83566489fcb7"
+          ],
+          "input_deliveries": {
+            "rtl": "artifact-7a3abdd7289840eb92232a9fb25d8cec",
+            "source": "capacity-task"
+          },
+          "role": "capacity-verification",
+          "role_version": 1,
+          "role_instruction": "Tiny runtime qualification fixture, not a chip experiment. Follow only the current stage. Use scoped native tools, no extra models, network or credentials. Keep calls serial. Return the requested NEBULA_OUTPUT JSON.",
+          "role_skills": [],
+          "role_accepted_types": [
+            "specification.source",
+            "rtl.snapshot",
+            "verification.report"
+          ],
+          "brief": {
+            "objective": "Read rtl/fixture.sv. Confirm y=a regardless of its comment. Write reports/verification/report.json with subject capacity_fixture, verdict passed, repair_summary Identity wire verified. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}. Do not edit RTL or invoke physical.",
+            "deliverables": [
+              "report: verification.report"
+            ],
+            "responsibilities": [
+              "Follow the common resource and tool contract; use actual captured reports."
+            ],
+            "exclusions": [
+              "Do not change hidden/frozen inputs or invoke other models."
+            ],
+            "completion_criteria": [
+              "Submit declared artifacts with truthful evidence and failure reports."
+            ],
+            "collaboration": [
+              "task:capacity:implementation",
+              "task:capacity:integration_ppa",
+              "task:capacity:revision"
+            ]
+          },
+          "brief_digest": "sha256:111a1be3064aa6198f130c269a7ba0f5d5937a56a1dd0905f35c6d50448a7254",
+          "permission": {
+            "read_paths": [
+              "spec/**",
+              "rtl/**",
+              "configuration/**",
+              "tools/**",
+              "tb/**",
+              "tests/**",
+              "reports/**",
+              "build/**",
+              "expert-checklist.json",
+              "workflow-definition.json"
+            ],
+            "write_paths": [
+              "tests/**",
+              "reports/**",
+              "build/**"
+            ],
+            "tools": [
+              "python3",
+              "git"
+            ]
+          },
+          "framework": "codex",
+          "model": "gpt-6-luna",
+          "reasoning_effort": "high",
+          "executor": "agent",
+          "command": "",
+          "timeout_seconds": 1200,
+          "session_id": "01a17b47-348c-7460-b5ca-87ca19a66b55",
+          "workspace_commit": "dc2ab27cae00dd7956ecc62f0295da4800914822",
+          "verdict": "",
+          "diagnostics": {
+            "changed_paths": [
+              "reports/verification/report.json"
+            ],
+            "execution_log": "NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}\nTASK COMPLETED",
+            "failure_reason": "NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}\nTASK COMPLETED",
+            "resume_site": {
+              "attempt_id": "attempt-1ef8edc5b0924f2588e2c2dab8609475",
+              "base_commit": "180d3544ef94db023c27ad62658f0354a0f5dcf5",
+              "modified_path_count": 1,
+              "modified_paths_sample": [
+                "reports/verification/report.json"
+              ],
+              "workspace_commit": "c038cb7a38d567ae41bc371dc64d97df855b8421"
+            },
+            "runner_pid": 87489,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "06e40d5978b2526a3b2bdbf4c105479c759345c5"
+          },
+          "created_at": "2026-10-27T02:55:59.499301+00:00",
+          "finished_at": "2026-10-27T02:56:19.409009+00:00"
+        }
+      ],
+      "pending_work": [
+        {
+          "id": "work-28032021b51e4a5189c9c890df140ad4",
+          "task_id": "capacity:verification",
+          "kind": "reverify",
+          "request_key": "reverify:attempt-753922dc680d4f42af1d8ad865f7a277:capacity:implementation:fail:capacity:verification",
+          "correlation_key": "attempt-753922dc680d4f42af1d8ad865f7a277:capacity:implementation:fail",
+          "summary": "Revalidate after upstream change: Add // repaired to rtl/fixture.sv; preserve y=a",
+          "causal_correlation_keys": [],
+          "source_task_id": "capacity:implementation",
+          "evidence_artifact_ids": [],
+          "evidence_attempt_ids": [],
+          "wait_for_work_item_ids": [
+            "work-14bab68796e848e6b8af83566489fcb7"
+          ],
+          "status": "pending",
+          "created_sequence": 2,
+          "claimed_attempt_id": "",
+          "resolved_attempt_id": "",
+          "created_at": "2026-10-27T02:55:00.382929+00:00"
+        }
+      ],
+      "deliveries": {
+        "report": {
+          "task_id": "capacity:verification",
+          "output_name": "report",
+          "artifact_id": "artifact-a544bb177dcb441a8ce7f39ae6525850",
+          "attempt_id": "attempt-1ef8edc5b0924f2588e2c2dab8609475",
+          "accepted_at": "2026-10-27T02:54:15.854384+00:00"
+        }
+      }
+    },
+    {
+      "id": "capacity:integration_ppa",
+      "workflow_id": "capacity",
+      "key": "integration_ppa",
+      "role": "capacity-integration_ppa",
+      "role_version": 1,
+      "intent": "Run exactly capacity-check physical once in a separate tool call. This is a deterministic fixture, not EDA. Read its returned report and write reports/integration_ppa/report.json reflecting its actual verdict. The first fixture deliberately fails until RTL contains // repaired. On failure return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"failed\",\"repair_summary\":\"Add // repaired to rtl/fixture.sv; preserve y=a\"}}. On pass return the same structure with verdict passed and repair_summary Fixture repaired. Do not edit RTL. Do not invoke physical a second time within this stage.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "configuration/**",
+          "tools/**",
+          "tb/**",
+          "tests/**",
+          "reports/**",
+          "build/**",
+          "expert-checklist.json",
+          "workflow-definition.json"
+        ],
+        "write_paths": [
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "capacity-task",
+          "optional": false
+        }
+      ],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "capacity:implementation",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        },
+        {
+          "input_name": "review",
+          "upstream_task_id": "capacity:verification",
+          "output_name": "report",
+          "required_type": "verification.report",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "reports/integration_ppa/**",
+            "tests/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6-luna",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 2,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Run exactly capacity-check physical once in a separate tool call. This is a deterministic fixture, not EDA. Read its returned report and write reports/integration_ppa/report.json reflecting its actual verdict. The first fixture deliberately fails until RTL contains // repaired. On failure return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"failed\",\"repair_summary\":\"Add // repaired to rtl/fixture.sv; preserve y=a\"}}. On pass return the same structure with verdict passed and repair_summary Fixture repaired. Do not edit RTL. Do not invoke physical a second time within this stage.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Follow the common resource and tool contract; use actual captured reports."
+        ],
+        "exclusions": [
+          "Do not change hidden/frozen inputs or invoke other models."
+        ],
+        "completion_criteria": [
+          "Submit declared artifacts with truthful evidence and failure reports."
+        ],
+        "collaboration": [
+          "task:capacity:implementation",
+          "task:capacity:verification",
+          "task:capacity:revision"
+        ]
+      },
+      "frozen": true,
+      "state": "paused",
+      "attempts": [
+        {
+          "id": "attempt-753922dc680d4f42af1d8ad865f7a277",
+          "task_id": "capacity:integration_ppa",
+          "ordinal": 1,
+          "status": "succeeded",
+          "work_item_ids": [
+            "work-b9b7e071b6be47ea8658f473d6250304"
+          ],
+          "input_deliveries": {
+            "review": "artifact-a544bb177dcb441a8ce7f39ae6525850",
+            "rtl": "artifact-a908fb5e2e8e4319814a9ce9175dfb53",
+            "source": "capacity-task"
+          },
+          "role": "capacity-integration_ppa",
+          "role_version": 1,
+          "role_instruction": "Tiny runtime qualification fixture, not a chip experiment. Follow only the current stage. Use scoped native tools, no extra models, network or credentials. Keep calls serial. Return the requested NEBULA_OUTPUT JSON.",
+          "role_skills": [],
+          "role_accepted_types": [
+            "specification.source",
+            "rtl.snapshot",
+            "verification.report"
+          ],
+          "brief": {
+            "objective": "Run exactly capacity-check physical once in a separate tool call. This is a deterministic fixture, not EDA. Read its returned report and write reports/integration_ppa/report.json reflecting its actual verdict. The first fixture deliberately fails until RTL contains // repaired. On failure return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"failed\",\"repair_summary\":\"Add // repaired to rtl/fixture.sv; preserve y=a\"}}. On pass return the same structure with verdict passed and repair_summary Fixture repaired. Do not edit RTL. Do not invoke physical a second time within this stage.",
+            "deliverables": [
+              "report: verification.report"
+            ],
+            "responsibilities": [
+              "Follow the common resource and tool contract; use actual captured reports."
+            ],
+            "exclusions": [
+              "Do not change hidden/frozen inputs or invoke other models."
+            ],
+            "completion_criteria": [
+              "Submit declared artifacts with truthful evidence and failure reports."
+            ],
+            "collaboration": [
+              "task:capacity:implementation",
+              "task:capacity:verification",
+              "task:capacity:revision"
+            ]
+          },
+          "brief_digest": "sha256:63868057e84c399ebfdc926ff36528976fede224e30f85f7191de366f9358dea",
+          "permission": {
+            "read_paths": [
+              "spec/**",
+              "rtl/**",
+              "configuration/**",
+              "tools/**",
+              "tb/**",
+              "tests/**",
+              "reports/**",
+              "build/**",
+              "expert-checklist.json",
+              "workflow-definition.json"
+            ],
+            "write_paths": [
+              "tests/**",
+              "reports/**",
+              "build/**"
+            ],
+            "tools": [
+              "python3",
+              "git"
+            ]
+          },
+          "framework": "codex",
+          "model": "gpt-6-luna",
+          "reasoning_effort": "high",
+          "executor": "agent",
+          "command": "",
+          "timeout_seconds": 1200,
+          "session_id": "01a17b47-a882-7503-a577-3dde064a3b10",
+          "workspace_commit": "2ae0816312ff25a5978ac5dcb58ead765d93fcac",
+          "verdict": "fail",
+          "diagnostics": {
+            "changed_paths": [
+              "reports/integration_ppa/report.json"
+            ],
+            "execution_log": "NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"failed\",\"repair_summary\":\"Add // repaired to rtl/fixture.sv; preserve y=a\"}}\n\nTASK COMPLETED",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-27T02:55:00.345626+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "report:verification.report@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 87489,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "2e2c4b3ea0dd48de7e2140f18ce16ba19b546f20"
+          },
+          "created_at": "2026-10-27T02:54:15.866699+00:00",
+          "finished_at": "2026-10-27T02:55:00.381642+00:00"
+        }
+      ],
+      "pending_work": [
+        {
+          "id": "work-683244396a254455a18e25e5c6b3f84d",
+          "task_id": "capacity:integration_ppa",
+          "kind": "reverify",
+          "request_key": "reverify:attempt-753922dc680d4f42af1d8ad865f7a277:capacity:implementation:fail:capacity:integration_ppa",
+          "correlation_key": "attempt-753922dc680d4f42af1d8ad865f7a277:capacity:implementation:fail",
+          "summary": "Revalidate after upstream change: Add // repaired to rtl/fixture.sv; preserve y=a",
+          "causal_correlation_keys": [],
+          "source_task_id": "capacity:implementation",
+          "evidence_artifact_ids": [],
+          "evidence_attempt_ids": [],
+          "wait_for_work_item_ids": [
+            "work-14bab68796e848e6b8af83566489fcb7"
+          ],
+          "status": "pending",
+          "created_sequence": 2,
+          "claimed_attempt_id": "",
+          "resolved_attempt_id": "",
+          "created_at": "2026-10-27T02:55:00.383108+00:00"
+        }
+      ],
+      "deliveries": {
+        "report": {
+          "task_id": "capacity:integration_ppa",
+          "output_name": "report",
+          "artifact_id": "artifact-e61ff5a09cb54235aa6c36ca2e99e07f",
+          "attempt_id": "attempt-753922dc680d4f42af1d8ad865f7a277",
+          "accepted_at": "2026-10-27T02:55:00.381325+00:00"
+        }
+      }
+    },
+    {
+      "id": "capacity:revision",
+      "workflow_id": "capacity",
+      "key": "revision",
+      "role": "capacity-rtl",
+      "role_version": 1,
+      "intent": "Read the final reports and rtl/fixture.sv. Preserve // repaired and y=a. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}. No further physical command or changes.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "configuration/**",
+          "tools/**",
+          "tb/**",
+          "tests/**",
+          "reports/**",
+          "build/**",
+          "expert-checklist.json",
+          "workflow-definition.json"
+        ],
+        "write_paths": [
+          "tests/**",
+          "reports/**",
+          "build/**",
+          "rtl/**",
+          "configuration/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "capacity-task",
+          "optional": false
+        }
+      ],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "capacity:implementation",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        },
+        {
+          "input_name": "review",
+          "upstream_task_id": "capacity:integration_ppa",
+          "output_name": "report",
+          "required_type": "verification.report",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "rtl",
+          "artifact_type": "rtl.snapshot",
+          "schema_version": 1,
+          "paths": [
+            "rtl/**",
+            "configuration/**",
+            "reports/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6-luna",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 2,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Read the final reports and rtl/fixture.sv. Preserve // repaired and y=a. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}. No further physical command or changes.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Follow the common resource and tool contract; use actual captured reports."
+        ],
+        "exclusions": [
+          "Do not change hidden/frozen inputs or invoke other models."
+        ],
+        "completion_criteria": [
+          "Submit declared artifacts with truthful evidence and failure reports."
+        ],
+        "collaboration": [
+          "task:capacity:implementation",
+          "task:capacity:verification",
+          "task:capacity:integration_ppa"
+        ]
+      },
+      "frozen": true,
+      "state": "paused",
+      "attempts": [],
+      "pending_work": [
+        {
+          "id": "work-7f24fb445ebd4f58b78829c1571d2728",
+          "task_id": "capacity:revision",
+          "kind": "initial",
+          "request_key": "initial:capacity:revision",
+          "correlation_key": "initial",
+          "summary": "Read the final reports and rtl/fixture.sv. Preserve // repaired and y=a. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}. No further physical command or changes.",
+          "causal_correlation_keys": [],
+          "source_task_id": "",
+          "evidence_artifact_ids": [],
+          "evidence_attempt_ids": [],
+          "wait_for_work_item_ids": [],
+          "status": "pending",
+          "created_sequence": 1,
+          "claimed_attempt_id": "",
+          "resolved_attempt_id": "",
+          "created_at": "2026-10-27T02:52:27.148294+00:00"
+        }
+      ],
+      "deliveries": {}
+    }
+  ],
+  "edges": [
+    {
+      "source_task_id": "capacity:implementation",
+      "target_task_id": "capacity:verification",
+      "input_name": "rtl",
+      "output_name": "rtl",
+      "required_type": "rtl.snapshot",
+      "release": {
+        "field": "",
+        "equals": null
+      }
+    },
+    {
+      "source_task_id": "capacity:implementation",
+      "target_task_id": "capacity:integration_ppa",
+      "input_name": "rtl",
+      "output_name": "rtl",
+      "required_type": "rtl.snapshot",
+      "release": {
+        "field": "",
+        "equals": null
+      }
+    },
+    {
+      "source_task_id": "capacity:verification",
+      "target_task_id": "capacity:integration_ppa",
+      "input_name": "review",
+      "output_name": "report",
+      "required_type": "verification.report",
+      "release": {
+        "field": "",
+        "equals": null
+      }
+    },
+    {
+      "source_task_id": "capacity:implementation",
+      "target_task_id": "capacity:revision",
+      "input_name": "rtl",
+      "output_name": "rtl",
+      "required_type": "rtl.snapshot",
+      "release": {
+        "field": "",
+        "equals": null
+      }
+    },
+    {
+      "source_task_id": "capacity:integration_ppa",
+      "target_task_id": "capacity:revision",
+      "input_name": "review",
+      "output_name": "report",
+      "required_type": "verification.report",
+      "release": {
+        "field": "",
+        "equals": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+--- previous configuration
++++ 03-check-before-review
+@@ -1,4 +1,4 @@
+-name: 02-add-reviewer
++name: 03-check-before-review
+ version: 2
+ parameters:
+   source: specification.source
+@@ -106,9 +106,15 @@
+       tools: *id001
+     inputs:
+       source: *id002
+-      rtl: &id003
++      rtl:
+         type: rtl.snapshot
+         from: $tasks.designer.outputs.rtl
++      smoke:
++        type: verification.report
++        from: $tasks.audit.outputs.report
++        release:
++          field: verdict
++          equals: passed
+     outputs:
+       report:
+         type: verification.report
+@@ -136,13 +142,9 @@
+       - build/**
+       tools: *id001
+     inputs:
+-      rtl: *id003
+-      review:
+-        type: verification.report
+-        from: $tasks.verifier.outputs.report
+-        release:
+-          field: verdict
+-          equals: passed
++      rtl:
++        type: rtl.snapshot
++        from: $tasks.designer.outputs.rtl
+     outputs:
+       report:
+         type: verification.report

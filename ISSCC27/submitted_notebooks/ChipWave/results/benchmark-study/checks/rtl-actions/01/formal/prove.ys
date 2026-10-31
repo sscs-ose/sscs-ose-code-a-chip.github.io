@@ -1,0 +1,13 @@
+read_verilog -sv /home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/released_design/rtl/npu/nebula_npu_dot4.sv
+rename nebula_npu_dot4 gold
+read_verilog -sv /home/asic03/project/user37/CodeAChip_Experiments/Benchmark_PPA_20261018/checks/rtl-actions/01/source/rtl/npu/nebula_npu_dot4.sv
+rename nebula_npu_dot4 gate
+proc
+memory_map
+opt
+async2sync
+equiv_make gold gate equivalence
+hierarchy -top equivalence
+equiv_simple
+equiv_induct -seq 8
+equiv_status -assert

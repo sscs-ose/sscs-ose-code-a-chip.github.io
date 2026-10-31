@@ -1,0 +1,3125 @@
+version: 1
+scope: project
+status: frozen
+confirmed: true
+spec_digest: sha256:9e2e4dc1c876bda98921b4d26ccea97cad53efc9e5064966c16cbc6a8f2ecec5
+execution_status: not_executed
+readiness:
+  specification_baseline: ready
+  specification: frozen
+  constraints: frozen
+  signoff_passed: true
+  rtl_lowering_ready: false
+  verification_contracts_ready: false
+  adapter_required_count: 26
+  detail: Captured specification readiness precedes this draft. Signoff accepts the
+    specification; all executable adapters and actual project checks remain downstream
+    obligations.
+  constraints_binding_note: The captured frozen constraints artifact artifact-0040978541934ec0803b607ff5200dae
+    and its actual JSON/SDC at commit a4591add32499f2aae18a8cb6ee5f01c880c43a4 bind
+    the current ready specification exactly. Constraints revision 2 is frozen. This
+    acceptance revision remains draft and requires the existing acceptance freezer
+    confirmation before the revised physical phase can qualify.
+inputs:
+- artifact_id: artifact-540e43d756d54c3582b8fe2356423275
+  type: specification.bundle
+  record_digest: sha256:3b786641399f91c025709250c843691b0c8b34c2ba487fb239fa0d368dfefd63
+  record_path: .nebula_inputs/artifact-540e43d756d54c3582b8fe2356423275/artifact.json
+  commit: 6c3112f809e563ec2f2e46fd4cb34d33b875cd72
+- artifact_id: artifact-6892c9f0c47b491c8ac8c08778634f0d
+  type: design.specification
+  record_digest: sha256:a21eff2198f2f667f7c3c1f9e9cc82ac87311118c9a121c687caaca5b03b4fa6
+  record_path: .nebula_inputs/artifact-6892c9f0c47b491c8ac8c08778634f0d/artifact.json
+  commit: d0e798e08104c96eb2ef428a723b42150e79a78e
+- artifact_id: artifact-92e241017ce24972ad3dfbfc92b3cc4f
+  type: specification.baseline
+  record_digest: sha256:2c83bf81bf2ed5a7e5fdb7337fb25826a503ee7023b182a09c0fab59490a7e1e
+  record_path: .nebula_inputs/artifact-92e241017ce24972ad3dfbfc92b3cc4f/artifact.json
+- artifact_id: artifact-971f6c7042664af69515024a25a72bc2
+  type: specification.csir
+  record_digest: sha256:c37698990b0e40542f2755b3ceef007dd85129f728ebaba2ca9b0bd439ea9622
+  record_path: .nebula_inputs/artifact-971f6c7042664af69515024a25a72bc2/artifact.json
+  commit: bf1a91c4ae11e33cf31e7b686a79ff3390dad0d2
+- artifact_id: artifact-0040978541934ec0803b607ff5200dae
+  type: implementation.constraints
+  record_digest: sha256:ec5c65ed8a43d455f87c338ed909572efb8fac39dfaf841b4b2e55c956fec8f2
+  record_path: .nebula_inputs/artifact-0040978541934ec0803b607ff5200dae/artifact.json
+  commit: a4591add32499f2aae18a8cb6ee5f01c880c43a4
+- artifact_id: authorized-calibrated-geometry-revision
+  type: specification.source
+  record_digest: sha256:c06e763240ef04f5783b783f97f628dfb794b01b4136eb97caf8a3029bcaeb63
+  record_path: .nebula_inputs/authorized-calibrated-geometry-revision/artifact.json
+  commit: b820a4da864e4c16064e384f9eadccf40b3b0d95
+input_file_sha256:
+  spec/acceptance.md: b7841cf3f2d3fe1b2c1f9324bd313fdb647ec1b5cec0d986fd5ab8a47b370e50
+  spec/public_cpu_interface_reference.sv: 058f7d46c174d485757e0b7b5501cdf9c550119aa642032bf519fe6d72fb8cbd
+  spec/source-contract.md: ba307c2b5ee170ee22b621bd80e0df4196f7fbceeba329ca4e7eac8ad7ccd33b
+  spec/contracts.json: 312b5e50d29b212cdd2093934006bf717d236e5091f5253ace6ad471260c47df
+  spec/design_doc.md: 3b2c475adbd277e410da4504911247bb3890d32ccb4fb3651d4003915274784f
+  spec/draft.specir: 8466108d6952e7dd591323f2ba67842dea975c1a7fad12d70943416a71f5ccd9
+  spec/provenance.json: cf0277a7b93fa9205d82357798ac2852e9ca02b743f7d8aecef9731cd3c03cef
+  spec/questions.json: f908d55afd8d6b469c39284760d35bfd980bcc9f895ade98e83efe6b17c79c05
+  spec/requirements.ledger.json: 104c9f6e78ca77929223ef8dc8e8134e34c774bbb34015081e2d37f891023983
+  physical/chip-nebula/constraints.sdc: 07035b98278546157e4e75570d2657337f7c9b8cb4d82e5482e991f558a0be16
+  physical/chip-nebula/implementation.constraints.json: 752843a10754d7ea76453133701edd50150bc675ca04adc5562f7b33783609d7
+execution_policy:
+  configurations:
+  - rv32i_five_stage_cpu ENABLE_XNEBULA=0 (default)
+  - rv32i_five_stage_cpu ENABLE_XNEBULA=1
+  - nebula_cpu_npu_top with core ENABLE_XNEBULA=1
+  base_suite: Run every applicable base CPU functional/cycle/protocol test in both
+    core configurations, and run integration smoke/workloads on the enabled physical
+    top. Standalone NPU checks exercise its specified internal interface.
+  evidence: Each item result must carry check ID, stable requirement IDs/design groups,
+    baseline/constraint/RTL hashes, actual command/tool identities, run/configuration/ELF/seed/reset/bus
+    schedule, raw logs and retrievable evidence hashes. Bind external contract operands
+    and results to actual same-run objects; free hashes or constant PASS flags do
+    not satisfy acceptance.
+  results: Keep NOT_RUN/PENDING, PASS, FAIL, TIMEOUT and INVALID distinct. A qualified
+    runtime retains the immutable checker FAIL/TIMEOUT; invalid or missing lineage
+    is INVALID. Every required run remains in fixed totals. A timeout is non-passing,
+    not a diagnosis.
+  completion: Whole-project PASS requires passing evidence for every required item
+    and every configuration, complete 443-ID trace coverage, valid common execution,
+    no pending/missing result or required adapter, plus required physical/GDS closure.
+    Report-only metrics require honest measured values or explicit supported-model
+    unavailability; they have no numerical budget.
+  scope: Reference calibration and historical results never count as DUT execution.
+    ACT4 subset success is not certification. Single-corner engineering closure does
+    not imply foundry release or silicon results.
+  downstream_permissions: Stage ownership denotes evidence responsibility, not a write/tool
+    authorization. Delivery and evaluator owners must execute in their own granted
+    scopes; this draft adds no workflow task or permission.
+  physical_revision: Every affected physical-stage result must identify this confirmed/frozen
+    acceptance revision and constraints revision 2 by actual immutable artifact/file
+    hashes, the same signed specification and qualified implementation. Source the
+    prescribed environments, explicitly invoke the selected OpenROAD path and verify
+    actual resolved bytes/version after environment loads; record NUM_CORES=2 and
+    actual tool threads=2. Ambient PATH selection, a version probe detached from the
+    execution binary, or old 26Q3/16-core measurements do not qualify.
+  physical_revalidation: Rerun or revalidate affected floorplan, rows/pins, placement,
+    CTS/repair, routing/extraction, setup/hold/electrical, router/independent DRC,
+    LVS, antenna and final exports with actual selected binary, two threads and new
+    formal inputs. Require fresh evidence for the external reset waveform and retain
+    all recovery/removal/library pulse checks. A previously saved checkpoint may be
+    considered only after explicit input, stage and design compatibility checks; unchanged
+    filenames or numeric results do not establish qualification.
+  functional_evidence_reuse: The geometry/tool revision permits qualified functional
+    evidence reuse only after exact source, signed specification, qualified RTL, immutable
+    checker/corpus, configuration and original runtime/evidence binding are verified.
+    Archive the reuse decision and original run identities; mark results reused rather
+    than newly executed. Incompatible or unresolved evidence requires rerun. This
+    plan-authoring task does not certify the supplied verification report or execute
+    a functional/physical run.
+metrics:
+- key: clock.period_ns
+  label: Frozen physical clock period
+  unit: ns
+  target: 100
+  basis: requirement
+  operator: ==
+  note: implementation.constraints.json#/clocks; Sky130HD tt_025C_1v80, nominal 10
+    MHz.
+  requirement_ids:
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+- key: cpu.fetch_to_retire_cycles
+  label: Independent ADDI fetch-to-retire
+  unit: cycles
+  target: 4
+  basis: requirement
+  operator: ==
+  note: Per PC of all 64 instructions; pre-edge fetch and post-NBA commit; both configurations.
+  requirement_ids:
+  - REQ-D58FD55E7FD3
+  design_groups:
+  - cpu.pipeline
+- key: cpu.steady_ipc
+  label: Independent ADDI steady retirement throughput
+  unit: instructions/cycle
+  target: 1
+  basis: requirement
+  operator: ==
+  requirement_ids:
+  - REQ-56CE793251EE
+  design_groups:
+  - cpu.pipeline
+- key: cpu.alu_dependency_delta
+  label: ALU dependent-minus-control interval and span
+  unit: cycles
+  target: 0
+  basis: requirement
+  operator: <=
+  requirement_ids:
+  - REQ-D8097CE0B9F1
+  design_groups:
+  - verification.cycles
+- key: cpu.load_dependency_delta
+  label: Load dependent-minus-control interval and span
+  unit: cycles
+  target: 1
+  basis: requirement
+  operator: <=
+  requirement_ids:
+  - REQ-F7C63D530051
+  - REQ-930A831E80DB
+  design_groups:
+  - verification.cycles
+- key: cpu.cycle_checks_passed
+  label: CPU-PIPE-CYCLES complete set
+  unit: checks
+  target: 22
+  basis: requirement
+  operator: ==
+  requirement_ids:
+  - REQ-206267FD77CA
+  design_groups:
+  - verification.cycles
+- key: cpu.act4_passed
+  label: Frozen applicable ACT4 corpus
+  unit: ELFs
+  target: 45
+  basis: requirement
+  operator: ==
+  requirement_ids:
+  - REQ-DB908DF98081
+  - REQ-693267807090
+  design_groups:
+  - verification.functional
+- key: directed.int_templates
+  label: CPU-DIR-INT template minimum
+  unit: templates
+  target: 12
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-637A2C479BEE
+  design_groups:
+  - verification.directed
+- key: directed.mem_templates
+  label: CPU-DIR-MEM template minimum
+  unit: templates
+  target: 10
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-0B2A29BBC15C
+  design_groups:
+  - verification.directed
+- key: directed.haz_templates
+  label: CPU-DIR-HAZ template minimum
+  unit: templates
+  target: 12
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-F1179F710B95
+  design_groups:
+  - verification.directed
+- key: directed.trap_templates
+  label: CPU-DIR-TRAP template minimum
+  unit: templates
+  target: 12
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-6EBD97F59D93
+  design_groups:
+  - verification.directed
+- key: directed.csr_templates
+  label: CPU-DIR-CSR template minimum
+  unit: templates
+  target: 8
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-F6F0DAAE5FAF
+  design_groups:
+  - verification.directed
+- key: directed.variants_per_template
+  label: Key-value variants per directed template
+  unit: variants
+  target: 2
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-0D35C0A5BD94
+  - REQ-F6ED37F83E19
+  design_groups:
+  - verification.directed
+- key: directed.programs
+  label: Directed program minimum
+  unit: programs
+  target: 108
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-F6ED37F83E19
+  design_groups:
+  - verification.directed
+- key: random.valid_programs
+  label: Fixed-seed bounded differential programs
+  unit: programs
+  target: 100
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-9BDA4375093B
+  design_groups:
+  - verification.differential
+- key: random.normal_retirements_per_program
+  label: Normal retirements in each valid random program
+  unit: instructions
+  target: 1000
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-AC347C5C9A4D
+  design_groups:
+  - verification.differential
+- key: random.normal_retirements_total
+  label: Aggregate normal differential retirements
+  unit: instructions
+  target: 100000
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-E205DAA96DF2
+  design_groups:
+  - verification.differential
+- key: bus.delay_seeds
+  label: Fixed random-wait delay seed minimum
+  unit: seeds
+  target: 20
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-58D073B3CDED
+  design_groups:
+  - verification.timeouts
+- key: npu.accept_to_valid_cycles
+  label: NPU request handshake to response validity
+  unit: cycles
+  target: 2
+  basis: requirement
+  operator: ==
+  requirement_ids:
+  - REQ-FE226BF78160
+  design_groups:
+  - npu.protocol
+- key: npu.outstanding_max
+  label: Maximum outstanding NPU operations
+  unit: operations
+  target: 1
+  basis: requirement
+  operator: <=
+  requirement_ids:
+  - REQ-67BAF3B834D3
+  design_groups:
+  - npu.protocol
+- key: timing.setup_slack
+  label: Required setup slack
+  unit: ns
+  target: 0
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: timing.hold_slack
+  label: Required hold slack
+  unit: ns
+  target: 0
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: physical.slew_violations
+  label: Library slew violations
+  unit: violations
+  target: 0
+  basis: requirement
+  operator: ==
+  note: Frozen constraints signoff obligation.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: physical.capacitance_violations
+  label: Library capacitance violations
+  unit: violations
+  target: 0
+  basis: requirement
+  operator: ==
+  note: Frozen constraints signoff obligation.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: physical.fanout_violations
+  label: Available library fanout violations
+  unit: violations
+  target: 0
+  basis: requirement
+  operator: ==
+  note: Fanout applies only when a characterized ceiling exists; otherwise report
+    structural fanout and limit unavailable.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: physical.router_drc_violations
+  label: Detailed-route DRC violations
+  unit: violations
+  target: 0
+  basis: requirement
+  operator: ==
+  note: Frozen constraints signoff obligation.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: physical.antenna_violations
+  label: Antenna violations
+  unit: violations
+  target: 0
+  basis: requirement
+  operator: ==
+  note: Frozen constraints signoff obligation.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: physical.klayout_drc_violations
+  label: Independent deck DRC violations
+  unit: violations
+  target: 0
+  basis: requirement
+  operator: ==
+  note: Frozen constraints signoff obligation.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/signoff
+- key: reset.low_pulse_ns
+  label: External reset minimum low pulse
+  unit: ns
+  target: 200
+  basis: requirement
+  operator: '>='
+  requirement_ids:
+  - REQ-D78B93943C97
+  design_groups:
+  - cpu.reset
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/reset
+- key: functional.normalized_score
+  label: Full functional score for PPA/time eligibility
+  unit: points
+  target: 50
+  basis: requirement
+  operator: ==
+  note: t09_group_cycles10_v1; ACT4=8 resolved; raw75 normalized50. Scoring does not
+    waive any project check.
+  requirement_ids:
+  - REQ-723FE432B3F3
+  - REQ-74D63A25028B
+  design_groups:
+  - verification.scoring
+- key: design.area
+  label: Area reports
+  unit: um^2
+  target: report_only
+  basis: requirement
+  note: Mapped functional, placed, core, die and support-cell accounting separately;
+    no hard ceiling.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/area
+- key: design.power
+  label: Per-workload supported-model power reports
+  unit: mW
+  target: report_only
+  basis: requirement
+  note: Dynamic/leakage/total per DOT64/GEMM8/CONV3 at100ns; no hard power limit.
+    Missing model/activity is unavailable.
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  design_groups:
+  - physical.scope
+  constraint_reference: physical/chip-nebula/implementation.constraints.json#/power
+- key: coverage.measured
+  label: Actual line/branch/toggle/functional coverage
+  unit: '%'
+  target: report_only
+  basis: requirement
+  note: Only formally eligible measured execution. No source numerical coverage threshold;
+    local common contribution=0.
+  requirement_ids:
+  - REQ-AD34FCA99747
+  design_groups:
+  - verification.functional
+- key: project.acceptance_coverage
+  label: Normative requirement trace closure
+  unit: requirements
+  target: 443
+  basis: requirement
+  operator: ==
+  note: Every catalog requirement has actionable items; actual covered counts require
+    executed evidence.
+  requirement_ids:
+  - REQ-AD34FCA99747
+  - REQ-E26D8D5FC2DE
+  design_groups:
+  - verification.functional
+categories:
+- key: delivery
+  name: Delivery and integration
+  cards:
+  - key: frozen-delivery
+    title: Frozen Delivery
+    items:
+    - id: AC-DELIVERY
+      title: Deliver exact frozen base contract
+      detail: 'Responsible stage: full-design-integration. Configuration: project
+        delivery. Dependencies: captured ready specification and frozen constraints.
+        Procedure: Read the actual root t09-base-contract.md and compare it directly
+        to source-contract.md bytes from line19 through EOF; validate the immutable
+        companion acceptance.md identity and delivery manifest. Pass condition: File
+        exists at the exact regular-file path; byte equality,6930 bytes and SHA2561021e4b88446ed12c7b6a3cc6f46847f16a44c70a47660fff24f5f91ca778958
+        all agree. Missing, reformatted or truncated content fails. Evidence: Actual
+        delivered byte object, source and companion hashes, manifest with responsible
+        owner, direct comparison result bound to SPEC_AUTHORITY.'
+      requirement_ids:
+      - REQ-AB306F4AA831
+      design_groups:
+      - spec.authority
+      responsible_stage: full-design-integration
+      dependencies: []
+      source_refs:
+      - spec/design_doc.md#baseline-delivery
+      execution_status: not_run
+    - id: AC-ORIGINAL
+      title: Original implementation and immutable checker
+      detail: 'Responsible stage: rtl-implementation. Configuration: both core configurations.
+        Dependencies: captured ready specification and frozen constraints. Procedure:
+        Audit the implementation history and authorized input/dependency inventory;
+        compare the independent checker and fixture/config/seed hashes before and
+        after all runs. Check original RTL elaborates and synthesizes. Pass condition:
+        Fresh original synthesizable RTL; no copied reference/prior-candidate/private
+        answer content in the workspace and zero checker/config/seed modifications
+        to obtain PASS. Do not inspect excluded source to perform this audit. Evidence:
+        Repository/dependency lineage, unchanged checker hashes and elaboration/synthesis
+        logs.'
+      requirement_ids:
+      - REQ-FDDBC67C954F
+      - REQ-CC6F59551A30
+      - REQ-3E3CE6190291
+      - REQ-8E067BBEC910
+      design_groups:
+      - project.scope
+      responsible_stage: rtl-implementation
+      dependencies: []
+      source_refs:
+      - spec/source-contract.md#L3
+      - spec/source-contract.md#L15
+      execution_status: not_run
+    - id: AC-RESOURCES
+      title: Measure development resource envelope
+      detail: 'Responsible stage: rtl-implementation. Configuration: development attempt.
+        Dependencies: captured ready specification and frozen constraints. Procedure:
+        Obtain platform allocation, cumulative task wall-time/token accounting, memory
+        peak and writable-disk usage for the development attempt; reconcile against
+        declared resource limits. Pass condition: Allocation16vCPU, RAM<=32GiB, writable
+        disk<=100GiB, development<=2h and same-model tokens<=1200000. Missing accounting
+        is unavailable/pending, never fabricated PASS; these are development limits,
+        not hardware targets. Evidence: Platform allocation and actual resource/time/token
+        receipts linked to the attempt.'
+      requirement_ids:
+      - REQ-83E61D370EBF
+      - REQ-264F9B513D18
+      - REQ-2FC06D942B8A
+      - REQ-6AC755A84F95
+      - REQ-919A9AD6965D
+      design_groups:
+      - project.resources
+      responsible_stage: rtl-implementation
+      dependencies: []
+      source_refs:
+      - spec/source-contract.md#L35
+      execution_status: not_run
+  - key: interfaces
+    title: Interfaces
+    items:
+    - id: AC-PORTS
+      title: Elaborate exact CPU and physical interfaces
+      detail: 'Responsible stage: full-design-integration. Configuration: both core
+        configurations. Dependencies: AC-ORIGINAL. Procedure: Compile the frozen wildcard
+        public fixture with no parameter override; independently elaborate parameter0,parameter1
+        and the physical top; compare each port name/direction/width to constraints.ports
+        and the public reference. Pass condition: Zero port differences or added ports;
+        default ENABLE_XNEBULA=0; top exactly nebula_cpu_npu_top with one enabled
+        core. Physical bit totals69 inputs/371 outputs agree. Evidence: Elaborator
+        port tables and parameter/hierarchy dump with source hashes.'
+      requirement_ids:
+      - REQ-19FAECECF72B
+      - REQ-30A1A8DECA35
+      - REQ-B27BE9BD6285
+      - REQ-FAC9A0F0E0BF
+      - REQ-143CDF1DFBC8
+      - REQ-11AF5B483862
+      - REQ-D02A0AE3A2DB
+      - REQ-0C7C339A0296
+      - REQ-10E0F94E468C
+      - REQ-6417D601B63D
+      - REQ-30AD2C4048CF
+      - REQ-068D962F5231
+      - REQ-AC1AC629C70C
+      - REQ-3E85D730A8FA
+      - REQ-69E61BF1BC08
+      - REQ-9EC2373BAC9D
+      - REQ-30C1DFAE7EA0
+      - REQ-57EC775000EC
+      - REQ-B3A20700BE16
+      - REQ-E6DDE0AC0E54
+      - REQ-26ED58355F60
+      - REQ-9F4CF352B4DC
+      - REQ-9D645EA89DE9
+      - REQ-54492583756F
+      - REQ-A1CE7C077C49
+      - REQ-C6D3D50DFCDB
+      - REQ-B10CAB222D48
+      - REQ-6EE114D5A075
+      - REQ-4F68440231C9
+      - REQ-307479DB8518
+      - REQ-500FBFC04817
+      - REQ-858FB2D8D1B2
+      - REQ-4C17FDB4FCDB
+      - REQ-FF0087FC5863
+      design_groups:
+      - cpu.interface
+      responsible_stage: full-design-integration
+      dependencies:
+      - AC-ORIGINAL
+      source_refs:
+      - spec/design_doc.md#ports
+      - spec/public_cpu_interface_reference.sv#L6-L25
+      execution_status: not_run
+    - id: AC-INTEGRATION
+      title: Replay ordered integration and dependency locks
+      detail: 'Responsible stage: full-design-integration. Configuration: both core
+        configurations. Dependencies: AC-PORTS. Procedure: Resolve every actual file/hash
+        in integration/design.f and dependencies.lock.json; rebuild from that order/top/configuration
+        and compare hierarchy/netlist ports. Pass condition: Explicit ordered dependencies
+        and hashes match delivered bytes; enabled top builds reproducibly; all program/data
+        memories and simulation components are outside physical netlist. Any missing/extra
+        untracked dependency fails. Evidence: File list, retrievable lock manifest,
+        clean elaboration logs and memory-exclusion hierarchy.'
+      requirement_ids:
+      - REQ-2EFF5B9CB3EB
+      - REQ-26835CBACE92
+      - REQ-DBB27F6C2D3C
+      design_groups:
+      - integration.boundary
+      responsible_stage: full-design-integration
+      dependencies:
+      - AC-PORTS
+      source_refs:
+      - spec/design_doc.md#integration
+      execution_status: not_run
+- key: cpu
+  name: Base CPU semantics
+  cards:
+  - key: structure
+    title: Structure
+    items:
+    - id: AC-STRUCTURE
+      title: Check real pipeline and architectural resource scope
+      detail: 'Responsible stage: rtl-implementation. Configuration: both core configurations.
+        Dependencies: AC-INTEGRATION. Procedure: RTL implementation owner supplies
+        source/state-transfer inventory showing four distinct interstage register
+        groups; verify the RTL32x32RF with2 combinational reads/1 rising-edge write;
+        mapped-netlist confirmation belongs to AC-SYNTHESIS after functional acceptance.
+        Run observable timing/hazard/flush/wait/differential checks independently.
+        Pass condition: Real IF/ID,ID/EX,EX/MEM,MEM/WB and single-issue pipeline in
+        both configurations, not a multicycle controller or delayed commit. Enabled
+        NPU appears in explicit generate; disabled hierarchy has no NPU multiplier.
+        No CPU M divider/multiplier,predictor,cache,internal program/data RAM or OS.
+        Exact base timing passes. Static structure review earns no extra scoring points;
+        any future automatic scoring rule requires published decidable rules and false-positive
+        regression before freeze. Evidence: State/transfer inventory, source-to-netlist
+        mapping, RTL elaboration hierarchy and separate external timing reports; later
+        mapped confirmation is AC-SYNTHESIS.'
+      requirement_ids:
+      - REQ-269A92199F57
+      - REQ-5A63794D81A1
+      - REQ-009CFCC955AD
+      - REQ-AD938E4C7993
+      - REQ-260B7A7590D6
+      - REQ-BFED1ACF2799
+      - REQ-FB0A4C73634E
+      - REQ-08F22F52719B
+      - REQ-B6574FECD558
+      - REQ-3EA8205B2DC9
+      - REQ-12E4D8BD2FF9
+      - REQ-79DCC08E60B9
+      - REQ-DDA492CBD6C0
+      - REQ-B327A59BB1D2
+      - REQ-F7DB76DFE7F3
+      design_groups:
+      - cpu.structure
+      - verification.structure
+      responsible_stage: rtl-implementation
+      dependencies:
+      - AC-INTEGRATION
+      source_refs:
+      - spec/design_doc.md#pipeline
+      - spec/design_doc.md#integration
+      - spec/acceptance.md#L66
+      execution_status: not_run
+  - key: decode
+    title: Decode
+    items:
+    - id: AC-ISA
+      title: Exercise complete RV32I and excluded encodings
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-INTEGRATION, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Run independent directed oracles for every integer/logic/shift/load/store/U/control/FENCE/system
+        family, with zero,all-ones,signed boundaries,shift0/31 and immediate extremes;
+        run malformed/reserved/unsupported encodings. Pass condition: Every event/result
+        is exact modulo32 with signed/unsigned semantics and correct immediates; all6
+        branches both directions,JAL/JALR links and bit0 clearing,x0 constant0. Six
+        CSR forms and MRET pass; FENCE orders the one-outstanding port without extra
+        transaction; FENCE.I and excluded M/A/F/D/C/reserved forms trap2. M-mode only,no
+        MMU/cache/asynchronous interrupt; no unsupported behavior inferred. Evidence:
+        Per-instruction expected/actual commit/trap/register/memory comparisons and
+        opcode-family inventory.'
+      requirement_ids:
+      - REQ-4B1E823D24A4
+      - REQ-921715D8B2AF
+      - REQ-89EDFB48B800
+      - REQ-B59DA4519DD0
+      - REQ-96DC594C97E2
+      - REQ-566FB24D26E1
+      - REQ-6D1464E99D6A
+      - REQ-D3AB11D19072
+      - REQ-E5694BFF2E04
+      - REQ-A2D47806D5E6
+      - REQ-B6E898125B0C
+      - REQ-04D39DB4975F
+      - REQ-28F20098C3A9
+      - REQ-E50EA77579AB
+      - REQ-04B19A02D3C3
+      - REQ-E4EC71EEA384
+      - REQ-C33AA043CC12
+      - REQ-5D7FE0139BE5
+      - REQ-EAFD9F729329
+      - REQ-146C35547C54
+      design_groups:
+      - cpu.decode
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-INTEGRATION
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#decode
+      execution_status: not_run
+  - key: fetch-reset
+    title: Fetch Reset
+    items:
+    - id: AC-FETCH
+      title: Pair fetch responses and ignore unowned data
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-INTEGRATION, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Use the one-cycle registered imem model, toggle invalid-cycle data,
+        hold decode during memory/CSR waits, and return already accepted wrong-path
+        responses around each redirect. Pass condition: Each accepted rising-edge
+        request owns only its next-cycle ordered word; no unrequested data is consumed
+        and no token/PC is lost or duplicated. Stalled word is retained; wrong-path
+        responses are discarded. With invalid IF/ID, stale CSR/MRET-looking data never
+        blocks permitted target fetch at the next edge after redirect; valid serial
+        tokens still wait for older stages. Evidence: Pre-edge request/post-edge response
+        and event traces including reset epochs and stale-data regression.'
+      requirement_ids:
+      - REQ-0392322ACD1C
+      - REQ-2345EA643433
+      - REQ-E6D7C96EB441
+      - REQ-F4E79D888F4E
+      - REQ-FCE03CABF728
+      - REQ-4384ABA79FF2
+      - REQ-CF49BA0213E9
+      - REQ-3521529EFA27
+      - REQ-17A77E0DD17F
+      - REQ-A4D3EB46112F
+      design_groups:
+      - cpu.fetch
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-INTEGRATION
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#fetch
+      - spec/design_doc.md#common-runtime
+      execution_status: not_run
+    - id: AC-RESET
+      title: Cancel CPU and external-memory state on reset
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-INTEGRATION, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Inject active-low reset during idle,ALU flow,branch vicinity,load
+        request/backpressure/response wait and held fetch; reset external memories
+        jointly and restart every cycle pair independently. Pass condition: While
+        reset low,requests/responses/commit/trap valids suppressed; all in-flight
+        tokens/transactions cleared. Release starts at0x80000000 with specified RF/CSR
+        reset state and no pre-reset event/effect. Asynchronous assertion and rising-edge
+        functional clock preserved; physical reset waveform checked separately. Evidence:
+        Reset/stimulus waveform, before/after event and bus traces, fresh reset-epoch
+        initial images.'
+      requirement_ids:
+      - REQ-D78B93943C97
+      - REQ-6C39607BFF86
+      - REQ-079A812CDD10
+      - REQ-90E5A2708BE1
+      - REQ-DEFCE26371DA
+      - REQ-5711801822DF
+      - REQ-0C97378EE39C
+      design_groups:
+      - cpu.reset
+      - verification.reset
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-INTEGRATION
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#reset
+      - spec/acceptance.md#L46
+      execution_status: not_run
+  - key: memory
+    title: Memory
+    items:
+    - id: AC-MEMORY
+      title: Verify byte lanes, ownership and error semantics
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-INTEGRATION, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Exercise all5 load/3 store forms at all legal lanes and boundary
+        addresses under response1..8 and request backpressure. Monitor accepted request/response
+        ownership and test alignment before permitting bus access. Pass condition:
+        Aligned word bus address; exact little-endian masks/data and sign/zero extension.
+        One outstanding,stable blocked request,unique held response,mandatory store
+        acknowledgment and no replay. Misalignment issues no request; error store
+        has zero memory effect and one precise trap, no normal commit. No recovery/preparation
+        latency concealed as bus waiting; absolute span check also passes. Evidence:
+        Accepted transaction/effect ledger, full initial/final images and event/expected
+        comparisons.'
+      requirement_ids:
+      - REQ-4D966719537C
+      - REQ-0E3A6660BAD4
+      - REQ-59AA63F02D48
+      - REQ-E2490F44D4FE
+      - REQ-6501DAE7C4FE
+      - REQ-72865D64F290
+      - REQ-469EDAA52B62
+      - REQ-1784087D048A
+      - REQ-BB13DC472AB4
+      - REQ-7D6D658EA3CB
+      - REQ-F3C9EF972C06
+      - REQ-7C1169296FCF
+      - REQ-C8E4CE003793
+      - REQ-7895FFDD0093
+      - REQ-5A8034DC909A
+      design_groups:
+      - cpu.memory
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-INTEGRATION
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#memory
+      execution_status: not_run
+  - key: hazards
+    title: Hazards
+    items:
+    - id: AC-HAZARDS
+      title: Forward newest values and bound dependency bubbles
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-INTEGRATION, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Run adjacent,one-gap,dual-source,repeated-rd,x0 ALU and load consumers
+        (ALU,branch,store address/data,NPU) against matched independent controls;
+        retire an older WB producer while its consumer waits in EX. Pass condition:
+        Newest live producer wins independently on both sources; unresolved load cannot
+        fall through to stale value; held operands refresh from WB. x0 never forwards.
+        ALU interval/span deltas<=0 and load deltas<=1 under same schedule; all actual
+        results correct. Evidence: Matched-pair instruction streams,retirement cycles
+        and independently expected operands/effects.'
+      requirement_ids:
+      - REQ-C5A7D192B104
+      - REQ-6922321A4B55
+      - REQ-703BD08FBBAC
+      - REQ-F6E424892CA2
+      design_groups:
+      - cpu.hazards
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-INTEGRATION
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#hazards
+      execution_status: not_run
+  - key: traps-csr
+    title: Traps Csr
+    items:
+    - id: AC-EXCEPTIONS
+      title: Verify precise fault priority and trap metadata
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-ISA, AC-MEMORY. Procedure: Inject every
+        listed cause with older work and distinct younger stores; test taken/not-taken
+        unaligned branch targets,JALR bit0 clearing,misaligned accesses plus error
+        opportunities,illegal words,ECALL/EBREAK and load/store errors. Pass condition:
+        Causes0,2,3,4,5,6,7,11 exact; trap PC is faulting instruction,mtval address/full
+        illegal word/zero as specified,mepc low bits masked. Alignment precedes bus
+        issue/error. Older effects retire in order; faulting instruction writes no
+        RF/memory or normal commit; all younger effects canceled. Not-taken unused
+        unaligned target does not trap. Evidence: Expected/actual cross-event sequence,CSR
+        snapshots and bus effects proving zero fault/young writes.'
+      requirement_ids:
+      - REQ-337FF384F441
+      - REQ-8F118A19392A
+      - REQ-2A5B83FE5927
+      - REQ-9286F4C274D2
+      - REQ-271F9AAFC83A
+      - REQ-AD49D324C64D
+      - REQ-21315BABC6AC
+      - REQ-1F2267160B22
+      - REQ-B3CB51F9E330
+      - REQ-E77C44483B33
+      - REQ-737329EE7EAD
+      - REQ-8A10CFB2386A
+      - REQ-CB7CB45CEA41
+      - REQ-537924B76D1B
+      - REQ-843F67C8CA73
+      - REQ-F9210FF2ABC9
+      - REQ-C6B4DA5C12B8
+      - REQ-F34E2E0A153C
+      - REQ-602F477BB0C1
+      - REQ-E23AA97A838B
+      - REQ-15BED143CDD8
+      - REQ-9092BC87EC32
+      - REQ-E568FB7F5AF1
+      - REQ-26EE8020D91F
+      design_groups:
+      - cpu.exceptions
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-ISA
+      - AC-MEMORY
+      source_refs:
+      - spec/design_doc.md#exceptions
+      execution_status: not_run
+    - id: AC-CSR
+      title: Verify exact CSR masks and MRET ordering
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-ISA, AC-EXCEPTIONS. Procedure: Run all6
+        CSR forms on0x300/305/340/341/342/343/301/f14,rd0,encoded rs1=0 versus nonzero
+        register containing0,zimm0/nonzero,unlisted addresses and read-only writes;
+        interleave pending memory,traps and MRET. Pass condition: mstatus reset0x1800,onlyMIE3/MPIE7/MPP11:12
+        visible,MPP=3; mtvec reset0x80000000/direct and low2masked; mscratch/mepc/mcause/mtval
+        reset0,mepc low2masked; misa0x40000100/mhartid0 readonly. Suppression depends
+        on encoded zero source, not runtime zero. Readonly/unlisted writes trap2;
+        masks/old-value writeback exact. Trap MPIE<-MIE,MIE<-0 and MRET MIE<-MPIE,MPIE<-1,PC<-mepc
+        occur at ordered WB; both configurations retain identical misa/task scope.
+        Evidence: CSR/reset/entry/return expected-state tables and event order linked
+        to locked ISA configuration.'
+      requirement_ids:
+      - REQ-8F60562C2372
+      - REQ-E788EC39CBE4
+      - REQ-B608E3CF8AA3
+      - REQ-E91316DDE27F
+      - REQ-6CF3405389C1
+      - REQ-B719BE12CB31
+      - REQ-7343B805DC84
+      - REQ-D8A2CC7C8F53
+      - REQ-8F2402C2FFF7
+      - REQ-E8377268435D
+      - REQ-78F670666B6D
+      - REQ-6E408BD8CB60
+      - REQ-0CEB9F126856
+      - REQ-0B54DE06AEAC
+      - REQ-A75F216EF6B9
+      - REQ-D4F27EA9D2DF
+      - REQ-94C010A2C5A1
+      - REQ-38D57823D8BF
+      - REQ-DF4622E245CC
+      - REQ-CAC576682593
+      - REQ-59E128C8F48E
+      - REQ-06E2CF5F45F5
+      - REQ-D8EAA8DAA33D
+      - REQ-A70472E9A2F7
+      - REQ-2B1C919C61DD
+      - REQ-5E9C42E5E0AC
+      design_groups:
+      - cpu.csr
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-ISA
+      - AC-EXCEPTIONS
+      source_refs:
+      - spec/design_doc.md#csr
+      execution_status: not_run
+  - key: retirement
+    title: Retirement
+    items:
+    - id: AC-RETIREMENT
+      title: Correlate each event with architectural effects
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-ISA, AC-MEMORY, AC-EXCEPTIONS. Procedure:
+        Externally sample every commit/trap post-NBA and match to ordered oracle events,actual
+        RF/CSR updates and accepted stores; check logic connectivity from observation
+        outputs to execution. Pass condition: Exactly one normal WB commit per valid
+        instruction,contiguous valid cycles carry distinct events; rd=0 when no RF
+        write,wstrb=0 for nonstore. Fault events separate from normal counts. Successful
+        stores match exact address/mask/data and acknowledge once; erroneous/killed
+        tokens have no side effect/normal commit. No fake delayed-valid stage or observer-to-execution
+        feedback; no core trace writer required. Evidence: External event/effect ledger,independent
+        expected streams,source connectivity review and end-of-run transaction drain.'
+      requirement_ids:
+      - REQ-E9119CE5C2CE
+      - REQ-A8BF7C0F30A9
+      - REQ-50A6C0331733
+      - REQ-661B4B6071E7
+      - REQ-080C908DD5DB
+      - REQ-A0360E64E01A
+      - REQ-32F76BF9D4D8
+      - REQ-2636FF3C7C71
+      - REQ-D447E2E7E8CF
+      design_groups:
+      - cpu.retirement
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-ISA
+      - AC-MEMORY
+      - AC-EXCEPTIONS
+      source_refs:
+      - spec/design_doc.md#retirement
+      execution_status: not_run
+- key: npu
+  name: NPU and extension
+  cards:
+  - key: unit
+    title: Unit
+    items:
+    - id: AC-NPU-PORTS
+      title: Elaborate standalone NPU interface
+      detail: 'Responsible stage: full-design-integration. Configuration: standalone
+        NPU. Dependencies: AC-ORIGINAL. Procedure: Elaborate nebula_npu_dot4 and compare
+        its complete port table to detailed-design section12. Pass condition: Exact
+        named module/scalar directions and32bit req_a/req_b/rsp_data; shared clk/rst_n,kill;
+        no added memory/accumulator interface. Evidence: Actual elaborator port table
+        and standalone file hash.'
+      requirement_ids:
+      - REQ-B78161A158A3
+      - REQ-C02E6748BCF7
+      - REQ-71538667A027
+      - REQ-EFAAE7C0F481
+      design_groups:
+      - npu.interface
+      responsible_stage: full-design-integration
+      dependencies:
+      - AC-ORIGINAL
+      source_refs:
+      - spec/design_doc.md#npu
+      execution_status: not_run
+    - id: AC-NPU-ARITH
+      title: Compare signed four-lane dot arithmetic
+      detail: 'Responsible stage: functional-performance-verify. Configuration: standalone
+        NPU. Dependencies: AC-NPU-PORTS, AC-RUNTIME. Procedure: Use an independent
+        integer oracle on asymmetric lane patterns,each of25Cartesian signed lane-pair
+        values from{-128,-1,0,1,127} in each of4lane positions,full extreme vectors
+        and random words from a manifest-fixed seed and sample count (record the count
+        before execution; no source numerical random-NPU minimum); repeat unrelated
+        requests to detect carryover. Inspect four parallel16bit products and widened
+        reduction. Pass condition: rsp_data equals signed32 sum of4 signed8 products,lane0
+        lowest byte; exact extremes-65024/65536,with sign extension before reduction.
+        No saturation,16bit wrap,hidden accumulation or memory effects; every presented
+        oracle case matches. Evidence: Operand/result vectors,oracle code/hash,zero
+        mismatch count and product/reduction structure.'
+      requirement_ids:
+      - REQ-8C1BEBF4607E
+      - REQ-A69B163641AD
+      - REQ-1B798F455119
+      - REQ-24BC3958C44C
+      - REQ-36D9A3F0A48F
+      - REQ-5CF3F62C3E34
+      design_groups:
+      - npu.arithmetic
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-NPU-PORTS
+      - AC-RUNTIME
+      source_refs:
+      - spec/design_doc.md#npu
+      execution_status: not_run
+    - id: AC-NPU-PROTOCOL
+      title: Measure exact n+2 response and held backpressure
+      detail: 'Responsible stage: functional-performance-verify. Configuration: standalone
+        NPU. Dependencies: AC-NPU-ARITH. Procedure: Record req_valid&&req_ready acceptance
+        at edge n,probe post-edge validity through n+2,hold rsp_ready low across varied
+        durations,then consume; keep requests asserted while busy and across response
+        consumption. Pass condition: First valid exactly after n+2,never early/late;
+        data and valid stable until actual response handshake. Outstanding count<=1;
+        no acceptance during pending/held response or its consumption edge under signed
+        FSM. Earliest new response consumption n+3; next request requires later IDLE
+        handshake; no missing/duplicate responses. Evidence: Per-edge handshake/result
+        ledger and held-response waveforms.'
+      requirement_ids:
+      - REQ-F3718CC6C576
+      - REQ-FE226BF78160
+      - REQ-67BAF3B834D3
+      - REQ-198A287E1CCB
+      design_groups:
+      - npu.protocol
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-NPU-ARITH
+      source_refs:
+      - spec/design_doc.md#npu
+      execution_status: not_run
+    - id: AC-NPU-CANCEL
+      title: Cancel at every NPU phase and coincident handshake
+      detail: 'Responsible stage: functional-performance-verify. Configuration: standalone
+        NPU. Dependencies: AC-NPU-PROTOCOL. Procedure: Assert kill/reset at acceptance,n+1,n+2,held
+        response and proposed response consumption,including both asserted and async
+        reset between edges; deassert and issue a fresh distinct request. Pass condition:
+        Reset/kill dominate both handshakes,suppress ready/valid,cancel all state;
+        canceled result never resurfaces or consumes. Fresh request produces only
+        its own result at n+2; outstanding returns0. Unit kill is cancellation,not
+        a derived clock. Evidence: Phase/edge cancellation matrix with attempted/actual
+        handshake and result records.'
+      requirement_ids:
+      - REQ-47B47DDA5109
+      - REQ-4187B6DAEA66
+      design_groups:
+      - npu.cancel
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-NPU-PROTOCOL
+      source_refs:
+      - spec/design_doc.md#npu
+      execution_status: not_run
+  - key: cpu-extension
+    title: Cpu Extension
+    items:
+    - id: AC-XDOT
+      title: Verify extension decode,ownership and ordinary WB
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-HAZARDS, AC-RETIREMENT, AC-NPU-CANCEL.
+        Procedure: Run R encoding opcode0x0b/funct3=0/funct7=0,rd0,both source forwarding/load
+        dependencies,consecutive dots and consumers; sweep invalid funct fields and
+        test all custom0 families when disabled. Place dot/young stores around older
+        memory errors,traps/redirects and reset. Pass condition: Enabled result equals
+        independent signed dot; rd0 still retires once. Disabled all custom0 trap2;
+        invalid fields never issue NPU. Valid EX owner accepts once only after older
+        unresolved effects cleared; younger work stalls during wait. Cancel/wrong-path
+        writes and commits0. Response traverses EX/MEM->MEM/WB->RF/commit normally;
+        unblocked signed-design schedule acceptance m,response transfer m+3,WB m+5
+        (fetch f+7),not fake commit delay. This design schedule adds no new throughput
+        budget. Evidence: CPU/NPU owner handshake traces,normal WB/effect correlation
+        and trap/cancel results for both configurations.'
+      requirement_ids:
+      - REQ-8C5A3CD2F539
+      - REQ-118353E38607
+      - REQ-E932851C3BC1
+      - REQ-A23073562299
+      - REQ-1659214BE95D
+      - REQ-F89BABF3940C
+      - REQ-6A23FA86F904
+      - REQ-56C709B438F4
+      - REQ-8D733FBB8902
+      - REQ-73CFAA00F0B0
+      - REQ-AF6A7C357E25
+      - REQ-CE1DED6EF6ED
+      - REQ-5A9FA832F2F3
+      - REQ-043365985E5F
+      design_groups:
+      - cpu.xdot4
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-HAZARDS
+      - AC-RETIREMENT
+      - AC-NPU-CANCEL
+      source_refs:
+      - spec/design_doc.md#xdot
+      execution_status: not_run
+- key: verification
+  name: Independent acceptance execution
+  cards:
+  - key: environment
+    title: Environment
+    items:
+    - id: AC-RUNTIME
+      title: Qualify official runtime and exclude local coverage
+      detail: 'Responsible stage: functional-performance-verify. Configuration: every
+        formal common build/run. Dependencies: AC-INTEGRATION. Procedure: In the same
+        launch shell explicitly source /tmp/chipnebula-pinned-tools/env.sh then /opt/rh/gcc-toolset-13/enable;
+        check source exits,probe actual effective Verilator after both loads and trace
+        the binary used by build/run children. Resolve authorized locks and preserve
+        both UDB byte identities/history. Pass condition: Verilator release exactly5.048;
+        script loads successful before build/run,same shell-instance identity and
+        inherited child environment,actual path/hash/probe/report agree. Missing/mismatched
+        lineage INVALID; valid checker FAIL/TIMEOUT retains outcome. Historical5.052
+        local deviation/counterexample remains visible; local/historical runs contribute0
+        common PASS/coverage even with5.048. ISA manual3496d46d01d783f1cc9b4a2a8b45004a97cbac94,ACT4
+        4a42cbd3756259bbc1f92a7d816bc2fd2bd551cb,Sail0.14.1,GCC16.1 match section17.2;
+        published metadata45entries joins exactly. ELF-generation and benchmark UDB
+        hashes remain distinct,no regeneration to erase comment difference. Same immutable
+        port_timing_v1 rules/checker versions for all candidates; external timing
+        proves neither internal stalls nor full app performance; historical calibration
+        is not current DUT or full benchmark release. Evidence: Retrievable script/executable/launch/child-lineage
+        receipts,raw version/exit output,checker/source/config hashes and local history;
+        actual runtime/common result qualifiers bound to the shared external contract
+        context.'
+      requirement_ids:
+      - REQ-ABAEDC5E100A
+      - REQ-EA7B625ABEF0
+      - REQ-D7E53423C050
+      - REQ-DB8C2F370500
+      - REQ-7C0B10687090
+      - REQ-AB6D9B607E01
+      - REQ-6A9CBCEDE20F
+      - REQ-A4C9D314C614
+      - REQ-D48B8A0A8BE7
+      - REQ-66B1B136E39A
+      - REQ-48D00D23F954
+      - REQ-F356AFEF1518
+      - REQ-507F3C986C6D
+      - REQ-61E0F6BEFED4
+      - REQ-0A79A337A5B8
+      - REQ-6065C85E0ACD
+      - REQ-1CB708E30983
+      design_groups:
+      - verification.reproducibility
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-INTEGRATION
+      source_refs:
+      - spec/design_doc.md#common-runtime
+      - spec/design_doc.md#decisions
+      execution_status: not_run
+    - id: AC-ENVIRONMENT
+      title: Bind full memory images and finite termination
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-INTEGRATION, AC-RUNTIME. Procedure:
+        Resolve same ELF/loader/config for DUT and reference,load full external256KiB
+        images at0x80000000 and compare all bytes. Verify link/macro layout and tohost
+        reservation,model boundary errors,then compare complete final images after
+        drain. Pass condition: Initial bytes equal,45locked ELF maximum loaded offset0x342c0
+        fits image; code/data/stack/vectors and0x8003f000 reserved. Environment interprets
+        tohost1=PASS,other nonzero=FAIL; timeout non-passing. CPU performs ordinary
+        accesses and has no test-name/PC/address shortcuts. Same-run final full images
+        equal and outstanding transactions0; memories excluded from core area. No
+        nonexistent feature is inferred as passing. Evidence: Actual ELF and loader
+        bytes/hash,framework config,full initial/final image objects,termination/event/bus
+        evidence.'
+      requirement_ids:
+      - REQ-1E1A1B96688F
+      - REQ-1C86CC4C72D3
+      - REQ-089C02F7655B
+      - REQ-4A2B99BF2D4F
+      - REQ-21D8E2024152
+      - REQ-E5670A9E5233
+      - REQ-FA20AA6E8F43
+      - REQ-9067CD0E4AE7
+      - REQ-392B59B6AF74
+      - REQ-208698025E30
+      - REQ-1494293713A7
+      - REQ-10F9AEEE784D
+      - REQ-4C6546ED46FD
+      - REQ-E293DAA3EDCD
+      - REQ-3F8F3008E7A1
+      - REQ-322390401491
+      - REQ-0364A64A3126
+      - REQ-131729937901
+      - REQ-ADE22725FB6F
+      - REQ-0F5272F9CC16
+      design_groups:
+      - integration.memory_environment
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-INTEGRATION
+      - AC-RUNTIME
+      source_refs:
+      - spec/design_doc.md#verification-data
+      - spec/design_doc.md#memory
+      execution_status: not_run
+    - id: AC-TIMEOUT
+      title: Freeze and enforce independent per-program cycle limits
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-RUNTIME, AC-ENVIRONMENT. Procedure:
+        Before each random/wait run,bind independent same-ELF Sail normal-retirement
+        steps; calculate limit100*steps+10000 or use an explicitly pre-fixed long-program
+        bound. Monitor active/start/final manifest and limit throughout execution.
+        Pass condition: >=20delay seeds; no limit increase or DUT-derived steps. Complete
+        at/before last allowed edge with drain; exceeding bound records TIMEOUT and
+        non-passing acceptance. Missing step identity,overflow or mutable bound INVALID.
+        Preserve raw result and avoid diagnosing a specific logic fault from timeout.
+        Evidence: Sail step object,pre-run/final/active manifest identity,cycle counter/termination
+        and immutable-limit audit.'
+      requirement_ids:
+      - REQ-58D073B3CDED
+      - REQ-2A3DFA57F39A
+      - REQ-ACFD27A4DF2E
+      - REQ-2BFE93C224C5
+      design_groups:
+      - verification.timeouts
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#timeout-data
+      execution_status: not_run
+  - key: corpora
+    title: Corpora
+    items:
+    - id: AC-ACT4
+      title: Execute every frozen applicable ACT4 ELF
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-RUNTIME, AC-ENVIRONMENT, AC-RETIREMENT.
+        Procedure: Verifier executes CPU-ACT complete45ELF manifest with locked RV32I/Zicsr/include_priv_tests=false
+        using independent oracle and sampled commits; joins every result to actual
+        same-run image/protocol/event checks. Pass condition: 45/45 PASS in each base
+        configuration,no dropped/skipped failing ELF; scope exclusions only before
+        generation with reasons/hashes. Actual misa/UDB/Sail scope agrees with limited
+        task M-mode; explicit task-card boundary oracle overrides known mismatches.
+        ACT4 does not replace other suites or constitute official RISC-V/Sm certification;
+        acceptance.md remains mandatory. Common coverage/counts include only independently
+        executed qualified runs; local contribution0. Evidence: Complete manifest
+        and per-ELF event/oracle/config/result/image objects with initial/final equality
+        and qualified runtime.'
+      requirement_ids:
+      - REQ-E26D8D5FC2DE
+      - REQ-DE2140A3B69D
+      - REQ-50A82E9483D9
+      - REQ-87962DDCB1B7
+      - REQ-40857E12BFE6
+      - REQ-08B8869F79AB
+      - REQ-18BD9E1F9704
+      - REQ-763603461F33
+      - REQ-4D90424F7EFA
+      - REQ-CFC8007861A0
+      - REQ-DB908DF98081
+      - REQ-A31DFEFC1259
+      - REQ-A3876C9F628F
+      - REQ-693267807090
+      - REQ-495F708C14A0
+      - REQ-0D51F220D6E6
+      - REQ-9DF2BA15A118
+      - REQ-11E8B8E83E3B
+      - REQ-062FCDE66532
+      - REQ-AD34FCA99747
+      design_groups:
+      - verification.functional
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      - AC-RETIREMENT
+      source_refs:
+      - spec/acceptance.md#L3-L16
+      - spec/design_doc.md#verification-data
+      execution_status: not_run
+    - id: AC-DIRECTED
+      title: Execute directed templates and all key-value variants
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-RUNTIME, AC-ENVIRONMENT, AC-ISA, AC-HAZARDS,
+        AC-EXCEPTIONS, AC-CSR. Procedure: Build/run a reviewable fixed manifest of
+        at least12INT,10MEM,12HAZ,12TRAP,8CSR templates,each>=2key-value variants,total>=54templates/108programs.
+        Include explicit initial state,expected ordered events,final RF/full memory
+        and termination for every program. Pass condition: All programs PASS; variants
+        include zero/all-ones/sign boundaries. INT every family/comparison/U/all6branch
+        directions/JALR/x0; MEM all load extensions/store lanes,same-address/word/high
+        boundary,waits,FENCE; HAZ EX/MEM and WB priority,dual source,repeated-rd,x0,load-to-branch/store;
+        TRAP wrong-path stores,control/hazards,all faults,MRET; CSR6forms,rd0/rs1=0,readonly/masks/status/vector/cause/tval.
+        Score by independent phenomenon; simplified smoke or tohost alone cannot substitute.
+        Authorized verifier uses artifact programs/oracles in its scope without copying
+        evaluator content into implementation workspace. Evidence: Complete template/variant
+        manifest,independent oracle provenance,per-program event/final-register/memory/termination
+        comparisons.'
+      requirement_ids:
+      - REQ-3888E9316EBC
+      - REQ-F5119EF273ED
+      - REQ-048B3610BE8D
+      - REQ-0D35C0A5BD94
+      - REQ-637A2C479BEE
+      - REQ-E81B683539C8
+      - REQ-46BFAE5AFC54
+      - REQ-614D839A79C6
+      - REQ-0A994E4E4F71
+      - REQ-F0537F10247E
+      - REQ-F9A5E46E627B
+      - REQ-0B2A29BBC15C
+      - REQ-7DE264240EC3
+      - REQ-92BEA226669F
+      - REQ-AF85A21FF988
+      - REQ-5195A0ABC39B
+      - REQ-D9130B2FA9F8
+      - REQ-F1179F710B95
+      - REQ-A7964968680B
+      - REQ-5AC2AEA7626F
+      - REQ-3D89EE290160
+      - REQ-EB7F0D9F2CB7
+      - REQ-F21CF4FCB931
+      - REQ-68462EEFDEE0
+      - REQ-9813F33887C5
+      - REQ-4DC150E33BBD
+      - REQ-6EBD97F59D93
+      - REQ-A621CA5BC558
+      - REQ-5AC64A8A9515
+      - REQ-7525E5D6F64B
+      - REQ-80DA52A06F33
+      - REQ-1ED25FC13901
+      - REQ-E82638145341
+      - REQ-F6F0DAAE5FAF
+      - REQ-2DD16DFA622F
+      - REQ-1F76B21A3E76
+      - REQ-345683224B61
+      - REQ-3D2CE3573FA4
+      - REQ-DBC595716C57
+      - REQ-F6175E6EA689
+      - REQ-8953929DBC9F
+      - REQ-F6ED37F83E19
+      - REQ-F46202F44F24
+      - REQ-967538B0F376
+      design_groups:
+      - verification.directed
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      - AC-ISA
+      - AC-HAZARDS
+      - AC-EXCEPTIONS
+      - AC-CSR
+      source_refs:
+      - spec/acceptance.md#L20-L32
+      execution_status: not_run
+    - id: AC-DIFFERENTIAL
+      title: Execute fixed-seed bounded differential corpus
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-RUNTIME, AC-ENVIRONMENT, AC-RETIREMENT,
+        AC-TIMEOUT. Procedure: Run>=100 pre-fixed bounded programs from independent
+        generator controlling legal addresses,initialized RF,bounded loops,writable
+        CSR masks and separate exception mode; execute the identical ELF/initial state
+        on configured Sail/task oracle and DUT. Pass condition: Each valid program>=1000
+        normal retirements,traps excluded,aggregate>=100000. Ordered PC/word/rd/value/store
+        fields and trap triples match,without requiring equal cycles; no duplicate/missing/wrong-path
+        events,unique response per accepted request,final full image equal after drain.
+        INT/MEM/TRAP mutually exclusive categories each retain independent passed/failed/timeout/invalid/total
+        counts; no pooling or selected seeds. Fixed seed-group tier policy unchanged.
+        First mismatch report records seed/ELF/config/reset/bus identities,ordinal,fields,both
+        streams20before/20after commits plus trap/bus context (boundaries or fatal
+        missing tail explicitly recorded),and replays identical stimulus. Evidence:
+        Generator/config/seed/category manifests,actual Sail steps and streams,all
+        result records and written replay objects.'
+      requirement_ids:
+      - REQ-531A036BA724
+      - REQ-B16900DB78E1
+      - REQ-61EFF1B90AE2
+      - REQ-9BDA4375093B
+      - REQ-AC347C5C9A4D
+      - REQ-E205DAA96DF2
+      - REQ-7F673DF52686
+      - REQ-3D763A14A85C
+      - REQ-AFE5CBAF7519
+      - REQ-FF9C94EF4446
+      - REQ-94F8AA34E74F
+      - REQ-E0133AEBAE8D
+      - REQ-1D122929046F
+      - REQ-C7FDC834D595
+      - REQ-2AD4DE23D819
+      - REQ-5D4302C35CEA
+      - REQ-B783BFD32988
+      - REQ-168298291FF1
+      - REQ-1B18F657413D
+      design_groups:
+      - verification.differential
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      - AC-RETIREMENT
+      - AC-TIMEOUT
+      source_refs:
+      - spec/design_doc.md#verification-data
+      - spec/design_doc.md#acceptance
+      execution_status: not_run
+    - id: AC-BOUNDARIES
+      title: Use task-card oracle at known Sail differences
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-CSR, AC-FLUSH, AC-RUNTIME. Procedure:
+        Execute two independent task-specific programs for misa write and two for
+        FENCE.I,with wrong-path store markers,handler CSR inspection and MRET to PASS.
+        Pass condition: All4programs per configuration trap2 at correct PC with original
+        word tval,zero wrong-path store/normal retirement for fault,MRET returns correctly;
+        conflicting Sail result never replaces frozen task-card expectation. Evidence:
+        Independent boundary-oracle provenance and four complete trap/store/return
+        comparison records.'
+      requirement_ids:
+      - REQ-07F76FB404FE
+      - REQ-04EAF62B38AA
+      - REQ-2CE871394711
+      design_groups:
+      - verification.boundaries
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-CSR
+      - AC-FLUSH
+      - AC-RUNTIME
+      source_refs:
+      - spec/acceptance.md#L64
+      execution_status: not_run
+  - key: protocol
+    title: Protocol
+    items:
+    - id: AC-BUS
+      title: Exercise fixed seeded wait schedules and store correlation
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-RUNTIME, AC-ENVIRONMENT, AC-MEMORY,
+        AC-RETIREMENT. Procedure: Run>=20fixed delay seeds spanning every response1..8
+        and backpressure; measure ready delay from first request validity and response
+        delay from acceptance,hold response until consumption; verify every retired
+        store against real accepted transaction. Pass condition: Stable blocked fields,no
+        response replay,one owner,stalls/flush preserve event order. Store address/mask/data
+        and memory effect match; no outstanding write at termination. Actual delay
+        distribution covers1..8; every seeded execution passes functionality,protocol
+        and final images. Evidence: Seed/schedule manifest,delay histogram,request/response/effect
+        ownership ledger and final transaction counts.'
+      requirement_ids:
+      - REQ-3CDB8C846B5E
+      - REQ-16B9755F52FA
+      - REQ-92BB4D8D5CAB
+      - REQ-43AC93F82BCD
+      - REQ-36405729B89B
+      - REQ-530267985156
+      - REQ-EE0CDA11C2F3
+      - REQ-71D3B024FC98
+      design_groups:
+      - verification.bus
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      - AC-MEMORY
+      - AC-RETIREMENT
+      source_refs:
+      - spec/acceptance.md#L44
+      - spec/acceptance.md#L48-L52
+      execution_status: not_run
+    - id: AC-FLUSH
+      title: Verify correct-path store markers after redirects
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-FETCH, AC-EXCEPTIONS, AC-RETIREMENT.
+        Procedure: Place distinguishable store markers on sequential and target paths
+        for taken/not-taken branches,JAL,JALR,trap and MRET; include load waits and
+        adjacent hazards. Pass condition: Only selected correct-path marker reaches
+        memory; wrong-path store request count0 and no wrong-path commit,while older
+        legal stores survive. Returned wrong-path fetch cannot restore a canceled
+        token. Evidence: Independent control-path oracle,accepted store/effect traces
+        and complete final images.'
+      requirement_ids:
+      - REQ-C6D95B0FEBF4
+      design_groups:
+      - verification.flush
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-FETCH
+      - AC-EXCEPTIONS
+      - AC-RETIREMENT
+      source_refs:
+      - spec/acceptance.md#L45
+      execution_status: not_run
+  - key: release
+    title: Release
+    items:
+    - id: AC-EVALUATOR-RELEASE
+      title: Validate evaluator detection and replay independently
+      detail: 'Responsible stage: functional-performance-verify (independent evaluator
+        owner). Configuration: independent evaluator release environment. Dependencies:
+        AC-RUNTIME. Procedure: Evaluator owner executes A-D on independently known-working
+        reference with full logs,>=1compilable mutant per hazard/exception/handshake
+        class,allACT4scope audits and full comparator/Sail regression; replay first-mismatch
+        artifacts. Pass condition: Known-good runs pass each family,each targeted
+        mutant fails for the specified reason,all generated ELFs avoid excluded features/interrupts
+        with inclusion/exclusion counts/reasons/hashes. Same programs used in complete
+        regression and replay reproduces first mismatch. Reference-source/private-answer
+        bodies stay outside tested implementation workspace; historical21mutant/reference
+        data is no substitute for release evidence. Evidence: Owner-produced reference/run
+        metadata,mutation matrix with compile/failure evidence,scope inventory,regression
+        and replay report.'
+      requirement_ids:
+      - REQ-C48756C1830E
+      - REQ-7EF5617E7736
+      - REQ-578522414F8D
+      - REQ-342AE06A54B4
+      - REQ-3F57C0C9E7A2
+      - REQ-054A022C992E
+      - REQ-77818D8F0881
+      design_groups:
+      - verification.release
+      responsible_stage: functional-performance-verify (independent evaluator owner)
+      dependencies:
+      - AC-RUNTIME
+      source_refs:
+      - spec/acceptance.md#L70-L75
+      execution_status: not_run
+- key: performance
+  name: Cycle acceptance
+  cards:
+  - key: latency
+    title: Latency
+    items:
+    - id: AC-PIPELINE
+      title: Measure per-PC five-edge flow and effects
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-STRUCTURE, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Run64independent ADDIs with one-cycle imem and zero data waits;
+        sample each request before edge n and every event after NBA settlement. Inspect
+        real stage transfer and RF/event alignment independently of port-only checker.
+        Pass condition: Single issue/in-order; each64PC commits exactlyn+4,fetch/commit
+        each continuous1percycle,no early/late/missing/duplicate event. Actual four
+        stage groups transfer the instruction; architectural updates agree with real
+        WB,not delayed observation fiction. Evidence: 64per-PC fetch/commit edge pairs,stage/RF
+        effect mapping and continuous sequence counts.'
+      requirement_ids:
+      - REQ-89D3BA17833E
+      - REQ-FD64F59A9F1A
+      - REQ-B39614D719F0
+      - REQ-0C348358645A
+      - REQ-D58FD55E7FD3
+      - REQ-E2998F12B044
+      - REQ-0F7329FEEA6B
+      - REQ-27179AE580E7
+      - REQ-D0755E26A106
+      - REQ-3F6DE7EF1AC6
+      - REQ-56CE793251EE
+      design_groups:
+      - cpu.pipeline
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-STRUCTURE
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#pipeline
+      - spec/source-contract.md#L31-L33
+      execution_status: not_run
+    - id: AC-PUBLIC-SMOKE
+      title: Run frozen wildcard 64-ADDI public smoke
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-PORTS, AC-RUNTIME. Procedure: Run frozen
+        default-parameter wildcard fixture:clk0,rst_n0 for2steps,ready1,response signals0;release
+        reset. Supply64ADDI at0x80000000+4*i,rs1=0,rd=i%31+1,imm=i+1,NOP0x13outside
+        aligned region; repeat equivalent fixture with enabled core. Pass condition:
+        All64retire within300post-reset steps; each fetch unique/aligned/continuous,commit
+        PC/word/rd/data(i+1)exact andn+4,wstrb0,no dmem request or trap.32bit imem_addr/commit_pc/commit_insn
+        and4bit wstrb; fixture input timing and NBA sampling preserved. Evidence:
+        Unmodified fixture hash,actual elaboration/log and per-PC edge/result report.'
+      requirement_ids:
+      - REQ-EE14DCD82F9D
+      - REQ-0632F6E72529
+      - REQ-14BFDDB3D9C0
+      - REQ-E8652C149296
+      - REQ-E7E7139855C9
+      - REQ-7A81F1545181
+      - REQ-227DE65963DC
+      - REQ-A03E7F8EA91E
+      - REQ-F154E7C95684
+      - REQ-121328341A54
+      - REQ-58B097F931C5
+      - REQ-13B6671CEE13
+      design_groups:
+      - verification.public_smoke
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-PORTS
+      - AC-RUNTIME
+      source_refs:
+      - spec/design_doc.md#acceptance
+      - spec/public_cpu_interface_reference.sv#L27-L117
+      execution_status: not_run
+  - key: paired-cycles
+    title: Paired Cycles
+    items:
+    - id: AC-CYCLES
+      title: Execute exact port_timing_v1 22-check set
+      detail: 'Responsible stage: functional-performance-verify. Configuration: both
+        core configurations. Dependencies: AC-RUNTIME, AC-ENVIRONMENT, AC-PIPELINE,
+        AC-HAZARDS, AC-BUS. Procedure: Run fixed port-only checker without hierarchy/stall
+        probes:continuous64ADDI,6ALU/x0pairs,5load-consumer classes across(r,d)=(1,0),(8,0),(1,3)for15pairs.
+        Reset core/memory each run and preserve pairs differing only consumer source.
+        Pass condition: 22/22PASS per configuration. Both dependent-minus-control
+        consumer-producer interval and whole retirement-span deltas<=0ALU,<=1load;
+        negative delta allowed. No-control span(last-first+1)<=N+M*(r+d)+H,H0independent/H1single
+        load-use; M actual serial accesses,N normal commits. No preparation/fetch/response-recovery
+        relabeled external wait. Every retirement/bus/final-image comparison passes;
+        wrong-path request0 and no unfinished transaction. Load->branch checks only
+        dependency increment,not no-control formula; branch/JAL/JALR intervals report-only.
+        New quantified v1 bounds never retroactively credited to historical scores.
+        Evidence: Exact22test IDs/results,matched program/schedule hashes,N/M/H,first/last/producer/consumer
+        edges,delta/span calculations and independent ISA/bus comparisons.'
+      requirement_ids:
+      - REQ-B7BD505096AE
+      - REQ-24B3FA3021E3
+      - REQ-8E39D58A91B1
+      - REQ-E1CF5533FD24
+      - REQ-AC5DDC407906
+      - REQ-D39019A3CFD8
+      - REQ-5A631995F829
+      - REQ-DD6D31288599
+      - REQ-280D2A05F8AA
+      - REQ-211D4C0B5236
+      - REQ-5D1EB7BD76E1
+      - REQ-BB9D0FFCA5D1
+      - REQ-206267FD77CA
+      - REQ-67D68C429EA8
+      - REQ-2CD55DE58324
+      - REQ-5F5F8E53BDA2
+      - REQ-F7C63D530051
+      - REQ-930A831E80DB
+      - REQ-D8097CE0B9F1
+      - REQ-ADDBCB23196D
+      - REQ-E060B588934B
+      - REQ-D391679F8906
+      - REQ-22DDCC807C2F
+      - REQ-D5301BBC4D00
+      - REQ-65E7A16DB29B
+      - REQ-A7F234D7A57F
+      - REQ-06A20B213C24
+      - REQ-47A8A62333AB
+      - REQ-083131ED5BCB
+      design_groups:
+      - verification.cycles
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      - AC-PIPELINE
+      - AC-HAZARDS
+      - AC-BUS
+      source_refs:
+      - spec/acceptance.md#L50-L58
+      - spec/design_doc.md#memory
+      execution_status: not_run
+- key: workloads
+  name: System workloads
+  cards:
+  - key: end-to-end
+    title: End To End
+    items:
+    - id: AC-DOT64
+      title: Execute DOT64 end to end
+      detail: 'Responsible stage: functional-performance-verify. Configuration: enabled
+        core and physical top. Dependencies: AC-XDOT, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Run two64signedINT8vectors packed lane0first in16xdot groups,with
+        ordinary CPU ADD accumulation. Include mixed signs,asymmetric lanes,zeros
+        and extreme vectors. Pass condition: One exact signedINT32scalar equals independent64term
+        sum; range endpoints-1040384/1048576 handled. Every result word,commit/store/protocol/final-image
+        check passes,tohost completes normally; no M instruction,NPU accumulator,saturation
+        or hidden memory operation. Report actual cycles with no invented workload-cycle
+        threshold. Evidence: Program/input/output/oracle hashes,independent expected
+        values,commit/bus/final-image reports and per-workload cycles.'
+      requirement_ids:
+      - REQ-9BBBD834A83C
+      - REQ-5006BB8FC9D7
+      - REQ-46BF76FC1DFC
+      - REQ-B151009B056E
+      - REQ-118353E38607
+      - REQ-F89BABF3940C
+      - REQ-6A23FA86F904
+      - REQ-AF6A7C357E25
+      - REQ-5A9FA832F2F3
+      design_groups:
+      - system.workloads
+      - cpu.xdot4
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-XDOT
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#workloads
+      - spec/source-contract.md#L15
+      execution_status: not_run
+    - id: AC-GEMM8
+      title: Execute signed GEMM8 end to end
+      detail: 'Responsible stage: functional-performance-verify. Configuration: enabled
+        core and physical top. Dependencies: AC-XDOT, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Run signed8x8 by8x8matrices; gather columns explicitly,2xdot groups
+        per8term output plus CPU ADD. Include nonsymmetric/mixed-sign/zero/extreme
+        matrices. Pass condition: All64INT32outputs equal independent matrix multiplication;
+        endpoints-130048/131072 per8term sum. Every result word,commit/store/protocol/final-image
+        check passes,tohost completes normally; no M instruction,NPU accumulator,saturation
+        or hidden memory operation. Report actual cycles with no invented workload-cycle
+        threshold. Evidence: Program/input/output/oracle hashes,independent expected
+        values,commit/bus/final-image reports and per-workload cycles.'
+      requirement_ids:
+      - REQ-F332169E266A
+      - REQ-5006BB8FC9D7
+      - REQ-46BF76FC1DFC
+      - REQ-B151009B056E
+      - REQ-118353E38607
+      - REQ-F89BABF3940C
+      - REQ-6A23FA86F904
+      - REQ-AF6A7C357E25
+      - REQ-5A9FA832F2F3
+      design_groups:
+      - system.workloads
+      - cpu.xdot4
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-XDOT
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#workloads
+      - spec/source-contract.md#L15
+      execution_status: not_run
+    - id: AC-CONV3
+      title: Execute CONV3 valid kernel end to end
+      detail: 'Responsible stage: functional-performance-verify. Configuration: enabled
+        core and physical top. Dependencies: AC-XDOT, AC-RUNTIME, AC-ENVIRONMENT.
+        Procedure: Run8x8input/3x3valid kernel to6x6output; use3dot groups per9term
+        patch,unused final lanes zero; use asymmetric kernel to distinguish spatial
+        convention. Resolve immutable checker convention before running; software
+        packing follows it without changing checker/hardware. Pass condition: All36INT32outputs
+        equal independent immutable-checker convention; signed-design default cross-correlation
+        indexing; endpoints-146304/147456 per9term sum. Every result word,commit/store/protocol/final-image
+        check passes,tohost completes normally; no M instruction,NPU accumulator,saturation
+        or hidden memory operation. Report actual cycles with no invented workload-cycle
+        threshold. Evidence: Program/input/output/oracle hashes,independent expected
+        values,commit/bus/final-image reports and per-workload cycles.'
+      requirement_ids:
+      - REQ-5EAE3E313E75
+      - REQ-5006BB8FC9D7
+      - REQ-46BF76FC1DFC
+      - REQ-B151009B056E
+      - REQ-118353E38607
+      - REQ-F89BABF3940C
+      - REQ-6A23FA86F904
+      - REQ-AF6A7C357E25
+      - REQ-5A9FA832F2F3
+      design_groups:
+      - system.workloads
+      - cpu.xdot4
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-XDOT
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      source_refs:
+      - spec/design_doc.md#workloads
+      - spec/source-contract.md#L15
+      execution_status: not_run
+- key: reporting
+  name: Results and project completion
+  cards:
+  - key: scoring
+    title: Scoring
+    items:
+    - id: AC-SCORING
+      title: Recompute exact versioned score without double counting
+      detail: 'Responsible stage: functional-performance-verify. Configuration: project
+        score report. Dependencies: AC-ACT4, AC-DIRECTED, AC-DIFFERENTIAL, AC-CYCLES,
+        AC-BUS, AC-FLUSH, AC-BOUNDARIES, AC-EVALUATOR-RELEASE. Procedure: Resolve
+        approved score-policy digest6a4f7a55c8d9e679eb95345e4b829d533262100eb5ac2c374eb1358fd1bf5f2d
+        and same complete qualified result/safety/category set. Recompute with exact
+        rational arithmetic and validate tier-boundary examples0,10,11,21,22cycles
+        passes plus safety findings. Pass condition: Versiont09_group_cycles10_v1;
+        resolved ACT4raw8,F48/P27,total75,normalize50/75; preserve attachment ACT4=10
+        as historical discrepancy. Old weights20/12/8/8/4.8/4/3.2sum60->40normalized;
+        cyclesraw15/7.5/0->10/5/0for22/11..21/0..10. Safety zeroes affected subitem
+        once; no per-failed-example5point charge or cycle failure charged again to
+        original8HAZ checks/separateLATgate. Every category has passed+failed+timeout+invalid=total,missing/pending
+        never reduce total; fixed INT/MEM/TRAP tiers separate. Same bound counts used
+        by verification/scoring; overflow INVALID. PPAmax50/timemax5enabled only if
+        complete valid functional50; acceptance obligations still all required. Branch
+        spacing report-only,load->branch delta only. Historical scores identify versions
+        and ACT4 success claims no certification. Evidence: Approved policy bytes/decision
+        identity,joined full result/safety/seed records,exact rational worksheet,tier/safety
+        boundary selfcheck and eligibility booleans.'
+      requirement_ids:
+      - REQ-5CFE1A7E01C1
+      - REQ-14B6323ACB58
+      - REQ-D56878A6A0EE
+      - REQ-FB4B5BD37A8E
+      - REQ-3369FF765E84
+      - REQ-B581DB3F8A88
+      - REQ-852029C93A29
+      - REQ-1D0F0F7D3C62
+      - REQ-1BC693FD835E
+      - REQ-B154AE2CD880
+      - REQ-422D1343D955
+      - REQ-F0896C3C07C7
+      - REQ-723FE432B3F3
+      - REQ-74D63A25028B
+      - REQ-BA9341D346D0
+      - REQ-92139E24D912
+      - REQ-99BE0C5F2E94
+      - REQ-50311EBBD9DE
+      - REQ-C52A2184393E
+      - REQ-1D32C7AE14BA
+      - REQ-9572AA12B1C9
+      - REQ-C7E41A5AB030
+      - REQ-58A1A115ABDC
+      - REQ-EA6253E37CC9
+      - REQ-BC3B040D1D56
+      - REQ-EBFDF6FD9EF7
+      - REQ-C2AEB83F6EB0
+      - REQ-DA5EE6429873
+      design_groups:
+      - verification.scoring
+      responsible_stage: functional-performance-verify
+      dependencies:
+      - AC-ACT4
+      - AC-DIRECTED
+      - AC-DIFFERENTIAL
+      - AC-CYCLES
+      - AC-BUS
+      - AC-FLUSH
+      - AC-BOUNDARIES
+      - AC-EVALUATOR-RELEASE
+      source_refs:
+      - spec/design_doc.md#scoring-data
+      - spec/design_doc.md#decisions
+      execution_status: not_run
+  - key: completion
+    title: Completion
+    items:
+    - id: AC-PROJECT-COMPLETION
+      title: Join executed requirement coverage and project verdict
+      detail: 'Responsible stage: gds-export; failure-analysis. Configuration: whole
+        project. Dependencies: every other item in this plan, as explicitly listed
+        below. Procedure: GDS exporter resolves every item/configuration result and
+        required adapter output into a same-baseline project acceptance record; reconcile
+        covered requirement IDs and full run populations to this443-IDcatalog and37semantic
+        groups. Failure-analysis owner retains failed run/counterexample evidence
+        and links subsequent reruns without overwriting history. Pass condition: Every
+        required item/configuration actually PASS with retrievable measurements; required
+        adapters executed and typed operands joined,no pending/missing/invalid/timeout
+        result or dropped failure. Report measured tests.total/passed/failed and acceptance.total/covered
+        plus real line/branch/toggle/functional coverage in reports/verification/result_summary.json;
+        missing coverage instrumentation explicitly unavailable,no invented threshold
+        or local-count inflation. Complete physical/GDS evidence and score policy
+        obeyed; report-only quantities retain honest availability. Only then build/gds/project_acceptance.json
+        may verdictPASS. This draft itself executes none of these checks. Evidence:
+        Per-check/configuration result map,443requirement-to-executed-evidence links,actual
+        summary reports,same-run external adapter outputs and build/gds/project_acceptance.json
+        with honest engineering verdict. Revised physical completion: Require the
+        existing freezer-confirmed immutable acceptance revision and frozen constraints
+        revision 2, joined to the same signed specification. Every affected physical-stage
+        and final ODB/netlist/SPEF/GDS result must carry the actual approved binary/hash/version
+        and two-thread receipts, new input hashes, compatible checkpoint lineage,
+        repeated geometry/pin/site checks and required external reset-waveform evidence.
+        Rerun/revalidate affected placement, CTS/repair, routing/extraction, timing/electrical,
+        DRC/LVS/antenna and export consistency before a new project verdict. The V1
+        failed layout and 26Q3/16-core measurements remain failed/unqualified history;
+        changing metadata or verdict alone never qualifies them. Reuse functional
+        evidence only under execution_policy.functional_evidence_reuse with exact
+        identities and honest reused classification.'
+      requirement_ids:
+      - REQ-E26D8D5FC2DE
+      - REQ-DE2140A3B69D
+      - REQ-50A82E9483D9
+      - REQ-87962DDCB1B7
+      - REQ-40857E12BFE6
+      - REQ-08B8869F79AB
+      - REQ-18BD9E1F9704
+      - REQ-763603461F33
+      - REQ-4D90424F7EFA
+      - REQ-CFC8007861A0
+      - REQ-DB908DF98081
+      - REQ-A31DFEFC1259
+      - REQ-A3876C9F628F
+      - REQ-693267807090
+      - REQ-495F708C14A0
+      - REQ-0D51F220D6E6
+      - REQ-9DF2BA15A118
+      - REQ-11E8B8E83E3B
+      - REQ-062FCDE66532
+      - REQ-AD34FCA99747
+      - REQ-ABAEDC5E100A
+      - REQ-EA7B625ABEF0
+      - REQ-D7E53423C050
+      - REQ-DB8C2F370500
+      - REQ-7C0B10687090
+      - REQ-AB6D9B607E01
+      - REQ-6A9CBCEDE20F
+      - REQ-A4C9D314C614
+      - REQ-D48B8A0A8BE7
+      - REQ-66B1B136E39A
+      - REQ-48D00D23F954
+      - REQ-F356AFEF1518
+      - REQ-507F3C986C6D
+      - REQ-61E0F6BEFED4
+      - REQ-0A79A337A5B8
+      - REQ-6065C85E0ACD
+      - REQ-1CB708E30983
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      - REQ-9BBBD834A83C
+      - REQ-F332169E266A
+      - REQ-5EAE3E313E75
+      - REQ-5006BB8FC9D7
+      - REQ-46BF76FC1DFC
+      - REQ-B151009B056E
+      design_groups:
+      - verification.functional
+      - verification.reproducibility
+      - physical.scope
+      - system.workloads
+      responsible_stage: gds-export; failure-analysis
+      dependencies:
+      - AC-DELIVERY
+      - AC-ORIGINAL
+      - AC-RESOURCES
+      - AC-PORTS
+      - AC-INTEGRATION
+      - AC-STRUCTURE
+      - AC-ISA
+      - AC-FETCH
+      - AC-RESET
+      - AC-MEMORY
+      - AC-HAZARDS
+      - AC-EXCEPTIONS
+      - AC-CSR
+      - AC-RETIREMENT
+      - AC-NPU-PORTS
+      - AC-NPU-ARITH
+      - AC-NPU-PROTOCOL
+      - AC-NPU-CANCEL
+      - AC-XDOT
+      - AC-RUNTIME
+      - AC-ENVIRONMENT
+      - AC-TIMEOUT
+      - AC-ACT4
+      - AC-DIRECTED
+      - AC-DIFFERENTIAL
+      - AC-BOUNDARIES
+      - AC-BUS
+      - AC-FLUSH
+      - AC-EVALUATOR-RELEASE
+      - AC-PIPELINE
+      - AC-PUBLIC-SMOKE
+      - AC-CYCLES
+      - AC-DOT64
+      - AC-GEMM8
+      - AC-CONV3
+      - AC-SCORING
+      - AC-PHYSICAL-INPUTS
+      - AC-SYNTHESIS
+      - AC-FLOORPLAN
+      - AC-PDN-ROUTING
+      - AC-POSTROUTE-STA
+      - AC-ELECTRICAL
+      - AC-ROUTE-CLEAN
+      - AC-EXPORT-CONSISTENCY
+      - AC-DRC-LVS
+      - AC-POWER-AREA
+      - AC-GDS
+      source_refs:
+      - spec/design_doc.md#verification-data
+      - spec/design_doc.md#common-runtime
+      - physical/chip-nebula/implementation.constraints.json#/signoff
+      - physical/chip-nebula/implementation.constraints.json#/physical_qualification
+      execution_status: not_run
+- key: physical
+  name: Physical implementation and GDS
+  cards:
+  - key: implementation-inputs
+    title: Implementation Inputs
+    items:
+    - id: AC-PHYSICAL-INPUTS
+      title: Revalidate frozen platform and timing inputs
+      detail: 'Responsible stage: synthesize; pnr. Configuration: enabled physical
+        top. Dependencies: AC-INTEGRATION, AC-STRUCTURE, AC-ACT4, AC-DIRECTED, AC-DIFFERENTIAL,
+        AC-CYCLES, AC-XDOT, AC-DOT64, AC-GEMM8, AC-CONV3. Procedure: Before synthesis/PnR
+        resolve the20manifest-bound views and compare actual bytes to frozen view_binding
+        hashes; verify ORFS3a964e13f11a4e435aac01ffa14db0a7d2853720,TTLiberty/LEF/GDS/CDL
+        cell sets/units and actual SDC digest. Inspect elaborated physical boundary.
+        Pass condition: Sky130HD tt_025C_1v80,topnebula_cpu_npu_top/coreenabled,no
+        pads/package/SRAM/external-memory arrays. All resource hashes/cell views match;
+        missing/mismatched view blocks execution. clk100ns waveform0/50,setup/hold
+        uncertainty0.1ns,source latency0,slew0.05ns,IOmin/max0.5ns,output0.005pFperbit.
+        Apply all frozen ports incl observers; no false/multicycle/case/dont_touch/observer/reset
+        exemptions. Protocol wait is not multicycle STA. Preserve async reset and
+        nominal1.8V/25C. Evidence: Actual input/resource/tool hash manifest,view/cell/unit
+        audit,physical port/hierarchy dump and serialized loaded SDC constraints.
+        Revised physical qualification: Before each affected physical stage, require
+        the newly confirmed/frozen acceptance artifact and frozen constraints revision
+        2 to bind the same specification digest. Load /tmp/chipnebula-pinned-tools/env.sh
+        and /opt/rh/gcc-toolset-13/enable; invoke /tmp/chipnebula-pinned-tools/bin/openroad
+        explicitly, resolving to /tmp/chipnebula-pinned-tools/src/OpenROAD/build/bin/openroad.
+        Actual execution binary SHA256 must equal 99517bea0776886f56750e54f87e8e91df94aecee6189cb9c0a3be2d62cabedf
+        and version 4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca, with NUM_CORES=2 and
+        actual tool threads=2 after both environment loads. Evidence must join each
+        stage command/environment, requested/resolved path, binary hash/version/thread
+        count and input/output hashes to the new immutable revisions; missing or mismatched
+        identity is non-passing. Old 26Q3/16-core runs remain separate unqualified
+        history for V2. Current tool qualification: The captured inventory reports
+        toolchain_ready=false and an unknown KLayout version. Before the affected
+        physical run and independent deck/GDS checks, pnr must probe the actual KLayout
+        executable in the execution environment and require version 0.30.12. Record
+        the probe command, raw stdout/stderr, exit status, requested/resolved executable
+        path and SHA256; bind that identity and the frozen deck/view hashes to actual
+        downstream commands and outputs. Unknown or mismatched version leaves resource
+        qualification pending and blocks execution; an executable path alone is insufficient.
+        Do not substitute another tool or waive DRC/LVS/GDS checks. This draft records
+        a downstream requirement, not a successful version probe or qualified toolchain.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      design_groups:
+      - physical.scope
+      responsible_stage: synthesize; pnr
+      dependencies:
+      - AC-INTEGRATION
+      - AC-STRUCTURE
+      - AC-ACT4
+      - AC-DIRECTED
+      - AC-DIFFERENTIAL
+      - AC-CYCLES
+      - AC-XDOT
+      - AC-DOT64
+      - AC-GEMM8
+      - AC-CONV3
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/view_binding
+      - physical/chip-nebula/constraints.sdc
+      - physical/chip-nebula/implementation.constraints.json#/physical_execution
+      - physical/chip-nebula/implementation.constraints.json#/physical_qualification
+      - .nebula_inputs/authorized-calibrated-geometry-revision/operator-decisions/calibrated-floorplan/decision.json
+      - .nebula_inputs/artifact-13c6dabcc2c44bb8ae2135107138ad70/artifact.json#/payload/dependencies
+      execution_status: not_run
+  - key: synthesis
+    title: Synthesis
+    items:
+    - id: AC-SYNTHESIS
+      title: Synthesize real functional top and close setup
+      detail: 'Responsible stage: synthesize. Configuration: enabled physical top.
+        Dependencies: AC-PHYSICAL-INPUTS. Procedure: Run frozen Yosys0.69+77 git9ff27d29c
+        built-in read_slang (no external plugin),ABC_AREA=1/area-priority and combinational
+        flattening; inspect resulting mapped netlist and run TTSTA with frozen SDC.
+        Pass condition: No blackboxes/inferred RAM/SRAM/internal images;RF32x32flops/muxes;
+        all functional cells characterized and not in exact DONT_USE list. Four pipeline
+        groups,NPU n+2,CPU n+4,asyncreset,forwarding/cancellation and observer ports
+        remain; no retiming,new sequential feature or latency change. Setup slack>=0ns.
+        Report measured standard-cell/macro counts (macro0),mapped cell area,setup/hold,actual
+        tool/constraint identity; downstream post-route hold remains required. Evidence:
+        build/synth actual mapped netlist,logs,STA paths,cell/blackbox/hierarchy reports
+        and reports/synthesis/result_summary.json with measured design.standard_cell_count/design.cell_area/design.macro_count,timing.setup_slack/timing.hold_slack.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      - REQ-269A92199F57
+      - REQ-5A63794D81A1
+      - REQ-009CFCC955AD
+      - REQ-AD938E4C7993
+      - REQ-260B7A7590D6
+      - REQ-BFED1ACF2799
+      - REQ-FB0A4C73634E
+      - REQ-08F22F52719B
+      - REQ-B6574FECD558
+      - REQ-3EA8205B2DC9
+      - REQ-89D3BA17833E
+      - REQ-FD64F59A9F1A
+      - REQ-B39614D719F0
+      - REQ-0C348358645A
+      - REQ-D58FD55E7FD3
+      - REQ-E2998F12B044
+      - REQ-0F7329FEEA6B
+      - REQ-27179AE580E7
+      - REQ-D0755E26A106
+      - REQ-3F6DE7EF1AC6
+      - REQ-56CE793251EE
+      design_groups:
+      - physical.scope
+      - cpu.structure
+      - cpu.pipeline
+      responsible_stage: synthesize
+      dependencies:
+      - AC-PHYSICAL-INPUTS
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/synthesis
+      execution_status: not_run
+  - key: floorplan-routing
+    title: Floorplan Routing
+    items:
+    - id: AC-FLOORPLAN
+      title: Validate planned geometry and native legal rows separately
+      detail: 'Responsible stage: pnr. Configuration: enabled physical top under calibrated-geometry-v2.
+        Dependencies: AC-SYNTHESIS and AC-PHYSICAL-INPUTS, plus a confirmed/frozen
+        acceptance revision bound to frozen constraints revision 2. Procedure: Obtain
+        actual mapped functional cell area A and its netlist/hash/stage evidence.
+        Compute nominal side sqrt(A/0.40), planned width ceil(side/0.46)*0.46 and
+        height ceil(side/2.72)*2.72; planned core is [10,10,10+width,10+height] um
+        and planned die is [0,0,width+20,height+20] um. Convert through the frozen
+        technology''s actual DBU-per-um without inventing an epsilon tolerance. Invoke
+        stock native initialize_floorplan with explicit planned core/die, site unithd,
+        approved binary and two-thread policy; retain manifest-bound technology LEF
+        and make_tracks.tcl. Derive expected native legal bounds independently on
+        the calibrated grid anchored at die origin (0,0): lower x/y bounds round inward
+        upward to 0.46/2.72 um grids, upper x/y bounds round inward downward to those
+        grids. Enumerate actual ODB rows/sites to derive origins, orientations, dimensions,
+        per-row site counts, total legal site area and union bbox; cross-check ODB
+        getCoreArea against the native legal-row bbox in integer DBU. At placement
+        and final physical export, repeat row/site and pin legality checks and bind
+        results to the actual database. Pass condition: Actual die equals planned
+        die in native integer DBU; planned core follows the unchanged formula. The
+        nonempty actual native legal-row region agrees with stock generation/inward
+        snapping, is contained in planned core and actual die, and has at least 10
+        um margin to all four die sides. Row/site grid, orientations and all placements
+        obey the frozen technology/site rules. Planning bbox and legal-row bbox are
+        distinct measurements and equality between them is not required. Never substitute
+        occupied-instance bbox for either, force off-grid rows, alter stock track
+        phases, silently enlarge the die or spoof core/row metadata. Retain nominal
+        40% planning target, aspect 1, 10 um margins and placement density 0.55; report
+        achieved planned and legal-row utilization/aspect separately with explicit
+        mapped-area numerator, actual area denominator and stage, rather than force
+        legal-row utilization to 40%. Report actual legal-site whitespace and CTS/repair/support-cell
+        accounting within the existing nominal 60% planning reserve, with no hidden
+        reserve. Every fixed top pin must have recorded location/layer and pass frozen
+        horizontal met3/vertical met2, stock track-phase, spacing and corner-clearance
+        checks. No pads/macros/fixed die budget or new area ceiling. Failure of snapping,
+        nonempty containment, margins, metadata or pin/site legality is an actual
+        failure; no waiver or new numeric geometry tolerance. Evidence: Written geometry
+        report with actual A/netlist hash, independently computed planned core/die
+        and areas, actual DBU units/die/getCoreArea/legal-row bbox, complete row origins/orientations/site
+        names/dimensions/counts, total legal site area, separate placed-instance area/occupied
+        bbox, planned/legal utilization and aspect, four measured margins, per-bit
+        pin/layer/track/spacing legality, support-cell/whitespace accounting and exact
+        database/tool/revision hashes. Historical coordinates and empty-fixture calibration
+        are examples only, not fixed geometry targets or design acceptance. Preserve
+        the original V1 strict-core failure and both failed force-geometry trials;
+        this is prospective V2 acceptance.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      design_groups:
+      - physical.scope
+      responsible_stage: pnr
+      dependencies:
+      - AC-SYNTHESIS
+      - AC-PHYSICAL-INPUTS
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/floorplan
+      - physical/chip-nebula/implementation.constraints.json#/pin_placement
+      - physical/chip-nebula/implementation.constraints.json#/floorplan/native_legal_rows
+      - physical/chip-nebula/implementation.constraints.json#/physical_revision
+      - .nebula_inputs/authorized-calibrated-geometry-revision/operator-decisions/calibrated-floorplan/decision.json
+      execution_status: not_run
+    - id: AC-PDN-ROUTING
+      title: Check approved PDN,cell recipes and routing policy
+      detail: 'Responsible stage: pnr. Configuration: enabled physical top. Dependencies:
+        AC-FLOORPLAN. Procedure: Inspect actual power connectivity,tap/tie/fill/diode
+        roster and routed layers/tracks against exact hashed pdn.tcl,tapcell.tcl,config.mk,fastroute.tcl,make_tracks.tcl
+        and technologyLEF. Pass condition: VDD1.8/VSS0 connect VPWR/VPB and VGND/VNB
+        correctly; approvedmet1followpin0.48um/5.44um,met4stripes1.6/27.14offset13.57,met5stripes1.6/27.2offset13.6
+        andmet1-met4/met4-met5connectivity;tapdistance14um and exact approved tie/fill/diode
+        cells. Signalsmet1..5,clocksmet3..5,capacityadjustment0.2,legal manifest tracks/vias;
+        no added layers/NDR/shielding/keepouts/low-power features. No missing PG connection
+        or unapproved support-cell recipe. Evidence: ODB/netlist PG connectivity,PDN/tap/support-cell
+        inventory,routing settings and actual route/layer legality checks.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      design_groups:
+      - physical.scope
+      responsible_stage: pnr
+      dependencies:
+      - AC-FLOORPLAN
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/pdn
+      - physical/chip-nebula/implementation.constraints.json#/routing
+      execution_status: not_run
+  - key: timing-electrical
+    title: Timing Electrical
+    items:
+    - id: AC-POSTROUTE-STA
+      title: Close extracted propagated-clock TT timing
+      detail: 'Responsible stage: pnr. Configuration: enabled physical top. Dependencies:
+        AC-PDN-ROUTING. Procedure: After CTS read frozen SDC then set_propagated_clock
+        nebula_clock; extract actual final ODB with manifest setRC.tcl/rcx_patterns.rules.
+        Analyze setup/hold using final functional netlist and matched SPEF,TTLiberty
+        and every required endpoint. Pass condition: Setup/hold slack>=0ns at100ns,uncertainties0.1retained,source
+        latency0 and CTS delay not double-counted. Early/lateR,Cand timingderates1.0,no
+        invented corners or timing exception; observer/reset checks retained. CTS
+        uses only approved clkbuf1/2/4/8/16; report actual skew/insertion with no
+        extra ceiling. Nominal single-corner engineering result only. Evidence: Final
+        ODB/netlist/SPEF/SDC/library hashes,CTS and path reports,unconstrained-path
+        audit and reports/pnr/result_summary.json measured timing.setup_slack/timing.hold_slack.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      design_groups:
+      - physical.scope
+      responsible_stage: pnr
+      dependencies:
+      - AC-PDN-ROUTING
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/clocks
+      - physical/chip-nebula/implementation.constraints.json#/cts
+      - physical/chip-nebula/implementation.constraints.json#/rc
+      execution_status: not_run
+    - id: AC-ELECTRICAL
+      title: Close characterized electrical and reset checks
+      detail: 'Responsible stage: pnr; functional-performance-verify. Configuration:
+        enabled physical top. Dependencies: AC-POSTROUTE-STA, AC-RESET, AC-NPU-CANCEL.
+        Procedure: Analyze all actual clock/data/observer/reset nets for characterized
+        slew/capacitance/fanout limits; run recovery/removal/library pulse-width checks
+        with propagated clock. Independently inspect external reset waveform. Pass
+        condition: Slew/capacitance violations0; available library fanout violations0,where
+        no characterized ceiling report structural fanout and limit unavailable. Recovery/removal/library
+        pulse checks pass; external reset low>=200ns,deassert49..51ns afterclk rise
+        incl+/-1ns skew (do not expand window),joint memory reset. No blanket reset
+        false path or invented assertion phase/synchronizer; async assertion retained.
+        Structural fixture loading SDC is not actual design STA closure. Evidence:
+        Actual electrical violation reports,reset recovery/removal/min-pulse paths
+        and environment waveform measurements. V2 evidence requirement: Rerun/revalidate
+        these checks against the new confirmed/frozen plan, frozen constraints revision
+        2 and actual selected 4a7cf/2-thread physical inputs. Provide an actual reset-environment
+        waveform linked to those formal inputs, independently measuring low pulse
+        >=200 ns, release 49..51 ns including bounded skew and joint memory reset;
+        historical absence or a fixture/read-only audit is not PASS. Retain the exact
+        recovery/removal/library-pulse and every electrical threshold above.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      - REQ-D78B93943C97
+      - REQ-6C39607BFF86
+      - REQ-079A812CDD10
+      - REQ-47B47DDA5109
+      - REQ-4187B6DAEA66
+      design_groups:
+      - physical.scope
+      - cpu.reset
+      - npu.cancel
+      responsible_stage: pnr; functional-performance-verify
+      dependencies:
+      - AC-POSTROUTE-STA
+      - AC-RESET
+      - AC-NPU-CANCEL
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/electrical
+      - physical/chip-nebula/implementation.constraints.json#/reset
+      - physical/chip-nebula/implementation.constraints.json#/physical_qualification/reset
+      execution_status: not_run
+  - key: physical-signoff
+    title: Physical Signoff
+    items:
+    - id: AC-ROUTE-CLEAN
+      title: Clear detailed routing DRC and antenna
+      detail: 'Responsible stage: pnr. Configuration: enabled physical top. Dependencies:
+        AC-ELECTRICAL. Procedure: Run final detailed-route connectivity/DRC and antenna
+        checks after all repairs using frozen allowed cells/rules; invalidate and
+        rerun STA/export checks if repair changes design. Pass condition: RouterDRC
+        violations0,antenna violations0,no unrouted functional net; actual final revision
+        corresponds to timing/electrical evidence. Required execution_status records
+        completed tool runs,not mere file existence. Evidence: Final router/antenna/connectivity
+        logs,repair inventory,ODB hash,reports/pnr/result_summary.json measured drc.violations/antenna.violations/design.die_area
+        and reports/pnr/execution_status.json.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      design_groups:
+      - physical.scope
+      responsible_stage: pnr
+      dependencies:
+      - AC-ELECTRICAL
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/signoff
+      execution_status: not_run
+    - id: AC-EXPORT-CONSISTENCY
+      title: Check final ODB,STA netlist and SPEF identity
+      detail: 'Responsible stage: pnr. Configuration: enabled physical top. Dependencies:
+        AC-ROUTE-CLEAN, AC-POSTROUTE-STA. Procedure: From final routed ODB regenerate
+        functional STA netlist/SPEF and compare actual instances,cells,pins,nets/connectivity
+        and parasitic ownership; rebuild identical STA scenario from exported artifacts.
+        Pass condition: ODB/exported netlist/SPEF represent one actual final design,all
+        functional nets have correct parasitic binding,zero unexplained instance/net/pin
+        mismatch; reloaded timing matches within platform gate tolerance1e-6. Every
+        hash points to same final revision; physical-only support cells explicitly
+        accounted for. Evidence: reports/pnr/post_route_export_consistency.json with
+        actual design/export hashes,comparison details and STA reload result; final
+        retrievable exports.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      design_groups:
+      - physical.scope
+      responsible_stage: pnr
+      dependencies:
+      - AC-ROUTE-CLEAN
+      - AC-POSTROUTE-STA
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/signoff
+      execution_status: not_run
+    - id: AC-DRC-LVS
+      title: Run independent frozen deck DRC and LVS
+      detail: 'Responsible stage: pnr; gds-export. Configuration: enabled physical
+        top. Dependencies: AC-EXPORT-CONSISTENCY. Procedure: Run manifest-bound drc/sky130hd.lydrc
+        and lvs/sky130hd.lylvs on final exported physical geometry with approved GDS/CDL/cell
+        views and actual final functional netlist; resolve PG/physical-only-cell treatment
+        per approved decks. Pass condition: Independent deckDRC violations0 and LVSmatches
+        actual enabled top,not empty/dummy/fixture design. Deck/view/input hashes
+        match frozen resources and final exports. Unsupported independent ERC,EM/IR,multi-corner/foundry/pad/package
+        qualification explicitly unavailable,never fabricated PASS. Evidence: Actual
+        KLayout deck commands/tool versions,input/deck/CDL/GDS hashes,complete marker
+        and LVS comparison databases/reports.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      design_groups:
+      - physical.scope
+      responsible_stage: pnr; gds-export
+      dependencies:
+      - AC-EXPORT-CONSISTENCY
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/signoff/independent_decks
+      execution_status: not_run
+    - id: AC-POWER-AREA
+      title: Report actual per-workload activity,power and area
+      detail: 'Responsible stage: pnr. Configuration: enabled post-route top. Dependencies:
+        AC-EXPORT-CONSISTENCY, AC-DOT64, AC-GEMM8, AC-CONV3. Procedure: Run DOT64,GEMM8,CONV3
+        on actual post-route functional design at100ns; capture eligible activity
+        from reset deassertion through committed tohost completion,excluding reset/idle
+        warm-up/external memories/pads/package; use only supported characterized models.
+        Pass condition: Each workload functional output still passes. Report separately
+        cycles,activity window boundaries/duration,annotation coverage,dynamic/leakage/total
+        estimates and actual design/model hashes,no weighted aggregate. Missing model/activity
+        explicitly unavailable,never measured-silicon power or fabricated number.
+        Area mapped/placed/core/die/support-cell accounting includes CPU/NPU/RF and
+        excludes external memory/pads/package. No area or power hard budget is inferred.
+        Evidence: Actual gate/activity traces and mapping coverage,supported-model
+        power reports or explicit unavailability reason,measured area breakdown with
+        final design identity.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      - REQ-9BBBD834A83C
+      - REQ-F332169E266A
+      - REQ-5EAE3E313E75
+      - REQ-5006BB8FC9D7
+      - REQ-46BF76FC1DFC
+      - REQ-B151009B056E
+      design_groups:
+      - physical.scope
+      - system.workloads
+      responsible_stage: pnr
+      dependencies:
+      - AC-EXPORT-CONSISTENCY
+      - AC-DOT64
+      - AC-GEMM8
+      - AC-CONV3
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/power
+      - physical/chip-nebula/implementation.constraints.json#/area
+      execution_status: not_run
+  - key: gds
+    title: Gds
+    items:
+    - id: AC-GDS
+      title: Read final GDS and reconcile project top
+      detail: 'Responsible stage: gds-export. Configuration: enabled physical top.
+        Dependencies: AC-DRC-LVS, AC-POWER-AREA, AC-EXPORT-CONSISTENCY. Procedure:
+        Export actual routed enabled top with approved library geometry,open GDS in
+        KLayout,enumerate top/hierarchy/bounds and join it to final ODB/netlist/SPEF/deck
+        results; verify every final file is retrievable. Pass condition: GDSbytes>0,readable=true,correct
+        topnebula_cpu_npu_top and populated actual functional geometry/hierarchy;
+        no missing referenced cells,ports/memory boundary correct. Independent DRC/LVS
+        and final STA/electrical/antenna results correspond to this export. No foundry
+        authorization,tapeout,package or fabricated silicon claims. Evidence: Actual
+        GDSbytes/hash/readability/top-cell report,final export lineage and build/gds/result_summary.json
+        measured gds.bytes/gds.readable/gds.top_cell.'
+      requirement_ids:
+      - REQ-BE04BC186AC6
+      - REQ-C953E329C695
+      - REQ-CAEE2894B770
+      - REQ-F5F055C323E2
+      - REQ-B3136724E4AB
+      - REQ-17C25DACF539
+      - REQ-68A4C372A16F
+      - REQ-2EFF5B9CB3EB
+      - REQ-26835CBACE92
+      - REQ-DBB27F6C2D3C
+      design_groups:
+      - physical.scope
+      - integration.boundary
+      responsible_stage: gds-export
+      dependencies:
+      - AC-DRC-LVS
+      - AC-POWER-AREA
+      - AC-EXPORT-CONSISTENCY
+      source_refs:
+      - physical/chip-nebula/implementation.constraints.json#/signoff
+      - spec/source-contract.md#L13
+      execution_status: not_run
+adapter_obligations:
+- contract_id: CPU_STRUCTURE
+  requirement_ids:
+  - REQ-269A92199F57
+  - REQ-5A63794D81A1
+  - REQ-009CFCC955AD
+  - REQ-AD938E4C7993
+  - REQ-260B7A7590D6
+  - REQ-BFED1ACF2799
+  - REQ-FB0A4C73634E
+  - REQ-08F22F52719B
+  - REQ-B6574FECD558
+  - REQ-3EA8205B2DC9
+  - REQ-28F20098C3A9
+  - REQ-E50EA77579AB
+  - REQ-04B19A02D3C3
+  - REQ-E4EC71EEA384
+  - REQ-C33AA043CC12
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - cpu.structure
+- contract_id: EXTERNAL_MEMORY
+  requirement_ids:
+  - REQ-1E1A1B96688F
+  - REQ-1C86CC4C72D3
+  - REQ-089C02F7655B
+  - REQ-4A2B99BF2D4F
+  - REQ-21D8E2024152
+  - REQ-E5670A9E5233
+  - REQ-FA20AA6E8F43
+  - REQ-9067CD0E4AE7
+  - REQ-392B59B6AF74
+  - REQ-208698025E30
+  - REQ-1494293713A7
+  - REQ-10F9AEEE784D
+  - REQ-4C6546ED46FD
+  - REQ-E293DAA3EDCD
+  - REQ-3F8F3008E7A1
+  - REQ-322390401491
+  - REQ-0364A64A3126
+  - REQ-131729937901
+  - REQ-ADE22725FB6F
+  - REQ-0F5272F9CC16
+  - REQ-6C39607BFF86
+  - REQ-079A812CDD10
+  - REQ-C8E4CE003793
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - integration.memory_environment
+- contract_id: CPU_EDGE_LATENCY
+  requirement_ids:
+  - REQ-89D3BA17833E
+  - REQ-FD64F59A9F1A
+  - REQ-B39614D719F0
+  - REQ-0C348358645A
+  - REQ-D58FD55E7FD3
+  - REQ-E2998F12B044
+  - REQ-0F7329FEEA6B
+  - REQ-27179AE580E7
+  - REQ-D0755E26A106
+  - REQ-3F6DE7EF1AC6
+  - REQ-56CE793251EE
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - cpu.pipeline
+- contract_id: CPU_MEMORY_BUDGET
+  requirement_ids:
+  - REQ-4D966719537C
+  - REQ-0E3A6660BAD4
+  - REQ-59AA63F02D48
+  - REQ-E2490F44D4FE
+  - REQ-6501DAE7C4FE
+  - REQ-72865D64F290
+  - REQ-469EDAA52B62
+  - REQ-1784087D048A
+  - REQ-BB13DC472AB4
+  - REQ-7D6D658EA3CB
+  - REQ-F3C9EF972C06
+  - REQ-7C1169296FCF
+  - REQ-C8E4CE003793
+  - REQ-7895FFDD0093
+  - REQ-5A8034DC909A
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - cpu.memory
+- contract_id: SPEC_AUTHORITY
+  requirement_ids:
+  - REQ-AB306F4AA831
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - spec.authority
+- contract_id: PROJECT_SCOPE
+  requirement_ids:
+  - REQ-FDDBC67C954F
+  - REQ-CC6F59551A30
+  - REQ-3E3CE6190291
+  - REQ-8E067BBEC910
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - project.scope
+- contract_id: PHYSICAL_SCOPE
+  requirement_ids:
+  - REQ-BE04BC186AC6
+  - REQ-C953E329C695
+  - REQ-CAEE2894B770
+  - REQ-F5F055C323E2
+  - REQ-B3136724E4AB
+  - REQ-17C25DACF539
+  - REQ-68A4C372A16F
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - physical.scope
+- contract_id: SYSTEM_WORKLOADS
+  requirement_ids:
+  - REQ-9BBBD834A83C
+  - REQ-F332169E266A
+  - REQ-5EAE3E313E75
+  - REQ-5006BB8FC9D7
+  - REQ-46BF76FC1DFC
+  - REQ-B151009B056E
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - system.workloads
+- contract_id: VERIFICATION_CYCLES
+  requirement_ids:
+  - REQ-B7BD505096AE
+  - REQ-24B3FA3021E3
+  - REQ-8E39D58A91B1
+  - REQ-E1CF5533FD24
+  - REQ-AC5DDC407906
+  - REQ-D39019A3CFD8
+  - REQ-5A631995F829
+  - REQ-DD6D31288599
+  - REQ-280D2A05F8AA
+  - REQ-211D4C0B5236
+  - REQ-5D1EB7BD76E1
+  - REQ-BB9D0FFCA5D1
+  - REQ-206267FD77CA
+  - REQ-67D68C429EA8
+  - REQ-2CD55DE58324
+  - REQ-5F5F8E53BDA2
+  - REQ-F7C63D530051
+  - REQ-930A831E80DB
+  - REQ-D8097CE0B9F1
+  - REQ-ADDBCB23196D
+  - REQ-E060B588934B
+  - REQ-D391679F8906
+  - REQ-22DDCC807C2F
+  - REQ-D5301BBC4D00
+  - REQ-65E7A16DB29B
+  - REQ-A7F234D7A57F
+  - REQ-06A20B213C24
+  - REQ-47A8A62333AB
+  - REQ-083131ED5BCB
+  - REQ-61E0F6BEFED4
+  - REQ-0A79A337A5B8
+  - REQ-6065C85E0ACD
+  - REQ-1CB708E30983
+  - REQ-AD34FCA99747
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.cycles
+- contract_id: VERIFICATION_REPRODUCIBILITY
+  requirement_ids:
+  - REQ-ABAEDC5E100A
+  - REQ-EA7B625ABEF0
+  - REQ-D7E53423C050
+  - REQ-DB8C2F370500
+  - REQ-7C0B10687090
+  - REQ-AB6D9B607E01
+  - REQ-6A9CBCEDE20F
+  - REQ-A4C9D314C614
+  - REQ-D48B8A0A8BE7
+  - REQ-66B1B136E39A
+  - REQ-48D00D23F954
+  - REQ-F356AFEF1518
+  - REQ-507F3C986C6D
+  - REQ-61E0F6BEFED4
+  - REQ-0A79A337A5B8
+  - REQ-6065C85E0ACD
+  - REQ-1CB708E30983
+  - REQ-AD34FCA99747
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.reproducibility
+- contract_id: PROJECT_RESOURCES
+  requirement_ids:
+  - REQ-83E61D370EBF
+  - REQ-264F9B513D18
+  - REQ-2FC06D942B8A
+  - REQ-6AC755A84F95
+  - REQ-919A9AD6965D
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - project.resources
+- contract_id: VERIFICATION_SCORING
+  requirement_ids:
+  - REQ-5CFE1A7E01C1
+  - REQ-14B6323ACB58
+  - REQ-D56878A6A0EE
+  - REQ-FB4B5BD37A8E
+  - REQ-3369FF765E84
+  - REQ-B581DB3F8A88
+  - REQ-852029C93A29
+  - REQ-1D0F0F7D3C62
+  - REQ-1BC693FD835E
+  - REQ-B154AE2CD880
+  - REQ-422D1343D955
+  - REQ-F0896C3C07C7
+  - REQ-723FE432B3F3
+  - REQ-74D63A25028B
+  - REQ-BA9341D346D0
+  - REQ-92139E24D912
+  - REQ-99BE0C5F2E94
+  - REQ-50311EBBD9DE
+  - REQ-C52A2184393E
+  - REQ-1D32C7AE14BA
+  - REQ-9572AA12B1C9
+  - REQ-C7E41A5AB030
+  - REQ-58A1A115ABDC
+  - REQ-EA6253E37CC9
+  - REQ-BC3B040D1D56
+  - REQ-EBFDF6FD9EF7
+  - REQ-C2AEB83F6EB0
+  - REQ-DA5EE6429873
+  - REQ-61E0F6BEFED4
+  - REQ-0A79A337A5B8
+  - REQ-6065C85E0ACD
+  - REQ-1CB708E30983
+  - REQ-AD34FCA99747
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.scoring
+- contract_id: VERIFICATION_FUNCTIONAL
+  requirement_ids:
+  - REQ-E26D8D5FC2DE
+  - REQ-DE2140A3B69D
+  - REQ-50A82E9483D9
+  - REQ-87962DDCB1B7
+  - REQ-40857E12BFE6
+  - REQ-08B8869F79AB
+  - REQ-18BD9E1F9704
+  - REQ-763603461F33
+  - REQ-4D90424F7EFA
+  - REQ-CFC8007861A0
+  - REQ-DB908DF98081
+  - REQ-A31DFEFC1259
+  - REQ-A3876C9F628F
+  - REQ-693267807090
+  - REQ-495F708C14A0
+  - REQ-0D51F220D6E6
+  - REQ-9DF2BA15A118
+  - REQ-11E8B8E83E3B
+  - REQ-062FCDE66532
+  - REQ-61E0F6BEFED4
+  - REQ-0A79A337A5B8
+  - REQ-6065C85E0ACD
+  - REQ-1CB708E30983
+  - REQ-AD34FCA99747
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.functional
+- contract_id: VERIFICATION_DIRECTED
+  requirement_ids:
+  - REQ-3888E9316EBC
+  - REQ-F5119EF273ED
+  - REQ-048B3610BE8D
+  - REQ-0D35C0A5BD94
+  - REQ-637A2C479BEE
+  - REQ-E81B683539C8
+  - REQ-46BFAE5AFC54
+  - REQ-614D839A79C6
+  - REQ-0A994E4E4F71
+  - REQ-F0537F10247E
+  - REQ-F9A5E46E627B
+  - REQ-0B2A29BBC15C
+  - REQ-7DE264240EC3
+  - REQ-92BEA226669F
+  - REQ-AF85A21FF988
+  - REQ-5195A0ABC39B
+  - REQ-D9130B2FA9F8
+  - REQ-F1179F710B95
+  - REQ-A7964968680B
+  - REQ-5AC2AEA7626F
+  - REQ-3D89EE290160
+  - REQ-EB7F0D9F2CB7
+  - REQ-F21CF4FCB931
+  - REQ-68462EEFDEE0
+  - REQ-9813F33887C5
+  - REQ-4DC150E33BBD
+  - REQ-6EBD97F59D93
+  - REQ-A621CA5BC558
+  - REQ-5AC64A8A9515
+  - REQ-7525E5D6F64B
+  - REQ-80DA52A06F33
+  - REQ-1ED25FC13901
+  - REQ-E82638145341
+  - REQ-F6F0DAAE5FAF
+  - REQ-2DD16DFA622F
+  - REQ-1F76B21A3E76
+  - REQ-345683224B61
+  - REQ-3D2CE3573FA4
+  - REQ-DBC595716C57
+  - REQ-F6175E6EA689
+  - REQ-8953929DBC9F
+  - REQ-F6ED37F83E19
+  - REQ-F46202F44F24
+  - REQ-967538B0F376
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.directed
+- contract_id: VERIFICATION_DIFFERENTIAL
+  requirement_ids:
+  - REQ-531A036BA724
+  - REQ-B16900DB78E1
+  - REQ-61EFF1B90AE2
+  - REQ-9BDA4375093B
+  - REQ-AC347C5C9A4D
+  - REQ-E205DAA96DF2
+  - REQ-7F673DF52686
+  - REQ-3D763A14A85C
+  - REQ-AFE5CBAF7519
+  - REQ-FF9C94EF4446
+  - REQ-94F8AA34E74F
+  - REQ-E0133AEBAE8D
+  - REQ-1D122929046F
+  - REQ-C7FDC834D595
+  - REQ-2AD4DE23D819
+  - REQ-5D4302C35CEA
+  - REQ-B783BFD32988
+  - REQ-168298291FF1
+  - REQ-1B18F657413D
+  - REQ-61E0F6BEFED4
+  - REQ-0A79A337A5B8
+  - REQ-6065C85E0ACD
+  - REQ-1CB708E30983
+  - REQ-AD34FCA99747
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.differential
+- contract_id: VERIFICATION_BUS
+  requirement_ids:
+  - REQ-3CDB8C846B5E
+  - REQ-16B9755F52FA
+  - REQ-92BB4D8D5CAB
+  - REQ-43AC93F82BCD
+  - REQ-36405729B89B
+  - REQ-530267985156
+  - REQ-EE0CDA11C2F3
+  - REQ-71D3B024FC98
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.bus
+- contract_id: VERIFICATION_FLUSH
+  requirement_ids:
+  - REQ-C6D95B0FEBF4
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.flush
+- contract_id: VERIFICATION_RESET
+  requirement_ids:
+  - REQ-90E5A2708BE1
+  - REQ-DEFCE26371DA
+  - REQ-5711801822DF
+  - REQ-0C97378EE39C
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.reset
+- contract_id: VERIFICATION_BOUNDARIES
+  requirement_ids:
+  - REQ-07F76FB404FE
+  - REQ-04EAF62B38AA
+  - REQ-2CE871394711
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.boundaries
+- contract_id: VERIFICATION_STRUCTURE
+  requirement_ids:
+  - REQ-12E4D8BD2FF9
+  - REQ-79DCC08E60B9
+  - REQ-DDA492CBD6C0
+  - REQ-B327A59BB1D2
+  - REQ-F7DB76DFE7F3
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.structure
+- contract_id: VERIFICATION_TIMEOUTS
+  requirement_ids:
+  - REQ-58D073B3CDED
+  - REQ-2A3DFA57F39A
+  - REQ-ACFD27A4DF2E
+  - REQ-2BFE93C224C5
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.timeouts
+- contract_id: VERIFICATION_RELEASE
+  requirement_ids:
+  - REQ-C48756C1830E
+  - REQ-7EF5617E7736
+  - REQ-578522414F8D
+  - REQ-342AE06A54B4
+  - REQ-3F57C0C9E7A2
+  - REQ-054A022C992E
+  - REQ-77818D8F0881
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.release
+- contract_id: VERIFICATION_PUBLIC_SMOKE
+  requirement_ids:
+  - REQ-EE14DCD82F9D
+  - REQ-0632F6E72529
+  - REQ-14BFDDB3D9C0
+  - REQ-E8652C149296
+  - REQ-E7E7139855C9
+  - REQ-7A81F1545181
+  - REQ-227DE65963DC
+  - REQ-A03E7F8EA91E
+  - REQ-F154E7C95684
+  - REQ-121328341A54
+  - REQ-58B097F931C5
+  - REQ-13B6671CEE13
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.public_smoke
+- contract_id: OPEN_ACT4_SCORE_WEIGHT
+  requirement_ids:
+  - REQ-FB4B5BD37A8E
+  - REQ-50311EBBD9DE
+  - REQ-14B6323ACB58
+  - REQ-D56878A6A0EE
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.scoring
+- contract_id: OPEN_LOCKED_REFERENCE_IDENTITY
+  requirement_ids:
+  - REQ-2B1C919C61DD
+  - REQ-5E9C42E5E0AC
+  - REQ-DB8C2F370500
+  - REQ-7C0B10687090
+  - REQ-AB6D9B607E01
+  - REQ-DB908DF98081
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - verification.reproducibility
+- contract_id: TOP_INSTANCE_BINDING
+  requirement_ids:
+  - REQ-2EFF5B9CB3EB
+  - REQ-26835CBACE92
+  - REQ-DBB27F6C2D3C
+  - REQ-FAC9A0F0E0BF
+  - REQ-143CDF1DFBC8
+  - REQ-11AF5B483862
+  status: required_downstream_execution
+  evidence_requirement: Bind every typed observe/constrain operand to retrievable
+    actual implementation/run evidence; validate the declared relation and archive
+    same-run result. Specification signoff or a constant result is insufficient.
+  design_groups:
+  - integration.boundary
+revision: 2
+physical_revision:
+  name: calibrated-geometry-v2
+  spec_digest: sha256:9e2e4dc1c876bda98921b4d26ccea97cad53efc9e5064966c16cbc6a8f2ecec5
+  spec_revision_id: specir:9e2e4dc1c876bda98921b4d26ccea97cad53efc9e5064966c16cbc6a8f2ecec5
+  constraints_artifact_id: artifact-0040978541934ec0803b607ff5200dae
+  constraints_commit: a4591add32499f2aae18a8cb6ee5f01c880c43a4
+  constraints_revision: 2
+  constraints_sha256: 752843a10754d7ea76453133701edd50150bc675ca04adc5562f7b33783609d7
+  sdc_sha256: 07035b98278546157e4e75570d2657337f7c9b8cb4d82e5482e991f558a0be16
+  authorization_artifact_id: authorized-calibrated-geometry-revision
+  authorization_artifact_digest: sha256:c06e763240ef04f5783b783f97f628dfb794b01b4136eb97caf8a3029bcaeb63
+  authorization_commit: b820a4da864e4c16064e384f9eadccf40b3b0d95
+  decision_path: .nebula_inputs/authorized-calibrated-geometry-revision/operator-decisions/calibrated-floorplan/decision.json
+  decision_sha256: dcb88460445a21b7f54f63cc0bd10fe4cf11945d68a10ae437c1f9aed3c98ed5
+  decision_work_item_id: work-19385c3c85a54e709e5552e66596b191
+  previous_draft_artifact_id: artifact-6c612801c3f141f2b5e44a38f2ccdc0d
+  previous_draft_commit: 35ab69392333ffa3cc761bd4ea761bae97fad6fc
+  previous_frozen_acceptance_artifact_id: artifact-478b595695d0419e81e4d77e864a23d7
+  previous_frozen_acceptance_commit: 74850eb8598c73903bb92ac9c97d8ff3e04dbc0f
+  semantics: Prospective calibrated geometry/tool revision, preserving the V1 strict-core
+    failure. Only planning-versus-native-row geometry and approved physical execution
+    identity change; all CPU/NPU, functional, scoring, timing, reset, electrical,
+    DRC/LVS/antenna thresholds and hashed views remain in force.
+  qualification: Current constraints are frozen; this draft must be published and
+    confirmed/frozen by the existing freeze-acceptance-plan task before affected physical
+    execution can qualify. Draft validation is not project verification.
+  historical_attempt_id: attempt-5618245a667f4befa40aaf23b428464d
+  historical_failure_record: .nebula_inputs/attempt-5618245a667f4befa40aaf23b428464d/failure.json
+  historical_tool_threads: OpenROAD 26Q3 / 16 cores; separate unqualified execution
+    for V2
+  history_policy: Retain failed verdicts, forced-row-origin and forced-core-boundary
+    trials, raw logs and checkpoint lineage. Old geometry and positive physical measurements
+    do not become V2 PASS by relabeling. Native structural calibration or a reader
+    audit is not actual implementation acceptance.
+physical_execution:
+  openroad_executable: /tmp/chipnebula-pinned-tools/bin/openroad
+  resolved_executable: /tmp/chipnebula-pinned-tools/src/OpenROAD/build/bin/openroad
+  version: 4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca
+  executable_sha256: 99517bea0776886f56750e54f87e8e91df94aecee6189cb9c0a3be2d62cabedf
+  num_cores: 2
+  NUM_CORES: 2
+  openroad_threads: 2
+  environment_source_paths:
+  - /tmp/chipnebula-pinned-tools/env.sh
+  - /opt/rh/gcc-toolset-13/enable

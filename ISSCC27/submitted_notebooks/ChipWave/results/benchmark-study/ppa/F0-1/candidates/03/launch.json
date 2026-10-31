@@ -1,0 +1,19 @@
+{
+  "candidate_artifact": "artifact-bc5b29259a424b7dbbcf46c8a7ce493f",
+  "candidate_index": 3,
+  "candidate": {
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 10
+    },
+    "rtl_actions": {
+      "operand_isolation": false,
+      "reduce_width": true
+    },
+    "rationale": "Candidate 3 uses the final one of three accepted evaluation slots and is untried in the complete captured history. Both earlier candidates used utilization=40, density=0.55, abc_area=0 and repair_margin=0. Candidate 1 enabled both RTL actions: cell_area_um2=160081, setup_slack_ns=-0.0262439, hold_slack_ns=0.0945523, zero electrical violations, failure_classes=[physical_execution,timing], physical_wall_seconds=3601.748373. Candidate 2 enabled only reduce_width: cell_area_um2=161973 versus baseline 161954, setup_slack_ns=0.105414, hold_slack_ns=0.122652, electrical_violations={max_slew:16,max_cap:6,max_fanout:0}, failure_classes=[electrical], physical_wall_seconds=4312.747450. Both were physical_qualified=false and rank_eligible=false with empty energy_j and estimated_power_w; neither has a qualified Q. Recorded elapsed_search_seconds=3667.903144 and 8115.444419 include execution and cannot be interpreted as agent-only budget use; EDA wait is separate from the shared 1200-second agent budget. Raise only repair_margin from 0 to 10 to target the measured electrical failure while preserving candidate 2 timing and the proved exact signed 18-bit reduction as the starting hypothesis. Retain operand_isolation=false because the only tested isolated design failed timing, although causality is not established. Width reduction targets arithmetic area and switching; electrical repair can add buffers, cell area, switching power and delay, and may still leave violations. Keep utilization, density and mapping fixed to avoid additional placement or mapping risks in the final slot. Minimize Q=(cell_area_um2/161954)*geomean(E_DOT64/2.293945631906608e-7,E_GEMM8/1.7792685987008622e-6,E_CONV3/1.1542462882162743e-6). Die area is diagnostic, not the objective. Require physical_qualified, measurement_qualified and rank_eligible before comparing area_ratio, energy_ratio and score against Q=1 and the 0.98 threshold. Report setup/hold slack, electrical_violations, failure_classes, correctness, activity/parasitic annotation, all three workload energy_j and estimated_power_w entries, physical_manifest, physical/postprocess wall costs and elapsed search costs. Preserve both failures and retain the best qualified result, currently baseline Q=1. Candidate 3 has no measured outcome or improvement claim. Energy comparisons are limited to Liberty-model zero-delay post-route activity with extracted SPEF, excluding SDF glitch and silicon-power claims."
+  },
+  "review_required": false,
+  "accepted_at": "2026-10-19T02:24:40.215666+00:00"
+}

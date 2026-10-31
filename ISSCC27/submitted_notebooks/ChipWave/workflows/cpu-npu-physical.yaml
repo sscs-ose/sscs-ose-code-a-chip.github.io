@@ -1,0 +1,64 @@
+name: cpu-npu-physical-acceptance
+version: 2
+planner:
+  framework: codex
+  model: gpt-6.1-sol
+parameters:
+  rtl: rtl.snapshot
+tasks:
+  physical:
+    role: case-physical-tool
+    intent: Run independent functional acceptance, synthesis, placement, routing,
+      STA, route DRC, GDS DRC and extracted LVS for the frozen CPU/NPU core at Sky130HD
+      TT25C1.8V 100 ns. Preserve failures without changing RTL, checker, or target.
+    permission:
+      read:
+      - rtl/**
+      - spec/**
+      - scripts/**
+      - verification/**
+      - physical/**
+      - workbench.yaml
+      - selected-delivery.json
+      write:
+      - build/**
+      tools:
+      - python3
+      - bash
+      - env
+      - make
+      - yosys
+      - openroad
+      - klayout
+      - verilator
+      - iverilog
+      - vvp
+    inputs:
+      rtl:
+        type: rtl.snapshot
+        from: $parameters.rtl
+    outputs:
+      report:
+        type: physical.report
+        paths:
+        - build/rtl-to-gds/**
+    max_attempts: 2
+    execution:
+      executor: tool
+      command: python3 scripts/run_physical.py --subject imported-main-rtl
+      timeout_seconds: 18000
+    gates:
+    - name: independent-physical-verdict
+      template: script-check
+      version: 1
+      parameters:
+        script: python3
+        arguments:
+        - -c
+        - import json; from pathlib import Path; r=json.loads(Path('build/rtl-to-gds/physical-report.json').read_text());
+          assert r['verdict']=='passed'; print('PHYSICAL_REPORT_PASSED')
+        expected: PHYSICAL_REPORT_PASSED
+        timeout: 30
+        level: L1
+        error_class: physical_signoff_failed
+      on_failure: report

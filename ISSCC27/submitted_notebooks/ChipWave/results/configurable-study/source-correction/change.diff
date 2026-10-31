@@ -1,0 +1,31 @@
+--- executed-v1/evaluate_study_physical.py
++++ corrected-v2/evaluate_study_physical.py
+@@ -12,6 +12,7 @@
+ from pathlib import Path
+ 
+ from study_protocol import WORKLOADS, score, write_json
++from classify_study_failures import classify
+ 
+ CASE = Path(__file__).resolve().parents[1]
+ 
+@@ -61,13 +62,14 @@
+                                         for key in ('max_slew', 'max_cap', 'max_fanout')},
+               'energy_j': {}, 'estimated_power_w': {}, 'postprocessing_commands': [],
+               'physical_manifest': physical['manifest']}
+-    if raw:
+-        if any(raw.get('finish__timing__' + kind + '__ws', -1) < 0 for kind in ('setup', 'hold')):
+-            result['failure_classes'].append('timing')
+-        if any(value != 0 for value in result['electrical_violations'].values()):
+-            result['failure_classes'].append('electrical')
++    native_path = run/'evidence/summary.json'
++    report_path = run/'evidence/physical-report.json'
++    native = json.loads(native_path.read_text()) if native_path.exists() else (
++        json.loads(report_path.read_text()).get('raw_flow_summary', {}) if report_path.exists() else {})
++    result['failure_classes'] = classify(physical, raw, native)
++    result['physical_qualified'] = physical['physical_qualified'] and not result['failure_classes']
+     started = time.monotonic()
+-    if physical['physical_qualified']:
++    if result['physical_qualified']:
+         output = run / ('workloads'+suffix)
+         if output.exists():
+             raise ValueError('Partial workload evidence preserved; use an explicitly versioned evaluation recovery')

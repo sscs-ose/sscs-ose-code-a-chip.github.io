@@ -1,0 +1,19 @@
+{
+  "candidate_artifact": "artifact-4c8c1a2e0e6a413493784ae19e85bdad",
+  "candidate_index": 1,
+  "candidate": {
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 0
+    },
+    "rtl_actions": {
+      "operand_isolation": true,
+      "reduce_width": true
+    },
+    "rationale": "The only captured measurement is the rank-eligible baseline: cell_area_um2=161954, setup_slack_ns=0.19292, hold_slack_ns=0.114491, and zero max_slew/max_cap/max_fanout violations. No later evaluation or feedback is captured. This action combination is untried. Retain the qualified physical settings because setup headroom is small; avoid adding area-mapping timing risk or repair overhead without evidence. Enable the proved exact signed 18-bit reduction to target redundant arithmetic area and switching, and operand isolation to suppress multiplier input activity except when accepting requests, preserving the registered cycle contract. Isolation adds gates, capacitance and possible input-path delay; width reduction may offset these costs, but synthesis may already remove redundant width and CPU activity may limit total benefit. These are hypotheses, not measured improvements. Optimize Q=(cell_area_um2/161954)*geomean(Ew/Ebaseline_w) over DOT64, GEMM8 and CONV3, whose baseline energy_j values are 2.293945631906608e-7, 1.7792685987008622e-6 and 1.1542462882162743e-6. Die area and estimated timing do not establish Q. Protected evaluation must report physical_qualified, measurement_qualified, rank_eligible, failure_classes, cell_area_um2, setup/hold slack, electrical violations, each workload energy_j, area_ratio, energy_ratio and score; verify activity/parasitic annotation and correctness at the fixed 10526 ps period. Interpret energies within the frozen Liberty/zero-delay post-route activity/extracted-SPEF scope, without SDF glitch or silicon-power claims. Retain all failures, evaluation costs and the best qualified result; no candidate PPA result is available yet."
+  },
+  "review_required": true,
+  "accepted_at": "2026-10-18T21:06:59.029263+00:00"
+}

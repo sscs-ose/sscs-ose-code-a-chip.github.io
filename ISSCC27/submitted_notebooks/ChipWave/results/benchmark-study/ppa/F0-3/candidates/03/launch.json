@@ -1,0 +1,19 @@
+{
+  "candidate_artifact": "artifact-ea41c31c245a46e58fe0f276fb69ad8e",
+  "candidate_index": 3,
+  "candidate": {
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 10
+    },
+    "rtl_actions": {
+      "operand_isolation": false,
+      "reduce_width": true
+    },
+    "rationale": "Choose the untried width-only configuration with repair_margin increased from 0 to 10 after reading all captured route and evaluation records. Candidate 2 had cell_area_um2=161973, setup_slack_ns=0.105414, hold_slack_ns=0.122652, and electrical violations max_slew=16, max_cap=6, max_fanout=0. It failed electrical qualification and has no measured workload energies or valid Q. The smallest positive repair-margin step directly targets that observed failure while limiting potential buffer, sizing, area and power overhead; closure and improvement remain hypotheses. Retain utilization=40, density=0.55 and abc_area=0 to isolate this repair change and avoid additional unmeasured placement or mapping risk. Retain the proved exact signed 18-bit reduction, sign extended to 32 bits, with operand isolation disabled. Candidate 1 with both actions had area 160081 um2, setup slack -0.0262439 ns and failures physical_execution and timing; its smaller area was unqualified. These observations do not prove the cause of its timing failure or a benefit from width reduction. Candidate 2 area slightly exceeds baseline 161954 um2, so qualification alone cannot establish an improvement: workload energy must compensate for any area overhead. Optimize Q=(cell_area_um2/161954)*geomean(E_DOT64/2.293945631906608e-7,E_GEMM8/1.7792685987008622e-6,E_CONV3/1.1542462882162743e-6). Baseline remains the qualified incumbent at Q=1.0; this proposal has no measured Q. Protected evaluation must report functional checks, physical_qualified, measurement_qualified, rank_eligible, failure_classes, cell_area_um2, die_area_um2, setup_slack_ns, hold_slack_ns, electrical_violations, energy_j and estimated_power_w for all three workloads, activity_and_parasitic_annotation, area_ratio, energy_ratio, score, physical_manifest, physical_wall_seconds, postprocess_wall_seconds, total_wall_seconds and common budget accounting. Preserve both failures and their physical costs of 3834.5636487400043 s and 4286.725275041012 s. Two new candidate evaluations are captured; this is the third and final available evaluation under the three-candidate limit and shared 1200 s agent budget, with EDA wait separate. Captured elapsed_search_seconds=8483.152906313015 is not a remaining agent-budget measurement. Rank only fully qualified results and retain the best qualified result, including the baseline if this trial fails or has worse Q. Energy scope remains Liberty-model estimation using zero-delay post-route gate activity and extracted SPEF; no SDF glitch or silicon-power claim."
+  },
+  "review_required": false,
+  "accepted_at": "2026-10-19T19:49:58.733558+00:00"
+}

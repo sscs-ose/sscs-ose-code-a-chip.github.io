@@ -1,0 +1,110 @@
+--- previous configuration
++++ 02-add-reviewer
+@@ -1,4 +1,4 @@
+-name: 01-custom-role
++name: 02-add-reviewer
+ version: 2
+ parameters:
+   source: specification.source
+@@ -43,7 +43,7 @@
+       - git
+       - make
+     inputs:
+-      source:
++      source: &id002
+         type: specification.source
+         from: $parameters.source
+     outputs:
+@@ -66,6 +66,61 @@
+         - rtl/**/*.sv
+         - rtl/**/*.v
+         min_files: 1
++  verifier:
++    role: tutorial-reviewer
++    intent: 'Independently verify the delivered RTL against spec/npu.md and treatment.md.
++
++      Read the actual implementation, run python3 tools/smoke.py and add/run tests
++
++      under tests/reviewer/ when useful. You may write tests/reviewer/, reports/ and
++
++      build/ only; RTL and the contract/checker/IP are read-only. Record actionable
++
++      defects including reproduction steps. Do not repair RTL, weaken checks,
++
++      invoke other models/agents or inspect other trials or the final evaluator.
++
++      Write reports/review.json with subject, verdict (passed or failed),
++
++      repair_summary (a string), and executed commands. End with exactly
++
++      NEBULA_OUTPUT: {"report":{"subject":"generated-rtl","verdict":"passed or failed","repair_summary":"specific
++      findings or none"}}.
++
++      Do not literally copy the placeholder verdict above: select passed or failed.
++
++      '
++    permission:
++      read:
++      - spec/**
++      - rtl/**
++      - ip/**
++      - tb/**
++      - tools/**
++      - tests/**
++      - build/**
++      write:
++      - tests/reviewer/**
++      - reports/**
++      - build/**
++      tools: *id001
++    inputs:
++      source: *id002
++      rtl: &id003
++        type: rtl.snapshot
++        from: $tasks.designer.outputs.rtl
++    outputs:
++      report:
++        type: verification.report
++        paths:
++        - reports/**
++        - tests/reviewer/**
++    max_attempts: 8
++    execution:
++      framework: codex
++      model: gpt-6.1-sol
++      reasoning_effort: high
++      timeout_seconds: 1200
+   audit:
+     role: study-auditor
+     intent: Execute common immutable development check; do not modify design.
+@@ -81,9 +136,13 @@
+       - build/**
+       tools: *id001
+     inputs:
+-      rtl:
+-        type: rtl.snapshot
+-        from: $tasks.designer.outputs.rtl
++      rtl: *id003
++      review:
++        type: verification.report
++        from: $tasks.verifier.outputs.report
++        release:
++          field: verdict
++          equals: passed
+     outputs:
+       report:
+         type: verification.report
+@@ -95,6 +154,13 @@
+       command: python3 tools/audit.py
+       timeout_seconds: 180
+ feedback:
++- source: verifier
++  verdict: fail
++  target: designer
++  kind: feedback
++  summary: Repair the independently reported defect.
++  summary_field: report.repair_summary
++  propagate: true
+ - source: audit
+   verdict: fail
+   target: designer

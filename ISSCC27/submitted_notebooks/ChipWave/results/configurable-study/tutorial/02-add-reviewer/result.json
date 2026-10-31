@@ -1,0 +1,73 @@
+{
+  "lesson": "02-add-reviewer",
+  "trial": "fresh-multi-1",
+  "state": "complete",
+  "tasks": [
+    {
+      "name": "designer",
+      "state": "satisfied",
+      "attempts": 1
+    },
+    {
+      "name": "verifier",
+      "state": "satisfied",
+      "attempts": 1
+    },
+    {
+      "name": "audit",
+      "state": "satisfied",
+      "attempts": 1
+    }
+  ],
+  "calls": [
+    {
+      "role": "tutorial-designer",
+      "mode": "saved RTL / real checker replay",
+      "seconds": 0.0003573319991119206
+    },
+    {
+      "role": "tutorial-reviewer",
+      "mode": "saved RTL / real checker replay",
+      "seconds": 0.019688411994138733
+    }
+  ],
+  "recipe_sha256": "ce746ba5c882e89584b46d673c1db39dd1829cb3479a3a73bef7d49aca75ada6",
+  "model_calls": 0,
+  "source_sha256": {
+    "rtl/nebula_npu_dot4.sv": "aecfd6292d1126f06c4feb7b5f68bdfc667deea387f1487bb343b3ce14f60b5a"
+  },
+  "dependencies": [
+    {
+      "from": "designer",
+      "to": "verifier"
+    },
+    {
+      "from": "designer",
+      "to": "audit"
+    },
+    {
+      "from": "verifier",
+      "to": "audit"
+    }
+  ],
+  "feedback": [
+    {
+      "source": "verifier",
+      "verdict": "fail",
+      "target": "designer",
+      "kind": "feedback",
+      "summary": "Repair the independently reported defect.",
+      "summary_field": "report.repair_summary",
+      "propagate": true
+    },
+    {
+      "source": "audit",
+      "verdict": "fail",
+      "target": "designer",
+      "kind": "feedback",
+      "summary": "Repair the common public checker failure.",
+      "summary_field": "report.repair_summary",
+      "propagate": true
+    }
+  ]
+}

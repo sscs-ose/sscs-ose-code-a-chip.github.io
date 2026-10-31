@@ -1,0 +1,635 @@
+{
+  "workflow": {
+    "id": "configuration-study",
+    "recipe": "configuration-study@2",
+    "goal": "Implement and verify the fixed dot4 contract",
+    "status": "complete",
+    "paused_reason": "",
+    "definition_digest": "sha256:2fb04e6749a4a1f9f85f01baecda7b13b5df2f2acf2860dd4aaa84c3bdee6055",
+    "metadata": {
+      "baseline_commit": "41a4b919192c21dd32b3abf644dc2c13261491c9",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "source": "common-source"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/generation/fresh-single-2/project/.chip_nebula/recipes/configuration.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-16T06:00:18.121995+00:00"
+  },
+  "tasks": [
+    {
+      "id": "configuration-study:designer",
+      "workflow_id": "configuration-study",
+      "key": "designer",
+      "role": "study-designer",
+      "role_version": 1,
+      "intent": "Read spec/npu.md and spec/treatment.md. Deliver the complete implementation\nunder rtl/. Run python3 tools/smoke.py and develop additional tests if useful.\nThe smoke endpoint executes the published checker and retains trusted receipts.\nYou may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,\ntools, the supplied testbench, task definitions or acceptance conditions.\nRead actual feedback and repair the same assigned task. Do not invoke other\nmodels/agents, access credentials, or attempt to inspect other trials or the\nfinal evaluator. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "ip/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "rtl/**",
+          "tests/designer/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "common-source",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "rtl",
+          "artifact_type": "rtl.snapshot",
+          "schema_version": 1,
+          "paths": [
+            "rtl/**"
+          ]
+        }
+      ],
+      "hard_gates": [
+        {
+          "name": "rtl-present",
+          "kind": "file_check",
+          "parameters": {
+            "min_files": 1,
+            "paths": [
+              "rtl/**/*.sv",
+              "rtl/**/*.v"
+            ]
+          },
+          "on_failure": "retry"
+        }
+      ],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Read spec/npu.md and spec/treatment.md. Deliver the complete implementation\nunder rtl/. Run python3 tools/smoke.py and develop additional tests if useful.\nThe smoke endpoint executes the published checker and retains trusted receipts.\nYou may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,\ntools, the supplied testbench, task definitions or acceptance conditions.\nRead actual feedback and repair the same assigned task. Do not invoke other\nmodels/agents, access credentials, or attempt to inspect other trials or the\nfinal evaluator. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Read the exact frozen inputs and perform the assigned engineering work."
+        ],
+        "exclusions": [
+          "Do not modify contracts, public checkers, permissions or IP source; no subordinate model calls."
+        ],
+        "completion_criteria": [
+          "Publish every declared output with an honest report verdict and actual evidence."
+        ],
+        "collaboration": [
+          "task:configuration-study:audit"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "configuration-study:audit",
+      "workflow_id": "configuration-study",
+      "key": "audit",
+      "role": "study-auditor",
+      "role_version": 1,
+      "intent": "Execute common immutable development check; do not modify design.",
+      "permission": {
+        "read_paths": [
+          "rtl/**",
+          "ip/**",
+          "tb/**",
+          "tools/**",
+          "reports/**",
+          "tests/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "configuration-study:designer",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "build/audit/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/audit.py",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 180,
+      "brief": {
+        "objective": "Execute common immutable development check; do not modify design.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Read the exact frozen inputs and perform the assigned engineering work."
+        ],
+        "exclusions": [
+          "Do not modify contracts, public checkers, permissions or IP source; no subordinate model calls."
+        ],
+        "completion_criteria": [
+          "Publish every declared output with an honest report verdict and actual evidence."
+        ],
+        "collaboration": [
+          "task:configuration-study:designer"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    }
+  ],
+  "roles": [
+    {
+      "name": "study-auditor",
+      "version": 1,
+      "instruction": "Replay the frozen common public checker and report its real outcome.",
+      "accepted_types": [
+        "rtl.snapshot",
+        "verification.report"
+      ],
+      "produced_types": [
+        "verification.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "study-designer",
+      "version": 1,
+      "instruction": "Read spec/npu.md and spec/treatment.md. Deliver the complete implementation\nunder rtl/. Run python3 tools/smoke.py and develop additional tests if useful.\nThe smoke endpoint executes the published checker and retains trusted receipts.\nYou may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,\ntools, the supplied testbench, task definitions or acceptance conditions.\nRead actual feedback and repair the same assigned task. Do not invoke other\nmodels/agents, access credentials, or attempt to inspect other trials or the\nfinal evaluator. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+      "accepted_types": [
+        "specification.source",
+        "verification.report"
+      ],
+      "produced_types": [
+        "rtl.snapshot"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    }
+  ],
+  "feedback": [
+    {
+      "source_task_id": "configuration-study:audit",
+      "verdict": "fail",
+      "target_task_id": "configuration-study:designer",
+      "kind": "feedback",
+      "summary": "Repair the common public checker failure.",
+      "propagate_to_dependents": true,
+      "payload_field": "",
+      "payload_equals": null,
+      "summary_field": "report.repair_summary"
+    }
+  ],
+  "attempts": [
+    {
+      "id": "attempt-089bb97f4e1641488ad1debbec222a75",
+      "task_id": "configuration-study:designer",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-c85ccfaf61684f4d94b1c7d2670c27ea"
+      ],
+      "input_deliveries": {
+        "source": "common-source"
+      },
+      "role": "study-designer",
+      "role_version": 1,
+      "role_instruction": "Read spec/npu.md and spec/treatment.md. Deliver the complete implementation\nunder rtl/. Run python3 tools/smoke.py and develop additional tests if useful.\nThe smoke endpoint executes the published checker and retains trusted receipts.\nYou may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,\ntools, the supplied testbench, task definitions or acceptance conditions.\nRead actual feedback and repair the same assigned task. Do not invoke other\nmodels/agents, access credentials, or attempt to inspect other trials or the\nfinal evaluator. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Read spec/npu.md and spec/treatment.md. Deliver the complete implementation\nunder rtl/. Run python3 tools/smoke.py and develop additional tests if useful.\nThe smoke endpoint executes the published checker and retains trusted receipts.\nYou may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,\ntools, the supplied testbench, task definitions or acceptance conditions.\nRead actual feedback and repair the same assigned task. Do not invoke other\nmodels/agents, access credentials, or attempt to inspect other trials or the\nfinal evaluator. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Read the exact frozen inputs and perform the assigned engineering work."
+        ],
+        "exclusions": [
+          "Do not modify contracts, public checkers, permissions or IP source; no subordinate model calls."
+        ],
+        "completion_criteria": [
+          "Publish every declared output with an honest report verdict and actual evidence."
+        ],
+        "collaboration": [
+          "task:configuration-study:audit"
+        ]
+      },
+      "brief_digest": "sha256:9f7c34a73df2fdee5fa68b46576a588344511f4b9206ac00c8a964a061473743",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "ip/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "rtl/**",
+          "tests/designer/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a1434c-080b-77f1-8c19-2e98b0def350",
+      "workspace_commit": "a6fc1126d1f7e45786286242fe0d4a203003a3bb",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "rtl/nebula_npu_dot4.sv",
+          "tests/designer/dot4_protocol_tb.sv",
+          "tests/designer/run.py",
+          "build/designer/sim",
+          "build/designer/test.log",
+          "build/designer/verification.json",
+          "build/public-check/sim",
+          "build/public-check/smoke.log"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}\nTASK COMPLETED",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T14:02:04.118358",
+            "details": {},
+            "evidence": "Found rtl/**/*.sv: 1 file(s)\nNOT FOUND: rtl/**/*.v",
+            "kind": "file_check",
+            "name": "rtl-present",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          },
+          {
+            "checked_at": "2026-10-16T06:02:04.118382+00:00",
+            "details": {
+              "validated_outputs": [
+                "rtl:rtl.snapshot@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 100351,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "41a4b919192c21dd32b3abf644dc2c13261491c9"
+      },
+      "created_at": "2026-10-16T06:00:18.307944+00:00",
+      "finished_at": "2026-10-16T06:02:04.150313+00:00"
+    },
+    {
+      "id": "attempt-bcb2567ea25e4bca995dedc0766d8c45",
+      "task_id": "configuration-study:audit",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-c75401f79d37491b8f1fd251624dc66c"
+      ],
+      "input_deliveries": {
+        "rtl": "artifact-bef9b97b3ce143b7856ce2f98a8d14c2"
+      },
+      "role": "study-auditor",
+      "role_version": 1,
+      "role_instruction": "Replay the frozen common public checker and report its real outcome.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "rtl.snapshot",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Execute common immutable development check; do not modify design.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Read the exact frozen inputs and perform the assigned engineering work."
+        ],
+        "exclusions": [
+          "Do not modify contracts, public checkers, permissions or IP source; no subordinate model calls."
+        ],
+        "completion_criteria": [
+          "Publish every declared output with an honest report verdict and actual evidence."
+        ],
+        "collaboration": [
+          "task:configuration-study:designer"
+        ]
+      },
+      "brief_digest": "sha256:bc58149443ddf45bfaf073164d0ca906e32278bd02785a1cd562252ccf52d887",
+      "permission": {
+        "read_paths": [
+          "rtl/**",
+          "ip/**",
+          "tb/**",
+          "tools/**",
+          "reports/**",
+          "tests/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/audit.py",
+      "timeout_seconds": 180,
+      "session_id": "",
+      "workspace_commit": "3ea214113c3345fb383067e0a096037131e12624",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "build/audit/audit.log",
+          "build/audit/report.json",
+          "build/audit/sim"
+        ],
+        "execution_log": "$ [audit] python3 tools/audit.py\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"generated-rtl\", \"verdict\": \"passed\", \"repair_summary\": \"NPU_SMOKE_PASS vectors=64 backpressure=covered kill=covered reset=covered\\ntb/npu_smoke_tb.sv:107: $finish called at 3746000 (1ps)\\n\"}}\n",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T06:02:04.443962+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:verification.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 100351,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "b7a264cec9479adc101d6fe4a4b07302a6a3feee"
+      },
+      "created_at": "2026-10-16T06:02:04.161716+00:00",
+      "finished_at": "2026-10-16T06:02:04.477585+00:00"
+    }
+  ],
+  "work_items": [
+    {
+      "id": "work-c75401f79d37491b8f1fd251624dc66c",
+      "task_id": "configuration-study:audit",
+      "kind": "initial",
+      "request_key": "initial:configuration-study:audit",
+      "correlation_key": "initial",
+      "summary": "Execute common immutable development check; do not modify design.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-bcb2567ea25e4bca995dedc0766d8c45",
+      "resolved_attempt_id": "attempt-bcb2567ea25e4bca995dedc0766d8c45",
+      "created_at": "2026-10-16T06:00:18.129133+00:00"
+    },
+    {
+      "id": "work-c85ccfaf61684f4d94b1c7d2670c27ea",
+      "task_id": "configuration-study:designer",
+      "kind": "initial",
+      "request_key": "initial:configuration-study:designer",
+      "correlation_key": "initial",
+      "summary": "Read spec/npu.md and spec/treatment.md. Deliver the complete implementation\nunder rtl/. Run python3 tools/smoke.py and develop additional tests if useful.\nThe smoke endpoint executes the published checker and retains trusted receipts.\nYou may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,\ntools, the supplied testbench, task definitions or acceptance conditions.\nRead actual feedback and repair the same assigned task. Do not invoke other\nmodels/agents, access credentials, or attempt to inspect other trials or the\nfinal evaluator. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-089bb97f4e1641488ad1debbec222a75",
+      "resolved_attempt_id": "attempt-089bb97f4e1641488ad1debbec222a75",
+      "created_at": "2026-10-16T06:00:18.128803+00:00"
+    }
+  ],
+  "deliveries": {
+    "configuration-study:designer": {
+      "rtl": {
+        "task_id": "configuration-study:designer",
+        "output_name": "rtl",
+        "artifact_id": "artifact-bef9b97b3ce143b7856ce2f98a8d14c2",
+        "attempt_id": "attempt-089bb97f4e1641488ad1debbec222a75",
+        "accepted_at": "2026-10-16T06:02:04.150033+00:00"
+      }
+    },
+    "configuration-study:audit": {
+      "report": {
+        "task_id": "configuration-study:audit",
+        "output_name": "report",
+        "artifact_id": "artifact-fc72ff06cb99434fb055cc7b078dc5e7",
+        "attempt_id": "attempt-bcb2567ea25e4bca995dedc0766d8c45",
+        "accepted_at": "2026-10-16T06:02:04.477374+00:00"
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "id": "common-source",
+      "type": "specification.source",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "external",
+        "task_id": "common-contract",
+        "attempt_id": "frozen-input",
+        "role": "study-author",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "41a4b919192c21dd32b3abf644dc2c13261491c9",
+        "tree": "ac2f24057be2910499732ffc7ed6a0838929e9cf",
+        "paths": [
+          "spec",
+          "tb",
+          "tools"
+        ]
+      },
+      "payload": {
+        "content": "Implement synthesizable SystemVerilog module nebula_npu_dot4.\nPorts: input clk,rst_n,req_valid; output req_ready; input [31:0] req_a,req_b;\noutput rsp_valid; input rsp_ready; output [31:0] rsp_data; input kill.\nEach request computes the signed INT32 sum of four parallel signed INT8\nproducts. Lane 0 is bits 7:0. Widen products before reduction. At most one\noperation is outstanding. An idle module is ready. If accepted on edge n,\nrsp_valid is low after n and n+1 and high after n+2. Hold valid/data under\nbackpressure, and do not accept another request before consuming the result.\nActive-low reset and active-high kill dominate acceptance and output,\nincluding combinational req_ready/rsp_valid while either is asserted.\nCancel pending work; no stale response may emerge after recovery.\nNo persistent accumulation across requests, memory, saturation or rounding.\nUse four parallel multipliers. All inputs are sampled on rising edges.\n",
+        "content_digest": "sha256:ff863f826accbfcd6dd80fedc787a0323ed590735e724db88460b8b185b091c6",
+        "media_type": "text/markdown",
+        "received_at": "2026-10-16T00:00:00+00:00",
+        "source_name": "Common dot4 specification"
+      },
+      "input_artifact_ids": [],
+      "metadata": {},
+      "created_at": "2026-10-16T06:00:18.122358+00:00"
+    },
+    {
+      "id": "artifact-bef9b97b3ce143b7856ce2f98a8d14c2",
+      "type": "rtl.snapshot",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "configuration-study",
+        "task_id": "configuration-study:designer",
+        "attempt_id": "attempt-089bb97f4e1641488ad1debbec222a75",
+        "role": "study-designer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "a6fc1126d1f7e45786286242fe0d4a203003a3bb",
+        "tree": "469dd9a3ff71cec42b6a56ba454acd641b608a2d",
+        "paths": [
+          "rtl/nebula_npu_dot4.sv"
+        ]
+      },
+      "payload": {
+        "commit": "a6fc1126d1f7e45786286242fe0d4a203003a3bb",
+        "module": "nebula_npu_dot4",
+        "paths": [
+          "rtl/nebula_npu_dot4.sv"
+        ]
+      },
+      "input_artifact_ids": [
+        "common-source"
+      ],
+      "metadata": {
+        "task_key": "designer",
+        "workflow_id": "configuration-study"
+      },
+      "created_at": "2026-10-16T06:02:04.147666+00:00"
+    },
+    {
+      "id": "artifact-fc72ff06cb99434fb055cc7b078dc5e7",
+      "type": "verification.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "configuration-study",
+        "task_id": "configuration-study:audit",
+        "attempt_id": "attempt-bcb2567ea25e4bca995dedc0766d8c45",
+        "role": "study-auditor",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "3ea214113c3345fb383067e0a096037131e12624",
+        "tree": "a26f5c833fae5f23bc976315bbac9832c66840c8",
+        "paths": [
+          "build/audit/audit.log",
+          "build/audit/report.json",
+          "build/audit/sim"
+        ]
+      },
+      "payload": {
+        "commit": "3ea214113c3345fb383067e0a096037131e12624",
+        "paths": [
+          "build/audit/audit.log",
+          "build/audit/report.json",
+          "build/audit/sim"
+        ],
+        "repair_summary": "NPU_SMOKE_PASS vectors=64 backpressure=covered kill=covered reset=covered\ntb/npu_smoke_tb.sv:107: $finish called at 3746000 (1ps)\n",
+        "subject": "generated-rtl",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-bef9b97b3ce143b7856ce2f98a8d14c2"
+      ],
+      "metadata": {
+        "task_key": "audit",
+        "workflow_id": "configuration-study"
+      },
+      "created_at": "2026-10-16T06:02:04.474894+00:00"
+    }
+  ],
+  "scope": "Frozen contracts, attempt decisions, engineering states, deliveries and captured/pending feedback evidence. WorkItem states are their exported final states. Private model-home and credentials excluded."
+}

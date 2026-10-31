@@ -1,0 +1,70 @@
+{
+  "schema_version": "0.1",
+  "contracts": [
+    {
+      "id": "behavior",
+      "requirements": [
+        "REQ-BEHAVIOR"
+      ],
+      "evidence": [
+        "task.md",
+        "../tb/development_tb.sv"
+      ],
+      "semantics": {
+        "language": "English plus executable SystemVerilog scoreboard",
+        "body": "Implement benchmark_counter with 16-bit unsigned count/load_value.\nActive-low asynchronous reset immediately clears count and overflow. At each\nrising edge, load has priority over en: load sets count=load_value and overflow=0.\nOtherwise en increments count modulo 2**16, with overflow=1 exactly on a wrap.\nWith neither load nor en, hold count and clear overflow. No extra clock latency."
+      },
+      "interface": {
+        "clk": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "rst_n": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "en": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "load": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "load_value": {
+          "mode": "observe",
+          "type": {
+            "kind": "uint",
+            "width": 16
+          }
+        },
+        "count": {
+          "mode": "constrain",
+          "type": {
+            "kind": "uint",
+            "width": 16
+          }
+        },
+        "overflow": {
+          "mode": "constrain",
+          "type": {
+            "kind": "bit"
+          }
+        }
+      },
+      "verification": {
+        "status": "executable",
+        "backend": "iverilog",
+        "adapter": "../tools/check.py"
+      }
+    }
+  ]
+}

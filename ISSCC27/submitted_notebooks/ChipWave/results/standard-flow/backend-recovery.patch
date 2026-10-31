@@ -1,0 +1,39 @@
+--- ChipNebula/src/chip_nebula/taskgraph/static_store.py	2026-10-12 17:02:11.426883748 +0800
++++ CodeAChip_Experiments/NextStage_20261013/backend/src/chip_nebula/taskgraph/static_store.py	2026-10-14 02:20:16.232731524 +0800
+@@ -979,14 +979,18 @@
+             return updated
+ 
+     def recoverable_site(self, task_id: str) -> RecoverableSite | None:
+-        """Return the newest saved site for this Task, independent of inputs."""
++        """Return the newest Task-local site, honoring an explicit WIP reset."""
+         self.get_task(task_id) or (_ for _ in ()).throw(KeyError(task_id))
+         rows = self._connection.execute(
+             "SELECT document FROM attempts WHERE task_id = ? ORDER BY ordinal DESC",
+             (task_id,),
+         ).fetchall()
++        restore_saved_wip = True
+         for row in rows:
+             attempt = _attempt_from(json.loads(row["document"]))
++            # An operator can retain history/session while resolving a reported merge conflict.
++            if attempt.diagnostics.get("restore_saved_wip") is False:
++                restore_saved_wip = False
+             session_reusable = (
+                 attempt.status == AttemptStatus.SUCCEEDED
+                 or attempt.diagnostics.get("session_reusable") is True
+@@ -996,12 +1000,13 @@
+                 return RecoverableSite(
+                     task_id=task_id, attempt_id=attempt.id,
+                     session_id=session_id,
+-                    workspace_commit=attempt.workspace_commit,
+-                    base_commit=str(attempt.diagnostics.get("workspace_base_commit", "")),
++                    workspace_commit=attempt.workspace_commit if restore_saved_wip else "",
++                    base_commit=(str(attempt.diagnostics.get("workspace_base_commit", ""))
++                                 if restore_saved_wip else ""),
+                     modified_paths=tuple(
+                         str(path)
+                         for path in attempt.diagnostics.get("changed_paths", ())
+-                    ),
++                    ) if restore_saved_wip else (),
+                     failure_reason=str(
+                         attempt.diagnostics.get("failure_reason", "")
+                     ),

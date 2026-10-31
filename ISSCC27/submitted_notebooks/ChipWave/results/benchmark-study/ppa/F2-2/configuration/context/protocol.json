@@ -1,0 +1,73 @@
+{
+  "allowed_rtl_actions": [
+    {
+      "operand_isolation": false,
+      "reduce_width": false
+    },
+    {
+      "operand_isolation": false,
+      "reduce_width": true
+    },
+    {
+      "operand_isolation": true,
+      "reduce_width": false
+    },
+    {
+      "operand_isolation": true,
+      "reduce_width": true
+    }
+  ],
+  "parameter_domains": {
+    "utilization": [
+      30,
+      40,
+      50
+    ],
+    "density": [
+      0.55,
+      0.65
+    ],
+    "abc_area": [
+      0,
+      1
+    ],
+    "repair_margin": [
+      0,
+      10,
+      20
+    ]
+  },
+  "aggregate_agent_budget_seconds": 1200,
+  "new_candidates_per_session": 3,
+  "period_ps": 10526,
+  "threads": 2,
+  "corner": "Sky130HD TT25C1.8V",
+  "clock_uncertainty_ns": 0.1,
+  "io_delay_ns": 0.5,
+  "workloads": [
+    "DOT64",
+    "GEMM8",
+    "CONV3"
+  ],
+  "objective": "qualified standard-cell-area ratio times geometric-mean workload energy ratio",
+  "action_semantics": {
+    "operand_isolation": "Mask multiply inputs to zero unless accepting a request; same registered protocol",
+    "reduce_width": "Exact signed 18-bit reduction, sign extended to 32 bits; unchanged cycle contract"
+  },
+  "unchanged": "CPU ISA/pipeline/memories/integration/interface latency, libraries, tools, checker and limits",
+  "baseline_configuration": {
+    "utilization": 40,
+    "density": 0.55,
+    "abc_area": 0,
+    "repair_margin": 0
+  },
+  "thresholds": [
+    1.0,
+    0.98
+  ],
+  "review_policy": {
+    "F0": "no model reviewer",
+    "F1": "every accepted proposal",
+    "F2": "first proposal or previous candidate not rank eligible"
+  }
+}

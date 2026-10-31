@@ -1,0 +1,64 @@
+{
+  "kind": "automated pre-execution planner schema correction",
+  "actor": "Codex supervising agent",
+  "reason": "a solo Task has no collaborators, but parser requires a nonempty string list",
+  "original": {
+    "tasks": [
+      {
+        "task_id": "cpu-npu-physical-main:physical",
+        "objective": "Complete the physical flow for physical-case using frozen imported-main-rtl commit a92d82ac578cbc316823f28337c20b1e368739a9, module nebula_cpu_npu_top, at Sky130HD TT25C1.8V with a 100 ns target.",
+        "deliverables": [
+          "physical.report schema version 1 under build/rtl-to-gds/**, including physical-report.json and real EDA evidence for every required stage.",
+          "Preserved failure results and supporting evidence wherever acceptance or signoff fails."
+        ],
+        "responsibilities": [
+          "Execute the fixed command: python3 scripts/run_physical.py --subject imported-main-rtl.",
+          "Own independent functional acceptance, synthesis, placement, routing, STA, route DRC, GDS DRC, extracted LVS, and evidence-backed reporting.",
+          "Read only the authorized design, specification, script, verification, physical, and configuration paths; write only build/**.",
+          "Use only the predefined permitted tools."
+        ],
+        "exclusions": [
+          "Do not modify immutable input records, RTL, checker, or target.",
+          "Do not fabricate evidence, suppress failures, or alter predefined tasks, dependencies, permissions, outputs, commands, or hard gates."
+        ],
+        "completion_criteria": [
+          "Produce the required report and real evidence covering every specified functional acceptance and physical stage for the frozen subject and target.",
+          "Successful signoff requires the unchanged L1 independent-physical-verdict check to verify build/rtl-to-gds/physical-report.json has verdict equal to passed and emit PHYSICAL_REPORT_PASSED within 30 seconds.",
+          "On gate failure, apply the predefined report disposition with error class physical_signoff_failed and preserve the failure evidence."
+        ],
+        "collaboration": []
+      }
+    ]
+  },
+  "corrected": {
+    "tasks": [
+      {
+        "task_id": "cpu-npu-physical-main:physical",
+        "objective": "Complete the physical flow for physical-case using frozen imported-main-rtl commit a92d82ac578cbc316823f28337c20b1e368739a9, module nebula_cpu_npu_top, at Sky130HD TT25C1.8V with a 100 ns target.",
+        "deliverables": [
+          "physical.report schema version 1 under build/rtl-to-gds/**, including physical-report.json and real EDA evidence for every required stage.",
+          "Preserved failure results and supporting evidence wherever acceptance or signoff fails."
+        ],
+        "responsibilities": [
+          "Execute the fixed command: python3 scripts/run_physical.py --subject imported-main-rtl.",
+          "Own independent functional acceptance, synthesis, placement, routing, STA, route DRC, GDS DRC, extracted LVS, and evidence-backed reporting.",
+          "Read only the authorized design, specification, script, verification, physical, and configuration paths; write only build/**.",
+          "Use only the predefined permitted tools."
+        ],
+        "exclusions": [
+          "Do not modify immutable input records, RTL, checker, or target.",
+          "Do not fabricate evidence, suppress failures, or alter predefined tasks, dependencies, permissions, outputs, commands, or hard gates."
+        ],
+        "completion_criteria": [
+          "Produce the required report and real evidence covering every specified functional acceptance and physical stage for the frozen subject and target.",
+          "Successful signoff requires the unchanged L1 independent-physical-verdict check to verify build/rtl-to-gds/physical-report.json has verdict equal to passed and emit PHYSICAL_REPORT_PASSED within 30 seconds.",
+          "On gate failure, apply the predefined report disposition with error class physical_signoff_failed and preserve the failure evidence."
+        ],
+        "collaboration": [
+          "This isolated tool Task has no upstream or downstream Task collaborators; publish real evidence to its declared output for workflow consumers."
+        ]
+      }
+    ]
+  },
+  "task_topology_permissions_commands_and_gates_changed": false
+}

@@ -1,0 +1,842 @@
+{
+  "public_runtime": "runtime/",
+  "browser_frontend_required": false,
+  "builtin_roles": [
+    {
+      "name": "failure-triager",
+      "version": 3,
+      "accepted_types": [
+        "design.specification",
+        "specification.csir",
+        "acceptance.plan",
+        "design.dependencies",
+        "ip.lock",
+        "rtl.snapshot",
+        "rtl.integration",
+        "design.review.report",
+        "verification.report",
+        "verification.audit.report",
+        "synthesis.report",
+        "timing.report",
+        "performance.report",
+        "power.report",
+        "physical.report",
+        "failure.report",
+        "verification.environment",
+        "timing.context",
+        "implementation.constraints",
+        "design.release",
+        "netlist.release",
+        "tapeout.release",
+        "netlist",
+        "physical.implementation",
+        "layout",
+        "gds"
+      ],
+      "produced_types": [
+        "failure.report"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/failure-triager.yaml",
+      "sha256": "b2ec5d5af703e89e122aeff9c50513940e78c837a374050e3464e8e1b8d8f3df"
+    },
+    {
+      "name": "functional-performance-verifier",
+      "version": 1,
+      "accepted_types": [
+        "specification.csir",
+        "acceptance.plan",
+        "rtl.integration",
+        "verification.report",
+        "verification.environment",
+        "repair.plan",
+        "human.decision"
+      ],
+      "produced_types": [
+        "verification.environment",
+        "verification.report"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/functional-performance-verifier.yaml",
+      "sha256": "e8af406f9049f75c9a4dc5eba2986db2f43bc0d58cf1098b92d4ce742bc01b4f"
+    },
+    {
+      "name": "gds-exporter",
+      "version": 2,
+      "accepted_types": [
+        "specification.csir",
+        "verification.report",
+        "acceptance.plan",
+        "physical.implementation",
+        "layout",
+        "gds"
+      ],
+      "produced_types": [
+        "gds"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/gds-exporter.yaml",
+      "sha256": "b97d711315f53b87841cba77b5e75a3d398caddb6bdf137962290c48e4fc7524"
+    },
+    {
+      "name": "integration-engineer",
+      "version": 1,
+      "accepted_types": [
+        "design.specification",
+        "specification.csir",
+        "design.dependencies",
+        "implementation.constraints",
+        "rtl.snapshot",
+        "rtl.integration",
+        "repair.plan",
+        "human.decision"
+      ],
+      "produced_types": [
+        "rtl.integration"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/integration-engineer.yaml",
+      "sha256": "5422b53eb6bf2fd5edd0ae6ddec6a119f4bae06f2863540e06000505cc0b408b"
+    },
+    {
+      "name": "logic-synthesizer",
+      "version": 1,
+      "accepted_types": [
+        "acceptance.plan",
+        "rtl.integration",
+        "verification.report",
+        "design.release",
+        "implementation.constraints",
+        "netlist"
+      ],
+      "produced_types": [
+        "netlist"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/logic-synthesizer.yaml",
+      "sha256": "58985b2b7920d912f07b9a4e2f2153aebbf8cd6d7e356c4f4ed56b9ddc137029"
+    },
+    {
+      "name": "pnr-engineer",
+      "version": 4,
+      "accepted_types": [
+        "acceptance.plan",
+        "netlist",
+        "implementation.constraints",
+        "netlist.release",
+        "layout"
+      ],
+      "produced_types": [
+        "physical.implementation",
+        "layout"
+      ],
+      "skills": [
+        "openroad-physical-closure"
+      ],
+      "path": "runtime/src/chip_nebula/configs/roles/pnr-engineer.yaml",
+      "sha256": "fa8d64c633faac3f1f07ce8bb8a9885fa8c45448a69e5a41b545d8065ee5ec29"
+    },
+    {
+      "name": "prepare-baseline-freezer",
+      "version": 2,
+      "accepted_types": [
+        "implementation.constraints",
+        "acceptance.plan",
+        "specification.csir"
+      ],
+      "produced_types": [
+        "implementation.constraints",
+        "acceptance.plan"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/prepare-baseline-freezer.yaml",
+      "sha256": "879079d0430d3096fc9bafcff59ac2ff08c3fdded9d5bc9ee101cba6e1b79d53"
+    },
+    {
+      "name": "project-constraints-author",
+      "version": 1,
+      "accepted_types": [
+        "design.specification",
+        "specification.csir",
+        "specification.bundle",
+        "specification.baseline",
+        "decision.request",
+        "human.decision"
+      ],
+      "produced_types": [
+        "decision.request",
+        "implementation.constraints"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/project-constraints-author.yaml",
+      "sha256": "6d44cb2397f7895799aa9316ab3e8cc0e74ec744264ac60c38e3c85eb001bc75"
+    },
+    {
+      "name": "project-decision-consolidator",
+      "version": 1,
+      "accepted_types": [
+        "specification.source",
+        "specification.source-analysis",
+        "design.specification",
+        "requirements.review.report",
+        "specification.bundle",
+        "spec.compiler.report",
+        "decision.request",
+        "implementation.constraints"
+      ],
+      "produced_types": [
+        "decision.request"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/project-decision-consolidator.yaml",
+      "sha256": "ca9b4146afa00b52094c65303a9cf9b01a0d1352506974d3a4c029ee0fb882e5"
+    },
+    {
+      "name": "project-verification-architect",
+      "version": 1,
+      "accepted_types": [],
+      "produced_types": [
+        "acceptance.plan"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/project-verification-architect.yaml",
+      "sha256": "7f832537d924799e983be4c69e51691b221265a420c2251c02b38ccab3a0e168"
+    },
+    {
+      "name": "requirements-closure-reviewer",
+      "version": 1,
+      "accepted_types": [
+        "specification.source",
+        "specification.source-analysis",
+        "design.specification",
+        "specification.bundle",
+        "human.decision"
+      ],
+      "produced_types": [
+        "requirements.review.report"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/requirements-closure-reviewer.yaml",
+      "sha256": "0078f8faf2f5cad0fde51836547d41d76b37be338ff63cf6a4ae15f11058ae11"
+    },
+    {
+      "name": "rtl-designer",
+      "version": 1,
+      "accepted_types": [
+        "design.specification",
+        "specification.csir",
+        "design.dependencies",
+        "rtl.snapshot",
+        "verification.environment",
+        "repair.plan",
+        "human.decision",
+        "verification.report",
+        "design.review.report",
+        "verification.audit.report",
+        "timing.report",
+        "synthesis.report"
+      ],
+      "produced_types": [
+        "rtl.snapshot"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/rtl-designer.yaml",
+      "sha256": "9e2a823b872dab3b9520f09eeaa774392571fe7c40e56ac87d549386305ed596"
+    },
+    {
+      "name": "spec-compiler",
+      "version": 1,
+      "accepted_types": [
+        "specification.bundle",
+        "requirements.review.report"
+      ],
+      "produced_types": [
+        "spec.compiler.report"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/spec-compiler.yaml",
+      "sha256": "04f4d72b3081e01777499db665ba902029a7695e67ff580f168d8aedc65aa10f"
+    },
+    {
+      "name": "specification-author",
+      "version": 2,
+      "accepted_types": [
+        "specification.source",
+        "specification.source-analysis",
+        "design.specification",
+        "specification.bundle",
+        "requirements.review.report",
+        "spec.compiler.report",
+        "decision.request",
+        "human.decision"
+      ],
+      "produced_types": [
+        "specification.source-analysis",
+        "design.specification",
+        "specification.bundle"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/specification-author.yaml",
+      "sha256": "07246b908b8c5a8f0b3c5934c25eb7c86ff1a4eee2ce1090b5e4669b62d7d7c2"
+    },
+    {
+      "name": "specification-readiness-auditor",
+      "version": 1,
+      "accepted_types": [
+        "specification.bundle",
+        "requirements.review.report",
+        "spec.compiler.report"
+      ],
+      "produced_types": [
+        "specification.baseline",
+        "specification.csir"
+      ],
+      "skills": [],
+      "path": "runtime/src/chip_nebula/configs/roles/specification-readiness-auditor.yaml",
+      "sha256": "c5c93d2c5029e54ae54353f2acf93ab044e00a8bcc46d7da4695aea7dbfc4fb6"
+    }
+  ],
+  "standard_recipe": {
+    "name": "specification-to-gds",
+    "path": "runtime/src/chip_nebula/configs/recipes/specification-to-gds.yaml",
+    "sha256": "83397530b3ba9827f7aa04ceedad9411eec2ab8cbf16c4da2f6a059511aef4bc",
+    "task_count": 20,
+    "tasks": [
+      {
+        "name": "analyze-source",
+        "role": "specification-author",
+        "executor": "agent",
+        "inputs": {
+          "source": {
+            "type": "specification.source",
+            "from": "$parameters.source"
+          }
+        },
+        "gates": [
+          "ledger-shape"
+        ]
+      },
+      {
+        "name": "generate-design-document",
+        "role": "specification-author",
+        "executor": "agent",
+        "inputs": {
+          "source": {
+            "type": "specification.source",
+            "from": "$parameters.source"
+          },
+          "analysis": {
+            "type": "specification.source-analysis",
+            "from": "$tasks.analyze-source.outputs.analysis"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "generate-csir-draft",
+        "role": "specification-author",
+        "executor": "agent",
+        "inputs": {
+          "source": {
+            "type": "specification.source",
+            "from": "$parameters.source"
+          },
+          "analysis": {
+            "type": "specification.source-analysis",
+            "from": "$tasks.analyze-source.outputs.analysis"
+          },
+          "design": {
+            "type": "design.specification",
+            "from": "$tasks.generate-design-document.outputs.design"
+          }
+        },
+        "gates": [
+          "ledger-status-protection"
+        ]
+      },
+      {
+        "name": "review-requirements-closure",
+        "role": "requirements-closure-reviewer",
+        "executor": "agent",
+        "inputs": {
+          "source": {
+            "type": "specification.source",
+            "from": "$parameters.source"
+          },
+          "analysis": {
+            "type": "specification.source-analysis",
+            "from": "$tasks.analyze-source.outputs.analysis"
+          },
+          "design": {
+            "type": "design.specification",
+            "from": "$tasks.generate-design-document.outputs.design"
+          },
+          "bundle": {
+            "type": "specification.bundle",
+            "from": "$tasks.generate-csir-draft.outputs.bundle"
+          }
+        },
+        "gates": [
+          "review-integrity",
+          "requirements-closure"
+        ]
+      },
+      {
+        "name": "spec-compiler",
+        "role": "spec-compiler",
+        "executor": "tool",
+        "inputs": {
+          "bundle": {
+            "type": "specification.bundle",
+            "from": "$tasks.generate-csir-draft.outputs.bundle"
+          },
+          "review": {
+            "type": "requirements.review.report",
+            "from": "$tasks.review-requirements-closure.outputs.review",
+            "release": {
+              "field": "verdict",
+              "equals": "passed"
+            }
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "consolidate-spec-decisions",
+        "role": "project-decision-consolidator",
+        "executor": "agent",
+        "inputs": {},
+        "gates": []
+      },
+      {
+        "name": "freeze-specification-baseline",
+        "role": "specification-readiness-auditor",
+        "executor": "tool",
+        "inputs": {
+          "bundle": {
+            "type": "specification.bundle",
+            "from": "$tasks.generate-csir-draft.outputs.bundle"
+          },
+          "review": {
+            "type": "requirements.review.report",
+            "from": "$tasks.review-requirements-closure.outputs.review",
+            "release": {
+              "field": "verdict",
+              "equals": "passed"
+            }
+          },
+          "compiler_result": {
+            "type": "spec.compiler.report",
+            "from": "$tasks.spec-compiler.outputs.result",
+            "release": {
+              "field": "failure_kind",
+              "equals": ""
+            }
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "propose-project-constraint-decisions",
+        "role": "project-constraints-author",
+        "executor": "agent",
+        "inputs": {
+          "design": {
+            "type": "design.specification",
+            "from": "$tasks.generate-design-document.outputs.design"
+          },
+          "bundle": {
+            "type": "specification.bundle",
+            "from": "$tasks.generate-csir-draft.outputs.bundle"
+          },
+          "baseline": {
+            "type": "specification.baseline",
+            "from": "$tasks.freeze-specification-baseline.outputs.baseline"
+          },
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "consolidate-project-decisions",
+        "role": "project-decision-consolidator",
+        "executor": "agent",
+        "inputs": {
+          "candidates": {
+            "type": "decision.request",
+            "from": "$tasks.propose-project-constraint-decisions.outputs.candidates"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "generate-project-constraints",
+        "role": "project-constraints-author",
+        "executor": "agent",
+        "inputs": {
+          "design": {
+            "type": "design.specification",
+            "from": "$tasks.generate-design-document.outputs.design"
+          },
+          "bundle": {
+            "type": "specification.bundle",
+            "from": "$tasks.generate-csir-draft.outputs.bundle"
+          },
+          "baseline": {
+            "type": "specification.baseline",
+            "from": "$tasks.freeze-specification-baseline.outputs.baseline"
+          },
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          },
+          "request": {
+            "type": "decision.request",
+            "from": "$tasks.consolidate-project-decisions.outputs.request"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "freeze-project-constraints",
+        "role": "prepare-baseline-freezer",
+        "executor": "tool",
+        "inputs": {
+          "draft": {
+            "type": "implementation.constraints",
+            "from": "$tasks.generate-project-constraints.outputs.draft"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "generate-acceptance-plan",
+        "role": "project-verification-architect",
+        "executor": "agent",
+        "inputs": {
+          "design": {
+            "type": "design.specification",
+            "from": "$tasks.generate-design-document.outputs.design"
+          },
+          "bundle": {
+            "type": "specification.bundle",
+            "from": "$tasks.generate-csir-draft.outputs.bundle"
+          },
+          "baseline": {
+            "type": "specification.baseline",
+            "from": "$tasks.freeze-specification-baseline.outputs.baseline"
+          },
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          },
+          "constraints": {
+            "type": "implementation.constraints",
+            "from": "$tasks.freeze-project-constraints.outputs.constraints"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "freeze-acceptance-plan",
+        "role": "prepare-baseline-freezer",
+        "executor": "tool",
+        "inputs": {
+          "draft": {
+            "type": "acceptance.plan",
+            "from": "$tasks.generate-acceptance-plan.outputs.draft"
+          },
+          "constraints": {
+            "type": "implementation.constraints",
+            "from": "$tasks.freeze-project-constraints.outputs.constraints"
+          },
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "rtl-implementation",
+        "role": "rtl-designer",
+        "executor": "agent",
+        "inputs": {
+          "design": {
+            "type": "design.specification",
+            "from": "$tasks.generate-design-document.outputs.design"
+          },
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          }
+        },
+        "gates": [
+          "synthesizable-rtl-present"
+        ]
+      },
+      {
+        "name": "full-design-integration",
+        "role": "integration-engineer",
+        "executor": "agent",
+        "inputs": {
+          "design": {
+            "type": "design.specification",
+            "from": "$tasks.generate-design-document.outputs.design"
+          },
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          },
+          "constraints": {
+            "type": "implementation.constraints",
+            "from": "$tasks.freeze-project-constraints.outputs.constraints"
+          },
+          "rtl": {
+            "type": "rtl.snapshot",
+            "from": "$tasks.rtl-implementation.outputs.rtl"
+          }
+        },
+        "gates": []
+      },
+      {
+        "name": "functional-performance-verify",
+        "role": "functional-performance-verifier",
+        "executor": "agent",
+        "inputs": {
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          },
+          "acceptance": {
+            "type": "acceptance.plan",
+            "from": "$tasks.freeze-acceptance-plan.outputs.acceptance"
+          },
+          "integration": {
+            "type": "rtl.integration",
+            "from": "$tasks.full-design-integration.outputs.integration"
+          }
+        },
+        "gates": [
+          "verification-result-summary",
+          "engineering-verdict"
+        ]
+      },
+      {
+        "name": "failure-analysis",
+        "role": "failure-triager",
+        "executor": "agent",
+        "inputs": {},
+        "gates": []
+      },
+      {
+        "name": "synthesize",
+        "role": "logic-synthesizer",
+        "executor": "agent",
+        "inputs": {
+          "integration": {
+            "type": "rtl.integration",
+            "from": "$tasks.full-design-integration.outputs.integration"
+          },
+          "verification": {
+            "type": "verification.report",
+            "from": "$tasks.functional-performance-verify.outputs.report",
+            "release": {
+              "field": "verdict",
+              "equals": "passed"
+            }
+          },
+          "acceptance": {
+            "type": "acceptance.plan",
+            "from": "$tasks.freeze-acceptance-plan.outputs.acceptance"
+          },
+          "constraints": {
+            "type": "implementation.constraints",
+            "from": "$tasks.freeze-project-constraints.outputs.constraints"
+          }
+        },
+        "gates": [
+          "synthesis-result-summary",
+          "setup-timing-closure"
+        ]
+      },
+      {
+        "name": "pnr",
+        "role": "pnr-engineer",
+        "executor": "agent",
+        "inputs": {
+          "netlist": {
+            "type": "netlist",
+            "from": "$tasks.synthesize.outputs.netlist"
+          },
+          "acceptance": {
+            "type": "acceptance.plan",
+            "from": "$tasks.freeze-acceptance-plan.outputs.acceptance"
+          },
+          "constraints": {
+            "type": "implementation.constraints",
+            "from": "$tasks.freeze-project-constraints.outputs.constraints"
+          }
+        },
+        "gates": [
+          "pnr-result-summary",
+          "post-route-export-consistency",
+          "post-route-setup-closure",
+          "post-route-hold-closure",
+          "detailed-route-drc-clean",
+          "antenna-clean",
+          "execution-status"
+        ]
+      },
+      {
+        "name": "gds-export",
+        "role": "gds-exporter",
+        "executor": "agent",
+        "inputs": {
+          "layout": {
+            "type": "layout",
+            "from": "$tasks.pnr.outputs.layout"
+          },
+          "specification": {
+            "type": "specification.csir",
+            "from": "$tasks.freeze-specification-baseline.outputs.specification"
+          },
+          "acceptance": {
+            "type": "acceptance.plan",
+            "from": "$tasks.freeze-acceptance-plan.outputs.acceptance"
+          },
+          "verification": {
+            "type": "verification.report",
+            "from": "$tasks.functional-performance-verify.outputs.report",
+            "release": {
+              "field": "verdict",
+              "equals": "passed"
+            }
+          }
+        },
+        "gates": [
+          "gds-result-summary",
+          "project-acceptance-verdict"
+        ]
+      }
+    ]
+  },
+  "configuration_seams": [
+    {
+      "object": "Role",
+      "location": ".chip_nebula/roles/<name>.yaml",
+      "fields": [
+        "name",
+        "version",
+        "system_prompt",
+        "accepted_types",
+        "produced_types",
+        "skills",
+        "framework",
+        "model"
+      ]
+    },
+    {
+      "object": "Task and dependencies",
+      "location": ".chip_nebula/recipes/<name>.yaml: tasks",
+      "fields": [
+        "role",
+        "intent",
+        "inputs.*.from",
+        "inputs.*.release",
+        "outputs",
+        "execution",
+        "max_attempts"
+      ]
+    },
+    {
+      "object": "Task authorization",
+      "location": "recipe: tasks.<task>.permission",
+      "fields": [
+        "read",
+        "write",
+        "tools"
+      ]
+    },
+    {
+      "object": "Feedback",
+      "location": "recipe: feedback",
+      "fields": [
+        "source",
+        "verdict",
+        "target",
+        "kind",
+        "summary_field",
+        "propagate",
+        "when"
+      ]
+    },
+    {
+      "object": "Gate",
+      "location": "recipe: tasks.<task>.gates",
+      "fields": [
+        "name",
+        "template",
+        "version",
+        "on_failure",
+        "parameters"
+      ]
+    },
+    {
+      "object": "Tool executor",
+      "location": "recipe: tasks.<task>.execution",
+      "fields": [
+        "executor: tool",
+        "command",
+        "timeout_seconds"
+      ]
+    },
+    {
+      "object": "IP",
+      "location": "ip/model2gds-dot4/ and project-local immutable IP input",
+      "fields": [
+        "source",
+        "license",
+        "ports",
+        "parameters",
+        "qualification",
+        "dependency lock"
+      ]
+    },
+    {
+      "object": "Skill",
+      "location": "runtime/src/chip_nebula/configs/skills/<name>/SKILL.md; project copies under .codex/skills/ or .claude/skills/",
+      "fields": [
+        "Role.skills"
+      ]
+    }
+  ],
+  "freeze_before_run": [
+    "source and IP bytes",
+    "roles and versions",
+    "recipe tasks/dependencies/feedback",
+    "read/write/tool grants",
+    "model and reasoning level",
+    "tool/PDK versions and constraints",
+    "budgets",
+    "development and final checkers",
+    "ranking and representative selection"
+  ],
+  "case_additions": [
+    "dot4 single/multi-role recipes",
+    "shared 1200-second budget wrapper",
+    "OS-isolated trial inputs and protected public-check receipts",
+    "PPA schemas and bounded tool evaluator",
+    "candidate-bound activity/parasitic audit and scoring",
+    "offline tutorial artifact replay"
+  ],
+  "limits": [
+    "The browser frontend is not part of this selected public distribution.",
+    "The published example integrates soft RTL IP; hard-macro declarations do not constitute a supported automatic physical integration flow.",
+    "The stock standard workflow may invoke its planner; formal configuration/PPA experiments freeze authored TaskBriefs and make zero planner calls.",
+    "Templates supply reusable roles; adding roles alone does not prove better circuit quality."
+  ]
+}

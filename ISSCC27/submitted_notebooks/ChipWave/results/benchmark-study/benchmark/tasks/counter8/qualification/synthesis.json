@@ -1,0 +1,344 @@
+{
+  "creator": "Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)",
+  "modules": {
+    "benchmark_counter": {
+      "attributes": {
+        "top": "00000000000000000000000000000001",
+        "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:1.8"
+      },
+      "ports": {
+        "clk": {
+          "direction": "input",
+          "bits": [ 2 ]
+        },
+        "rst_n": {
+          "direction": "input",
+          "bits": [ 3 ]
+        },
+        "en": {
+          "direction": "input",
+          "bits": [ 4 ]
+        },
+        "load": {
+          "direction": "input",
+          "bits": [ 5 ]
+        },
+        "load_value": {
+          "direction": "input",
+          "bits": [ 6, 7, 8, 9, 10, 11, 12, 13 ]
+        },
+        "count": {
+          "direction": "output",
+          "bits": [ 14, 15, 16, 17, 18, 19, 20, 21 ]
+        },
+        "overflow": {
+          "direction": "output",
+          "bits": [ 22 ]
+        }
+      },
+      "cells": {
+        "$3": {
+          "hide_name": 1,
+          "type": "$add",
+          "parameters": {
+            "A_SIGNED": "00000000000000000000000000000000",
+            "A_WIDTH": "00000000000000000000000000001000",
+            "B_SIGNED": "00000000000000000000000000000000",
+            "B_WIDTH": "00000000000000000000000000001000",
+            "Y_WIDTH": "00000000000000000000000000001000"
+          },
+          "attributes": {
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:6.28-6.38"
+          },
+          "port_directions": {
+            "A": "input",
+            "B": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 14, 15, 16, 17, 18, 19, 20, 21 ],
+            "B": [ "1", "0", "0", "0", "0", "0", "0", "0" ],
+            "Y": [ 23, 24, 25, 26, 27, 28, 29, 30 ]
+          }
+        },
+        "$4": {
+          "hide_name": 1,
+          "type": "$reduce_and",
+          "parameters": {
+            "A_SIGNED": "00000000000000000000000000000000",
+            "A_WIDTH": "00000000000000000000000000001000",
+            "Y_WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:6.49-6.55"
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 14, 15, 16, 17, 18, 19, 20, 21 ],
+            "Y": [ 31 ]
+          }
+        },
+        "$auto$ff.cc:337:slice$21": {
+          "hide_name": 1,
+          "type": "$adffe",
+          "parameters": {
+            "ARST_POLARITY": "00000000000000000000000000000000",
+            "ARST_VALUE": "00000000",
+            "CLK_POLARITY": "00000000000000000000000000000001",
+            "EN_POLARITY": "00000000000000000000000000000001",
+            "WIDTH": "00000000000000000000000000001000"
+          },
+          "attributes": {
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:3.2"
+          },
+          "port_directions": {
+            "ARST": "input",
+            "CLK": "input",
+            "D": "input",
+            "EN": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "ARST": [ 3 ],
+            "CLK": [ 2 ],
+            "D": [ 32, 33, 34, 35, 36, 37, 38, 39 ],
+            "EN": [ 40 ],
+            "Q": [ 14, 15, 16, 17, 18, 19, 20, 21 ]
+          }
+        },
+        "$auto$simple.cc:194:make_patterns_logic$23": {
+          "hide_name": 1,
+          "type": "$reduce_bool",
+          "parameters": {
+            "A_SIGNED": "00000000000000000000000000000000",
+            "A_WIDTH": "00000000000000000000000000000010",
+            "Y_WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 4, 5 ],
+            "Y": [ 40 ]
+          }
+        },
+        "$driver$overflow": {
+          "hide_name": 1,
+          "type": "$adff",
+          "parameters": {
+            "ARST_POLARITY": "00000000000000000000000000000000",
+            "ARST_VALUE": "0",
+            "CLK_POLARITY": "00000000000000000000000000000001",
+            "WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:3.2"
+          },
+          "port_directions": {
+            "ARST": "input",
+            "CLK": "input",
+            "D": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "ARST": [ 3 ],
+            "CLK": [ 2 ],
+            "D": [ 41 ],
+            "Q": [ 22 ]
+          }
+        },
+        "$procmux$15": {
+          "hide_name": 1,
+          "type": "$mux",
+          "parameters": {
+            "WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "full_case": "00000000000000000000000000000001",
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:5.17-5.56|CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:5.8-7.20"
+          },
+          "port_directions": {
+            "A": "input",
+            "B": "input",
+            "S": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 42 ],
+            "B": [ "0" ],
+            "S": [ 5 ],
+            "Y": [ 41 ]
+          }
+        },
+        "$procmux$19": {
+          "hide_name": 1,
+          "type": "$mux",
+          "parameters": {
+            "WIDTH": "00000000000000000000000000001000"
+          },
+          "attributes": {
+            "full_case": "00000000000000000000000000000001",
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:5.17-5.56|CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:5.8-7.20"
+          },
+          "port_directions": {
+            "A": "input",
+            "B": "input",
+            "S": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 43, 44, 45, 46, 47, 48, 49, 50 ],
+            "B": [ 6, 7, 8, 9, 10, 11, 12, 13 ],
+            "S": [ 5 ],
+            "Y": [ 32, 33, 34, 35, 36, 37, 38, 39 ]
+          }
+        },
+        "$procmux$2": {
+          "hide_name": 1,
+          "type": "$mux",
+          "parameters": {
+            "WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "full_case": "00000000000000000000000000000001",
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:6.15-6.59|CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:6.8-7.20"
+          },
+          "port_directions": {
+            "A": "input",
+            "B": "input",
+            "S": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ "0" ],
+            "B": [ 31 ],
+            "S": [ 4 ],
+            "Y": [ 42 ]
+          }
+        },
+        "$procmux$8": {
+          "hide_name": 1,
+          "type": "$mux",
+          "parameters": {
+            "WIDTH": "00000000000000000000000000001000"
+          },
+          "attributes": {
+            "full_case": "00000000000000000000000000000001",
+            "src": "CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:6.15-6.59|CodeAChip_Experiments/Benchmark_PPA_20261018/benchmark/tasks/counter8/grader/reference/design.sv:6.8-7.20"
+          },
+          "port_directions": {
+            "A": "input",
+            "B": "input",
+            "S": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ "x", "x", "x", "x", "x", "x", "x", "x" ],
+            "B": [ 23, 24, 25, 26, 27, 28, 29, 30 ],
+            "S": [ 4 ],
+            "Y": [ 43, 44, 45, 46, 47, 48, 49, 50 ]
+          }
+        }
+      },
+      "netnames": {
+        "$3y": {
+          "hide_name": 1,
+          "bits": [ 23, 24, 25, 26, 27, 28, 29, 30 ],
+          "attributes": {
+          }
+        },
+        "$4y": {
+          "hide_name": 1,
+          "bits": [ 31 ],
+          "attributes": {
+          }
+        },
+        "$auto$simple.cc:193:make_patterns_logic$22": {
+          "hide_name": 1,
+          "bits": [ 40 ],
+          "attributes": {
+          }
+        },
+        "$count$5": {
+          "hide_name": 1,
+          "bits": [ 43, 44, 45, 46, 47, 48, 49, 50 ],
+          "attributes": {
+          }
+        },
+        "$count$7": {
+          "hide_name": 1,
+          "bits": [ 32, 33, 34, 35, 36, 37, 38, 39 ],
+          "attributes": {
+          }
+        },
+        "$overflow$6": {
+          "hide_name": 1,
+          "bits": [ 42 ],
+          "attributes": {
+          }
+        },
+        "$overflow$8": {
+          "hide_name": 1,
+          "bits": [ 41 ],
+          "attributes": {
+          }
+        },
+        "clk": {
+          "hide_name": 0,
+          "bits": [ 2 ],
+          "attributes": {
+            "hdlname": "clk"
+          }
+        },
+        "count": {
+          "hide_name": 0,
+          "bits": [ 14, 15, 16, 17, 18, 19, 20, 21 ],
+          "attributes": {
+            "hdlname": "count"
+          }
+        },
+        "en": {
+          "hide_name": 0,
+          "bits": [ 4 ],
+          "attributes": {
+            "hdlname": "en"
+          }
+        },
+        "load": {
+          "hide_name": 0,
+          "bits": [ 5 ],
+          "attributes": {
+            "hdlname": "load"
+          }
+        },
+        "load_value": {
+          "hide_name": 0,
+          "bits": [ 6, 7, 8, 9, 10, 11, 12, 13 ],
+          "attributes": {
+            "hdlname": "load_value"
+          }
+        },
+        "overflow": {
+          "hide_name": 0,
+          "bits": [ 22 ],
+          "attributes": {
+            "hdlname": "overflow"
+          }
+        },
+        "rst_n": {
+          "hide_name": 0,
+          "bits": [ 3 ],
+          "attributes": {
+            "hdlname": "rst_n"
+          }
+        }
+      }
+    }
+  }
+}

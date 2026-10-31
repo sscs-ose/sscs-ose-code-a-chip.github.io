@@ -1,0 +1,227 @@
+schema_version: 2
+project_name: Digital IC Design Benchmark for Agents
+suite_id: ic-delivery-rtl-v0.3
+status: design_only
+replicates_per_task: 5
+hardware_limit:
+  vcpu: 16
+  ram_gib: 32
+  disk_gib: 100
+  gpu: false
+score:
+  functional_raw_basic_weight: 60
+  functional_raw_edge_weight: 15
+  task_raw_allocations:
+    T09: {F: 48, P: 27}
+  functional: 50
+  ppa: 50
+  completion_time: 5
+  setup_violation_exponent: 4
+  candidate_delivery_error_penalty: 5
+  task_weights:
+    T01: 0.03
+    T02: 0.03
+    T03: 0.06
+    T04: 0.06
+    T05: 0.06
+    T06: 0.1
+    T07: 0.1
+    T08: 0.11
+    T09: 0.2
+    T10: 0.25
+  rank_order:
+  - functional_total
+  - ppa_rank_bucket
+  - completion_time_seconds_ascending
+  suite_rank_order:
+  - full_functional_task_count
+  - functional_total_sum
+  - ppa_rank_bucket_sum
+  - normalized_completion_time_sum_ascending
+  ppa_rank_resolution_points: 1.25
+ppa_measurement:
+  layout_seeds:
+  - 11
+  - 29
+  - 47
+  minimum_activity_annotation: 0.95
+  platform: asap7
+  flow: yosys_openroad_routed
+  shared_clock_period_ps: 1000
+  task_clock_contracts:
+    T05:
+      wr_clk_period_ps: 1000
+      rd_clk_period_ps: 1000
+      relationship: asynchronous
+    T08:
+      logic_clk_period_ps: 1000
+      tx_clk_period_ps: 1000
+      rx_clk_period_ps: 1000
+      relationship: asynchronous
+  parameter_set_status: target_1ghz_partially_calibrated
+  baseline_values_status: partial_rebaseline
+  calibrated_baseline_tasks:
+  - T01
+  - T02
+  - T03
+  - T04
+  - T05
+  - T06
+  - T07
+  - T08
+  - T09
+  pending_baseline_tasks:
+  - T10
+tasks:
+- id: T01
+  level_hypothesis: 1
+  title: serdes_rx_comma_aligner
+  origin: original
+  time_limit_minutes: 30
+  same_model_token_cap: 80000
+  f_points:
+  - 25
+  - 15
+  - 20
+  p_points:
+  - 10
+  - 5
+- id: T02
+  level_hypothesis: 2
+  title: synchronous_fifo
+  origin: original
+  time_limit_minutes: 60
+  same_model_token_cap: 80000
+  f_points:
+  - 25
+  - 15
+  - 10
+  - 10
+  p_points:
+  - 5
+  - 5
+  - 5
+- id: T03
+  level_hypothesis: 3
+  title: apb4_timer
+  origin: original
+  time_limit_minutes: 90
+  same_model_token_cap: 120000
+  f_points:
+  - 20
+  - 20
+  - 20
+  p_points:
+  - 10
+  - 5
+- id: T04
+  level_hypothesis: 4
+  title: round_robin_stream_arbiter
+  origin: original
+  time_limit_minutes: 90
+  same_model_token_cap: 160000
+  f_points:
+  - 20
+  - 20
+  - 20
+  p_points:
+  - 10
+  - 5
+- id: T05
+  level_hypothesis: 5
+  title: asynchronous_fifo
+  origin: original
+  time_limit_minutes: 120
+  same_model_token_cap: 240000
+  f_points:
+  - 25
+  - 15
+  - 10
+  - 10
+  p_points:
+  - 7
+  - 8
+- id: T06
+  level_hypothesis: 6
+  title: axi4lite_to_apb4_bridge
+  origin: original
+  time_limit_minutes: 120
+  same_model_token_cap: 320000
+  f_points:
+  - 20
+  - 20
+  - 20
+  p_points:
+  - 5
+  - 5
+  - 5
+- id: T07
+  level_hypothesis: 7
+  title: direct_mapped_writeback_cache
+  origin: original
+  time_limit_minutes: 120
+  same_model_token_cap: 480000
+  f_points:
+  - 15
+  - 15
+  - 15
+  - 15
+  p_points:
+  - 10
+  - 5
+- id: T08
+  title: mac_1gbe_bug_repair_vlan_admission
+  status: frozen
+  spec_revision: 3.0-frame-transactions
+  judge_revision: 3.1-boundary-crosses
+  freeze_receipt: benchmark/tasks/T08/FREEZE.json
+  level_hypothesis: 8
+  origin: MIT-licensed brownfield fixture plus original specification
+  time_limit_minutes: 120
+  same_model_token_cap: null
+  f_points:
+  - 12
+  - 12
+  - 15
+  - 15
+  - 6
+  p_points:
+  - 9
+  - 6
+- id: T09
+  status: frozen
+  spec_revision: port_timing_v1
+  judge_revision: t09_group_cycles10_v1
+  freeze_receipt: benchmark/tasks/T09/FREEZE.json
+  level_hypothesis: 9
+  title: rv32i_five_stage_cpu
+  origin: original
+  time_limit_minutes: 120
+  same_model_token_cap: 1200000
+  f_points:
+  - 20
+  - 12
+  - 8
+  - 8
+  p_points:
+  - 4.8
+  - 4
+  - 3.2
+  - 15
+- id: T10
+  level_hypothesis: 10
+  title: mixed_precision_systolic_matmul_16x16_stream
+  origin: original
+  time_limit_minutes: 240
+  same_model_token_cap: 2000000
+  f_points:
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  p_points:
+  - 5
+  - 5
+  - 5

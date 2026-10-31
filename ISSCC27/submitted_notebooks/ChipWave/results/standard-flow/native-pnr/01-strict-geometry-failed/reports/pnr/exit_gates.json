@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "passed": false,
+  "gates": [
+    {
+      "name": "post-route-export-consistency",
+      "report": {
+        "level": "L1",
+        "check_type": "post_route_consistency",
+        "passed": true,
+        "evidence": "post-route export consistency passed",
+        "details": {
+          "report": "reports/pnr/post_route_export_consistency.json",
+          "tolerance_ns": 1e-06,
+          "errors": [],
+          "status": "passed"
+        },
+        "suggestion": "",
+        "checked_at": "2026-10-14T06:08:46.860629"
+      }
+    },
+    {
+      "name": "post-route-setup-closure",
+      "report": {
+        "level": "L1",
+        "check_type": "metric_check",
+        "passed": true,
+        "evidence": "Metric timing.setup_slack: 34.875776143060676 >= 0",
+        "details": {
+          "actual_value": 34.875776143060676,
+          "actual_values": [
+            34.875776143060676
+          ],
+          "threshold": 0
+        },
+        "suggestion": "",
+        "checked_at": "2026-10-14T06:08:46.860821"
+      }
+    },
+    {
+      "name": "post-route-hold-closure",
+      "report": {
+        "level": "L1",
+        "check_type": "metric_check",
+        "passed": true,
+        "evidence": "Metric timing.hold_slack: 0.09850287531118164 >= 0",
+        "details": {
+          "actual_value": 0.09850287531118164,
+          "actual_values": [
+            0.09850287531118164
+          ],
+          "threshold": 0
+        },
+        "suggestion": "",
+        "checked_at": "2026-10-14T06:08:46.860977"
+      }
+    },
+    {
+      "name": "detailed-route-drc-clean",
+      "report": {
+        "level": "L1",
+        "check_type": "metric_check",
+        "passed": true,
+        "evidence": "Metric drc.violations: 0.0 <= 0",
+        "details": {
+          "actual_value": 0.0,
+          "actual_values": [
+            0.0
+          ],
+          "threshold": 0
+        },
+        "suggestion": "",
+        "checked_at": "2026-10-14T06:08:46.861103"
+      }
+    },
+    {
+      "name": "antenna-clean",
+      "report": {
+        "level": "L1",
+        "check_type": "metric_check",
+        "passed": true,
+        "evidence": "Metric antenna.violations: 0.0 <= 0",
+        "details": {
+          "actual_value": 0.0,
+          "actual_values": [
+            0.0
+          ],
+          "threshold": 0
+        },
+        "suggestion": "",
+        "checked_at": "2026-10-14T06:08:46.861222"
+      }
+    },
+    {
+      "name": "pnr-result-summary",
+      "report": {
+        "passed": true,
+        "evidence": "reports/pnr/summary_gate.log",
+        "details": {
+          "command": [
+            "/tmp/chipnebula-public-repro-user37/bin/python",
+            "-m",
+            "chip_nebula.taskgraph.result_summary",
+            "reports/pnr/result_summary.json",
+            "--profile",
+            "pnr",
+            "--required",
+            "antenna.violations",
+            "--required",
+            "design.die_area",
+            "--required",
+            "drc.violations",
+            "--required",
+            "timing.hold_slack",
+            "--required",
+            "timing.setup_slack",
+            "--measured",
+            "design.die_area",
+            "--measured",
+            "timing.setup_slack",
+            "--measured",
+            "timing.hold_slack",
+            "--measured",
+            "drc.violations",
+            "--measured",
+            "antenna.violations"
+          ],
+          "exit_code": 0,
+          "evidence": "reports/pnr/summary_gate.log"
+        }
+      }
+    },
+    {
+      "name": "execution-status",
+      "report": {
+        "level": "L1",
+        "check_type": "file_check",
+        "passed": true,
+        "evidence": "Found reports/pnr/execution_status.json: 1 file(s)",
+        "details": {},
+        "suggestion": "",
+        "checked_at": "2026-10-14T06:08:47.354677"
+      }
+    }
+  ],
+  "additional_engineering_checks": {
+    "connectivity": true,
+    "equivalence": true,
+    "actual_gds_masters": true,
+    "independent_decks": true,
+    "electrical": true,
+    "frozen_geometry": false,
+    "all_orfs_commands_completed": false
+  }
+}

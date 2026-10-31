@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "physical_qualified": false,
+  "rank_eligible": false,
+  "configuration": {
+    "utilization": 40,
+    "density": 0.55,
+    "abc_area": 0,
+    "repair_margin": 0
+  },
+  "period_ps": 10526,
+  "physical_wall_seconds": 4286.725275041012,
+  "failure_classes": [
+    "electrical"
+  ],
+  "candidate_index": 2,
+  "cell_area_um2": 161973,
+  "die_area_um2": 378736,
+  "setup_slack_ns": 0.105414,
+  "hold_slack_ns": 0.122652,
+  "electrical_violations": {
+    "max_slew": 16,
+    "max_cap": 6,
+    "max_fanout": 0
+  },
+  "energy_j": {},
+  "estimated_power_w": {},
+  "postprocessing_commands": [],
+  "physical_manifest": {
+    "schema_version": 1,
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 0
+    },
+    "period_ps": 10526,
+    "rtl_sha256": {
+      "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+      "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+      "rtl/npu/nebula_npu_dot4.sv": "27bbbc14c9f89d9734fdf02d2b984aaaa7bc24f322f5398d3589ce3d9f8ef81c"
+    },
+    "source_design_delivery": "shared-rtl-actions-01",
+    "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+    "config_sha256": "66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff",
+    "physical_timeout_seconds": 14400,
+    "threads": 2,
+    "scope": "One fixed-RTL physical implementation; historical records are unchanged"
+  },
+  "postprocess_wall_seconds": 4.3999170884490013e-07,
+  "total_wall_seconds": 4286.725275481003,
+  "rtl_actions": {
+    "operand_isolation": false,
+    "reduce_width": true
+  },
+  "candidate_artifact": "artifact-5621fceb6a0d46ef8d940db0bd5a5d70",
+  "proposal_rationale": "Choose the untried width-only candidate after inspecting the complete captured route and evaluation histories. Candidate 1 enabled both actions at these physical settings: cell area 160081 um2 versus baseline 161954 um2, setup slack -0.0262439 ns versus +0.19292 ns, hold slack +0.0945523 ns, and zero reported electrical violations. It failed physical_execution and timing, was not rank eligible, and produced no workload energies; its area decrease is not a qualified Q improvement. Its physical cost was 3834.5636487400043 s; retain that failure and cost. Disable operand isolation to remove its potential input-gating delay and capacitance, while retaining the proved exact signed 18-bit reduction to target arithmetic area and switching. The captured report does not identify the critical path or establish which action caused failure; timing recovery and energy benefit remain hypotheses, and disabling isolation gives up its possible switching savings. Keep utilization 40, density 0.55, abc_area 0 and repair_margin 0 to compare this action change directly with measured implementations; there is no electrical evidence motivating extra repair margin. Q=(cell_area_um2/161954)*geomean(E_DOT64/2.293945631906608e-7,E_GEMM8/1.7792685987008622e-6,E_CONV3/1.1542462882162743e-6). Baseline remains the qualified incumbent at Q=1.0; this proposal has no measured Q. Protected evaluation must report functional checks, physical_qualified, measurement_qualified, rank_eligible, failure_classes, cell_area_um2, die_area_um2, setup_slack_ns, hold_slack_ns, electrical_violations, per-workload energy_j and estimated_power_w, activity/parasitic annotation, area_ratio, energy_ratio, score, physical/postprocess costs and common budget accounting. Rank only fully qualified measurements, preserve the best qualified result and all failed trials, and respect the shared 1200 s agent budget and three-candidate limit; one candidate evaluation is captured so far and EDA wait is separate. Energy scope is Liberty-model estimation from zero-delay post-route gate activity and extracted SPEF; no glitch or silicon-power claim.",
+  "review_required": false,
+  "source_delivery_sha256": "a978787b199e44a35f72e754aa7a3e3889b13825d2ab3efbbfdc4383b27c29e1",
+  "elapsed_search_seconds": 8483.152906313015,
+  "normalization_baseline_sha256": "ed31b28f25797e86ee7143ca2742654179f6095fd1942a3765d9188113b0a344"
+}

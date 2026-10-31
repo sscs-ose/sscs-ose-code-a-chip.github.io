@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "verdict": "passed",
+  "netlist": "build/synth/nebula_cpu_npu_top.v",
+  "summary": "Reproducible mapped netlist revalidated against frozen constraints and acceptance revision 2; synthesis-result-summary and setup-timing-closure satisfied.",
+  "baseline": "reports/synthesis/baseline_revalidation.json",
+  "verification_verdict": "passed",
+  "mapping": {
+    "tool": "Yosys 0.69+77 git 9ff27d29c; built-in read_slang",
+    "abc_area": 1,
+    "policy": "ABC map -a then buffering/sizing at 100 ns; no retiming or RTL/constraint edit",
+    "sta_tool": "OpenSTA 3.1.0 8572175ac4 Copyright (c) 2026, Parallax Software, Inc."
+  },
+  "measured": {
+    "standard_cells": 16683,
+    "liberty_area_um2": 128016.528,
+    "lef_footprint_area_um2": 128016.528,
+    "macro_count": 0,
+    "latch_count": 0,
+    "setup_slack_ns": 39.721889496,
+    "hold_slack_ns": 0.366578341
+  },
+  "warning_count": 2,
+  "evidence": [
+    "reports/synthesis/input_audit.json",
+    "reports/synthesis/cell_audit.json",
+    "reports/synthesis/structure_audit.json",
+    "reports/synthesis/warnings.json",
+    "reports/synthesis/memory_mapping.json",
+    "reports/synthesis/timing_audit.json",
+    "reports/synthesis/fanout.json",
+    "reports/synthesis/tool_identity.json",
+    "reports/synthesis/result_summary.json"
+  ],
+  "not_checked": [
+    "Full formal sequential equivalence",
+    "Placement/routing/extracted RC, CTS, DRC/LVS/GDS and physical electrical closure",
+    "Independent ORFS Git revision: exported platform has no Git metadata; captured manifest hashes and cell roster checked"
+  ],
+  "risk": "Positive pre-layout timing and zero wire-load electrical violations do not establish post-route closure. Propagated-clock, extracted-RC, final reset/electrical and DRC/LVS checks remain required in PnR.",
+  "netlist_sha256": "a3c92f1bb9609445af213c8645de4c896a5f0d6e932bc6ec45b3154f28a87632",
+  "gates": "reports/synthesis/gates.json",
+  "reproducibility": "reports/synthesis/reproducibility.json",
+  "critical_path": {
+    "startpoint": "rst_n (input port clocked by nebula_clock)",
+    "endpoint": "_29329_ (rising edge-triggered flip-flop clocked by nebula_clock)",
+    "group": "nebula_clock",
+    "slack_ns": 39.721889,
+    "endpoint_q_connection": "\\core.mem [182]"
+  }
+}
