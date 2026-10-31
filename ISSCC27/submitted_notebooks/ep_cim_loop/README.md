@@ -35,7 +35,7 @@ seokjindaveoh@tamu.edu, jl90@tamu.edu, yisuin@tamu.edu<br>
 ep_cim_loop/
 ├── ep_cim_loop.ipynb            the notebook (run this)
 ├── README.md, LICENSE
-├── env/                       tool setup: Dockerfile, requirements.txt, colab_setup.sh, setup.sh
+├── env/                       tool setup: Dockerfile, requirements.txt, colab_setup.sh (+ tools/ Xyce bundle for Colab), setup.sh
 ├── weights/                   saved network weights (nostab_5bit.npz)
 ├── results/                   saved runs: time tables, tool versions, DRC / LVS summaries
 └── src/
@@ -56,7 +56,7 @@ ep_cim_loop/
 | `ep_cim_loop.ipynb` | the notebook (executed; all outputs and figures saved) |
 | `env/Dockerfile` | Docker image: IIC-OSIC-TOOLS 2026.10 (all EDA tools) + pinned Python packages + SKY130 PDK `c6d73a35` + this folder |
 | `env/requirements.txt` | pinned Python packages (CPU PyTorch) |
-| `env/colab_setup.sh` | Google Colab install (prebuilt Xyce bundle + public binaries), called by the setup cell |
+| `env/colab_setup.sh`, `env/tools/` | Google Colab install: prebuilt Xyce bundle in `env/tools/` (with its licenses inside) + public binaries; called by the setup cell (not used by Docker) |
 | `env/setup.sh`, `env/environment.yml` | install without Docker and without root (user space), called by the setup cell |
 | `env/run_apptainer.sh` | the Docker image steps with Apptainer / Singularity (HPC clusters without Docker) |
 | `src/cac_ep/ep/` | EP training code (`EPConfig`, `EPNetwork`, `fit`) |
@@ -142,7 +142,7 @@ bash env/run_apptainer.sh ../cac_run quick load      # or: full full  (run folde
 The script pulls the base image from Docker Hub, repeats steps 2–4 of the Dockerfile in user space and runs the notebook with papermill (outputs in `../cac_run/home/out`). If the compute nodes have no direct internet, load the site's web proxy first (`http_proxy`, `https_proxy`).
 
 ### Other ways (QUICK)
-- **Google Colab** — [open the notebook in Colab](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/ep_cim_loop/ep_cim_loop.ipynb) and choose *Run all*. The setup cell takes this folder from the official Code-a-Chip repository (sparse checkout; before the pull request is merged, from the submission fork), downloads a prebuilt Xyce bundle (a release file, 101 MB, too large for the repository) and installs the other tools with apt / conda / pip (`env/colab_setup.sh`).
+- **Google Colab** — [open the notebook in Colab](https://colab.research.google.com/github/sscs-ose/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/ep_cim_loop/ep_cim_loop.ipynb) and choose *Run all*. The setup cell takes this folder from the official Code-a-Chip repository (sparse checkout), uses the prebuilt Xyce bundle shipped in `env/tools/` (Ubuntu 22.04 x86_64, 97 MiB) and installs the other tools with apt / conda / pip (`env/colab_setup.sh`).
 - **Linux without Docker and without root** — `pip install --user -r env/requirements.txt`, then run the notebook; the setup cell installs the tools in user space (`env/setup.sh`: Magic, Netgen, OpenROAD, Yosys and Icarus Verilog from conda-forge / public builds, the PDK, and a source build of Xyce, about 2 h once). Tool builds differ from the Docker image, so use it for QUICK. Known limit of both Colab and Linux without Docker: they install the public OpenROAD build of Dec. 2024, which lacks a function used by the digital place-and-route script, so section 8 (the four digital blocks) and the placement step fail there and the later sections use the saved digital blocks (chip LVS still matches). Use Docker to run section 8.
 
 ## Modes and measured times

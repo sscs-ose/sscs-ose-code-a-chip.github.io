@@ -2,7 +2,7 @@
 # Fast tool install for ep_cim_loop.ipynb on Google Colab (Ubuntu 22.04 x86_64), or any Ubuntu 22.04 x86_64 machine.
 #   bash env/colab_setup.sh [ENV folder]        (default ~/oss_env)   then put ENV/bin first on PATH
 # No compiling: Xyce 7.10 comes from a prebuilt bundle, the rest from public binaries.
-#   tools   : prebuilt bundle (Xyce 7.10 + Trilinos 14.4) from $TOOLS_URL,
+#   tools   : prebuilt bundle (Xyce 7.10 + Trilinos 14.4) from env/tools/ (or $TOOLS_URL),
 #             sha256 checked, unpacked to ENV/ep_dr_tools (binaries carry their own .so files, RUNPATH $ORIGIN/../lib);
 #   openroad: root (Colab): apt-get install of the public OpenROAD .deb (Precision Innovations 2024-12-14, Ubuntu 22.04) + its apt deps
 #             not root    : env/setup.sh parts mamba eda openroad (user space, same as the full install)
@@ -16,7 +16,10 @@
 set -o pipefail
 E=$(mkdir -p "${1:-$HOME/oss_env}" && cd "${1:-$HOME/oss_env}" && pwd)
 HERE=$(cd "$(dirname "$0")" && pwd)
-TOOLS_URL=${TOOLS_URL:-https://github.com/seokjindaveoh/cac-test/releases/download/v1/ep_dr_tools_ubuntu22.tar.gz}
+# The bundle ships in this folder (env/tools/, also in the official Code-a-Chip repository); TOOLS_URL overrides it.
+LOCAL_TOOLS=$HERE/tools/ep_dr_tools_ubuntu22.tar.gz
+if [ -f "$LOCAL_TOOLS" ]; then TOOLS_URL=${TOOLS_URL:-file://$LOCAL_TOOLS}
+else TOOLS_URL=${TOOLS_URL:-https://raw.githubusercontent.com/sscs-ose/sscs-ose-code-a-chip.github.io/main/ISSCC27/submitted_notebooks/ep_cim_loop/env/tools/ep_dr_tools_ubuntu22.tar.gz}; fi
 TOOLS_SHA256=${TOOLS_SHA256:-b49b91562246a8789d4b4147952f40b08930373ba53ff47cbe5d6852aea683ad}   # sha256 of ep_dr_tools_ubuntu22.tar.gz (bundle v1)
 PR=${EP_PDK_ROOT:-$HOME/pdk/volare}
 PY=${PYTHON:-python3}
