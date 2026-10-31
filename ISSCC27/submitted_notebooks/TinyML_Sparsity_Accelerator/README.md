@@ -122,11 +122,11 @@ The self-checking testbench (`tb/top_tb.v`) exercises the core across 4 operatio
 ### Workload Benchmarking on Real Quantized TinyML Network:
 ![Energy Benchmarks and Power Savings](docs/fom_energy_benchmarks.png)
 
-Evaluated against 4,000 empirical execution tiles extracted from a quantized INT8 neural network (`tinyml_model_int8.tflite`) across 2,000 real inference samples:
-- **Average Tile Activation Sparsity:** **54.2%**
-- **Tiles Selecting Sparse Mode:** **68.4%** ($Z \ge 5$)
-- **Net Dynamic Energy Reduction:** **44.8%**
-- **Classification Accuracy Drop:** **0.0%** (Exact bit-level INT8 numerical equivalence)
+Evaluated against 4,000 empirical execution tiles extracted from a quantized INT8 neural network (`tinyml_model_int8.tflite`) across 2,000 real inference samples (MNIST digit recognition benchmark):
+- **Average Tile Activation Sparsity:** **30.11%**
+- **Tiles Selecting Sparse Mode:** **2,135 (53.38%)** ($Z \ge 5$)
+- **Net Dynamic Energy Reduction:** **5.91%** modeled energy savings vs. always-dense baseline
+- **Classification Accuracy Drop:** **0.0%** (Exact bit-level INT8 numerical equivalence; baseline 95.61% float, 94.40% quantized INT8)
 
 ### 4.1 Functional Simulation & Waveform Verification (GTKWave & WaveDrom)
 
@@ -340,10 +340,10 @@ TinyML_Sparsity_Accelerator/
 - **Lead Contact & Corresponding Author:** **Sanchitta Sahoo** (`sahoosanchitta@gmail.com`)
 
 ### Team Members:
-1. **Sanchitta Sahoo** (Undergraduate Student) - Dept. of Electronics and Communication Engineering (ECE), Silicon University, Bhubaneswar, Odisha, India  
+1. **Sanchitta Sahoo** (Undergraduate Student, Team Lead) - Dept. of Electronics and Communication Engineering (ECE), Silicon University, Bhubaneswar, Odisha, India  
    *Email:* [sahoosanchitta@gmail.com](mailto:sahoosanchitta@gmail.com)
 2. **R Shahishnu Rahul** (Undergraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
-3. **Sree Mathesh K** (Postgraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
-4. **Viji H.** (Postgraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
+3. **Sree Mathesh K** (Undergraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
+4. **Viji H.** (Undergraduate Student) - Dept. of Electronics and Communication Engineering (ECE), SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
 5. **Dr. M. Sivappriya** (Faculty Advisor, IEEE Member) - Assistant Professor, Dept. of Networking and Communications, SRM Institute of Science and Technology, Chennai, Tamil Nadu, India
 
