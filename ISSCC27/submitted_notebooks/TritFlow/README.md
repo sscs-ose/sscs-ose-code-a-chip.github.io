@@ -34,7 +34,7 @@ Both notebooks are saved with their outputs.
 
 Open a notebook in Colab and choose **Runtime → Run all**. On a fresh Colab CPU runtime this takes about 13 to 15 minutes, including setup. The first cell fetches the TritFlow source at a pinned commit of [PenguinEino/tritflow](https://github.com/PenguinEino/tritflow) and installs the tools at fixed versions:
 
-- Python 3.12
+- Python 3.13 on Colab (also checked locally with 3.12)
 - KLayout 0.30.6
 - ngspice 42
 - OpenSUSI TR-1um PDK, commit `5d963db`
