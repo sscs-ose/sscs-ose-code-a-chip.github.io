@@ -56,23 +56,19 @@ def main():
     LEAD = {"gpt2": (14, 0.93), "qwen2.5-0.5b": (14, 0.72)}
     for q in pts:
         x, y = q["w_kurtosis_mig"], q["gain_over_W6A4_ppl"]
-        s = sig(q)
+        right = x > split
         yc = max(-LIM * 0.94, min(LIM * 0.94, y))
         clipped = yc != y
-        kw = dict(gain=dict(marker="D", ms=7, color=pc.ACC, mfc=pc.ACC),
-                  loss=dict(marker="o", ms=6, color="black", mfc="black"),
-                  none=dict(marker="o", ms=6, color="0.35", mfc="white"))[s]
+        kw = dict(marker="D", ms=7, color=pc.ACC) if right else \
+            dict(marker="o", ms=6.5, color="black")
         if clipped:
             kw["marker"] = "^" if y > 0 else "v"
-            kw["ms"] = 8
-        ax.plot([x], [yc], ls="none", mew=1.1, zorder=3, **kw)
-        if q.get("prospective"):
-            ax.plot([x], [yc], ls="none", marker="o", ms=13, mfc="none",
-                    mec="0.2", mew=0.8, zorder=2)
+            kw["ms"] = 8.5
+        ax.plot([x], [yc], ls="none", zorder=3, **kw)
         nm = NAME.get(q["model"])
         if nm:
             lab = "%s %+.2f" % (nm, y)
-            col = pc.ACC if s == "gain" else "black"
+            col = pc.ACC if right else "black"
             if q["model"] in LEAD:
                 ax.annotate(lab, (x, yc), xytext=LEAD[q["model"]],
                             fontsize=FS - 0.5, color=col, va="center",
@@ -82,17 +78,6 @@ def main():
                 ax.text(x * (1.1 if y > 0 else 1.5), yc - (0.1 if y > 0 else 0),
                         lab, fontsize=FS - 0.5, ha="left", va="center",
                         color=col)
-    h = [ax.plot([], [], ls="none", marker="D", ms=7, color=pc.ACC)[0],
-         ax.plot([], [], ls="none", marker="o", ms=6, color="0.35",
-                 mfc="white")[0],
-         ax.plot([], [], ls="none", marker="o", ms=6, color="black")[0],
-         ax.plot([], [], ls="none", marker="o", ms=13, mfc="none",
-                 mec="0.2", mew=0.8)[0]]
-    ax.legend(h, ["SidecarCIM better", "no significant difference",
-                  "W6A4 better", "held-out model"],
-              loc="lower left", bbox_to_anchor=(0.28, 0.02), fontsize=FS - 1,
-              frameon=True,
-              framealpha=0.9, edgecolor="0.8", handletextpad=0.3, ncol=2)
     ax.set_xscale("log")
     ax.set_xlim(x_lo, x_hi)
     ax.set_ylim(-LIM, LIM)
