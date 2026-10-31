@@ -57,7 +57,7 @@
 
 
 ## Program Schedule
-- **October 9, 2026, 11:59 AM Pacific Time**: Notebook submission deadline (GitHub pull request)
+- **October 31st, 2026, 11:59 AM Pacific Time**: Notebook submission deadline (GitHub pull request)
 - Early November: Announcement of winners
 - February 14-18, 2027: Attend the conference
 
