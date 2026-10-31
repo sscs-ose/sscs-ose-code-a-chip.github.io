@@ -5,6 +5,8 @@
 所有作者单位：Tsinghua University  
 赴会代表：Zhanchen Zhao
 
+**投稿已提交：** [官方 PR #237](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/pull/237)，提交账号 zhaozc21，首次提交时间为北京时间 2026-10-31 13:09。
+
 ## 截止时间与提交方式
 
 核对日期：2026-10-31。
@@ -45,7 +47,7 @@
 结果记录见 [revision-validation.json](revision-validation.json)，可运行文稿检查见 [validation.json](validation.json)。
 
 - 同步名称、入口文件、四位作者、单位、赴会代表和已批准许可。
-- 在独立副本执行七个现有 Notebook 代码单元和八项检查。
+- v9 已在独立副本执行七个现有 Notebook 代码单元和八项检查；v10 复用该结果，并核对文档链接、文件清单与保留材料的字节一致性。
 - 核对来源哈希、双语图片/链接、冻结设计及文件清单。
 - 沿用 v4 的 324 次 RTL 仿真、三组联合 STA，以及 v5 的 GDS 和图像。
 - 本轮新增设计实验为零。
@@ -60,4 +62,4 @@
 4. 发起面向官方仓库 main 分支的 PR，标题可用：**ISSCC27: FoldAgent — Agent-Assisted Logic Folding with Automated Verification**。
 5. 截止前完成最终修改，随后关注组织者的问题。
 
-本文件说明投稿材料与操作；线上提交状态以官方仓库的 PR 为准。公开授权及许可证状态见 [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md)。
+本项目已按上述方式提交至官方 [PR #237](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/pull/237)；后续材料更新沿用同一 PR。公开授权及许可证状态见 [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md)。

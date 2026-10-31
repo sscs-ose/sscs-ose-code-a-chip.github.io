@@ -1,10 +1,12 @@
 # FoldAgent: Agent-Assisted Logic Folding with Automated Verification
 
-FoldAgent submission edition v9 · 31 October 2026  
+FoldAgent submission package v10 · documentation cleanup · 31 October 2026  
 Zhanchen Zhao, Wenyu Sun, Yaqing Lai, Yubo Deng  
 Tsinghua University (all authors)
 
-Read [中文完整参考稿](FoldAgent-zh.html), [the illustrated manuscript](FoldAgent.html), [中文读图说明](REVIEW_zh.md), and [response to review](REVIEW-RESPONSE.md). FoldAgent connects agent-assisted RTL partitioning to automated verification and documented physical feedback. The notebook leads with one tradeoff: a fixed 1 mm² projected footprint plus a second logic tier preserves measured throughput across 162 paired scenarios, at the cost of 725 functional cross-tier links and a same-cycle round trip. A predict–run–explain exercise separates interface capacity, compute resources and throughput evidence.
+Start with the **[English notebook](FoldAgent.ipynb)** or the **[illustrated English manuscript](FoldAgent.html)**. The English notebook is the primary submission. Optional Chinese reading: [full translation](FoldAgent-zh.html) and [figure guide](REVIEW_zh.md).
+
+FoldAgent connects agent-assisted RTL partitioning to automated verification and documented physical feedback. The notebook leads with one tradeoff: a fixed 1 mm² projected footprint plus a second logic tier preserves measured throughput across 162 paired scenarios, at the cost of 725 functional cross-tier links and a same-cycle round trip. A predict–run–explain exercise separates interface capacity, compute resources and throughput evidence.
 
 ## Read and check saved results
 
@@ -65,20 +67,20 @@ Conference representative: Zhanchen Zhao, confirmed by the author. Public releas
 
 ## Saved GDS and placement views
 
-Figure 2 now shows both final GDS layouts with equal-scale full-die views and two coordinate-bound closeups. The control-tier GDS is reused; the compute-tier GDS is a format export of the frozen final DEF. See [GDS files and records](physical/gds/README.md). This v9 evidence/print/submission revision reuses the prior manuscript, all v4 performance/timing results and v5 GDS artifacts/images; it adds zero design experiments. Open the [simplified placement overview](figures/02-placement.png) for component and terminal positions, alongside the routed geometry in Figure 2.
+Figure 2 now shows both final GDS layouts with equal-scale full-die views and two coordinate-bound closeups. The control-tier GDS is reused; the compute-tier GDS is a format export of the frozen final DEF. See [GDS files and records](physical/gds/README.md). This v10 documentation cleanup preserves the v9 notebook, both HTML copies, all v4 performance/timing results and v5 GDS artifacts/images byte for byte. Open the [simplified placement overview](figures/02-placement.png) for component and terminal positions, alongside the routed geometry in Figure 2.
 
 ## Release status
 
 Public redistribution is authorized. The root LICENSE, NOTICE, LICENSE-SCOPE.md and patch-directory license apply the approved scheme. [PUBLICATION-AUTHORIZATION.json](PUBLICATION-AUTHORIZATION.json) records the author's confirmation. Historical experiment reports retain their original dates and status fields; current release status is recorded here.
 
-All four authors are affiliated with Tsinghua University. This is the reviewed submission payload; the official pull request records its online submission status.
+All four authors are affiliated with Tsinghua University. The project was submitted by zhaozc21 through [official PR #237](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/pull/237).
 
 ## Submission
 
-Place this project under ISSCC27/submitted_notebooks/FoldAgent/ in a fork of the official Code-a-Chip repository and submit a pull request. See [the final submission checklist](SUBMISSION.md) for the verified deadline, required files and current local status. Original project names in source records preserve provenance.
+The submission is under ISSCC27/submitted_notebooks/FoldAgent/ in [PR #237](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/pull/237), targeting the official repository's main branch. See [submission details](SUBMISSION.md) for the required files and deadline. Original project names in source records preserve provenance.
 
 ## Agent evidence and upload scope
 
 Follow the [saved agent inputs, frozen briefs and delivered RTL](evidence/agent/README.md). The historical model configuration is recorded alongside the attempt; generation replay requires the original runtime and full assembled prompts. The packaged rerun paths cover verification, performance and timing.
 
-Upload the clean project directory extracted from the submission ZIP. Its exact contents are the entries in package-manifest.json plus that manifest. Notebook validation may create validation/ work copies, runtime caches and browser previews; keep them in the authoring workspace. Retained validation.json, revision-validation.json and validation-tests.log provide the compact report and test log. Printed HTML retains the design-exercise explanations; expandable code/output listings are hidden in print.
+Upload the clean project directory extracted from the submission ZIP. Its exact contents are the entries in package-manifest.json plus that manifest. Notebook validation may create validation/ work copies, runtime caches and browser previews; keep them in the authoring workspace. Retained validation.json and validation-tests.log record the v9 notebook execution and tests; revision-validation.json records this documentation cleanup's link, manifest and unchanged-file checks. Printed HTML retains the design-exercise explanations; expandable code/output listings are hidden in print.

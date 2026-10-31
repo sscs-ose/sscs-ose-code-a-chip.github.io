@@ -18,13 +18,13 @@ Zhanchen Zhao、Wenyu Sun、Yaqing Lai、Yubo Deng。赴会代表：Zhanchen Zha
 
 许可全文见 [LICENSE](LICENSE)，目录适用范围见 [LICENSE-SCOPE.md](LICENSE-SCOPE.md)，署名见 [NOTICE](NOTICE)，第三方声明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
 
-[IEEE SSCS 官方要求](https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-awards/)中的开放许可、代表及可复现材料已纳入本包。当前为本地准备完成的发布包，GitHub 投稿操作尚未执行。
+[IEEE SSCS 官方要求](https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-awards/)中的开放许可、代表及可复现材料已纳入本包。已由 **zhaozc21** 于北京时间 **2026-10-31 13:09** 提交至官方仓库：[正式投稿 PR #237](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/pull/237)。
 
 ## 沿用的技术证据
 
 v4 已完成的 324 次 RTL 仿真和三组联合 STA、v5 两层 GDS 与图像、v6 设计取舍及教学练习均继续复用。原始报告保留生成时的日期和状态字段；当前公开许可状态以本文件和授权记录为准。
 
-完整 P&R 重建包、独立 GDS DRC/LVS、PVT、公平物理基线与能耗继续列作后续研究。本次更新集中于许可证、署名和文稿导出。
+完整 P&R 重建包、独立 GDS DRC/LVS、PVT、公平物理基线与能耗继续列作后续研究。v10 整理阅读入口、过程说明和投稿状态；正文、许可、代码与实验材料沿用已提交版本。
 
 ## 本次更名
 
