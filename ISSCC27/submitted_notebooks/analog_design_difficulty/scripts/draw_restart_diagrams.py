@@ -3,8 +3,8 @@
 
     uv run python scripts/draw_restart_diagrams.py
 
-Writes assets/diagrams/requirement_vs_network.svg (Figure 1) and sampling_cycle.svg
-(Figure 2). These are explanatory drawings, not simulation results. Quantities named in them are those of
+Writes assets/diagrams/requirement_vs_network.svg (Figure 1), sampling_cycle.svg (Figure 2), and
+working_checks_cycle.svg (Figure 3). These are explanatory drawings, not simulation results. Quantities named in them are those of
 experiments/closure/CLOSURE_BRIEF.md.
 """
 from __future__ import annotations
@@ -177,7 +177,7 @@ def requirement_vs_network() -> None:
 def sampling_cycle() -> None:
     import numpy as np
     sys.path.insert(0, str(ROOT / "scripts"))
-    import draw_diagrams as dd  # noqa: E402  same schematic symbols as Figure 8 and the testbench sketches
+    import draw_diagrams as dd  # noqa: E402  same schematic symbols as Figure 9 and the testbench sketches
     plt.rcParams.update(RC)     # draw_diagrams sets its own rcParams on import
     fig = plt.figure(figsize=(13.5, 5.0))
     ax = fig.add_axes([0.0, 0.08, 0.36, 0.84])
@@ -278,6 +278,102 @@ def sampling_cycle() -> None:
     finish(fig, "sampling_cycle")
 
 
+# --------------------------------------------------------------------------- Figure 3
+
+def working_checks_cycle() -> None:
+    """Where the deterministic working checks of Table 2 act in one cycle, and the separate random-noise lane."""
+    import numpy as np
+    plt.rcParams.update(RC)
+    fig = plt.figure(figsize=(13.5, 7.4))
+    t = np.linspace(-12, 112, 4001)
+    phi = ((t >= 0) & (t < 40) | (t >= 100)).astype(float)
+    u = np.where(t < 1, 0.75, 1.05)
+    u = np.where(t >= 41, 0.85, u)
+    vt, vp = 1.05, 0.75
+    v = np.where(t < 0, vp, vt + (vp - vt) * np.exp(-np.clip(t, 0, None) / 4.0))
+    v = np.where(t >= 40, vt - 0.012, v)
+    v = np.where(t >= 100, (vt - 0.012) + (0.85 - vt + 0.012) * (1 - np.exp(-(t - 100) / 4.0)), v)
+    rng = np.random.default_rng(3)
+    nz = np.convolve(rng.normal(0, 1, t.size), np.ones(15) / 15, mode="same") * 0.032
+    ramp = np.clip((t - 38.8) / 1.2, 0, 1)
+    nz = nz + (0.028 - float(np.interp(40, t, nz))) * ramp   # make the frozen value visible
+    frozen = 0.028
+    vn = np.where((t >= 0) & (t < 40), nz, np.where((t >= 40) & (t < 100), frozen, np.nan))
+    x0, w = 0.20, 0.62
+    a1 = fig.add_axes([x0, 0.86, w, 0.09])
+    a2 = fig.add_axes([x0, 0.62, w, 0.22], sharex=a1)
+    a3 = fig.add_axes([x0, 0.25, w, 0.35], sharex=a1)
+    a4 = fig.add_axes([x0, 0.06, w, 0.16], sharex=a1)
+    win = [(50, 60), (94, 99)]
+    for a in (a1, a2, a3, a4):
+        for s_ in ("top", "right", "left"):
+            a.spines[s_].set_visible(False)
+        a.set_yticks([])
+        for lo, hi in win:
+            a.axvspan(lo, hi, color=SUM, alpha=0.10, lw=0)
+        a.axvline(40, color=MUTED, lw=0.8, ls=":")
+        a.axvline(0, color=MUTED, lw=0.8, ls=":")
+        a.axvline(100, color=MUTED, lw=0.8, ls=":")
+    # 1 clock
+    a1.plot(t, phi, color=STATE, lw=1.7)
+    a1.set_ylim(-0.25, 1.9)
+    a1.text(20, 1.45, "switch closed: acquire 40 ns", ha="center", va="center", fontsize=8.6)
+    a1.text(70, 0.42, "switch open: hold 60 ns", ha="center", va="center", fontsize=8.6)
+    fig.text(x0 - 0.012, 0.905, "1  clock φ", ha="right", va="center", fontsize=9.5, color=STATE, weight="bold")
+    # 2 voltages
+    a2.plot(t, u, color=REQ, lw=1.4, ls="--")
+    a2.plot(t, v, color=PHYS, lw=2.0)
+    a2.set_ylim(0.66, 1.14)
+    a2.text(113, 0.85, "input u", fontsize=8.6, color=REQ, va="center")
+    a2.text(113, 1.03, "V(Cs)", fontsize=8.6, color=PHYS, va="center")
+    a2.text(-11, 0.80, "previous\nheld voltage", fontsize=8.0, color=PHYS, va="bottom")
+    a2.text(52, 1.06, "E", fontsize=10, color=SUM, weight="bold", ha="left")
+    a2.text(94, 1.06, "L", fontsize=10, color=SUM, weight="bold", ha="left")
+    a2.text(-11, 1.14, "illustrative waveforms, not simulation", fontsize=7.6, color=MUTED, style="italic", va="top")
+    fig.text(x0 - 0.012, 0.73, "2  voltages", ha="right", va="center", fontsize=9.5, color=INK, weight="bold")
+    # 3 deterministic working checks
+    a3.set_ylim(0, 5.2)
+    rows = [
+        (4.5, 0, 40, "acquisition left over, previous-sample history", "0.10 mV", "from closing through acquisition"),
+        (3.5, 34, 40, "driver static tracking", "0.15 mV", "evaluated just before opening"),
+        (2.5, 38.5, 46, "level-dependent step at opening", "0.15 mV", "switch opening, entry into hold"),
+        (1.5, 50, 99, "hold droop, feedthrough of the next input", "0.10 mV", "from the early to the late read"),
+    ]
+    for y, lo, hi, name, alloc, when in rows:
+        a3.add_patch(Rectangle((lo, y - 0.22), hi - lo, 0.44, facecolor=PHYS, alpha=0.75, lw=0))
+        lx = hi + 1.5 if hi < 60 else lo - 1.5
+        ha = "left" if hi < 60 else "right"
+        a3.text(lx, y + 0.06, f"{name}   {alloc}", ha=ha, va="bottom", fontsize=8.6, color=INK)
+        a3.text(lx, y - 0.06, when, ha=ha, va="top", fontsize=7.8, color=MUTED, style="italic")
+    a3.text(113, 0.55, "reserve 0.086 mV:\nPVT spread, model and\nnumerical uncertainty;\nnot tied to a time",
+            fontsize=8.0, color=INK, va="center", ha="left",
+            bbox=dict(boxstyle="round,pad=0.35", facecolor="white", edgecolor=MUTED, ls="--", lw=1.0))
+    a3.text(-11, 0.45, "magnitudes sum to 0.586 mV = 1 VLSB (conservative). The checks share causes; they are not\n"
+            "independent physical components. Only the parent residual, read at E and L, is pass/fail.",
+            fontsize=7.8, color=SUM, va="center")
+    fig.text(x0 - 0.012, 0.43, "3  deterministic\nworking checks\n(Table 2)", ha="right", va="center", fontsize=9.5,
+             color=PHYS, weight="bold")
+    # 4 random sampled noise, separate lane
+    a4.plot(t, vn, color=STATE, lw=1.1)
+    a4.axhline(0, color=MUTED, lw=0.6)
+    a4.plot([40], [frozen], "o", color=STATE, ms=5)
+    a4.set_ylim(-0.075, 0.075)
+    a4.text(20, 0.062, "switch and driver noise move V(Cs) while it tracks", ha="center", fontsize=8.0, color=STATE)
+    a4.text(42, frozen + 0.012, "opening freezes one random value", fontsize=8.0, color=STATE, va="bottom")
+    a4.text(70, -0.062, "sample uncertainty carried through the hold; evaluated as RMS (≤ 146 µV),\nnot added to the deterministic sum",
+            ha="center", va="bottom", fontsize=8.0, color=STATE)
+    a4.set_xlim(-12, 112)
+    a4.set_xlabel("time (ns)", fontsize=9, labelpad=1)
+    for a in (a1, a2, a3):
+        a.tick_params(labelbottom=False, bottom=False)
+    fig.text(x0 - 0.012, 0.14, "4  random sampled\nnoise (separate)", ha="right", va="center", fontsize=9.5,
+             color=STATE, weight="bold")
+    fig.text(x0 - 0.012, 0.075, "first cut: kT/C only", ha="right", va="center", fontsize=7.8, color=MUTED,
+             style="italic")
+    finish(fig, "working_checks_cycle")
+
+
 if __name__ == "__main__":
     requirement_vs_network()
     sampling_cycle()
+    working_checks_cycle()

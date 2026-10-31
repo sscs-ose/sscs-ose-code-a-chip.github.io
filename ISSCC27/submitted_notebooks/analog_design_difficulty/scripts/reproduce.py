@@ -9,7 +9,7 @@ Usage (from the folder that contains scripts/ and experiments/):
 Stages
 1. reduced model (first-cut evidence)                       experiments/experiment_a/ideal/run_experiment.py
 2. first-cut SKY130 evidence                                experiments/experiment_a/sky130/run_sky130.py, run_followup.py
-3. first cut on the sequential bench (Figure 3)             experiments/closure/run_screen.py f2 --pvt screen --legacy
+3. first cut on the sequential bench (Figure 4)             experiments/closure/run_screen.py f2 --pvt screen --legacy
 4. final closure verification of the selected design       experiments/closure/run_final.py q1_nvt1
 5. closure result, data figures, explanatory diagrams      assemble_final.py, figures.py, scripts/draw_restart_diagrams.py
 6. notebook                                                 executed in place
