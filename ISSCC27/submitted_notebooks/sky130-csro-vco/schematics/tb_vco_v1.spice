@@ -1,0 +1,99 @@
+** sch_path: /home/satancci/vco/vco.v2/schematics/sym/tb_vco_v1.sch
+**.subckt tb_vco_v1
+V1 VDD GND 1.8
+V2 ai_vco GND 0
+x1 ao_vco ai_vco GND VDD vco
+**** begin user architecture code
+
+
+
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.ic v(ao_vco) = 0
+.option method=gear
+
+.control
+  reset
+  alter V2 0.00
+  tran 0.1p 2n
+  meas tran T trig v(ao_vco) val=0.9 rise=2 targ v(ao_vco) val=0.9 rise=3
+  let freq = 1 / T
+  print freq
+
+
+  write tb_vco_v1.raw v(ao_vco)
+  wrdata tb_vco_v1.csv v(ao_vco)
+
+  alter V2 1.8
+  tran 0.1p 2n
+  meas tran T trig v(ao_vco) val=0.9 rise=2 targ v(ao_vco) val=0.9 rise=3
+  let freq = 1 / T
+  print freq
+
+  save all
+
+.endc
+
+
+.end
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  /home/satancci/vco/vco.v2/schematics/analog/vco.sym # of pins=4
+** sym_path: /home/satancci/vco/vco.v2/schematics/analog/vco.sym
+** sch_path: /home/satancci/vco/vco.v2/schematics/analog/vco.sch
+.subckt vco ao_vco ai_vco AVSS AVDD1V8
+*.iopin AVDD1V8
+*.iopin ao_vco
+*.iopin AVSS
+*.iopin ai_vco
+XM1 net1 ai_vco AVSS GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0
++ sd=0 mult=1 m=1
+XM9 net3 ai_vco AVSS GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0
++ sd=0 mult=1 m=1
+XM10 net2 ai_vco AVSS GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0
++ sd=0 mult=1 m=1
+XM11 net1 AVDD1V8 AVSS GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0
++ sd=0 mult=1 m=1
+XM12 net2 AVDD1V8 AVSS GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0
++ sd=0 mult=1 m=1
+XM13 net3 AVDD1V8 AVSS GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0
++ sd=0 mult=1 m=1
+C1 ao_left AVSS 3f m=1
+C2 ao_rig AVSS 3f m=1
+C3 ao_vco AVSS 3f m=1
+XM4 net5 net7 AVDD1V8 VDD sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM14 net6 net7 AVDD1V8 VDD sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM15 net4 net7 AVDD1V8 VDD sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM16 net6 AVSS AVDD1V8 VDD sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM17 net5 AVSS AVDD1V8 VDD sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM18 net4 AVSS AVDD1V8 VDD sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM8 net7 net7 AVDD1V8 VDD sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM20 net7 ai_vco AVSS GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0
++ sd=0 mult=1 m=1
+XM3 ao_left ao_vco net6 net6 sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM7 ao_rig ao_left net5 net5 sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM5 ao_vco ao_rig net4 net4 sky130_fd_pr__pfet_01v8 L=0.15 W=1.3 nf=1 ad=0.377 as=0.377 pd=3.18 ps=3.18 nrd=0.223076923076923
++ nrs=0.223076923076923 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 ao_left ao_vco net1 net1 sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0
++ sb=0 sd=0 mult=1 m=1
+XM6 ao_rig ao_left net2 net2 sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0
++ sb=0 sd=0 mult=1 m=1
+XM19 ao_vco ao_rig net3 net3 sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0
++ sb=0 sd=0 mult=1 m=1
+.ends
+
+.GLOBAL VDD
+.GLOBAL GND
+.end
