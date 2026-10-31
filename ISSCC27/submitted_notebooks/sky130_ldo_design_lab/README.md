@@ -100,7 +100,6 @@ These are compact circuit simulations.
 5. `models` contains the public model archive, original license, and source hashes.
 6. `figures` contains the transistor schematics and editable drawing descriptions.
 7. `data/device` and `scripts/device_lab.py` provide supporting device characterization.
-8. `VERIFICATION.json` records notebook execution and checks.
 
 ## Attribution and license
 
