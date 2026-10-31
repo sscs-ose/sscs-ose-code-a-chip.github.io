@@ -30,7 +30,7 @@ Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --
 
 ### 3. CACE-Compliant Datasheet & Verification Summary
 
-| Parameter | IEEE Target Spec | Measured / Realized | Evidence Level & Tool Provenance | Unit | Margin / Status |
+| Parameter | IEEE Target Spec | Realized / Simulated | Evidence Level & Tool Provenance | Unit | Margin / Status |
 | :--- | :---: | :---: | :--- | :---: | :---: |
 | **Technology** | SkyWater 130nm | **SkyWater SKY130** | Physical PDK Rules (`sky130A`) | — | **Pass [OK]** |
 | **Supply Voltage ($V_{DD}$)** | $\le 0.80$ | **$0.60$** | Transistor Netlist & SPICE OP | V | **Pass [OK]** |
@@ -54,7 +54,7 @@ Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --
 | **Chopping Ripple Suppression** | $\ge 35.0$ | **$62.3$** | Behavioral CT-Chopper + RRL | dB | **Pass [OK]** ($+27.3\,\text{dB}$) |
 | **Clinical EEG Fidelity ($r$)** | $> 0.95$ | **$0.9926$** | Multi-band physiological EEG | — | **Pass [OK]** ($> 99.2\%$) |
 | **Physical DRC Cleanliness** | 0 errors | **0 Violations (15/15)** | Level 5 KLayout / gdstk DRM Audit (`klayout.db`) | — | **Pass [OK]** (100% Clean) |
-| **Physical LVS Sign-Off** | 100% Match | **15/15 Devices Matched** | Level 5 GDSTK Boolean Extraction Engine (`lvs.log`) | — | **Pass [OK]** (100% Match, 17 Pins) |
+| **Physical LVS Match** | 100% Match | **15/15 Devices Matched** | Level 5 GDSTK Boolean Extraction Engine (`lvs.log`) | — | **Pass [OK]** (100% Match, 17 Pins) |
 
 ---
 

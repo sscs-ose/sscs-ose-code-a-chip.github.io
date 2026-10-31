@@ -1,4 +1,4 @@
-# 🧠 NeuroDyn-AFE: Sub-0.6V Chopper-Stabilized Dynamic Biosignal Front-End with $g_m/I_D$ Sizing Engine, Noise-Shaped Direct-Digitization, and Common-Centroid Layout in SkyWater 130nm
+# 🧠 NeuroDyn-AFE: Sub-0.6V Chopper-Stabilized Dynamic Biosignal Front-End with $g_m/I_D$ Sizing Engine, Causal Ripple Reduction Loop, and Common-Centroid Layout in SkyWater 130nm
 
 <div align="center">
 
@@ -37,7 +37,7 @@ Wearable, battery-less, and implantable bio-potential monitoring systems (e.g., 
 
 ---
 
-## 📊 Target Specifications & Measured Performance Datasheet
+## 📊 Target Specifications & Simulated Performance Datasheet
 
 Following IEEE reproducible research guidelines and open-source EDA verification standards, all performance metrics are classified according to five rigorous **Evidence Levels**:
 
@@ -75,14 +75,14 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 | **Foundry SPICE Netlist Suite** | Verified | **Complete 6-Deck Suite** | Level 4 Automated Netlists (.op, .ac, .cmrr, .psrr, .noise, .tran) | — | SKY130 TT models (Tail $V_{ds} = 77.27\,\text{mV} \ge 3 U_T$, Saturation verified) |
 | **Active Silicon Area** | $< 0.025$ | **$0.00425$** | Level 5 Physical GDSII Layout (`gdstk`) | $\text{mm}^2$ | Full macro PR boundary 84×50.65 µm (incl. guard ring, MIM caps, chopper, 2nd stage) |
 | **Physical DRC Cleanliness** | Clean | **0 Violations (15/15 rules)** | Level 5 Automated DRM Audit (`klayout.db`/`gdstk`) | — | SkyWater SKY130 DRM Compliant |
-| **Physical LVS Sign-Off** | 100% Match | **15/15 Devices Matched** | Level 5 GDSTK Boolean Extraction Engine (`lvs.log`) | — | 11 MOSFETs, 2 Caps, 2 Resistors, 17 Pins (`lvs.log`) |
+| **Physical LVS Match** | 100% Match | **15/15 Devices Matched** | Level 5 GDSTK Boolean Extraction Engine (`lvs.log`) | — | 11 MOSFETs, 2 Caps, 2 Resistors, 17 Pins (`lvs.log`) |
 
 ---
 
 ## 🏛️ System Architecture
 
 ![Block Diagram](images/block_diagram.svg)
-<div align="center"><em>Figure 1: Complete NeuroDyn-AFE System Architecture showing Chopper Modulator, Dynamic Subthreshold OTA, Ripple Reduction Loop (RRL), and Direct Noise-Shaped Quantization.</em></div>
+<div align="center"><em>Figure 1: Complete NeuroDyn-AFE System Architecture showing Chopper Modulator, Dynamic Subthreshold OTA, Ripple Reduction Loop (RRL), and Direct-Digitization Interface.</em></div>
 
 ### Signal Flow Walkthrough
 
@@ -91,7 +91,7 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 3. **Subthreshold Dynamic Operational Amplifier**: The up-modulated signal is amplified by the high-gain ($>65\,\text{dB}$) core differential amplifier. The core amplifier contributes its own input-referred $1/f$ flicker noise and transistor threshold mismatch ($V_{os,\text{mismatch}}$, Monte Carlo $\sigma = 1.42\,\text{mV}$, peak $\approx 12.4\,\text{mV}$), both of which are currently located at DC and low frequencies.
 4. **Output Chopping Demodulator ($\text{CHOP2}$)**: The amplified signal is multiplied again by the synchronized square wave at $f_{chop}$. This shifts the amplified biopotential signal back to baseband (DC to $1\,\text{kHz}$), while simultaneously modulating the amplifier's internal $1/f$ flicker noise and offset voltage up to $4\,\text{kHz}$!
 5. **Ripple Reduction Loop (RRL)**: Left uncorrected, the up-modulated offset voltage creates large square-wave ripple voltages at $f_{chop}$ that degrade dynamic range. The RRL integrates the AC ripple and dynamically feeds back a compensatory voltage ($V_{corr}$) into the auxiliary differential pair ($M_{1,\text{aux}}, M_{2,\text{aux}}$), extinguishing the ripple at the source.
-6. **Noise-Shaped Dynamic SAR Quantizer**: The clean baseband signal is directly converted to a 14-bit digital word using a 1st-order noise-shaping capacitive SAR without requiring power-hungry active anti-aliasing filters.
+6. **Direct-Digitization Interface (Quantizer Target)**: The low-noise, ripple-suppressed baseband biopotential signal provides an ideal low-impedance interface to feed downstream noise-shaping capacitive SAR quantizers without requiring power-hungry active anti-aliasing filters.
 
 ---
 
@@ -217,6 +217,7 @@ $$\sigma_{Vth} = \frac{A_{Vth}}{\sqrt{W \cdot L}} = \frac{5.0\,\text{mV}\cdot\mu
 | Metric | **This Work (Core OTA)** | **This Work (Full System)** | M. Ding et al. [1] | K. Lee et al. [2] | Q. Fan et al. [3] | R. F. Yazicioglu et al. [4] |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Venue** | **ISSCC 2027 (Code-a-Chip)** | **ISSCC 2027 (Code-a-Chip)** | IEEE JSSC 2024 | IEEE ISSCC 2023 | IEEE JSSC 2011 | IEEE JSSC 2007 |
+| **Result Type** | **Simulated (BSIM4)** | **Simulated (BSIM4)** | Measured (Silicon) | Measured (Silicon) | Measured (Silicon) | Measured (Silicon) |
 | **Technology** | **SkyWater 130nm** | **SkyWater 130nm** | TSMC 65nm | UMC 180nm | AMI 0.5µm | AMI 0.5µm |
 | **Open-Source PDK?** | **Yes (SKY130)** | **Yes (SKY130)** | No (Proprietary) | No (Proprietary) | No (Proprietary) | No (Proprietary) |
 | **Automated Layout?** | **Yes (KLayout GDS)** | **Yes (KLayout GDS)** | No | No | No | No |
@@ -230,6 +231,8 @@ $$\sigma_{Vth} = \frac{A_{Vth}}{\sqrt{W \cdot L}} = \frac{5.0\,\text{mV}\cdot\mu
 | **NEF** | **1.65** | **1.88** | 2.05 | 2.22 | 4.60 | 3.20 |
 | **PEF** | **1.63** | **2.12** | 3.36 | 4.93 | 38.10 | 30.70 |
 | **Residual Offset ($\mu\text{V}$)** | **0.78** | **0.78** | 1.20 | 3.50 | 2.00 | 25.0 |
+
+*Note: Prior art entries [1]–[4] report experimental measurements from fabricated silicon test chips, whereas This Work presents pre-silicon schematic-level BSIM4 SPICE simulation and discrete-time behavioral modeling in SkyWater SKY130.*
 
 ---
 
