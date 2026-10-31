@@ -55,8 +55,13 @@ PDK_ROOT="$PWD/.pdk" SILK_DEMO_CELL_TIMEOUT=7200 .venv/bin/python tools/execute_
 - `requirements.lock`, `environment.json`: software and model pins.
 - `source_provenance.json`, `LICENSE`: source attribution and MIT license.
 
-The embedded figures are from a completed development run. Verification of the
-final public GitHub-to-Colab path is in progress. A baseline eye-height failure
+The published notebook contains outputs from the completed GitHub-to-Colab run
+on 31 October 2026: all 34 code cells executed without exceptions, with nine
+figures, three PVT points and 20 Monte Carlo samples. The run used Python 3.13.18,
+Silk 0.2.0, ngspice 42, NumPy 2.1.3 and Matplotlib 3.10.0. The recorded circuit,
+characterization and setup source hashes match this submission. Its elapsed
+time was not recorded; the timing above is from the earlier 27-point run.
+Interactive viewers and download buttons require a live notebook runtime. A baseline eye-height failure
 is intentional; the equalizer optimization improves it. Device-stress findings
 remain visible even when link specifications pass. Area and parasitic estimates
 are early design estimates, not a completed physical layout.
