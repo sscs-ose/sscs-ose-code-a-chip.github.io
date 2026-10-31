@@ -1,0 +1,43 @@
+* Bootstrapped NMOS sampling switch with a clock-boosted CB-charging device
+* (Abo and Gray 1999 structure), SKY130 1.8 V devices. R3 sampling-network study.
+* Ports: in  - driver side      out - Cs side
+*        phi - track clock (high = track)   phib - its complement
+*        vdd, vss
+* Hold (phi = 0): MTN (gate Z1 = ~2 VDD from the cross-coupled booster MZA/MZB,
+*   CZ1/CZ2) charges the top plate T of CB to VDD; MB0 grounds the bottom plate BT;
+*   G is discharged through the cascode MGC (gate VDD) and MG0.
+* Track (phi = VDD): Z1 falls to VDD, so MTN is off as soon as T rises above VDD;
+*   MGT connects T to G and MBI connects BT to the input, so
+*   G = Vin + VDD*CB/(CB + Cpar) and Vgs(MS) is nearly level-independent.
+* Why the boosted NMOS and not a PMOS gated by G: with a PMOS whose gate is G, the
+*   charging device is still on while BT starts to follow the input, so the charge
+*   kept on CB depends on the input-node kick at turn-on (and therefore on the previous
+*   sample); measured as a history-dependent pedestal in sw_boot.spice.
+* Oxide: every gate-channel/source/drain voltage <= VDD in steady state; G and Z1
+*   exceed VDD with respect to the substrate (gate-to-bulk under an inverted channel).
+* Start-up: a DC operating point cannot charge CB or pump the booster, so a bench that
+*   starts "with the switch closed" must set .ic on t, g (Vin+VDD), bt, x (Vin), z1 (VDD),
+*   z2 (2 VDD); see Switch.ic in proposals/shbench_switch_ext.patch.
+* Parameters: WS, MS (main switch finger width/count), CB (ideal; 5 % bottom-plate
+*   parasitic at BT), CZ (booster capacitors, ideal).
+.subckt sw_bootab in out phi phib vdd vss WS=2.5 MS=2 CB=0.4p CZ=50f
+XMS  in   g    out  vss sky130_fd_pr__nfet_01v8 W={WS} L=0.15 m={MS}
+CB   t    bt   {CB}
+CBP  bt   vss  {0.05*CB}
+* clock booster: z1 = VDD in track, ~2*VDD in hold
+XMZA vdd  z2   z1   vss sky130_fd_pr__nfet_01v8 W=0.42 L=0.15 m=1
+XMZB vdd  z1   z2   vss sky130_fd_pr__nfet_01v8 W=0.42 L=0.15 m=1
+CZ1  phib z1   {CZ}
+CZ2  phi  z2   {CZ}
+* hold: recharge CB, ground BT, discharge G
+XMTN vdd  z1   t    vss sky130_fd_pr__nfet_01v8 W=1 L=0.15 m=1
+XMB0 bt   phib vss  vss sky130_fd_pr__nfet_01v8 W=2 L=0.15 m=1
+XMGC g    vdd  n1   vss sky130_fd_pr__nfet_01v8 W=2 L=0.15 m=2
+XMG0 n1   phib vss  vss sky130_fd_pr__nfet_01v8 W=2 L=0.15 m=2
+XMXP x    phi  vdd  vdd sky130_fd_pr__pfet_01v8 W=1 L=0.15 m=1
+* track: connect T to G, BT to the input
+XMGT g    x    t    t   sky130_fd_pr__pfet_01v8 W=2 L=0.15 m=2
+XMXS x    phi  bt   vss sky130_fd_pr__nfet_01v8 W=1 L=0.15 m=1
+XMXB x    g    bt   vss sky130_fd_pr__nfet_01v8 W=1 L=0.15 m=1
+XMBI in   g    bt   vss sky130_fd_pr__nfet_01v8 W=2 L=0.15 m=2
+.ends sw_bootab

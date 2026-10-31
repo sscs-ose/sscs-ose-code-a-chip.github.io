@@ -1,0 +1,51 @@
+* gbfc2: single-stage NMOS(native)-input folded-cascode OTA with a gain-boosted output cascode,
+* load-compensated by CL + Cs (R3 alternative driver family; (design-study record)
+* ports: vcmd fb out ibias vdd vss
+* Sizing in um; CL, CGB, RP, RN, RBT ideal passives (as Rz/Cc in driver_f2.spice).
+* Mechanisms (see report): tail cascode MTC removes the input-common-mode dependence of the tail
+* current, which otherwise reaches the output through the unequal current division at the boosted
+* and unboosted folding nodes; the booster holds f2 = f1 so M1/M2 have equal vds at every level.
+* Known open points (report section 4): sampled noise 160-234 uV rms > 146 uV budget; the booster's
+* large-signal recovery leaves ~0.1 mV history after 40 ns at tt; PA/MP1 saturation margin 43/48 mV
+* at fs/125 C corners (< 50 mV).
+.subckt drv_gbfc2 vcmd fb out ibias vdd vss
+XMB0 ibias ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+XMT tc ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=12
+XMTC tail vbn2 tc vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=12
+XM1 f1 vcmd tail vss sky130_fd_pr__nfet_03v3_nvt W=10 L=0.5 m=4
+XM2 f2 fb tail vss sky130_fd_pr__nfet_03v3_nvt W=10 L=0.5 m=4
+XMP1 f1 vbp1 vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=96
+XMP2 f2 vbp1 vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=96
+XMC1 d1 vbp2 f1 vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=32
+XMC2 out gb f2 vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=32
+XNC1 d1 vbn2 s1 vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=4
+XNC2 out vbn2 s2 vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=4
+XNM1 s1 d1 vss vss sky130_fd_pr__nfet_01v8 W=5 L=0.5 m=4
+XNM2 s2 d1 vss vss sky130_fd_pr__nfet_01v8 W=5 L=0.5 m=4
+* bias: diode PB1 sets vbp1 (Psrc mirror); diode+resistor stacks set the cascode gates so that
+* the folding nodes sit I*RP below VDD and the NMOS mirror drains I*RN above ground
+XMBS1 vbp1 ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+XPB1 vbp1 vbp1 vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=8
+XMBS3 vbp2 ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+XPB3 x3 x3 vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=8
+RP x3 vbp2 20.5k
+XPB4 vbn2 vbp1 vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=8
+RN vbn2 n3 25k
+XNB3 n3 n3 vss vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=1
+CL out vss 1p
+* gain-boost amplifier for the output-side PMOS cascode MC2 (Bult-Geelen regulated cascode):
+* it holds f2 at f1, so the two input devices see the same vds at every input level.
+* PMOS diodes DA/DB (same flavour as the booster pair PA/PB) shift f2 and f1 down by one Vsg, so
+* the PA/PB sources sit just below f2 and PA keeps vds ~ Vsg(MC2) over PVT; RBT is the booster
+* tail, an NMOS mirror NLA/NLB is the load, CGB sets the booster bandwidth below the f2 pole.
+XDA ls2 ls2 f2 vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=16
+XDB lsr lsr f1 vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=16
+XMSA ls2 ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+XMSB lsr ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+RBT vdd vbt 10k
+XPA gb ls2 vbt vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=2
+XPB bd lsr vbt vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=2
+XNLB bd bd vss vss sky130_fd_pr__nfet_01v8 W=2 L=4 m=1
+XNLA gb bd vss vss sky130_fd_pr__nfet_01v8 W=2 L=4 m=1
+CGB gb vss 0.3p
+.ends

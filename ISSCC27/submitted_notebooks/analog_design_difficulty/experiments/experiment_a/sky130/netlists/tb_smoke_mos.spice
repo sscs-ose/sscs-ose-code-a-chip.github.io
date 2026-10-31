@@ -1,0 +1,15 @@
+* Environment smoke test: SKY130 nfet_01v8 / pfet_01v8 operating point
+.lib "@PDK_LIB@" @CORNER@
+.temp @TEMP@
+VDD vdd 0 1.8
+VG g 0 0.9
+VGP gp 0 0.9
+XMN dn g 0 0 sky130_fd_pr__nfet_01v8 W=2 L=0.5
+VDN vdd dn 0
+XMP dp gp vdd vdd sky130_fd_pr__pfet_01v8 W=2 L=0.5
+VDP dp 0 0
+.control
+op
+print i(VDN) i(VDP)
+.endc
+.end

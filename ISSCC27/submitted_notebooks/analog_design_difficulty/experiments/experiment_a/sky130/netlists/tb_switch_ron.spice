@@ -1,0 +1,32 @@
+* Sampler transmission-gate on-resistance versus signal level
+* Three transmission gates of the same kind as in tb_t1_connected.spice
+* (nfet_01v8 bulk 0 V, pfet_01v8 bulk 1.8 V, L = 0.15 um, Wp = 2 Wn): half,
+* chosen, and double width. Gates fully on (1.8 V / 0 V). Both terminals sit at
+* V (swept 0.5 V to 1.3 V); a 1 mV terminal difference gives Ron(V) = 1 mV / I.
+.lib "@PDK_LIB@" @CORNER@
+.temp @TEMP@
+.option reltol=1e-6 abstol=1e-15
+VDD vdd 0 1.8
+VGN gn 0 1.8
+VGP gp 0 0
+VS s 0 0.9
+VD1 d1 s 1m
+VD2 d2 s 1m
+VD3 d3 s 1m
+* half width: Wn 7.5 um, Wp 15 um
+XN1 d1 gn s 0 sky130_fd_pr__nfet_01v8 W=2.5 L=0.15 m=3
+XP1 d1 gp s vdd sky130_fd_pr__pfet_01v8 W=2.5 L=0.15 m=6
+* chosen: Wn 15 um, Wp 30 um
+XN2 d2 gn s 0 sky130_fd_pr__nfet_01v8 W=5 L=0.15 m=3
+XP2 d2 gp s vdd sky130_fd_pr__pfet_01v8 W=5 L=0.15 m=6
+* double width: Wn 30 um, Wp 60 um
+XN3 d3 gn s 0 sky130_fd_pr__nfet_01v8 W=5 L=0.15 m=6
+XP3 d3 gp s vdd sky130_fd_pr__pfet_01v8 W=5 L=0.15 m=12
+.control
+dc VS 0.5 1.3 0.01
+let ron_half = 1m/(-i(VD1))
+let ron = 1m/(-i(VD2))
+let ron_double = 1m/(-i(VD3))
+wrdata @OUTDIR@/ron.dat ron_half ron ron_double
+.endc
+.end

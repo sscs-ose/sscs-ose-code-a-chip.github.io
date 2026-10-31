@@ -1,0 +1,39 @@
+* STATUS (R3 driver study, 2026-10-31): static-accuracy candidate. Passes DC tracking (rS <= 0.025 mV),
+* loop PM/GM and primary-timing sequential screen with a charge-free switch over the screening set;
+* FAILS the declared stress input timing (settles a full-scale command step in ~45-60 ns, not 40 ns).
+* Two devices below the 50 mV saturation-margin criterion at ss/fs -40 C (XM5 33 mV at 0.6 V, XM16 45 mV at 1.2 V).
+* Report: the design-study record Iref (10 uA), Rz, Cc are ideal elements.
+* drv_fc17: folded-cascode first stage + common-source second stage, Miller compensated
+* (generated, R3 driver study). Ports as drv_f2: vcmd fb out ibias vdd vss
+.subckt drv_fc17 vcmd fb out ibias vdd vss
+* reference and NMOS bias sinks (10 uA each)
+XM8  ibias ibias vss vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=8
+XM18 vbp   ibias vss vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=8
+XM21 vbpc  ibias vss vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=8
+* PMOS bias: vbp diode (10 uA), vbpc diode of reduced W/L, PMOS source feeding the vbnc diode
+XM17 vbp   vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=4
+XM19 vbpc  vbpc  vdd vdd sky130_fd_pr__pfet_01v8_lvt W=2 L=1 m=1
+XM20 vbnc  vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=4
+XM22 vbnc  vbnc  vss vss sky130_fd_pr__nfet_01v8 W=1 L=2 m=1
+* input pair and tail
+XM5  tail  ibias vss vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=16
+XM1  f1    fb    tail vss sky130_fd_pr__nfet_01v8_lvt W=5 L=1 m=16
+XM2  f2    vcmd  tail vss sky130_fd_pr__nfet_01v8_lvt W=5 L=1 m=16
+* PMOS current sources and cascodes (folding)
+XM9  f1    vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=8
+XM10 f2    vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=8
+XM11 y1    vbpc  f1  vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=4
+XM12 x     vbpc  f2  vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=4
+* NMOS low-voltage cascode mirror (diode side y1)
+XM15 y1    vbnc  s1  vss sky130_fd_pr__nfet_01v8 W=5 L=0.5 m=2
+XM16 x     vbnc  s2  vss sky130_fd_pr__nfet_01v8 W=5 L=0.5 m=2
+XM13 s1    y1    vss vss sky130_fd_pr__nfet_01v8 W=2 L=1 m=2
+XM14 s2    y1    vss vss sky130_fd_pr__nfet_01v8 W=2 L=1 m=2
+* second stage
+XM6  out   x     vdd vdd sky130_fd_pr__pfet_01v8 W=5 L=0.5 m=12
+XM23 ib2   vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=4
+XM24 ib2   ib2   vss vss sky130_fd_pr__nfet_01v8 W=2 L=1 m=1
+XM7  out   ib2   vss vss sky130_fd_pr__nfet_01v8 W=2 L=1 m=10
+RZ   x     xc    1.5k
+CC   xc    out   0.7p
+.ends drv_fc17

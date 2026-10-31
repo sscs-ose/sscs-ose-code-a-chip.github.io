@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 980 600" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+  <title>What an interface representation keeps, and what the connected test checks</title>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#222"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2e8b57"/>
+    </marker>
+    <marker id="arro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e8613c"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="980" height="600" fill="#ffffff"/>
+
+  <!-- column headings -->
+  <text x="20" y="30" font-size="15" font-weight="bold" fill="#222">1  The real sampling network, as the driver output sees it</text>
+  <text x="500" y="30" font-size="15" font-weight="bold" fill="#2e8b57">2  Interface representation</text>
+  <text x="760" y="30" font-size="15" font-weight="bold" fill="#2e8b57">3  Block test (b)</text>
+
+  <!-- 1: physical behaviours -->
+  <rect x="20" y="44" width="420" height="300" rx="10" fill="#eef6ee" stroke="#222" stroke-width="1.4"/>
+  <text x="34" y="68" font-size="11.5" fill="#666" font-style="italic">physical behaviours present in the connected circuit</text>
+  <g font-size="12.5">
+    <!-- carried -->
+    <rect x="34" y="80" width="392" height="28" rx="5" fill="#ffffff" stroke="#2e8b57" stroke-width="1.6"/>
+    <text x="46" y="99" fill="#222">capacitance to be charged: Cs = 1 pF</text>
+    <rect x="34" y="114" width="392" height="28" rx="5" fill="#ffffff" stroke="#2e8b57" stroke-width="1.6"/>
+    <text x="46" y="133" fill="#222">stored previous sample and its range (0.6–1.2 V)</text>
+    <rect x="34" y="148" width="392" height="28" rx="5" fill="#ffffff" stroke="#2e8b57" stroke-width="1.6"/>
+    <text x="46" y="167" fill="#222">conduction of the gate: on-resistance …</text>
+    <rect x="34" y="182" width="392" height="28" rx="5" fill="#ffffff" stroke="#2e8b57" stroke-width="1.6"/>
+    <text x="46" y="201" fill="#222">acquisition timing (Tacq)</text>
+    <!-- omitted -->
+    <rect x="34" y="222" width="392" height="26" rx="5" fill="#f4f4f4" stroke="#999" stroke-width="1.1" stroke-dasharray="5 3"/>
+    <text x="46" y="240" fill="#777">… which changes with the terminal voltages</text>
+    <rect x="34" y="252" width="392" height="26" rx="5" fill="#f4f4f4" stroke="#999" stroke-width="1.1" stroke-dasharray="5 3"/>
+    <text x="46" y="270" fill="#777">voltage-dependent junction and gate capacitances</text>
+    <rect x="34" y="282" width="392" height="26" rx="5" fill="#f4f4f4" stroke="#999" stroke-width="1.1" stroke-dasharray="5 3"/>
+    <text x="46" y="300" fill="#777">charge coupled from the clock edges at turn-on</text>
+    <rect x="34" y="312" width="392" height="26" rx="5" fill="#f4f4f4" stroke="#999" stroke-width="1.1" stroke-dasharray="5 3"/>
+    <text x="46" y="330" fill="#777">feedback of all of these into the driver's own loop</text>
+  </g>
+  <text x="440" y="362" font-size="11.5" fill="#777" text-anchor="end">dashed: not carried by the representation</text>
+
+  <!-- selection arrows -->
+  <path d="M428,94 C460,94 462,120 492,120" fill="none" stroke="#2e8b57" stroke-width="1.6" marker-end="url(#arrg)"/>
+  <path d="M428,128 C460,128 462,142 492,142" fill="none" stroke="#2e8b57" stroke-width="1.6" marker-end="url(#arrg)"/>
+  <path d="M428,162 C460,162 462,164 492,164" fill="none" stroke="#2e8b57" stroke-width="1.6" marker-end="url(#arrg)"/>
+  <path d="M428,196 C460,196 462,186 492,186" fill="none" stroke="#2e8b57" stroke-width="1.6" marker-end="url(#arrg)"/>
+  <text x="462" y="226" font-size="11.5" fill="#2e8b57" text-anchor="middle">select</text>
+
+  <!-- 2: interface representation -->
+  <rect x="496" y="96" width="236" height="110" rx="10" fill="#fff7e0" stroke="#222" stroke-width="1.4"/>
+  <g font-size="12.5" fill="#222">
+    <text x="508" y="124">Cs = 1 pF</text>
+    <text x="508" y="146">target and previous: 0.6–1.2 V</text>
+    <text x="508" y="168">one linear resistance R_if</text>
+    <text x="508" y="190">Tacq = 40 ns</text>
+  </g>
+  <text x="614" y="226" font-size="11.5" fill="#666" text-anchor="middle">a few quantities with their conditions,</text>
+  <text x="614" y="242" font-size="11.5" fill="#666" text-anchor="middle">written down and shared across the boundary</text>
+
+  <!-- 3: block test using the representation -->
+  <path d="M734,150 L760,150" fill="none" stroke="#222" stroke-width="1.6" marker-end="url(#arr)"/>
+  <rect x="764" y="96" width="196" height="110" rx="10" fill="#eaf2fb" stroke="#222" stroke-width="1.4"/>
+  <g stroke="#222" stroke-width="1.5" fill="none">
+    <polygon points="782,124 782,164 812,144" fill="#ffffff"/>
+    <line x1="812" y1="144" x2="836" y2="144"/>
+    <path d="M836,144 l4,-6 l6,12 l6,-12 l6,12 l6,-12 l4,6" stroke="#2e8b57"/>
+    <line x1="868" y1="144" x2="890" y2="144"/>
+    <line x1="890" y1="144" x2="890" y2="156"/>
+    <line x1="880" y1="156" x2="900" y2="156"/>
+    <line x1="880" y1="162" x2="900" y2="162"/>
+    <line x1="890" y1="162" x2="890" y2="176"/>
+  </g>
+  <text x="852" y="134" font-size="11" fill="#2e8b57" text-anchor="middle">R_if</text>
+  <text x="908" y="163" font-size="11" fill="#222">Cs</text>
+  <text x="862" y="196" font-size="11.5" fill="#222" text-anchor="middle">driver + representation</text>
+  <text x="862" y="226" font-size="11.5" fill="#666" text-anchor="middle">designed and verified by one side</text>
+  <text x="862" y="242" font-size="11.5" fill="#666" text-anchor="middle">without the other circuit</text>
+
+  <!-- 4: composition -->
+  <text x="20" y="408" font-size="15" font-weight="bold" fill="#e8613c">4  Connected test (c): the driver and the real sampling network</text>
+  <rect x="20" y="420" width="940" height="160" rx="10" fill="#ffffff" stroke="#e8613c" stroke-width="1.8"/>
+  <text x="40" y="452" font-size="13.5" fill="#222">Do the behaviours that were left out change the error at the end of Tacq,</text>
+  <text x="40" y="472" font-size="13.5" fill="#222">compared with ε = 0.29 mV, at the representative operating points?</text>
+  <path d="M428,300 C540,310 640,350 660,416" fill="none" stroke="#e8613c" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arro)"/>
+  <text x="672" y="372" font-size="11.5" fill="#e8613c">the omitted behaviours return here</text>
+  <g font-size="12.5">
+    <rect x="40" y="494" width="420" height="68" rx="8" fill="#eef6ee" stroke="#2e8b57" stroke-width="1.3"/>
+    <text x="56" y="520" fill="#2e8b57" font-weight="bold">no</text>
+    <text x="88" y="520" fill="#222">the representation is adequate for this</text>
+    <text x="88" y="540" fill="#222">requirement, at these conditions</text>
+    <rect x="490" y="494" width="450" height="68" rx="8" fill="#fdeee8" stroke="#e8613c" stroke-width="1.3"/>
+    <text x="506" y="520" fill="#e8613c" font-weight="bold">yes</text>
+    <text x="544" y="520" fill="#222">revise the representation, the block test,</text>
+    <text x="544" y="540" fill="#222">the allocation, the circuit, or the boundary</text>
+  </g>
+</svg>

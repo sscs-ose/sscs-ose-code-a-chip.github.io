@@ -1,0 +1,26 @@
+* Driver bring-up: DC operating point and DC tracking of the unity-gain driver
+.lib "@PDK_LIB@" @CORNER@
+.temp @TEMP@
+.include "@OUTDIR@/@SRCFILE@"
+.param vcmd0=0.9
+VDD vdd 0 1.8
+IREF vdd ibias @IREF@
+VCMD vcmd 0 {vcmd0}
+XSRC vcmd out out ibias vdd 0 src2
+CL out 0 1p
+.control
+op
+print v(out) v(xsrc.x) v(xsrc.d1) v(xsrc.tail) v(ibias)
+print @m.xsrc.xm1.msky130_fd_pr__nfet_01v8_lvt[id] @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[id] @m.xsrc.xm7.msky130_fd_pr__nfet_01v8[id]
+print @m.xsrc.xm1.msky130_fd_pr__nfet_01v8_lvt[gm] @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[gm]
+print @m.xsrc.xm1.msky130_fd_pr__nfet_01v8_lvt[vds] @m.xsrc.xm1.msky130_fd_pr__nfet_01v8_lvt[vdsat]
+print @m.xsrc.xm2.msky130_fd_pr__nfet_01v8_lvt[vds] @m.xsrc.xm2.msky130_fd_pr__nfet_01v8_lvt[vdsat]
+print @m.xsrc.xm3.msky130_fd_pr__pfet_01v8_lvt[vds] @m.xsrc.xm3.msky130_fd_pr__pfet_01v8_lvt[vdsat]
+print @m.xsrc.xm5.msky130_fd_pr__nfet_01v8[vds] @m.xsrc.xm5.msky130_fd_pr__nfet_01v8[vdsat]
+print @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[vds] @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[vdsat]
+print @m.xsrc.xm7.msky130_fd_pr__nfet_01v8[vds] @m.xsrc.xm7.msky130_fd_pr__nfet_01v8[vdsat]
+print @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[cgs] @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[cgg] @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[cdd]
+dc VCMD 0.3 1.5 0.01
+wrdata @OUTDIR@/dc_transfer.dat v(out) v(xsrc.tail)
+.endc
+.end

@@ -1,0 +1,48 @@
+* STATUS (R3 driver2 root-cause study, 2026-10-31): driver candidate. Over the 45 PVT conditions
+* (tt/ss/ff/sf/fs x 1.62/1.8/1.98 V x -40/27/125 C): DC static residual R_S <= 0.029 mV (continuous 0.6-1.2 V,
+* terminal correction); loop PM >= 63.4 deg, GM >= 11.4 dB (acquisition: F2 TG on + 1 pF; hold: TG off;
+* 0.6/0.9/1.2 V); every non-diode device vds-vdsat >= 59 mV at 0.6/0.9/1.2 V; supply 286 uA at tt (245-330 uA).
+* Sequential screen (cal_alt + pair, SCREEN_PVT) with a charge-free 1 kOhm switch: max|r| <= 0.042 LSB
+* (stress timing) and <= 0.038 LSB (primary timing); 0.124 LSB at ss/1.62/125 stress (worst hot/low-VDD point).
+* Not evaluated: noise, mismatch, layout. Report: the design-study record
+* Iref (10 uA, external), Rz and Cc are ideal elements. The input pair is the SKY130 native-threshold
+* thick-oxide device nfet_03v3_nvt (W=1, L=0.6 bin), operated well inside its 3.3 V rating; its body is the substrate.
+*
+* Topology: folded-cascode first stage (native NMOS pair, PMOS folding sources 40 uA > 30 uA tail,
+* PMOS cascodes, NMOS low-voltage cascode mirror) + PMOS common-source second stage with NMOS sink
+* (~145 uA at tt, own bias diode), Miller Cc with series Rz.
+* drv_nf16a: native-input folded-cascode first stage + common-source second stage, Miller compensated
+* (generated, R3 driver2 root-cause study). Ports as drv_f2: vcmd fb out ibias vdd vss
+.subckt drv_nf16a vcmd fb out ibias vdd vss
+* reference (Iref = 10 uA sunk into ibias) and NMOS bias sinks, 10 uA each
+XM8  ibias ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+XM18 vbp   ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+XM21 vbpc  ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+* PMOS bias: vbp diode; PMOS copies feeding the vbnc diode and the output-sink diode; vbpc diode
+XM17 vbp   vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=1
+XM20 vbnc  vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=1
+XM22 vbnc  vbnc  vss vss sky130_fd_pr__nfet_01v8 W=1 L=2.5 m=1
+XM19 vbpc  vbpc  vdd vdd sky130_fd_pr__pfet_01v8_lvt W=1.1 L=1 m=1
+XM23 ib2   vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=1
+XM24 ib2   ib2   vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=1
+* tail and native-threshold input pair
+XM5  tail  ibias vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=3
+XM1  f1    fb    tail vss sky130_fd_pr__nfet_03v3_nvt W=1 L=0.6 m=2
+XM2  f2    vcmd  tail vss sky130_fd_pr__nfet_03v3_nvt W=1 L=0.6 m=2
+* PMOS folding sources and cascodes
+XM9  f1    vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=4
+XM10 f2    vbp   vdd vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=0.5 m=4
+XM11 y1    vbpc  f1  vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=4
+XM12 x     vbpc  f2  vdd sky130_fd_pr__pfet_01v8_lvt W=5 L=1 m=4
+* NMOS low-voltage cascode mirror (diode side y1)
+XM15 y1    vbnc  s1  vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=2
+XM16 x     vbnc  s2  vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=2
+XM13 s1    y1    vss vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=2
+XM14 s2    y1    vss vss sky130_fd_pr__nfet_01v8 W=5 L=1 m=2
+* second stage
+XM6  out   x     vdd vdd sky130_fd_pr__pfet_01v8 W=5 L=0.5 m=28
+XM7  out   ib2   vss vss sky130_fd_pr__nfet_01v8 W=4 L=1 m=13
+RZ   x     xc    3.5k
+CC   xc    out   0.3p
+
+.ends drv_nf16a
