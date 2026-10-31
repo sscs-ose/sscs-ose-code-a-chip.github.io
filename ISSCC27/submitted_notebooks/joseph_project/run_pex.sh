@@ -23,7 +23,7 @@ python3 - << 'EOF'
 import sys
 from pathlib import Path
 sys.path.insert(0, ".")
-from src.layout.layout_generator import generate_common_centroid_layout
+from src.layout.layout_generator import NeuroDynLayoutGenerator
 from src.layout.drc_checker import Sky130DRCChecker
 import gdstk
 
@@ -31,12 +31,15 @@ import gdstk
 gds_file = Path("data/gds/neurodyn_afe_sky130.gds")
 if not gds_file.exists():
     print("[PEX] Generating fresh GDSII layout...")
-    generate_common_centroid_layout(str(gds_file))
+    layout_gen = NeuroDynLayoutGenerator(".")
+    layout_gen.generate_full_layout()
 
 # Run 15-Rule DRC Check
 checker = Sky130DRCChecker(str(gds_file))
-passed, results = checker.run_all_checks()
-print(f"[DRC] Checked 15 SkyWater SKY130 DRM rules: {'PASS (0 violations)' if passed else 'FAIL'}")
+drc_df = checker.run_drc_check()
+violations = len(drc_df[drc_df["Status"] == "FAIL"])
+passed = (violations == 0)
+print(f"[DRC] Checked {len(drc_df)} SkyWater SKY130 DRM rules: {'PASS (0 violations)' if passed else f'FAIL ({violations} violations)'}")
 if not passed:
     sys.exit(1)
 

@@ -31,16 +31,16 @@ checker = Sky130LVSChecker(".")
 res = checker.run_lvs()
 
 print("\n--- LVS Verification Summary ---")
-print(f"Status:          {'PASS [100% MATCH]' if res['lvs_match'] else 'FAIL'}")
-print(f"Device Match:    {res['matched_devices']}/{res['total_devices']} categories matched")
-print(f"NMOS Count:      {res['layout_devices']['nmos_count']} extracted")
-print(f"PMOS Count:      {res['layout_devices']['pmos_count']} extracted")
-print(f"MIM Capacitors:  {res['layout_devices']['cap_count']} extracted")
-print(f"Poly Resistors:  {res['layout_devices']['res_count']} extracted")
-print(f"Extracted Pins:  {len(res['layout_devices']['pins'])} terminals verified")
-print(f"LVS Log Written: data/lvs.log\n")
+print(f"Status:          {'PASS [100% MATCH]' if res['passed'] else 'FAIL'}")
+print(f"Device Match:    {res['schematic_devices']}/{res['layout_devices']} devices verified")
+print(f"NMOS Count:      {res['layout_nmos']} extracted")
+print(f"PMOS Count:      {res['layout_pmos']} extracted")
+print(f"MIM Capacitors:  {res['layout_caps']} extracted")
+print(f"Poly Resistors:  {res['layout_res']} extracted")
+print(f"Extracted Pins:  {len(res['extracted_pins'])} terminals verified")
+print(f"LVS Log Written: {res['log_path']}\n")
 
-if not res['lvs_match']:
+if not res['passed']:
     sys.exit(1)
 EOF
 

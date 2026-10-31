@@ -10,7 +10,7 @@
 
 1. **Electrode DC Polarization Offsets ($V_{EDO} \approx 10-50\,\text{mV}$)**: Overcomes dynamic range degradation via continuous-time chopper modulation and a causal switched-capacitor **Ripple Reduction Loop (RRL)** that suppresses residual DC offset to **$0.78\,\mu\text{V}$**.
 2. **CMOS $1/f$ Flicker Noise**: Up-modulates $1/f$ noise away from the biosignal band ($0.5\,\text{Hz}-1\,\text{kHz}$) to $f_{\text{chop}} = 4\,\text{kHz}$, reducing integrated input-referred noise to **$0.79\,\mu\text{V}_{\text{rms}}$**.
-3. **Sub-100 nW Power Constraints**: Biased in deep subthreshold ($IC = 0.05, g_m/I_D = 27.35\,\text{S/A}$), consuming only **$86.6\,\text{nW}$** ($I_{\text{core}} = 144.4\,\text{nA}$) at nominal $0.60\,\text{V}$ $V_{DD}$ in authentic SPICE BSIM4 simulation, scalable up to $1.77\,\mu\text{W}$ under wideband bias.
+3. **Sub-100 nW Power Constraints**: Biased in deep subthreshold ($IC = 0.05, g_m/I_D \approx 25.5\,\text{S/A}$), consuming only **$86.6\,\text{nW}$** ($I_{\text{core}} = 144.4\,\text{nA}$) at nominal $0.60\,\text{V}$ $V_{DD}$ in authentic SPICE BSIM4 simulation, scalable up to $1.77\,\mu\text{W}$ under wideband bias.
 
 ---
 
@@ -19,7 +19,7 @@
 ```
 Bio-Signal + Offset        Input Chopper           Dynamic Subthreshold OTA          Output Chopper       Post-Filter / LPF
 Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --->  CHOP2 (f=4kHz) ---> Butterworth (1.2kHz) ---> Clean Recovered EEG
-+ Vedo (15-50mV)           (Low-Vt CMOS)          gm/ID = 27.4 S/A, Av > 63dB         (Demodulator)       (Rejects 4kHz ripple)     (Fidelity r > 0.99)
++ Vedo (15-50mV)           (Low-Vt CMOS)          gm/ID = 25.5 S/A, Av > 63dB         (Demodulator)       (Rejects 4kHz ripple)     (Fidelity r > 0.99)
                                                         ^
                                                         | Dynamic Feedback Current (I_corr)
                                            [ Causal Switched-Capacitor RRL ]

@@ -30,7 +30,7 @@ Wearable, battery-less, and implantable bio-potential monitoring systems (e.g., 
 
 1. **Sub-0.6V Deep Subthreshold Inverter/OTA**: Operating at an Inversion Coefficient $IC \approx 0.05$ achieving near-theoretical transconductance efficiency ($g_m/I_D \approx 25.5\,\text{S/A}$), consuming only **$0.087\,\mu\text{W}$** ($86.6\,\text{nW}$) (Core OTA) and **$0.207\,\mu\text{W}$** ($206.6\,\text{nW}$) (Full AFE System) from a single **$0.60\,\text{V}$** supply.
 2. **Continuous-Time Chopper Stabilization with Low-Vt Switches**: Employs native low-threshold transmission gates (`sky130_fd_pr__nfet_01v8_lvt` / `pfet_01v8_lvt`, $V_{th} \approx 0.35\,\text{V}$), eliminating the sub-1V switch conduction gap and keeping switch $R_{on} < 18\,\text{k}\Omega$. Completely up-modulates $1/f$ flicker noise away from the biopotential band ($0.5\,\text{Hz}-1\,\text{kHz}$) at $f_{chop} = 4\,\text{kHz}$.
-3. **Causal Switched-Capacitor Ripple Reduction Loop (RRL)**: An in-situ differencing integrator extracts output ripple without requiring prior knowledge of the bio-signal, steering dynamic cancellation current into the auxiliary differential pair, suppressing output ripple by **$> 42.3\,\text{dB}$** and reducing residual DC offset from $15.0\,\text{mV}$ raw electrode offset ($12.4\,\text{mV}$ worst-case mismatch) down to **$0.78\,\mu\text{V}$**.
+3. **Causal Switched-Capacitor Ripple Reduction Loop (RRL)**: An in-situ differencing integrator extracts output ripple without requiring prior knowledge of the bio-signal, steering dynamic cancellation current into the auxiliary differential pair, suppressing output ripple by **$> 62.3\,\text{dB}$** and reducing residual DC offset from $15.0\,\text{mV}$ raw electrode offset ($12.4\,\text{mV}$ worst-case mismatch) down to **$0.78\,\mu\text{V}$**.
 4. **Record-Breaking Figures-of-Merit**: Achieves a Noise Efficiency Factor **$\text{NEF} = 1.65$** (Core OTA) / **$1.88$** (Full System) and Power Efficiency Factor **$\text{PEF} = 1.63$** (Core) / **$2.12$** (Full System), setting a new benchmark for open-source biomedical front-ends.
 5. **2nd-Order Optimal Common-Centroid Layout Generation**: Includes a procedural Python script utilizing `gdstk` and `klayout` that generates a DRC-clean **GDSII** layout (`neurodyn_afe_sky130.gds`) featuring quadratic-cancelling common-centroid matching (`[D, A, B, B, A, B, A, A, B, D]`), dummy lithographic rings, and guard-ring perimeter shielding to cancel linear tilts and radial thermal gradients.
 6. **Zero-Friction Reproducibility**: Features a standalone, fully verified Jupyter notebook with interactive **Plotly** and **ipywidgets** dashboards, automated Ngspice netlist generators, and multi-corner PVT datasets (TT, FF, SS, SF, FS; $-40^\circ\text{C}$ to $+85^\circ\text{C}$) ensuring instant execution both locally and on Google Colab.
@@ -73,7 +73,7 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 | **Chopping Ripple Suppression** | $\ge 35.0$ | **$62.3$** | Level 3 Behavioral CT-Chopper + RRL | dB | In-situ switched-cap differencing |
 | **Clinical EEG Fidelity ($r$)** | $> 0.95$ | **$0.9926$** | Level 3 Multi-band Physiological EEG | — | Clinical Grade ($> 99.2\%$) |
 | **Foundry SPICE Netlist Suite** | Verified | **Complete 6-Deck Suite** | Level 4 Automated Netlists (.op, .ac, .cmrr, .psrr, .noise, .tran) | — | SKY130 TT models (Tail $V_{ds} = 77.27\,\text{mV} \ge 3 U_T$, Saturation verified) |
-| **Active Silicon Area** | $< 0.025$ | **$0.0084$** | Level 5 Physical GDSII Layout (`gdstk`) | $\text{mm}^2$ | Matched diff-pair core macro with guard rings |
+| **Active Silicon Area** | $< 0.025$ | **$0.00425$** | Level 5 Physical GDSII Layout (`gdstk`) | $\text{mm}^2$ | Full macro PR boundary 84×50.65 µm (incl. guard ring, MIM caps, chopper, 2nd stage) |
 | **Physical DRC Cleanliness** | Clean | **0 Violations (15/15 rules)** | Level 5 Automated DRM Audit (`klayout.db`/`gdstk`) | — | SkyWater SKY130 DRM Compliant |
 | **Physical LVS Sign-Off** | 100% Match | **15/15 Devices Matched** | Level 5 GDSTK Boolean Extraction Engine (`lvs.log`) | — | 11 MOSFETs, 2 Caps, 2 Resistors, 17 Pins (`lvs.log`) |
 
@@ -101,19 +101,19 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 
 Rather than relying on uncalibrated hand-drawn schematics, the NeuroDyn-AFE topology is defined directly in its SPICE netlist (`data/neurodyn_ac_testbench.cir`) and sized according to weak-inversion device physics:
 
-- **Main Differential Pair ($M_1, M_2$)**: Operating at $IC = 0.05$ with $W/L = 40.6\,\mu\text{m}/1.0\,\mu\text{m}$ (4 fingers of $10.15\,\mu\text{m}$), biased at $g_m/I_D = 25.5\,\text{S/A}$ to maximize transconductance efficiency and minimize thermal noise.
-- **Auxiliary Dynamic Steering Pair ($M_{1,\text{aux}}, M_{2,\text{aux}}$)**: Sized at 1/10th width ($W/L = 4.06\,\mu\text{m}/1.0\,\mu\text{m}$) to receive the causal switched-capacitor Ripple Reduction Loop (RRL) feedback voltage without degrading input capacitance.
+- **Main Differential Pair ($M_1, M_2$)**: Operating at $IC = 0.05$ with $W/L = 80.0\,\mu\text{m}/2.0\,\mu\text{m}$ (4 fingers of $20.0\,\mu\text{m}$), biased at $g_m/I_D = 25.5\,\text{S/A}$ to maximize transconductance efficiency and minimize thermal noise.
+- **Auxiliary Dynamic Steering Pair ($M_{1,\text{aux}}, M_{2,\text{aux}}$)**: Sized at 1/10th width ($W/L = 8.0\,\mu\text{m}/2.0\,\mu\text{m}$) to receive the causal switched-capacitor Ripple Reduction Loop (RRL) feedback voltage without degrading input capacitance.
 - **Biasing & Common-Mode Feedback (CMFB)**: Continuous-time high-impedance resistive network ($R_{cm1,2} = 10\,\text{M}\Omega$) sensing output common mode and driving the load gates to enforce $V_{cm} = 0.30\,\text{V}$.
-- **Miller Frequency Compensation ($C_{c1}, C_{c2}$)**: $1.2\,\text{pF}$ on-chip MIM capacitors (`sky130_fd_pr__cap_mim_m3_1`) providing $68.4^\circ$ phase margin with $C_L = 5\,\text{pF}$ differential loads.
+- **Miller Frequency Compensation ($C_{c1}, C_{c2}$)**: $1.2\,\text{pF}$ on-chip MIM capacitors (`sky130_fd_pr__cap_mim_m3_1`) providing $124.9^\circ$ phase margin with $C_L = 5\,\text{pF}$ differential loads.
 
 ### Transistor Sizing & Operating Point Summary
 
 | Component | Function | Model Type | $W\,(\mu\text{m})$ | $L\,(\mu\text{m})$ | Multiplier ($M$) | Inversion ($IC$) | $g_m/I_D\,(\text{S/A})$ |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **$M_{1}, M_{2}$** | Main Input Differential Pair | `sky130_fd_pr__nfet_01v8` | 40.6 | 1.00 | 4 | 0.05 | 25.5 |
-| **$M_{1,\text{aux}}, M_{2,\text{aux}}$** | Auxiliary RRL Correction Pair | `sky130_fd_pr__nfet_01v8` | 4.0 | 1.00 | 1 | 0.05 | 25.5 |
-| **$M_{tail}$** | Tail Current Source ($2.76\,\mu\text{A}$) | `sky130_fd_pr__nfet_01v8` | 20.0 | 2.00 | 2 | 0.40 | 18.2 |
-| **$M_{3}, M_{4}$** | Active Current Mirror Load | `sky130_fd_pr__pfet_01v8` | 12.6 | 2.00 | 4 | 1.00 | 14.5 |
+| **$M_{1}, M_{2}$** | Main Input Differential Pair | `sky130_fd_pr__nfet_01v8` | 80.0 | 2.00 | 4 | 0.05 | 25.5 |
+| **$M_{1,\text{aux}}, M_{2,\text{aux}}$** | Auxiliary RRL Correction Pair | `sky130_fd_pr__nfet_01v8` | 8.0 | 2.00 | 1 | 0.05 | 25.5 |
+| **$M_{tail}$** | Tail Current Source ($144.4\,\text{nA}$) | `sky130_fd_pr__nfet_01v8` | 20.0 | 2.00 | 2 | 0.05 | 25.5 |
+| **$M_{3}, M_{4}$** | Active Current Mirror Load | `sky130_fd_pr__pfet_01v8` | 32.0 | 3.50 | 4 | 1.00 | 14.5 |
 | **$M_{5} - M_{8}$** | Output Buffer Stage | `sky130_fd_pr__pfet/nfet` | 25.0 | 1.00 | 2 | 0.80 | 16.0 |
 | **$S_{1} - S_{8}$** | Chopper CMOS Transmission Gates | `sky130_fd_pr__nfet/pfet` | 2.0/4.0 | 0.15 | 1 | Strong | — |
 | **$C_{c1}, C_{c2}$** | Miller Frequency Compensation | `sky130_fd_pr__cap_mim_m3_1` | 12.0 | 12.0 | 1 | — | $1.2\,\text{pF}$ |
@@ -204,7 +204,7 @@ To evaluate performance robustness across fabrication and environmental shifts w
 ### Statistical Pelgrom Mismatch Variance Analysis (500 Samples)
 
 Transistor threshold mismatch is evaluated using official SkyWater SKY130 Pelgrom mismatch coefficients ($A_{Vth} = 5.0\,\text{mV}\cdot\mu\text{m}$):
-$$\sigma_{Vth} = \frac{A_{Vth}}{\sqrt{W \cdot L}} = \frac{5.0\,\text{mV}\cdot\mu\text{m}}{\sqrt{40.6\,\mu\text{m} \cdot 1.0\,\mu\text{m}}} = 0.785\,\text{mV}$$
+$$\sigma_{Vth} = \frac{A_{Vth}}{\sqrt{W \cdot L}} = \frac{5.0\,\text{mV}\cdot\mu\text{m}}{\sqrt{80.0\,\mu\text{m} \cdot 2.0\,\mu\text{m}}} = 0.395\,\text{mV}$$
 
 - **Unchopped Raw Offset**: Mean = $0.12\,\text{mV}$, $\sigma = 1.42\,\text{mV}$, Peak = $12.4\,\text{mV}$.
 - **Chopped Only**: Mean = $0.05\,\mu\text{V}$, $\sigma = 15.0\,\mu\text{V}$ (due to switch charge injection mismatch).
@@ -257,7 +257,7 @@ Following the standardized **Circuit Automatic Characterization Engine (CACE)** 
 | `f_chop` | Dynamic Chopping Frequency | $2.0 - 10.0\,\text{kHz}$ | **$4.0\,\text{kHz}$** | $\gg f_{1/f,\text{corner}}$ | PASS |
 | `ripple_suppr` | Chopping Ripple Suppression | $\ge 35.0\,\text{dB}$ | **$62.3\,\text{dB}$** | $+27.3\,\text{dB}$ margin | PASS |
 | `residual_offset` | Output DC Residual Offset | $\le 2.00\,\mu\text{V}$ | **$0.78\,\mu\text{V}$** | $-61.0\%$ lower offset | PASS |
-| `area_active` | Physical Silicon Core Area | $\le 0.0250\,\text{mm}^2$ | **$0.0084\,\text{mm}^2$** | $-66.4\%$ compact | PASS |
+| `area_active` | Physical Silicon Core Area | $\le 0.0250\,\text{mm}^2$ | **$0.00425\,\text{mm}^2$** | $-83.0\%$ compact | PASS |
 | `drc_clean` | Automated Physical DRC Status | $0\,\text{violations}$ | **$0\,\text{violations}$** | $15/15$ DRM Rules Clean | PASS |
 
 *CACE Verification Summary: **20 of 20 Parameters PASS** (100% specification compliance).*
@@ -374,10 +374,14 @@ ISSCC27/submitted_notebooks/joseph_project/
 │   ├── monte_carlo_mismatch.csv           # 500-run Monte Carlo mismatch results
 │   └── gds/
 │       └── neurodyn_afe_sky130.gds        # Complete DRC-clean GDSII layout
-└── images/                                # High-Resolution Vector Figures
+└── images/                                # High-Resolution Vector & Characterization Figures
     ├── block_diagram.svg                  # Vector system architecture diagram
     ├── layout_preview.png                 # High-res silicon layout preview
-    └── anim_chopper_spectrum.png          # Spectrum up/down-conversion illustration
+    ├── anim_chopper_spectrum.png          # Spectrum up/down-conversion illustration
+    ├── gmid_curves.png                    # Subthreshold gm/ID characterization curves
+    ├── pvt_scatter.png                    # Multi-corner PVT performance scatter
+    ├── monte_carlo_distribution.png       # 500-run Monte Carlo mismatch histograms
+    └── radar_fom.png                      # Multi-dimensional FoM benchmark radar
 ```
 
 ---
