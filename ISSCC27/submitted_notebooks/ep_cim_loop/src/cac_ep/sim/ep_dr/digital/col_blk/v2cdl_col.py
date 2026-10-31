@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""[col_blk 사본 10/28: digital/v2cdl_hvl.py] 1 단계 (col_ctrl) 는 그대로 씀. 2 단계 (col_blk) 는 매크로 CDL 을 함께 넣는다 (아래 MACRO_CDL).
+[ep_dr/digital 사본 10/28: ep_demo/digital/v2cdl.py 를 고침] 라이브러리 CDL = hvl (w/l 에 u 붙인 사본, mk_pdk.py),
+전원 pin: hvl 셀은 VPWR·VPB → VDD, VGND·VNB → VSS (scl 은 VDD·VSS 하나씩).
+
+
+conversion is mechanical because every instance is a library cell whose pin
+ORDER is defined in the PDK's own CDL (sky130_scl_9T.cdl): parse the verilog's
+named port maps, re-emit each instance as an X line in the library's pin order
+with VDD VSS appended (power is implicit in verilog, explicit in CDL).
+
+Output <top>.cdl = library CDL + .SUBCKT <top> with the module's bit-blasted
+port list (matching the pin texts write_stream drops on 68/5).
+"""
+import re, sys, os
+
+TOP = sys.argv[1]
+HERE = os.path.dirname(os.path.abspath(__file__))
+LIBCDL = '/home/grads/s/seokjindaveoh/work/ep_dr/digital/pdk/sky130_fd_sc_hvl_u.cdl'
+PG = {'VPWR': 'VDD', 'VPB': 'VDD', 'VGND': 'VSS', 'VNB': 'VSS'}
+# 2 단계: 매크로 CDL (핀 순서는 각 .subckt 줄). 매크로 PG 핀 이름은 VDD·VSS 그대로
+MACRO_CDL = ['/home/grads/s/seokjindaveoh/work/ep_dr/digital/col_blk/macros/' + f for f in
+             ('cb_tg_n2.cdl', 'cb_tgw_n20.cdl', 'clamp_d2r.cdl')]
+PG.update({'VDD': 'VDD', 'VSS': 'VSS'})
+
+# ---- library pin order ----
+order = {}
+for ln in open(LIBCDL):
+    if ln.upper().startswith('.SUBCKT'):
+        t = ln.split()
+        order[t[1]] = t[2:]
+used_macro = {}
+for f in MACRO_CDL:
+    if os.path.exists(f):
+        for ln in open(f, encoding="utf-8", errors="replace"):
+            if ln.upper().startswith('.SUBCKT'):
+                t = ln.split()
+                order[t[1]] = t[2:]
+                used_macro[t[1]] = f
+
+src = open(os.path.join(HERE, TOP + '_pnr.v')).read()
+src = re.sub(r'//.*', '', src)
+src = re.sub(r'/\*.*?\*/', '', src, flags=re.S)
+
+# tokenize statements; escaped identifiers (\acc[3] ) keep their brackets
+stmts = [s.strip() for s in src.split(';') if s.strip()]
+
+def clean(n):
+    n = n.strip()
+    if n.startswith('\\'):
+        # escaped identifier ENDS IN A SPACE and the [4] follows.  Collapse the
+        # whitespace or the CDL token splits in two (measured: NVN-13310,
+        # "8 ports on the instance", LVS ABORT).
+        n = re.sub(r'\s+', '', n[1:])
+    return n
+
+ports = []          # bit-blasted, in module-declaration order
+inst_lines = []
+aliases = []        # (a, b) from assign
+mod_re = re.compile(r'module\s+(\S+)\s*\((.*?)\)', re.S)
+dir_re = re.compile(r'^(input|output|inout)\s+(?:wire\s+)?(?:\[(\d+):(\d+)\]\s*)?(.*)$', re.S)
+
+port_dirs = {}
+for s in stmts:
+    m = mod_re.match(s)
+    if m and m.group(1) == TOP:
+        raw = [clean(x) for x in m.group(2).split(',')]
+        ports = raw
+        continue
+    m = dir_re.match(s)
+    if m:
+        lo, hi = m.group(3), m.group(2)
+        names = [clean(x) for x in m.group(4).split(',')]
+        for nm in names:
+            port_dirs[nm] = (m.group(1), int(hi) if hi else None,
+                             int(lo) if lo else None)
+        continue
+    if s.startswith('wire') or s.startswith('tri'):
+        continue
+    if s.startswith('assign'):
+        m2 = re.match(r"assign\s+(.+?)\s*=\s*(.+)$", s, re.S)
+        aliases.append((clean(m2.group(1)), clean(m2.group(2))))
+        continue
+    if s.startswith('endmodule') or s.startswith('module'):
+        continue
+    # instance: CELL name ( .PIN(net), ... )
+    m3 = re.match(r'(\S+)\s+(\S+)\s*\((.*)\)\s*$', s, re.S)
+    if not m3:
+        continue
+    cell, iname, body = m3.group(1), clean(m3.group(2)), m3.group(3)
+    if cell not in order:
+        sys.exit(f'FATAL: cell {cell} not in library CDL')
+    if cell in used_macro:
+        used_macro[cell] = (used_macro[cell] if isinstance(used_macro[cell], tuple) else (used_macro[cell], 1))
+    if re.match(r'sky130_fd_sc_hvl__fill_\d+$', cell):
+        continue                 # filler = 소자 없는 subckt → LVS 가 '빠진 인스턴스' 로 셈 (hvl_cells_test 잡 721103)
+    conns = {}
+    for pm in re.finditer(r'\.(\w+)\s*\(\s*([^)]*?)\s*\)', body):
+        pin, net = pm.group(1), pm.group(2).strip()
+        if net == '':
+            net = f'_nc_{iname}_{pin}'
+        elif net in ("1'b0", "1'B0"):
+            net = 'VSS'
+        elif net in ("1'b1", "1'B1"):
+            net = 'VDD'
+        else:
+            net = clean(net)
+        conns[pin] = net
+    row = []
+    for p in order[cell]:
+        if p in PG:
+            row.append(PG[p])
+        else:
+            row.append(conns.get(p, f'_nc_{iname}_{p}'))
+    inst_lines.append('X%s %s %s' % (iname.replace('[', '_').replace(']', ''),
+                                     ' '.join(row), cell))
+
+if aliases:
+    sys.exit(f'FATAL: assign statements present, handle aliases: {aliases[:5]}')
+
+# bit-blast the port list in declaration order
+blast = []
+for p in ports:
+    if p in port_dirs and port_dirs[p][1] is not None:
+        hi, lo = port_dirs[p][1], port_dirs[p][2]
+        step = -1 if hi >= lo else 1
+        for b in range(hi, lo + step, step):
+            blast.append(f'{p}[{b}]')
+    elif '[' in p:
+        blast.append(p)          # already a bit (escaped name)
+    else:
+        blast.append(p)
+
+out = [f'* {TOP}.cdl -- GENERATED by v2cdl.py from {TOP}_pnr.v', '']
+out.append(f'.INCLUDE {LIBCDL}')
+for cell, v in used_macro.items():
+    if isinstance(v, tuple):
+        out.append(f'.INCLUDE {v[0]}')
+out.append('')
+out.append('.SUBCKT %s %s VDD VSS' % (TOP, ' '.join(blast)))
+out.extend(inst_lines)
+out.append(f'.ENDS {TOP}')
+open(os.path.join(HERE, TOP + '.cdl'), 'w').write('\n'.join(out) + '\n')
+print(f'{TOP}.cdl: {len(inst_lines)} instances, {len(blast)} + VDD VSS ports')

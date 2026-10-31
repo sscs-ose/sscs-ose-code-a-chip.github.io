@@ -1,0 +1,37 @@
+* SKY130_OTA_HOG_TR — HOG (folded cascode + Hogervorst class-AB) with transistor current sources.
+* 원본: sources/.../design/ota_hog_folded_classab.spice (Cc/Rz/이상 전류원 → 아래로 교체)
+*   - 전류원은 단위 소자 개수로 비율을 맞춘다 (Palermo Lab 5): NMOS 단위 W0.9/L1 = 5 uA, PMOS 단위 W2/L0.8 = 5 uA
+*   - gate 는 공유 바이어스선 vbn / vbp (셀 밖 HOG_BIAS 가 만든다), 캐스코드 vbnc / vbpc 도 공유선
+*   - Cc, Rz, level-shifter 단위 수(nls) 는 전역 .param cc / rz / nls
+.subckt SKY130_OTA_HOG_TR inp inn out vbn vbp vbnc vbpc vdd vss
+XMtail  stail vbn  vss  vss sky130_fd_pr__nfet_g5v0d10v5 w=3.6 l=1 nf=4
+XMiref1 d1    vbp  vdd  vdd sky130_fd_pr__pfet_g5v0d10v5 w=8 l=0.8 nf=4
+XMiref2 d2    vbp  vdd  vdd sky130_fd_pr__pfet_g5v0d10v5 w=8 l=0.8 nf=4
+XMd1 d1 inn stail vss sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMd2 d2 inp stail vss sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMcasp1 c1     vbpc d1 vdd  sky130_fd_pr__pfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMcasp2 s1_out vbpc d2 vdd  sky130_fd_pr__pfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMcasn1 c1     vbnc e1 vss  sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMcasn2 s1_out vbnc e2 vss  sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMm1    e1     c1   vss vss sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMm2    e2     c1   vss vss sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMipb   pdrv vbp vdd vdd sky130_fd_pr__pfet_g5v0d10v5 w='2*nls' l=0.8 nf='nls'
+XMinb   ndrv vbn vss vss sky130_fd_pr__nfet_g5v0d10v5 w='0.9*nls' l=1 nf='nls'
+XMpls vss s1_out pdrv vdd sky130_fd_pr__pfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMnls vdd s1_out ndrv vss sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+XMpcs out pdrv vdd vdd sky130_fd_pr__pfet_g5v0d10v5 w=5 l=0.5 nf=1
+XMncs out ndrv vss vss sky130_fd_pr__nfet_g5v0d10v5 w=3 l=0.5 nf=1
+Cc s1_out cmid 'cc'
+Rz cmid   out  'rz'
+.ends SKY130_OTA_HOG_TR
+
+* 공유 바이어스 (셀 밖 한 벌): 단위 소자 + 기준 전류 5 uA
+*   PMOS 는 low-voltage cascode 기준 (Palermo Lecture 4 / Lab 5): XBP 의 Vsd 를 셀 안 Iref 와 같게
+*   (x = vbpc + Vsg(XBPC) = d1 과 같은 식) 만들어 CLM 비율 오차를 없앤다. XBPC 는 casp 와 같은 전류 밀도.
+.subckt HOG_BIAS vbn vbp vbpc vdd vss
+XBN vbn vbn vss vss sky130_fd_pr__nfet_g5v0d10v5 w=0.9 l=1 nf=1
+Ibn vdd vbn 5u
+XBP  x   vbp  vdd vdd sky130_fd_pr__pfet_g5v0d10v5 w=2 l=0.8 nf=1
+XBPC vbp vbpc x   vdd sky130_fd_pr__pfet_g5v0d10v5 w=1.5 l=0.5 nf=1
+Ibp vbp vss 5u
+.ends HOG_BIAS

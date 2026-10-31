@@ -1,0 +1,134 @@
+* WU 블록 (gen_wu.py). 정본 netlist: real_circuit/wu_lib.py wu_subckt(1e6, 20e-15, 'pa_sa', 20e-15, 2.0)
+* 바꾼 것: 이상 R 1/2 MΩ → res_xhigh_po_0p35 333.33 kΩ 줄 3/6 개 직렬, C 10·20 fF → cap_mim_m3 (w=l), 노드 0 → 핀 vcm, Rabs 1 TΩ (수치용) 뺌
+.subckt wu_sa inp inn clk q qb vdd vss
+MMt tl clk vss vss nfet_g5v0d10v5 w=1u l=1u
+MM1 sp inp tl vss nfet_g5v0d10v5 w=4u l=1u
+MM2 sn inn tl vss nfet_g5v0d10v5 w=4u l=1u
+MM3 xo yo sp vss nfet_g5v0d10v5 w=2u l=0.5u
+MM4 yo xo sn vss nfet_g5v0d10v5 w=2u l=0.5u
+MM5 xo yo vdd vdd pfet_g5v0d10v5 w=4u l=0.5u
+MM6 yo xo vdd vdd pfet_g5v0d10v5 w=4u l=0.5u
+MS1 xo clk vdd vdd pfet_g5v0d10v5 w=1u l=0.5u
+MS2 yo clk vdd vdd pfet_g5v0d10v5 w=1u l=0.5u
+MS3 sp clk vdd vdd pfet_g5v0d10v5 w=1u l=0.5u
+MS4 sn clk vdd vdd pfet_g5v0d10v5 w=1u l=0.5u
+MB1n xb xo vss vss nfet_g5v0d10v5 w=1u l=0.5u
+MB1p xb xo vdd vdd pfet_g5v0d10v5 w=2u l=0.5u
+MB2n yb yo vss vss nfet_g5v0d10v5 w=1u l=0.5u
+MB2p yb yo vdd vdd pfet_g5v0d10v5 w=2u l=0.5u
+ML1p1 m1 yb vdd vdd pfet_g5v0d10v5 w=4u l=0.5u
+ML1p2 q qb m1 vdd pfet_g5v0d10v5 w=4u l=0.5u
+ML1n1 q yb vss vss nfet_g5v0d10v5 w=1u l=0.5u
+ML1n2 q qb vss vss nfet_g5v0d10v5 w=1u l=0.5u
+ML2p1 m2 xb vdd vdd pfet_g5v0d10v5 w=4u l=0.5u
+ML2p2 qb q m2 vdd pfet_g5v0d10v5 w=4u l=0.5u
+ML2n1 qb xb vss vss nfet_g5v0d10v5 w=1u l=0.5u
+ML2n2 qb q vss vss nfet_g5v0d10v5 w=1u l=0.5u
+.ends wu_sa
+.subckt wu_pre inp inn op on vbn vdd vss
+MMt tl vbn vss vss nfet_g5v0d10v5 w=3.6u l=1u
+MM1 on inp tl vss nfet_g5v0d10v5 w=4u l=1u
+MM2 op inn tl vss nfet_g5v0d10v5 w=4u l=1u
+ML1 on on vdd vdd pfet_g5v0d10v5 w=1u l=1u
+ML2 op op vdd vdd pfet_g5v0d10v5 w=1u l=1u
+.ends wu_pre
+.subckt wu_dlat d clk clkb q qb vdd vss
+MTn s clk d vss nfet_g5v0d10v5 w=2u l=0.5u
+MTp s clkb d vdd pfet_g5v0d10v5 w=4u l=0.5u
+MI1n qb s vss vss nfet_g5v0d10v5 w=1u l=0.5u
+MI1p qb s vdd vdd pfet_g5v0d10v5 w=2u l=0.5u
+MI2n q qb vss vss nfet_g5v0d10v5 w=1u l=0.5u
+MI2p q qb vdd vdd pfet_g5v0d10v5 w=2u l=0.5u
+.ends wu_dlat
+.subckt wu_tg3 vp vm akx aky ako abs ctl ctlb vdd vss
+MT0n akx ctl vp vss nfet_g5v0d10v5 w=2u l=0.5u
+MT0p akx ctlb vp vdd pfet_g5v0d10v5 w=4u l=0.5u
+MT1n aky ctl vm vss nfet_g5v0d10v5 w=2u l=0.5u
+MT1p aky ctlb vm vdd pfet_g5v0d10v5 w=4u l=0.5u
+MT2n abs ctl ako vss nfet_g5v0d10v5 w=2u l=0.5u
+MT2p abs ctlb ako vdd pfet_g5v0d10v5 w=4u l=0.5u
+.ends wu_tg3
+.subckt wu_rbank akx akp vcm aky akm ako vss
+R0 akx r0 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R1 r0 r1 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R2 r1 akp $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R3 akp r3 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R4 r3 r4 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R5 r4 r5 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R6 r5 r6 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R7 r6 r7 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R8 r7 vcm $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R9 aky r9 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R10 r9 r10 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R11 r10 akm $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R12 akm r12 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R13 r12 r13 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R14 r13 r14 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R15 r14 r15 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R16 r15 r16 $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+R17 r16 ako $SUB=vss $[res_xhigh_po_0p35] w=0.350u l=58.230u
+.ends wu_rbank
+.subckt wu_mim10 top bot
+C0 top bot cap_mim_m3__base w=2.080u l=2.080u
+.ends wu_mim10
+.subckt wu_mim20 top bot
+C0 top bot cap_mim_m3__base w=3.005u l=3.005u
+.ends wu_mim20
+.subckt hog inp inn out vbn vbp vbnc vbpc VDD VSS
+MXMm1 e1 c1 VSS VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMm2 e2 c1 VSS VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMcasn1 c1 vbnc e1 VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMcasn2 s1_out vbnc e2 VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMtail stail vbn VSS VSS nfet_g5v0d10v5 w=3.6u l=1u
+MXMinb ndrv vbn VSS VSS nfet_g5v0d10v5 w=0.9u l=1u
+MXMd1 d1 inn stail VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMd2 d2 inp stail VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMncs out ndrv VSS VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMnls VDD s1_out ndrv VSS nfet_g5v0d10v5 w=3u l=0.5u
+MXMpls VSS s1_out pdrv VDD pfet_g5v0d10v5 w=3u l=0.5u
+MXMpcs out pdrv VDD VDD pfet_g5v0d10v5 w=5u l=0.5u
+MXMipb pdrv vbp VDD VDD pfet_g5v0d10v5 w=2u l=0.8u
+MXMcasp1 c1 vbpc d1 VDD pfet_g5v0d10v5 w=3u l=0.5u
+MXMcasp2 s1_out vbpc d2 VDD pfet_g5v0d10v5 w=3u l=0.5u
+MXMiref1 d1 vbp VDD VDD pfet_g5v0d10v5 w=8u l=0.8u
+MXMiref2 d2 vbp VDD VDD pfet_g5v0d10v5 w=8u l=0.8u
+MXDUM0 VSS VSS VSS VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM1 VSS VSS VSS VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM2 VSS VSS VSS VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM3 VSS VSS VSS VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM4 stail stail stail VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM5 stail stail stail VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM6 stail stail stail VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM7 stail stail stail VSS nfet_g5v0d10v5 w=0.75u l=0.5u
+MXDUM8 VDD VDD VDD VDD pfet_g5v0d10v5 w=2u l=0.8u
+MXDUM9 VDD VDD VDD VDD pfet_g5v0d10v5 w=2u l=0.8u
+MXDUM10 VDD VDD VDD VDD pfet_g5v0d10v5 w=2u l=0.8u
+MXDUM11 VDD VDD VDD VDD pfet_g5v0d10v5 w=2u l=0.8u
+CCc s1_out cmid cap_mim_m3__base w=6.030u l=8.040u
+RRz cmid out $SUB=VSS $[res_xhigh_po_0p35] w=0.350u l=0.680u
+.ends hog
+.subckt wu fp fm np nm ck ck3 lat latb lq sen absf absn q1 q2 vbn vbp vbnc vbpc vdd vss vcm
+XXC1 fp fm ck q1 q1b vdd vss wu_sa
+XXP3 absf absn pa3p pa3n vbn vdd vss wu_pre
+XXC3 pa3p pa3n ck3 sen senb vdd vss wu_sa
+XXLAT sen lat latb lq lqb vdd vss wu_dlat
+XXC2 np nm ck q2 q2b vdd vss wu_sa
+XXCab_absf absf vcm wu_mim20
+XXCab_absn absn vcm wu_mim20
+XXT1 fp fm a1x a1y a1o absf q1 q1b vdd vss wu_tg3
+XXR1 a1x a1p vcm a1y a1m a1o vss wu_rbank
+XXA1 a1p a1m a1o vbn vbp vbnc vbpc vdd vss hog
+XXF1 a1o a1m wu_mim10
+XXT2 fm fp a2x a2y a2o absf q1b q1 vdd vss wu_tg3
+XXR2 a2x a2p vcm a2y a2m a2o vss wu_rbank
+XXA2 a2p a2m a2o vbn vbp vbnc vbpc vdd vss hog
+XXF2 a2o a2m wu_mim10
+XXT3 np nm a3x a3y a3o absn q2 q2b vdd vss wu_tg3
+XXR3 a3x a3p vcm a3y a3m a3o vss wu_rbank
+XXA3 a3p a3m a3o vbn vbp vbnc vbpc vdd vss hog
+XXF3 a3o a3m wu_mim10
+XXT4 nm np a4x a4y a4o absn q2b q2 vdd vss wu_tg3
+XXR4 a4x a4p vcm a4y a4m a4o vss wu_rbank
+XXA4 a4p a4m a4o vbn vbp vbnc vbpc vdd vss hog
+XXF4 a4o a4m wu_mim10
+.ends wu

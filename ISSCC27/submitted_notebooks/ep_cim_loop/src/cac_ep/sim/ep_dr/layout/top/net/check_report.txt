@@ -1,0 +1,72 @@
+# check_report — chip_core r3 — mk_top.py 2026-10-28 07:35, col_blk = digital/col_blk/out/col_blk, arr = layout/top/strap/arr_w3s_128x64.cdl
+인스턴스 25 (블록 23 + hvl inv_2 2), 넷 831 (core 핀 25 포함), 연결된 핀 1997, 안 쓰는 핀 599, VSS 에 묶은 핀 46
+cell 별 인스턴스: arr_w3s_128x64 ×2, input_drive ×2, row_blk ×2, col_blk ×2, data_blk ×2, wbuf ×2, tg_n2 ×2, wu ×2, glob_dig ×1, bias_beta ×1, nudge_inj ×1, tp_tl ×1, tp_br ×1, tp_bandl ×1, tp_bandr ×1, sky130_fd_sc_hvl__inv_2 ×2
+
+## 1. 안 쓰는 핀 (CDL 은 nc_<inst>_<pin> 넷, Verilog 는 빈 연결)
+- arr_f (arr_w3s_128x64): 22 개 — row_106 … row_127
+- arr_n (arr_w3s_128x64): 22 개 — row_106 … row_127
+- data_f (data_blk): 12 개 — sp[2] sp[1] sp[0] spb[2] spb[1] spb[0] sm[2] sm[1] sm[0] smb[2] smb[1] smb[0]
+- wu1 (wu): 5 개 — sen absf absn q1 q2
+- wu2 (wu): 5 개 — sen absf absn q1 q2
+- tp_tl (tp_tl): 199 개 — ro_1_en … nacc_11_g
+- tp_br (tp_br): 221 개 — ro_1_en … pair_6_pg1
+- tp_bandl (tp_bandl): 56 개 — ch_poly_1_a … kv_m2_l_1_f2
+- tp_bandr (tp_bandr): 57 개 — kv_hpo0p35_l_1_f1 … ch_pdiff_2_b
+## 1b. VSS 에 묶은 핀 (Verilog 1'b0)
+- arr_f: 22 개 — wl_106 … wl_127
+- arr_n: 22 개 — wl_106 … wl_127
+- colb_f: 1 개 — lo
+- colb_n: 1 개 — lo
+## 1c. 핀 하나만 닿는 넷 (core 핀 빼고): 0 
+## 1d. 블록이 안 닿는 core 핀: 0 
+
+## 2. 한 넷에 출력 둘 이상 (core 입력 핀은 구동으로 셈): 0
+## 2b. 구동 없는 넷 (입력만, core 핀 빼고): 0 
+## 2c. 대소문자만 다른 넷: 0 
+
+## 3. core 핀 ↔ 패드 (floorplan_opt_D3.json pads 59)
+- core 핀 25: SCK SDI SLD RST SEL_EN WP CK CK3 LAT LQ1 LQ2 VRAILP VRAILM VWH VWLO VWL VBUS_F VBUS_N IBIAS VBNC VBPC IBIASP VDD VSS VCM
+- 패드 없는 core 핀: 0 
+- core 핀 없는 패드 이름 (예비·1.8 V 빼고): 0 
+- 예비 → core 핀: {'SPARE17': 'IBIASP'}, 1.8 V pad ring 만 (core 핀 아님): ['VDDL', 'VSSL'], 남는 예비 14: SPARE8 SPARE9 SPARE10 SPARE4 SPARE11 SPARE12 SPARE15 SPARE16 SPARE18 SPARE21 SPARE1 SPARE2 SPARE3 SPARE5
+- 같은 이름 패드 여럿: VSSL ×2, VDDL ×2, VRAILP ×2, VRAILM ×2, VDD ×8, VSS ×7, VCM ×2
+
+## 4. 덱 v3 비교 (real_circuit/decks/chip_write3.sp: 최상위 줄 2999, 블록에 넣은 소자 2706)
+- 덱의 블록 경계 node 718 개 (블록 둘 이상·패드가 닿는 node). 같음 701, 덱과 일부러 다름 (DEVIATIONS) 17, 예상 밖 0
+- 배열 셀 (행 = TE, WL = 게이트, 열 = 소스, body = vss) 대응이 다른 셀: 0
+- 덱 소자 중 블록을 못 정한 것: 0 
+  dload_b    → -                            expected [D5]  덱만: data_* glob  칩만: -  
+  lo         → VSS                          expected [D6]  덱만: -  칩만: -  short: VSS=vss+lo
+  rst        → RST                          expected [D4]  덱만: colb_* data_* rowb_*  칩만: -  
+  sm0        → sm_n_0                       expected [D10]  덱만: data_*  칩만: -  
+  sm1        → sm_n_1                       expected [D10]  덱만: data_*  칩만: -  
+  sm2        → sm_n_2                       expected [D10]  덱만: data_*  칩만: -  
+  smb0       → smb_n_0                      expected [D10]  덱만: data_*  칩만: -  
+  smb1       → smb_n_1                      expected [D10]  덱만: data_*  칩만: -  
+  smb2       → smb_n_2                      expected [D10]  덱만: data_*  칩만: -  
+  sp0        → sp_n_0                       expected [D10]  덱만: data_*  칩만: -  
+  sp1        → sp_n_1                       expected [D10]  덱만: data_*  칩만: -  
+  sp2        → sp_n_2                       expected [D10]  덱만: data_*  칩만: -  
+  spb0       → spb_n_0                      expected [D10]  덱만: data_*  칩만: -  
+  spb1       → spb_n_1                      expected [D10]  덱만: data_*  칩만: -  
+  spb2       → spb_n_2                      expected [D10]  덱만: data_*  칩만: -  
+  vdd        → VDD                          expected [D13]  덱만: -  칩만: tp_bandl@VDD tp_bandr@VDD tp_br@VDD tp_tl@VDD  
+  vss        → VSS                          expected [D6]  덱만: -  칩만: -  short: VSS=vss+lo
+
+## 4b. place/ 와 맞춰 보기 (LEF 핀 = CDL 핀, 인스턴스): LEF 4, 인스턴스 4
+- tp_tl: place/lef 에 LEF 없음
+- tp_br: place/lef 에 LEF 없음
+- tp_bandl: place/lef 에 LEF 없음
+- tp_bandr: place/lef 에 LEF 없음
+- tp_tl: place 는 자리 (test_areas) 만
+- tp_br: place 는 자리 (test_areas) 만
+- tp_bandl: place 는 자리 (test_areas) 만
+- tp_bandr: place 는 자리 (test_areas) 만
+
+## 5. CDL include
+- chip_core.cdl 은 lib/ 사본만 include (Olympus /home/grads/s/seokjindaveoh/work/ep_dr/layout/top/net/lib). 원본:
+  - 한 번씩 include: digital/pdk/sky130_fd_sc_hvl_u.cdl, digital/row_blk/macros/rb_macros.cdl, digital/col_blk/macros/cb_tg_n2.cdl, digital/col_blk/macros/cb_tgw_n20.cdl, digital/col_blk/macros/clamp_d2r.cdl
+  - 블록: arr_w3s_128x64=layout/top/strap/arr_w3s_128x64.cdl, input_drive=layout/blk_analog/out/input_drive.cdl, row_blk=digital/row_blk/out/row_blk/row_blk.cdl, col_blk=digital/col_blk/out/col_blk/col_blk.cdl, data_blk=layout/blk_digital/out/data_blk.cdl, wbuf=layout/blk_analog/out/wbuf.cdl, tg_n2=layout/blocks/tg_n2.cdl, wu=layout/blk_wu/out/wu.cdl, glob_dig=layout/blk_digital/out/glob_dig.cdl, bias_beta=layout/blk_analog/out/bias_beta.cdl, nudge_inj=layout/blk_analog/out/nudge_inj.cdl, tp_tl=layout/top/testpat/out/tp_tl.cdl, tp_br=layout/top/testpat/out/tp_br.cdl, tp_bandl=layout/top/testpat/out/tp_bandl.cdl, tp_bandr=layout/top/testpat/out/tp_bandr.cdl
+- 사본에서 뺀 겹친 subckt (앞과 같은 내용): 68 sky130_fd_sc_hvl__inv_1 (tp_tl.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), sky130_fd_sc_hvl__nand2_1 (tp_tl.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), sky130_fd_sc_hvl__dfrtp_1 (tp_tl.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), sky130_fd_sc_hvl__buf_4 (tp_tl.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), sky130_fd_sc_hvl__inv_1 (tp_br.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), sky130_fd_sc_hvl__nand2_1 (tp_br.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), sky130_fd_sc_hvl__dfrtp_1 (tp_br.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), sky130_fd_sc_hvl__buf_4 (tp_br.cdl, 앞 정의 sky130_fd_sc_hvl_u.cdl), tp_ro (tp_br.cdl, 앞 정의 tp_tl.cdl), tp_kv_hpo0p35_s (tp_br.cdl, 앞 정의 tp_tl.cdl), tp_kv_hpo1p41_s (tp_br.cdl, 앞 정의 tp_tl.cdl), tp_kv_xpo0p35_s (tp_br.cdl, 앞 정의 tp_tl.cdl) …
+- 이름 같고 내용 다른 subckt (앞 정의를 씀): 0 
+- lib/ 사본끼리 subckt 이름 겹침: 0 

@@ -1,0 +1,21 @@
+* testpat 단독 시험 tp_dev_t
+.subckt tp_1t1r s te wl VSS
+R0 te dn $[reram]
+M1 dn wl s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+M2 dn wl s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+.ends tp_1t1r
+.subckt tp_nacc s d g VSS
+M1 d g s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+M2 d g s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+.ends tp_nacc
+.subckt tp_pair ns ng2 nd2 ng1 nd1 pg2 ps pd2 pd1 pg1 VSS VDD
+MN1 nd1 ng1 ns VSS nfet_g5v0d10v5 w=4u l=1u
+MN2 nd2 ng2 ns VSS nfet_g5v0d10v5 w=4u l=1u
+MP1 pd1 pg1 ps VDD pfet_g5v0d10v5 w=4u l=1u
+MP2 pd2 pg2 ps VDD pfet_g5v0d10v5 w=4u l=1u
+.ends tp_pair
+.subckt tp_dev_t s0_s s0_te s0_wl s1_s s1_d s1_g s2_ns s2_ng2 s2_nd2 s2_ng1 s2_nd1 s2_pg2 s2_ps s2_pd2 s2_pd1 s2_pg1 VDD VSS
+X0 s0_s s0_te s0_wl VSS tp_1t1r
+X1 s1_s s1_d s1_g VSS tp_nacc
+X2 s2_ns s2_ng2 s2_nd2 s2_ng1 s2_nd1 s2_pg2 s2_ps s2_pd2 s2_pd1 s2_pg1 VSS VDD tp_pair
+.ends tp_dev_t

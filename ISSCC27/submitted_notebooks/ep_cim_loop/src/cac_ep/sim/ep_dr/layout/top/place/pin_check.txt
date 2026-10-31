@@ -1,0 +1,47 @@
+# 핀 맞춤 검사 (place_real.py). 차 = 둘째 블록 핀 가운데 − 첫째 블록 핀 가운데 (µm). 곧은 구간 = 마주 보는 두 핀 사각형 사이 거리.
+
+[f] 배열 row_i (서쪽 끝) ↔ input_drive row_i: 쌍 100, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.185–5.185 µm
+[f] 배열 row_i (동쪽 끝) ↔ row_blk row[i]: 쌍 106, 최대 |차| 0.0100 µm, 어긋난 쌍 106, 곧은 구간 5.000–5.000 µm
+   어긋난 쌍 (차 µm): row_0 +0.010, row_1 +0.010, row_2 +0.010, row_3 +0.010, row_4 +0.010, row_5 +0.010, row_6 +0.010, row_7 +0.010, row_8 +0.010, row_9 +0.010, row_10 +0.010, row_11 +0.010 …
+[f] 배열 wl_i (동쪽 끝) ↔ row_blk wl[i]: 쌍 106, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.000–5.000 µm
+[f] 배열 col_c (남쪽 끝) ↔ col_blk col[c]: 쌍 64, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.000–5.000 µm
+[f] data_blk ga·gb ↔ input_drive ga·gb: 쌍 98, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.185–5.185 µm
+[n] 배열 row_i (서쪽 끝) ↔ input_drive row_i: 쌍 100, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.185–5.185 µm
+[n] 배열 row_i (동쪽 끝) ↔ row_blk row[i]: 쌍 106, 최대 |차| 0.0100 µm, 어긋난 쌍 106, 곧은 구간 5.000–5.000 µm
+   어긋난 쌍 (차 µm): row_0 -0.010, row_1 -0.010, row_2 -0.010, row_3 -0.010, row_4 -0.010, row_5 -0.010, row_6 -0.010, row_7 -0.010, row_8 -0.010, row_9 -0.010, row_10 -0.010, row_11 -0.010 …
+[n] 배열 wl_i (동쪽 끝) ↔ row_blk wl[i]: 쌍 106, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.000–5.000 µm
+[n] 배열 col_c (남쪽 끝) ↔ col_blk col[c]: 쌍 64, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.000–5.000 µm
+[n] data_blk ga·gb ↔ input_drive ga·gb: 쌍 98, 최대 |차| 0.0000 µm, 어긋난 쌍 0, 곧은 구간 5.185–5.185 µm
+
+# netlist 대조 (net/chip_core.v)
+[f] 배열 row ↔ input_drive row: 쌍 100, 같은 넷 100
+[f] 배열 row ↔ row_blk row: 쌍 106, 같은 넷 106
+[f] 배열 wl ↔ row_blk wl: 쌍 106, 같은 넷 106
+[f] 배열 col ↔ col_blk col: 쌍 64, 같은 넷 64
+[f] data ga·gb ↔ input_drive ga·gb: 쌍 98, 같은 넷 98
+[n] 배열 row ↔ input_drive row: 쌍 100, 같은 넷 100
+[n] 배열 row ↔ row_blk row: 쌍 106, 같은 넷 106
+[n] 배열 wl ↔ row_blk wl: 쌍 106, 같은 넷 106
+[n] 배열 col ↔ col_blk col: 쌍 64, 같은 넷 64
+[n] data ga·gb ↔ input_drive ga·gb: 쌍 98, 같은 넷 98
+netlist 인스턴스 중 배치 안 한 것: 없음, 배치했는데 netlist 에 없는 것: 없음
+ilatb1: A = LAT, Y = latb_1
+ilatb2: A = LAT, Y = latb_2
+
+core 1346.6 × 1133.14 µm (d3 1296.31 × 1112.88), die 어림 2020.0 × 1810.0 µm (d3 1970.0 × 1790.0)
+core 안: True, 배선 띠 안쪽: True
+
+# 블록 경계 사이 간격이 10 µm 미만인 쌍 (작은 것부터, 대각은 유클리드 거리)
+     2.723  colb_f ↔ rowb_f
+     2.723  colb_n ↔ rowb_n
+     5.000  arr_f ↔ colb_f
+     5.000  arr_f ↔ idrv_f
+     5.000  arr_f ↔ rowb_f
+     5.000  arr_n ↔ colb_n
+     5.000  arr_n ↔ idrv_n
+     5.000  arr_n ↔ rowb_n
+     5.000  data_f ↔ idrv_f
+     5.000  data_n ↔ idrv_n
+     5.000  rowb_n ↔ tp_bandl
+     5.340  colb_f ↔ idrv_f
+     5.340  colb_n ↔ idrv_n

@@ -1,0 +1,18 @@
+* testpat 단독 시험 tp_ch_t1
+.subckt tp_ch_poly a b VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_poly
+.subckt tp_ch_ndiff a b VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_ndiff
+.subckt tp_ch_pdiff a b VDD VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_pdiff
+.subckt tp_ch_t1 s0_a s0_b s1_a s1_b s2_a s2_b VDD VSS
+X0 s0_a s0_b VSS tp_ch_poly
+X1 s1_a s1_b VSS tp_ch_ndiff
+X2 s2_a s2_b VDD VSS tp_ch_pdiff
+.ends tp_ch_t1

@@ -1,0 +1,18 @@
+# Conda tools for the user-space install without Docker (no root). This file records what env/setup.sh (part "eda") creates;
+# env/setup.sh is the tested path and also installs what conda does not have (OpenROAD release build, OpenVAF, ngspice 47 with OSDI, Xyce 7.10).
+#   micromamba create -y -p $ENV/eda -f env/environment.yml
+# Netgen 1.5 (LVS) comes from litex-hub in its own environment (the conda-forge package "netgen" is a different program, a mesh generator):
+#   micromamba create -y -p $ENV/netgen -c litex-hub -c conda-forge 'litex-hub::netgen>=1.5'
+# Build environment for ngspice and Xyce (part "xybuild" inside env/setup.sh):
+#   micromamba create -y -p $ENV/xybuild/env -c conda-forge gcc_linux-64=11 gxx_linux-64=11 gfortran_linux-64=11 cmake=3.27 make bison flex \
+#       'openblas=0.3.27' 'libblas=*=*openblas' 'liblapack=*=*openblas' suitesparse=5.10 fftw
+name: eda
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10          # runtime of the OpenROAD release build (with Qt5, tclreadline)
+  - magic=8.3.678        # sky130A.tech needs Magic >= 8.3.411
+  - qt-main=5.15
+  - tclreadline
+  - readline
+  - tk

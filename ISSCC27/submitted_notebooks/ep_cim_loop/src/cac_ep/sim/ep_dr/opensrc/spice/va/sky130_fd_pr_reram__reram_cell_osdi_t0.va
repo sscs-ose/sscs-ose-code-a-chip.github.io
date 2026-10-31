@@ -1,0 +1,74 @@
+// t0 판 (10/30): 「이어서 3」 의 chip_write3 동작점 실패 대책. 상태 변화율 (dTf/dt, 온도의 가열 항) 에 ramp = min($abstime / 1 ps, 1) 을 곱해
+// t = 0 (동작점) 에서는 0 으로 만든다 → 쓰기 전압이 걸린 셀도 동작점에서 V(tf) = Tfilament_0, V(th) = Temperature_0. analysis() 분기 없음.
+// 1 ps 뒤에는 원래 식과 같다. 나머지는 sky130_fd_pr_reram__reram_cell_osdi.va 와 같음.
+// OSDI (OpenVAF) 용 사본 — 원본: ep_demo/char/va/sky130_fd_pr_reram__reram_cell.va (SkyWater, Apache-2.0, 아래 원문 저작권 줄 그대로).
+// 원본은 filament 두께·온도를 변수에 들고 다니며 $abstime 차이로 직접 적분한다 (t_previous). OpenVAF/OSDI 는 시간 단계 사이에
+// 변수 값을 남기지 않아 (원본을 그대로 컴파일하면 ngspice 에서 G 가 한 번도 안 바뀜, 10/28 확인) 그 두 상태를 내부 node 로 옮겼다:
+//   V(tf) = Tfilament [nm],  V(th) = 온도 [K].  식·상수·경계는 원본과 같다:
+//   dTf/dt = velocity_k1·(exp(−Eg/kT)·exp(γ·a0/Tox·V/kT) − exp(−Er/kT)·exp(−γ·a0/Tox·V/kT)),  Tf ∈ [Tfilament_min, Tfilament_max]
+//   dT/dt  = |V·I| / C_thermal + (Temperature_0 − T) / tau_thermal      (원본의 1 차 backward Euler 갱신과 같은 미분식)
+//   I(TE,BE) = I_k1·exp(−(Tox − Tf)/(Tox − Tfilament_ref))·sinh(V/V_ref)
+// 원본은 시간 단계마다 forward Euler (t_step 으로 단계 상한), 여기는 시뮬레이터 적분기 (gear/trap + LTE) 가 푼다 → 작은 단계 극한에서 같아야 한다.
+// DC (t = 0) 에서 Tf = Tfilament_0 이 되도록 tf node 에 아주 약한 되돌림 항 gpin·(V(tf) − Tf0) 를 둔다
+// (gpin = 1 /s: 1 µs 동안 1 nm 떨어져 있어도 1e−6 nm 움직임 = 무시할 만함. 0 V 에서 원본 식의 dTf/dt 는 ≈ −3e−18 nm/s).
+//
+// Copyright 2020 The SkyWater PDK Authors
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
+// SPDX-License-Identifier: Apache-2.0
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sky130_fd_pr_reram__reram_cell(TE, BE);
+    inout TE; // top electrode
+    inout BE; // bottom electrode
+    electrical TE, BE;
+    electrical tf;   // 내부 상태: filament 두께 [nm] (전압으로)
+    electrical th;   // 내부 상태: 온도 [K] (전압으로)
+
+    // ---- 원본과 같은 parameter (이름·기본값·범위)
+    parameter real area_ox             = 0.1024e-12 from (0:inf);
+    parameter real Tox                 = 5.0e-9     from (0:inf);
+    parameter real Tfilament_max       = 4.9e-9     from (0:inf);
+    parameter real Tfilament_min       = 3.3e-9     from (0:inf);
+    parameter real Tfilament_0         = 3.3e-9     from [Tfilament_min:Tfilament_max];
+    parameter real Eact_generation     = 1.501      from (0:inf);
+    parameter real Eact_recombination  = 1.500      from (0:inf);
+    parameter real I_k1                = 6.140e-5   from (0:inf);
+    parameter real Tfilament_ref       = 4.7249e-9  from (0:inf);
+    parameter real V_ref               = 0.430      from (0:inf);
+    parameter real velocity_k1         = 150        from (0:inf);
+    parameter real gamma_k0            = 16.5       from (0:inf);
+    parameter real gamma_k1            = -1.25      from (-inf:inf);
+    parameter real Temperature_0       = 300        from (0:inf);
+    parameter real C_thermal           = 3.1825e-16 from (0:inf);
+    parameter real tau_thermal         = 0.23e-9    from (0:inf);
+    parameter real t_step              = 1.0e-9     from (0:inf);
+    // ---- 이 사본에서 더한 것
+    parameter real gpin                = 1.0        from [0:inf);    // tf 되돌림 [1/s] (DC 에서 Tf = Tfilament_0 을 정함)
+    parameter real sc                  = 1e-6       from (0:inf);    // 내부 node 방정식 크기 맞춤 (A 단위 잔차)
+
+    real a0, vcell, tfil, tfu, temp, gamma, kT_over_q, dTdt, icell, ramp;
+
+    analog begin
+        a0 = 0.25e-9;
+        ramp = min($abstime / 1.0e-12, 1.0);
+        $bound_step(t_step);
+        vcell = V(TE, BE);
+        tfil = V(tf) * 1e-9;
+        tfu = min(max(tfil, Tfilament_min), Tfilament_max);         // 전류·γ 에는 경계 안 값
+        temp = max(V(th), 1.0);
+        gamma = gamma_k0 + gamma_k1 * pow((Tox - tfu) / 1.0e-9, 3);
+        kT_over_q = (`P_K * temp) / `P_Q;
+        dTdt = velocity_k1 * (exp(-Eact_generation    / kT_over_q) * exp( gamma * a0 / Tox * vcell / kT_over_q) -
+                              exp(-Eact_recombination / kT_over_q) * exp(-gamma * a0 / Tox * vcell / kT_over_q));
+        if ((tfil >= Tfilament_max && dTdt > 0) || (tfil <= Tfilament_min && dTdt < 0))
+            dTdt = 0;                                                // 원본 soft_minmax (경계에서 멈춤) 과 같은 뜻
+        dTdt = ramp * dTdt;
+        icell = I_k1 * exp(-(Tox - tfu) / (Tox - Tfilament_ref)) * sinh(vcell / V_ref);
+        I(TE, BE) <+ icell;
+        I(tf) <+ sc * (ddt(V(tf)) - dTdt * 1e9 + gpin * (V(tf) - Tfilament_0 * 1e9));
+        I(th) <+ sc * (ddt(V(th)) - ramp * abs(vcell * icell) / C_thermal + (V(th) - Temperature_0) / tau_thermal);
+    end
+endmodule
