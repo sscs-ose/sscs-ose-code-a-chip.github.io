@@ -1,8 +1,5 @@
 """Portable SKY130 device experiments and replay of native ngspice evidence.
 
-The saved tables are compact model simulation data. No circuit simulator is
-replaced by a behavioral or numerical circuit model in this module.
-
 Set SKY130_MODEL to sky130.lib.spice, or set PDK_ROOT to the directory that
 contains sky130A. Set NGSPICE to an executable when it is not on PATH.
 Run ``python scripts/device_lab.py check`` to check the included device results.
