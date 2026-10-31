@@ -18,6 +18,8 @@ The submitted notebook contains executed outputs.
 ## Local notebook setup
 
 Use Python 3.11 or later in an isolated environment.
+On Windows, keep the environment folder path short. If pip reports a path length
+error while installing JupyterLab, create the environment in a shorter directory.
 
 ```text
 python -m pip install -r requirements.txt
