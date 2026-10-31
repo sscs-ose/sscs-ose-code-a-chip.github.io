@@ -23,12 +23,12 @@ TritFlow is a design flow that takes ternary HDL to GDS, using CMOS cells that w
 
 | Notebook | Language | Open in Colab |
 |---|---|---|
-| [tritflow_en.ipynb](tritflow_en.ipynb) | English | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/d814a1cd5fd3d8205fe20ee2bcbc1bd8a5f1be4b/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) |
-| [tritflow_ja.ipynb](tritflow_ja.ipynb) | Japanese | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/d814a1cd5fd3d8205fe20ee2bcbc1bd8a5f1be4b/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) |
+| [tritflow_en.ipynb](tritflow_en.ipynb) | English | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/5926fbffd6506ba428bd1bc6cf3fe0b56b11ed26/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) |
+| [tritflow_ja.ipynb](tritflow_ja.ipynb) | Japanese | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/5926fbffd6506ba428bd1bc6cf3fe0b56b11ed26/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) |
 
 Both notebooks are saved with their outputs.
 
-**Source code:** [github.com/PenguinEino/tritflow](https://github.com/PenguinEino/tritflow) (cell library, synthesis, place and route, verification and the notebook generator; the notebooks fetch commit [`99394c9`](https://github.com/PenguinEino/tritflow/tree/99394c966c2834fb64bfed92a53cf6860446e57a)).
+**Source code:** [github.com/PenguinEino/tritflow](https://github.com/PenguinEino/tritflow) (cell library, synthesis, place and route, verification and the notebook generator; the notebooks fetch commit [`e533a3c`](https://github.com/PenguinEino/tritflow/tree/e533a3cfbd39b07243faaa417b9ceb359da0c1f0)).
 
 ## Running
 
