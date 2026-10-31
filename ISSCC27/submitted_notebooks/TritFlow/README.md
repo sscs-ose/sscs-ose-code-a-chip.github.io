@@ -2,7 +2,7 @@
 
 | Team member | Affiliation | Email |
 |---|---|---|
-| Einosuke Okazaki (岡崎 英之介), designated representative | Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan | einosukeokazaki@gmail.com |
+| Einosuke Okazaki, designated representative | Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan | einosukeokazaki@gmail.com |
 
 If selected, Einosuke Okazaki will attend ISSCC 2027 in person and present the poster.
 
