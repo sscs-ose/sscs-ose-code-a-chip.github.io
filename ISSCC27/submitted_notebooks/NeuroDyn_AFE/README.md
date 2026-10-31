@@ -31,7 +31,7 @@ Wearable, battery-less, and implantable bio-potential monitoring systems (e.g., 
 1. **Sub-0.6V Deep Subthreshold Inverter/OTA**: Operating at an Inversion Coefficient $IC \approx 0.05$ achieving near-theoretical transconductance efficiency ($g_m/I_D \approx 25.5\,\text{S/A}$), consuming only **$0.087\,\mu\text{W}$** ($86.6\,\text{nW}$) (Core OTA) and **$0.207\,\mu\text{W}$** ($206.6\,\text{nW}$) (Full AFE System) from a single **$0.60\,\text{V}$** supply.
 2. **Continuous-Time Chopper Stabilization with Low-Vt Switches**: Employs native low-threshold transmission gates (`sky130_fd_pr__nfet_01v8_lvt` / `pfet_01v8_lvt`, $V_{th} \approx 0.35\,\text{V}$), eliminating the sub-1V switch conduction gap and keeping switch $R_{on} < 18\,\text{k}\Omega$. Completely up-modulates $1/f$ flicker noise away from the biopotential band ($0.5\,\text{Hz}-1\,\text{kHz}$) at $f_{chop} = 4\,\text{kHz}$.
 3. **Causal Switched-Capacitor Ripple Reduction Loop (RRL)**: An in-situ differencing integrator extracts output ripple without requiring prior knowledge of the bio-signal, steering dynamic cancellation current into the auxiliary differential pair, suppressing output ripple by **$> 62.3\,\text{dB}$** and reducing residual DC offset from $15.0\,\text{mV}$ raw electrode offset ($12.4\,\text{mV}$ worst-case mismatch) down to **$0.78\,\mu\text{V}$**.
-4. **Record-Breaking Figures-of-Merit**: Achieves a Noise Efficiency Factor **$\text{NEF} = 1.65$** (Core OTA) / **$1.88$** (Full System) and Power Efficiency Factor **$\text{PEF} = 1.63$** (Core) / **$2.12$** (Full System), setting a new benchmark for open-source biomedical front-ends.
+4. **High-Efficiency Subthreshold Figures-of-Merit**: Achieves a simulated Noise Efficiency Factor **$\text{NEF} = 1.65$** (Core OTA) / **$1.88$** (Full System) and Power Efficiency Factor **$\text{PEF} = 1.63$** (Core) / **$2.12$** (Full System), demonstrating the near-theoretical transconductance efficiency achievable with deep subthreshold biasing in SkyWater 130nm.
 5. **2nd-Order Optimal Common-Centroid Layout Generation**: Includes a procedural Python script utilizing `gdstk` and `klayout` that generates a DRC-clean **GDSII** layout (`neurodyn_afe_sky130.gds`) featuring quadratic-cancelling common-centroid matching (`[D, A, B, B, A, B, A, A, B, D]`), dummy lithographic rings, and guard-ring perimeter shielding to cancel linear tilts and radial thermal gradients.
 6. **Zero-Friction Reproducibility**: Features a standalone, fully verified Jupyter notebook with interactive **Plotly** and **ipywidgets** dashboards, automated Ngspice netlist generators, and multi-corner PVT datasets (TT, FF, SS, SF, FS; $-40^\circ\text{C}$ to $+85^\circ\text{C}$) ensuring instant execution both locally and on Google Colab.
 
@@ -45,7 +45,7 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 - **Level 2 (Analytical EKV Model)**: Derived from subthreshold $g_m/I_D$ physics ($IC = 0.05$), small-signal $g_m \cdot r_o$ formulations, and thermal noise integration.
 - **Level 3 (Behavioral Simulation)**: Evaluated via continuous-time dynamic chopper + Burt & Zhang causal RRL simulation in Python.
 - **Level 4 (Foundry SPICE Netlist Suite)**: Complete 6-testbench suite generated for SkyWater SKY130 (`neurodyn_ac_testbench.cir`, `neurodyn_op_testbench.cir`, `neurodyn_cmrr_testbench.cir`, `neurodyn_psrr_testbench.cir`, `neurodyn_noise_testbench.cir`, `neurodyn_tran_testbench.cir`). Utilizes low-threshold devices (`pfet_01v8_lvt`, `nfet_01v8_lvt`) to eliminate headroom pinch-off under $0.60\,\text{V}$ $V_{DD}$, ensuring weak-inversion saturation across all active transistors ($V_{ds,\text{tail}} = 77.27\,\text{mV} \ge 3 U_T$) and verified $0.144\,\mu\text{A}$ ($144.4\,\text{nA}$) core quiescent current ($0.087\,\mu\text{W}$ / $86.6\,\text{nW}$).
-- **Level 5 (Physical Silicon Layout)**: Procedurally generated GDSII (`neurodyn_afe_sky130.gds`) verified against 15 SkyWater SKY130 DRM geometrical rules (0 violations).
+- **Level 5 (Procedural GDSII Cell Layout)**: Procedurally generated GDSII macro (`neurodyn_afe_sky130.gds`) verified against 15 SkyWater SKY130 DRM geometrical design rules (0 violations) and polygon-level device extraction.
 
 | Parameter | Target Specification | Realized / Simulated | Evidence Level & Tool Provenance | Unit | Condition / Remarks |
 | :--- | :---: | :---: | :--- | :---: | :--- |
@@ -73,8 +73,8 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 | **Chopping Ripple Suppression** | $\ge 35.0$ | **$62.3$** | Level 3 Behavioral CT-Chopper + RRL | dB | In-situ switched-cap differencing |
 | **Clinical EEG Fidelity ($r$)** | $> 0.95$ | **$0.9926$** | Level 3 Multi-band Physiological EEG | — | Clinical Grade ($> 99.2\%$) |
 | **Foundry SPICE Netlist Suite** | Verified | **Complete 6-Deck Suite** | Level 4 Automated Netlists (.op, .ac, .cmrr, .psrr, .noise, .tran) | — | SKY130 TT models (Tail $V_{ds} = 77.27\,\text{mV} \ge 3 U_T$, Saturation verified) |
-| **Active Silicon Area** | $< 0.025$ | **$0.00425$** | Level 5 Physical GDSII Layout (`gdstk`) | $\text{mm}^2$ | Full macro PR boundary 84×50.65 µm (incl. guard ring, MIM caps, chopper, 2nd stage) |
-| **Physical DRC Cleanliness** | Clean | **0 Violations (15/15 rules)** | Level 5 Automated DRM Audit (`klayout.db`/`gdstk`) | — | SkyWater SKY130 DRM Compliant |
+| **Core Layout Macro Area** | $< 0.025$ | **$0.00425$** | Level 5 Procedural GDSII Layout (`gdstk`) | $\text{mm}^2$ | Macro PR boundary 84×50.65 µm (incl. guard ring, MIM caps, chopper, 2nd stage) |
+| **DRC Geometrical Status** | Clean | **0 Violations (15/15 rules)** | Level 5 Automated Geometric DRM Audit (`gdstk`) | — | 15 Fundamental SkyWater DRM Rules Checked |
 | **Physical LVS Match** | 100% Match | **15/15 Devices Matched** | Level 5 GDSTK Boolean Extraction Engine (`lvs.log`) | — | 11 MOSFETs, 2 Caps, 2 Resistors, 17 Pins (`lvs.log`) |
 
 ---
@@ -153,10 +153,10 @@ Since $f_{chop} = 4\,\text{kHz} \gg f_{\text{corner}, 1/f} \approx 800\,\text{Hz
 
 ---
 
-## 🔬 Silicon Layout & Common-Centroid Matching
+## 🔬 Procedural Cell Layout & Common-Centroid Matching
 
-![Silicon Layout](images/layout_preview.png)
-<div align="center"><em>Figure 4: DRC-Clean Silicon Layout generated in SkyWater SKY130 130nm technology (`neurodyn_afe_sky130.gds`).</em></div>
+![GDSII Macro Layout](images/layout_preview.png)
+<div align="center"><em>Figure 4: Procedurally Synthesized GDSII Cell Layout generated in SkyWater SKY130 130nm technology (`neurodyn_afe_sky130.gds`).</em></div>
 
 ### 2nd-Order Gradient & Stress Cancellation Proof
 
@@ -180,6 +180,9 @@ The layout is verified using the automated `src/layout/drc_checker.py` verificat
 
 - **15 Fundamental Rules Checked**: Diffusion min width (diff.1, $0.15\,\mu\text{m}$), poly gate length (poly.1a, $0.15\,\mu\text{m}$), poly spacing (poly.2a, $0.21\,\mu\text{m}$), poly endcap overhang (poly.8, $0.13\,\mu\text{m}$), diffusion extension (diff.4, $0.25\,\mu\text{m}$), contact dimensions (licon.1/licon.2), metal wires (m1.1/m1.2/m2.1/m2.2), and substrate tap (tap.1).
 - **DRC Audit Result**: **100% CLEAN - ZERO (0) VIOLATIONS** with substantial safety margins across all geometrical rules.
+
+> [!NOTE]
+> **Layout Scope & Fabrication Boundary**: The procedural layout engine generates the core analog front-end cell macro (input pair, active loads, Miller compensation capacitors, and guard ring perimeter). It is intended as a modular analog cell generator. Integration into a full-chip harness (e.g., Efabless Caravel or TinyTapeout) with bonding pads, ESD clamps, and full-chip seal rings would be the subsequent step for physical manufacturing.
 
 ---
 
@@ -232,7 +235,7 @@ $$\sigma_{Vth} = \frac{A_{Vth}}{\sqrt{W \cdot L}} = \frac{5.0\,\text{mV}\cdot\mu
 | **PEF** | **1.63** | **2.12** | 3.36 | 4.93 | 38.10 | 30.70 |
 | **Residual Offset ($\mu\text{V}$)** | **0.78** | **0.78** | 1.20 | 3.50 | 2.00 | 25.0 |
 
-*Note: Prior art entries [1]–[4] report experimental measurements from fabricated silicon test chips, whereas This Work presents pre-silicon schematic-level BSIM4 SPICE simulation and discrete-time behavioral modeling in SkyWater SKY130.*
+*Note: Prior art entries [1]–[4] report experimental measurements from fabricated silicon test chips, whereas This Work presents pre-silicon schematic-level BSIM4 SPICE simulation and discrete-time behavioral modeling in SkyWater SKY130. NeuroDyn-AFE specifically targets low-frequency biopotentials (clinical EEG/ECG, bandwidth $66.8\,\text{Hz}$), enabling deep sub-100 nW power scaling, whereas prior designs [1]–[4] cover wider $1\,\text{kHz}$ bandwidths.*
 
 ---
 

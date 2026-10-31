@@ -58,7 +58,7 @@ Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --
 
 ---
 
-### 4. Silicon Physical Layout & Common-Centroid Matching
+### 4. Procedural GDSII Cell Layout & Common-Centroid Matching
 
 * **Matched Input Differential Pair Macro**: Synthesizes the 10-finger common-centroid array `[D, A, B, B, A, B, A, A, B, D]` with outer dummy protection and continuous guard ring shielding.
 * **Mathematical Matching Proof**:
@@ -66,6 +66,7 @@ Vin (10uV - 1mV)     --->  CHOP1 (f=4kHz)   --->  M1/M2 Input Pair (IC=0.05)  --
   $$\text{Quadratic Moment: } \Delta M_2 = \overline{X_A^2} - \overline{X_B^2} = 17.5 - 17.5 = 0.0000 \quad (\text{Exact Thermal/Stress Cancellation})$$
 * **Physical GDSII**: Generated autonomously via `gdstk` (`data/gds/neurodyn_afe_sky130.gds`, 11,930 bytes), verified against 15 SkyWater SKY130 DRM rules with zero violations.
 * **Polygon-Level LVS Extraction**: Extracted 16 NMOS gate fingers ($\text{Poly} \cap \text{Diff} \setminus \text{N-Well}$), 16 PMOS gate fingers ($\text{Poly} \cap \text{Diff} \cap \text{N-Well}$), 2 MIM capacitor plates (`capm`), 2 poly resistors, and 17 pin labels directly from the physical GDSII file.
+* **Design Scope**: Pre-silicon modular cell macro generator for open-source EDA exploration; ready for integration into a chip harness (Caravel / TinyTapeout) with full-chip I/O pads and seal rings for future tapeout.
 
 ---
 

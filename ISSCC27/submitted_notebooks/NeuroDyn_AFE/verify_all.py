@@ -9,7 +9,7 @@ Executes complete automated unit and integration tests across:
   3. Continuous-Time Chopper + Causal RRL Simulation with Clinical EEG
   4. 2nd-Order Gradient-Cancelling Common-Centroid Matching Proof
   5. Procedural GDSII Layout Synthesis & Automated Physical DRC (15/15 Rules Clean)
-  6. Physical Layout-Versus-Schematic (LVS) Netlist & Pin Sign-Off (15/15 Devices)
+  6. Procedural Layout-Versus-Schematic (LVS) Device Extraction & Topology Match (15/15 Devices)
   7. Standardized CACE Specification Compliance & SOTA FoM Benchmarking
 """
 
@@ -165,7 +165,7 @@ def run_test_5_layout_and_drc():
     print(f"  [PASS] DRC Check: 100% CLEAN - ZERO (0) VIOLATIONS across {len(drc_df)} SkyWater SKY130 DRM rules")
 
 def run_test_6_lvs_verification():
-    print("\n[TEST 6/7] Running Physical Layout-Versus-Schematic (LVS) Sign-Off...")
+    print("\n[TEST 6/7] Running Procedural Layout Device Extraction & Topology Match (LVS)...")
     lvs_checker = Sky130LVSChecker(PROJECT_DIR)
     lvs_res = lvs_checker.run_lvs()
     assert lvs_res["status"] == "PASS", f"LVS verification failed! Unmatched: {lvs_res['unmatched_devices']}"
@@ -174,7 +174,7 @@ def run_test_6_lvs_verification():
     
     print(f"  [PASS] LVS Check: 100% MATCH - 15/15 Devices matched uniquely (11 MOSFETs, 2 Caps, 2 Resistors)")
     print(f"  [PASS] Verified Pin Labels ({len(lvs_res['extracted_pins'])} pins): {', '.join(lvs_res['extracted_pins'])}")
-    print(f"  [PASS] LVS Sign-Off Log: {os.path.basename(lvs_res['log_path'])}")
+    print(f"  [PASS] LVS Extraction Log: {os.path.basename(lvs_res['log_path'])}")
 
 def run_test_7_cace_audit():
     print("\n[TEST 7/7] Running Standardized CACE Specification Audit...")
