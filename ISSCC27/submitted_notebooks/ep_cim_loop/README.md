@@ -175,7 +175,7 @@ One cluster node, 16 cores, 64 GB, in the Docker image (run with Singularity, sa
 |---|---|---|---:|
 | **QUICK** | `MODE=quick TRAIN=load` | saved weights; Xyce weight-update block; all layout generators; four digital blocks with Yosys + OpenROAD; netlist, placement, routing, pad ring; core + die LVS; DRC of the array block | 29 min |
 | **FULL** | `MODE=full TRAIN=load` | QUICK + Xyce chip read deck + Xyce read circuit on all 3,097 test images + DRC of the full core and die | 112 min |
-| **FULL + training** | `MODE=full TRAIN=full` | FULL + EP training (seed 0, 165,000 training images); the new weights are compared with the saved weights | 144 min |
+| **FULL + training** | `MODE=full TRAIN=full` | FULL + EP training (seed 0, 165,000 training images); the new weights are compared with the saved weights | 124–144 min |
 
 The step-by-step times are in `results/` and at the end of the notebook.
 
