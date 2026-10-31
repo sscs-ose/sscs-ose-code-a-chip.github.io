@@ -2,7 +2,7 @@
 
 **Michael Ibrahim, IEEE Member**
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MichaelIbrahim-GaTech/sscs-ose-code-a-chip.github.io/blob/main/ISSCC27/submitted_notebooks/Pulsed%20Latches%20Predict%20and%20Repair/Pulsed%20Latches%20Predict%20and%20Repair.ipynb)
 
 An interactive Jupyter notebook exploring race-through in pulsed-latch pipelines, two circuit-level timing repairs, and their energy cost relative to flip-flop storage.
 
@@ -24,7 +24,7 @@ A resettable D flip-flop implementation provides a reference under the same stim
 
 ## Notebook contents
 
-[Pulsed_Latches_Predict_and_Repair.ipynb](<Pulsed_Latches_Predict_and_Repair.ipynb>)
+[Pulsed Latches Predict and Repair.ipynb](Pulsed%20Latches%20Predict%20and%20Repair.ipynb)
 
 The notebook includes the circuit diagram, simulation setup, generated SPICE netlists, waveform analysis, transaction checks, and energy comparisons. Readers can change the input history, padding counts, and pulse-generator configuration to explore the tradeoffs.
 
