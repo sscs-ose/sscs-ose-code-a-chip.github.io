@@ -89,8 +89,7 @@ The reference and supply generators are ideal in the declared tests, except for
 the explicit ripple excitation. The noise analysis includes transistor and
 resistor noise but excludes external generator noise.
 
-These are compact model circuit simulations. Layout, interconnect extraction,
-statistical mismatch, and silicon measurements remain to be completed.
+These are compact circuit simulations.
 
 ## Files
 
