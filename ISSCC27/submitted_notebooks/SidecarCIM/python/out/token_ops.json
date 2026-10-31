@@ -1,0 +1,971 @@
+{
+ "method": "Edge study B: weight-stationary MVM counts per generated token (batch 1, decode).\n\nCounts only (no energy). Each linear layer y = x W with W (d_in, d_out) is mapped on tiles of\nR rows x 8 columns (R = 32, the SidecarCIM macro, and R = 128); one tile MVM = one R-input,\n8-output dot-product block. Per token: tiles = ceil(d_in / R) * ceil(d_out / 8); a partial\ntile still costs one MVM (utilization = d_in*d_out / (tiles*R*8)).\nLayer shapes are read from the real module tree (model built from its HF config on the meta\ndevice, no weights). \"quantized\" = the layers SidecarCIM runs in the studies (GPT-2 mlp.c_fc,\nGPT-Neo/TinyStories mlp.c_fc, Qwen mlp.gate_proj + up_proj); \"all_linear\" = every nn.Linear /\nConv1D incl. the LM head; \"body\" = all_linear without the LM head.\n\"by_type\" splits all_linear into the wholemodel.py layer types (attn_qkv, attn_o, mlp_in, mlp_down)\nplus lm_head, so per-token energy can cover the whole model (body = all but lm_head).\nAttention score / value products (q.K^T, p.V against the KV cache) are activation x activation,\nnot weight-stationary: listed only as MACs per token at a few context lengths (GPT-Neo local\nlayers cap the context at the window size).\nUsage: python token_ops.py   -> out/token_ops.json",
+ "tile_cols": 8,
+ "tile_rows": [
+  32,
+  128
+ ],
+ "batch": 1,
+ "models": {
+  "gpt2": {
+   "config": {
+    "model_type": "gpt2",
+    "hidden": 768,
+    "layers": 12,
+    "heads": 12,
+    "vocab": 50257,
+    "params_total": 124439808,
+    "params_linear": 123532032,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "c_attn (768x2304)": 12,
+    "c_proj (768x768)": 12,
+    "c_fc (768x3072)": 12,
+    "c_proj (3072x768)": 12,
+    "lm_head (768x50257)": 1
+   },
+   "quantized": {
+    "layers": 12,
+    "macs": 28311552,
+    "mvm_32x8": 110592,
+    "util_32x8": 1.0,
+    "mvm_128x8": 27648,
+    "util_128x8": 1.0
+   },
+   "body_linear": {
+    "layers": 48,
+    "macs": 84934656,
+    "mvm_32x8": 331776,
+    "util_32x8": 1.0,
+    "mvm_128x8": 82944,
+    "util_128x8": 1.0
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 38597376,
+    "mvm_32x8": 150792,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 37698,
+    "util_128x8": 0.9999
+   },
+   "all_linear": {
+    "layers": 49,
+    "macs": 123532032,
+    "mvm_32x8": 482568,
+    "util_32x8": 1.0,
+    "mvm_128x8": 120642,
+    "util_128x8": 1.0
+   },
+   "quantized_share_of_all_mvm_32x8": 0.2292,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 12,
+     "macs": 21233664,
+     "mvm_32x8": 82944,
+     "util_32x8": 1.0,
+     "mvm_128x8": 20736,
+     "util_128x8": 1.0
+    },
+    "attn_o": {
+     "layers": 12,
+     "macs": 7077888,
+     "mvm_32x8": 27648,
+     "util_32x8": 1.0,
+     "mvm_128x8": 6912,
+     "util_128x8": 1.0
+    },
+    "mlp_in": {
+     "layers": 12,
+     "macs": 28311552,
+     "mvm_32x8": 110592,
+     "util_32x8": 1.0,
+     "mvm_128x8": 27648,
+     "util_128x8": 1.0
+    },
+    "mlp_down": {
+     "layers": 12,
+     "macs": 28311552,
+     "mvm_32x8": 110592,
+     "util_32x8": 1.0,
+     "mvm_128x8": 27648,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 38597376,
+     "mvm_32x8": 150792,
+     "util_32x8": 0.9999,
+     "mvm_128x8": 37698,
+     "util_128x8": 0.9999
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 2359296,
+    "512": 9437184,
+    "1024": 18874368
+   },
+   "hf_id": "gpt2",
+   "note": "GPT-2 small (124M)",
+   "quantized_layers": [
+    "mlp.c_fc"
+   ]
+  },
+  "tinystories-1m": {
+   "config": {
+    "model_type": "gpt_neo",
+    "hidden": 64,
+    "layers": 8,
+    "heads": 16,
+    "vocab": 50257,
+    "params_total": 3745984,
+    "params_linear": 3609664,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "k_proj (64x64)": 8,
+    "v_proj (64x64)": 8,
+    "q_proj (64x64)": 8,
+    "out_proj (64x64)": 8,
+    "c_fc (64x256)": 8,
+    "c_proj (256x64)": 8,
+    "lm_head (64x50257)": 1
+   },
+   "quantized": {
+    "layers": 8,
+    "macs": 131072,
+    "mvm_32x8": 512,
+    "util_32x8": 1.0,
+    "mvm_128x8": 256,
+    "util_128x8": 0.5
+   },
+   "body_linear": {
+    "layers": 48,
+    "macs": 393216,
+    "mvm_32x8": 1536,
+    "util_32x8": 1.0,
+    "mvm_128x8": 640,
+    "util_128x8": 0.6
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 3216448,
+    "mvm_32x8": 12566,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 6283,
+    "util_128x8": 0.4999
+   },
+   "all_linear": {
+    "layers": 49,
+    "macs": 3609664,
+    "mvm_32x8": 14102,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 6923,
+    "util_128x8": 0.5092
+   },
+   "quantized_share_of_all_mvm_32x8": 0.0363,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 24,
+     "macs": 98304,
+     "mvm_32x8": 384,
+     "util_32x8": 1.0,
+     "mvm_128x8": 192,
+     "util_128x8": 0.5
+    },
+    "attn_o": {
+     "layers": 8,
+     "macs": 32768,
+     "mvm_32x8": 128,
+     "util_32x8": 1.0,
+     "mvm_128x8": 64,
+     "util_128x8": 0.5
+    },
+    "mlp_in": {
+     "layers": 8,
+     "macs": 131072,
+     "mvm_32x8": 512,
+     "util_32x8": 1.0,
+     "mvm_128x8": 256,
+     "util_128x8": 0.5
+    },
+    "mlp_down": {
+     "layers": 8,
+     "macs": 131072,
+     "mvm_32x8": 512,
+     "util_32x8": 1.0,
+     "mvm_128x8": 128,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 3216448,
+     "mvm_32x8": 12566,
+     "util_32x8": 0.9999,
+     "mvm_128x8": 6283,
+     "util_128x8": 0.4999
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 131072,
+    "512": 393216,
+    "1024": 655360
+   },
+   "hf_id": "roneneldan/TinyStories-1M",
+   "note": "GPT-Neo, TinyStories",
+   "quantized_layers": [
+    "mlp.c_fc"
+   ]
+  },
+  "tinystories-3m": {
+   "config": {
+    "model_type": "gpt_neo",
+    "hidden": 128,
+    "layers": 8,
+    "heads": 16,
+    "vocab": 50257,
+    "params_total": 8278400,
+    "params_linear": 8005760,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "k_proj (128x128)": 8,
+    "v_proj (128x128)": 8,
+    "q_proj (128x128)": 8,
+    "out_proj (128x128)": 8,
+    "c_fc (128x512)": 8,
+    "c_proj (512x128)": 8,
+    "lm_head (128x50257)": 1
+   },
+   "quantized": {
+    "layers": 8,
+    "macs": 524288,
+    "mvm_32x8": 2048,
+    "util_32x8": 1.0,
+    "mvm_128x8": 512,
+    "util_128x8": 1.0
+   },
+   "body_linear": {
+    "layers": 48,
+    "macs": 1572864,
+    "mvm_32x8": 6144,
+    "util_32x8": 1.0,
+    "mvm_128x8": 1536,
+    "util_128x8": 1.0
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 6432896,
+    "mvm_32x8": 25132,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 6283,
+    "util_128x8": 0.9999
+   },
+   "all_linear": {
+    "layers": 49,
+    "macs": 8005760,
+    "mvm_32x8": 31276,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 7819,
+    "util_128x8": 0.9999
+   },
+   "quantized_share_of_all_mvm_32x8": 0.0655,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 24,
+     "macs": 393216,
+     "mvm_32x8": 1536,
+     "util_32x8": 1.0,
+     "mvm_128x8": 384,
+     "util_128x8": 1.0
+    },
+    "attn_o": {
+     "layers": 8,
+     "macs": 131072,
+     "mvm_32x8": 512,
+     "util_32x8": 1.0,
+     "mvm_128x8": 128,
+     "util_128x8": 1.0
+    },
+    "mlp_in": {
+     "layers": 8,
+     "macs": 524288,
+     "mvm_32x8": 2048,
+     "util_32x8": 1.0,
+     "mvm_128x8": 512,
+     "util_128x8": 1.0
+    },
+    "mlp_down": {
+     "layers": 8,
+     "macs": 524288,
+     "mvm_32x8": 2048,
+     "util_32x8": 1.0,
+     "mvm_128x8": 512,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 6432896,
+     "mvm_32x8": 25132,
+     "util_32x8": 0.9999,
+     "mvm_128x8": 6283,
+     "util_128x8": 0.9999
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 262144,
+    "512": 786432,
+    "1024": 1310720
+   },
+   "hf_id": "roneneldan/TinyStories-3M",
+   "note": "GPT-Neo, TinyStories",
+   "quantized_layers": [
+    "mlp.c_fc"
+   ]
+  },
+  "tinystories-8m": {
+   "config": {
+    "model_type": "gpt_neo",
+    "hidden": 256,
+    "layers": 8,
+    "heads": 16,
+    "vocab": 50257,
+    "params_total": 19702528,
+    "params_linear": 19157248,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "k_proj (256x256)": 8,
+    "v_proj (256x256)": 8,
+    "q_proj (256x256)": 8,
+    "out_proj (256x256)": 8,
+    "c_fc (256x1024)": 8,
+    "c_proj (1024x256)": 8,
+    "lm_head (256x50257)": 1
+   },
+   "quantized": {
+    "layers": 8,
+    "macs": 2097152,
+    "mvm_32x8": 8192,
+    "util_32x8": 1.0,
+    "mvm_128x8": 2048,
+    "util_128x8": 1.0
+   },
+   "body_linear": {
+    "layers": 48,
+    "macs": 6291456,
+    "mvm_32x8": 24576,
+    "util_32x8": 1.0,
+    "mvm_128x8": 6144,
+    "util_128x8": 1.0
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 12865792,
+    "mvm_32x8": 50264,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 12566,
+    "util_128x8": 0.9999
+   },
+   "all_linear": {
+    "layers": 49,
+    "macs": 19157248,
+    "mvm_32x8": 74840,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 18710,
+    "util_128x8": 0.9999
+   },
+   "quantized_share_of_all_mvm_32x8": 0.1095,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 24,
+     "macs": 1572864,
+     "mvm_32x8": 6144,
+     "util_32x8": 1.0,
+     "mvm_128x8": 1536,
+     "util_128x8": 1.0
+    },
+    "attn_o": {
+     "layers": 8,
+     "macs": 524288,
+     "mvm_32x8": 2048,
+     "util_32x8": 1.0,
+     "mvm_128x8": 512,
+     "util_128x8": 1.0
+    },
+    "mlp_in": {
+     "layers": 8,
+     "macs": 2097152,
+     "mvm_32x8": 8192,
+     "util_32x8": 1.0,
+     "mvm_128x8": 2048,
+     "util_128x8": 1.0
+    },
+    "mlp_down": {
+     "layers": 8,
+     "macs": 2097152,
+     "mvm_32x8": 8192,
+     "util_32x8": 1.0,
+     "mvm_128x8": 2048,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 12865792,
+     "mvm_32x8": 50264,
+     "util_32x8": 0.9999,
+     "mvm_128x8": 12566,
+     "util_128x8": 0.9999
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 524288,
+    "512": 1572864,
+    "1024": 2621440
+   },
+   "hf_id": "roneneldan/TinyStories-8M",
+   "note": "GPT-Neo, TinyStories",
+   "quantized_layers": [
+    "mlp.c_fc"
+   ]
+  },
+  "tinystories-33m": {
+   "config": {
+    "model_type": "gpt_neo",
+    "hidden": 768,
+    "layers": 4,
+    "heads": 16,
+    "vocab": 50257,
+    "params_total": 68514048,
+    "params_linear": 66908928,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "k_proj (768x768)": 4,
+    "v_proj (768x768)": 4,
+    "q_proj (768x768)": 4,
+    "out_proj (768x768)": 4,
+    "c_fc (768x3072)": 4,
+    "c_proj (3072x768)": 4,
+    "lm_head (768x50257)": 1
+   },
+   "quantized": {
+    "layers": 4,
+    "macs": 9437184,
+    "mvm_32x8": 36864,
+    "util_32x8": 1.0,
+    "mvm_128x8": 9216,
+    "util_128x8": 1.0
+   },
+   "body_linear": {
+    "layers": 24,
+    "macs": 28311552,
+    "mvm_32x8": 110592,
+    "util_32x8": 1.0,
+    "mvm_128x8": 27648,
+    "util_128x8": 1.0
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 38597376,
+    "mvm_32x8": 150792,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 37698,
+    "util_128x8": 0.9999
+   },
+   "all_linear": {
+    "layers": 25,
+    "macs": 66908928,
+    "mvm_32x8": 261384,
+    "util_32x8": 0.9999,
+    "mvm_128x8": 65346,
+    "util_128x8": 0.9999
+   },
+   "quantized_share_of_all_mvm_32x8": 0.141,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 12,
+     "macs": 7077888,
+     "mvm_32x8": 27648,
+     "util_32x8": 1.0,
+     "mvm_128x8": 6912,
+     "util_128x8": 1.0
+    },
+    "attn_o": {
+     "layers": 4,
+     "macs": 2359296,
+     "mvm_32x8": 9216,
+     "util_32x8": 1.0,
+     "mvm_128x8": 2304,
+     "util_128x8": 1.0
+    },
+    "mlp_in": {
+     "layers": 4,
+     "macs": 9437184,
+     "mvm_32x8": 36864,
+     "util_32x8": 1.0,
+     "mvm_128x8": 9216,
+     "util_128x8": 1.0
+    },
+    "mlp_down": {
+     "layers": 4,
+     "macs": 9437184,
+     "mvm_32x8": 36864,
+     "util_32x8": 1.0,
+     "mvm_128x8": 9216,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 38597376,
+     "mvm_32x8": 150792,
+     "util_32x8": 0.9999,
+     "mvm_128x8": 37698,
+     "util_128x8": 0.9999
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 786432,
+    "512": 2359296,
+    "1024": 3932160
+   },
+   "hf_id": "roneneldan/TinyStories-33M",
+   "note": "GPT-Neo, TinyStories",
+   "quantized_layers": [
+    "mlp.c_fc"
+   ]
+  },
+  "qwen2.5-0.5b": {
+   "config": {
+    "model_type": "qwen2",
+    "hidden": 896,
+    "layers": 24,
+    "heads": 14,
+    "vocab": 151936,
+    "params_total": 494032768,
+    "params_linear": 493961216,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "q_proj (896x896)": 24,
+    "k_proj (896x128)": 24,
+    "v_proj (896x128)": 24,
+    "o_proj (896x896)": 24,
+    "gate_proj (896x4864)": 24,
+    "up_proj (896x4864)": 24,
+    "down_proj (4864x896)": 24,
+    "lm_head (896x151936)": 1
+   },
+   "quantized": {
+    "layers": 48,
+    "macs": 209190912,
+    "mvm_32x8": 817152,
+    "util_32x8": 1.0,
+    "mvm_128x8": 204288,
+    "util_128x8": 1.0
+   },
+   "body_linear": {
+    "layers": 168,
+    "macs": 357826560,
+    "mvm_32x8": 1397760,
+    "util_32x8": 1.0,
+    "mvm_128x8": 349440,
+    "util_128x8": 1.0
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 136134656,
+    "mvm_32x8": 531776,
+    "util_32x8": 1.0,
+    "mvm_128x8": 132944,
+    "util_128x8": 1.0
+   },
+   "all_linear": {
+    "layers": 169,
+    "macs": 493961216,
+    "mvm_32x8": 1929536,
+    "util_32x8": 1.0,
+    "mvm_128x8": 482384,
+    "util_128x8": 1.0
+   },
+   "quantized_share_of_all_mvm_32x8": 0.4235,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 72,
+     "macs": 24772608,
+     "mvm_32x8": 96768,
+     "util_32x8": 1.0,
+     "mvm_128x8": 24192,
+     "util_128x8": 1.0
+    },
+    "attn_o": {
+     "layers": 24,
+     "macs": 19267584,
+     "mvm_32x8": 75264,
+     "util_32x8": 1.0,
+     "mvm_128x8": 18816,
+     "util_128x8": 1.0
+    },
+    "mlp_in": {
+     "layers": 48,
+     "macs": 209190912,
+     "mvm_32x8": 817152,
+     "util_32x8": 1.0,
+     "mvm_128x8": 204288,
+     "util_128x8": 1.0
+    },
+    "mlp_down": {
+     "layers": 24,
+     "macs": 104595456,
+     "mvm_32x8": 408576,
+     "util_32x8": 1.0,
+     "mvm_128x8": 102144,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 136134656,
+     "mvm_32x8": 531776,
+     "util_32x8": 1.0,
+     "mvm_128x8": 132944,
+     "util_128x8": 1.0
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 5505024,
+    "512": 22020096,
+    "1024": 44040192
+   },
+   "hf_id": "Qwen/Qwen2.5-0.5B",
+   "note": "Qwen2.5-0.5B (reference, not edge)",
+   "quantized_layers": [
+    "mlp.gate_proj",
+    "mlp.up_proj"
+   ]
+  },
+  "smollm2-135m": {
+   "config": {
+    "model_type": "llama",
+    "hidden": 576,
+    "layers": 30,
+    "heads": 9,
+    "vocab": 49152,
+    "params_total": 134515008,
+    "params_linear": 134479872,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "q_proj (576x576)": 30,
+    "k_proj (576x192)": 30,
+    "v_proj (576x192)": 30,
+    "o_proj (576x576)": 30,
+    "gate_proj (576x1536)": 30,
+    "up_proj (576x1536)": 30,
+    "down_proj (1536x576)": 30,
+    "lm_head (576x49152)": 1
+   },
+   "quantized": {
+    "layers": 60,
+    "macs": 53084160,
+    "mvm_32x8": 207360,
+    "util_32x8": 1.0,
+    "mvm_128x8": 57600,
+    "util_128x8": 0.9
+   },
+   "body_linear": {
+    "layers": 210,
+    "macs": 106168320,
+    "mvm_32x8": 414720,
+    "util_32x8": 1.0,
+    "mvm_128x8": 112320,
+    "util_128x8": 0.9231
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 28311552,
+    "mvm_32x8": 110592,
+    "util_32x8": 1.0,
+    "mvm_128x8": 30720,
+    "util_128x8": 0.9
+   },
+   "all_linear": {
+    "layers": 211,
+    "macs": 134479872,
+    "mvm_32x8": 525312,
+    "util_32x8": 1.0,
+    "mvm_128x8": 143040,
+    "util_128x8": 0.9181
+   },
+   "quantized_share_of_all_mvm_32x8": 0.3947,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 90,
+     "macs": 16588800,
+     "mvm_32x8": 64800,
+     "util_32x8": 1.0,
+     "mvm_128x8": 18000,
+     "util_128x8": 0.9
+    },
+    "attn_o": {
+     "layers": 30,
+     "macs": 9953280,
+     "mvm_32x8": 38880,
+     "util_32x8": 1.0,
+     "mvm_128x8": 10800,
+     "util_128x8": 0.9
+    },
+    "mlp_in": {
+     "layers": 60,
+     "macs": 53084160,
+     "mvm_32x8": 207360,
+     "util_32x8": 1.0,
+     "mvm_128x8": 57600,
+     "util_128x8": 0.9
+    },
+    "mlp_down": {
+     "layers": 30,
+     "macs": 26542080,
+     "mvm_32x8": 103680,
+     "util_32x8": 1.0,
+     "mvm_128x8": 25920,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 28311552,
+     "mvm_32x8": 110592,
+     "util_32x8": 1.0,
+     "mvm_128x8": 30720,
+     "util_128x8": 0.9
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 4423680,
+    "512": 17694720,
+    "1024": 35389440
+   },
+   "hf_id": "HuggingFaceTB/SmolLM2-135M",
+   "note": "SmolLM2-135M (Llama)",
+   "quantized_layers": [
+    "mlp.gate_proj",
+    "mlp.up_proj"
+   ]
+  },
+  "smollm2-360m": {
+   "config": {
+    "model_type": "llama",
+    "hidden": 960,
+    "layers": 32,
+    "heads": 15,
+    "vocab": 49152,
+    "params_total": 361821120,
+    "params_linear": 361758720,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "q_proj (960x960)": 32,
+    "k_proj (960x320)": 32,
+    "v_proj (960x320)": 32,
+    "o_proj (960x960)": 32,
+    "gate_proj (960x2560)": 32,
+    "up_proj (960x2560)": 32,
+    "down_proj (2560x960)": 32,
+    "lm_head (960x49152)": 1
+   },
+   "quantized": {
+    "layers": 64,
+    "macs": 157286400,
+    "mvm_32x8": 614400,
+    "util_32x8": 1.0,
+    "mvm_128x8": 163840,
+    "util_128x8": 0.9375
+   },
+   "body_linear": {
+    "layers": 224,
+    "macs": 314572800,
+    "mvm_32x8": 1228800,
+    "util_32x8": 1.0,
+    "mvm_128x8": 322560,
+    "util_128x8": 0.9524
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 47185920,
+    "mvm_32x8": 184320,
+    "util_32x8": 1.0,
+    "mvm_128x8": 49152,
+    "util_128x8": 0.9375
+   },
+   "all_linear": {
+    "layers": 225,
+    "macs": 361758720,
+    "mvm_32x8": 1413120,
+    "util_32x8": 1.0,
+    "mvm_128x8": 371712,
+    "util_128x8": 0.9504
+   },
+   "quantized_share_of_all_mvm_32x8": 0.4348,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 96,
+     "macs": 49152000,
+     "mvm_32x8": 192000,
+     "util_32x8": 1.0,
+     "mvm_128x8": 51200,
+     "util_128x8": 0.9375
+    },
+    "attn_o": {
+     "layers": 32,
+     "macs": 29491200,
+     "mvm_32x8": 115200,
+     "util_32x8": 1.0,
+     "mvm_128x8": 30720,
+     "util_128x8": 0.9375
+    },
+    "mlp_in": {
+     "layers": 64,
+     "macs": 157286400,
+     "mvm_32x8": 614400,
+     "util_32x8": 1.0,
+     "mvm_128x8": 163840,
+     "util_128x8": 0.9375
+    },
+    "mlp_down": {
+     "layers": 32,
+     "macs": 78643200,
+     "mvm_32x8": 307200,
+     "util_32x8": 1.0,
+     "mvm_128x8": 76800,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 47185920,
+     "mvm_32x8": 184320,
+     "util_32x8": 1.0,
+     "mvm_128x8": 49152,
+     "util_128x8": 0.9375
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 7864320,
+    "512": 31457280,
+    "1024": 62914560
+   },
+   "hf_id": "HuggingFaceTB/SmolLM2-360M",
+   "note": "SmolLM2-360M (Llama)",
+   "quantized_layers": [
+    "mlp.gate_proj",
+    "mlp.up_proj"
+   ]
+  },
+  "smollm2-1.7b": {
+   "config": {
+    "model_type": "llama",
+    "hidden": 2048,
+    "layers": 24,
+    "heads": 32,
+    "vocab": 49152,
+    "params_total": 1711376384,
+    "params_linear": 1711276032,
+    "tied_lm_head": true
+   },
+   "layer_kinds": {
+    "q_proj (2048x2048)": 24,
+    "k_proj (2048x2048)": 24,
+    "v_proj (2048x2048)": 24,
+    "o_proj (2048x2048)": 24,
+    "gate_proj (2048x8192)": 24,
+    "up_proj (2048x8192)": 24,
+    "down_proj (8192x2048)": 24,
+    "lm_head (2048x49152)": 1
+   },
+   "quantized": {
+    "layers": 48,
+    "macs": 805306368,
+    "mvm_32x8": 3145728,
+    "util_32x8": 1.0,
+    "mvm_128x8": 786432,
+    "util_128x8": 1.0
+   },
+   "body_linear": {
+    "layers": 168,
+    "macs": 1610612736,
+    "mvm_32x8": 6291456,
+    "util_32x8": 1.0,
+    "mvm_128x8": 1572864,
+    "util_128x8": 1.0
+   },
+   "lm_head": {
+    "layers": 1,
+    "macs": 100663296,
+    "mvm_32x8": 393216,
+    "util_32x8": 1.0,
+    "mvm_128x8": 98304,
+    "util_128x8": 1.0
+   },
+   "all_linear": {
+    "layers": 169,
+    "macs": 1711276032,
+    "mvm_32x8": 6684672,
+    "util_32x8": 1.0,
+    "mvm_128x8": 1671168,
+    "util_128x8": 1.0
+   },
+   "quantized_share_of_all_mvm_32x8": 0.4706,
+   "by_type": {
+    "attn_qkv": {
+     "layers": 72,
+     "macs": 301989888,
+     "mvm_32x8": 1179648,
+     "util_32x8": 1.0,
+     "mvm_128x8": 294912,
+     "util_128x8": 1.0
+    },
+    "attn_o": {
+     "layers": 24,
+     "macs": 100663296,
+     "mvm_32x8": 393216,
+     "util_32x8": 1.0,
+     "mvm_128x8": 98304,
+     "util_128x8": 1.0
+    },
+    "mlp_in": {
+     "layers": 48,
+     "macs": 805306368,
+     "mvm_32x8": 3145728,
+     "util_32x8": 1.0,
+     "mvm_128x8": 786432,
+     "util_128x8": 1.0
+    },
+    "mlp_down": {
+     "layers": 24,
+     "macs": 402653184,
+     "mvm_32x8": 1572864,
+     "util_32x8": 1.0,
+     "mvm_128x8": 393216,
+     "util_128x8": 1.0
+    },
+    "lm_head": {
+     "layers": 1,
+     "macs": 100663296,
+     "mvm_32x8": 393216,
+     "util_32x8": 1.0,
+     "mvm_128x8": 98304,
+     "util_128x8": 1.0
+    }
+   },
+   "attention_kv_macs_per_token": {
+    "128": 12582912,
+    "512": 50331648,
+    "1024": 100663296
+   },
+   "hf_id": "HuggingFaceTB/SmolLM2-1.7B",
+   "note": "SmolLM2-1.7B (Llama)",
+   "quantized_layers": [
+    "mlp.gate_proj",
+    "mlp.up_proj"
+   ]
+  }
+ }
+}
