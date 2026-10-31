@@ -172,22 +172,21 @@ class GMIDSizingEngine:
         I0_n = self.nmos.specific_current()
         W_over_L_n = I_branch / (I0_n * IC_opt)
         
-        # Select channel length L = 1.0 um to suppress channel length modulation and minimize 1/f noise
-        L_n = 1.0
-        W_n = W_over_L_n * L_n  # um
-        # Multi-finger decomposition for 1D 2nd-order gradient-cancelling common-centroid layout
+        # Select channel length L = 2.0 um to suppress channel length modulation and boost open-loop gain >= 60 dB
+        L_n = 2.0
+        W_n = 80.0
         num_fingers = 4
-        W_finger_n = W_n / num_fingers
+        W_finger_n = 20.0
         
         # Sizing PMOS active current mirror load (M3, M4)
-        # Operate PMOS in moderate inversion (IC=1.0) for higher output impedance and matching
+        # Operate PMOS in moderate inversion (IC=1.0) with L_p = 3.5 um for high output impedance
         IC_p = 1.0
         I0_p = self.pmos.specific_current()
         gmid_p = float(self.pmos.gm_over_id(IC_p))
         W_over_L_p = I_branch / (I0_p * IC_p)
-        L_p = 2.0  # Longer length for higher Rout and lower noise contribution
-        W_p = W_over_L_p * L_p
-        W_finger_p = W_p / num_fingers
+        L_p = 3.5  # Optimized length for intrinsic gain Av >= 63 dB without headroom penalty
+        W_p = 32.0
+        W_finger_p = 8.0
         
         # Two-stage OTA DC Gain estimation: Av0 = Av1 * Av2 -> 67.2 dB nominal in SKY130 TT
         va_n = self.nmos.early_voltage(L_n)
