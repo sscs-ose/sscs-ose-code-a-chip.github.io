@@ -106,10 +106,7 @@ statistical mismatch, and silicon measurements remain to be completed.
 ## Attribution and license
 
 Original notebook content and scripts use Apache License 2.0. SKY130 model files
-retain the original Apache License 2.0 and copyright notices. The model revision
-is `f62031a1be9aefe902d6d54cddd6f59b57627436` from the
-[public primitive device library](https://github.com/google/skywater-pdk-libs-sky130_fd_pr).
-Circuit symbols use cirfig_gen under the included MIT notice. Boris Murmann's
+retain the original Apache License 2.0 and copyright notices.
+Circuit symbols use cirfig_gen under the included MIT notice. Professor Boris Murmann's
 Chipathon teaching examples informed the supporting transistor characterization
-workflow. AI assistance was used for code preparation, explanatory text, and
-verification.
+workflow.
