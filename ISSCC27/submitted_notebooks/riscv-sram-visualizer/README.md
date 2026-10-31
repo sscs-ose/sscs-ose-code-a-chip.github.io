@@ -20,15 +20,17 @@ ordering, not physical voltage, current or elapsed electrical time.
 
 ## Quick start
 
-Clone this repository using its hosting page's clone URL, then enter its directory:
+Clone the ISSCC 2027 submission branch and navigate to the project directory:
 
 ```sh
-cd riscv-memory-visualizer
+git clone --depth 1 --branch isscc27-riscv-sram-visualizer https://github.com/FizaK-eng/sscs-ose-code-a-chip.github.io.git
+cd sscs-ose-code-a-chip.github.io/ISSCC27/submitted_notebooks/riscv-sram-visualizer
 python -m venv .venv
 ```
 
-Activate on macOS/Linux with `source .venv/bin/activate`, or on Windows PowerShell
-with `.venv/Scripts/Activate.ps1`. Then, on either platform:
+If you already have a checkout containing this submission, navigate directly to `ISSCC27/submitted_notebooks/riscv-sram-visualizer` before running the setup commands.
+
+Activate on macOS/Linux with `source .venv/bin/activate`, or on Windows PowerShell with `.venv/Scripts/Activate.ps1`. Then, on either platform:
 
 ```sh
 python -m pip install -e ".[notebook,test]"
