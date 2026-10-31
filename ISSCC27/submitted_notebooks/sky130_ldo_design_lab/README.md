@@ -1,82 +1,115 @@
-# Gate drive has a cost
+# A complete 50 mA SKY130 LDO with a local gate feedback loop
 
-A reproducible SKY130 LDO sizing laboratory
+**Author and travel representative: Christian Reivan**  
+**GitHub: [christianreivan](https://github.com/christianreivan)**
 
-Author and travel representative: Christian Reivan  
-GitHub: https://github.com/christianreivan
+This Code a Chip notebook implements a complete transistor LDO. The circuit
+contains a current mirror error amplifier, physical bias generator, PMOS super
+source follower gate driver, NMOS pass array, direct output feedback,
+compensation, and an output bleeder. The external reference is shared by the
+amplifier and bias circuit.
 
-This educational Code a Chip entry connects pass transistor current capacity,
-available gate swing, transconductance sizing closure, and actual terminal loading.
-Its main result is directly reproducible from saved native ngspice data: at 100 mV
-across the PFET, reducing VSG from 1.8 V to 1.2 V increases the first width estimate
-for 50 mA from about 3.05 mm to 10.97 mm.
+The nominal circuit regulates VIN = 1.2 V to VOUT = 1.0 V for loads from 0 to 50 mA.
+The amplifier and driver require a separate VAA = 1.8 V rail. The output capacitor
+sweep covers 10, 50, 100, and 350 pF. Every regulator control device uses a public
+SKY130 transistor model. There is no behavioral amplifier or controller in the core.
 
-Open `sky130_ldo_design_lab.ipynb` and run all cells. This verifies the frozen data
-and regenerates the calculations and figures without needing the PDK or a lab server.
-The submitted notebook contains executed outputs.
+Open [the notebook](sky130_ldo_design_lab.ipynb) for the transistor schematics,
+hand derivation, native results, and executable plots. The contribution is a
+reproducible connected circuit study of the tradeoffs among gate drive, supply
+rejection, light load damping, and transient response.
 
-## Local notebook setup
+## Read and run
 
-Use Python 3.11 or later in an isolated environment.
-On Windows, keep the environment folder path short. If pip reports a path length
-error while installing JupyterLab, create the environment in a shorter directory.
+Use Python 3.11 or later. From this directory, install the requirements and start
+JupyterLab:
 
 ```text
 python -m pip install -r requirements.txt
 python -m jupyterlab
 ```
 
-Open the notebook from this project directory. To check saved evidence directly:
+Open `sky130_ldo_design_lab.ipynb` and select Run All. The included ngspice results
+allow every figure and table to be reproduced without installing a simulator.
+The notebook contains executed outputs for immediate reading.
 
-```text
-python scripts/device_lab.py check
+## Simulate the complete circuit
+
+Install [ngspice](https://ngspice.sourceforge.io/download.html).
+The full circuit runs use ngspice 47. The project includes the required public
+SKY130 MOS models and their source manifest, so a separate PDK installation
+is not required.
+
+If the executable is named `ngspice` and is on the system search path, no additional
+configuration is needed. Otherwise set the `NGSPICE` environment variable to its
+absolute path. For example, on Windows PowerShell:
+
+```powershell
+$env:NGSPICE = 'C:/Spice64/bin/ngspice_con.exe'
 ```
 
-## Native regeneration
-
-The original experiments use ngspice 41 and the public open_pdks.sky130a package
-1.0.471_0_g97d0844 with build 20240223_100318. See FOUNDATIONAL_EVIDENCE.json for
-the package URL and top model library hash. No PDK is redistributed here.
-
-Install native ngspice and SKY130. Set SKY130_MODEL to the absolute path of
-sky130.lib.spice, or set PDK_ROOT to the directory containing sky130A. Set NGSPICE
-to the native executable if it is not on PATH. Then run:
+Set `RUN_NATIVE = True` in the notebook to generate new transistor simulations and
+plot their results. Alternatively, run the complete experiment from the terminal:
 
 ```text
-python scripts/device_lab.py regenerate --output work/device_run
+python scripts/ldo_lab.py regenerate --all-cases --output work/full_run
 ```
 
-The runner launches real ngspice, records its version and the model hash, and saves
-fresh raw tables and logs in a new directory. It refuses a nonempty destination.
-Changing the simulator or PDK revision may change the numerical values.
-The submitted notebook defaults to saved evidence mode. It does not claim a new
-native run merely because Run All successfully redraws the figures.
+Choose a new output directory for each run. The runner records the simulator
+version, checks the public model files, writes the SPICE decks, runs ngspice,
+and saves the new native tables and logs. The analysis functions accept that
+directory directly. Numerical results can differ with simulator versions.
 
-## Contents
+The canonical circuit is in [circuits/ldo.spice](circuits/ldo.spice).
+Its [circuit description](circuits/ldo.json) records every transistor terminal,
+dimension, resistor, and capacitor. Simulation fixtures also include the supply,
+reference, and load sources and the requested analysis commands.
 
-1. sky130_ldo_design_lab.ipynb contains the lesson and executed calculations.
-2. scripts/device_lab.py provides portable analysis and optional native regeneration.
-3. data/device contains native tables, logs, portable SPICE decks, and declared settings.
-4. FOUNDATIONAL_EVIDENCE.json records source hashes, public hashes, and transformations.
-5. figures contains connected fixture drawings and their attribution.
-6. VERIFICATION.json records notebook execution and evidence checks.
+## What is measured
 
-## Evidence boundaries
+1. DC regulation and device operating points from 0 to 50 mA.
+2. VIN and VAA supply transfer from 1 Hz to 1 GHz.
+3. Reference transfer and closed loop output impedance.
+4. Precision loop voltage injection, its port impedance condition, and small load steps.
+5. Output capacitor endpoints at 0 and 50 mA.
+6. Five process corners at 0, 27, and 85 °C with 100 pF.
+7. Large load steps, startup, DC input sweeps, and intrinsic output noise.
+8. The effect of removing the VIN coupling capacitor from the same connected circuit.
 
-The evidence is nominal SKY130 compact model simulation at TT and 27 degrees C.
-The current capacity results describe isolated pass devices. They do not establish
-regulated dropout, closed loop PSR, stability, transient performance, or silicon results.
-The continuous sizing root needs legal layout geometry selection and rechecking.
-The terminal capacitance fixtures use VDS magnitude 0.9 V, which differs from the
-100 mV dropout example. Recharacterize capacitance at the actual connected bias.
+At nominal full load and 100 pF, the worst VIN transfer is about −18.5 dB.
+A 0 to 50 mA step with 10 ns edges produces approximately 363 mV undershoot.
+The auxiliary rail is evaluated separately and has a weak rejection corner.
+The notebook explains these limitations alongside the corresponding results.
+
+## Physical implementation assumptions
+
+The source tied body of the NMOS pass array requires suitable well isolation.
+The 1.8 V auxiliary supply provides gate drive headroom and contributes power.
+The reference and supply generators are ideal in the declared tests, except for
+the explicit ripple excitation. The noise analysis includes transistor and
+resistor noise but excludes external generator noise.
+
+These are compact model circuit simulations. Layout, interconnect extraction,
+statistical mismatch, and silicon measurements remain to be completed.
+
+## Files
+
+1. `sky130_ldo_design_lab.ipynb` contains the complete lesson and executed results.
+2. `circuits` contains the canonical complete circuit.
+3. `scripts/ldo_lab.py` runs and analyzes the complete regulator experiments.
+4. `data/ldo` contains native simulation tables, portable decks, and conditions.
+5. `models` contains the public model archive, original license, and source hashes.
+6. `figures` contains the transistor schematics and editable drawing descriptions.
+7. `data/device` and `scripts/device_lab.py` provide supporting device characterization.
+8. `VERIFICATION.json` records notebook execution and checks.
 
 ## Attribution and license
 
-This submission curates the author's native SKY130 characterization data and uses
-original portable scripts. Boris Murmann's Chipathon 2024 examples informed the
-device lookup teaching approach. SKY130 and ngspice remain separately licensed
-dependencies. Circuit symbols use cirfig_gen under its included MIT notice.
-Original notebook content and code use Apache License 2.0.
-
-AI assistance was used for preparation, code adaptation, and checking. Circuit data
-are identified native ngspice outputs. All physical claims are limited to that evidence.
+Original notebook content and scripts use Apache License 2.0. SKY130 model files
+retain the original Apache License 2.0 and copyright notices. The model revision
+is `f62031a1be9aefe902d6d54cddd6f59b57627436` from the
+[public primitive device library](https://github.com/google/skywater-pdk-libs-sky130_fd_pr).
+Circuit symbols use cirfig_gen under the included MIT notice. Boris Murmann's
+Chipathon teaching examples informed the supporting transistor characterization
+workflow. AI assistance was used for code preparation, explanatory text, and
+verification.

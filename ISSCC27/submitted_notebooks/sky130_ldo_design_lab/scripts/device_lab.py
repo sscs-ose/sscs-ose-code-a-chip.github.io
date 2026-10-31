@@ -5,7 +5,7 @@ replaced by a behavioral or numerical circuit model in this module.
 
 Set SKY130_MODEL to sky130.lib.spice, or set PDK_ROOT to the directory that
 contains sky130A. Set NGSPICE to an executable when it is not on PATH.
-Run ``python scripts/device_lab.py check`` to audit saved evidence.
+Run ``python scripts/device_lab.py check`` to check the included device results.
 Run ``python scripts/device_lab.py regenerate --output work/device_run``
 to launch native ngspice in a new output directory.
 """
@@ -113,7 +113,7 @@ def dropout_summary(load_current_a: float = .05,
 
 
 def load_sizing_history(data_dir: Path | str = DATA) -> pd.DataFrame:
-    """Historical native sizing iterations, retained with their actual sequence."""
+    """Native sizing iterations in simulation order."""
     return pd.read_csv(Path(data_dir) / "sizing_iterations.csv")
 
 
@@ -192,7 +192,7 @@ def terminal_summary(data_dir: Path | str = DATA) -> pd.DataFrame:
 
 
 def verify_saved_data(data_dir: Path | str = DATA) -> dict:
-    """Check frozen source hashes, native table dimensions and documented landmarks."""
+    """Check source hashes, native table dimensions and documented landmarks."""
     data_dir = Path(data_dir)
     manifest = json.loads((ROOT / "FOUNDATIONAL_EVIDENCE.json").read_text())
     checked = 0
@@ -275,7 +275,7 @@ def regenerate(output_dir: Path | str, cases: tuple[str, ...] = CASES) -> dict:
     executable, model = native_tools()
     output = Path(output_dir).resolve()
     if output == DATA.resolve() or DATA.resolve() in output.parents:
-        raise ValueError("Choose a new work directory outside the frozen saved data")
+        raise ValueError("Choose a new work directory outside the included data")
     if output.exists() and any(output.iterdir()):
         raise FileExistsError("Choose an empty output directory for a fresh native run")
     if any(case not in CASES for case in cases):
