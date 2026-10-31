@@ -233,7 +233,7 @@ class CACESpecificationVerifier:
             "Direction": "min"
         },
         {
-            "Parameter": "Silicon Core Area",
+            "Parameter": "Core Macro Layout Area",
             "Symbol": "Area",
             "Tool": "gdstk / GDSII Layout",
             "Evidence_Level": "Level 5 Physical Layout (PR boundary 84×50.65 µm)",
