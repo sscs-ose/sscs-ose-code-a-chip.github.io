@@ -6,6 +6,17 @@
 
 If selected, Einosuke Okazaki will attend ISSCC 2027 in person and present the poster.
 
+## Highlights
+
+TritFlow is a design flow from ternary HDL to GDS on OpenSUSI TR-1um, built on CMOS cells that handle three voltage levels directly. The notebooks run ternary HDL through logic synthesis, two-metal place and route, GDS output, DRC/LVS, post-layout simulation and ternary timing analysis in order.
+
+- **To our knowledge, the first ternary physical design flow from HDL to GDS**: one automated pipeline runs a dedicated ternary HDL (TritVerilog) → logic synthesis → two-metal place and route → GDS → DRC/LVS → post-layout SPICE → ternary timing analysis.
+- **Physical balanced ternary**: without binary encoding, CMOS cells carry −1, 0 and +1 as the three voltages −5 V, 0 V and +5 V.
+- **Manufacturable GDS**: the layouts pass the PDK's official DRC/LVS decks, and the flow generates a full-chip GDS with the MPW shuttle's frame and pads.
+- **Standard cells from a taped-out design**: the cells are based on balanced-ternary logic circuits the author taped out on OpenSUSI-TR10 in 2026. The chips are scheduled for delivery in January 2027, so simulation results can be compared directly with measurements.
+- **Every step interactive on Colab**: schematics, layouts and waveforms of each step appear in place, and the HDL can be edited and rerun.
+- **A flow on Japan's first commercial open-source PDK**: built on OpenSUSI TR-1um, it pushes forward the democratization of chip design in Japan.
+
 ![TritFlow on a ternary full adder: TritVerilog, synthesis, standard cell, place and route, post-layout SPICE and the MPW top](tritflow_flow.png)
 
 ## Notebooks
@@ -16,15 +27,6 @@ If selected, Einosuke Okazaki will attend ISSCC 2027 in person and present the p
 | [tritflow_ja.ipynb](tritflow_ja.ipynb) | Japanese | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/53a9d26715709a543095e25cc410ee43183fe209/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) |
 
 Both notebooks are saved with their outputs.
-
-## Highlights
-
-- **To our knowledge, the first ternary physical design flow from HDL to GDS**: one automated pipeline runs a dedicated ternary HDL (TritVerilog) → logic synthesis → two-metal place and route → GDS → DRC/LVS → post-layout SPICE → ternary timing analysis.
-- **Physical balanced ternary**: without binary encoding, CMOS cells carry −1, 0 and +1 as the three voltages −5 V, 0 V and +5 V.
-- **Manufacturable GDS**: the layouts pass the PDK's official DRC/LVS decks, and the flow generates a full-chip GDS with the MPW shuttle's frame and pads.
-- **Standard cells from a taped-out design**: the cells are based on balanced-ternary logic circuits the author taped out on OpenSUSI-TR10 in 2026. The chips are scheduled for delivery in January 2027, so simulation results can be compared directly with measurements.
-- **Every step interactive on Colab**: schematics, layouts and waveforms of each step appear in place, and the HDL can be edited and rerun.
-- **A flow on Japan's first commercial open-source PDK**: built on OpenSUSI TR-1um, it pushes forward the democratization of chip design in Japan.
 
 ## Running
 
