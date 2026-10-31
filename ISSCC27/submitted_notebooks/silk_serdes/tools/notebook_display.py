@@ -32,3 +32,17 @@ def draw_eye(ax, eye, ui, title):
     ax.axhline(0, color="gray", lw=.6)
     ax.set(xlim=(0, ui), xlabel="Phase (UI)", ylabel="RXP − RXN (V)",
            title=f"{title}: {eye.height*1e3:.1f} mV, {eye.width/ui:.3f} UI")
+
+def show_file(path):
+    """Offer a Colab download button or a local Jupyter file link."""
+    import sys
+    path = Path(path)
+    if "google.colab" in sys.modules:
+        from google.colab import files
+        from ipywidgets import Button
+        button = Button(description=f"Download {path.name}", layout={"width": "auto"})
+        button.on_click(lambda _: files.download(str(path)))
+        display(button)
+    else:
+        from IPython.display import FileLink
+        display(FileLink(str(path)))
