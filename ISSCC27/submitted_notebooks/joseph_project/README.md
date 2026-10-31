@@ -17,7 +17,7 @@
 
 | Name | Role | Affiliation | IEEE Member | SSCS Member | Contact |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| **Joseph** (Lead Author) | Circuit Design & Layout Automation | Undergraduate STudent | Yes | No | <josephgeorge28360@gmail.com> |
+| **Joseph** (Lead Author) | Circuit Design & Layout Automation | Undergraduate Student | Yes | No | <josephgeorge28360@gmail.com> |
 
 ---
 
@@ -159,13 +159,13 @@ Since $f_{chop} = 4\,\text{kHz} \gg f_{\text{corner}, 1/f} \approx 800\,\text{Hz
 Threshold voltage and oxide thickness vary across the wafer following spatial Taylor expansions:
 $$V_{th}(x) = V_{th0} + g_1 \cdot x + g_2 \cdot x^2 + \mathcal{O}(x^3)$$
 To simultaneously cancel both 1st-order linear wafer tilts ($g_1$) and 2nd-order quadratic thermal/packaging stress curvatures ($g_2$) between matched input transistors $M_1$ ('A') and $M_2$ ('B'), the layout synthesizes an optimal 2nd-order sequence:
-$$\text{Pattern} = [D, A, B, B, A, B, A, A, B, D]$$
-Where $A \in \{1, 4, 6, 7\}$ and $B \in \{2, 3, 5, 8\}$ (with $D \in \{0, 9\}$ as OPC dummy boundaries):
+$$\text{Array Pattern} = [D, A, B, B, A, B, A, A, B, D]$$
+Where active matched fingers are indexed $X \in \{0, \dots, 7\}$: $A \in \{0, 3, 5, 6\}$ and $B \in \{1, 2, 4, 7\}$ (flanked by outer OPC dummies $D$):
 
-- **1st-Order Linear Moment ($M_1$)**: $\sum_{i \in A} x_i = 1+4+6+7 = 18 \implies \bar{x}_A = 4.5$; $\sum_{j \in B} x_j = 2+3+5+8 = 18 \implies \bar{x}_B = 4.5$.  
-  $$\mathbf{\Delta M_1 = \bar{x}_A - \bar{x}_B = 0.0000 \quad (\text{Exact Linear Cancellation, } >95\,\text{dB Suppression})}$$
-- **2nd-Order Quadratic Moment ($M_2$)**: $\sum_{i \in A} x_i^2 = 1 + 16 + 36 + 49 = 102 \implies \overline{x_A^2} = 25.5$; $\sum_{j \in B} x_j^2 = 4 + 9 + 25 + 64 = 102 \implies \overline{x_B^2} = 25.5$.  
-  $$\mathbf{\Delta M_2 = \overline{x_A^2} - \overline{x_B^2} = 0.0000 \quad (\text{Exact Quadratic Stress Cancellation})}$$
+- **1st-Order Linear Moment ($M_1$)**: $\sum_{i \in A} X_i = 0+3+5+6 = 14 \implies \bar{X}_A = 3.5$; $\sum_{j \in B} X_j = 1+2+4+7 = 14 \implies \bar{X}_B = 3.5$.  
+  $$\mathbf{\Delta M_1 = \bar{X}_A - \bar{X}_B = 3.5 - 3.5 = 0.0000 \quad (\text{Exact Linear Cancellation, } >95\,\text{dB Suppression})}$$
+- **2nd-Order Quadratic Moment ($M_2$)**: $\sum_{i \in A} X_i^2 = 0 + 9 + 25 + 36 = 70 \implies \overline{X_A^2} = 17.5$; $\sum_{j \in B} X_j^2 = 1 + 4 + 16 + 49 = 70 \implies \overline{X_B^2} = 17.5$.  
+  $$\mathbf{\Delta M_2 = \overline{X_A^2} - \overline{X_B^2} = 17.5 - 17.5 = 0.0000 \quad (\text{Exact Quadratic Stress Cancellation})}$$
 - **Complete Lithographic Protection**: Symmetrical dummy transistors ('D') absorb boundary etch gradients, while a continuous $P^+$ substrate tap ring provides latch-up protection and shields against substrate noise.
 
 ---
@@ -209,21 +209,22 @@ Using Pelgrom mismatch parameters for SKY130 ($\sigma_{Vth} = \frac{A_{Vth}}{\sq
 
 ## 🏆 Head-to-Head Comparison with State-of-the-Art
 
-| Metric | **This Work (NeuroDyn-AFE)** | M. Ding et al. [1] | K. Lee et al. [2] | Q. Fan et al. [3] | R. F. Yazicioglu et al. [4] |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Venue** | **ISSCC 2027 (Code-a-Chip)** | IEEE JSSC 2024 | IEEE ISSCC 2023 | IEEE JSSC 2011 | IEEE JSSC 2007 |
-| **Technology** | **SkyWater 130nm** | TSMC 65nm | UMC 180nm | AMI 0.5µm | AMI 0.5µm |
-| **Open-Source PDK?** | **Yes (SKY130)** | No (Proprietary) | No (Proprietary) | No (Proprietary) | No (Proprietary) |
-| **Automated Layout?** | **Yes (KLayout GDS)** | No | No | No | No |
-| **Supply Voltage (V)** | **0.60** | 0.80 | 1.00 | 1.80 | 3.00 |
-| **Power ($\mu\text{W}$)** | **1.77** | 3.36 | 5.80 | 2.00 | 60.0 |
-| **Bandwidth (Hz)** | **1000** | 1000 | 1000 | 1000 | 1000 |
-| **DC Gain (dB)** | **67.2** | 60.0 | 64.0 | 60.0 | 52.0 |
-| **CMRR (dB)** | **108.5** | 102.0 | 96.0 | 110.0 | 85.0 |
-| **IR Noise ($\mu\text{V}_{\text{rms}}$)** | **0.79** | 0.95 | 1.10 | 0.90 | 1.10 |
-| **NEF** | **1.65** | 2.05 | 2.22 | 4.60 | 3.20 |
-| **PEF** | **1.63** | 3.36 | 4.93 | 38.10 | 30.70 |
-| **Residual Offset ($\mu\text{V}$)** | **0.78** | 1.20 | 3.50 | 2.00 | 25.0 |
+| Metric | **This Work (Core OTA)** | **This Work (Full System)** | M. Ding et al. [1] | K. Lee et al. [2] | Q. Fan et al. [3] | R. F. Yazicioglu et al. [4] |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Venue** | **ISSCC 2027 (Code-a-Chip)** | **ISSCC 2027 (Code-a-Chip)** | IEEE JSSC 2024 | IEEE ISSCC 2023 | IEEE JSSC 2011 | IEEE JSSC 2007 |
+| **Technology** | **SkyWater 130nm** | **SkyWater 130nm** | TSMC 65nm | UMC 180nm | AMI 0.5µm | AMI 0.5µm |
+| **Open-Source PDK?** | **Yes (SKY130)** | **Yes (SKY130)** | No (Proprietary) | No (Proprietary) | No (Proprietary) | No (Proprietary) |
+| **Automated Layout?** | **Yes (KLayout GDS)** | **Yes (KLayout GDS)** | No | No | No | No |
+| **Supply Voltage (V)** | **0.60** | **0.60** | 0.80 | 1.00 | 1.80 | 3.00 |
+| **Power ($\mu\text{W}$)** | **1.77** | **1.90** | 3.36 | 5.80 | 2.00 | 60.0 |
+| **Total Current ($\mu\text{A}$)** | **2.96** | **3.16** | 4.20 | 5.80 | 1.11 | 20.0 |
+| **Bandwidth (Hz)** | **1000** | **1000** | 1000 | 1000 | 1000 | 1000 |
+| **DC Gain (dB)** | **67.2** | **67.2** | 60.0 | 64.0 | 60.0 | 52.0 |
+| **CMRR (dB)** | **108.5** | **108.5** | 102.0 | 96.0 | 110.0 | 85.0 |
+| **IR Noise ($\mu\text{V}_{\text{rms}}$)** | **0.79** | **0.79** | 0.95 | 1.10 | 0.90 | 1.10 |
+| **NEF** | **1.65** | **1.88** | 2.05 | 2.22 | 4.60 | 3.20 |
+| **PEF** | **1.63** | **2.12** | 3.36 | 4.93 | 38.10 | 30.70 |
+| **Residual Offset ($\mu\text{V}$)** | **0.78** | **0.78** | 1.20 | 3.50 | 2.00 | 25.0 |
 
 ---
 
@@ -283,7 +284,7 @@ python verify_all.py
 
 This script sequentially executes all six core domains:
 
-1. **Device Physics & $g_m/I_D$ Modeling**: Confirms weak-inversion transconductance efficiency ($27.35\text{ S/A} \le 29\text{ S/A}$) and thermal noise integration.
+1. **Device Physics & $g_m/I_D$ Modeling**: Confirms weak-inversion transconductance efficiency ($25.5\text{ S/A} \le 29\text{ S/A}$) and thermal noise integration.
 2. **Open-Source PDK Discovery & SPICE Synthesis**: Validates SkyWater SKY130 BSIM4 TT model includes (`sky130_neurodyn_tt.lib.spice`) and netlist generation.
 3. **Dynamic Chopping & Clinical EEG Simulation**: Validates 15 mV $V_{EDO}$ offset cancellation ($0.78\,\mu\text{V}$ residual), ripple suppression ($62.3\text{ dB}$), and clinical EEG morphology ($r = 0.9926$).
 4. **Common-Centroid Mathematical Proof**: Validates 1st-order ($\Delta M_1 = 0.0000$) and 2nd-order ($\Delta M_2 = 0.0000$) layout centroid matching.
@@ -308,7 +309,7 @@ To ensure zero-friction reproducibility, the repository includes a self-containe
 
 - **Automatic Model Resolution**: The simulation manager automatically checks for an external open_pdks installation via `PDK_ROOT`, `SKY130_MODEL_FILE`, or standard system paths. If not set, it resolves to the local pinned model library (`data/models/sky130_fd_pr/models/sky130_neurodyn_tt.lib.spice`).
 - **Transistor-Level SPICE Verification (Level 4)**: The generated testbench (`data/neurodyn_ac_testbench.cir`) executes a 401-point AC frequency sweep in `ngspice` (with raw output preserved in `data/ac_results.raw`), validating netlist syntax, device connectivity, and PDK subcircuit compatibility.
-- **Calibrated Analytical EKV Model (Level 2)**: The deep-subthreshold small-signal open-loop DC gain ($67.2\text{ dB}$), bandwidth ($1200\text{ Hz}$), and unity-gain frequency ($1.25\text{ MHz}$) are derived using the physics-based $g_m/I_D$ methodology ($g_m/I_D = 27.35\text{ S/A}$ at $IC = 0.05$). This analytical model accurately captures the high subthreshold transconductance efficiency and early voltage before dynamic output-stage buffering.
+- **Calibrated Analytical EKV Model (Level 2)**: The deep-subthreshold small-signal open-loop DC gain ($67.2\text{ dB}$), bandwidth ($1200\text{ Hz}$), and unity-gain frequency ($1.25\text{ MHz}$) are derived using the physics-based $g_m/I_D$ methodology ($g_m/I_D = 25.5\text{ S/A}$ at $IC = 0.05$). This analytical model accurately captures the high subthreshold transconductance efficiency and early voltage before dynamic output-stage buffering.
 - **Behavioral Chopper & RRL Model (Level 3)**: Continuous-time dynamic chopping at $4\text{ kHz}$ and the causal Burt & Zhang switched-capacitor ripple reduction loop are verified in Python with multi-rhythm human EEG biopotentials, achieving $0.78\,\mu\text{V}$ residual DC offset and $> 62\text{ dB}$ ripple suppression.
 - **Physical Layout & DRC Cleanliness (Level 5)**: Procedurally synthesized GDSII macro (`data/gds/neurodyn_afe_sky130.gds`) verified 100% clean across 15 SkyWater SKY130 DRM geometrical rules.
 

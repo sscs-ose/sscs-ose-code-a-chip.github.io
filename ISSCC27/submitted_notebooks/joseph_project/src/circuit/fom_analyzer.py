@@ -51,7 +51,25 @@ class FoMAnalyzer:
         """
         benchmarks = [
             {
-                "Work": "This Work (NeuroDyn-AFE)",
+                "Work": "This Work (Core OTA)",
+                "Conference / Journal": "ISSCC 2027 (Code-a-Chip)",
+                "Technology": "SkyWater 130nm",
+                "Topology": "Inverter-Based OTA (IC=0.05)",
+                "Supply (V)": 0.60,
+                "Current (uA)": 2.96,
+                "Power (uW)": 1.77,
+                "Bandwidth (Hz)": 1000,
+                "Gain (dB)": 67.2,
+                "CMRR (dB)": 108.5,
+                "IR Noise (uVrms)": 0.79,
+                "NEF": 1.65,
+                "PEF": 1.63,
+                "Residual Offset (uV)": 0.78,
+                "Open Source PDK": "Yes (SKY130)",
+                "Automated Layout": "Yes (KLayout GDSII)"
+            },
+            {
+                "Work": "This Work (Full System)",
                 "Conference / Journal": "ISSCC 2027 (Code-a-Chip)",
                 "Technology": "SkyWater 130nm",
                 "Topology": "Dynamic Chopper + RRL",
