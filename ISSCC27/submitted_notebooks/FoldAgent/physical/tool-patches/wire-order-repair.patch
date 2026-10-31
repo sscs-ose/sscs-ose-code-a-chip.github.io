@@ -1,0 +1,148 @@
+--- src/odb/src/db/tmg_conn.cpp.before
++++ src/odb/src/db/tmg_conn.cpp
+@@ -1466,10 +1466,30 @@
+   }
+   newWire_ = nullptr;
+   last_id_ = -1;
++  last_extension_ = -1;
++  std::vector<std::tuple<dbTechLayer*, Point, Rect>> patches;
+   if (!no_convert) {
+     newWire_ = net_->getWire();
+     if (!newWire_) {
+       newWire_ = dbWire::create(net_);
++    }
++    dbWireDecoder decoder;
++    decoder.begin(newWire_);
++    int x = 0;
++    int y = 0;
++    for (auto op = decoder.next(); op != dbWireDecoder::END_DECODE;
++         op = decoder.next()) {
++      if (op == dbWireDecoder::POINT) {
++        decoder.getPoint(x, y);
++      } else if (op == dbWireDecoder::POINT_EXT) {
++        int extension;
++        decoder.getPoint(x, y, extension);
++      } else if (op == dbWireDecoder::RECT) {
++        int x1, y1, x2, y2;
++        decoder.getRect(x1, y1, x2, y2);
++        patches.emplace_back(decoder.getLayer(), Point(x, y),
++                             Rect(x1, y1, x2, y2));
++      }
+     }
+     encoder_.begin(newWire_);
+     for (WirePoint& pt : wire_points_) {
+@@ -1601,6 +1621,12 @@
+ 
+   checkVisited();
+   if (!no_convert) {
++    // RECT patches do not participate in the connectivity traversal.
++    for (const auto& [layer, point, rect] : patches) {
++      encoder_.newPath(layer, dbWireType::ROUTED);
++      encoder_.addPoint(point.x(), point.y());
++      encoder_.addRect(rect.xMin(), rect.yMin(), rect.xMax(), rect.yMax());
++    }
+     encoder_.end();
+   }
+ }
+@@ -1782,8 +1808,10 @@
+         encoder_.addBTerm(x->bterm);
+       }
+     }
+-  } else if (path_rule_ != wire_section->shape.getRule()) {
+-    // make a branch, for taper
++  } else if (path_rule_ != wire_section->shape.getRule()
++             || (!wire_section->shape.isVia() && !firstSegmentAfterVia_
++                 && last_extension_ != getExtension(fr, wire_section))) {
++    // Preserve taper and independent start/end extensions.
+ 
+     path_rule_ = wire_section->shape.getRule();
+     if (wire_section->shape.isVia()) {
+@@ -1869,6 +1897,9 @@
+ 
+   wire_points_[to].dbwire_id = to_id;
+   last_id_ = to_id;
++  last_extension_ = wire_section->shape.isVia()
++                        ? -1
++                        : getExtension(to, wire_section);
+ 
+   firstSegmentAfterVia_ = wire_section->shape.isVia();
+ }
+--- src/odb/src/db/tmg_conn.h.before
++++ src/odb/src/db/tmg_conn.h
+@@ -257,6 +257,7 @@
+   // Graph walk and writing of the new wire encoding.
+   std::vector<Terminal*> tstackV_;  // Also used when checking connectivity.
+   int last_id_{-1};
++  int last_extension_{-1};
+   dbTechNonDefaultRule* net_rule_{nullptr};
+   dbTechNonDefaultRule* path_rule_{nullptr};
+   bool need_short_wire_id_{false};
+--- src/odb/test/cpp/TestOrderWires.cpp.before
++++ src/odb/test/cpp/TestOrderWires.cpp
+@@ -4,6 +4,7 @@
+ #include "gtest/gtest.h"
+ #include "odb/db.h"
+ #include "odb/dbWireCodec.h"
++#include "odb/dbShape.h"
+ #include "odb/wOrder.h"
+ #include "tst/fixture.h"
+ 
+@@ -118,7 +119,58 @@
+   EXPECT_EQ(decoder.next(), dbWireDecoder::ITERM);
+   EXPECT_EQ(decoder.getITerm(), bump_net.receiver_iterm);
+ 
++  EXPECT_EQ(decoder.next(), dbWireDecoder::PATH);
++  EXPECT_EQ(decoder.getLayer(), metal1);
++  EXPECT_EQ(decoder.next(), dbWireDecoder::POINT);
++  decoder.getPoint(x, y);
++  EXPECT_EQ(x, bump_net.bump_x);
++  EXPECT_EQ(y, bump_net.bump_y);
++  EXPECT_EQ(decoder.next(), dbWireDecoder::RECT);
++  int x1, y1, x2, y2;
++  decoder.getRect(x1, y1, x2, y2);
++  EXPECT_EQ(Rect(x1, y1, x2, y2), Rect(-70, -70, 70, 70));
+   EXPECT_EQ(decoder.next(), dbWireDecoder::END_DECODE);
+ }
+ 
++
++TEST_F(TestOrderWires, SeparateExtensionsAtCorner)
++{
++  const InputBumpNet pins = buildInputBumpNet();
++  dbTechLayer* layer = db_->getTech()->findLayer("metal1");
++  dbWire* wire = dbWire::create(pins.net);
++  const int x = pins.bump_x - 2000;
++  const int y = pins.receiver_y;
++  const int half = layer->getWidth() / 2;
++  dbWireEncoder encoder;
++  encoder.begin(wire);
++  encoder.newPath(layer, dbWireType::ROUTED);
++  encoder.addPoint(pins.bump_x, y);
++  encoder.addPoint(x, y, 0);
++  encoder.newPath(layer, dbWireType::ROUTED);
++  encoder.addPoint(x, y);
++  encoder.addPoint(x, y + 2000);
++  encoder.addPoint(pins.receiver_x, y + 2000);
++  encoder.addPoint(pins.receiver_x, pins.receiver_y);
++  encoder.end();
++  const auto contains_corner = [&]() {
++    dbWireShapeItr shapes;
++    dbShape shape;
++    shapes.begin(pins.net->getWire());
++    while (shapes.next(shape)) {
++      if (!shape.isVia() && shape.getTechLayer() == layer
++          && shape.xMin() <= x - half / 2
++          && shape.xMax() >= x - half / 2
++          && shape.yMin() <= y - half / 2
++          && shape.yMax() >= y - half / 2) {
++        return true;
++      }
++    }
++    return false;
++  };
++  ASSERT_TRUE(contains_corner());
++  orderWires(&logger_, block_);
++  EXPECT_TRUE(pins.net->isWireOrdered());
++  EXPECT_TRUE(contains_corner());
++}
++
+ }  // namespace odb

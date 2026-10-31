@@ -1,0 +1,437 @@
+{
+  "schema_version": 1,
+  "id": "logic-folding-single-lb-v1",
+  "state": "research_spec_frozen_pending_user_review",
+  "objective": "固定占地、保持 DRAM 有效供数和稳态计算吞吐的双 logic 层切分与物理反馈 RTL 优化",
+  "baseline": {
+    "rtl_path": "work/chipnebula-3d-rtl-feedback-round3-20261019/screen-v2/R/input/lb_feedback.sv",
+    "rtl_sha256": "da28b093a22a9fa923c89fa8dd28f00292ceeba8ada8c142192757b140deb5ad",
+    "geometry_path": "work/chipnebula-3d-rtl-feedback-round3-20261019/screen-v2/R/condition/geometry.json",
+    "contract_path": "work/chipnebula-3d-rtl-feedback-round3-20261019/screen-v2/replay/cases/R/spec/contract.md",
+    "history_report": "reports/ChipNebula-3D-RTL-feedback-round3.md",
+    "normal_MC": 8,
+    "spare_MC": 2,
+    "banks_per_normal_MC": 2,
+    "parallel_signed8x8": 32,
+    "logical_payload_storage_bytes": 352,
+    "K": [
+      4,
+      16,
+      64
+    ],
+    "reference_cycles_per_job": [
+      5,
+      8,
+      20
+    ],
+    "historic_route_qualified": false
+  },
+  "technology": {
+    "platform": "sky130hd",
+    "process_scope": "single-die open PDK plus explicitly assumed TSV/bonding proxy; not a 3D foundry PDK",
+    "liberty_path": ".tools/chipnebula-sky130/OpenROAD-flow-scripts/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib",
+    "corner": "TT25C1v80",
+    "voltage_V": 1.8,
+    "tx_cell": "sky130_fd_sc_hd__buf_4",
+    "rx_cell": "sky130_fd_sc_hd__buf_2",
+    "preserve_endpoint_buffers": true
+  },
+  "stack": {
+    "top_to_bottom": [
+      "DRAM3",
+      "DRAM2",
+      "DRAM1",
+      "DRAM0",
+      "L0",
+      "L1",
+      "package"
+    ],
+    "DRAM0_to_L0": "F2F conceptual; existing DRAM anchors retained",
+    "L0_to_L1": "F2B: L0 backside lands on L1 frontside, TSVs through L0",
+    "L1_to_package": "L1 backside with host and power TSVs",
+    "coordinate_view": "all coordinates expressed in common top view; local front faces of L0/L1 both point upward",
+    "L0_to_global": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    "L1_to_global": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    "DRAM_internal_routing": "external fixed environment, not synthesized",
+    "host_feedthrough_signals": 181
+  },
+  "geometry": {
+    "units": "um",
+    "die_rect_um": [
+      0.0,
+      0.0,
+      1000.0,
+      1000.0
+    ],
+    "core_rect_um": [
+      10.12,
+      10.88,
+      978.42,
+      979.2
+    ],
+    "single_area_control_die_rect_um": [
+      0,
+      0,
+      2000,
+      1000
+    ],
+    "single_area_control_core_rect_um": [
+      10.12,
+      10.88,
+      1978.46,
+      979.2
+    ],
+    "link_windows_um": [
+      [
+        20,
+        210,
+        220,
+        410
+      ],
+      [
+        770,
+        210,
+        970,
+        410
+      ],
+      [
+        20,
+        590,
+        220,
+        790
+      ],
+      [
+        770,
+        590,
+        970,
+        790
+      ]
+    ],
+    "site_pg_fraction": 0.5,
+    "utility_sites_per_window": 4,
+    "utility_assignment": "clk/rst_n use first two utility sites of window 0; other 14 reserved, not functional capacity",
+    "signal_pad_side_um": 2.0,
+    "tsv_diameter_um": 1.0,
+    "tsv_length_um": 10.0,
+    "tsv_keepout_side_um": 3.0,
+    "package_host_first_x_um": 47.5,
+    "package_host_pitch_um": 5.0,
+    "package_host_y_um": 25.0,
+    "host_pin_order": "ascending port string from original 181-bit host interface",
+    "L0_blockages": "original G1-20 union plus 3x3 TSV keepout at every link-grid site; no original host edge pins",
+    "L1_blockages": "3x3 keepout at all link-grid PG sites and 181 package-host TSVs; no copied DRAM blockers",
+    "single_controls_blockages": "original G1-20 plus 181 package-host TSV keepouts; no logic-logic windows or extra TSVs",
+    "routing_policy": "TSV KOZ blocks li1/met1/met2/met3; 2x2 met5 landing terminal with 0.5um surrounding clearance on met4/met5 except central legal access; ordinary die routing and PDN checked separately",
+    "allocation": "reserve utility and PG first; order host functional ports then fold_x[0:31],fold_start,fold_consume, then moved lanes ascending, each forward bits then reverse bits; round-robin windows, row-major signal sites; never overlap terminals",
+    "package_pin_change": "reassign host pads consistently to the frozen package strip for S0/Sarea and L1; historical physical numbers are not reused",
+    "site_width_um": 0.46,
+    "row_height_um": 2.72,
+    "TSV_row_policy": "Snap TSV cell keepouts outward to core-origin site/row grid, cut affected rows BEFORE taps/endcaps/PDN; no tap/endcap exemptions inside new TSV KOZ. Existing MC auxiliary exceptions remain restricted to original rules. Report raw and row-snapped union separately."
+  },
+  "timing": {
+    "frequency_hz": 10000000,
+    "period_ns": 100,
+    "input_delay_ns": 20,
+    "output_delay_ns": 20,
+    "input_transition_ns": 1.0,
+    "external_output_load_fF": 5,
+    "setup_uncertainty_ns": 1,
+    "hold_uncertainty_ns": 1,
+    "link_clock": "common synchronous clock, propagated per-die CTS and package/root feedthrough",
+    "link_encoding": "unserialized parallel wires, one logical value per signal per cycle",
+    "P0_added_pipeline_cycles": 0,
+    "retiming_policy": "P1/P2 may retime only if all identical-workload throughput gates still pass; no new clocks or serial PHY",
+    "RLC_model": "per vertical signal, pi RC: total C split half at each terminal; excludes local wires and library pin C",
+    "link_RC_nominal": {
+      "R_ohm": 0.5,
+      "C_fF": 50
+    },
+    "link_RC_min": {
+      "R_ohm": 0.25,
+      "C_fF": 15
+    },
+    "link_RC_max": {
+      "R_ohm": 1.0,
+      "C_fF": 100
+    },
+    "RC_evidence": "assumed sensitivity envelope, NOT extracted or claimed foundry-calibrated; applies equally across pitch scenarios",
+    "STA": "merge actual die netlists under L0/L1; hierarchical SPEF -path plus top-level link SPEF; propagated common clocks; remove die-local artificial IO budgets from final analysis; verify annotation/connectivity/units, setup and hold",
+    "input_transition_reason": "New common fixture uses 1ns instead of historical 2ns: chosen endpoint cell input max_transition is 1.5ns; all references rerun under new fixture.",
+    "RC_sanity_geometry": {
+      "copper_resistivity_ohm_m": 1.7e-08,
+      "oxide_relative_permittivity": 3.9,
+      "oxide_thickness_um": 0.1,
+      "vacuum_permittivity_F_m": 8.8541878128e-12,
+      "source_kind": "assumed engineering sanity model; not a calibrated field solver"
+    },
+    "implementation_only_cross_die_io_budget_ns": {
+      "max_input": 25,
+      "min_input": 0,
+      "max_output": 25,
+      "min_output": 0,
+      "scope": "per-die optimization only, removed in final stitched STA; not an acceptance shortcut"
+    }
+  },
+  "scenarios": [
+    {
+      "id": "N10",
+      "role": "primary",
+      "pitch_um": 10.0
+    },
+    {
+      "id": "T12p5",
+      "role": "capacity sensitivity",
+      "pitch_um": 12.5
+    },
+    {
+      "id": "D5",
+      "role": "density sensitivity",
+      "pitch_um": 5.0
+    }
+  ],
+  "P0": {
+    "name": "compute-only coarse cut",
+    "L0": [
+      "host command/config/repair",
+      "8x4 row slots and issue/response state",
+      "input PIPO",
+      "output PIPO and output ordering",
+      "consume and job state"
+    ],
+    "L1": [
+      "32 signed8x8 multipliers",
+      "8 tile reductions",
+      "8 INT32 accumulators",
+      "host/power pass-through"
+    ],
+    "L0_to_L1": [
+      {
+        "name": "fold_x",
+        "bits": 32
+      },
+      {
+        "name": "fold_w",
+        "bits": 256
+      },
+      {
+        "name": "fold_start",
+        "bits": 1
+      },
+      {
+        "name": "fold_consume",
+        "bits": 1
+      }
+    ],
+    "L1_to_L0": [
+      {
+        "name": "fold_next",
+        "bits": 256
+      }
+    ],
+    "other_crossings": {
+      "host_functional": 179,
+      "clock_reset_utility": 2
+    },
+    "added_payload_storage_bytes": 0,
+    "equivalence_expectation": "same cycle-level behavior before physical delays; L0->L1->L0 combinational paths require joint STA"
+  },
+  "feedback": {
+    "max_candidates_total": 3,
+    "candidate_order": [
+      "P0",
+      "P1",
+      "P2"
+    ],
+    "max_rtl_attempts_per_candidate": 3,
+    "fixed_rtl_task": true,
+    "eligible_changes": [
+      "move whole output-lane compute/accumulator groups",
+      "move corresponding weight-row lane storage/valid state with reservation proof",
+      "regroup control/buffering without reducing useful capacity",
+      "retime only with full throughput proof"
+    ],
+    "fixed_resources": [
+      "DRAM anchors",
+      "scenario geometry",
+      "clock frequency",
+      "normal/spare semantics",
+      "arithmetic precision",
+      "32 concurrent multiplications",
+      "logical buffer capacity",
+      "host-facing command/config and output order stay L0; 181 host feedthrough wires fixed for this pilot"
+    ],
+    "evidence_required": [
+      "actual ODB/iteration/hash",
+      "persistent hotspot or timing/terminal-capacity failure",
+      "net drivers/receivers and RTL boundary",
+      "predicted structural change",
+      "post-synthesis survival audit"
+    ],
+    "target_selection": "100um fixed bins; top 3 by DRC count then coordinates from latest completed snapshot; report new hotspots and die totals",
+    "stop_without_evidence": true,
+    "best_selection": "function/performance first; complete route then fewer unrouted nets then total D10 then total CPU; earliest candidate breaks ties"
+  },
+  "verification": {
+    "functional": "reuse original verifier arithmetic/config/ordering/late-error assertions; separate new metrics harness; never relax original correctness assertions",
+    "tests": [
+      "all 65536 config encodings",
+      "all 73 legal repair mappings",
+      "original randomized functional seeds",
+      "K 4/16/64 x normal/swap0/spare2 continuous jobs",
+      "120 existing late error tasks",
+      "simultaneous 8-lane returns and 4-row burst",
+      "independent request stalls and response delays",
+      "reset with outstanding responses then fresh job",
+      "output stall and both output banks busy",
+      "paired terminal overlap/out-of-range/direction failures",
+      "capacity-limited case must reject infeasible cut",
+      "link SPEF units, hierarchy, short/open and no duplicate C",
+      "min/max RC, L0->L1 and L0->L1->L0 timing paths"
+    ],
+    "steady_measurement": {
+      "warmup_jobs": 100,
+      "measured_jobs": 1000,
+      "seeds": [
+        11,
+        23,
+        37
+      ],
+      "maps": [
+        "normal",
+        "lane0_to8",
+        "lane0_to8_lane7_to9"
+      ],
+      "response_profiles": {
+        "fast": "ready=1, response next cycle",
+        "jitter": "per-lane ordered due cycles, latency uniform integers 1..7; request ready=0 on exactly 1 in 4 PRNG draws; at most 1 return/lane/cycle",
+        "burst": "accept up to four rows then release up to one response/lane/cycle; timeout flush after 16 cycles to avoid waiting for nonexistent small-K requests"
+      },
+      "output_stall_profile": "ready=0 for first 3 of every 11 cycles; fixed schedule independent of DUT",
+      "same_prng_events": "seed/lane/request-ordinal keyed response latencies and fixed-cycle ready sequence; payloads tied to request identity",
+      "window": "Measure 1000 intervals after 100 warmup jobs: completion interval from final output accept of job99 to job1099; separately DRAM-service interval from final response of job99 to job1099. Count useful bytes for jobs100..1099 only; finish after job1099. This removes a constant initial pipeline latency.",
+      "rule": "For every identical-workload case, both completion and DRAM-service interval cycles must be <= reference; no rounding tolerance. Bytes/job and outputs identical. Report absolute latency separately.",
+      "no_response_backpressure": "total reserved outstanding data plus stored-but-unconsumed data must fit true per-lane/row capacity; partial rows retained",
+      "global_test_timeout_cycles": 1000000,
+      "PRNG": "Python random.Random seeded by base_seed*1000003+lane*1009+request_ordinal; ready schedule uses separate seed base_seed*1000033+lane; no use of shared RNG consumption by DUT events"
+    },
+    "physical_qualification": [
+      "each die completely routed; no shorts/opens; DRC/antenna/LVS pass under installed rules",
+      "all used vertical terminals paired and legal under proxy rules",
+      "actual connection and SPEF coverage for every cross-die path",
+      "setup/hold nonnegative at TT with min/max link envelope and common uncertainty",
+      "same-workload supply and compute gates pass"
+    ],
+    "power": "same seeded continuous-job gate-netlist VCD, propagate/annotate activity including links; report coverage; integrate full measured window energy/jobs; include endpoint cells and link C once, not twice; no default-activity power claimed as workload result",
+    "unqualified_claims": [
+      "real 3D foundry signoff",
+      "DRAM analog timing/thermal validation",
+      "1.5TB/s measured bandwidth",
+      "full attention/FFN end-to-end inference",
+      "multi-seed statistical physical improvement"
+    ]
+  },
+  "execution": {
+    "stage2_authorized": true,
+    "requires": [
+      "user review of this pack",
+      "new phase2 goal",
+      "selected model/framework and explicit internal budget"
+    ],
+    "screen": {
+      "seed": 11,
+      "threads": 4,
+      "checkpoints": [
+        5,
+        10
+      ],
+      "per_die_seconds": 5400,
+      "diagnostic_seconds": 600,
+      "post_drt_antenna_repair": false
+    },
+    "full_route": {
+      "per_die_cumulative_seconds": 14400,
+      "diagnostic_seconds": 600,
+      "restore_full_antenna_and_signoff_checks": true,
+      "checkpoint_resume_only_if_exact_inputs_and_policy_allow": true,
+      "otherwise_cold_restart_counts_against_same_cumulative_limit": true
+    },
+    "matrix": {
+      "primary": [
+        "S0",
+        "Sarea",
+        "P0",
+        "P1_if_evidence",
+        "P2_if_evidence"
+      ],
+      "sensitivity": [
+        "P0 frozen and primary-best frozen in T12p5",
+        "P0 frozen and primary-best frozen in D5"
+      ],
+      "full": [
+        "S0",
+        "Sarea",
+        "primary-best L0",
+        "primary-best L1"
+      ],
+      "deduplicate_identical_cases": true,
+      "infeasible_geometry_or_capacity": "record not feasible without PnR; do not widen interface or enlarge area",
+      "no_candidate_passes": "deliver failure and stop, no forced winner"
+    },
+    "max_screen_die_runs": 16,
+    "max_full_die_runs": 4,
+    "aggregate_route_seconds_upper_bound": 122400,
+    "aggregate_diagnostic_seconds_upper_bound": 9600,
+    "native_model_token_proposal": {
+      "authorization": "superseded: user removed token caps and requires P0 checkpoint",
+      "total": 1000000,
+      "allocations": {
+        "shared_planning": 200000,
+        "P0": 300000,
+        "P1": 150000,
+        "P2": 150000,
+        "analysis_delivery": 100000,
+        "inflight_reserve": 100000
+      }
+    },
+    "budget_policy": "count all input/output tokens including repeated context; reserve next-call estimate; do not auto-transfer phases or erase failed attempts; model identity and actual allowance supplied by user before phase2; no calls in phase1",
+    "end": "deliver first-round report and stop; no multi-LB or 3-tier expansion",
+    "stop_after_P0": true,
+    "native_model_token_cap": null,
+    "execution_authorization": "spec/execution-authorization.json"
+  },
+  "assumptions": [
+    "All TSV/pad/RC parameters are research proxies and must be replaceable with real process/stack inputs.",
+    "1mm square is the reduced experiment footprint, not the real 13x6.6mm DRAM size.",
+    "Geometry capacity is not evidence of routability.",
+    "No additional DRAM normal lanes or bandwidth from spare MCs.",
+    "Thermal/IR/EM/yield remain unqualified; fixed 25C PPA is conditional."
+  ],
+  "bank_mapping": {
+    "kind": "assumed logical mapping consistent with V1.1 counts, not vendor physical pin/bank numbering",
+    "LB_grid": [
+      3,
+      5
+    ],
+    "DRAM_tiers": 4,
+    "banks_per_die_grid": [
+      6,
+      10
+    ],
+    "rule": "for LB ell, MC j=2*t+p serves DRAM tier t and bank rows 2*(ell//5)+b, column 2*(ell%5)+p, b=0,1; spare MC8/9 replace targets without adding workload bandwidth",
+    "spare_physical_location": "unknown; retain original symmetric proxy geometry, not a recovered real location"
+  }
+}

@@ -1,0 +1,194 @@
+diff --git a/src/drt/src/dr/FlexDR_maze.cpp b/src/drt/src/dr/FlexDR_maze.cpp
+index 02f1e748a..f5ef2aaf0 100644
+--- a/src/drt/src/dr/FlexDR_maze.cpp
++++ b/src/drt/src/dr/FlexDR_maze.cpp
+@@ -2243,7 +2243,7 @@ void FlexDRWorker::routeNet_prep(
+     unConnPins.insert(pin.get());
+     if (gridGraph_.getNDR()) {
+       if (net->autoTaperEnabled(router_cfg_->AUTO_TAPER_NDR_NETS)
+-          && pin->isInstPin()) {  // create a taper box for each pin
++          && pin->hasFrTerm()) {  // create a taper box for each real terminal
+         auto [l, h] = pin->getAPBbox();
+         frCoord pitch
+             = getTech()->getLayer(gridGraph_.getLayerNum(l.z()))->getPitch(),
+diff --git a/src/odb/include/odb/dbShape.h b/src/odb/include/odb/dbShape.h
+index 42e6dd2f3..1ad1a8293 100644
+--- a/src/odb/include/odb/dbShape.h
++++ b/src/odb/include/odb/dbShape.h
+@@ -280,6 +280,7 @@ class dbWireShapeItr
+   int point_cnt_;
+   int shape_id_;
+   bool has_width_;
++  dbTechNonDefaultRule* rule_;
+ };
+ 
+ ///////////////////////////////////////////////////////////////////////////////
+diff --git a/src/odb/src/db/dbWireShapeItr.cpp b/src/odb/src/db/dbWireShapeItr.cpp
+index 3b78bd07d..62324e10f 100644
+--- a/src/odb/src/db/dbWireShapeItr.cpp
++++ b/src/odb/src/db/dbWireShapeItr.cpp
+@@ -58,6 +58,7 @@ void dbWireShapeItr::begin(dbWire* wire)
+   dw_ = 0;
+   point_cnt_ = 0;
+   has_width_ = false;
++  rule_ = nullptr;
+ }
+ 
+ bool dbWireShapeItr::next(dbShape& shape)
+@@ -80,6 +81,8 @@ nextOpCode:
+       layer_ = dbTechLayer::getTechLayer(tech_, operand);
+       point_cnt_ = 0;
+       dw_ = layer_->getWidth() >> 1;
++      has_width_ = false;
++      rule_ = nullptr;
+       goto nextOpCode;
+     }
+ 
+@@ -94,20 +97,18 @@ nextOpCode:
+       has_prev_ext_ = false;
+       point_cnt_ = 0;
+       dw_ = layer_->getWidth() >> 1;
++      has_width_ = false;
++      rule_ = nullptr;
+       goto nextOpCode;
+     }
+ 
+     case kRule: {
+-      if (opcode & WOP_BLOCK_RULE) {
+-        dbTechLayerRule* rule
+-            = dbTechLayerRule::getTechLayerRule(block_, operand);
+-        dw_ = rule->getWidth() >> 1;
+-      } else {
+-        dbTechLayerRule* rule
+-            = dbTechLayerRule::getTechLayerRule(tech_, operand);
+-        dw_ = rule->getWidth() >> 1;
+-      }
+-
++      dbTechLayerRule* rule
++          = (opcode & WOP_BLOCK_RULE)
++                ? dbTechLayerRule::getTechLayerRule(block_, operand)
++                : dbTechLayerRule::getTechLayerRule(tech_, operand);
++      dw_ = rule->getWidth() >> 1;
++      rule_ = rule->getNonDefaultRule();
+       has_width_ = true;
+       goto nextOpCode;
+     }
+@@ -247,8 +248,14 @@ nextOpCode:
+         layer_ = via->getBottomLayer();
+       }
+ 
+-      if (!has_width_) {
+-        dw_ = layer_->getWidth() >> 1;
++      // A via changes layers; select that layer's width from the path rule.
++      dw_ = layer_->getWidth() >> 1;
++      has_width_ = false;
++      if (rule_) {
++        if (auto* layer_rule = rule_->getLayerRule(layer_)) {
++          dw_ = layer_rule->getWidth() >> 1;
++          has_width_ = true;
++        }
+       }
+ 
+       prev_ext_ = 0;
+@@ -279,8 +286,14 @@ nextOpCode:
+         layer_ = via->getBottomLayer();
+       }
+ 
+-      if (!has_width_) {
+-        dw_ = layer_->getWidth() >> 1;
++      // A via changes layers; select that layer's width from the path rule.
++      dw_ = layer_->getWidth() >> 1;
++      has_width_ = false;
++      if (rule_) {
++        if (auto* layer_rule = rule_->getLayerRule(layer_)) {
++          dw_ = layer_rule->getWidth() >> 1;
++          has_width_ = true;
++        }
+       }
+ 
+       prev_ext_ = 0;
+diff --git a/src/odb/test/cpp/TestDbWire.cc b/src/odb/test/cpp/TestDbWire.cc
+index b2eab0cc0..b7d4e94e4 100644
+--- a/src/odb/test/cpp/TestDbWire.cc
++++ b/src/odb/test/cpp/TestDbWire.cc
+@@ -4,6 +4,8 @@
+ #include <unistd.h>
+ 
+ #include <memory>
++#include <string>
++#include <vector>
+ 
+ #include "gtest/gtest.h"
+ #include "odb/db.h"
+@@ -69,6 +71,71 @@ TEST_F(OdbMultiPatternedTest, NdrWidth)
+   EXPECT_EQ(shape_cnt, 2);
+ }
+ 
++// Cover both NDR storage scopes and both via encodings across layer changes.
++TEST_F(OdbMultiPatternedTest, NdrViaLayerWidthsAndDefaultBranches)
++{
++  dbTech* tech = lib_->getTech();
++  auto* met1 = tech->findLayer("met1");
++  auto* met2 = tech->findLayer("met2");
++  auto* tech_via = tech->findVia("M1M2_PR_MR");
++  ASSERT_NE(tech_via, nullptr);
++  met1->setWrongWayWidth(200);
++  auto* block_via = dbVia::create(block_, "block_via");
++  for (auto* box : tech_via->getBoxes()) {
++    dbBox::create(block_via, box->getTechLayer(), box->xMin(), box->yMin(),
++                  box->xMax(), box->yMax());
++  }
++  for (bool block_rule : {false, true}) {
++    for (bool use_block_via : {false, true}) {
++      const auto name = std::string("ndr_") + (block_rule ? "b" : "t")
++                        + (use_block_via ? "b" : "t");
++      auto* ndr = block_rule ? dbTechNonDefaultRule::create(block_, name.c_str())
++                             : dbTechNonDefaultRule::create(tech, name.c_str());
++      auto* r1 = dbTechLayerRule::create(ndr, met1);
++      auto* r2 = dbTechLayerRule::create(ndr, met2);
++      r1->setWidth(420);
++      r2->setWidth(840);
++      auto* net = dbNet::create(block_, name.c_str());
++      auto* wire = dbWire::create(net);
++      dbWireEncoder encoder;
++      encoder.begin(wire);
++      auto add_via = [&]() {
++        if (use_block_via) {
++          encoder.addVia(block_via);
++        } else {
++          encoder.addTechVia(tech_via);
++        }
++      };
++      encoder.newPath(met1, dbWireType::ROUTED, r1);
++      encoder.addPoint(0, 0);
++      const int junction = encoder.addPoint(0, 10000);
++      add_via();
++      encoder.addPoint(0, 20000);
++      add_via();
++      encoder.addPoint(0, 30000);
++      encoder.newPath(junction);
++      encoder.addPoint(0, 40000);
++      add_via();
++      encoder.addPoint(0, 50000);
++      encoder.newPath(met1, dbWireType::ROUTED);
++      encoder.addPoint(10000, 0);
++      encoder.addPoint(10000, 10000);
++      encoder.end();
++      std::vector<int> widths;
++      dbWireShapeItr itr;
++      dbShape shape;
++      itr.begin(wire);
++      while (itr.next(shape)) {
++        if (!shape.isVia()) {
++          widths.push_back(shape.getBox().minDXDY());
++        }
++      }
++      EXPECT_EQ(widths, (std::vector<int>{420, 840, 420, 200,
++                                        static_cast<int>(met2->getWidth()), 200}));
++    }
++  }
++}
++
+ TEST_F(OdbMultiPatternedTest, CanColorColoredLayer)
+ {
+   // Arrange
