@@ -1,6 +1,7 @@
 # A complete 50 mA SKY130 LDO with a local gate feedback loop
 
-**Author and travel representative: Christian Reivan**  
+**Author and travel representative: Christian Reivan**
+**Affiliation: Samsung Electronics**
 **GitHub: [christianreivan](https://github.com/christianreivan)**
 
 This Code a Chip notebook implements a complete transistor LDO. The circuit
