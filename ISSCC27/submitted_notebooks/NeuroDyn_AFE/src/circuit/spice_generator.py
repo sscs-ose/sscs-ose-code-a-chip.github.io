@@ -113,22 +113,22 @@ def parse_ngspice_ac_raw(raw_path: str, output_variable: str = "v(outdiff)") -> 
 
 
 def _normalize_pdk_include(pdk_include: Optional[str]) -> Optional[str]:
-    """Return an absolute normalized include path for SPICE decks."""
+    """Return a portable normalized include path for SPICE decks."""
+    data_dir = (Path(__file__).resolve().parent.parent.parent / "data").resolve()
+    target_rel = "models/sky130_fd_pr/models/sky130_neurodyn_tt.lib.spice"
     if not pdk_include:
-        default_pdk = (
-            Path(__file__).resolve().parent.parent.parent
-            / "data"
-            / "models"
-            / "sky130_fd_pr"
-            / "models"
-            / "sky130_neurodyn_tt.lib.spice"
-        )
-        if default_pdk.exists():
-            return str(default_pdk).replace("\\", "/")
-        return None
+        return target_rel
     p = Path(pdk_include)
+    try:
+        p_resolved = p.resolve()
+        if p_resolved == (data_dir / "models" / "sky130_fd_pr" / "models" / "sky130_neurodyn_tt.lib.spice").resolve():
+            return target_rel
+        if p_resolved.is_relative_to(data_dir):
+            return str(p_resolved.relative_to(data_dir)).replace("\\", "/")
+    except (ValueError, AttributeError):
+        pass
     if not p.is_absolute():
-        p = p.resolve()
+        return str(p).replace("\\", "/")
     return str(p).replace("\\", "/")
 
 
