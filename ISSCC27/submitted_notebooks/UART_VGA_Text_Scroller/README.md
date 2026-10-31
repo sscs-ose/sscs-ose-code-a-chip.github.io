@@ -17,7 +17,7 @@ The project was **previously submitted to Tiny Tapeout SKY26c**. The present not
 
 ## Run the notebook
 
-1. Upload `UART_VGA_Code_a_Chip_ISSCC27_ARCHITECTURE_IN_TEXT.ipynb` to [Google Colab](https://colab.research.google.com/) or launch it from GitHub.
+1. Upload `UART_VGA_Code_a_Chip_ISSCC27_MITS.ipynb` to [Google Colab](https://colab.research.google.com/) or launch it from GitHub.
 2. Select **Runtime → Run all** with internet access. The notebook clones the original RTL, installs Icarus (if missing), and installs the original project Cocotb dependencies into the runtime. No login is required to clone the public source.
 3. Keep `RUN_ORIGINAL_COCOTB = True` for the complete integrated RTL regression. This increases run time but is needed for the final four-check PASS summary.
 4. Confirm the final verification manifest shows **4/4 PASS**. The original Cocotb suite contains **one integrated test case** with multiple internal checks, not four separate tests.
@@ -47,6 +47,6 @@ Architecture is embedded inside the notebook.
 
 The architecture is embedded in the `.ipynb` itself; a standalone PNG is also in `figures/`. The figure is an explanatory overview, not a transistor schematic or a machine-checked netlist. Refer to the frozen `src/project.v` for exact connectivity.
 
-The TinyVGA `uo_out[7:0]` signals and independent ALU `uio_out[7:6]` signals are distinct; `uio_oe` is hardwired to `8'b11000000`. For precise bit-level wiring consult the original Verilog. See `figures/architecture.png`.
+The TinyVGA `uo_out[7:0]` signals and independent ALU `uio_out[7:6]` signals are distinct; `uio_oe` is hardwired to `8'b11000000`. For precise bit-level wiring consult the original Verilog. See `figures/Architecture.png`.
 
 
