@@ -58,6 +58,8 @@ Following IEEE reproducible research guidelines and open-source EDA verification
 | **Open-Loop DC Gain ($A_{v0}$)** | $> 60.0$ | **$63.10$** | Level 1 Live Ngspice-46 (`ac_results.raw`) | dB | Subthreshold $g_m \cdot r_{out}$ ($V_A \approx 10\,\text{V}$) |
 | **Unity-Gain Frequency ($f_u$)** | $> 50\,\text{kHz}$ | **$57.7$** ($57.66\,\text{kHz}$) | Level 1 Live Ngspice-46 ($C_L = 5.0\,\text{pF}, C_c = 1.2\,\text{pF}$) | kHz | Stable biopotential closed-loop bandwidth |
 | **Phase Margin ($PM$)** | $> 60$ | **$124.9$** | Level 1 Live Ngspice-46 Miller Compensation | deg | With $C_c = 1.2\,\text{pF}$ (Unconditionally Stable) |
+| **Tail Saturation Voltage ($V_{ds,\text{tail}}$)** | $\ge 3 U_T \approx 78\,\text{mV}$ | **$77.27$** | Level 1 Live Ngspice-46 OP (`neurodyn_op.log`) | mV | Weak Inversion Saturation Verified |
+| **CMFB Gate Bias Voltage ($V_{bp,\text{cmfb}}$)** | $> +50\,\text{mV}$ | **$+194.04$** | Level 1 Live Ngspice-46 OP (Clamped VCVS) | mV | Strictly Positive Bias Margin |
 | **Input-Referred Noise Floor** | $< 35.0$ | **$24.88$** | Level 2 Analytical EKV ($4 k_B T \gamma / g_m$) | $\text{nV}/\sqrt{\text{Hz}}$ | In-band thermal floor |
 | **Integrated Noise ($V_{ni,\text{rms}}$)** | $< 1.0$ | **$0.79$** | Level 2 Analytical + Level 3 FFT | $\mu\text{V}_{\text{rms}}$ | $0.5\,\text{Hz} - 1.0\,\text{kHz}$ |
 | **Core Noise Efficiency Factor ($\text{NEF}_{\text{core}}$)** | $< 2.0$ | **$1.65$** | Level 2 Analytical Definition ($I_{\text{core}} = 0.144\,\mu\text{A}$) | — | Core amplifier limit |
