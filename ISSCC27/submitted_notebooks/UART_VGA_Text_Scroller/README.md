@@ -3,6 +3,9 @@
 **IEEE SSCS Code-a-Chip — ISSCC 2027**  
 **Design Submitted for Tapeout:** Tiny Tapeout SKY26c #847, UART VGA Text Scroller with a 2-bit ALU  
 **Proposed Team Representative:** Noble G  
+**Affiliation:** Muthoot Institute of Technology and Science[MITS], Kochi, Kerala, India
+**Email:**  nobleg@mgits.ac.in
+**IEEE Memebr:** Yes 
 **License:** Apache 2.0
 
 ## Project summary
