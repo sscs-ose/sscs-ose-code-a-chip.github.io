@@ -1,0 +1,14 @@
+* DEVELOPMENT candidate: actuator-domain driver-ready AND qualification.
+* Inputs: native current-limited reset_n AND original monitor ready.
+* NAND2 PFETs .42/1 um each; series NFETs .42/1 um each.
+* Output inverter PFET .84/1 and NFET .42/1 um.
+* Native-reset input gate area matches the preceding two-inverter receiver.
+* Original-ready gate loading is added; this is not a guaranteed cold-start POR.
+.subckt microrobot_ready_driver_qualified reset_raw monitor_ready driver_ready vact vss
+Xpa nand_b reset_raw vact vact sky130_fd_pr__pfet_01v8 w=0.42 l=1
+Xpb nand_b monitor_ready vact vact sky130_fd_pr__pfet_01v8 w=0.42 l=1
+Xna nand_b reset_raw series vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xnb series monitor_ready vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xop driver_ready nand_b vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xon driver_ready nand_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+.ends microrobot_ready_driver_qualified

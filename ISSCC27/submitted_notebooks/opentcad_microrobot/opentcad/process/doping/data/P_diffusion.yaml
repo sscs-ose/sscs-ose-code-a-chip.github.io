@@ -1,0 +1,29 @@
+# Intrinsic diffusivity of phosphorus in silicon.
+#
+# Source: Fair, "Concentration-Dependent Diffusion of Dopants in Silicon"
+#         (1981); Plummer, Silicon VLSI Technology, Table 7.2.
+#
+# Phosphorus has a famous "kink and tail" diffusion profile at high
+# concentrations due to a strong D_minus_minus (double-ionized vacancy)
+# contribution: at Nd > 1e20 cm⁻³ an interstitial-dominated enhanced
+# diffusion regime sets in. Only the intrinsic D_i is wired in Phase
+# 2.3a; the full Fair model with D⁻ and D²⁻ is a future upgrade.
+
+species: phosphorus
+symbol: P
+target: Si
+dopant_kind: donor
+
+intrinsic:
+  D0_cm2s: 3.85        # [cm² / s]
+  Ea_eV:   3.66        # [eV]
+
+# Fair concentration-dependent coefficients — placeholders.
+# Phosphorus: D = D_i + D_minus * (n/n_i) + D_minus_minus * (n/n_i)²
+fair:
+  D_minus:
+    D0_cm2s: 4.44
+    Ea_eV:   4.00
+  D_minus_minus:
+    D0_cm2s: 44.2
+    Ea_eV:   4.37

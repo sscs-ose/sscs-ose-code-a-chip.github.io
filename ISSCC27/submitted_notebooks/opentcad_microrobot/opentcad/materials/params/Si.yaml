@@ -1,0 +1,81 @@
+# Silicon material parameters — OpenTCAD
+# All values at T=300K unless noted.
+# Every value has units and a literature citation.
+
+material: Silicon
+symbol: Si
+
+bandgap:
+  Eg_eV_300K: 1.124       # [eV]   Ref: Green (1990) J.Appl.Phys. 67,2944
+  varshni_alpha: 4.73e-4   # [eV/K] Varshni parameter
+  varshni_beta_K: 636      # [K]
+
+electron_affinity_eV: 4.05  # [eV] Ref: Sze (1981)
+Nc_cm3_300K: 2.86e19        # [cm^-3] Conduction band DOS
+Nv_cm3_300K: 3.10e19        # [cm^-3] Valence band DOS
+ni_cm3_300K: 9.65e9         # [cm^-3] Intrinsic concentration, Ref: Green (1990)
+permittivity_relative: 11.7  # Ref: Sze & Ng (2007)
+
+mobility_constant:
+  electron_cm2_Vs: 1350.0  # [cm^2/Vs] low-field, lightly doped
+  hole_cm2_Vs: 480.0       # [cm^2/Vs]
+  uncertainty_percent: 5
+
+# Klaassen unified low-field bulk mobility — Ref: Klaassen (1992) Solid-State Electron. 35,953
+# Parameter naming follows the DEVSIM Klaassen.py reference implementation.
+mobility_klaassen:
+  mu_min_e: 52.2     # [cm^2/Vs] minimum electron mobility (lattice limit)
+  mu_max_e: 1417.0   # [cm^2/Vs] maximum electron mobility
+  theta1_e: 2.285    # temperature exponent
+  m_e: 1.0           # effective mass ratio (electrons)
+  Nref_1_e: 9.68e16  # [cm^-3] electron ionized-impurity reference
+  alpha_1_e: 0.68    # electron impurity-scattering exponent
+
+  mu_min_h: 44.9
+  mu_max_h: 470.5
+  theta1_h: 2.247
+  m_h: 1.258
+  Nref_1_h: 2.2e17
+  alpha_1_h: 0.719
+
+  # Cluster-screening + carrier-carrier scattering coefficients
+  f_BH: 3.828
+  f_CW: 2.459
+  c_D: 0.21
+  c_A: 0.50
+  Nref_D: 4.0e20
+  Nref_A: 7.2e20
+
+  r1: 0.7643
+  r2: 2.2999
+  r3: 6.5502
+  r4: 2.3670
+  r5: -0.01552
+  r6: 0.6478
+
+  s1: 0.892333
+  s2: 0.41372
+  s3: 0.19778
+  s4: 0.28227
+  s5: 0.005978
+  s6: 1.80618
+  s7: 0.72169
+
+recombination:
+  tau_n_s: 1.0e-5    # [s] SRH electron lifetime. HackerFab may be 100-1000x shorter.
+  tau_p_s: 1.0e-5    # [s] SRH hole lifetime
+  Et_eV: 0.0         # [eV] trap energy re mid-gap
+  Cn_cm6_per_s: 2.8e-31  # Auger, Ref: Dziewior & Schmid (1977)
+  Cp_cm6_per_s: 9.9e-32
+  B_rad_cm3_per_s: 9.5e-15  # Radiative (negligible in Si)
+
+velocity_saturation:
+  vsat_e_cm_s: 1.02e7  # [cm/s] Ref: Canali et al. (1975) IEEE TED
+  vsat_h_cm_s: 0.72e7
+  beta_e: 2.0
+  beta_h: 1.0
+
+calibration:
+  status: literature_values
+  calibrated_against: null
+  notes: "Validate mobility against SKY130 Id-Vg before quantitative use."

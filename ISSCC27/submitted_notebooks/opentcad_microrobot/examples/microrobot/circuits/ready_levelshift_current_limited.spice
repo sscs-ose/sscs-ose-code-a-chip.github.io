@@ -1,0 +1,22 @@
+* DEVELOPMENT candidate: nonregenerative reset level conversion.
+* All dimensions in um. Standard SKY130 1.8V devices; no added storage.
+* IMPORTANT extra sixth port bias_p must connect to the existing clock bp.
+* Existing 5-port ready converters are not pin-compatible with this candidate.
+* Keep original actuator-domain ready driving the driver clamps separately.
+*
+* ready low -> input_b high -> reset_n pulled low by Xsink.
+* ready high -> input_b low -> bias-limited Xpullup raises reset_n to Vlogic.
+* There is no cross-coupled feedback latch and no ideal threshold source.
+* Xpullup W/L is .42 times the clock's 1/8 PMOS reference device.
+* Rough nominal estimate: ~2nA reset-low current, ~3.5nW at1.8V.
+* Estimate assumes settled TT clock bias; it is not a startup/corner bound.
+* During reset-low the pullup current is a real static logic-rail load.
+* The actuator inverter power must be measured at the actuator port separately.
+* Startup depends on VACT inverter validity and the shared clock bias; this
+* candidate does not establish deterministic POR from arbitrary dark states.
+.subckt microrobot_ready_levelshift ready reset_n vact vlogic vss bias_p
+Xip input_b ready vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xin input_b ready vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xpullup reset_n bias_p vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.42 l=8
+Xsink reset_n input_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+.ends microrobot_ready_levelshift

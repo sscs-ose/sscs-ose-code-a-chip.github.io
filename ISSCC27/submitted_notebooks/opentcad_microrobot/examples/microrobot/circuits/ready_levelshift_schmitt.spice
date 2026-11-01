@@ -1,0 +1,45 @@
+* DESIGN ONLY: nonregenerative converter + CMOS Schmitt receiver + output buffer.
+* NOT simulated, characterized or accepted. Not a deterministic POR claim.
+* Six-port interface identical to ready_levelshift_current_limited.spice.
+* Connect final reset_n to BOTH native DFF reset and both driver ready pins.
+* Existing analog ready stays only at this converter input; do not use it to
+* bypass final reset qualification at either driver. Shared signal does not
+* guarantee identical thresholds/delays of the downstream receiving circuits.
+*
+* First4FETs retain the existing bias-limited converter. The next6FETs form
+* a proposed CMOS Schmitt INVERTER: output-high feedback raises NMOS midpoint,
+* opposing low-side turn-on; output-low feedback lowers PMOS midpoint,
+* opposing high-side turn-on. Feedback devices are weaker (L2 versus L1).
+* Output regeneration is intended to sharpen reset_b before final inverter.
+* No new gate load on clock bp or bn beyond the original converter pullup.
+* This topology/sizing is our new design, NOT an unmodified PDK standard cell.
+* Locally found hvl__schmittbuf_1 uses5V devices/HV resistors; it has not been
+* imported or treated as characterized at the~1.7V logic rail.
+*
+* Starting sizes only: signal P=.84x1,N=.42x1; feedback P=.84x2,N=.42x2um.
+* All are 1.8V device geometry choices already within existing block families.
+* Four raw-input gates total2.52um2, ~21fF oxide at~8.2fF/um2 before overlap.
+* At2nA, ideal0->1.8V input charging~19us. Actual bias current is rail-dependent.
+* Output buffer .84/.42x1 is unchanged micro_inv sizing; nominal two driver
+* input ports contribute~.19pF before overlap/routing/native-reset input load.
+* Driver gate charging costs~.62pJ at1.8V; regeneration does NOT eliminate it.
+* Schmitt thresholds, hysteresis, leakage, crowbar, bias loading, startup,
+* assertion speed, rail droop and full terminal stresses require simulation.
+* Isolated slow-ramp forward/reverse gate before any coupled startup run.
+.subckt microrobot_ready_levelshift ready reset_n vact vlogic vss bias_p
+* Existing current-limited actuator-to-logic conversion, output now internal.
+Xip input_b ready vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xin input_b ready vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xpullup raw_reset bias_p vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.42 l=8
+Xsink raw_reset input_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+* CMOS Schmitt inverter: input-gated stacks and output-gated midpoint feedback.
+Xsp_top p_mid raw_reset vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xsp_out reset_b raw_reset p_mid vlogic sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xsn_out reset_b raw_reset n_mid vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xsn_bottom n_mid raw_reset vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xsn_feedback vlogic reset_b n_mid vss sky130_fd_pr__nfet_01v8 w=0.42 l=2
+Xsp_feedback vss reset_b p_mid vlogic sky130_fd_pr__pfet_01v8 w=0.84 l=2
+* Final noninverting polarity relative to raw_reset, shared load driver.
+Xoutp reset_n reset_b vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xoutn reset_n reset_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+.ends microrobot_ready_levelshift

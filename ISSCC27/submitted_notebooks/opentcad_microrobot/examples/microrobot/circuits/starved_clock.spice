@@ -1,0 +1,38 @@
+* Functional open-PDK candidate, not a reproduction of Reynolds' PTAT clock.
+* Diode-stack bias is supply/temperature dependent. No compensated reference.
+* All W/L in um under the installed SKY130 model scale.
+.subckt microrobot_clock clk vdd vss bias_n bias_p
+* A passive diode-connected stack has a nonzero DC path at illumination.
+Vbias vdd ref_vdd 0
+Xb1 bias_n bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xb2 b2 b2 bias_n vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xb3 ref_vdd ref_vdd b2 vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xmirror bias_p bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xpdiode bias_p bias_p ref_vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+Xcbiasp bias_p vss sky130_fd_pr__cap_mim_m3_1 w=7 l=7
+Xcbiasn bias_n vss sky130_fd_pr__cap_mim_m3_1 w=7 l=7
+X1 raw a vdd vss bias_p bias_n micro_starved_inv
+X2 a b vdd vss bias_p bias_n micro_starved_inv
+X3 b c vdd vss bias_p bias_n micro_starved_inv
+X4 c d vdd vss bias_p bias_n micro_starved_inv
+X5 d raw vdd vss bias_p bias_n micro_starved_inv
+Xc1 a vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+Xc2 b vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+Xc3 c vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+Xc4 d vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+* Deliberate timing-capacitor asymmetry for nominal startup.
+Xc5 raw vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2.5
+* Long-channel receiver first, then a smaller faster receiver. Their supply
+* current is included; a slow raw ring must not drive digital gates for free.
+Xbp1 buffered raw vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+Xbn1 buffered raw vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xbp2 clk buffered vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1
+Xbn2 clk buffered vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=1
+.ends microrobot_clock
+
+.subckt micro_starved_inv a y vdd vss bp bn
+Xps ps bp vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+Xpi y a ps vdd sky130_fd_pr__pfet_01v8 w=1 l=0.5
+Xni y a ns vss sky130_fd_pr__nfet_01v8 w=0.5 l=0.5
+Xns ns bn vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+.ends micro_starved_inv

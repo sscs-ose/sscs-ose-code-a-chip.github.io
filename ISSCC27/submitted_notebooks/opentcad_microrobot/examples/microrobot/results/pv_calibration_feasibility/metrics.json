@@ -1,0 +1,547 @@
+{
+  "status": "Reviewed and accepted as fixed-structure optical-throughput feasibility evidence; reflection-only calibration infeasible; physical PV calibration incomplete.",
+  "executed_UTC": "2026-10-31T11:28:42.622065+00:00",
+  "execution": {
+    "command_argv": [
+      "<USER_HOME>/Documents/opentcad_final/examples/microrobot/pv_calibration.py",
+      "--source-dir",
+      "<USER_HOME>/Downloads/Reynolds-2022-data",
+      "--output",
+      "examples/microrobot/results/pv_calibration_feasibility"
+    ],
+    "python": "3.14.2",
+    "executable": "<USER_HOME>/Documents/opentcad_final/.venv/bin/python",
+    "platform": "macOS-15.7.2-arm64-arm-64bit-Mach-O",
+    "packages": {
+      "numpy": "2.4.4",
+      "scipy": "1.17.1",
+      "devsim": "2.10.0",
+      "gmsh": "4.15.2",
+      "pyvista": "0.47.3",
+      "matplotlib": "3.10.8",
+      "pydantic": "2.13.3",
+      "PyYAML": "6.0.3"
+    },
+    "fresh_light_DD_sweeps": 2,
+    "curve_seconds": {
+      "baseline_R0p3": 7.196716665988788,
+      "maximum_R0": 6.599011667014565
+    },
+    "total_seconds": 15.338708791998215,
+    "code_sha256": {
+      "examples/microrobot/pv.py": "3d91bd170f44b1f325e767c9cfa4919fbe9730f7960990909b38c4378cd7a942",
+      "examples/microrobot/pv_calibration.py": "650084d775e93e4eaaca0f83cfa3ae6c9326b712a8607e10f3f35b6f8c1d0494",
+      "examples/microrobot/reynolds_data.py": "12f10d9d9b6b1fc633677286df6e76039b85c6c81bca1abf3f939edb02f12f6b",
+      "examples/microrobot/reynolds_fit.py": "fade52b0610b3e9b56fcff988bf83a623eac6672fe91c13cf0aa9ef6a2fbd4fd",
+      "opentcad/device/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "opentcad/device/compact.py": "e7e6b55bf39ebf5c8243e3b0fd6783a045a7f383c3add970db582e6e6f9fc0c7",
+      "opentcad/device/optical.py": "22fb5cdcad2f0722fd8499253088c12f76e3e640e4a116a152671d5a027398f8",
+      "opentcad/device/physics.py": "a59540f9e78f2111785786fd070cf51f32173200575e2c9f9b75f6b593724bee",
+      "opentcad/device/solver.py": "07f649d8c978dfa3d01a44b4e7a1fd3361e3808ca4d4ba3ec1a4e5e9f0ea25c8",
+      "opentcad/geometry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "opentcad/geometry/formats.py": "1287eac54fe31d05f8e90325cf253a6a12477319a11b9e15249b4eab7587b958",
+      "opentcad/geometry/mesh.py": "2e838de5d73f91ff9894d73252c5659003b9ef0c41bd78b5f06bf10705d3f44a",
+      "opentcad/geometry/structure.py": "896e60e9a56d47c23c738a525cf67b6b35e3ee1f48941d931361363bd8528b3c",
+      "opentcad/materials/database.py": "f05c0f3acf53ce2df1aefa69234211c624dc52ba726be3109110402eed985ba9",
+      "opentcad/materials/params/Si.yaml": "3fe545eafb10d01cc31c46fa96e5fe9530643b9c697221529aedaae20d3ec558"
+    }
+  },
+  "source": {
+    "path": "<USER_HOME>/Downloads/Reynolds-2022-data/FigS2_CircuitTesting.csv",
+    "sha256": "fe9899154837d6e3d02e33c5bdf6e59f4c4754f2ad017d4c2f45d62dd94eee02",
+    "size_bytes": 7487131,
+    "inventory_sha256": "26e6d95ff646cf14e8e1636bb82f16512f045207b12118cc453a9b6f241b777c",
+    "matches_prior_local_inventory": true,
+    "provenance": "User-supplied local data; user-reported origin not independently authenticated; license unverified"
+  },
+  "method": {
+    "variable": "effective_reflectance only",
+    "bounds": [
+      0,
+      1
+    ],
+    "all_other_physics_fixed": true,
+    "training_pair_voltage_V": [
+      0,
+      0.05
+    ],
+    "training_upper_boundary_exclusive": true,
+    "training_bin_width_V": 0.025,
+    "holdouts_V": [
+      [
+        0.9,
+        1.05
+      ],
+      [
+        1.15,
+        1.25
+      ]
+    ],
+    "holdouts_fresh_blind": false,
+    "pair_voltage_relation": "2 * cell voltage",
+    "pair_current_relation": "540 * current_per_um2",
+    "dark_light_offset_assumption": "One constant shared entering-current offset cancels in equal-voltage-bin difference",
+    "negative_voltage_extrapolation": false,
+    "process_identification": false
+  },
+  "training_target": {
+    "bins": [
+      {
+        "interval_V": [
+          0.0,
+          0.025
+        ],
+        "branches": {
+          "iv_dark": {
+            "points": 148,
+            "mean_entering_A": 1.9214297297297298e-09
+          },
+          "iv_1sun": {
+            "points": 147,
+            "mean_entering_A": -1.4811446258503402e-07
+          }
+        },
+        "dark_minus_light_A": 1.5003589231476376e-07
+      },
+      {
+        "interval_V": [
+          0.025,
+          0.05
+        ],
+        "branches": {
+          "iv_dark": {
+            "points": 149,
+            "mean_entering_A": 2.0404399328859057e-09
+          },
+          "iv_1sun": {
+            "points": 149,
+            "mean_entering_A": -1.4804390604026845e-07
+          }
+        },
+        "dark_minus_light_A": 1.5008434597315437e-07
+      }
+    ],
+    "photocurrent_target_A": 1.5006011914395906e-07,
+    "responsivity_target_A_W": 0.2778891095258501
+  },
+  "feasibility": {
+    "target_A": 1.5006011914395906e-07,
+    "maximum_R0_A": 1.0445227875063854e-07,
+    "bracketed": false,
+    "linearized_required_effective_reflectance": -0.436638060354827,
+    "required_input_multiplier_at_R0": 1.436638060354827,
+    "relative_shortfall_at_R0": 0.303930455696673,
+    "inference": "Linearized photocurrent-throughput relation used only to propose a bounded third DD curve; not a fitted process parameter"
+  },
+  "third_curve_decision": "The target is not bracketed: third DD candidate skipped, and the bounded optical family is infeasible.",
+  "shared_observation_offset_A": 1.980933439500473e-09,
+  "archive": {
+    "path": "<USER_HOME>/Documents/opentcad_final/examples/microrobot/results/pv.json",
+    "sha256": "4d9c1d68a599883bb98daa496a533aa2f8941ed6bec16fa3d0f894a4080f01f0",
+    "checks": {
+      "dark": {
+        "points": 29,
+        "complete_grid": true,
+        "finite_current": true,
+        "short_circuit_photon_budget_passed": true,
+        "final_contact_relative_residual": 2.1946588541923933e-13,
+        "per_voltage_contact_audit": "Unavailable in historical archive"
+      },
+      "light": {
+        "points": 29,
+        "complete_grid": true,
+        "finite_current": true,
+        "short_circuit_photon_budget_passed": true,
+        "final_contact_relative_residual": 2.8367796153636675e-12,
+        "per_voltage_contact_audit": "Unavailable in historical archive"
+      },
+      "medium_mesh": {
+        "points": 29,
+        "complete_grid": true,
+        "finite_current": true,
+        "short_circuit_photon_budget_passed": true,
+        "final_contact_relative_residual": 2.833458344927093e-12,
+        "per_voltage_contact_audit": "Unavailable in historical archive"
+      },
+      "coarse_mesh": {
+        "points": 29,
+        "complete_grid": true,
+        "finite_current": true,
+        "short_circuit_photon_budget_passed": true,
+        "final_contact_relative_residual": 9.305145995139394e-13,
+        "per_voltage_contact_audit": "Unavailable in historical archive"
+      },
+      "short_lifetime": {
+        "points": 29,
+        "complete_grid": true,
+        "finite_current": true,
+        "short_circuit_photon_budget_passed": true,
+        "final_contact_relative_residual": 1.993583763825744e-12,
+        "per_voltage_contact_audit": "Unavailable in historical archive"
+      }
+    },
+    "source_identity": "Contemporaneous source hashes unavailable; parameters/grid/budget checked; fresh baseline regression required. Archived dark remains conditional evidence.",
+    "archived_sensitivity_only": {
+      "medium_vs_fine_Isc_relative": 0.0036560518952732934,
+      "coarse_vs_fine_Isc_relative": 0.011685857112224252,
+      "short_lifetime_vs_nominal_Isc_relative": -0.008243453429642278,
+      "interpretation": "Historical sensitivity, not rerun or independent process calibration"
+    },
+    "fresh_baseline_agreement": {
+      "max_absolute_current_change_A_per_um2": 0.0,
+      "max_scaled_current_change": 0.0,
+      "scale": "max(abs(archived I(V)), archived Isc)",
+      "tolerance": 0.0001,
+      "passed": true
+    }
+  },
+  "curves": {
+    "baseline_R0p3": {
+      "reflectance": 0.3,
+      "validation": {
+        "points": 29,
+        "complete_grid": true,
+        "finite_current": true,
+        "short_circuit_photon_budget_passed": true,
+        "final_contact_relative_residual": 2.8367796153636675e-12,
+        "max_absolute_contact_residual_A_per_um2": 5.015154669028985e-18,
+        "max_relative_contact_residual": 4.015542139084694e-08,
+        "conservation_absolute_tolerance_A_per_um2": 1e-20,
+        "conservation_relative_tolerance": 1e-05
+      },
+      "device_metrics": {
+        "Isc_pair_A": 7.316854530239386e-08,
+        "Voc_pair_V_linear_interpolation": 0.9211638484787846,
+        "MPP_pair_sampled_V_A_W": [
+          0.8,
+          6.502993915611173e-08,
+          5.2023951324889384e-08
+        ],
+        "responsivity_A_W": 0.13549730611554417,
+        "absorbed_photon_ceiling_A_W": 0.22112883792006505,
+        "Isc_to_absorbed_photon_limit": 0.6127527616480513
+      },
+      "low_bias_photocurrent_A": 7.31161039630153e-08,
+      "residuals": {
+        "iv_dark": {
+          "train_nonnegative": {
+            "points": 6206,
+            "occupied_bins": 44,
+            "rms_A": 2.0082624773021084e-05,
+            "equal_bin_rms_A": 3.269581801011225e-05,
+            "bias_A": 4.965155942934494e-06,
+            "mae_A": 4.965307740039601e-06,
+            "max_absolute_A": 0.00015943531373672026
+          },
+          "heldout_combined": {
+            "points": 1420,
+            "occupied_bins": 10,
+            "rms_A": 1.1742160600969127e-05,
+            "equal_bin_rms_A": 1.1912504191827246e-05,
+            "bias_A": 6.719828326202993e-06,
+            "mae_A": 6.719828326202993e-06,
+            "max_absolute_A": 3.3830555950395e-05
+          },
+          "low_bias_train": {
+            "points": 297,
+            "occupied_bins": 2,
+            "rms_A": 3.205651335131116e-10,
+            "equal_bin_rms_A": 3.204385961675549e-10,
+            "bias_A": -2.003514419189993e-13,
+            "mae_A": 2.565335356192497e-10,
+            "max_absolute_A": 9.127861559217832e-10
+          },
+          "forward_train_ge_1p25V": {
+            "points": 396,
+            "occupied_bins": 4,
+            "rms_A": 7.942877468191882e-05,
+            "equal_bin_rms_A": 0.0001084033395054978,
+            "bias_A": 7.413313282320367e-05,
+            "mae_A": 7.413313282320367e-05,
+            "max_absolute_A": 0.00015943531373672026
+          },
+          "heldout_0.90_1.05V": {
+            "points": 857,
+            "occupied_bins": 6,
+            "rms_A": 3.339571279025456e-07,
+            "equal_bin_rms_A": 3.2894664718299957e-07,
+            "bias_A": 2.654749482092264e-07,
+            "mae_A": 2.654749482092264e-07,
+            "max_absolute_A": 7.287650818500857e-07
+          },
+          "heldout_1.15_1.25V": {
+            "points": 563,
+            "occupied_bins": 4,
+            "rms_A": 1.8643693669083197e-05,
+            "equal_bin_rms_A": 1.883101381911539e-05,
+            "bias_A": 1.6544661088086935e-05,
+            "mae_A": 1.6544661088086935e-05,
+            "max_absolute_A": 3.3830555950395e-05
+          },
+          "excluded_negative_voltage_points": 7377,
+          "excluded_above_DD_voltage_points": 0
+        },
+        "iv_1sun": {
+          "train_nonnegative": {
+            "points": 6206,
+            "occupied_bins": 44,
+            "rms_A": 1.9805755814698806e-05,
+            "equal_bin_rms_A": 3.25417991576776e-05,
+            "bias_A": 4.963385016983071e-06,
+            "mae_A": 4.963385016983071e-06,
+            "max_absolute_A": 0.00015956927774083654
+          },
+          "heldout_combined": {
+            "points": 1422,
+            "occupied_bins": 10,
+            "rms_A": 1.2048080153697167e-05,
+            "equal_bin_rms_A": 1.1808077594171876e-05,
+            "bias_A": 7.017154875538932e-06,
+            "mae_A": 7.017154875538932e-06,
+            "max_absolute_A": 3.394047167527849e-05
+          },
+          "low_bias_train": {
+            "points": 296,
+            "occupied_bins": 2,
+            "rms_A": 7.694472351083299e-08,
+            "equal_bin_rms_A": 7.694477451842991e-08,
+            "bias_A": 7.694396615213245e-08,
+            "mae_A": 7.694396615213245e-08,
+            "max_absolute_A": 7.791092999262271e-08
+          },
+          "forward_train_ge_1p25V": {
+            "points": 388,
+            "occupied_bins": 4,
+            "rms_A": 7.913079284461758e-05,
+            "equal_bin_rms_A": 0.00010789027368789023,
+            "bias_A": 7.442946577733009e-05,
+            "mae_A": 7.442946577733009e-05,
+            "max_absolute_A": 0.00015956927774083654
+          },
+          "heldout_0.90_1.05V": {
+            "points": 848,
+            "occupied_bins": 6,
+            "rms_A": 3.965649376344414e-07,
+            "equal_bin_rms_A": 3.9720565902297913e-07,
+            "bias_A": 3.4162917180253405e-07,
+            "mae_A": 3.4162917180253405e-07,
+            "max_absolute_A": 8.128008139932165e-07
+          },
+          "heldout_1.15_1.25V": {
+            "points": 574,
+            "occupied_bins": 4,
+            "rms_A": 1.895707635726252e-05,
+            "equal_bin_rms_A": 1.8663871052694828e-05,
+            "bias_A": 1.687925556677319e-05,
+            "mae_A": 1.687925556677319e-05,
+            "max_absolute_A": 3.394047167527849e-05
+          },
+          "excluded_negative_voltage_points": 7375,
+          "excluded_above_DD_voltage_points": 0
+        }
+      }
+    },
+    "maximum_R0": {
+      "reflectance": 0.0,
+      "validation": {
+        "points": 29,
+        "complete_grid": true,
+        "finite_current": true,
+        "short_circuit_photon_budget_passed": true,
+        "final_contact_relative_residual": 1.9724512270393686e-12,
+        "max_absolute_contact_residual_A_per_um2": 4.697931524500358e-18,
+        "max_relative_contact_residual": 3.823258420699712e-08,
+        "conservation_absolute_tolerance_A_per_um2": 1e-20,
+        "conservation_relative_tolerance": 1e-05
+      },
+      "device_metrics": {
+        "Isc_pair_A": 1.0452719377422209e-07,
+        "Voc_pair_V_linear_interpolation": 0.9433655110060384,
+        "MPP_pair_sampled_V_A_W": [
+          0.8,
+          9.55160705781031e-08,
+          7.641285646248248e-08
+        ],
+        "responsivity_A_W": 0.19356887735967052,
+        "absorbed_photon_ceiling_A_W": 0.3158983398858072,
+        "Isc_to_absorbed_photon_limit": 0.6127568680153335
+      },
+      "low_bias_photocurrent_A": 1.0445227875063854e-07,
+      "residuals": {
+        "iv_dark": {
+          "train_nonnegative": {
+            "points": 6206,
+            "occupied_bins": 44,
+            "rms_A": 2.0082624773021084e-05,
+            "equal_bin_rms_A": 3.269581801011225e-05,
+            "bias_A": 4.965155942934494e-06,
+            "mae_A": 4.965307740039601e-06,
+            "max_absolute_A": 0.00015943531373672026
+          },
+          "heldout_combined": {
+            "points": 1420,
+            "occupied_bins": 10,
+            "rms_A": 1.1742160600969127e-05,
+            "equal_bin_rms_A": 1.1912504191827246e-05,
+            "bias_A": 6.719828326202993e-06,
+            "mae_A": 6.719828326202993e-06,
+            "max_absolute_A": 3.3830555950395e-05
+          },
+          "low_bias_train": {
+            "points": 297,
+            "occupied_bins": 2,
+            "rms_A": 3.205651335131116e-10,
+            "equal_bin_rms_A": 3.204385961675549e-10,
+            "bias_A": -2.003514419189993e-13,
+            "mae_A": 2.565335356192497e-10,
+            "max_absolute_A": 9.127861559217832e-10
+          },
+          "forward_train_ge_1p25V": {
+            "points": 396,
+            "occupied_bins": 4,
+            "rms_A": 7.942877468191882e-05,
+            "equal_bin_rms_A": 0.0001084033395054978,
+            "bias_A": 7.413313282320367e-05,
+            "mae_A": 7.413313282320367e-05,
+            "max_absolute_A": 0.00015943531373672026
+          },
+          "heldout_0.90_1.05V": {
+            "points": 857,
+            "occupied_bins": 6,
+            "rms_A": 3.339571279025456e-07,
+            "equal_bin_rms_A": 3.2894664718299957e-07,
+            "bias_A": 2.654749482092264e-07,
+            "mae_A": 2.654749482092264e-07,
+            "max_absolute_A": 7.287650818500857e-07
+          },
+          "heldout_1.15_1.25V": {
+            "points": 563,
+            "occupied_bins": 4,
+            "rms_A": 1.8643693669083197e-05,
+            "equal_bin_rms_A": 1.883101381911539e-05,
+            "bias_A": 1.6544661088086935e-05,
+            "mae_A": 1.6544661088086935e-05,
+            "max_absolute_A": 3.3830555950395e-05
+          },
+          "excluded_negative_voltage_points": 7377,
+          "excluded_above_DD_voltage_points": 0
+        },
+        "iv_1sun": {
+          "train_nonnegative": {
+            "points": 6206,
+            "occupied_bins": 44,
+            "rms_A": 1.9799201991421332e-05,
+            "equal_bin_rms_A": 3.2534709411991096e-05,
+            "bias_A": 4.932868167661501e-06,
+            "mae_A": 4.932868167661501e-06,
+            "max_absolute_A": 0.00015954625225036545
+          },
+          "heldout_combined": {
+            "points": 1422,
+            "occupied_bins": 10,
+            "rms_A": 1.2031313660970185e-05,
+            "equal_bin_rms_A": 1.1791373462253172e-05,
+            "bias_A": 6.987426131244651e-06,
+            "mae_A": 6.987426131244651e-06,
+            "max_absolute_A": 3.39123192588045e-05
+          },
+          "low_bias_train": {
+            "points": 296,
+            "occupied_bins": 2,
+            "rms_A": 4.5609152377031984e-08,
+            "equal_bin_rms_A": 4.560912354869821e-08,
+            "bias_A": 4.5607872502923284e-08,
+            "mae_A": 4.5607872502923284e-08,
+            "max_absolute_A": 4.655894179086303e-08
+          },
+          "forward_train_ge_1p25V": {
+            "points": 388,
+            "occupied_bins": 4,
+            "rms_A": 7.910634954786706e-05,
+            "equal_bin_rms_A": 0.00010786762529799784,
+            "bias_A": 7.440307271933289e-05,
+            "mae_A": 7.440307271933289e-05,
+            "max_absolute_A": 0.00015954625225036545
+          },
+          "heldout_0.90_1.05V": {
+            "points": 848,
+            "occupied_bins": 6,
+            "rms_A": 3.7090014900934153e-07,
+            "equal_bin_rms_A": 3.7152661024293993e-07,
+            "bias_A": 3.11420367247394e-07,
+            "mae_A": 3.11420367247394e-07,
+            "max_absolute_A": 7.827385308041313e-07
+          },
+          "heldout_1.15_1.25V": {
+            "points": 574,
+            "occupied_bins": 4,
+            "rms_A": 1.8931446573169166e-05,
+            "equal_bin_rms_A": 1.8638244882033366e-05,
+            "bias_A": 1.6850236040425273e-05,
+            "mae_A": 1.6850236040425273e-05,
+            "max_absolute_A": 3.39123192588045e-05
+          },
+          "excluded_negative_voltage_points": 7375,
+          "excluded_above_DD_voltage_points": 0
+        }
+      }
+    }
+  },
+  "observed_1sun_summary_unchanged": {
+    "observed_sample_mpp": {
+      "sample_index_zero_based": 13556,
+      "voltage_V": 1.12934,
+      "delivered_current_A": 1.43254e-07,
+      "power_W": 1.6178247236e-07
+    },
+    "zero_current_crossings": {
+      "adjacent_sign_changes": 4,
+      "exact_zero_samples": 0,
+      "count": 4,
+      "voltage_range_V": [
+        1.2349670273604272,
+        1.2479
+      ],
+      "median_voltage_V": 1.242842843244257
+    },
+    "closest_zero_current_sample": {
+      "sample_index_zero_based": 13352,
+      "voltage_V": 1.24058,
+      "entering_current_A": -4.2726e-10
+    },
+    "repeated_voltage_values": 1060,
+    "repeated_voltage_max_current_span_A": 2.4710899999999997e-07,
+    "near_zero_voltage_abs_below_10mV": {
+      "points": 130,
+      "median_entering_current_A": -1.48106e-07,
+      "entering_current_range_A": [
+        -1.4908299999999999e-07,
+        -1.47374e-07
+      ],
+      "interpretation": "Local observed current distribution; no exact Isc interpolation or offset correction."
+    },
+    "method": "Acquisition order retained; no global interpolation, sorting, averaging or offsets. MPP is the maximum observed generating sample, sensitive to noise and extreme-value selection; it is not a smoothed/continuous-curve estimate or a model validation tolerance. Crossings may reflect noise or sweep reversal and are not a unique measured Voc."
+  },
+  "required_information": {
+    "target_fraction_of_R0_absorbed_photon_ceiling": 0.8796789170411694,
+    "missing": [
+      "actual optical irradiance/wavelength and illuminated area",
+      "measured reflection/absorption",
+      "absorber/emitter geometry and doping profiles",
+      "contact selectivity/geometry and surface recombination",
+      "temperature and observation offsets",
+      "dark-IV shape and independent validation"
+    ]
+  },
+  "promotion": {
+    "promoted": false,
+    "reason": "Photocurrent-only feasibility does not calibrate dark shape/Voc/MPP; fixed conceptual structure and conditional archived dark cannot identify the measured process"
+  },
+  "analysis_status_as_executed": "Infeasible within the fixed-structure effective-reflectance family; PV calibration incomplete",
+  "review": {
+    "role": "Astra orchestration/evidence review",
+    "acceptance_scope": "Fixed-structure optical-throughput feasibility evidence only",
+    "physical_calibration_complete": false,
+    "reviewed_after_execution": true
+  }
+}

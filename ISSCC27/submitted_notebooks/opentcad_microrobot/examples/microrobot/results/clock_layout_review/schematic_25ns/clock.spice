@@ -1,0 +1,68 @@
+* Our low-power clock candidate; three scaled S2E-fit cells, optical ramp, chosen storage capacitor
+.lib "/usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.temp 26.85
+* Derived from unchanged canonical clock; Vbias0V removed, ref_vdd aliased to vdd.
+.subckt microrobot_clock clk vdd vss bias_n bias_p
+Xb1 bias_n bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xb2 b2 b2 bias_n vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xb3 vdd vdd b2 vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xmirror bias_p bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xpdiode bias_p bias_p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+Xcbiasp bias_p vss sky130_fd_pr__cap_mim_m3_1 w=7 l=7
+Xcbiasn bias_n vss sky130_fd_pr__cap_mim_m3_1 w=7 l=7
+X1_Xps X1_ps bias_p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+X1_Xpi a raw X1_ps vdd sky130_fd_pr__pfet_01v8 w=1 l=0.5
+X1_Xni a raw X1_ns vss sky130_fd_pr__nfet_01v8 w=0.5 l=0.5
+X1_Xns X1_ns bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+X2_Xps X2_ps bias_p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+X2_Xpi b a X2_ps vdd sky130_fd_pr__pfet_01v8 w=1 l=0.5
+X2_Xni b a X2_ns vss sky130_fd_pr__nfet_01v8 w=0.5 l=0.5
+X2_Xns X2_ns bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+X3_Xps X3_ps bias_p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+X3_Xpi c b X3_ps vdd sky130_fd_pr__pfet_01v8 w=1 l=0.5
+X3_Xni c b X3_ns vss sky130_fd_pr__nfet_01v8 w=0.5 l=0.5
+X3_Xns X3_ns bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+X4_Xps X4_ps bias_p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+X4_Xpi d c X4_ps vdd sky130_fd_pr__pfet_01v8 w=1 l=0.5
+X4_Xni d c X4_ns vss sky130_fd_pr__nfet_01v8 w=0.5 l=0.5
+X4_Xns X4_ns bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+X5_Xps X5_ps bias_p vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+X5_Xpi raw d X5_ps vdd sky130_fd_pr__pfet_01v8 w=1 l=0.5
+X5_Xni raw d X5_ns vss sky130_fd_pr__nfet_01v8 w=0.5 l=0.5
+X5_Xns X5_ns bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xc1 a vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+Xc2 b vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+Xc3 c vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+Xc4 d vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+Xc5 raw vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2.5
+Xbp1 buffered raw vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=8
+Xbn1 buffered raw vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xbp2 clk buffered vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1
+Xbn2 clk buffered vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=1
+.ends microrobot_clock
+
+Vlight illumination 0 PWL(0 0 1u 0 0.000101 1000)
+.model fitted_pv D(IS=2.9405522317e-17 N=1.14470885396 TNOM=26.85 EG=0 XTI=0)
+Bph1 0 pv1 I={4.0350658074e-08*v(illumination)/1000}
+Bph2 pv1 pv2 I={4.0350658074e-08*v(illumination)/1000}
+Bph3 pv2 supply I={4.0350658074e-08*v(illumination)/1000}
+Dp1 pv1 0 fitted_pv
+Dp2 pv2 pv1 fitted_pv
+Dp3 supply pv2 fitted_pv
+Cstore supply 0 2e-12
+Vsense supply vdd 0
+Xclock clk vdd 0 bn bp microrobot_clock
+Vlogic supply digital_supply 0
+.include "receiver_cells.spice"
+Xff clk feedback 0 0 digital_supply digital_supply div2 sky130_fd_sc_hd__dfxtp_1
+Xfeedback div2 0 0 digital_supply digital_supply feedback sky130_fd_sc_hd__inv_1
+Coutput clk 0 2e-15
+.options method=gear maxord=2 reltol=1e-06 abstol=1e-15
+.control
+set wr_vecnames
+set wr_singlescale
+tran 2.5e-08 0.004 0 2.5e-08
+wrdata clock.dat v(vdd) v(clk) v(bn) v(bp) i(Vsense) i(Vlogic) v(div2)
+quit
+.endc
+.end

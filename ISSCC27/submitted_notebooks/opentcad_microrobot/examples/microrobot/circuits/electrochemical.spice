@@ -1,0 +1,12 @@
+* Uncalibrated reduced electrode model; SI units.
+* eta = metal minus local solution voltage; unknown absolute Ag/AgCl offset.
+* theta is a dimensionless coverage encoded as a numerical voltage (1 V = 1).
+* Cdl, adsorption charge and Faradaic leakage are separate terminal currents.
+.subckt micro_electrode metal solution theta params: cdl=40p qmax=260p tau=20m rf=10g width=0.08 offset=0
+Cdouble metal solution {cdl}
+Rfaradaic metal solution {rf}
+* Numerical state normalization; not a physical capacitor/power contribution.
+Cstate theta 0 1n
+Bstate theta 0 I={1n/tau*(v(theta)-1/(1+exp(-(v(metal,solution)-offset)/width)))}
+Bads metal solution I={qmax/tau*(1/(1+exp(-(v(metal,solution)-offset)/width))-v(theta))}
+.ends micro_electrode
