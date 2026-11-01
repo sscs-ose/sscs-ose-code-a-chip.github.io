@@ -52,6 +52,10 @@ low-frequency PSRR), slightly higher dropout, and ≈ 1.7× MIM area. Limitation
 schematic-level only (no layout or PEX; the xschem file is label-connected), mid-band PSRR still only ≈ 9 dB, and poly-resistor
 mismatch not modelled.
 
+For context, the notebook (end of Section 13) places the design next to four published capacitor-less LDOs using the FOM table of
+Ming, Zhou and Zhang (VLSI-SoC 2011): 0.14 ns (tt) / 0.20 ns (PVT worst) here, versus 0.032, 0.067, 1.29 and 19.5 ns for Hazucha 2005,
+Man 2007, Or & Leung 2010 and Milliken 2007. Those are silicon measurements at 50–100 mA, so the comparison is indicative only.
+
 ## Files
 
 | File | Content |
