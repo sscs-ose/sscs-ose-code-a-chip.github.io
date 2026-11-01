@@ -1,13 +1,13 @@
 # From RTL to GDS: Reproducible UART-to-VGA ASIC Design and Verification
 
 **IEEE SSCS Code-a-Chip — ISSCC 2027**  
-**Design Submitted for Tapeout:** Tiny Tapeout SKY26c #847, UART VGA Text Scroller with a 2-bit ALU  
-**Proposed Team Representative:** Noble G  
-**Affiliation:** Muthoot Institute of Technology and Science[MITS], Kochi, Kerala, India
-**Email:**  nobleg@mgits.ac.in
-**IEEE Memebr:** Yes 
-**License:** Apache 2.0
 
+**Design Submitted for Tapeout:** Tiny Tapeout SKY26c #847, UART VGA Text Scroller
+**Proposed Team Representative:** Noble G  
+**Affiliation:** Muthoot Institute of Technology and Science (MITS), Kochi, Kerala, India  
+**Email:**  nobleg@mgits.ac.in  
+**IEEE Member:** Yes  
+**License:** Apache 2.0  
 ## Project summary
 
 An open-source educational laboratory built from a published **SKY130 Tiny Tapeout UART/VGA ASIC**. The notebook clones the original RTL at a pinned commit and combines a compact 32×6-bit message buffer, UART 8N1 timing, VGA 640×480 at 25.175 MHz, source-parsed 5×7 glyphs (4× scaled), a 2-bit ALU, and a link to the published physical layout. The aim is a transparent, executable teaching artifact connecting source RTL to reproducible verification and implementation evidence.
