@@ -1,0 +1,98 @@
+{
+  "profile_version": "hullcirq-sky130-route-repair-v5",
+  "origin": "development_assistant_standard_physical_repair_under_user_authorized_completion",
+  "original_GUI_settings_inherited": [
+    "top_module",
+    "clock_name",
+    "clock_period_ns",
+    "reset_name",
+    "reset_active",
+    "reset_kind",
+    "pdk",
+    "cell_library"
+  ],
+  "additional_conditions_origin": "35_percent_prior_project_selection_and_explicit_LibreLane_3.0.16_timing_defaults_not_original_GUI_fields",
+  "flow": "HuLLCirqRouteClosureV5",
+  "stop_after": "KLayout.Render",
+  "jobs": 2,
+  "config": {
+    "FP_CORE_UTIL": 35,
+    "IO_DELAY_CONSTRAINT": 20.0,
+    "CLOCK_UNCERTAINTY_CONSTRAINT": 0.25,
+    "CLOCK_TRANSITION_CONSTRAINT": 0.15,
+    "TIME_DERATING_CONSTRAINT": 5.0,
+    "DEFAULT_CORNER": "nom_tt_025C_1v80",
+    "STA_CORNERS": [
+      "nom_tt_025C_1v80",
+      "nom_ss_100C_1v60",
+      "nom_ff_n40C_1v95",
+      "min_tt_025C_1v80",
+      "min_ss_100C_1v60",
+      "min_ff_n40C_1v95",
+      "max_tt_025C_1v80",
+      "max_ss_100C_1v60",
+      "max_ff_n40C_1v95"
+    ],
+    "STA_THREADS": 1,
+    "DRT_THREADS": 2,
+    "RUN_POST_GRT_DESIGN_REPAIR": true,
+    "RUN_POST_GRT_RESIZER_TIMING": true,
+    "CTS_SINK_CLUSTERING_SIZE": 8,
+    "CTS_DISTANCE_BETWEEN_BUFFERS": 50,
+    "PNR_CORNERS": [
+      "max_ss_100C_1v60"
+    ],
+    "RSZ_CORNERS": [
+      "max_ss_100C_1v60"
+    ],
+    "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 30,
+    "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30
+  },
+  "SDC_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/base.sdc",
+  "SDC_sha256": "34c8f331c366db51a78ed8a0d2a7bbac3b6c1cfe0277a04c6aca9ba4948e7f78",
+  "limits": [
+    "No false path is added for the synchronous reset.",
+    "I/O delays are 20 percent of the original GUI clock period; drive/load and further physical defaults are retained in the resolved tool configuration.",
+    "Routing DRC and extracted STA may run before the cutoff; signoff DRC/LVS and SDF simulation are separate stages.",
+    "The existing finite generic netlist test is a prerequisite, not verification of the newly technology-mapped netlist.",
+    "This profile reuses original technology mapping and the v4 clock tree/rerouted checkpoint, then executes a second standard post-GRT repair pass before fresh detailed routing/extraction/stream-out. No fresh synthesis, placement or CTS is claimed. The checkpoint belongs to the unchanged original GUI job. Final timing and electrical constraints are unchanged.",
+    "The v2 actual clock tree retained four internal clock trunks with 16 loads against the unchanged fanout limit 10. Version 3 adds the standard CTS buffer spacing of 50 micrometres; success is determined by the actual new reports, never inferred from this parameter.",
+    "Version 4 explicitly optimizes and checks intermediate routing at max_ss_100C_1v60 with 30 percent slew/capacitance repair margins. A separate PnR-only SDC uses fanout 8 to reserve antenna-diode headroom. Final signoff retains the original SDC, fanout 10, 0.75 ns slew, original cell capacitance limits and all nine STA corners. Intermediate estimates never establish extracted closure.",
+    "Version 4 retained 81 estimated max_ss slew violations after its first repair/reroute pass. Version 5 resumes that exact checkpoint at OpenROAD.RepairDesignPostGRT, including its antenna diodes, so standard repair_design sees the updated routes and loads. The cancelled v4 trial is retained and is not treated as adopted evidence. Success still requires new extracted nine-corner checks and new DRC/LVS/functional evidence.",
+    "The standard Classic flow substitutes only ResizerTimingPostGRT with a class that copies RSZ_CORNERS from all nine original STA_CORNERS before normal construction. This retains slow-corner design repair and all-corner setup/hold repair. Upstream scripts are unchanged; the small launcher is frozen per run."
+  ],
+  "implementation_kind": "resume_v4_post_GRT_checkpoint_from_OpenROAD.RepairDesignPostGRT",
+  "required_additional_checks": [
+    "max_slew_violations_zero",
+    "max_capacitance_violations_zero",
+    "max_fanout_violations_zero"
+  ],
+  "optimization_conditions": {
+    "pnr_max_fanout": 8,
+    "final_max_fanout": 10,
+    "signoff_constraints_changed": false,
+    "pnr_sdc": "original_base_SDC_plus_fixed_fanout8_override"
+  },
+  "checkpoint_origin": {
+    "run_id": "physical-workflow-5167c8015178403a98f6fc10910a41a8",
+    "stage": "11-openroad-stamidpnr-3",
+    "adopted": false,
+    "original_GUI_job_changed": false
+  },
+  "per_step_override": {
+    "OpenROAD.ResizerTimingPostGRT": {
+      "RSZ_CORNERS": [
+        "nom_tt_025C_1v80",
+        "nom_ss_100C_1v60",
+        "nom_ff_n40C_1v95",
+        "min_tt_025C_1v80",
+        "min_ss_100C_1v60",
+        "min_ff_n40C_1v95",
+        "max_tt_025C_1v80",
+        "max_ss_100C_1v60",
+        "max_ff_n40C_1v95"
+      ]
+    }
+  },
+  "fixed_launcher_sha256": "4b863a00b212d4cabe94e268fae3857ac345f0a92df705152bb2c121eaca84cc"
+}

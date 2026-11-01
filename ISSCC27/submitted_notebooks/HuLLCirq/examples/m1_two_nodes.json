@@ -1,0 +1,56 @@
+{
+  "schema_version": "0.1",
+  "project": {"id": "m1-two-nodes", "name": "M1 Graph Editing Fixture"},
+  "settings": {
+    "top_module": "m1_graph_top",
+    "clock_name": "clk",
+    "clock_period_ns": 50.0,
+    "reset_name": "rst",
+    "reset_active": "high",
+    "reset_kind": "synchronous",
+    "rtl_language": "verilog_2005",
+    "pdk": "sky130A",
+    "cell_library": "sky130_fd_sc_hd"
+  },
+  "nodes": [
+    {
+      "id": "node-producer",
+      "name": "Producer",
+      "module_name": "m1_producer",
+      "parent_id": null,
+      "behavior": "Graph fixture only: propose a signed 32-bit sequence source. No RTL or simulation exists yet.",
+      "test_expectations": "Future test: reset initializes the source; transferred values preserve order; data stays stable while stalled. Not executed.",
+      "constraints": {"latency_cycles": 1, "protocol": "valid_ready"},
+      "ports": [
+        {"id": "port-producer-data", "name": "data_out", "direction": "output", "width": 32,
+         "signed": true, "protocol": "valid_ready", "clock": "clk", "reset": "rst"}
+      ]
+    },
+    {
+      "id": "node-consumer",
+      "name": "Consumer",
+      "module_name": "m1_consumer",
+      "parent_id": null,
+      "behavior": "Graph fixture only: propose a signed 32-bit sequence consumer. No RTL or simulation exists yet.",
+      "test_expectations": "Future test: accepted values match the producer sequence without loss or reordering under stalls. Not executed.",
+      "constraints": {"latency_cycles": 1, "protocol": "valid_ready"},
+      "ports": [
+        {"id": "port-consumer-data", "name": "data_in", "direction": "input", "width": 32,
+         "signed": true, "protocol": "valid_ready", "clock": "clk", "reset": "rst"}
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-producer-consumer",
+      "source": {"node_id": "node-producer", "port_id": "port-producer-data"},
+      "target": {"node_id": "node-consumer", "port_id": "port-consumer-data"},
+      "behavior": "Transfer signed data when valid and ready are both high. Keep data stable under backpressure; synchronous active-high reset clears pending transfer. This is an input rule, not verified behavior.",
+      "protocol": "valid_ready"
+    }
+  ],
+  "layout": {
+    "nodes": {"node-producer": {"x": 100, "y": 140}, "node-consumer": {"x": 460, "y": 140}},
+    "viewport": {"x": 0, "y": 0, "zoom": 1}
+  }
+}

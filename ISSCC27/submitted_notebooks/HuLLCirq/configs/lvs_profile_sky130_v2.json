@@ -1,0 +1,55 @@
+{
+  "profile_version": "hullcirq-sky130-lvs-v2",
+  "origin": "development_assistant_S13_full_fresh_extraction_variant_original_GUI_S11_inputs_PDK_tools_and_worker_unchanged",
+  "flow": [
+    "Magic.SpiceExtraction",
+    "Netgen.LVS"
+  ],
+  "jobs": 2,
+  "config": {
+    "MAGIC_EXT_USE_GDS": true,
+    "MAGIC_EXT_ABSTRACT": false,
+    "MAGIC_EXT_ABSTRACT_CELLS": null,
+    "MAGIC_EXT_UNIQUE": "all",
+    "MAGIC_EXT_SHORT_RESISTOR": false,
+    "LVS_FLATTEN_CELLS": null,
+    "LVS_IGNORE_CELLS": null,
+    "LVS_INCLUDE_MARCO_NETLISTS": false,
+    "VDD_NETS": [
+      "VPWR"
+    ],
+    "GND_NETS": [
+      "VGND"
+    ]
+  },
+  "deck_files": {
+    "libs.tech/magic/sky130A.magicrc": "c6f29a510b7014907a42b436610964157063c8b19d8e3bb582eaca2288fa7e05",
+    "libs.tech/magic/sky130A.tech": "d9ef56e3ab01b8fb605edf964fcfa01a0bf14ca8503f6ccecdecfd71f0907519",
+    "libs.tech/netgen/sky130A_setup.tcl": "7a33f3f54fab57a9d9b0887ac7b7b64ce6c454110e8b7f01f3cfb90a1282dc94",
+    "libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice": "304da9725492089107bb20840a4020558b028487d300f8df79bbbad5332aaa99"
+  },
+  "limits": [
+    "Magic extracts the unchanged accepted GDS, with capacitance/resistance disabled, unique all, no added abstract cells or custom flatten rules. DEF is retained as a required companion input; GDS extraction is selected explicitly.",
+    "A versioned fixed launcher changes only Magic.SpiceExtraction.get_script_path to a hash-bound one-line variant of the licensed LibreLane 3.0.16 Tcl: bare extract becomes extract all. The full fresh geometry is extracted, without adding cell abstraction, ignore rules, waivers or changing PDK/tool/worker bytes. The original v1 profile and first execution are retained.",
+    "Netgen compares extracted SPICE with the original S11 powered netlist and pinned SKY130 cell SPICE models. The powered file is first hashed at S13, not retrospectively claimed as a hash-retained S11 artifact; its signal graph and component types are checked against the adopted mapped netlist and DEF.",
+    "No user LVS ignore/flatten cells or waivers are added. Upstream Netgen uses -blackbox and the pinned PDK setup's device reductions, tolerances and physical-only-cell treatment. These remain part of the recorded comparison scope.",
+    "Explicit finite zero error metrics, zero illegal overlaps and a complete top-cell unique-match report are mandatory. Tool exit zero alone is insufficient.",
+    "This is recorded layout-versus-powered-netlist connectivity evidence, not formal RTL equivalence, foundry qualification, extracted dynamic simulation, power integrity or dynamic SDF verification."
+  ],
+  "force_full_extraction": true,
+  "extraction_variant": {
+    "upstream_release": "3.0.16",
+    "upstream_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/magic/extract_spice.tcl",
+    "upstream_sha256": "461bf51e4226c283de33361bad02f48d0335ad7ab05965cbba43e2677e040660",
+    "script_path": "scripts/extract_spice_full.tcl",
+    "script_sha256": "005c7419a1ffc7a1a7987e74fccd6f450864fd102d6bbae7f6af7fe224b7935d",
+    "launcher_path": "scripts/run_full_lvs.py",
+    "launcher_sha256": "cb09c96fc056ea8edeff682a128b81730c9aa332467edada7da84fb33b27d38c",
+    "replacement": {
+      "from": "extract",
+      "to": "extract all",
+      "count": 1
+    },
+    "reason": "The first S13 run demonstrated repeated negative .ext lookups through PDK library paths. Magic 8.3.623 incremental extraction checks timestamps before its visited-definition guard, repeating the lookup per cell use. Full extraction skips this prepass and extracts every fresh cell definition."
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "profile_version": "hullcirq-sky130-route-repair-npu2v3",
+  "origin": "development_assistant_extra_standard_electrical_repair_after_recorded_second_GUI_failure",
+  "original_GUI_settings_inherited": ["top_module", "clock_name", "clock_period_ns", "reset_name", "reset_active", "reset_kind", "pdk", "cell_library"],
+  "additional_conditions_origin": "same_npu2v2_optimization_with_one_standard_RepairDesignPostGRT_after_completed_all_corner_timing_repair",
+  "flow": "HuLLCirqNpu2RouteClosureV3",
+  "stop_after": "KLayout.Render",
+  "jobs": 2,
+  "config": {
+    "FP_CORE_UTIL": 35,
+    "IO_DELAY_CONSTRAINT": 20.0,
+    "CLOCK_UNCERTAINTY_CONSTRAINT": 0.25,
+    "CLOCK_TRANSITION_CONSTRAINT": 0.15,
+    "TIME_DERATING_CONSTRAINT": 5.0,
+    "DEFAULT_CORNER": "nom_tt_025C_1v80",
+    "STA_CORNERS": [
+      "nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95",
+      "min_tt_025C_1v80", "min_ss_100C_1v60", "min_ff_n40C_1v95",
+      "max_tt_025C_1v80", "max_ss_100C_1v60", "max_ff_n40C_1v95"
+    ],
+    "STA_THREADS": 1,
+    "DRT_THREADS": 2,
+    "RUN_POST_GRT_DESIGN_REPAIR": true,
+    "RUN_POST_GRT_RESIZER_TIMING": true,
+    "CTS_SINK_CLUSTERING_SIZE": 8,
+    "CTS_DISTANCE_BETWEEN_BUFFERS": 50,
+    "PNR_CORNERS": ["max_ss_100C_1v60"],
+    "RSZ_CORNERS": ["max_ss_100C_1v60"],
+    "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 60,
+    "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+    "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.1,
+    "EXTRA_EXCLUDED_CELLS": ["sky130_fd_sc_hd__clkdlybuf*"]
+  },
+  "SDC_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/base.sdc",
+  "SDC_sha256": "34c8f331c366db51a78ed8a0d2a7bbac3b6c1cfe0277a04c6aca9ba4948e7f78",
+  "implementation_kind": "resume_second_NPU2_repair_post_timing_checkpoint_before_one_extra_standard_electrical_repair",
+  "required_additional_checks": ["max_slew_violations_zero", "max_capacitance_violations_zero", "max_fanout_violations_zero"],
+  "optimization_conditions": {
+    "pnr_max_fanout": 8,
+    "final_max_fanout": 10,
+    "signoff_constraints_changed": false,
+    "pnr_sdc": "original_base_SDC_plus_fixed_fanout8_override",
+    "pnr_slew_margin_percent": 60,
+    "pnr_hold_slack_margin_ns": 0.1,
+    "new_optimization_excluded_cells": ["sky130_fd_sc_hd__clkdlybuf*"],
+    "existing_instances_removed": false,
+    "timing_models_excluded": false,
+    "extra_standard_electrical_repair_passes": 1
+  },
+  "checkpoint_origin": {
+    "run_id": "physical-workflow-8c0636d426f3410ba947195343216b3f",
+    "stage": "05-openroad-stamidpnr-3",
+    "adopted": false,
+    "validation_status": "Failed",
+    "original_GUI_job_changed": false,
+    "state_sha256": "685fdf31a1ceb18f928f5ca18769b0c9badb2a01d90e2d5302d7923e348b2f54",
+    "input_manifest_sha256": "c74d6ce016d2558ff43ed075df3b289b53fb1a19c2f1d14e3eea380f077e4829",
+    "source_execution_sha256": "164901b4702ab9048c3204cb04b74d31499495d28d0c1ab9009b7a2ec9214b2b"
+  },
+  "per_step_override": {
+    "OpenROAD.ResizerTimingPostGRT": {
+      "RSZ_CORNERS": [
+        "nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95",
+        "min_tt_025C_1v80", "min_ss_100C_1v60", "min_ff_n40C_1v95",
+        "max_tt_025C_1v80", "max_ss_100C_1v60", "max_ff_n40C_1v95"
+      ]
+    }
+  },
+  "extra_standard_step": {
+    "id": "HuLLCirq.RepairDesignAfterTimingV3",
+    "implementation": "OpenROAD.RepairDesignPostGRT",
+    "after": "OpenROAD.ResizerTimingPostGRT",
+    "before": "OpenROAD.STAMidPNR-3",
+    "custom_Tcl": false
+  },
+  "fixed_launcher_sha256": "492a28fcf8b5d6f8f016e4d61e502ced358c1b66c1535ac6ced57a5ffb6b45f4",
+  "standard_tool_sources": [
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/flows/classic.py",
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/flows/sequential.py",
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/steps/openroad.py",
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/openroad/rsz_timing_postgrt.tcl"
+  ],
+  "limits": [
+    "The second GUI repair completed with 929 max_ss, 776 nom_ss, 546 min_ss and 9 nom_tt/max_tt slew violations; capacitance, fanout and setup/hold checks passed. The failed run remains unchanged and is not adopted.",
+    "All 104 max_ss violating output drivers are buf_1 instances already present after the first electrical repair and unchanged by timing repair. None are hold-prefixed output drivers. The exact internal resizer cause is not established.",
+    "One additional unmodified standard electrical-repair pass uses updated post-timing global-route loads. It is a bounded correction hypothesis, not a prediction of success. No new buf_1/2 exclusion, manual netlist rewrite or check waiver is introduced.",
+    "The exact post-timing checkpoint reuses completed all-nine-corner timing repair. Standard electrical repair, MidSTA, detailed routing, RC extraction and final all-nine-corner STA execute again. Any newly introduced hold, setup or electrical violation fails the normal strict checks.",
+    "Original 50 ns clock, base signoff SDC, 0.75 ns slew limit, capacitance/fanout limits and all nine final corners remain unchanged. Every changed layout requires new S12, S13 and S14 evidence.",
+    "All checkpoint views are pinned by fresh post-failure observations explicitly distinguished from original retained hashes. Review-only changes are allowed only with the same executed-source hash and valid current self-checksum."
+  ]
+}

@@ -1,0 +1,681 @@
+{
+  "schema_version": 1,
+  "source": {
+    "path": "submission/evidence/npu_explicit/design-inputs.json",
+    "sha256": "caafeece840e86f7fe647e4786708bb325821871e44c52d993b5735674ec7678"
+  },
+  "functional_report_source": {
+    "path": "submission/evidence/npu_explicit/S14/functional-report.json",
+    "sha256": "1dc8c86120e0506d90d4b066fa3212e00c16cf85b407ac962f37978c329fd35c"
+  },
+  "settings": {
+    "top_module": "hullcirq_npu2_top",
+    "clock_name": "clk",
+    "clock_period_ns": 50,
+    "reset_name": "rst",
+    "reset_active": "high",
+    "reset_kind": "synchronous",
+    "rtl_language": "verilog_2005",
+    "pdk": "sky130A",
+    "cell_library": "sky130_fd_sc_hd"
+  },
+  "job": {
+    "id": "matrix-job-2x2-k3-signed-v1",
+    "k": 3,
+    "A": [
+      [
+        -8,
+        3,
+        5
+      ],
+      [
+        7,
+        -2,
+        4
+      ]
+    ],
+    "B": [
+      [
+        6,
+        -1
+      ],
+      [
+        -3,
+        5
+      ],
+      [
+        2,
+        7
+      ]
+    ],
+    "bias": [
+      3,
+      -2
+    ],
+    "relu": false
+  },
+  "arithmetic": {
+    "operand_bits": 8,
+    "signed_product_bits": 16,
+    "accumulator_bits": 32,
+    "wrap": "signed32 modulo 2^32 before optional ReLU",
+    "raw_mac": [
+      -47,
+      58,
+      56,
+      11
+    ],
+    "after_bias_wrap": [
+      -44,
+      56,
+      59,
+      9
+    ],
+    "expected_outputs": [
+      -44,
+      56,
+      59,
+      9
+    ],
+    "products_by_output": [
+      {
+        "row": 0,
+        "column": 0,
+        "products": [
+          -48,
+          -9,
+          10
+        ],
+        "mac": -47,
+        "bias": 3,
+        "result": -44
+      },
+      {
+        "row": 0,
+        "column": 1,
+        "products": [
+          8,
+          15,
+          35
+        ],
+        "mac": 58,
+        "bias": -2,
+        "result": 56
+      },
+      {
+        "row": 1,
+        "column": 0,
+        "products": [
+          42,
+          6,
+          8
+        ],
+        "mac": 56,
+        "bias": 3,
+        "result": 59
+      },
+      {
+        "row": 1,
+        "column": 1,
+        "products": [
+          -7,
+          -10,
+          28
+        ],
+        "mac": 11,
+        "bias": -2,
+        "result": 9
+      }
+    ]
+  },
+  "functional_observations": [
+    {
+      "index": 0,
+      "value": -44,
+      "cycle": 44
+    },
+    {
+      "index": 1,
+      "value": 56,
+      "cycle": 45
+    },
+    {
+      "index": 2,
+      "value": 59,
+      "cycle": 47
+    },
+    {
+      "index": 3,
+      "value": 9,
+      "cycle": 49
+    }
+  ],
+  "nodes": [
+    {
+      "id": "npu2-control",
+      "name": "Job control",
+      "module_name": "hullcirq_npu2_control",
+      "role": "Latch one job; distribute independent scheduler/post configuration; complete only after four external transfers.",
+      "ports": [
+        {
+          "name": "config_data",
+          "direction": "input",
+          "width": 69,
+          "signed": false
+        },
+        {
+          "name": "schedule_config",
+          "direction": "output",
+          "width": 4,
+          "signed": false
+        },
+        {
+          "name": "post_config",
+          "direction": "output",
+          "width": 65,
+          "signed": false
+        },
+        {
+          "name": "output_transfer",
+          "direction": "input",
+          "width": 1,
+          "signed": false
+        },
+        {
+          "name": "busy",
+          "direction": "output",
+          "width": 1,
+          "signed": false
+        },
+        {
+          "name": "job_done",
+          "direction": "output",
+          "width": 1,
+          "signed": false
+        }
+      ]
+    },
+    {
+      "id": "npu2-buffer",
+      "name": "Operand buffer",
+      "module_name": "hullcirq_npu2_buffer",
+      "role": "Two banks of 16 byte registers; produce A0k, A1k, Bk0, Bk1 in one 32-bit response.",
+      "ports": [
+        {
+          "name": "load_data",
+          "direction": "input",
+          "width": 13,
+          "signed": false
+        },
+        {
+          "name": "read_index",
+          "direction": "input",
+          "width": 3,
+          "signed": false
+        },
+        {
+          "name": "operands",
+          "direction": "output",
+          "width": 32,
+          "signed": false
+        }
+      ]
+    },
+    {
+      "id": "npu2-scheduler",
+      "name": "2x2 scheduler",
+      "module_name": "hullcirq_npu2_scheduler",
+      "role": "For each k request one bundle, then send one 34-bit bundle with first/last markers.",
+      "ports": [
+        {
+          "name": "schedule_config",
+          "direction": "input",
+          "width": 4,
+          "signed": false
+        },
+        {
+          "name": "read_index",
+          "direction": "output",
+          "width": 3,
+          "signed": false
+        },
+        {
+          "name": "operands",
+          "direction": "input",
+          "width": 32,
+          "signed": false
+        },
+        {
+          "name": "batch_data",
+          "direction": "output",
+          "width": 34,
+          "signed": false
+        }
+      ]
+    },
+    {
+      "id": "npu2-dispatcher",
+      "name": "Four-lane dispatcher",
+      "module_name": "hullcirq_npu2_dispatcher",
+      "role": "Deliver four independent 18-bit pairs exactly once per operand batch.",
+      "ports": [
+        {
+          "name": "batch_data",
+          "direction": "input",
+          "width": 34,
+          "signed": false
+        },
+        {
+          "name": "pair00",
+          "direction": "output",
+          "width": 18,
+          "signed": false
+        },
+        {
+          "name": "pair01",
+          "direction": "output",
+          "width": 18,
+          "signed": false
+        },
+        {
+          "name": "pair10",
+          "direction": "output",
+          "width": 18,
+          "signed": false
+        },
+        {
+          "name": "pair11",
+          "direction": "output",
+          "width": 18,
+          "signed": false
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe00",
+      "name": "PE 0,0",
+      "module_name": "hullcirq_npu2_pe00",
+      "role": "Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.",
+      "ports": [
+        {
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false
+        },
+        {
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe01",
+      "name": "PE 0,1",
+      "module_name": "hullcirq_npu2_pe01",
+      "role": "Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.",
+      "ports": [
+        {
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false
+        },
+        {
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe10",
+      "name": "PE 1,0",
+      "module_name": "hullcirq_npu2_pe10",
+      "role": "Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.",
+      "ports": [
+        {
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false
+        },
+        {
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe11",
+      "name": "PE 1,1",
+      "module_name": "hullcirq_npu2_pe11",
+      "role": "Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.",
+      "ports": [
+        {
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false
+        },
+        {
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true
+        }
+      ]
+    },
+    {
+      "id": "npu2-collector",
+      "name": "Row-major collector",
+      "module_name": "hullcirq_npu2_collector",
+      "role": "Serialize the four final sums in row-major 00,01,10,11 order.",
+      "ports": [
+        {
+          "name": "sum00",
+          "direction": "input",
+          "width": 32,
+          "signed": true
+        },
+        {
+          "name": "sum01",
+          "direction": "input",
+          "width": 32,
+          "signed": true
+        },
+        {
+          "name": "sum10",
+          "direction": "input",
+          "width": 32,
+          "signed": true
+        },
+        {
+          "name": "sum11",
+          "direction": "input",
+          "width": 32,
+          "signed": true
+        },
+        {
+          "name": "acc_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true
+        }
+      ]
+    },
+    {
+      "id": "npu2-post",
+      "name": "Bias and ReLU",
+      "module_name": "hullcirq_npu2_post",
+      "role": "Add the signed32 column bias with wrap, then optionally apply ReLU.",
+      "ports": [
+        {
+          "name": "post_config",
+          "direction": "input",
+          "width": 65,
+          "signed": false
+        },
+        {
+          "name": "acc_data",
+          "direction": "input",
+          "width": 32,
+          "signed": true
+        },
+        {
+          "name": "result_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true
+        }
+      ]
+    },
+    {
+      "id": "npu2-fifo",
+      "name": "Output FIFO",
+      "module_name": "hullcirq_npu2_fifo",
+      "role": "Depth-two signed32 output queue; report actual external valid-and-ready transfers.",
+      "ports": [
+        {
+          "name": "result_data",
+          "direction": "input",
+          "width": 32,
+          "signed": true
+        },
+        {
+          "name": "output_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true
+        },
+        {
+          "name": "output_transfer",
+          "direction": "output",
+          "width": 1,
+          "signed": false
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "npu2-edge-schedule",
+      "source": {
+        "node_id": "npu2-control",
+        "port_id": "npu2-control-schedule_config"
+      },
+      "target": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-schedule_config"
+      },
+      "payload_width": 4,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-post-config",
+      "source": {
+        "node_id": "npu2-control",
+        "port_id": "npu2-control-post_config"
+      },
+      "target": {
+        "node_id": "npu2-post",
+        "port_id": "npu2-post-post_config"
+      },
+      "payload_width": 65,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-read-request",
+      "source": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-read_index"
+      },
+      "target": {
+        "node_id": "npu2-buffer",
+        "port_id": "npu2-buffer-read_index"
+      },
+      "payload_width": 3,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-read-response",
+      "source": {
+        "node_id": "npu2-buffer",
+        "port_id": "npu2-buffer-operands"
+      },
+      "target": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-operands"
+      },
+      "payload_width": 32,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-batch",
+      "source": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-batch_data"
+      },
+      "target": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-batch_data"
+      },
+      "payload_width": 34,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-pair-00",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair00"
+      },
+      "target": {
+        "node_id": "npu2-pe00",
+        "port_id": "npu2-pe00-pair_data"
+      },
+      "payload_width": 18,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-sum-00",
+      "source": {
+        "node_id": "npu2-pe00",
+        "port_id": "npu2-pe00-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum00"
+      },
+      "payload_width": 32,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-pair-01",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair01"
+      },
+      "target": {
+        "node_id": "npu2-pe01",
+        "port_id": "npu2-pe01-pair_data"
+      },
+      "payload_width": 18,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-sum-01",
+      "source": {
+        "node_id": "npu2-pe01",
+        "port_id": "npu2-pe01-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum01"
+      },
+      "payload_width": 32,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-pair-10",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair10"
+      },
+      "target": {
+        "node_id": "npu2-pe10",
+        "port_id": "npu2-pe10-pair_data"
+      },
+      "payload_width": 18,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-sum-10",
+      "source": {
+        "node_id": "npu2-pe10",
+        "port_id": "npu2-pe10-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum10"
+      },
+      "payload_width": 32,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-pair-11",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair11"
+      },
+      "target": {
+        "node_id": "npu2-pe11",
+        "port_id": "npu2-pe11-pair_data"
+      },
+      "payload_width": 18,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-sum-11",
+      "source": {
+        "node_id": "npu2-pe11",
+        "port_id": "npu2-pe11-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum11"
+      },
+      "payload_width": 32,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-collected-sum",
+      "source": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-acc_data"
+      },
+      "target": {
+        "node_id": "npu2-post",
+        "port_id": "npu2-post-acc_data"
+      },
+      "payload_width": 32,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-post-result",
+      "source": {
+        "node_id": "npu2-post",
+        "port_id": "npu2-post-result_data"
+      },
+      "target": {
+        "node_id": "npu2-fifo",
+        "port_id": "npu2-fifo-result_data"
+      },
+      "payload_width": 32,
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "npu2-edge-completion",
+      "source": {
+        "node_id": "npu2-fifo",
+        "port_id": "npu2-fifo-output_transfer"
+      },
+      "target": {
+        "node_id": "npu2-control",
+        "port_id": "npu2-control-output_transfer"
+      },
+      "payload_width": 1,
+      "protocol": "raw"
+    }
+  ],
+  "limits": [
+    "Independent arithmetic is recomputed from the original input matrices, not from DUT output.",
+    "The 50 ns clock is the unchanged saved target; no frequency-optimality claim is made.",
+    "Original request preparation fields retain historical pending text; the separate source-bound execution report determines the recorded result.",
+    "This logical graph is not a physical floorplan, throughput comparison, exhaustive proof or new circuit execution."
+  ]
+}

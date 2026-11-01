@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HuLLCirq · Placed-cell functional roles</title>
+<style>
+:root{color-scheme:light;--navy:#061b40;--teal:#007e91;--orange:#ff8a00;--blue:#1759bd;--ink:#172b43;--muted:#53677c;--line:#d7e2ec;--surface:#fff;--back:#f1f5f9;--focus:#006d85}
+*{box-sizing:border-box}body{margin:0;background:var(--back);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button,input,select,summary{outline-offset:3px}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,canvas:focus-visible{outline:3px solid #21a6ba}button{border:1px solid #b7c9db;border-radius:6px;background:#fff;color:var(--navy);padding:6px 10px;cursor:pointer}button:hover{background:#eaf3fa}button:disabled{opacity:.45;cursor:default}input[type=search],select{width:100%;border:1px solid #b7c9db;border-radius:6px;background:#fff;color:var(--ink);padding:8px}input[type=checkbox]{accent-color:var(--teal);flex:none;width:15px;height:15px;margin:2px 0}h1,h2,h3,p{margin:0}h1{font-size:21px;font-weight:650;line-height:1.25}h2{font-size:14px}h3{font-size:13px}code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{overflow-wrap:anywhere}pre{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}small,.small{font-size:12px;color:var(--muted)}[hidden]{display:none!important}
+.header{padding:16px 22px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:22px;flex-wrap:wrap}.brand{font-size:26px;font-weight:850;letter-spacing:-1px;color:var(--navy);white-space:nowrap}.brand .hu{color:#e66d00}.brand .ll{color:var(--teal)}.heading{flex:1;min-width:240px}.heading p{margin-top:5px;color:var(--muted)}.badge{font-size:12px;border:1px solid #bfd5e5;background:#edf6fb;border-radius:20px;padding:5px 11px;color:var(--navy);white-space:nowrap}.scope{margin:14px 18px 0;padding:11px 14px;background:#fff8e9;border:1px solid #efcf93;border-left:4px solid var(--orange);border-radius:7px;font-size:13px}.scope strong{color:#805300}.scope p+p{margin-top:4px}.workspace{display:grid;grid-template-columns:255px minmax(340px,1fr) 310px;gap:12px;padding:14px 18px;align-items:start}.panel{background:var(--surface);border:1px solid var(--line);border-radius:9px;overflow:hidden}.section{padding:13px;border-bottom:1px solid #e4ecf3}.section:last-child{border-bottom:0}.section>p,.section>small{display:block;margin-top:7px}.section h2{margin-bottom:9px}.button-row{display:flex;gap:6px;flex-wrap:wrap}.button-row button{font-size:12px;padding:5px 8px}.filter-list{display:flex;flex-direction:column;gap:2px;margin-top:9px;max-height:375px;overflow:auto}.filter-row{display:flex;align-items:flex-start;gap:7px;padding:6px 3px;border-radius:4px;cursor:pointer}.filter-row:hover{background:#f1f6fa}.filter-row .swatch{width:12px;height:12px;border-radius:3px;flex:none;margin-top:3px;border:1px solid #0002}.filter-name{flex:1;min-width:0;overflow-wrap:anywhere}.count{color:var(--muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}.pe-actions{margin-top:8px}.search-info{min-height:18px;margin-top:6px;color:var(--muted);font-size:12px}.search-results{display:flex;flex-direction:column;gap:4px;max-height:245px;overflow:auto}.search-result{display:block;text-align:left;padding:7px;font-size:12px;overflow-wrap:anywhere}.search-result small{display:block;margin-top:2px}.viewport-panel{min-width:0}.toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line)}.toolbar button{min-width:34px}.toolbar .toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.canvas-wrap{position:relative;width:100%;height:min(75vh,850px);min-height:480px;overflow:hidden;background:#e5edf4}canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}canvas.dragging{cursor:grabbing}.canvas-overlay{position:absolute;left:14px;top:13px;pointer-events:none;background:#fffE;border:1px solid #d0dfeb;border-radius:5px;padding:5px 8px;font-size:12px;color:var(--navy)}.tooltip{position:absolute;z-index:2;max-width:300px;padding:8px 10px;background:#061b40F2;color:#fff;border:1px solid #829cb8;border-radius:6px;pointer-events:none;font-size:12px;overflow-wrap:anywhere;box-shadow:0 3px 14px #061b4030}.tooltip small{color:#b9dbe9;display:block;margin-top:3px}.canvas-footer{padding:9px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-variant-numeric:tabular-nums}.hint{padding:10px 12px;color:var(--muted);font-size:12px;background:#f8fbfd;border-top:1px solid #e4ecf3}.selection-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.selection-title button{padding:3px 7px;font-size:12px}.selection-empty{color:var(--muted);font-size:13px}.detail-grid{display:grid;grid-template-columns:75px minmax(0,1fr);gap:8px 10px;margin:12px 0;font-size:12px}.detail-grid dt{font-weight:600;color:var(--muted)}.detail-grid dd{margin:0;min-width:0;overflow-wrap:anywhere}.detail-role{display:inline-block;border-left:4px solid var(--teal);padding-left:7px;font-weight:650}.evidence{padding-left:19px;margin:8px 0 0;font-size:12px;max-height:310px;overflow:auto;overflow-wrap:anywhere}.evidence li{margin:0 0 8px;white-space:pre-wrap}.status-explanation{margin-top:8px;font-size:12px;color:var(--muted)}.status-explanation p+p{margin-top:6px}.status-marker{display:inline-block;min-width:9px;height:9px;margin-right:6px;border-radius:50%;background:#8a9cb0}.category-note{border-top:1px solid #e4ecf3;margin-top:10px;padding-top:9px}.metadata{padding:0 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.metadata .panel{padding:13px}.metadata summary{cursor:pointer;font-weight:650;color:var(--navy)}.metadata pre{max-height:400px;overflow:auto;margin-bottom:0}.notes{padding-left:20px;font-size:13px}.notes li{margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere}.error{margin:18px;padding:18px;border:1px solid #c35b5b;background:#fff0f0;border-radius:8px;color:#8b2020}.loading{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:14px;background:#fff;border:1px solid #d0dfeb;border-radius:6px}.live{font-size:12px;color:var(--teal);margin-top:7px;min-height:18px}.validation-note{margin:0 18px 10px;color:#8b2020;font-size:13px}.legend-desc{margin-top:4px;font-size:11px;color:var(--muted);display:block}
+@media(max-width:1250px){.workspace{grid-template-columns:230px minmax(300px,1fr)}.inspect-panel{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.inspect-panel .section{border-bottom:0}.inspect-panel .section+.section{border-left:1px solid var(--line)}}@media(max-width:800px){.header{padding:13px 14px;gap:12px}.scope{margin:12px 10px 0}.workspace{padding:12px 10px;grid-template-columns:1fr}.filter-panel{order:2}.viewport-panel{order:1}.inspect-panel{order:3;display:block}.inspect-panel .section+.section{border-left:0;border-top:1px solid var(--line)}.filter-list{max-height:230px}.canvas-wrap{height:62vh;min-height:360px}.metadata{grid-template-columns:1fr;padding:0 10px 12px}.filter-panel .section{padding:12px}.toolbar .toggle{margin-left:0}.badge{white-space:normal}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="brand" aria-label="HuLLCirq"><span class="hu">Hu</span><span class="ll">LL</span>Cirq</div>
+  <div class="heading"><h1 id="viewer-title">Placed-cell functional roles</h1><p>Inspect functional-role evidence on the saved placed-cell layout.</p></div>
+  <span class="badge">Read-only · original placement</span>
+</header>
+<div class="scope" role="note">
+  <p><strong>Scope:</strong> Colored shapes are actual placed-cell footprints. Filters select cells with a supplied role; they do not define block rectangles, move cells or redesign hierarchy.</p>
+  <p>Source-confirmed evidence and semantic net-name inference are distinct. This view does not segment routing, establish original RTL hierarchy, or prove timing or circuit behavior.</p>
+</div>
+<div id="load-error" class="error" role="alert" hidden></div>
+<p id="validation-note" class="validation-note" hidden></p>
+<main class="workspace" id="workspace">
+  <aside class="panel filter-panel" aria-label="Find and filter placed cells">
+    <section class="section">
+      <h2>Find an instance</h2>
+      <label for="cell-search" class="small">Exact name or partial instance name</label>
+      <input id="cell-search" type="search" placeholder="Type an instance name…" autocomplete="off" spellcheck="false">
+      <div id="search-info" class="search-info" role="status">Search all cells, including hidden roles.</div>
+      <div id="search-results" class="search-results" aria-label="Matching instances"></div>
+    </section>
+    <section class="section">
+      <h2>Functional roles</h2>
+      <div class="button-row"><button id="roles-all" type="button">Show all</button><button id="roles-none" type="button">Hide all</button></div>
+      <div class="filter-list" id="role-list"></div>
+      <small>Counts describe the full payload. Visibility also follows the status filters.</small>
+      <div class="category-note small">Shared, unknown, physical-only and clock categories remain separate when supplied. They are never silently assigned to a functional role.</div>
+    </section>
+    <section class="section">
+      <h2>Array instance selector</h2>
+      <label for="pe-select" class="small">Individual array instance role</label>
+      <select id="pe-select" aria-label="Select array instance role"></select>
+      <div class="button-row pe-actions"><button id="role-only-pe" type="button">Show only this instance</button><button id="roles-all-pe" type="button">Show all array instances</button></div>
+      <small>Uses repeated-instance roles supplied by this saved map, without drawing invented block boundaries.</small>
+    </section>
+    <section class="section">
+      <h2>Evidence status</h2>
+      <div class="button-row"><button id="statuses-all" type="button">Show all</button><button id="statuses-none" type="button">Hide all</button></div>
+      <div class="filter-list" id="status-list"></div>
+    </section>
+  </aside>
+  <section class="panel viewport-panel" aria-label="Placed-cell layout">
+    <div class="toolbar">
+      <button id="fit-button" type="button" title="Fit original die (Home)">Fit die</button>
+      <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+      <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+      <button id="focus-selection" type="button" disabled>Focus cell</button>
+      <label class="toggle"><input id="cell-outlines" type="checkbox">Cell outlines at close zoom</label>
+    </div>
+    <div class="canvas-wrap" id="canvas-wrap">
+      <canvas id="layout-canvas" tabindex="0" aria-label="Read-only cell layout. Drag to pan, scroll to zoom, click a cell to inspect. Arrow keys pan; plus and minus zoom; Home fits the die."></canvas>
+      <div class="canvas-overlay" id="die-label">Layout coordinates · µm · Y upward</div>
+      <div class="tooltip" id="hover-tooltip" hidden></div>
+      <div id="loading" class="loading" role="status">Preparing placed-cell view…</div>
+    </div>
+    <div class="canvas-footer"><span id="visible-count">No cells loaded</span><span id="view-status">—</span></div>
+    <div class="hint">Drag to pan · Scroll or +/− to zoom · Click to inspect · Home to fit. Searching a hidden cell enables its role and status filters.</div>
+  </section>
+  <aside class="panel inspect-panel" aria-label="Selected cell and interpretation">
+    <section class="section" id="selection-panel">
+      <div class="selection-title"><h2>Selected cell</h2><button id="clear-selection" type="button" disabled>Clear</button></div>
+      <p id="selection-empty" class="selection-empty">Click a footprint or find an instance. Its original name, master, coordinates and supplied classification evidence appear here.</p>
+      <div id="selection-details" hidden></div>
+      <div class="live" id="selection-message" aria-live="polite"></div>
+    </section>
+    <section class="section">
+      <h2>How to read the colors</h2>
+      <div class="status-explanation">
+        <p><strong>Source-confirmed:</strong> explicit source or preserved-name evidence, only when the supplied status says so.</p>
+        <p><strong>Source + connectivity:</strong> source evidence confirms a template or function; named nets infer its lane. This is not full source confirmation of that lane.</p>
+        <p><strong>Net-inferred:</strong> supplied semantic net names or recorded backward fan-in attribution. Inferred cones may be shared; they do not reconstruct the original module hierarchy.</p>
+        <p><strong>Shared / unknown:</strong> shared attribution or insufficient evidence remains visible as such.</p>
+        <p><strong>Physical / clock:</strong> implementation-support roles stay distinct from functional block roles.</p>
+        <p>Colors identify roles. The cell’s status and complete evidence describe the strength and origin of its classification.</p>
+      </div>
+    </section>
+  </aside>
+</main>
+<section class="metadata" id="metadata" aria-label="Source metadata">
+  <div class="panel"><details><summary>Summary and provenance</summary><pre id="source-metadata"></pre></details></div>
+  <div class="panel"><h2>Notes and limits</h2><ul id="data-notes" class="notes"></ul></div>
+</section>
+<!-- The generator must escape '<' as '\u003c' before inserting JSON here. -->
+<script id="layout-data" type="application/json">__LAYOUT_DATA_JSON__</script>
+<script>
+"use strict";
+(() => {
+  const $ = id => document.getElementById(id);
+  const number = value => Number(value).toLocaleString("en-US", {maximumFractionDigits: 4});
+  const error = message => {
+    $("loading").hidden = true;
+    $("workspace").hidden = true;
+    $("metadata").hidden = true;
+    $("load-error").textContent = message;
+    $("load-error").hidden = false;
+  };
+  /*__LAYOUT_UNPACK__*/
+  const decodeLayoutData = typeof unpackLayoutData === "function" ? unpackLayoutData : value => value;
+  let data;
+  try { data = decodeLayoutData(JSON.parse($("layout-data").textContent)); }
+  catch (exception) { error("Layout data is unavailable or invalid. Generate this viewer with its saved layout payload. " + exception.message); return; }
+  if (!data || !Array.isArray(data.die) || data.die.length !== 4 ||
+      !data.die.every(value => typeof value === "number" && Number.isFinite(value)) ||
+      data.die[2] <= data.die[0] || data.die[3] <= data.die[1] || !Array.isArray(data.cells)) {
+    error("The payload must provide a finite, nonempty die bounding box and a cells array."); return;
+  }
+  $("viewer-title").textContent = String(data.title || "Placed-cell functional roles");
+  document.title = "HuLLCirq · " + $("viewer-title").textContent;
+  const die = data.die, dieWidth = die[2] - die[0], dieHeight = die[3] - die[1];
+  $("die-label").textContent = `${number(dieWidth)} × ${number(dieHeight)} µm · Y upward`;
+  $("source-metadata").textContent = JSON.stringify({schema_version: data.schema_version,
+    die: data.die, summary: data.summary || {}, provenance: data.provenance || {}}, null, 2);
+  const notes = Array.isArray(data.notes) ? data.notes : [];
+  for (const note of notes) {
+    const li = document.createElement("li"); li.textContent = String(note); $("data-notes").append(li);
+  }
+  if (!notes.length) {
+    const li = document.createElement("li");
+    li.textContent = "No additional notes were supplied. This view is a cell-role overlay, not verification of routing, timing or behavior.";
+    $("data-notes").append(li);
+  }
+  const roles = [], roleIndex = new Map(), roleBuckets = [];
+  const statuses = [], statusIndex = new Map();
+  const statusLabels = {
+    source_confirmed: "Source-confirmed",
+    source_and_connectivity: "Source template + net inference",
+    connectivity_inferred: "Connectivity-inferred",
+    structural_inferred: "Structure-inferred",
+    clock_inferred: "Clock-network inference",
+    physical_inferred: "Physical-role inference",
+    shared: "Shared attribution",
+    unknown: "Unknown attribution",
+    unspecified: "Status not supplied"
+  };
+  function safeColor(value) {
+    return typeof value === "string" && value.length < 80 && CSS.supports("color", value) ? value : "#8a9cb0";
+  }
+  function addRole(raw) {
+    const id = String(raw.id ?? "unknown");
+    if (roleIndex.has(id)) return roleIndex.get(id);
+    const index = roles.length;
+    roleIndex.set(id, index);
+    const suppliedGroup = typeof raw.group === "string" && raw.group ? raw.group : null;
+    roles.push({id, label: String(raw.label || id), color: safeColor(raw.color),
+      description: String(raw.description || "No role description supplied."),
+      group: suppliedGroup || (id.startsWith("pe:") ? "pe" : null), count: 0, shown: true});
+    roleBuckets.push([]); return index;
+  }
+  for (const role of Array.isArray(data.roles) ? data.roles : []) if (role && typeof role === "object") addRole(role);
+  function addStatus(raw) {
+    const id = typeof raw === "string" && raw ? raw : "unspecified";
+    if (statusIndex.has(id)) return statusIndex.get(id);
+    const index = statuses.length; statusIndex.set(id, index);
+    statuses.push({id, label: statusLabels[id] || id, count: 0, shown: true}); return index;
+  }
+  const cells = data.cells, cellCount = cells.length;
+  const boxes = new Float64Array(cellCount * 4), cellRole = new Int32Array(cellCount), cellStatus = new Int32Array(cellCount);
+  const valid = new Uint8Array(cellCount), lowerNames = new Array(cellCount), names = new Array(cellCount);
+  const exactNames = new Map();
+  let validCount = 0, invalidCount = 0, outsideCount = 0;
+  const binsPerSide = 128, bins = new Map(), largeCells = [];
+  const binX = x => Math.max(0, Math.min(binsPerSide - 1, Math.floor((x - die[0]) / dieWidth * binsPerSide)));
+  const binY = y => Math.max(0, Math.min(binsPerSide - 1, Math.floor((y - die[1]) / dieHeight * binsPerSide)));
+  for (let i = 0; i < cellCount; ++i) {
+    const cell = cells[i], bbox = cell && cell.bbox;
+    if (!cell || typeof cell.id !== "string" || !Array.isArray(bbox) || bbox.length !== 4 ||
+        !bbox.every(value => typeof value === "number" && Number.isFinite(value)) || bbox[2] <= bbox[0] || bbox[3] <= bbox[1]) {
+      invalidCount++; continue;
+    }
+    valid[i] = 1; validCount++; boxes.set(bbox, i * 4);
+    names[i] = cell.id; lowerNames[i] = cell.id.toLocaleLowerCase("en-US");
+    if (!exactNames.has(cell.id)) exactNames.set(cell.id, i);
+    const roleId = typeof cell.role === "string" && cell.role ? cell.role : "unknown";
+    const ri = roleIndex.has(roleId) ? roleIndex.get(roleId) : addRole({id: roleId, label: roleId,
+      description: "This role is present in the cell data without a separate role description."});
+    const si = addStatus(cell.status); cellRole[i] = ri; cellStatus[i] = si;
+    roles[ri].count++; statuses[si].count++; roleBuckets[ri].push(i);
+    if (bbox[0] < die[0] || bbox[1] < die[1] || bbox[2] > die[2] || bbox[3] > die[3]) outsideCount++;
+    const x0 = binX(bbox[0]), x1 = binX(bbox[2]), y0 = binY(bbox[1]), y1 = binY(bbox[3]);
+    if ((x1 - x0 + 1) * (y1 - y0 + 1) > 1024) { largeCells.push(i); continue; }
+    for (let by = y0; by <= y1; ++by) for (let bx = x0; bx <= x1; ++bx) {
+      const key = by * binsPerSide + bx;
+      if (!bins.has(key)) bins.set(key, []);
+      bins.get(key).push(i);
+    }
+  }
+  if (invalidCount || outsideCount) {
+    $("validation-note").textContent = `${number(invalidCount)} invalid cell records omitted; ${number(outsideCount)} valid footprints extend outside the supplied die. The original payload remains unchanged.`;
+    $("validation-note").hidden = false;
+  }
+  const canvas = $("layout-canvas"), context = canvas.getContext("2d", {alpha: false});
+  if (!context) { error("This browser does not provide a 2D canvas."); return; }
+  let width = 1, height = 1, pixelRatio = 1, scale = 1, fitScale = 1, offsetX = 0, offsetY = 0;
+  let selected = -1, hovered = -1, selectedHidden = false, filteredCount = validCount;
+  let renderPending = false, hoverPending = false, pointer = null, drag = null, fitted = true;
+  const visible = i => !!valid[i] && roles[cellRole[i]].shown && statuses[cellStatus[i]].shown;
+  const screenX = x => offsetX + (x - die[0]) * scale;
+  const screenY = y => offsetY + (die[3] - y) * scale;
+  const worldPoint = (x, y) => [die[0] + (x - offsetX) / scale, die[3] - (y - offsetY) / scale];
+  function requestRender() {
+    if (renderPending) return;
+    renderPending = true;
+    requestAnimationFrame(() => { renderPending = false; render(); });
+  }
+  function fit() {
+    fitScale = Math.min(Math.max(1, width - 48) / dieWidth, Math.max(1, height - 48) / dieHeight);
+    scale = fitScale; offsetX = (width - dieWidth * scale) / 2; offsetY = (height - dieHeight * scale) / 2;
+    fitted = true; hideHover(); requestRender();
+  }
+  function zoomAt(x, y, factor) {
+    const point = worldPoint(x, y), next = Math.max(fitScale * .25, Math.min(fitScale * 800, scale * factor));
+    scale = next; offsetX = x - (point[0] - die[0]) * scale; offsetY = y - (die[3] - point[1]) * scale;
+    fitted = false; hideHover(); requestRender();
+  }
+  function outlineCell(i, color, lineWidth) {
+    const j = i * 4, x = screenX(boxes[j]), y = screenY(boxes[j + 3]);
+    context.strokeStyle = color; context.lineWidth = lineWidth;
+    context.strokeRect(x, y, Math.max(1, (boxes[j + 2] - boxes[j]) * scale), Math.max(1, (boxes[j + 3] - boxes[j + 1]) * scale));
+  }
+  function render() {
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    context.fillStyle = "#e5edf4"; context.fillRect(0, 0, width, height);
+    context.fillStyle = "#fff"; context.fillRect(screenX(die[0]), screenY(die[3]), dieWidth * scale, dieHeight * scale);
+    const lower = worldPoint(0, height), upper = worldPoint(width, 0), outlines = $("cell-outlines").checked;
+    let drawnCount = 0;
+    for (let ri = 0; ri < roles.length; ++ri) {
+      if (!roles[ri].shown) continue;
+      context.fillStyle = roles[ri].color;
+      if (outlines) { context.strokeStyle = "#061b4044"; context.lineWidth = .6; }
+      for (const i of roleBuckets[ri]) {
+        if (!statuses[cellStatus[i]].shown) continue;
+        const j = i * 4, x0 = boxes[j], y0 = boxes[j + 1], x1 = boxes[j + 2], y1 = boxes[j + 3];
+        if (x1 < lower[0] || x0 > upper[0] || y1 < lower[1] || y0 > upper[1]) continue;
+        const x = screenX(x0), y = screenY(y1), w = (x1 - x0) * scale, h = (y1 - y0) * scale;
+        context.fillRect(x, y, w, h);
+        if (outlines && w > 4 && h > 4) context.strokeRect(x, y, w, h);
+        drawnCount++;
+      }
+    }
+    context.lineWidth = 1.3; context.strokeStyle = "#405d7a";
+    context.strokeRect(screenX(die[0]), screenY(die[3]), dieWidth * scale, dieHeight * scale);
+    if (hovered >= 0 && visible(hovered) && hovered !== selected) outlineCell(hovered, "#061b40", 1.5);
+    if (selected >= 0 && visible(selected)) {
+      outlineCell(selected, "#fff", 5); outlineCell(selected, "#061b40", 2.2);
+      const j = selected * 4, x = screenX((boxes[j] + boxes[j + 2]) / 2), y = screenY((boxes[j + 1] + boxes[j + 3]) / 2);
+      context.strokeStyle = "#061b40"; context.lineWidth = 1;
+      context.beginPath(); context.moveTo(x - 8, y); context.lineTo(x + 8, y); context.moveTo(x, y - 8); context.lineTo(x, y + 8); context.stroke();
+    }
+    $("visible-count").textContent = `${number(drawnCount)} in view · ${number(filteredCount)} shown / ${number(validCount)} valid cells`;
+    $("view-status").textContent = `${number(scale / fitScale * 100)}% of fit · ${number(1 / scale)} µm/px`;
+  }
+  function refreshFilters() {
+    filteredCount = 0;
+    for (let i = 0; i < cellCount; ++i) if (visible(i)) filteredCount++;
+    for (const input of $("role-list").querySelectorAll("input")) input.checked = roles[Number(input.dataset.index)].shown;
+    for (const input of $("status-list").querySelectorAll("input")) input.checked = statuses[Number(input.dataset.index)].shown;
+    selectedHidden = selected >= 0 && !visible(selected);
+    $("selection-message").textContent = selectedHidden ? "Selected cell is hidden by the current filters. Its record remains available below." : "";
+    hideHover(); requestRender();
+  }
+  function filterRow(item, index, type) {
+    const label = document.createElement("label"); label.className = "filter-row"; label.title = item.description || item.id;
+    const input = document.createElement("input"); input.type = "checkbox"; input.checked = true; input.dataset.index = String(index);
+    input.setAttribute("aria-label", "Show " + (item.label || item.id));
+    input.addEventListener("change", () => { item.shown = input.checked; refreshFilters(); });
+    const swatch = document.createElement("span"); swatch.className = "swatch"; swatch.style.backgroundColor = item.color || "#8a9cb0";
+    const name = document.createElement("span"); name.className = "filter-name"; name.textContent = item.label || item.id;
+    if (type === "role" || type === "status") {
+      const id = document.createElement("small"); id.className = "legend-desc"; id.textContent = item.id; name.append(id);
+    }
+    const count = document.createElement("span"); count.className = "count"; count.textContent = number(item.count);
+    label.append(input, swatch, name, count); return label;
+  }
+  roles.forEach((role, index) => $("role-list").append(filterRow(role, index, "role")));
+  statuses.forEach((status, index) => $("status-list").append(filterRow(status, index, "status")));
+  const peRoles = roles.filter(role => role.group === "pe");
+  const peRoleIds = new Set(peRoles.map(role => role.id));
+  for (const role of peRoles) {
+    const option = document.createElement("option"); option.value = role.id;
+    option.textContent = `${role.label} · ${number(role.count)} cells`;
+    option.disabled = !role.count; $("pe-select").append(option);
+  }
+  const availablePE = Array.from($("pe-select").options).find(option => !option.disabled);
+  $("pe-select").disabled = !availablePE; $("role-only-pe").disabled = !availablePE; $("roles-all-pe").disabled = !availablePE;
+  if (availablePE) $("pe-select").value = availablePE.value;
+  $("roles-all").addEventListener("click", () => { roles.forEach(role => role.shown = true); refreshFilters(); });
+  $("roles-none").addEventListener("click", () => { roles.forEach(role => role.shown = false); refreshFilters(); });
+  $("statuses-all").addEventListener("click", () => { statuses.forEach(status => status.shown = true); refreshFilters(); });
+  $("statuses-none").addEventListener("click", () => { statuses.forEach(status => status.shown = false); refreshFilters(); });
+  $("role-only-pe").addEventListener("click", () => { roles.forEach(role => role.shown = role.id === $("pe-select").value); refreshFilters(); });
+  $("roles-all-pe").addEventListener("click", () => { roles.forEach(role => role.shown = peRoleIds.has(role.id)); refreshFilters(); });
+  function detailsPair(list, label, value, className) {
+    const dt = document.createElement("dt"), dd = document.createElement("dd"); dt.textContent = label; dd.textContent = value;
+    if (className) dd.className = className; list.append(dt, dd); return dd;
+  }
+  function selectCell(i, focus = false) {
+    if (i < 0 || i >= cellCount || !valid[i]) return;
+    const wasHidden = !visible(i); selected = i;
+    roles[cellRole[i]].shown = true; statuses[cellStatus[i]].shown = true;
+    const cell = cells[i], role = roles[cellRole[i]], details = $("selection-details");
+    details.replaceChildren(); $("selection-empty").hidden = true; details.hidden = false;
+    const list = document.createElement("dl"); list.className = "detail-grid";
+    detailsPair(list, "Instance", String(cell.id), "mono");
+    detailsPair(list, "Master", String(cell.master ?? "Not supplied"), "mono");
+    const roleValue = detailsPair(list, "Role", role.label, "detail-role"); roleValue.style.borderColor = role.color;
+    detailsPair(list, "Role ID", role.id, "mono");
+    detailsPair(list, "Status", String(cell.status || "unspecified"), "mono");
+    detailsPair(list, "Bounds", `[${cell.bbox.map(number).join(", ")}] µm`, "mono");
+    detailsPair(list, "Size", `${number(cell.bbox[2] - cell.bbox[0])} × ${number(cell.bbox[3] - cell.bbox[1])} µm`);
+    details.append(list);
+    const description = document.createElement("p"); description.className = "small"; description.textContent = role.description; details.append(description);
+    const heading = document.createElement("h3"); heading.style.marginTop = "13px"; heading.textContent = "Classification rule and evidence"; details.append(heading);
+    if (cell.rule !== undefined) {
+      const rule = document.createElement("pre"); rule.textContent = typeof cell.rule === "string" ? cell.rule : JSON.stringify(cell.rule, null, 2); details.append(rule);
+    }
+    const evidence = Array.isArray(cell.evidence) ? cell.evidence : [];
+    if (evidence.length) {
+      const ul = document.createElement("ol"); ul.className = "evidence";
+      for (const item of evidence) {
+        const li = document.createElement("li");
+        li.textContent = typeof item === "string" ? item : JSON.stringify(item, null, 2);
+        ul.append(li);
+      }
+      details.append(ul);
+    } else {
+      const message = document.createElement("p"); message.className = "small";
+      message.textContent = "No classification evidence was supplied. A role label alone does not establish source confirmation."; details.append(message);
+    }
+    const raw = document.createElement("details"), summary = document.createElement("summary"), pre = document.createElement("pre");
+    raw.style.marginTop = "12px"; summary.textContent = "Full original cell record"; pre.textContent = JSON.stringify(cell, null, 2); raw.append(summary, pre); details.append(raw);
+    $("clear-selection").disabled = false; $("focus-selection").disabled = false;
+    refreshFilters();
+    if (wasHidden) $("selection-message").textContent = "Enabled the selected cell’s role and status filters.";
+    if (focus) focusSelection(); else requestRender();
+  }
+  function focusSelection() {
+    if (selected < 0) return;
+    const j = selected * 4, cellWidth = boxes[j + 2] - boxes[j], cellHeight = boxes[j + 3] - boxes[j + 1];
+    scale = Math.max(scale, Math.min(fitScale * 160, Math.min(width * .35 / cellWidth, height * .28 / cellHeight)));
+    offsetX = width / 2 - ((boxes[j] + boxes[j + 2]) / 2 - die[0]) * scale;
+    offsetY = height / 2 - (die[3] - (boxes[j + 1] + boxes[j + 3]) / 2) * scale;
+    fitted = false; hideHover(); requestRender();
+  }
+  function clearSelection() {
+    selected = -1; $("selection-details").replaceChildren(); $("selection-details").hidden = true; $("selection-empty").hidden = false;
+    $("clear-selection").disabled = true; $("focus-selection").disabled = true; $("selection-message").textContent = ""; requestRender();
+  }
+  $("clear-selection").addEventListener("click", clearSelection);
+  $("focus-selection").addEventListener("click", () => { if (selected >= 0) { selectCell(selected); focusSelection(); } });
+  $("fit-button").addEventListener("click", fit);
+  $("zoom-in").addEventListener("click", () => zoomAt(width / 2, height / 2, 1.5));
+  $("zoom-out").addEventListener("click", () => zoomAt(width / 2, height / 2, 1 / 1.5));
+  $("cell-outlines").addEventListener("change", requestRender);
+  let searchTimer, searchMatches = [];
+  function search() {
+    const query = $("cell-search").value.trim(), lower = query.toLocaleLowerCase("en-US"), result = $("search-results");
+    result.replaceChildren(); searchMatches = [];
+    if (!query) { $("search-info").textContent = "Search all cells, including hidden roles."; return; }
+    let count = 0;
+    const exact = exactNames.get(query);
+    if (exact !== undefined) { searchMatches.push(exact); count++; }
+    for (let i = 0; i < cellCount; ++i) if (valid[i] && i !== exact && lowerNames[i].includes(lower)) {
+      count++; if (searchMatches.length < 80) searchMatches.push(i);
+    }
+    $("search-info").textContent = count ? `${number(count)} matches${count > 80 ? " · first 80 shown" : ""}${exact !== undefined ? " · exact name first" : ""}` : "No matching instance name.";
+    for (const i of searchMatches) {
+      const button = document.createElement("button"); button.type = "button"; button.className = "search-result";
+      const name = document.createElement("span"); name.className = "mono"; name.textContent = names[i];
+      const role = document.createElement("small"); role.textContent = roles[cellRole[i]].label + (visible(i) ? "" : " · hidden by filter");
+      button.append(name, role); button.addEventListener("click", () => selectCell(i, true)); result.append(button);
+    }
+  }
+  $("cell-search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(search, 120); });
+  $("cell-search").addEventListener("keydown", event => {
+    if (event.key === "Enter") { clearTimeout(searchTimer); search(); if (searchMatches.length) selectCell(searchMatches[0], true); }
+  });
+  function hitTest(x, y) {
+    const [wx, wy] = worldPoint(x, y), candidates = bins.get(binY(wy) * binsPerSide + binX(wx)) || [];
+    let hit = -1, smallest = Infinity;
+    for (const group of [candidates, largeCells]) for (const i of group) {
+      if (!visible(i)) continue;
+      const j = i * 4;
+      if (wx >= boxes[j] && wx <= boxes[j + 2] && wy >= boxes[j + 1] && wy <= boxes[j + 3]) {
+        const area = (boxes[j + 2] - boxes[j]) * (boxes[j + 3] - boxes[j + 1]);
+        if (area < smallest) { hit = i; smallest = area; }
+      }
+    }
+    return hit;
+  }
+  function hideHover() { hovered = -1; $("hover-tooltip").hidden = true; }
+  function updateHover() {
+    hoverPending = false; if (!pointer || drag) return;
+    const i = hitTest(pointer.x, pointer.y), tooltip = $("hover-tooltip");
+    if (i !== hovered) { hovered = i; requestRender(); }
+    if (i < 0) { tooltip.hidden = true; return; }
+    const name = document.createElement("span"); name.className = "mono"; name.textContent = names[i];
+    const description = document.createElement("small"); description.textContent = `${roles[cellRole[i]].label} · ${statuses[cellStatus[i]].id} · ${String(cells[i].master ?? "master not supplied")}`;
+    tooltip.replaceChildren(name, description); tooltip.hidden = false;
+    tooltip.style.left = Math.max(6, Math.min(width - tooltip.offsetWidth - 6, pointer.x + 14)) + "px";
+    tooltip.style.top = Math.max(6, Math.min(height - tooltip.offsetHeight - 6, pointer.y + 14)) + "px";
+  }
+  const localPoint = event => { const rect = canvas.getBoundingClientRect(); return {x: event.clientX - rect.left, y: event.clientY - rect.top}; };
+  canvas.addEventListener("pointerdown", event => {
+    if (event.button !== 0) return;
+    const point = localPoint(event); drag = {...point, originX: offsetX, originY: offsetY, moved: false, id: event.pointerId};
+    canvas.setPointerCapture(event.pointerId); canvas.classList.add("dragging"); hideHover(); canvas.focus({preventScroll: true});
+  });
+  canvas.addEventListener("pointermove", event => {
+    const point = localPoint(event); pointer = point;
+    if (drag && drag.id === event.pointerId) {
+      const dx = point.x - drag.x, dy = point.y - drag.y;
+      if (Math.hypot(dx, dy) > 4) drag.moved = true;
+      if (drag.moved) { offsetX = drag.originX + dx; offsetY = drag.originY + dy; fitted = false; requestRender(); }
+    } else if (!hoverPending) { hoverPending = true; requestAnimationFrame(updateHover); }
+  });
+  canvas.addEventListener("pointerup", event => {
+    if (!drag || drag.id !== event.pointerId) return;
+    const point = localPoint(event), moved = drag.moved; drag = null; canvas.classList.remove("dragging");
+    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    if (!moved) { const hit = hitTest(point.x, point.y); if (hit >= 0) selectCell(hit); }
+    pointer = point; updateHover();
+  });
+  canvas.addEventListener("pointercancel", () => { drag = null; canvas.classList.remove("dragging"); hideHover(); requestRender(); });
+  canvas.addEventListener("pointerleave", () => { if (!drag) { pointer = null; hideHover(); requestRender(); } });
+  canvas.addEventListener("wheel", event => { event.preventDefault(); const point = localPoint(event); zoomAt(point.x, point.y, Math.exp(-event.deltaY * .0015)); }, {passive: false});
+  canvas.addEventListener("dblclick", event => { const point = localPoint(event); zoomAt(point.x, point.y, 2); });
+  canvas.addEventListener("keydown", event => {
+    let handled = true;
+    if (event.key === "Home") fit();
+    else if (event.key === "+" || event.key === "=") zoomAt(width / 2, height / 2, 1.5);
+    else if (event.key === "-") zoomAt(width / 2, height / 2, 1 / 1.5);
+    else if (event.key === "Escape") clearSelection();
+    else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+      const step = event.shiftKey ? 120 : 40;
+      if (event.key === "ArrowLeft") offsetX += step; if (event.key === "ArrowRight") offsetX -= step;
+      if (event.key === "ArrowUp") offsetY += step; if (event.key === "ArrowDown") offsetY -= step;
+      fitted = false; hideHover(); requestRender();
+    } else handled = false;
+    if (handled) event.preventDefault();
+  });
+  function resize() {
+    const center = worldPoint(width / 2, height / 2), rect = $("canvas-wrap").getBoundingClientRect();
+    width = Math.max(1, rect.width); height = Math.max(1, rect.height); pixelRatio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * pixelRatio); canvas.height = Math.round(height * pixelRatio);
+    fitScale = Math.min(Math.max(1, width - 48) / dieWidth, Math.max(1, height - 48) / dieHeight);
+    if (fitted) fit();
+    else { offsetX = width / 2 - (center[0] - die[0]) * scale; offsetY = height / 2 - (die[3] - center[1]) * scale; requestRender(); }
+  }
+  new ResizeObserver(resize).observe($("canvas-wrap")); resize();
+  $("loading").hidden = true; refreshFilters();
+  // Read-only inspection hooks for local browser QA; these never mutate the input payload.
+  window.HuLLCirqLayoutViewer = Object.freeze({
+    fit, selectInstance: id => { const index = exactNames.get(String(id)); if (index === undefined) return false; selectCell(index, true); return true; },
+    getState: () => ({cellCount, validCount, invalidCount, outsideCount, filteredCount,
+      selectedInstance: selected >= 0 ? names[selected] : null, hoveredInstance: hovered >= 0 ? names[hovered] : null,
+      scale, fitScale, offsetX, offsetY, yAxis: "up", roleCounts: Object.fromEntries(roles.map(role => [role.id, role.count])),
+      shownRoles: roles.filter(role => role.shown).map(role => role.id), shownStatuses: statuses.filter(status => status.shown).map(status => status.id)})
+  });
+})();
+</script>
+</body>
+</html>

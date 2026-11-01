@@ -1,0 +1,531 @@
+{
+  "schema_version": "0.1",
+  "project": {
+    "id": "project-af23b25da57e454b803eb0f585d8682a",
+    "name": "Provider transport recovery probe 20261031"
+  },
+  "system": {
+    "id": "system-37309ee18f04448b83764b85eea3ddb2",
+    "name": "Counter from blank inputs"
+  },
+  "settings": {
+    "top_module": "release_counter_top",
+    "clock_name": "clk_ctr",
+    "clock_period_ns": 50,
+    "reset_name": "rst_ctr",
+    "reset_active": "high",
+    "reset_kind": "synchronous",
+    "rtl_language": "verilog_2005",
+    "pdk": "sky130A",
+    "cell_library": "sky130_fd_sc_hd"
+  },
+  "nodes": [
+    {
+      "id": "node_712747f72413",
+      "name": "Counter",
+      "module_name": "release_counter",
+      "parent_id": null,
+      "behavior": "Use clk_ctr and synchronous active-high rst_ctr; sample reset only at the rising clock edge. One elastic output slot and a modulo-16 counter. data_in is a 4-bit unsigned increment, data_in_valid enables a command, data_out_ready is output readiness. On reset data_out=0 and data_out_valid=0. Otherwise can_accept=(!old_data_out_valid)||data_out_ready; when can_accept, data_out_valid=data_in_valid and accepted command adds data_in modulo16 to data_out; idle input leaves data_out unchanged. When stalled both outputs hold. data_in_ready=(!new_data_out_valid)||data_out_ready is observed after the edge.",
+      "test_expectations": "Fourteen independent saved cycles check modulo wrap, stalls, idle-valid clearing and reset flush. Check every data and valid/ready output after every rising edge, including defined invalid-cycle data. Preserve all saved expected values and 50 ns.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "port_123ed02cac07",
+          "name": "data_in",
+          "direction": "input",
+          "width": 4,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk_ctr",
+          "reset": "rst_ctr"
+        },
+        {
+          "id": "port_1b4741ae61e5",
+          "name": "data_out",
+          "direction": "output",
+          "width": 4,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk_ctr",
+          "reset": "rst_ctr"
+        }
+      ],
+      "verification": {
+        "kind": "generic_cycle_vectors",
+        "version": 1,
+        "cycles": [
+          {
+            "reset": 1,
+            "drive": {
+              "data_in": 0,
+              "data_in_valid": 0,
+              "data_out_ready": 0
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 0,
+              "data_out_valid": 0
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 1,
+              "data_in_valid": 0,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 0,
+              "data_out_valid": 0
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 15,
+              "data_in_valid": 1,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 15,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 1,
+              "data_in_valid": 1,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 0,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 7,
+              "data_in_valid": 1,
+              "data_out_ready": 0
+            },
+            "expect": {
+              "data_in_ready": 0,
+              "data_out": 0,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 7,
+              "data_in_valid": 1,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 7,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 3,
+              "data_in_valid": 0,
+              "data_out_ready": 0
+            },
+            "expect": {
+              "data_in_ready": 0,
+              "data_out": 7,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 3,
+              "data_in_valid": 0,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 7,
+              "data_out_valid": 0
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 4,
+              "data_in_valid": 1,
+              "data_out_ready": 0
+            },
+            "expect": {
+              "data_in_ready": 0,
+              "data_out": 11,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 1,
+            "drive": {
+              "data_in": 9,
+              "data_in_valid": 1,
+              "data_out_ready": 0
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 0,
+              "data_out_valid": 0
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 2,
+              "data_in_valid": 1,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 2,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 0,
+              "data_in_valid": 1,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 2,
+              "data_out_valid": 1
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 1,
+              "data_in_valid": 0,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 2,
+              "data_out_valid": 0
+            }
+          },
+          {
+            "reset": 0,
+            "drive": {
+              "data_in": 14,
+              "data_in_valid": 1,
+              "data_out_ready": 1
+            },
+            "expect": {
+              "data_in_ready": 1,
+              "data_out": 0,
+              "data_out_valid": 1
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "edges": [],
+  "external_io": {
+    "version": 1,
+    "ports": [
+      {
+        "id": "external_f7bdffe64afe",
+        "name": "data_in",
+        "direction": "input",
+        "width": 4,
+        "signed": false,
+        "protocol": "valid_ready"
+      },
+      {
+        "id": "external_a0edc419a18f",
+        "name": "data_out",
+        "direction": "output",
+        "width": 4,
+        "signed": false,
+        "protocol": "valid_ready"
+      }
+    ],
+    "connections": [
+      {
+        "id": "external_connection_bab3e2123ce4",
+        "external_port_id": "external_f7bdffe64afe",
+        "node_id": "node_712747f72413",
+        "port_id": "port_123ed02cac07"
+      },
+      {
+        "id": "external_connection_98fcfc81dc4f",
+        "external_port_id": "external_a0edc419a18f",
+        "node_id": "node_712747f72413",
+        "port_id": "port_1b4741ae61e5"
+      }
+    ]
+  },
+  "layout": {
+    "nodes": {
+      "node_712747f72413": {
+        "x": 420,
+        "y": 140
+      }
+    },
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 1
+    }
+  },
+  "global_integration": {
+    "public_ports": [
+      {
+        "name": "data_in",
+        "direction": "input",
+        "width": 4,
+        "signed": false
+      },
+      {
+        "name": "data_in_valid",
+        "direction": "input",
+        "width": 1,
+        "signed": false
+      },
+      {
+        "name": "data_in_ready",
+        "direction": "output",
+        "width": 1,
+        "signed": false
+      },
+      {
+        "name": "data_out",
+        "direction": "output",
+        "width": 4,
+        "signed": false
+      },
+      {
+        "name": "data_out_valid",
+        "direction": "output",
+        "width": 1,
+        "signed": false
+      },
+      {
+        "name": "data_out_ready",
+        "direction": "input",
+        "width": 1,
+        "signed": false
+      }
+    ],
+    "behavior": "Instantiate the adopted release_counter definition exactly once using its canonical instance name. Wire each of the six public data/valid/ready pins directly to the corresponding exact node port declared by the saved external bindings. Share clk_ctr and synchronous active-high rst_ctr. Preserve the adopted elastic modulo-16 behavior without duplicating its datapath."
+  },
+  "global_verification": {
+    "kind": "generic_cycle_vectors",
+    "version": 1,
+    "cycles": [
+      {
+        "reset": 1,
+        "drive": {
+          "data_in": 0,
+          "data_in_valid": 0,
+          "data_out_ready": 0
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 0,
+          "data_out_valid": 0
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 1,
+          "data_in_valid": 0,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 0,
+          "data_out_valid": 0
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 15,
+          "data_in_valid": 1,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 15,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 1,
+          "data_in_valid": 1,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 0,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 7,
+          "data_in_valid": 1,
+          "data_out_ready": 0
+        },
+        "expect": {
+          "data_in_ready": 0,
+          "data_out": 0,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 7,
+          "data_in_valid": 1,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 7,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 3,
+          "data_in_valid": 0,
+          "data_out_ready": 0
+        },
+        "expect": {
+          "data_in_ready": 0,
+          "data_out": 7,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 3,
+          "data_in_valid": 0,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 7,
+          "data_out_valid": 0
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 4,
+          "data_in_valid": 1,
+          "data_out_ready": 0
+        },
+        "expect": {
+          "data_in_ready": 0,
+          "data_out": 11,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 1,
+        "drive": {
+          "data_in": 9,
+          "data_in_valid": 1,
+          "data_out_ready": 0
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 0,
+          "data_out_valid": 0
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 2,
+          "data_in_valid": 1,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 2,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 0,
+          "data_in_valid": 1,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 2,
+          "data_out_valid": 1
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 1,
+          "data_in_valid": 0,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 2,
+          "data_out_valid": 0
+        }
+      },
+      {
+        "reset": 0,
+        "drive": {
+          "data_in": 14,
+          "data_in_valid": 1,
+          "data_out_ready": 1
+        },
+        "expect": {
+          "data_in_ready": 1,
+          "data_out": 0,
+          "data_out_valid": 1
+        }
+      }
+    ]
+  },
+  "copy_provenance": {
+    "project_id": "project-c5fb7157a44d447c9c083b97c3325fd8",
+    "system_id": "system-9aa523090af945d08986d55a97384f18",
+    "revision_id": "revision-a6b236d051c7445585bd2246957038e2",
+    "captured_at": "2026-10-30T16:56:10.459+00:00",
+    "evidence_scope": "Source history only. No results or adoption transferred to this editable copy."
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "profile_version": "hullcirq-sky130-generic-closure-v2",
+  "origin": "development_assistant_standard_physical_correction_under_user_authorized_generic_GUI_completion",
+  "original_GUI_settings_inherited": [
+    "top_module",
+    "clock_name",
+    "clock_period_ns",
+    "reset_name",
+    "reset_active",
+    "reset_kind",
+    "pdk",
+    "cell_library"
+  ],
+  "additional_conditions_origin": "explicit_standard_optimization_assumptions_not_original_GUI_fields_or_a_prediction_of_closure",
+  "flow": "HuLLCirqGenericRouteClosureV2",
+  "stop_after": "KLayout.Render",
+  "jobs": 2,
+  "config": {
+    "FP_CORE_UTIL": 30,
+    "IO_DELAY_CONSTRAINT": 20,
+    "CLOCK_UNCERTAINTY_CONSTRAINT": 0.25,
+    "CLOCK_TRANSITION_CONSTRAINT": 0.15,
+    "TIME_DERATING_CONSTRAINT": 5,
+    "DEFAULT_CORNER": "nom_tt_025C_1v80",
+    "STA_CORNERS": [
+      "nom_tt_025C_1v80",
+      "nom_ss_100C_1v60",
+      "nom_ff_n40C_1v95",
+      "min_tt_025C_1v80",
+      "min_ss_100C_1v60",
+      "min_ff_n40C_1v95",
+      "max_tt_025C_1v80",
+      "max_ss_100C_1v60",
+      "max_ff_n40C_1v95"
+    ],
+    "STA_THREADS": 1,
+    "DRT_THREADS": 2,
+    "RUN_POST_GRT_DESIGN_REPAIR": true,
+    "RUN_POST_GRT_RESIZER_TIMING": true,
+    "CTS_SINK_CLUSTERING_SIZE": 8,
+    "CTS_DISTANCE_BETWEEN_BUFFERS": 50,
+    "PNR_CORNERS": [
+      "max_ss_100C_1v60"
+    ],
+    "RSZ_CORNERS": [
+      "max_ss_100C_1v60"
+    ],
+    "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 60,
+    "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+    "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.1,
+    "EXTRA_EXCLUDED_CELLS": [
+      "sky130_fd_sc_hd__clkdlybuf*"
+    ]
+  },
+  "SDC_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/base.sdc",
+  "SDC_sha256": "34c8f331c366db51a78ed8a0d2a7bbac3b6c1cfe0277a04c6aca9ba4948e7f78",
+  "implementation_kind": "fresh_generic_standard_electrical_closure",
+  "required_additional_checks": [
+    "max_slew_violations_zero_all_nine_corners",
+    "max_capacitance_violations_zero_all_nine_corners",
+    "max_fanout_violations_zero_all_nine_corners"
+  ],
+  "optimization_conditions": {
+    "pnr_max_fanout": 8,
+    "final_max_fanout": 10,
+    "signoff_constraints_changed": false,
+    "pnr_sdc": "original_base_SDC_plus_fixed_fanout8_override",
+    "pnr_slew_margin_percent": 60,
+    "pnr_capacitance_margin_percent": 30,
+    "pnr_hold_slack_margin_ns": 0.1,
+    "new_optimization_excluded_cells": [
+      "sky130_fd_sc_hd__clkdlybuf*"
+    ],
+    "existing_instances_removed": false,
+    "timing_models_excluded": false,
+    "extra_standard_electrical_repair_passes": 1
+  },
+  "per_step_override": {
+    "OpenROAD.ResizerTimingPostGRT": {
+      "RSZ_CORNERS": [
+        "nom_tt_025C_1v80",
+        "nom_ss_100C_1v60",
+        "nom_ff_n40C_1v95",
+        "min_tt_025C_1v80",
+        "min_ss_100C_1v60",
+        "min_ff_n40C_1v95",
+        "max_tt_025C_1v80",
+        "max_ss_100C_1v60",
+        "max_ff_n40C_1v95"
+      ]
+    }
+  },
+  "extra_standard_step": {
+    "id": "HuLLCirq.GenericRepairDesignAfterTimingV2",
+    "implementation": "OpenROAD.RepairDesignPostGRT",
+    "after": "OpenROAD.ResizerTimingPostGRT",
+    "before": "OpenROAD.STAMidPNR-3",
+    "custom_Tcl": false
+  },
+  "fixed_launcher_sha256": "3f0bf202c97f091a006f28b973c4d44020c3d9548bb92ec0a4dfda6f70035607",
+  "standard_tool_sources": [
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/flows/classic.py",
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/flows/sequential.py",
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/steps/openroad.py"
+  ],
+  "limits": [
+    "A new complete Classic run performs fresh synthesis and PDK mapping, placement, CTS, routing, extraction and stream-out. No checkpoint, old NPU source binding or technology mapping is reused.",
+    "The original saved clock period and complete signoff SDC remain unchanged. Only PnR optimization adds fanout-eight headroom; final fanout ten, 0.75 ns slew, cell capacitance limits and all nine signoff corners are retained.",
+    "The standard slow-corner post-GRT electrical step and all-nine-corner timing step are followed by one additional unmodified standard electrical step. Any remaining electrical, setup, hold, routing or mapping violation fails the strict checks.",
+    "Delay-buffer cells are excluded only from new optimization choices; existing instances, libraries and timing models are not removed or masked. No RTL or netlist text is rewritten.",
+    "This is a bounded correction hypothesis, not an asserted result. A changed layout requires new S12 DRC, S13 LVS and S14 verification before adoption.",
+    "Finite independent cycle vectors are unchanged. Static extracted STA is not dynamic SDF simulation.",
+    "Explicit repeated fresh correction binds a complete electrical-only failed S11 or S14 and its preceding immutable preparation bundle. The selected bounded core utilization is an execution assumption, not a changed signoff condition. No automatic retry."
+  ],
+  "allowed_core_utilization": [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    50
+  ]
+}

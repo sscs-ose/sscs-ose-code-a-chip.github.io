@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="960" viewBox="0 0 1320 960" role="img">
+<title>Eleven-node explicit 2x2 NPU: saved logical architecture</title>
+<style>text{font-family:Arial,sans-serif;fill:#132d4f} .title{font-size:25px;font-weight:700}.small{font-size:13px}.tiny{font-size:11px}.node{fill:#f1f6fc;stroke:#285987;stroke-width:2}.pe{fill:#e8f7f2;stroke:#087760;stroke-width:2}.wire{fill:none;stroke:#285987;stroke-width:2.5;marker-end:url(#arrow)}.control{stroke:#a36a14;stroke-dasharray:6 4}.label{font-size:14px;font-weight:700}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10z" fill="#285987"/></marker></defs>
+<rect width="1320" height="960" fill="white"/>
+<text x="35" y="40" class="title" >Eleven-node explicit 2x2 NPU</text>
+<text x="35" y="66" class="small" >Logical graph from the original saved specification. Boxes/grouping are not physical placement.</text>
+<rect x="60" y="180" width="235" height="125" rx="10" class="node"/>
+<text x="74" y="207" class="label" >Operand buffer</text>
+<text x="74" y="232" class="small" >2 x 16-byte register banks</text>
+<text x="74" y="251" class="small" >A0k,A1k,Bk0,Bk1 response</text>
+<text x="74" y="270" class="small" >No SRAM macro is claimed</text>
+<rect x="390" y="180" width="235" height="125" rx="10" class="node"/>
+<text x="404" y="207" class="label" >2x2 scheduler</text>
+<text x="404" y="232" class="small" >Iterate k = 0..K-1</text>
+<text x="404" y="251" class="small" >First/last markers per batch</text>
+<text x="404" y="270" class="small" >Exactly K accepted batches</text>
+<rect x="720" y="180" width="235" height="125" rx="10" class="node"/>
+<text x="734" y="207" class="label" >Four-lane dispatcher</text>
+<text x="734" y="232" class="small" >Independent delivered flags</text>
+<text x="734" y="251" class="small" >One transfer per PE per k</text>
+<text x="734" y="270" class="small" >Hold stable under stalls</text>
+<rect x="1040" y="180" width="235" height="125" rx="10" class="node"/>
+<text x="1054" y="207" class="label" >Job control</text>
+<text x="1054" y="232" class="small" >Accept one legal config</text>
+<text x="1054" y="251" class="small" >Independent config channels</text>
+<text x="1054" y="270" class="small" >Count 4 external transfers</text>
+<text x="65" y="145" class="small" >External load: 13-bit address/bank/byte</text>
+<path class="wire" d="M177 150 L177 178"/>
+<text x="1040" y="145" class="small" >External config: 69 bits</text>
+<path class="wire" d="M1157 150 L1157 178"/>
+<path class="wire" d="M295 220 L388 220"/>
+<text x="303" y="210" class="tiny" >32-bit reply</text>
+<path class="wire" d="M390 275 L297 275"/>
+<text x="300" y="266" class="tiny" >3-bit index</text>
+<path class="wire" d="M625 242 L718 242"/>
+<text x="633" y="232" class="tiny" >34-bit batch</text>
+<path class="wire control" d="M1080 180 L1080 110 L507 110 L507 178"/>
+<text x="635" y="101" class="small" >4-bit K configuration; independent valid/ready</text>
+<rect x="705" y="395" width="570" height="280" rx="14" fill="#fafdfb" stroke="#80bcae" stroke-dasharray="6 4"/>
+<text x="725" y="420" class="label" >Four explicit PE nodes (logical 2x2 grouping)</text>
+<rect x="730" y="440" width="245" height="95" rx="10" class="pe"/>
+<text x="744" y="467" class="label" >PE 00: C[0,0]</text>
+<text x="744" y="492" class="small" >signed8 x signed8 -&gt; 16</text>
+<text x="744" y="511" class="small" >signed32 MAC accumulator</text>
+<rect x="1005" y="440" width="245" height="95" rx="10" class="pe"/>
+<text x="1019" y="467" class="label" >PE 01: C[0,1]</text>
+<text x="1019" y="492" class="small" >signed8 x signed8 -&gt; 16</text>
+<text x="1019" y="511" class="small" >signed32 MAC accumulator</text>
+<rect x="730" y="555" width="245" height="95" rx="10" class="pe"/>
+<text x="744" y="582" class="label" >PE 10: C[1,0]</text>
+<text x="744" y="607" class="small" >signed8 x signed8 -&gt; 16</text>
+<text x="744" y="626" class="small" >signed32 MAC accumulator</text>
+<rect x="1005" y="555" width="245" height="95" rx="10" class="pe"/>
+<text x="1019" y="582" class="label" >PE 11: C[1,1]</text>
+<text x="1019" y="607" class="small" >signed8 x signed8 -&gt; 16</text>
+<text x="1019" y="626" class="small" >signed32 MAC accumulator</text>
+<path class="wire" d="M837 305 L837 350 L990 350 L990 392"/>
+<text x="450" y="335" class="small" >4 independent 18-bit pairs</text>
+<text x="450" y="356" class="small" >a[7:0], b[7:0], first, last</text>
+<rect x="390" y="485" width="235" height="130" rx="10" class="node"/>
+<text x="404" y="512" class="label" >Row-major collector</text>
+<text x="404" y="537" class="small" >Select 00, 01, 10, 11</text>
+<text x="404" y="556" class="small" >Only chosen lane gets ready</text>
+<text x="404" y="575" class="small" >Advance on actual transfer</text>
+<path class="wire" d="M705 550 L627 550"/>
+<text x="638" y="500" class="tiny" >4 x 32-bit</text>
+<text x="638" y="516" class="tiny" >independent</text>
+<text x="638" y="532" class="tiny" >sum streams</text>
+<rect x="60" y="485" width="235" height="130" rx="10" class="node"/>
+<text x="74" y="512" class="label" >Bias and ReLU</text>
+<text x="74" y="537" class="small" >signed32 column-bias add</text>
+<text x="74" y="556" class="small" >Wrap modulo 2^32</text>
+<text x="74" y="575" class="small" >Optional ReLU after wrap</text>
+<path class="wire" d="M390 550 L297 550"/>
+<text x="313" y="538" class="tiny" >32 bits</text>
+<rect x="60" y="735" width="235" height="105" rx="10" class="node"/>
+<text x="74" y="762" class="label" >Output FIFO</text>
+<text x="74" y="787" class="small" >Depth 2, signed32</text>
+<text x="74" y="806" class="small" >Maintain row-major order</text>
+<path class="wire" d="M177 615 L177 733"/>
+<text x="190" y="680" class="small" >32-bit result</text>
+<path class="wire" d="M295 785 L600 785"/>
+<text x="315" y="772" class="small" >External output: signed32 + valid/ready</text>
+<text x="35" y="880" class="small" >Other saved control edges: Job control -&gt; Bias/ReLU (65 bits); FIFO -&gt; Job control (1-bit output_transfer pulse).</text>
+<text x="35" y="902" class="small" >All blue payload arrows use valid/ready; PE fanout/collection arrows group four independent channels, not one shared wire.</text>
+<text x="35" y="924" class="small" >Shared clk/rst: 50 ns target, synchronous active-high reset. No all-ready broadcast or systolic propagation is implied.</text>
+</svg>

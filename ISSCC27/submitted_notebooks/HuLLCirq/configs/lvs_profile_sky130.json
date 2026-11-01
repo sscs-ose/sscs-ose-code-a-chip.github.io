@@ -1,0 +1,31 @@
+{
+  "profile_version": "hullcirq-sky130-lvs-v1",
+  "origin": "development_assistant_S13_execution_profile_original_GUI_and_S11_outputs_unchanged",
+  "flow": ["Magic.SpiceExtraction", "Netgen.LVS"],
+  "jobs": 2,
+  "config": {
+    "MAGIC_EXT_USE_GDS": true,
+    "MAGIC_EXT_ABSTRACT": false,
+    "MAGIC_EXT_ABSTRACT_CELLS": null,
+    "MAGIC_EXT_UNIQUE": "all",
+    "MAGIC_EXT_SHORT_RESISTOR": false,
+    "LVS_FLATTEN_CELLS": null,
+    "LVS_IGNORE_CELLS": null,
+    "LVS_INCLUDE_MARCO_NETLISTS": false,
+    "VDD_NETS": ["VPWR"],
+    "GND_NETS": ["VGND"]
+  },
+  "deck_files": {
+    "libs.tech/magic/sky130A.magicrc": "c6f29a510b7014907a42b436610964157063c8b19d8e3bb582eaca2288fa7e05",
+    "libs.tech/magic/sky130A.tech": "d9ef56e3ab01b8fb605edf964fcfa01a0bf14ca8503f6ccecdecfd71f0907519",
+    "libs.tech/netgen/sky130A_setup.tcl": "7a33f3f54fab57a9d9b0887ac7b7b64ce6c454110e8b7f01f3cfb90a1282dc94",
+    "libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice": "304da9725492089107bb20840a4020558b028487d300f8df79bbbad5332aaa99"
+  },
+  "limits": [
+    "Magic extracts the unchanged accepted GDS, with capacitance/resistance disabled, unique all, no added abstract cells or custom flatten rules. DEF is retained as a required companion input; GDS extraction is selected explicitly.",
+    "Netgen compares extracted SPICE with the original S11 powered netlist and pinned SKY130 cell SPICE models. The powered file is first hashed at S13, not retrospectively claimed as a hash-retained S11 artifact; its signal graph and component types are checked against the adopted mapped netlist and DEF.",
+    "No user LVS ignore/flatten cells or waivers are added. Upstream Netgen uses -blackbox and the pinned PDK setup's device reductions, tolerances and physical-only-cell treatment. These remain part of the recorded comparison scope.",
+    "Explicit finite zero error metrics, zero illegal overlaps and a complete top-cell unique-match report are mandatory. Tool exit zero alone is insufficient.",
+    "This is recorded layout-versus-powered-netlist connectivity evidence, not formal RTL equivalence, foundry qualification, extracted dynamic simulation, power integrity or dynamic SDF verification."
+  ]
+}

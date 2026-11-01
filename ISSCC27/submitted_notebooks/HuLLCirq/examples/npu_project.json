@@ -1,0 +1,747 @@
+{
+  "schema_version": "0.1",
+  "project": {
+    "id": "hullcirq-npu-4x4-int8",
+    "name": "HuLLCirq 4×4 INT8 NPU",
+    "specification_origin": "development_assistant_proposal_saved_through_gui_under_user_authorization",
+    "implementation_scope": "PE template first; full NPU/global integration not implemented"
+  },
+  "settings": {
+    "top_module": "hullcirq_npu",
+    "clock_name": "clk",
+    "clock_period_ns": 50,
+    "reset_name": "rst",
+    "reset_active": "high",
+    "reset_kind": "synchronous",
+    "rtl_language": "verilog_2005",
+    "pdk": "sky130A",
+    "cell_library": "sky130_fd_sc_hd"
+  },
+  "nodes": [
+    {
+      "id": "node-control",
+      "name": "Job control",
+      "module_name": "hullcirq_control",
+      "parent_id": null,
+      "behavior": "Accept one configuration/job at a time. Job configuration contains K (1..16), four signed INT32 column biases and ReLU enable. Keep configuration stable while busy, reject overlapping starts and report completion only after the final output transfer. Global integration must clear all PE accumulators at each job boundary. Detailed integration is planned; no control RTL is currently generated.",
+      "test_expectations": "Required system tests are the GUI-saved matrix job and its per-node projections. Functional evidence is only claimed for stages that actually execute. Hold valid/data under stalls, reset cancels pending transfers, and preserve job/result ordering.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "port-control-config_data",
+          "name": "config_data",
+          "direction": "input",
+          "width": 134,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-control-schedule_config",
+          "name": "schedule_config",
+          "direction": "output",
+          "width": 134,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-control-post_config",
+          "name": "post_config",
+          "direction": "output",
+          "width": 129,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "node-buffer",
+      "name": "A / B input buffers",
+      "module_name": "hullcirq_buffer",
+      "parent_id": null,
+      "behavior": "Store A[4,K] and B[K,4] as signed INT8 in registers (maximum 128 bytes, no SRAM). load_data is a 16-bit addressed byte-write packet; read_request identifies one A and one B address, read_response packs A in low8 and B in high8. Stall responses without losing their request. Detailed address encoding and global port expansion remain planned.",
+      "test_expectations": "Required system tests are the GUI-saved matrix job and its per-node projections. Functional evidence is only claimed for stages that actually execute. Hold valid/data under stalls, reset cancels pending transfers, and preserve job/result ordering.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "port-buffer-load_data",
+          "name": "load_data",
+          "direction": "input",
+          "width": 16,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-buffer-read_request",
+          "name": "read_request",
+          "direction": "input",
+          "width": 16,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-buffer-read_response",
+          "name": "read_response",
+          "direction": "output",
+          "width": 16,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "node-scheduler",
+      "name": "Array scheduler",
+      "module_name": "hullcirq_scheduler",
+      "parent_id": null,
+      "behavior": "For each configured matrix job, schedule the K operand pairs for each of 16 output-stationary PE instances. Pair low8 is signed A[m,k]; high8 is signed B[k,n]. Only count accepted valid/ready transfers, clear PEs at job boundaries and preserve row-major final-result order. Edges to the PE template represent an intended 16-lane expansion during global integration, which is not implemented in this revision.",
+      "test_expectations": "Required system tests are the GUI-saved matrix job and its per-node projections. Functional evidence is only claimed for stages that actually execute. Hold valid/data under stalls, reset cancels pending transfers, and preserve job/result ordering.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "port-scheduler-schedule_config",
+          "name": "schedule_config",
+          "direction": "input",
+          "width": 134,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-scheduler-read_request",
+          "name": "read_request",
+          "direction": "output",
+          "width": 16,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-scheduler-read_response",
+          "name": "read_response",
+          "direction": "input",
+          "width": 16,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-scheduler-pair_data",
+          "name": "pair_data",
+          "direction": "output",
+          "width": 16,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "node-pe",
+      "name": "INT8 PE template",
+      "module_name": "hullcirq_pe",
+      "parent_id": null,
+      "behavior": "Single PE implementation intended for reuse across the 4x4 output-stationary array. Synchronous active-high rst clears signed INT32 accumulator, acc_data and acc_data_valid to zero. pair_data low8 is signed INT8 a and high8 is signed INT8 b. pair_data_ready = !acc_data_valid || acc_data_ready, including during reset. On each non-reset rising clk input handshake, compute signed8* signed8 (16-bit signed product), add it with sign extension to the accumulator modulo 2^32, and publish the new accumulator on acc_data with valid=1. Output-only handshake clears valid while retaining accumulator/data. Simultaneous input/output handshakes replace the consumed output with the new sum. During output backpressure, hold acc_data and valid and do not consume input. Reset has highest priority. No initial values or extra ports. Global integration must drive this rst at each job boundary; that integration remains planned.",
+      "test_expectations": "Executable PE verification uses the 42 GUI-saved cycles in verification.vectors, projected from row0 of the saved K=4 matrix job across all four columns. Each column begins with reset. Check mixed signs and INT8 extrema, acceptance into an empty output while downstream is stalled, output/data hold, rejected inputs during stalls, simultaneous consume/replace, output-only clearing, accumulator retention, and reset priority. This finite projection does not verify the complete NPU, K=1/16, long-run INT32 wraparound, bias/ReLU or FIFO.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "port-pe-pair_data",
+          "name": "pair_data",
+          "direction": "input",
+          "width": 16,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-pe-acc_data",
+          "name": "acc_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ],
+      "verification": {
+        "kind": "int8_mac_stream",
+        "version": 1,
+        "input_port": "pair_data",
+        "output_port": "acc_data",
+        "accumulator_width": 32,
+        "initial_accumulator": 0,
+        "vectors": [
+          {
+            "reset": 1,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 32896
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 32896
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 1533
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 1533
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 768
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 32895
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 1,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 384
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 384
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 65277
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 65277
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 32512
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 127
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 1,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 128
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 128
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 32765
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 32765
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 32768
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 639
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 1,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 1920
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 1920
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 0,
+            "input_data": 1789
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 1789
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 256
+          },
+          {
+            "reset": 0,
+            "input_valid": 1,
+            "output_ready": 1,
+            "input_data": 65407
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          },
+          {
+            "reset": 1,
+            "input_valid": 0,
+            "output_ready": 0,
+            "input_data": 0
+          },
+          {
+            "reset": 0,
+            "input_valid": 0,
+            "output_ready": 1,
+            "input_data": 0
+          }
+        ]
+      },
+      "verification_provenance": {
+          "origin": "development_assistant_specification_proposal",
+          "source": "design.verification_jobs[0]",
+          "projection": "A[0,k] and B[k,n], n=0..3, k=0..3; each column reset; stall/reset schedule explicitly saved in this initial specification",
+          "stage_generated_data": false
+      },
+      "verification_scope": "one_pe_template_only",
+      "replication_plan": {
+        "rows": 4,
+        "columns": 4,
+        "instance_count": 16,
+        "status": "planned_not_instantiated"
+      }
+    },
+    {
+      "id": "node-post",
+      "name": "Bias and ReLU",
+      "module_name": "hullcirq_post",
+      "parent_id": null,
+      "behavior": "For each final PE sum, select its output-column signed INT32 bias from the stable job configuration, add modulo 2^32, then apply max(0,signed result) if ReLU enabled. Forward one result per row-major output position. Hold data/valid during backpressure. Global result selection/column tracking is planned and not verified.",
+      "test_expectations": "Required system tests are the GUI-saved matrix job and its per-node projections. Functional evidence is only claimed for stages that actually execute. Hold valid/data under stalls, reset cancels pending transfers, and preserve job/result ordering.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "port-post-acc_data",
+          "name": "acc_data",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-post-post_config",
+          "name": "post_config",
+          "direction": "input",
+          "width": 129,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-post-result_data",
+          "name": "result_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "node-fifo",
+      "name": "Output FIFO",
+      "module_name": "hullcirq_fifo",
+      "parent_id": null,
+      "behavior": "Two-entry signed INT32 output FIFO; deliver exactly 16 final results in row-major order for each matrix job. Preserve values/order through arbitrary backpressure. Handle simultaneous enqueue/dequeue and full/empty boundaries. Synchronous reset empties the queue. FIFO depth 2 is the initial system choice; depth 4 is a later evaluated change.",
+      "test_expectations": "Required system tests are the GUI-saved matrix job and its per-node projections. Functional evidence is only claimed for stages that actually execute. Hold valid/data under stalls, reset cancels pending transfers, and preserve job/result ordering.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "port-fifo-result_data",
+          "name": "result_data",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "port-fifo-output_data",
+          "name": "output_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-control-scheduler",
+      "source": {
+        "node_id": "node-control",
+        "port_id": "port-control-schedule_config"
+      },
+      "target": {
+        "node_id": "node-scheduler",
+        "port_id": "port-scheduler-schedule_config"
+      },
+      "behavior": "Transfer only when valid and ready are high; hold data and valid under stalls. Both sides use clk and synchronous active-high rst. Configure one K-step job, preventing overlapping jobs.",
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "edge-control-post",
+      "source": {
+        "node_id": "node-control",
+        "port_id": "port-control-post_config"
+      },
+      "target": {
+        "node_id": "node-post",
+        "port_id": "port-post-post_config"
+      },
+      "behavior": "Transfer only when valid and ready are high; hold data and valid under stalls. Both sides use clk and synchronous active-high rst. Keep all four biases and ReLU mode stable for the entire job.",
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "edge-scheduler-buffer",
+      "source": {
+        "node_id": "node-scheduler",
+        "port_id": "port-scheduler-read_request"
+      },
+      "target": {
+        "node_id": "node-buffer",
+        "port_id": "port-buffer-read_request"
+      },
+      "behavior": "Transfer only when valid and ready are high; hold data and valid under stalls. Both sides use clk and synchronous active-high rst. Read an A/B operand pair. Address encoding remains a global-integration decision.",
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "edge-buffer-scheduler",
+      "source": {
+        "node_id": "node-buffer",
+        "port_id": "port-buffer-read_response"
+      },
+      "target": {
+        "node_id": "node-scheduler",
+        "port_id": "port-scheduler-read_response"
+      },
+      "behavior": "Transfer only when valid and ready are high; hold data and valid under stalls. Both sides use clk and synchronous active-high rst. Response low8 is signed A and high8 is signed B; preserve request order.",
+      "protocol": "valid_ready"
+    },
+    {
+      "id": "edge-scheduler-pe",
+      "source": {
+        "node_id": "node-scheduler",
+        "port_id": "port-scheduler-pair_data"
+      },
+      "target": {
+        "node_id": "node-pe",
+        "port_id": "port-pe-pair_data"
+      },
+      "behavior": "Transfer only when valid and ready are high; hold data and valid under stalls. Both sides use clk and synchronous active-high rst. Logical PE-template contract: input low8 signed A[m,k], high8 signed B[k,n]. Clear PE at job boundary through its synchronous reset. Generate 16 lane-specific instances during future global integration, rather than broadcasting one pair to every PE.",
+      "protocol": "valid_ready",
+      "planned_lane_count": 16
+    },
+    {
+      "id": "edge-pe-post",
+      "source": {
+        "node_id": "node-pe",
+        "port_id": "port-pe-acc_data"
+      },
+      "target": {
+        "node_id": "node-post",
+        "port_id": "port-post-acc_data"
+      },
+      "behavior": "Transfer only when valid and ready are high; hold data and valid under stalls. Both sides use clk and synchronous active-high rst. Per-instance sums update after every accepted operand pair; global integration must select the final Kth sum for each lane in row-major order and drain intermediate output handshakes. Node validation checks all partial sums; complete-array selection remains unimplemented.",
+      "protocol": "valid_ready",
+      "planned_lane_count": 16
+    },
+    {
+      "id": "edge-post-fifo",
+      "source": {
+        "node_id": "node-post",
+        "port_id": "port-post-result_data"
+      },
+      "target": {
+        "node_id": "node-fifo",
+        "port_id": "port-fifo-result_data"
+      },
+      "behavior": "Transfer only when valid and ready are high; hold data and valid under stalls. Both sides use clk and synchronous active-high rst. Carry final biased/ReLU result in row-major order.",
+      "protocol": "valid_ready"
+    }
+  ],
+  "verification_jobs": [
+    {
+      "id": "matrix-job-k4-boundaries",
+      "k": 4,
+      "A": [
+        [
+          -128,
+          -3,
+          0,
+          127
+        ],
+        [
+          2,
+          -1,
+          4,
+          7
+        ],
+        [
+          12,
+          6,
+          -9,
+          -15
+        ],
+        [
+          -1,
+          -128,
+          127,
+          0
+        ]
+      ],
+      "B": [
+        [
+          -128,
+          1,
+          0,
+          7
+        ],
+        [
+          5,
+          -2,
+          127,
+          6
+        ],
+        [
+          3,
+          127,
+          -128,
+          1
+        ],
+        [
+          -128,
+          0,
+          2,
+          -1
+        ]
+      ],
+      "bias": [
+        0,
+        10,
+        -8,
+        2147483647
+      ],
+      "relu": false,
+      "expected_result_source": "Independent signed integer reference with wrap32 after bias; full system reference execution is not yet implemented",
+      "origin": "development_assistant_initial_gui_specification",
+      "execution_status": "not_run_for_full_npu"
+    }
+  ],
+  "layout": {
+    "nodes": {
+      "node-control": {
+        "x": 70,
+        "y": 50
+      },
+      "node-buffer": {
+        "x": 70,
+        "y": 260
+      },
+      "node-scheduler": {
+        "x": 420,
+        "y": 170
+      },
+      "node-pe": {
+        "x": 760,
+        "y": 170
+      },
+      "node-post": {
+        "x": 1090,
+        "y": 170
+      },
+      "node-fifo": {
+        "x": 1410,
+        "y": 170
+      }
+    },
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.7
+    }
+  }
+}

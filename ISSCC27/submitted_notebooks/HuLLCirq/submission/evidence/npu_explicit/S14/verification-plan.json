@@ -1,0 +1,288 @@
+{
+  "kind": "npu2-global-original-matrix-v1",
+  "version": 1,
+  "profile": "npu2-explicit-four-pe-v1",
+  "recipe": {
+    "kind": "npu2-global-original-matrix-v1",
+    "source_job": {
+      "id": "matrix-job-2x2-k3-signed-v1",
+      "k": 3,
+      "A": [
+        [
+          -8,
+          3,
+          5
+        ],
+        [
+          7,
+          -2,
+          4
+        ]
+      ],
+      "B": [
+        [
+          6,
+          -1
+        ],
+        [
+          -3,
+          5
+        ],
+        [
+          2,
+          7
+        ]
+      ],
+      "bias": [
+        3,
+        -2
+      ],
+      "relu": false,
+      "scope": "New canonical input only. Reference results and all executed verification evidence are pending."
+    },
+    "load_words": [
+      248,
+      259,
+      517,
+      2055,
+      2558,
+      2564,
+      4102,
+      4607,
+      4861,
+      4869,
+      5122,
+      5383
+    ],
+    "configuration_word": 590295810083827744867,
+    "expected_outputs": [
+      -44,
+      56,
+      59,
+      9
+    ],
+    "output_ready_pattern": [
+      0,
+      1,
+      0,
+      1,
+      1
+    ],
+    "reset_cycles": 3,
+    "load_timeout_cycles": 2000,
+    "job_timeout_cycles": 12000
+  },
+  "vector_hash": "8b52fdd880a7fad416852253888208e291e884cf6993b96280ee380b48f5f9ee",
+  "public_boundary_vectors": {
+    "template": "npu2-compiler-hierarchy-public-boundary-original-job-v1",
+    "configuration": [
+      590295810083827744867
+    ],
+    "post_configuration": [
+      36893488130239234054
+    ],
+    "load_words": [
+      248,
+      259,
+      517,
+      2055,
+      2558,
+      2564,
+      4102,
+      4607,
+      4861,
+      4869,
+      5122,
+      5383
+    ],
+    "read_indices": [
+      0,
+      1,
+      2
+    ],
+    "operands": [
+      4278585336,
+      100531715,
+      117572613
+    ],
+    "batches": [
+      8573552632,
+      100531715,
+      8707507205
+    ],
+    "lane_pairs": {
+      "00": [
+        67320,
+        64771,
+        131589
+      ],
+      "01": [
+        131064,
+        1283,
+        132869
+      ],
+      "10": [
+        67079,
+        65022,
+        131588
+      ],
+      "11": [
+        130823,
+        1534,
+        132868
+      ]
+    },
+    "lane_sums": {
+      "00": [
+        4294967249
+      ],
+      "01": [
+        58
+      ],
+      "10": [
+        56
+      ],
+      "11": [
+        11
+      ]
+    },
+    "collected_sums": [
+      4294967249,
+      58,
+      56,
+      11
+    ],
+    "results": [
+      4294967252,
+      56,
+      59,
+      9
+    ]
+  },
+  "public_boundary_vector_hash": "6e558fd2120643da055f44a8fd0bbbdc8c33bc56ca43b6cc2f364f6457dcfb5d",
+  "connections": [
+    {
+      "source_node": "npu2-control",
+      "source_port": "schedule_config",
+      "target_node": "npu2-scheduler",
+      "target_port": "schedule_config",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-control",
+      "source_port": "post_config",
+      "target_node": "npu2-post",
+      "target_port": "post_config",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-scheduler",
+      "source_port": "read_index",
+      "target_node": "npu2-buffer",
+      "target_port": "read_index",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-buffer",
+      "source_port": "operands",
+      "target_node": "npu2-scheduler",
+      "target_port": "operands",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-scheduler",
+      "source_port": "batch_data",
+      "target_node": "npu2-dispatcher",
+      "target_port": "batch_data",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-dispatcher",
+      "source_port": "pair00",
+      "target_node": "npu2-pe00",
+      "target_port": "pair_data",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-pe00",
+      "source_port": "sum_data",
+      "target_node": "npu2-collector",
+      "target_port": "sum00",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-dispatcher",
+      "source_port": "pair01",
+      "target_node": "npu2-pe01",
+      "target_port": "pair_data",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-pe01",
+      "source_port": "sum_data",
+      "target_node": "npu2-collector",
+      "target_port": "sum01",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-dispatcher",
+      "source_port": "pair10",
+      "target_node": "npu2-pe10",
+      "target_port": "pair_data",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-pe10",
+      "source_port": "sum_data",
+      "target_node": "npu2-collector",
+      "target_port": "sum10",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-dispatcher",
+      "source_port": "pair11",
+      "target_node": "npu2-pe11",
+      "target_port": "pair_data",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-pe11",
+      "source_port": "sum_data",
+      "target_node": "npu2-collector",
+      "target_port": "sum11",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-collector",
+      "source_port": "acc_data",
+      "target_node": "npu2-post",
+      "target_port": "acc_data",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-post",
+      "source_port": "result_data",
+      "target_node": "npu2-fifo",
+      "target_port": "result_data",
+      "protocol": "valid_ready"
+    },
+    {
+      "source_node": "npu2-fifo",
+      "source_port": "output_transfer",
+      "target_node": "npu2-control",
+      "target_port": "output_transfer",
+      "protocol": "raw"
+    }
+  ],
+  "connections_sha256": "981928212723d4737113b3cb75cb3f5b87aa8422d0f49a1d6b214003772a2a4e",
+  "testbench": "module hullcirq_global_tb;\n  reg clk=0, rst=1;\n  reg [68:0] config_data=0; reg config_data_valid=0;\n  wire config_data_ready; reg [12:0] load_data=0; reg load_data_valid=0;\n  wire load_data_ready; wire signed [31:0] output_data;\n  wire output_data_valid; reg output_data_ready=0; wire busy,job_done;\n  hullcirq_npu2_top dut(.clk(clk),.rst(rst),.config_data(config_data),\n    .config_data_valid(config_data_valid),.config_data_ready(config_data_ready),\n    .load_data(load_data),.load_data_valid(load_data_valid),.load_data_ready(load_data_ready),\n    .output_data(output_data),.output_data_valid(output_data_valid),\n    .output_data_ready(output_data_ready),.busy(busy),.job_done(job_done));\n  always #5 clk=~clk;\n  reg signed [31:0] expected [0:3];\n  integer cycles=0, outputs=0, done_count=0, started=0, after_start=0, i;\n  reg stalled=0; reg [31:0] held_data=0; reg previous_done=0;\n  task fail; input [511:0] message; begin\n    $display(\"HULLCIRQ_FAIL cycle=%0d outputs=%0d %0s\",cycles,outputs,message); $finish;\n  end endtask\n  task send_load; input [12:0] word; integer wait_cycle;\n    begin\n      @(negedge clk); load_data=word; load_data_valid=1;\n      begin : waiting\n        for(wait_cycle=0;wait_cycle<2000;wait_cycle=wait_cycle+1) begin\n          @(posedge clk);\n          if(load_data_ready===1'b1) begin\n            @(negedge clk); load_data_valid=0; disable waiting;\n          end\n        end\n        fail(\"load timeout\");\n      end\n    end\n  endtask\n  always @(negedge clk) begin\n    if(rst) output_data_ready=0;\n    else output_data_ready=(cycles%5==1 || cycles%5==3 || cycles%5==4);\n  end\n  always @(posedge clk) begin\n    cycles=cycles+1;\n    if(rst) begin outputs=0; done_count=0; started=0; after_start=0;\n      stalled=0; previous_done=0;\n    end else begin\n      if(stalled && (output_data_valid!==1'b1 || output_data!==held_data)) fail(\"output changed under backpressure\");\n      if(output_data_valid!==1'b0 && output_data_valid!==1'b1) fail(\"unknown output valid\");\n      if(busy!==1'b0 && busy!==1'b1) fail(\"unknown busy\");\n      if(job_done!==1'b0 && job_done!==1'b1) fail(\"unknown job_done\");\n      if(busy===1'b1 && load_data_ready!==1'b0) fail(\"loading enabled during job\");\n      if(config_data_valid===1'b1 && config_data_ready===1'b1) started=1;\n      if(started) after_start=after_start+1;\n      if(started && after_start>2 && outputs<4 && busy!==1'b1) fail(\"busy dropped before four outputs\");\n      if(output_data_valid===1'b1 && output_data_ready===1'b1) begin\n        if(!started || outputs>=4) fail(\"unexpected extra output\");\n        if(output_data!==expected[outputs]) fail(\"matrix output mismatch\");\n        $display(\"HULLCIRQ_OUTPUT index=%0d value=%0d cycle=%0d\",outputs,output_data,cycles);\n        outputs=outputs+1;\n      end\n      if(job_done===1'b1) begin\n        if(outputs!=4 || previous_done) fail(\"premature or repeated completion\");\n        done_count=done_count+1;\n      end\n      stalled=(output_data_valid===1'b1 && output_data_ready!==1'b1);\n      held_data=output_data; previous_done=job_done;\n    end\n  end\n  initial begin\n    expected[0] = 32'hffffffd4;\n    expected[1] = 32'h00000038;\n    expected[2] = 32'h0000003b;\n    expected[3] = 32'h00000009;\n    repeat(3) @(negedge clk); rst=0;\n    send_load(13'h00f8);\n    send_load(13'h0103);\n    send_load(13'h0205);\n    send_load(13'h0807);\n    send_load(13'h09fe);\n    send_load(13'h0a04);\n    send_load(13'h1006);\n    send_load(13'h11ff);\n    send_load(13'h12fd);\n    send_load(13'h1305);\n    send_load(13'h1402);\n    send_load(13'h1507);\n    @(negedge clk); config_data=69'h1fffffffc000000063; config_data_valid=1;\n    begin : config_wait\n      for(i=0;i<2000;i=i+1) begin\n        @(posedge clk);\n        if(config_data_ready===1'b1) begin\n          @(negedge clk); config_data_valid=0; disable config_wait;\n        end\n      end\n      fail(\"configuration timeout\");\n    end\n    begin : finish_wait\n      for(i=0;i<12000;i=i+1) begin\n        @(negedge clk);\n        if(done_count==1) begin\n          repeat(12) @(negedge clk);\n          if(outputs!=4 || done_count!=1 || busy!==1'b0 || output_data_valid!==1'b0)\n            fail(\"completion did not return to idle\");\n          // PUBLIC_COMPLETION_CHECK\n          $display(\"HULLCIRQ_GLOBAL_PASS outputs=4 vector_hash=8b52fdd880a7fad416852253888208e291e884cf6993b96280ee380b48f5f9ee\"); $finish;\n        end\n      end\n      fail(\"job timeout\");\n    end\n  end\n  initial begin #200000; fail(\"watchdog timeout\"); end\nendmodule\n",
+  "testbench_sha256": "edba4771562afa974516d34cc87d8d0a526a7989896e5da63c473485c2419d23",
+  "output_count": 4,
+  "reference_origin": "ordinary_program_independent_signed_integer_2x2_matrix_dot_products_wrap32_bias_relu",
+  "stimulus_origin": "same_original_GUI_matrix_job_projected_to_external_load_and_configuration_transactions",
+  "scope": "one_saved_job_full_system_external_transactions_zero_delay",
+  "limits": [
+    "Only the single saved job and deterministic backpressure recipe are checked.",
+    "No synthesis, PDK mapping, timing, layout, DRC, LVS or SDF execution is implied."
+  ]
+}

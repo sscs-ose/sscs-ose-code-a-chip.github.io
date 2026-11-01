@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#071b43">
+  <title>HuLLCirq · Design workspace</title>
+  <link rel="stylesheet" href="/src/gui/styles.css">
+  <script type="module" src="/src/gui/bootstrap.js"></script>
+</head>
+<body class="is-opening">
+  <section id="startup-screen" class="startup-screen" aria-label="Opening HuLLCirq" aria-busy="true" data-state="loading" data-testid="startup-screen">
+    <div class="startup-card">
+      <div class="startup-logo" style="font-size:42px;font-weight:700">HuLLCirq</div>
+      <span class="startup-indicator" aria-hidden="true"></span>
+      <h1 id="startup-title">Opening your workspace</h1>
+      <p id="startup-detail" role="status" aria-live="polite">Connecting to the local service…</p>
+      <p class="startup-note">Saved projects and browser drafts stay in place.</p>
+      <a id="startup-retry" class="startup-retry" href="/" hidden>Retry opening workspace</a>
+    </div>
+  </section>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="HuLLCirq design workspace"><strong style="font-size:26px">HuLLCirq</strong></a>
+    <div class="header-divider"></div>
+    <div class="project-title"><span class="eyebrow">DESIGN WORKSPACE</span><strong id="project-title">Opening project…</strong></div>
+    <div class="header-status">
+      <span class="service-status"><span class="connection-dot" id="service-dot"></span><span id="service-state">Connecting</span></span>
+      <button type="button" id="llm-header-status" class="llm-header-status connection-unknown" data-testid="llm-header-status" title="Open LLM connection settings"><span id="llm-header-icon" aria-hidden="true"></span><span id="llm-header-text">LLM · Not tested</span></button>
+      <span class="milestone">S01–S07 · Node evidence</span>
+    </div>
+  </header>
+  <div class="command-bar" aria-label="Project commands">
+    <span class="save-state" id="save-state" role="status">Loading saved design</span>
+    <span class="revision-label" id="revision-label"></span>
+    <div class="command-actions">
+      <button type="button" id="undo" title="Undo (Ctrl+Z)" data-testid="undo">↶ <span>Undo</span></button>
+      <button type="button" id="redo" title="Redo (Ctrl+Shift+Z)" data-testid="redo">↷ <span>Redo</span></button>
+      <span class="button-divider"></span>
+      <button type="button" id="workspace-home" data-testid="workspace-home">Projects</button>
+      <button type="button" id="workspace-library" data-testid="workspace-library">Component Library</button>
+      <button type="button" id="load-project" data-testid="load-project">Reload saved system</button>
+      <button type="button" id="import-project" data-testid="import-project">Replace design JSON</button>
+      <button type="button" id="export-project" data-testid="export-project">Export design JSON</button>
+      <button type="button" class="primary" id="save-project" data-testid="save-project">Save design</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+  </div>
+  <div id="workspace-switcher" class="workspace-switcher" aria-label="Project and system selection"></div>
+  <div id="workspace-readonly" class="workspace-readonly" role="status" hidden>This is a preserved read-only snapshot. Open Projects and duplicate it to create an editable design with fresh execution history.</div>
+  <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+  <section id="recovered-drafts" class="recovery-banner" aria-label="Recovered draft backup" hidden></section>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="sidebar-heading"><span class="eyebrow">DESIGN STAGES</span><span id="stage-count">01 / 14</span></div>
+      <div id="workflow-progress" class="workflow-progress" aria-label="Design stage completion"></div>
+      <div id="stage-legend" class="stage-legend" aria-label="Design stage status legend"></div>
+      <nav id="stage-tabs" aria-label="Design stages"></nav>
+      <div class="sidebar-footer"><span class="eyebrow">EXECUTION ENVIRONMENT</span><div id="llm-status-pill" class="llm-status-pill connection-unknown"><span class="status-dot" id="llm-connection-dot" aria-hidden="true"></span><span id="llm-connection-state">LLM · Not configured</span></div><div><span class="status-dot muted"></span><span id="eda-connection-state">EDA · Not configured</span></div><p>Adoption follows manual review or a saved, authorized verification policy. Circuit and physical verification have distinct scopes.</p></div>
+    </aside>
+    <main class="main-panel" id="main-panel">
+      <div class="stage-header"><div><div class="breadcrumbs" id="breadcrumbs"></div><h1 id="stage-title"></h1><p id="stage-description"></p></div><button type="button" class="primary verify" id="run-verification" data-testid="run-verification">Run verification</button></div>
+      <div class="stage-status" id="stage-status" aria-label="Stage status"></div>
+      <section id="next-step" class="next-step" aria-label="Next step" data-testid="next-step"></section>
+      <div id="stage-content" class="stage-content"></div>
+      <section class="review-panel" aria-labelledby="review-title"><div class="review-heading"><div><span class="eyebrow">ADOPTION & REVIEW</span><h2 id="review-title">Review results</h2></div><span id="review-state"></span></div><div id="review-operator-host"></div><div id="review-content"></div></section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="workspace-dialog" class="workspace-dialog" aria-labelledby="workspace-dialog-title">
+    <div class="workspace-dialog-heading"><div><span class="eyebrow">HuLLCirq WORKSPACE</span><h1 id="workspace-dialog-title">Projects & components</h1></div><button type="button" id="workspace-close-dialog" aria-label="Return to design">Return to design</button></div>
+    <div id="workspace-dialog-content"></div>
+  </dialog>
+  <noscript><p class="message error">This local design workspace requires JavaScript.</p></noscript>
+</body>
+</html>
