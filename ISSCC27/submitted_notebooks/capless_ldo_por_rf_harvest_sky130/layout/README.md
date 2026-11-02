@@ -69,10 +69,19 @@ Notes:
 |---|---|---|
 | 0 → 1 mA load step, 100 ns edge: undershoot | ≤ 300 mV | **≤ 279 mV** (worst at 125 °C; 209 mV at −40 °C, 240 mV at 27 °C) |
 | 1 → 0 mA: overshoot | | ≤ 180 mV |
-| Small-step (10 µA) recovery overshoot | | ≤ 17 % (no ringing) |
-| Iq, LDO + bandgap + POR | | 7.2 µA at tt / 27 °C; ≤ 11.5 µA at 125 °C |
-| VOUT 4 ms after power-up | | 1.186–1.234 V, except fs / −40 °C / ≥ 2.5 V (see below) |
-| POR release V_on / hysteresis (15 corner × temperature points, `reports/postlayout_por_pex.csv`) | 2.0 V ± 10 % / ≥ 150 mV | **1.894–2.192 V / ≥ 245 mV** |
+| Small-step (10 µA) recovery overshoot | | ≤ 17 %, except fs / −40 °C / ≥ 2.5 V: 24–26 % (VREF still settling, see below) |
+| Iq, LDO + bandgap + POR (4 ms after power-up) | | 7.2 µA at tt / 27 °C; worst 12.8 µA (sf / −40 °C / 2.5 V); ≤ 11.5 µA at 125 °C |
+| VOUT 4 ms after power-up, ±3 % | 1.164–1.236 V | 1.186–1.234 V at 43 / 45 points. **FAIL at fs / −40 °C / ≥ 2.5 V: 1.244 V (+3.7 %)**; it is 1.205 V at 8 ms |
+| POR release V_on / hysteresis (15 corner × temperature points, `reports/postlayout_por_pex.csv`) | 2.0 V ± 10 % / ≥ 150 mV | **1.894–2.192 V / ≥ 244 mV** |
+
+**Spec status with the real bandgap, after layout.** The notebook's "18 PASS, 0 FAIL" (Section 13) is the schematic-level result with the ideal reference. After layout, with the bandgap:
+- **Load step, POR, stability: PASS.**
+- **PSRR at 1 kHz: FAIL**, 24.8 dB against ≥ 30 dB.
+- **VOUT ±3 % at 4 ms: FAIL** at fs / −40 °C / ≥ 2.5 V (+3.7 %; it passes by 8 ms).
+- **Quiescent current:** the ≤ 10 µA spec was for the LDO alone. The whole block (LDO + bandgap + POR) draws 7.2 µA at tt and up to 12.8 µA in the cold.
+- **Usable VIN:** the POR keeps the core in reset below its release threshold (1.89–2.19 V over PVT), so RST_N stays low at VIN = 1.8 V by design.
+
+**Post-layout PSRR at 1 kHz fails the notebook's 30 dB spec: 24.8 dB at tt** (34.9 dB before layout). The cause is not found; see the open points.
 
 **Before vs after layout** (tt, 27 °C, 2.5 V; the same netlist without parasitics vs with them):
 
@@ -101,7 +110,7 @@ Notes on the table:
   - The stand-alone bandgap is up only at VIN = 2.49 V.
   - In the full-block POR test, RST_N releases at 2.19 V at that corner.
   - So VREF may not be fully settled when reset releases there. This is not verified, and the same POR delay would cover it.
-- **PSRR at 1 kHz drops 10 dB after layout** (34.9 → 24.8 dB). The cause is not identified yet. At 1 kHz the extracted capacitances alone should not matter, so the next step is to find which device geometry change (extracted vs schematic) costs the gain.
+- **PSRR at 1 kHz drops 10 dB after layout** (34.9 → 24.8 dB), below the 30 dB spec. The cause is not identified yet. At 1 kHz the extracted capacitances alone should not matter, so the next step is to find which device geometry change (extracted vs schematic) costs the gain.
 - **Not done:**
   - RC extraction is not in the simulations. Resistance extraction runs, but `extresist` fails on 37 native-device nodes.
   - No ESD, no antenna model, no rectifier model beyond a current source.

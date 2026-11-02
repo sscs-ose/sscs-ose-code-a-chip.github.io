@@ -26,7 +26,7 @@ and an automatic device voltage-stress check. It also documents the design itera
 `P_V1`) failed the 100 ns load-step spec, and the notebook explains why re-sizing could not fix it and compares v1 and v2 for every
 affected spec.
 
-## Key results (from the saved notebook run)
+## Key results (from the saved notebook run: schematic level, ideal VREF; post-layout results with the real bandgap are in the v3 section below)
 
 | Parameter | Target | v1 (before) | v2 (this design) | Status |
 |---|---|---|---|---|
@@ -74,9 +74,10 @@ The whole block was then re-simulated from the C-extracted netlist (1,992 parasi
 |---|---|---|
 | Load step 0↔1 mA, 100 ns, PVT worst | ≤ 300 mV | −279 / +180 mV |
 | Load step, tt (pre → post layout) | | −201 → −231 mV |
-| Iq LDO + bandgap + POR | | 7.2 µA tt; ≤ 11.5 µA at 125 °C |
-| POR V_on / hysteresis (15 PVT points) | 2.0 V ± 10 % / ≥ 150 mV | 1.894–2.192 V / ≥ 245 mV |
-| PSRR tt at 1 kHz / 100 kHz / 847 kHz | | 24.8 / 21.3 / 19.1 dB |
+| Iq LDO + bandgap + POR | (LDO alone: ≤ 10 µA) | 7.2 µA tt; worst 12.8 µA (sf / −40 °C) |
+| POR V_on / hysteresis (15 PVT points) | 2.0 V ± 10 % / ≥ 150 mV | 1.894–2.192 V / ≥ 244 mV |
+| PSRR tt at 1 kHz / 100 kHz / 847 kHz | ≥ 30 dB at 1 kHz | **24.8 (FAIL)** / 21.3 / 19.1 dB |
+| VOUT 4 ms after power-up | ± 3 % | 43 / 45 points; **FAIL at fs / −40 °C / ≥ 2.5 V (+3.7 %, settles by 8 ms)** |
 
 Open points are listed with numbers in `layout/README.md`:
 - start-up settling of up to 8 ms at fs / −40 °C
