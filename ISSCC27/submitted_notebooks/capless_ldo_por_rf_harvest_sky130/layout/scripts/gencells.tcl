@@ -47,48 +47,50 @@ magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c21 w 0.84 l 0.5 m 1 nf 1 to
 box 6600um 0 6600um 0
 magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c22 w 10.0 l 0.5 m 1 nf 40 topc 1 botc 0 full_metal 1 guard 1
 box 6900um 0 6900um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c23 w 20.0 l 16.0 m 4 nf 1 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c23 w 20.0 l 16.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
 box 7200um 0 7200um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c24 w 20.0 l 16.0 m 4 nf 2 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c24 w 20.0 l 16.0 m 4 nf 1 topc 1 botc 0 full_metal 1 guard 1
 box 7500um 0 7500um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c25 w 20.0 l 2.0 m 4 nf 4 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c25 w 20.0 l 16.0 m 4 nf 2 topc 1 botc 0 full_metal 1 guard 1
 box 7800um 0 7800um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c26 w 20.0 l 2.0 m 4 nf 8 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c26 w 20.0 l 2.0 m 4 nf 4 topc 1 botc 0 full_metal 1 guard 1
 box 8100um 0 8100um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c27 w 0.84 l 4.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c27 w 20.0 l 2.0 m 4 nf 8 topc 1 botc 0 full_metal 1 guard 1
 box 8400um 0 8400um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c28 w 16.0 l 4.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c28 w 0.84 l 4.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
 box 8700um 0 8700um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c29 w 4.0 l 4.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c29 w 16.0 l 4.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
 box 9000um 0 9000um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c30 w 4.0 l 4.0 m 3 nf 1 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c30 w 4.0 l 4.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
 box 9300um 0 9300um 0
-magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c31 w 0.42 l 50.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c31 w 4.0 l 4.0 m 3 nf 1 topc 1 botc 0 full_metal 1 guard 1
 box 9600um 0 9600um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c32 w 0.35 l 14.76 m 1 nx 1 snake 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__pfet_g5v0d10v5 c32 w 0.42 l 50.0 m 1 nf 1 topc 1 botc 0 full_metal 1 guard 1
 box 9900um 0 9900um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c33 w 0.35 l 29.46 m 1 nx 1 snake 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c33 w 0.35 l 14.76 m 1 nx 1 snake 0 full_metal 1 guard 1
 box 10200um 0 10200um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c34 w 0.35 l 3.74 m 1 nx 1 snake 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c34 w 0.35 l 29.46 m 1 nx 1 snake 0 full_metal 1 guard 1
 box 10500um 0 10500um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c35 w 0.35 l 46.5 m 1 nx 4 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c35 w 0.35 l 3.74 m 1 nx 1 snake 0 full_metal 1 guard 1
 box 10800um 0 10800um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c36 w 0.35 l 46.7 m 1 nx 2 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c36 w 0.35 l 46.5 m 1 nx 4 snake 1 full_metal 1 guard 1
 box 11100um 0 11100um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c37 w 0.35 l 50.92 m 1 nx 4 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c37 w 0.35 l 46.7 m 1 nx 2 snake 1 full_metal 1 guard 1
 box 11400um 0 11400um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c38 w 0.35 l 55.3 m 1 nx 5 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c38 w 0.35 l 50.92 m 1 nx 4 snake 1 full_metal 1 guard 1
 box 11700um 0 11700um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c39 w 0.35 l 58.14 m 1 nx 17 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c39 w 0.35 l 55.3 m 1 nx 5 snake 1 full_metal 1 guard 1
 box 12000um 0 12000um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c40 w 0.35 l 58.16 m 1 nx 10 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c40 w 0.35 l 58.14 m 1 nx 17 snake 1 full_metal 1 guard 1
 box 12300um 0 12300um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c41 w 0.35 l 58.18 m 1 nx 8 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c41 w 0.35 l 58.16 m 1 nx 10 snake 1 full_metal 1 guard 1
 box 12600um 0 12600um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c42 w 0.35 l 58.24 m 1 nx 5 snake 1 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c42 w 0.35 l 58.18 m 1 nx 8 snake 1 full_metal 1 guard 1
 box 12900um 0 12900um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c43 w 0.35 l 58.86 m 1 nx 1 snake 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c43 w 0.35 l 58.24 m 1 nx 5 snake 1 full_metal 1 guard 1
 box 13200um 0 13200um 0
-magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c44 w 0.35 l 7.4 m 1 nx 1 snake 0 full_metal 1 guard 1
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c44 w 0.35 l 58.86 m 1 nx 1 snake 0 full_metal 1 guard 1
+box 13500um 0 13500um 0
+magic::gencell sky130::sky130_fd_pr__res_xhigh_po_0p35 c45 w 0.35 l 7.4 m 1 nx 1 snake 0 full_metal 1 guard 1
 writeall force
 quit -noprompt

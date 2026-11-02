@@ -244,6 +244,13 @@ TPITCH = 0.90                # track pitch inside a channel
 RPITCH = 0.85                # minimum centre distance between risers of different nets
 GAP = 3.0                    # spacing between device cells
 ROWW = 300.0                 # max row width (um)
+# matched bandgap devices, placed side by side in this order (dummies at the ends):
+#  * PNPs: Q1 at the centroid of the eight Q2 units, Q3 next to them
+#  * PMOS mirror (all branches) and its self-cascode devices, each set in one row
+MATCH = [["bgr_QD0"] + [f"bgr_Q2_{k}" for k in range(4)] + ["bgr_Q1"] + [f"bgr_Q2_{k}" for k in range(4, 8)] +
+         ["bgr_Q3", "bgr_QD1"],
+         ["bgr_MPD0", "bgr_MPA", "bgr_MPB", "bgr_MPI", "bgr_MPO", "bgr_MPC", "bgr_MPD1"],
+         ["bgr_MPAC", "bgr_MPBC", "bgr_MPIC", "bgr_MPOC", "bgr_MPCC"]]
 
 PNP_PORTS = {"Emitter": (3.39, 3.39, "metal1"), "Base": (1.20, 1.125, "locali"), "Collector": (5.60, 0.38, "locali")}
 
@@ -341,13 +348,26 @@ def cmd_place():
     order = {"ldo": 0, "bgr": 1, "por": 2}
     units.sort(key=lambda u: (u["pl"]["kind"] == "cap", order[u["dev"]["name"].split("_")[0]],
                               -(u["cell"]["bbox"][3] - u["cell"]["bbox"][1])))
-    # rows
-    rows, cur, w = [], [], 0.0
+    # matched groups: kept together in one row, in the given order, at the place of the group's first member
+    byname = {u["uname"]: u for u in units}
+    groups = [g for g in MATCH if all(n in byname for n in g)]
+    missing = [n for g in MATCH if g not in groups for n in g if n not in byname]
+    assert not missing, f"MATCH names not in the netlist: {missing}"
+    items, done = [], set()   # single units or whole groups
     for u in units:
-        bw = (u["cell"]["bbox"][2] - u["cell"]["bbox"][0]) / UM + GAP + (3.0 if u["pl"]["kind"] in ("cap", "res") else 0)
-        if cur and (w + bw > ROWW or (u["pl"]["kind"] == "cap") != (cur[-1]["pl"]["kind"] == "cap")):
+        grp = next((g for g in groups if u["uname"] in g), None)
+        if grp is None:
+            items.append([u])
+        elif grp[0] not in done:
+            items.append([byname[n] for n in grp]); done.add(grp[0])
+    # rows
+    bw = lambda u: (u["cell"]["bbox"][2] - u["cell"]["bbox"][0]) / UM + GAP + (3.0 if u["pl"]["kind"] in ("cap", "res") else 0)
+    rows, cur, w = [], [], 0.0
+    for it in items:
+        iw = sum(bw(u) for u in it)
+        if cur and (w + iw > ROWW or (it[0]["pl"]["kind"] == "cap") != (cur[-1]["pl"]["kind"] == "cap")):
             rows.append(cur); cur, w = [], 0.0
-        cur.append(u); w += bw
+        cur += it; w += iw
     rows.append(cur)
     # terminals per unit (cell coordinates)
     for u in units:

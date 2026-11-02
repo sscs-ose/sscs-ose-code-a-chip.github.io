@@ -129,10 +129,17 @@ def bgr_subckt(p):
     # W/L = 1/4 keeps its 125 C leakage below the chain current (2/2 never starts at ss/125 C on a slow ramp). The cost:
     # at -40 C, VREF - VBE is only ~0.45 V, so st is released slowly (VREF settles in ~8 ms at fs/-40 C).
     # Tried and rejected: gate at pd (rises with the kick itself -> premature release, core stays off after layout),
-    # source at gnd (releases in the cold low-current state VREF ~ VBE), a current-mirror release (cold start at 1.8-2.2 V).
+    # source at gnd (releases in the cold low-current state VREF ~ VBE), a current-mirror release (cold start at 1.8-2.2 V),
+    # a native MSN (125 C slow-ramp start up to 3.7 V).
     s += fet("MSN", "st", "vref", "e7", "gnd", "n", p['Wsn'], p['Lsn'])
     s += f"XQ7 gnd gnd e7 {pnp}\n"
     s += fet("MS2", "pg", "st", "gnd", "gnd", "n", p['Wst2'], p['Lst2'])
+    if p.get('lay'):
+        # layout dummies at both ends of the matched rows (layout.py MATCH): PNPs with E = B = C = gnd, and mirror
+        # PMOS units with every terminal at vin (off)
+        s += f"XQD0 gnd gnd gnd {pnp}\nXQD1 gnd gnd gnd {pnp}\n"
+        for k in range(2):
+            s += fet(f"MPD{k}", "vin", "vin", "vin", "vin", "p", p['Wpm'], p['Lpm'], nf=math.ceil(p['Wpm'] / 20))
     # supply-ripple filter outside the bandgap loop: core, output branch and start-up release (MSN gate) use the raw
     # node vr; the pin vref is vr through Rf into a MIM to gnd (the LDO gate draws no DC current, so no DC error).
     # A cap directly on vr slows the release and lets the kick overshoot VREF and collapse the core when cold.
@@ -206,7 +213,15 @@ def bgr_tran(p, vin=2.5, corner="tt", temp=27, mc=False, seed=None, t_ramp=1e-3,
     s = "* bgr tran\n" + (f".option seed={seed}\n" if seed is not None else "")
     s += models(corner, mc) + f".temp {temp}\n.option gmin=1e-15 reltol=1e-4\n" + bgr_subckt(p) + body
     s += ".control\n" + ctl + "\n.endc\n.end\n"
-    r = spice(s, tag)
+    try:
+        r = spice(s, tag)
+    except RuntimeError:
+        r = {}
+    if "vref" not in r:
+        # "Transient solution failed" at the very start (seen for a few cold Monte Carlo seeds): retry with the
+        # gear integrator and a 10 TOhm shunt on every node, as the top-level post-layout runs use
+        s = s.replace(".option gmin=1e-15 reltol=1e-4\n", ".option gmin=1e-15 reltol=1e-4 method=gear rshunt=1e13\n")
+        r = spice(s, tag + "_g")
     return dict(vref=r["vref"], iref=r["iref"], itot=-r["itot"], drift=r["vref"] - r.get("vmid", r["vref"]))
 
 

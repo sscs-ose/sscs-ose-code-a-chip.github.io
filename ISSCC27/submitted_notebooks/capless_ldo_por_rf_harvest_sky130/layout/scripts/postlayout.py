@@ -11,7 +11,7 @@ VIEWS = {"pex": "mag/pexrun/ldo_top_pexC.spice", "sch": "mag/schematic.spice"}
 
 
 def top_tb(view, corner, temp, vin, body_extra, ctl, tstop, tag, seed=None):
-    """seed = None: process corner only; seed = n: local mismatch Monte Carlo sample n (tt process)"""
+    """seed = None: process corner only; seed = n: process corner plus local mismatch Monte Carlo sample n"""
     mc = (f".option seed={seed}\n" + models(corner, True)) if seed is not None else models(corner)
     net = (f"* post-layout tb ({view})\n" + mc + f".temp {temp}\n"
            ".option gmin=1e-14 reltol=1e-4 rshunt=1e13 method=gear\n"

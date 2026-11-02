@@ -13,8 +13,12 @@ def chip(seed):
         return dict(seed=seed, untrim=v16, code=code, v27=f(code), vm40=f(code, -40), v125=f(code, 125),
                     v18=f(code, 27, 1.8), v33=f(code, 27, 3.3))
     except Exception as e:
-        return dict(seed=seed)
-df = pd.DataFrame(pmap(chip, list(range(1, n + 1)))).dropna()
+        return dict(seed=seed, err=str(e).strip().splitlines()[-1][:160])
+res = pd.DataFrame(pmap(chip, list(range(1, n + 1))))
+bad = res[res.v27.isna()] if "v27" in res else res
+for _, r in bad.iterrows():
+    print(f"seed {int(r.seed)}: no result ({r.get('err', '')})")
+df = res.dropna(subset=["v27", "vm40", "v125", "v18", "v33"]).drop(columns=["err"], errors="ignore")
 df.to_csv("bgr_trim_mc.csv", index=False)
 allv = df[["v27", "vm40", "v125", "v18", "v33"]].values.ravel()
 print(f"chips {len(df)}/{n}; untrimmed sigma {df.untrim.std()/1.2*100:.2f} %; codes used {df.code.min()}..{df.code.max()}")

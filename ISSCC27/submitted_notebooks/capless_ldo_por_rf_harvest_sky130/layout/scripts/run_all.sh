@@ -23,5 +23,8 @@ python bgr_mc.py 200 > bgr_mc.log 2>&1
 python bgr_trim_mc.py 100 > bgr_trim_mc.log 2>&1
 python bgr_psrr.py > bgr_psrr.log 2>&1
 python pl_mc.py pex 100 > pl_mc_pex.log 2>&1
-python pl_mc.py pex 60 125 1.8 >> pl_mc_pex.log 2>&1'
-tail -1 pl_pex_pvt.log; tail -1 pl_por_pex.log; cat pl_pex_tt.log pl_sch_tt.log bgr_slow.log; tail -1 bgr_pvt.log; tail -1 bgr_mc.log; tail -1 bgr_trim_mc.log; cat bgr_psrr.log pl_mc_pex.log
+python pl_mc.py pex 60 125 1.8 >> pl_mc_pex.log 2>&1
+python pl_mc.py pex 60 125 1.8 ss >> pl_mc_pex.log 2>&1
+python pl_mc.py pex 60 -40 2.5 fs >> pl_mc_pex.log 2>&1
+python pl_loop.py pex 16 > pl_loop_pex.log 2>&1'
+tail -1 pl_pex_pvt.log; tail -1 pl_por_pex.log; cat pl_pex_tt.log pl_sch_tt.log bgr_slow.log; tail -1 bgr_pvt.log; tail -1 bgr_mc.log; tail -1 bgr_trim_mc.log; cat bgr_psrr.log pl_mc_pex.log; tail -3 pl_loop_pex.log

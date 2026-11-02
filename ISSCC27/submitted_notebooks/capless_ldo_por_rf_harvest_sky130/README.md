@@ -12,12 +12,15 @@ Battery-less sensor tags powered by NFC/RF energy harvesting run from a small st
 unregulated (1.8–3.3 V) and changes with the harvested power. This project designs, at transistor level in the open-source
 **SkyWater SKY130** PDK, the two analog blocks such a tag needs:
 
-* a **capacitor-less LDO** (VIN 1.8–3.3 V → VOUT 1.2 V, 0–1 mA, ≈ 7.4 µA quiescent current, stable with 10–100 pF
-  on-chip load capacitance, all thick-oxide `g5v0d10v5` devices). The pass gate is driven through a **class-AB common-gate
+* a **capacitor-less LDO** (VIN 1.8–3.3 V → VOUT 1.2 V, 0–1 mA, ≈ 7.4 µA quiescent current for the LDO alone, stable
+  with 10–100 pF on-chip load capacitance, all thick-oxide `g5v0d10v5` devices). The "sub-8 µA" in the title is this
+  LDO-alone figure from the schematic-level design. With the transistor-level bandgap and the POR (v3, after layout), the
+  whole block draws 7.2 µA at tt / 27 °C and up to 12.8 µA at the cold corners. The pass gate is driven through a **class-AB common-gate
   current-buffer coupling path** (Ahuja-type compensation). This path gives the gate a coupling gain > 1 during fast load steps,
   which a passive Miller capacitor cannot provide. The same path carries a supply feed-forward that improves mid-band PSRR.
 * a **hysteretic power-on-reset** whose threshold detector is biased at the MOSFET **zero-temperature-coefficient** point,
-  so the release threshold (≈ 2.0 V) stays almost flat over −40…125 °C without a voltage reference.
+  so the release threshold (≈ 2.0 V) stays almost flat over −40…125 °C without a voltage reference. The LDO regulates
+  from VIN = 1.8 V, but the core is held in reset until VIN passes the POR threshold (1.89–2.19 V over PVT after layout).
 
 The notebook covers the full flow. It generates gm/Id lookup tables from the PDK, sizes the circuit by hand from them, generates
 netlists from Python, and verifies the design with ngspice: DC, loop gain plus small-step damping, PSRR, load/line transients,
@@ -63,25 +66,31 @@ v3 adds a transistor-level nano-power bandgap and replaces the ideal VREF/Iref w
 - **Trimmed Monte Carlo:** −0.61 … +0.96 % over −40…125 °C and 1.8–3.3 V.
 - **Supply filter:** an RC filter outside the bandgap loop.
 
-LDO + POR + bandgap have a fully scripted SKY130 layout, 390 × 524 µm:
+LDO + POR + bandgap have a fully scripted SKY130 layout, 391 × 522 µm:
+- bandgap PNPs in a common-centroid row, the PMOS mirror in one row with dummies
 - KLayout official DRC: **0 violations**
 - Magic DRC on the final GDS: **0**
-- Netgen LVS: **match**, 77 devices / 46 nets
+- Netgen LVS: **match**, 79 devices / 46 nets
 
-The whole block was then re-simulated from the C-extracted netlist (1,992 parasitic capacitors), as power-up transients over 45 PVT points:
+The whole block was then re-simulated from the C-extracted netlist (1,991 parasitic capacitors), as power-up transients over 45 PVT points, plus loop gain and Monte Carlo:
 
 | | Spec | Post-layout |
 |---|---|---|
-| Load step 0↔1 mA, 100 ns, PVT worst | ≤ 300 mV | −279 / +180 mV |
-| Load step, tt (pre → post layout) | | −201 → −231 mV |
-| Iq LDO + bandgap + POR | (LDO alone: ≤ 10 µA) | 7.2 µA tt; worst 12.8 µA (sf / −40 °C) |
+| Load step 0↔1 mA, 100 ns, PVT worst | ≤ 300 mV | −277 / +179 mV |
+| Load step, tt (pre → post layout) | | −201 → −230 mV |
+| Phase margin, 72 PVT × load × C_L points (global loop) | ≥ 45° | ≥ 95°, gain margin ≥ 16.7 dB at 68 points; 4 cold 1 mA points have a low-frequency doublet (step overshoot there ≤ 6.5 %) |
+| Iq LDO + bandgap + POR | (LDO alone: ≤ 10 µA) | 7.2 µA tt; worst 12.9 µA (sf / −40 °C) |
 | POR V_on / hysteresis (15 PVT points) | 2.0 V ± 10 % / ≥ 150 mV | 1.894–2.192 V / ≥ 244 mV |
-| PSRR tt at 1 kHz / 100 kHz / 847 kHz | ≥ 30 dB at 1 kHz | **24.8 (FAIL)** / 21.3 / 19.1 dB |
-| Post-layout Monte Carlo, 100 chips (tt, 27 °C) | | all start; VOUT σ 1.03 % untrimmed; undershoot ≤ 239 mV |
-| VOUT 4 ms after power-up | ± 3 % | 43 / 45 points; **FAIL at fs / −40 °C / ≥ 2.5 V (+3.7 %, settles by 8 ms)** |
+| PSRR tt at 1 kHz / 100 kHz / 847 kHz | ≥ 30 dB at 1 kHz | **24.7 (FAIL)** / 22.1 / 19.1 dB |
+| Monte Carlo with mismatch: tt / 27 °C (100), tt and ss / 125 °C / 1.8 V, fs / −40 °C (60 each) | | all start; VOUT σ 1.0–1.2 % untrimmed; undershoot ≤ 283 mV |
+| VOUT 4 ms after power-up | ± 3 % | 43 / 45 points; **FAIL at fs / −40 °C / ≥ 2.5 V (+3.8 %, settles by 8 ms)** |
+
+Notebook Section 16 has two code cells for these results:
+- one re-plots them and checks them against the specs
+- one re-simulates the extracted netlist with the notebook's own ngspice setup
 
 Open points are listed with numbers in `layout/README.md`:
-- start-up settling of up to 8 ms at fs / −40 °C
+- start-up settling of up to 8 ms at fs / −40 °C (five alternative start-up circuits tried and documented)
 - a 10 dB post-layout loss of 1 kHz PSRR, located in the bandgap's node capacitance but not fixed
 - capacitance-only extraction (no RC)
 
@@ -104,6 +113,7 @@ Details: `layout/README.md` and notebook Section 16.
 * **Colab:** open the notebook in Google Colab → *Runtime → Run all*. The first code cell installs
   ngspice (conda-forge via micromamba) and the SKY130 PDK (via ciel, ≈ 2 GB). Expect a few minutes for installation and
   roughly 20–35 min for the ≈ 1,400 simulations (≈ 5 min measured on 16 desktop cores).
+  Section 16 part 2 re-simulates the extracted layout netlist and adds a few minutes (two power-up transients).
 * **Linux/WSL:** same. If `ngspice` is on `PATH` and `$PDK_ROOT/sky130A` exists, installation is skipped.
 
 Tested with ngspice-41 (conda-forge), open_pdks SKY130A `792ef67037d74c8c51811eab3ce23cf793491296` (ciel 3.2.0),
