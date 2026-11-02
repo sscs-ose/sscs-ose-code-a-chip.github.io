@@ -77,11 +77,12 @@ The whole block was then re-simulated from the C-extracted netlist (1,992 parasi
 | Iq LDO + bandgap + POR | (LDO alone: ≤ 10 µA) | 7.2 µA tt; worst 12.8 µA (sf / −40 °C) |
 | POR V_on / hysteresis (15 PVT points) | 2.0 V ± 10 % / ≥ 150 mV | 1.894–2.192 V / ≥ 244 mV |
 | PSRR tt at 1 kHz / 100 kHz / 847 kHz | ≥ 30 dB at 1 kHz | **24.8 (FAIL)** / 21.3 / 19.1 dB |
+| Post-layout Monte Carlo, 100 chips (tt, 27 °C) | | all start; VOUT σ 1.03 % untrimmed; undershoot ≤ 239 mV |
 | VOUT 4 ms after power-up | ± 3 % | 43 / 45 points; **FAIL at fs / −40 °C / ≥ 2.5 V (+3.7 %, settles by 8 ms)** |
 
 Open points are listed with numbers in `layout/README.md`:
 - start-up settling of up to 8 ms at fs / −40 °C
-- a 10 dB post-layout loss of 1 kHz PSRR that is not yet explained
+- a 10 dB post-layout loss of 1 kHz PSRR, located in the bandgap's node capacitance but not fixed
 - capacitance-only extraction (no RC)
 
 Details: `layout/README.md` and notebook Section 16.

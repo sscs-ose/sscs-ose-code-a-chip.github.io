@@ -6,7 +6,7 @@ This folder adds three things the schematic-level notebook did not have:
 2. **A complete scripted layout of LDO + POR + bandgap**, with DRC and LVS sign-off.
 3. **Parasitic extraction and post-layout re-simulation** of the whole block over 45 PVT points: load step, small-step damping, Iq, POR thresholds and PSRR.
 
-Everything is reproduced by `scripts/run_all.sh`: device cells, placement and routing, DRC/LVS, C extraction, then all simulations.
+Everything is reproduced by `scripts/run_all.sh`: device cells, placement and routing, DRC/LVS, C extraction, then all simulations. Notebook Section 16 has a code cell that re-plots the stored results and checks them against the specs.
 
 ## Bandgap (`scripts/lib.py`: `bgr_subckt`, `BGR0`)
 
@@ -81,7 +81,7 @@ Notes:
 - **Quiescent current:** the ≤ 10 µA spec was for the LDO alone. The whole block (LDO + bandgap + POR) draws 7.2 µA at tt and up to 12.8 µA in the cold.
 - **Usable VIN:** the POR keeps the core in reset below its release threshold (1.89–2.19 V over PVT), so RST_N stays low at VIN = 1.8 V by design.
 
-**Post-layout PSRR at 1 kHz fails the notebook's 30 dB spec: 24.8 dB at tt** (34.9 dB before layout). The cause is not found; see the open points.
+**Post-layout PSRR at 1 kHz fails the notebook's 30 dB spec: 24.8 dB at tt** (34.9 dB before layout). The cause is located below; it is not fixed.
 
 **Before vs after layout** (tt, 27 °C, 2.5 V; the same netlist without parasitics vs with them):
 
@@ -99,18 +99,50 @@ Notes on the table:
 - With the ideal reference, the notebook's PSRR was −0.4 dB at 100 kHz (v1) and 8.7 dB (v2).
 - **VOUT −8.5 mV:** the extracted bandgap gives 1.191 V instead of 1.199 V (meandered high-resistance poly vs the schematic value). This is about 4 trim LSBs, well inside the trim range.
 
+**Where the 1 kHz PSRR goes** (`scripts/pl_psrr_diag.py`): the same extracted netlist was re-simulated with groups of parasitic capacitors removed.
+
+| Extracted netlist variant | PSRR at 1 kHz (tt) |
+|---|---|
+| All 1,992 parasitic capacitors (as extracted) | 24.8 dB |
+| No parasitic capacitors | 32.7 dB |
+| Only the capacitors that touch VIN | 31.9 dB |
+| All except the capacitors that touch VIN | 25.1 dB |
+| Bandgap routing capacitors removed | 29.2 dB |
+| LDO / POR routing capacitors removed | 25.0 / 24.8 dB |
+| Capacitors of a single bandgap net removed (pg, ng, pd, ncas, st) | 24.8–27.6 dB |
+
+So the loss is not coupling from VIN (< 1 dB), and not a single node. It is the bandgap's own capacitance to ground, spread over its nA-biased internal nodes (routing about 4 dB, device-internal the rest). These nodes have MΩ-range impedance, so their poles move down toward 1 kHz, and the core's line rejection falls there. A fix would be a lower filter corner after the bandgap (≈ 200 Hz needs about 40 MΩ and 20 pF, plus a fast-charge switch so start-up is not slowed), or more bias current in the core.
+
+**Post-layout Monte Carlo** (`scripts/pl_mc.py`, `reports/postlayout_mc_pex_*.csv`): local mismatch on every device of the extracted netlist, tt process, untrimmed, power-up then the load step.
+
+| | tt, 27 °C, 2.5 V (100 chips) | tt, 125 °C, 1.8 V (60 chips) |
+|---|---|---|
+| Start-up | 100 / 100 | 60 / 60 |
+| VOUT mean / σ | 1.1936 V / 12.4 mV (1.03 %) | 1.1940 V / 12.9 mV (1.07 %) |
+| VOUT min … max | 1.1644 … 1.2278 V | 1.1657 … 1.2259 V |
+| Load-step undershoot / overshoot, worst | 239 / 154 mV | 280 / 177 mV |
+| Iq, mean / worst | 7.27 / 7.90 µA | 9.99 / 10.71 µA |
+| RST_N released | 100 / 100 | 0 / 60 (1.8 V is below V_on, as designed) |
+
+Without trim, the 3σ VOUT spread is about ±3.1 %, set mostly by the bandgap (σ 0.86 % alone). The one-time trim at 27 °C brings the reference to −0.61 … +0.96 % over temperature and supply (bandgap table above).
+
 ## Open points (measured, not hidden)
 
 - **Start-up settling at fs / −40 °C, VIN ≥ 2.5 V.**
   - The start-up kick overshoots VREF to 1.67 V. It relaxes to 1.243 V at 4 ms, 1.205 V at 8 ms and 1.193 V at 16 ms.
   - Measured at 4 ms, this corner reads VOUT = 1.243 V and a 25 % small-step overshoot (the drift contaminates the step).
-  - Cause: the release NMOS (gate VREF, source on a VBE) is weak in the cold, and making it stronger brings back the 125 °C slow-ramp start failure. A release driven by a copy of the core current would remove the trade-off. I tried one, but it raised the cold start VIN to 1.8–2.2 V.
+  - Cause: the release NMOS (gate VREF, source on a VBE) has only VREF − VBE ≈ 0.45 V of drive at −40 °C. Making it stronger brings back the 125 °C slow-ramp start failure.
+  - Alternatives tried (`scripts/bgr_slow.py`, `scripts/pl_swap.py`), none adopted:
+    - **Release from a copy of the core current:** the cold start VIN rises to 1.8–2.2 V.
+    - **Release NMOS source to ground:** it releases in the cold low-current state (VREF ≈ VBE), so the cold slow-ramp start goes to 2.2–3.4 V.
+    - **Release NMOS gate on the mirror-diode drain `pd`:** best on the schematic (start ≤ 1.34 V at every corner, clean cold release). But `pd` also rises during the kick itself. After layout the core then never latched at 15 of 45 PVT points, so it was rejected.
+    - **Weaker kick transistor:** less overshoot, but VOUT is still out of range at 4 ms.
   - The POR does not wait for VREF to settle. A product should add a ≈ 10 ms delay or a VREF-good comparator.
 - **ss / 125 °C, slow ramp:**
   - The stand-alone bandgap is up only at VIN = 2.49 V.
   - In the full-block POR test, RST_N releases at 2.19 V at that corner.
   - So VREF may not be fully settled when reset releases there. This is not verified, and the same POR delay would cover it.
-- **PSRR at 1 kHz drops 10 dB after layout** (34.9 → 24.8 dB), below the 30 dB spec. The cause is not identified yet. At 1 kHz the extracted capacitances alone should not matter, so the next step is to find which device geometry change (extracted vs schematic) costs the gain.
+- **PSRR at 1 kHz drops 10 dB after layout** (34.9 → 24.8 dB), below the 30 dB spec. The cause is located (the bandgap's distributed node capacitance; table above) but not fixed.
 - **Not done:**
   - RC extraction is not in the simulations. Resistance extraction runs, but `extresist` fails on 37 native-device nodes.
   - No ESD, no antenna model, no rectifier model beyond a current source.

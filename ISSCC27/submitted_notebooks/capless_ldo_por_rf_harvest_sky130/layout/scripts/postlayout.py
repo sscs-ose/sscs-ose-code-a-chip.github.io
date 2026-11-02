@@ -10,8 +10,10 @@ from lib import *
 VIEWS = {"pex": "mag/pexrun/ldo_top_pexC.spice", "sch": "mag/schematic.spice"}
 
 
-def top_tb(view, corner, temp, vin, body_extra, ctl, tstop, tag):
-    net = (f"* post-layout tb ({view})\n" + models(corner) + f".temp {temp}\n"
+def top_tb(view, corner, temp, vin, body_extra, ctl, tstop, tag, seed=None):
+    """seed = None: process corner only; seed = n: local mismatch Monte Carlo sample n (tt process)"""
+    mc = (f".option seed={seed}\n" + models(corner, True)) if seed is not None else models(corner)
+    net = (f"* post-layout tb ({view})\n" + mc + f".temp {temp}\n"
            ".option gmin=1e-14 reltol=1e-4 rshunt=1e13 method=gear\n"
            f".include \"{os.path.abspath(VIEWS[view])}\"\n"
            f"Vin vin 0 PWL(0 0 1m {vin})\n"
@@ -23,7 +25,7 @@ def top_tb(view, corner, temp, vin, body_extra, ctl, tstop, tag):
 T_ON = 4.0e-3          # power-up ramp 1 ms, then settle
 
 
-def load_step(view, corner="tt", temp=27, vin=2.5, tr=100e-9):
+def load_step(view, corner="tt", temp=27, vin=2.5, tr=100e-9, seed=None):
     t1, t2, te = T_ON, T_ON + 40e-6, T_ON + 80e-6
     body = f"Il vout 0 PWL(0 0 {t1} 0 {t1+tr} 1m {t2} 1m {t2+tr} 0)\n"
     ctl = (f"meas tran vpre avg v(vout) from={t1-20e-6} to={t1}\n"
@@ -32,7 +34,7 @@ def load_step(view, corner="tt", temp=27, vin=2.5, tr=100e-9):
            f"meas tran vmax max v(vout) from={t2} to={te}\n"
            f"meas tran iq avg i(Vin) from={t1-20e-6} to={t1}\n"
            f"meas tran rst find v(rstn) at={t1-1e-6}\n")
-    r = top_tb(view, corner, temp, vin, body, ctl, te, f"pl_{view}_ls_{corner}_{temp}_{vin}")
+    r = top_tb(view, corner, temp, vin, body, ctl, te, f"pl_{view}_ls_{corner}_{temp}_{vin}" + (f"_mc{seed}" if seed is not None else ""), seed)
     return dict(vout=r["vpre"], under=(r["vpre"] - r["vmin"]) * 1e3, over=(r["vmax"] - r["vpre"]) * 1e3,
                 load_reg=(r["vpre"] - r["vload"]) * 1e3, iq=-r["iq"] * 1e6, rstn=r["rst"])
 

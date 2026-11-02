@@ -53,7 +53,7 @@ BGR0 = dict(
     trim=None, nbits=5, lsb=25e3, Wsw=5,   # R2 trim (None = untrimmed R2); code 15/16 ~ nominal
     pcas=1, Lpc=2, ksc=4,       # PMOS self-cascode: bottom device W*ksc, L = Lpc (no extra bias needed)
     Wsu=0.42, Lsu=50, nsu=4,    # start-up pull-up: chain of nsu PMOS diodes VIN -> st (sub-nA when on)
-    Wsn=1, Lsn=4,               # start-up release: thick NMOS, gate at VREF (on once VREF > ~0.8 V)
+    Wsn=1, Lsn=4,               # start-up release: thick NMOS, gate at VREF, source on a PNP
     Wst2=1, Lst2=1,             # start-up kick: thick NMOS that pulls pg low while st is high
     ncvr=4, Cvr_side=25, Rf=2e6,  # VREF ripple filter: Rf into 4 x (25 x 25 um) MIM ~ 5 pF to gnd
 )
@@ -120,13 +120,16 @@ def bgr_subckt(p):
             s += res(f"RT{k}", a, b, p['lsb'] * 2 ** k)
             s += fet(f"MT{k}", a, ("vin" if (code >> k) & 1 else "gnd"), b, "gnd", "n", p['Wsw'], 0.5)
     s += f"XQ3 gnd gnd e3 {pnp} m={p['mq']}\n"
-    # start-up: weak PMOS-diode chain pulls st up; thick NMOS MSN (gate = VREF) pulls it down once VREF is
-    # established. VREF low -> st high -> kick MS2 pulls pg low. VREF up -> st ~ 0 -> MS2 off.
+    # start-up: weak PMOS-diode chain pulls st up; thick NMOS MSN pulls it down once the core runs.
+    # Core off -> st high -> kick MS2 pulls pg low. Core on -> st ~ 0 -> MS2 off.
     nodes = ["vin"] + [f"su{k}" for k in range(1, p['nsu'])] + ["st"]
     for k in range(p['nsu']):
         s += fet(f"MSU{k}", nodes[k + 1], nodes[k + 1], nodes[k], "vin", "p", p['Wsu'], p['Lsu'])
-    # MSN source sits on a PNP (e7): VGS ~ 0 in the stuck state (VREF ~ VBE), ~0.7 V once VREF ~ 1.25 V.
-    # W/L = 1/4 keeps its 125 C leakage below the chain current (W/L = 2/2 never starts at ss/125 C on a slow ramp)
+    # MSN gate at VREF, source on a PNP (e7): VGS ~ 0 in the stuck states (VREF ~ 0 or ~VBE), VREF - VBE once running.
+    # W/L = 1/4 keeps its 125 C leakage below the chain current (2/2 never starts at ss/125 C on a slow ramp). The cost:
+    # at -40 C, VREF - VBE is only ~0.45 V, so st is released slowly (VREF settles in ~8 ms at fs/-40 C).
+    # Tried and rejected: gate at pd (rises with the kick itself -> premature release, core stays off after layout),
+    # source at gnd (releases in the cold low-current state VREF ~ VBE), a current-mirror release (cold start at 1.8-2.2 V).
     s += fet("MSN", "st", "vref", "e7", "gnd", "n", p['Wsn'], p['Lsn'])
     s += f"XQ7 gnd gnd e7 {pnp}\n"
     s += fet("MS2", "pg", "st", "gnd", "gnd", "n", p['Wst2'], p['Lst2'])

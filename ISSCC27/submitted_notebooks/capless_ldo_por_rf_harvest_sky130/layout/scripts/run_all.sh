@@ -16,9 +16,12 @@ sh run.sh bash -c '
 python postlayout.py pex pvt 16 > pl_pex_pvt.log 2>&1
 python por_check.py pex 15 > pl_por_pex.log 2>&1
 python postlayout.py pex tt > pl_pex_tt.log 2>&1
+python postlayout.py sch tt > pl_sch_tt.log 2>&1
 python bgr_slow.py > bgr_slow.log 2>&1
 python bgr_pvt.py > bgr_pvt.log 2>&1
 python bgr_mc.py 200 > bgr_mc.log 2>&1
 python bgr_trim_mc.py 100 > bgr_trim_mc.log 2>&1
-python bgr_psrr.py > bgr_psrr.log 2>&1'
-tail -1 pl_pex_pvt.log; tail -1 pl_por_pex.log; cat pl_pex_tt.log bgr_slow.log; tail -1 bgr_pvt.log; tail -1 bgr_mc.log; tail -1 bgr_trim_mc.log; cat bgr_psrr.log
+python bgr_psrr.py > bgr_psrr.log 2>&1
+python pl_mc.py pex 100 > pl_mc_pex.log 2>&1
+python pl_mc.py pex 60 125 1.8 >> pl_mc_pex.log 2>&1'
+tail -1 pl_pex_pvt.log; tail -1 pl_por_pex.log; cat pl_pex_tt.log pl_sch_tt.log bgr_slow.log; tail -1 bgr_pvt.log; tail -1 bgr_mc.log; tail -1 bgr_trim_mc.log; cat bgr_psrr.log pl_mc_pex.log
