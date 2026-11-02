@@ -8,7 +8,7 @@ This folder adds three things the schematic-level notebook did not have:
    - load step, small-step damping, Iq and POR thresholds over 45 PVT points
    - loop gain over 72 PVT × load × C_L points
    - PSRR
-   - Monte Carlo at three corners
+   - Monte Carlo at four settings (tt / 27 °C, tt and ss / 125 °C / 1.8 V, fs / −40 °C)
 
 Everything is reproduced by `scripts/run_all.sh`: device cells, placement and routing, DRC/LVS, C extraction, then all simulations. Notebook Section 16 has two code cells:
 - one re-plots the stored results and checks them against the specs
@@ -98,7 +98,8 @@ Notes:
   - In a copy of the extracted netlist, the gate of the error-amplifier input transistor gets its own port. A MOS gate draws no current, so a plain voltage injection there is exact.
   - Each point first runs the power-up transient. Every node voltage at the end becomes a `.nodeset`, so the operating point is the running state of the real bandgap.
   - Then op + AC with a 1 GH DC path.
-- **Points:** 72 = 5 corners × 3 temperatures × {0, 1 mA} × {10, 100 pF} at 2.5 V, plus 12 points at 1.8 V.
+- **Points:** 72 = 60 at VIN = 2.5 V (5 corners × 3 temperatures × {0, 1 mA} × {10, 100 pF}) plus 12 at 1.8 V (tt / ss / sf × −40 / 125 °C × {0, 1 mA}, 100 pF).
+- **`vout_op` vs `vout_tran`:** at the cold points the two differ by 18–61 mV. The transient is read at 6 ms, where the cold start-up is still settling (see open points). The op is the settled DC state. For example, at fs / −40 °C the transient reaches 1.193 V at 16 ms, the same as the op. So the margins are taken at the settled bias. At sf / −40 °C / 1.8 V that settled state is the headroom-limited bandgap (VREF ≈ 1.13 V).
 
 | | Spec | Post-layout |
 |---|---|---|
@@ -110,7 +111,7 @@ Notes:
 **Low-frequency doublet at four points** (tt and ff, −40 °C, 1 mA, 10 and 100 pF; `doublet` column):
 - The loop gain shows a sharp pole-zero doublet near 250 Hz (peak ≈ 100 dB), and the unwrapped phase turns +360° through it.
 - Read modulo 360°, the margins there are 100–116° and ≥ 25 dB, but a Bode margin is not a clean measure in that case.
-- The step response was checked directly (`scripts/pl_ss_cold.py`): at those points, a 1 → 1.1 mA step 16 ms after power-up (start-up settled) overshoots 4.6–6.5 %, against 3.6 % at 27 °C. So the closed loop stays well damped.
+- The step response was checked directly (`scripts/pl_ss_cold.py`, `reports/postlayout_ss_cold.txt`): at those points, a 1 → 1.1 mA step 16 ms after power-up (start-up settled) overshoots 4.6–6.5 %, against 3.6 % at 27 °C. So the closed loop stays well damped.
 - The origin of the doublet is not identified.
 
 This is the global loop only. The notebook (Section 9.2) explains why the global-loop margin overstates the damping: the class-AB current-buffer path forms a faster inner loop. The small-step overshoot (≤ 17 % here) is the damping check for that inner loop.
@@ -138,11 +139,11 @@ Notes on the table:
 - With the ideal reference, the notebook's PSRR was −0.4 dB at 100 kHz (v1) and 8.7 dB (v2).
 - **VOUT −8.5 mV:** the extracted bandgap gives 1.191 V instead of 1.199 V (meandered high-resistance poly vs the schematic value). This is about 4 trim LSBs, well inside the trim range.
 
-**Where the 1 kHz PSRR goes** (`scripts/pl_psrr_diag.py`): the same extracted netlist was re-simulated with groups of parasitic capacitors removed.
+**Where the 1 kHz PSRR goes** (`scripts/pl_psrr_diag.py`): the extracted netlist was re-simulated with groups of parasitic capacitors removed. This was run on the extraction before the matched-placement change; its full-netlist value is 24.8 dB against 24.7 dB on the final one.
 
 | Extracted netlist variant | PSRR at 1 kHz (tt) |
 |---|---|
-| All parasitic capacitors (as extracted) | 24.8 dB |
+| All parasitic capacitors (as extracted) | 24.8 dB (24.7 dB on the final extraction) |
 | No parasitic capacitors | 32.7 dB |
 | Only the capacitors that touch VIN | 31.9 dB |
 | All except the capacitors that touch VIN | 25.1 dB |
@@ -160,13 +161,14 @@ A lower filter corner was tried: 40 MΩ and 20 pF (≈ 200 Hz), with a PMOS bypa
 |---|---|---|---|---|
 | Start-up | 100 / 100 | 60 / 60 | 60 / 60 | 60 / 60 |
 | VOUT mean / σ | 1.1939 V / 12.1 mV | 1.1953 V / 13.9 mV | 1.2019 V / 14.0 mV | 1.2533 V / 13.1 mV (4 ms; still settling) |
-| Untrimmed chips outside ±3 % | 3 / 100 | 2 / 60 | 1 / 60 | (settling) |
+| Untrimmed chips outside ±3 % | 3 / 100 | 2 / 60 | 1 / 60 | 57 / 60 at 4 ms (start-up still settling) |
 | Load-step undershoot / overshoot, worst | 236 / 151 mV | 279 / 175 mV | **283** / 186 mV | 199 / 120 mV |
 | Iq, mean / worst | 7.26 / 7.68 µA | 9.98 / 10.45 µA | 9.87 / 10.34 µA | 9.38 / 10.16 µA |
 | RST_N released | 100 / 100 | 0 / 60 (below V_on, as designed) | 0 / 60 (as designed) | 60 / 60 |
 
 - The load step stays inside 300 mV with mismatch at the worst corner (ss / 125 °C / 1.8 V).
 - The untrimmed VOUT σ is about 1.0–1.2 %, set mostly by the bandgap (σ 0.86 % alone). The one-time trim at 27 °C brings the reference to −0.61 … +0.96 % over temperature and supply.
+- The 24–25 % small-step overshoot at fs / −40 °C in the PVT table is read 4 ms after power-up, while VREF is still drifting, so it would overstate the ringing (it would correspond to ≈ 43° of phase margin). Measured after the start-up has settled (100 µA step at 16 ms, `scripts/pl_ss_cold.py`, `reports/postlayout_ss_cold.txt`), the overshoot is 8.5–9.1 % at fs / −40 °C from 0 mA (a larger, 91 mV dip) and 3.5–6.5 % at tt / ff / fs −40 °C at 1 mA, against 3.6 % at 27 °C.
 - The `load_reg` column in these files is the VOUT shift inside the 40 µs load pulse. It is a transient value, not the DC load regulation of the notebook (2.43 mV/mA, Section 9.1).
 
 ## Open points (measured, not hidden)

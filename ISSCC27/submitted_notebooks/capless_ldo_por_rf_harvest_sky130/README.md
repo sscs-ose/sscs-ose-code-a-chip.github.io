@@ -15,7 +15,7 @@ unregulated (1.8–3.3 V) and changes with the harvested power. This project des
 * a **capacitor-less LDO** (VIN 1.8–3.3 V → VOUT 1.2 V, 0–1 mA, ≈ 7.4 µA quiescent current for the LDO alone, stable
   with 10–100 pF on-chip load capacitance, all thick-oxide `g5v0d10v5` devices). The "sub-8 µA" in the title is this
   LDO-alone figure from the schematic-level design. With the transistor-level bandgap and the POR (v3, after layout), the
-  whole block draws 7.2 µA at tt / 27 °C and up to 12.8 µA at the cold corners. The pass gate is driven through a **class-AB common-gate
+  whole block draws 7.2 µA at tt / 27 °C and up to 12.9 µA at the cold corners. The pass gate is driven through a **class-AB common-gate
   current-buffer coupling path** (Ahuja-type compensation). This path gives the gate a coupling gain > 1 during fast load steps,
   which a passive Miller capacitor cannot provide. The same path carries a supply feed-forward that improves mid-band PSRR.
 * a **hysteretic power-on-reset** whose threshold detector is biased at the MOSFET **zero-temperature-coefficient** point,
