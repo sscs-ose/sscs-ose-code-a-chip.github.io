@@ -4,7 +4,7 @@ that replaces the ideal VREF and Iref sources.
 Run inside the cac-eda container (sh run.sh python ...). All helpers from notebook cell 9 are loaded
 unchanged; only `tb` is extended so P["ref"] == "bgr" swaps the ideal sources for the bandgap subcircuit.
 """
-import os, math
+import os, math, re
 
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "_nb_cell09_original.py"), encoding="utf-8").read())
 
@@ -55,6 +55,7 @@ BGR0 = dict(
     Wsu=0.42, Lsu=50, nsu=4,    # start-up pull-up: chain of nsu PMOS diodes VIN -> st (sub-nA when on)
     Wsn=1, Lsn=4,               # start-up release: thick NMOS, gate at VREF (on once VREF > ~0.8 V)
     Wst2=1, Lst2=1,             # start-up kick: thick NMOS that pulls pg low while st is high
+    ncvr=4, Cvr_side=25, Rf=2e6,  # VREF ripple filter: Rf into 4 x (25 x 25 um) MIM ~ 5 pF to gnd
 )
 
 NVT = "nfet_05v0_nvt"
@@ -74,7 +75,7 @@ def bgr_subckt(p):
     # With pcas=1 every branch gets a wide-swing cascode (gate pc), so all mirror devices see the same small Vsd.
     pd = "pd" if p.get('ls', 0) else "pg"     # with ls=1 the R1-branch PMOS diode is level-shifted
     br = [("MPA", pd, p['Wpm'], 1), ("MPB", "ng", p['Wpm'], 1), ("MPO", "vref", p['Wpm'], p['kout']),
-          ("MPI", "iref", p['Wpm'] / 2, p['kib'])]
+          ("MPI", "iref", p['Wpm'] / 2 * p['kib'], 1)]   # one wide unit per mpm (shorter layout rows)
     if p.get('cas', 1):
         br.append(("MPC", "ncas", p['Wpm'], 1))
     for name, out, w, m in br:
@@ -82,10 +83,10 @@ def bgr_subckt(p):
         if p.get('pcas', 1):
             # self-cascode: top device (W, Lpm) in near-triode, bottom device (ksc*W, Lpc) saturated; same gate
             mid = name.lower() + "_m"
-            s += fet(name, mid, "pg", "vin", "vin", "p", w, p['Lpm'], m=m)
-            s += fet(name + "C", out, "pg", mid, "vin", "p", w * p['ksc'], p['Lpc'], m=m)
+            s += fet(name, mid, "pg", "vin", "vin", "p", w, p['Lpm'], nf=math.ceil(w / 20), m=m)
+            s += fet(name + "C", out, "pg", mid, "vin", "p", w * p['ksc'], p['Lpc'], nf=math.ceil(w * p['ksc'] / 20), m=m)
         else:
-            s += fet(name, out, "pg", "vin", "vin", "p", w, p['Lpm'], m=m)
+            s += fet(name, out, "pg", "vin", "vin", "p", w, p['Lpm'], nf=math.ceil(w / 20), m=m)
     if p.get('ls', 0):
         # level shift: native follower MNF puts the mirror gate pg ~VGS(nat) below the diode drain pd, so the
         # R1 branch keeps ~0.25 V more headroom at low VIN / cold. Sink MNSK (native copy, own PNP) biases it.
@@ -124,10 +125,20 @@ def bgr_subckt(p):
     nodes = ["vin"] + [f"su{k}" for k in range(1, p['nsu'])] + ["st"]
     for k in range(p['nsu']):
         s += fet(f"MSU{k}", nodes[k + 1], nodes[k + 1], nodes[k], "vin", "p", p['Wsu'], p['Lsu'])
-    # MSN source sits on a PNP (e7): VGS ~ 0 in the stuck state (VREF ~ VBE), ~0.7 V once VREF ~ 1.25 V
+    # MSN source sits on a PNP (e7): VGS ~ 0 in the stuck state (VREF ~ VBE), ~0.7 V once VREF ~ 1.25 V.
+    # W/L = 1/4 keeps its 125 C leakage below the chain current (W/L = 2/2 never starts at ss/125 C on a slow ramp)
     s += fet("MSN", "st", "vref", "e7", "gnd", "n", p['Wsn'], p['Lsn'])
     s += f"XQ7 gnd gnd e7 {pnp}\n"
     s += fet("MS2", "pg", "st", "gnd", "gnd", "n", p['Wst2'], p['Lst2'])
+    # supply-ripple filter outside the bandgap loop: core, output branch and start-up release (MSN gate) use the raw
+    # node vr; the pin vref is vr through Rf into a MIM to gnd (the LDO gate draws no DC current, so no DC error).
+    # A cap directly on vr slows the release and lets the kick overshoot VREF and collapse the core when cold.
+    if p.get('ncvr', 0):
+        head, body = s.split("\n", 1)
+        s = head + "\n" + re.sub(r"(?<=\s)vref(?=\s)", "vr", body)
+        s += res("Rf", "vr", "vref", p['Rf'])
+        for k in range(p['ncvr']):
+            s += f"XCvr{k} vref gnd sky130_fd_pr__cap_mim_m3_1 W={p['Cvr_side']} L={p['Cvr_side']} MF=1\n"
     return s + ".ends bgr\n"
 
 

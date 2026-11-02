@@ -73,7 +73,7 @@ def plan(d):
     m, p = d["model"], d["par"]
     if m in ("nfet_g5v0d10v5", "pfet_g5v0d10v5", "nfet_05v0_nvt"):
         W, L, nf, mm = f(p["w"]), f(p["l"]), int(f(p.get("nf", 1))), int(f(p.get("m", 1)))
-        if mm > 1 and L < 2:          # short gates: stack as fingers so gate risers never cross S/D stacks
+        if mm > 1 and (L < 2 or mm > 4):   # short gates or many units: fingers instead of a tall stack
             nf, mm, W = nf * mm, 1, W * mm
         wf = W / nf
         while wf > 20:                # keep fingers <= 20 um

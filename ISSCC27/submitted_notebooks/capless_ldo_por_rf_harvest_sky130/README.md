@@ -48,17 +48,42 @@ affected spec.
 | Output noise, 100 Hz–100 kHz (tt, ideal VREF) | info | n/a | 36–59 µVrms | INFO |
 
 Costs of v2 (all still inside spec): less damping margin, ≈ 5 dB lower DC loop gain (hence worse line/load regulation and lower
-low-frequency PSRR), slightly higher dropout, and ≈ 1.7× MIM area. Limitations (detailed in the notebook): ideal VREF/Iref,
-schematic-level only (no layout or PEX; the xschem file is label-connected), mid-band PSRR still only ≈ 9 dB, and poly-resistor
-mismatch not modelled.
+low-frequency PSRR), slightly higher dropout, and ≈ 1.7× MIM area. Limitations of the v2 results (detailed in the notebook): ideal VREF/Iref,
+schematic-level only (the xschem file is label-connected), mid-band PSRR ≈ 9 dB, and poly-resistor mismatch not modelled. v3 (below)
+adds the real reference, the layout and post-layout results; with the reference filter the mid-band PSRR is ≈ 19–21 dB.
 
 For context, the notebook (end of Section 13) places the design next to four published capacitor-less LDOs using the FOM table of
 Ming, Zhou and Zhang (VLSI-SoC 2011): 0.14 ns (tt) / 0.20 ns (PVT worst) here, versus 0.032, 0.067, 1.29 and 19.5 ns for Hazucha 2005,
 Man 2007, Or & Leung 2010 and Milliken 2007. Those are silicon measurements at 50–100 mA, so the comparison is indicative only.
 
-## v3 addendum (1–2 Nov 2026, after the deadline)
+## v3: real reference, layout and post-layout verification
 
-A transistor-level nano-power bandgap (no op-amp, 0.68 µA; trimmed Monte Carlo −0.61 … +0.96 % over −40…125 °C and 1.8–3.3 V) replaces the ideal VREF/Iref. LDO + POR + bandgap now have a fully scripted SKY130 layout (390 × 716 µm): **KLayout official DRC 0 violations, Magic DRC on the final GDS 0, Netgen LVS match (75 devices / 45 nets)**. Parasitic extraction with coupling capacitance and post-layout re-simulation are not finished yet. Details: `layout/README.md` and notebook Section 16.
+v3 adds a transistor-level nano-power bandgap and replaces the ideal VREF/Iref with it.
+- **Design:** no op-amp; 0.63 µA at 27 °C.
+- **Trimmed Monte Carlo:** −0.61 … +0.96 % over −40…125 °C and 1.8–3.3 V.
+- **Supply filter:** an RC filter outside the bandgap loop.
+
+LDO + POR + bandgap have a fully scripted SKY130 layout, 390 × 524 µm:
+- KLayout official DRC: **0 violations**
+- Magic DRC on the final GDS: **0**
+- Netgen LVS: **match**, 77 devices / 46 nets
+
+The whole block was then re-simulated from the C-extracted netlist (1,992 parasitic capacitors), as power-up transients over 45 PVT points:
+
+| | Spec | Post-layout |
+|---|---|---|
+| Load step 0↔1 mA, 100 ns, PVT worst | ≤ 300 mV | −279 / +180 mV |
+| Load step, tt (pre → post layout) | | −201 → −231 mV |
+| Iq LDO + bandgap + POR | | 7.2 µA tt; ≤ 11.5 µA at 125 °C |
+| POR V_on / hysteresis (15 PVT points) | 2.0 V ± 10 % / ≥ 150 mV | 1.894–2.192 V / ≥ 245 mV |
+| PSRR tt at 1 kHz / 100 kHz / 847 kHz | | 24.8 / 21.3 / 19.1 dB |
+
+Open points are listed with numbers in `layout/README.md`:
+- start-up settling of up to 8 ms at fs / −40 °C
+- a 10 dB post-layout loss of 1 kHz PSRR that is not yet explained
+- capacitance-only extraction (no RC)
+
+Details: `layout/README.md` and notebook Section 16.
 
 ## Files
 
@@ -67,7 +92,7 @@ A transistor-level nano-power bandgap (no op-amp, 0.68 µA; trimmed Monte Carlo 
 | `capless_ldo_por_rf_harvest_sky130.ipynb` | The notebook (executed, outputs saved) |
 | `LICENSE` | Apache License 2.0 |
 | `README.md` | This file |
-| `layout/` | v3: GDS, layout render, generator + verification scripts, DRC/LVS reports, bandgap data |
+| `layout/` | v3: GDS, layout render, generator, verification and post-layout scripts, DRC/LVS/PEX reports, post-layout and bandgap data |
 | `.gitignore` | Ignores simulation/PDK/tool folders created when the notebook runs |
 | `xschem/capless_ldo_por.sch` | xschem schematic generated from the notebook parameters (devices connected by net labels, no drawn wires) |
 | `xschem/capless_ldo_por.svg`, `.spice` | SVG export and xschem netlist; the netlist matches the notebook netlist device by device (35/35) |
