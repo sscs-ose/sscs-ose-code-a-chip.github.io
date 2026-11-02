@@ -56,6 +56,10 @@ For context, the notebook (end of Section 13) places the design next to four pub
 Ming, Zhou and Zhang (VLSI-SoC 2011): 0.14 ns (tt) / 0.20 ns (PVT worst) here, versus 0.032, 0.067, 1.29 and 19.5 ns for Hazucha 2005,
 Man 2007, Or & Leung 2010 and Milliken 2007. Those are silicon measurements at 50–100 mA, so the comparison is indicative only.
 
+## v3 addendum (1–2 Nov 2026, after the deadline)
+
+A transistor-level nano-power bandgap (no op-amp, 0.68 µA; trimmed Monte Carlo −0.61 … +0.96 % over −40…125 °C and 1.8–3.3 V) replaces the ideal VREF/Iref. LDO + POR + bandgap now have a fully scripted SKY130 layout (390 × 716 µm): **KLayout official DRC 0 violations, Magic DRC on the final GDS 0, Netgen LVS match (75 devices / 45 nets)**. Parasitic extraction with coupling capacitance and post-layout re-simulation are not finished yet. Details: `layout/README.md` and notebook Section 16.
+
 ## Files
 
 | File | Content |
@@ -63,6 +67,7 @@ Man 2007, Or & Leung 2010 and Milliken 2007. Those are silicon measurements at 5
 | `capless_ldo_por_rf_harvest_sky130.ipynb` | The notebook (executed, outputs saved) |
 | `LICENSE` | Apache License 2.0 |
 | `README.md` | This file |
+| `layout/` | v3: GDS, layout render, generator + verification scripts, DRC/LVS reports, bandgap data |
 | `.gitignore` | Ignores simulation/PDK/tool folders created when the notebook runs |
 | `xschem/capless_ldo_por.sch` | xschem schematic generated from the notebook parameters (devices connected by net labels, no drawn wires) |
 | `xschem/capless_ldo_por.svg`, `.spice` | SVG export and xschem netlist; the netlist matches the notebook netlist device by device (35/35) |
