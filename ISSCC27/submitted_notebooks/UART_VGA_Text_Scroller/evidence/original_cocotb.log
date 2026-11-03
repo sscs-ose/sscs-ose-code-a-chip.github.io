@@ -1,0 +1,28 @@
+rm -f results.xml
+"make" -f Makefile results.xml
+make[1]: Entering directory '/content/ttsky26c-uart-vga-scroller/test'
+mkdir -p sim_build/rtl
+/usr/bin/iverilog -o sim_build/rtl/sim.vvp -s tb -g2012 -I/content/ttsky26c-uart-vga-scroller/test/../src -f sim_build/rtl/cmds.f  /content/ttsky26c-uart-vga-scroller/test/../src/project.v /content/ttsky26c-uart-vga-scroller/test/tb.v
+rm -f results.xml
+COCOTB_TEST_MODULES=test COCOTB_TESTCASE= COCOTB_TEST_FILTER= COCOTB_TOPLEVEL=tb TOPLEVEL_LANG=verilog \
+         /usr/bin/vvp -M /usr/local/lib/python3.13/dist-packages/cocotb/libs -m libcocotbvpi_icarus   sim_build/rtl/sim.vvp -fst  
+     -.--ns INFO     gpi                                ..mbed/gpi_embed.cpp:93   in _embed_init_python              Using Python 3.13.0rc1 interpreter at /usr/bin/python3
+     -.--ns INFO     gpi                                ../gpi/GpiCommon.cpp:79   in gpi_print_registered_impl       VPI registered
+     0.00ns INFO     cocotb                             Running on Icarus Verilog version 12.0 (stable)
+     0.00ns INFO     cocotb                             Seeding Python random module with 1793436884
+     0.00ns INFO     cocotb                             Initialized cocotb v2.0.1 from /usr/local/lib/python3.13/dist-packages/cocotb
+     0.00ns INFO     cocotb                             Running tests
+     0.00ns INFO     cocotb.regression                  running test.test_uart_vga_scroller_4x_colour (1/1)
+34424764.90ns INFO     cocotb.tb                          Verified and saved output/vga_32char_white_black_start.png
+34450369.90ns INFO     cocotb.tb                          Verified and saved output/vga_32char_yellow_blue_end.png
+34450369.90ns INFO     cocotb.tb                          PASS: 32-character UART buffer, 4x VGA, colours, scrolling, pause, and exhaustive 2-bit ALU verified.
+34450369.90ns INFO     cocotb.regression                  test.test_uart_vga_scroller_4x_colour passed
+34450369.90ns INFO     cocotb.regression                  ***********************************************************************************************
+                                                          ** TEST                                   STATUS  SIM TIME (ns)  REAL TIME (s)  RATIO (ns/s) **
+                                                          ***********************************************************************************************
+                                                          ** test.test_uart_vga_scroller_4x_colour   PASS    34450369.90          86.25     399414.71  **
+                                                          ***********************************************************************************************
+                                                          ** TESTS=1 PASS=1 FAIL=0 SKIP=0                    34450369.90          86.25     399404.93  **
+                                                          ***********************************************************************************************
+FST info: dumpfile tb.fst opened for output.
+make[1]: Leaving directory '/content/ttsky26c-uart-vga-scroller/test'
