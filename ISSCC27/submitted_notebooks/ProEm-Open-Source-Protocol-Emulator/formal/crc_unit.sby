@@ -1,0 +1,25 @@
+[tasks]
+prove
+cover
+
+[options]
+prove: mode prove
+cover: mode cover
+cover: depth 20
+
+[engines]
+prove: abc pdr
+cover: smtbmc yices
+
+[script]
+read -formal crc_unit.sv crc_unit_formal.sv
+prep -top crc_unit_formal
+memory_map
+flatten
+techmap
+opt -fast
+setundef -anyseq
+
+[files]
+../src/core/frame_chain/crc_unit.sv
+crc_unit_formal.sv

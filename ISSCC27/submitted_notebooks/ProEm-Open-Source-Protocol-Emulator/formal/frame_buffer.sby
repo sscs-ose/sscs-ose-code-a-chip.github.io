@@ -1,0 +1,21 @@
+[tasks]
+prove
+cover
+
+[options]
+prove: mode prove
+cover: mode cover
+cover: depth 30
+
+[engines]
+prove: abc pdr
+cover: smtbmc yices
+
+[script]
+read -formal frame_buffer.sv frame_buffer_formal.sv
+prep -top frame_buffer_formal
+memory_map
+
+[files]
+../src/primitives/frame_buffer.sv
+frame_buffer_formal.sv

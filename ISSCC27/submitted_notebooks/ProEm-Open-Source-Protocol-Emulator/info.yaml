@@ -1,0 +1,71 @@
+# =============================================================================
+# Project: ProEm - Open Source Protocol Emulator
+# File: info.yaml
+# Type: Tiny Tapeout project information (read by the GDS, test and docs workflows)
+# Author: Paul Vincent Bezzina
+# Description:
+# =============================================================================
+
+project:
+  title: "ProEm - Open Source Protocol Emulator"
+  author: "Paul Vincent Bezzina"
+  discord: ""
+  description: "Two-channel programmable protocol emulator: UART, SPI, I2C, CAN, USB low speed, 10BASE-T receive and 20 more serial standards from one instruction set, with on-chip CRC"
+  language: "SystemVerilog"
+  clock_hz: 50000000
+
+  tiles: "6x4"
+
+  top_module: "tt_um_vertrex_star_proem"
+
+  source_files:
+    - "primitives/frame_buffer.sv"
+    - "primitives/host_fifo.sv"
+    - "primitives/uart_rx.sv"
+    - "primitives/uart_tx.sv"
+    - "core/frame_chain/first_counter.sv"
+    - "core/frame_chain/header_counter.sv"
+    - "core/frame_chain/start_router.sv"
+    - "core/frame_chain/main_counter.sv"
+    - "core/frame_chain/end_counter.sv"
+    - "core/frame_chain/watchdog.sv"
+    - "core/frame_chain/branch_unit.sv"
+    - "core/frame_chain/crc_unit.sv"
+    - "core/frame_chain/frame_chain.sv"
+    - "core/line_codec.sv"
+    - "core/entry_dispatch.sv"
+    - "core/control_unit.sv"
+    - "core/return_path.sv"
+    - "core/emulator_channel.sv"
+    - "top/protocol_emulator.sv"
+    - "top/tt_um_vertrex_star_proem.sv"
+
+pinout:
+  ui[0]: "RX: instructions from the host (send 0x55 first)"
+  ui[1]: ""
+  ui[2]: ""
+  ui[3]: ""
+  ui[4]: ""
+  ui[5]: ""
+  ui[6]: ""
+  ui[7]: ""
+
+  uo[0]: "TX: results to the host"
+  uo[1]: "BAUD_LOCKED"
+  uo[2]: "ARMED_A"
+  uo[3]: "ARMED_B"
+  uo[4]: "HOST_FULL_A"
+  uo[5]: "HOST_FULL_B"
+  uo[6]: "SELECT_A (chip select)"
+  uo[7]: "SELECT_B (chip select)"
+
+  uio[0]: "PIN0 / A_DATA (TX, MOSI, SDA, D+)"
+  uio[1]: "PIN1 / A_PAIR (D-)"
+  uio[2]: "PIN2 / A_CLOCK (SCK, SCL)"
+  uio[3]: "PIN3 / B_DATA (TX, MOSI, SDA, D+)"
+  uio[4]: "PIN4 / B_PAIR (D-)"
+  uio[5]: "PIN5 / B_CLOCK (SCK, SCL)"
+  uio[6]: "PIN6 (input)"
+  uio[7]: "PIN7 (input)"
+
+yaml_version: 6
