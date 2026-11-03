@@ -1,0 +1,99 @@
+* Transient Chopper Simulation Testbench
+.include "models/sky130_fd_pr/models/sky130_neurodyn_tt.lib.spice"
+
+.option noacct method=gear trtol=7 reltol=1e-3 chgtol=1e-14 gmin=1e-12
+
+* 4-Switch Low-Vt CMOS Chopper Bridge (SkyWater SKY130 LVT)
+.subckt chopper_bridge in_p in_n out_p out_n phi phi_bar vdd vss
+* Direct Phase (phi high, phi_bar low)
+XMN1 in_p phi out_p vss sky130_fd_pr__nfet_01v8_lvt W=3.0u L=0.35u
+XMP1 in_p phi_bar out_p vdd sky130_fd_pr__pfet_01v8_lvt W=6.0u L=0.35u
+
+XMN2 in_n phi out_n vss sky130_fd_pr__nfet_01v8_lvt W=3.0u L=0.35u
+XMP2 in_n phi_bar out_n vdd sky130_fd_pr__pfet_01v8_lvt W=6.0u L=0.35u
+
+* Inverted Phase (phi low, phi_bar high -> Cross connection)
+XMN3 in_p phi_bar out_n vss sky130_fd_pr__nfet_01v8_lvt W=3.0u L=0.35u
+XMP3 in_p phi out_n vdd sky130_fd_pr__pfet_01v8_lvt W=6.0u L=0.35u
+
+XMN4 in_n phi_bar out_p vss sky130_fd_pr__nfet_01v8_lvt W=3.0u L=0.35u
+XMP4 in_n phi out_p vdd sky130_fd_pr__pfet_01v8_lvt W=6.0u L=0.35u
+.ends chopper_bridge
+
+* NeuroDyn-AFE Dynamic Operational Transconductance Amplifier (OTA)
+* SkyWater SKY130 130nm Process (sky130_fd_pr__nfet_01v8_lvt, sky130_fd_pr__pfet_01v8_lvt)
+.subckt neurodyn_ota inp inm outp outm vdd vss vbn_tail vbp vaux_p vaux_n vbn_out
+
+* Tail Current Source (Vbn_tail = 0.36V, Vds >= 75mV >= 3*U_T for weak-inversion saturation)
+XM_tail tail vbn_tail vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
+
+* Main Input Differential Pair (2nd-Order Optimal Common-Centroid [D,A,B,B,A,B,A,A,B,D])
+XM1 nodep inp tail vss sky130_fd_pr__nfet_01v8_lvt W=20.00u L=2.00u mult=4
+XM2 noden inm tail vss sky130_fd_pr__nfet_01v8_lvt W=20.00u L=2.00u mult=4
+
+* Auxiliary Differential Pair for Ripple Reduction Loop (RRL) (1/10th Sized for Fine Steering)
+XM1_aux nodep vaux_p tail vss sky130_fd_pr__nfet_01v8_lvt W=2.00u L=2.00u mult=1
+XM2_aux noden vaux_n tail vss sky130_fd_pr__nfet_01v8_lvt W=2.00u L=2.00u mult=1
+
+* Active PMOS load with Low-Vt to prevent headroom pinch-off under 0.60V VDD
+XM3 nodep vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8_lvt W=8.00u L=3.50u mult=4
+XM4 noden vbp_cmfb vdd vdd sky130_fd_pr__pfet_01v8_lvt W=8.00u L=3.50u mult=4
+
+* Continuous-Time Resistive Common-Mode Sensing Network (50 MEG) with Clamped CMFB VCVS
+R_cm1 nodep vcm_sense 50MEG
+R_cm2 noden vcm_sense 50MEG
+E_cmfb vbp_cmfb_raw 0 VOL='min(0.55, max(0.05, V(vbp) + 15.0*(V(vcm_sense) - 0.30)))'
+R_cmfb vbp_cmfb_raw vbp_cmfb 10k
+C_cmfb vbp_cmfb 0 10p
+
+* Miller Frequency Compensation Capacitors
+C_c1 noden outp 1.2p
+C_c2 nodep outm 1.2p
+
+* Second gain stage (common-source output conversion with Low-Vt PMOS and Low-Vt NMOS loads)
+* Sized for I_stage2 = 0.20 uA under Vbn_out = 0.2605V
+XM5 outp noden vdd vdd sky130_fd_pr__pfet_01v8_lvt W=8.00u L=3.50u mult=4
+XM6 outp vbn_out vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
+
+XM7 outm nodep vdd vdd sky130_fd_pr__pfet_01v8_lvt W=8.00u L=3.50u mult=4
+XM8 outm vbn_out vss vss sky130_fd_pr__nfet_01v8_lvt W=10.15u L=2.0u mult=2
+
+.ends neurodyn_ota
+
+
+Vdd vdd 0 DC 0.6
+Vss vss 0 DC 0
+Vbn_tail vbn_tail 0 DC 0.36
+Vbp vbp 0 DC 0.24
+Vbn_out vbn_out 0 DC 0.2605
+
+* Non-overlapping Chopper Clock Generators (f_ch = 2 kHz -> T = 500 us)
+Vphi phi 0 PULSE(0 0.6 0 1u 1u 248u 500u)
+Vphib phi_bar 0 PULSE(0.6 0 0 1u 1u 248u 500u)
+
+* Differential Neural Input Signal (100 uV amplitude, 20 Hz sinusoid on 0.40V Vcm)
+Vcm vcm 0 DC 0.4
+Vsig_p vin_p vcm SIN(0 50u 20)
+Vsig_n vin_n vcm SIN(0 -50u 20)
+
+* Input Chopper (CHOP1)
+XCHOP1 vin_p vin_n chop_p chop_n phi phi_bar vdd vss chopper_bridge
+
+* Core Dynamic OTA
+Vauxp vaux_p 0 DC 0
+Vauxn vaux_n 0 DC 0
+XOTA chop_p chop_n amp_p amp_n vdd vss vbn_tail vbp vaux_p vaux_n vbn_out neurodyn_ota
+
+* Output Demodulator Chopper (CHOP2)
+XCHOP2 amp_p amp_n out_demod_p out_demod_n phi phi_bar vdd vss chopper_bridge
+
+* Load Capacitors
+CL1 out_demod_p vss 5p
+CL2 out_demod_n vss 5p
+
+.control
+set filetype=ascii
+tran 1u 2m
+write tran_results.raw v(vin_p) v(vin_n) v(chop_p) v(amp_p) v(out_demod_p)
+.endc
+.end

@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 560" width="1160" height="560">
+  <defs>
+    <linearGradient id="bg_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAFCFF"/>
+      <stop offset="100%" stop-color="#F3F6FA"/>
+    </linearGradient>
+    <linearGradient id="grad_chop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E1F5FE"/>
+      <stop offset="100%" stop-color="#B3E5FC"/>
+    </linearGradient>
+    <linearGradient id="grad_ota" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8F5E9"/>
+      <stop offset="100%" stop-color="#C8E6C9"/>
+    </linearGradient>
+    <linearGradient id="grad_rrl" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF8E1"/>
+      <stop offset="100%" stop-color="#FFE082"/>
+    </linearGradient>
+    <linearGradient id="grad_adc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EDE7F6"/>
+      <stop offset="100%" stop-color="#D1C4E9"/>
+    </linearGradient>
+    <linearGradient id="grad_lpf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ECEFF1"/>
+      <stop offset="100%" stop-color="#CFD8DC"/>
+    </linearGradient>
+    <filter id="card_shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#263238" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#37474F"/>
+    </marker>
+    <marker id="arr_orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#E65100"/>
+    </marker>
+    <marker id="arr_purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#4527A0"/>
+    </marker>
+  </defs>
+
+  <!-- Outer Frame Canvas -->
+  <rect width="1160" height="560" fill="url(#bg_grad)" rx="10" stroke="#B0BEC5" stroke-width="1.2"/>
+
+  <!-- Top Title Header -->
+  <rect x="0" y="0" width="1160" height="60" fill="#1A237E" rx="10"/>
+  <rect x="0" y="46" width="1160" height="14" fill="#1A237E"/>
+  <text x="30" y="32" font-family="'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif" font-size="19" font-weight="bold" fill="#FFFFFF">NeuroDyn-AFE: Sub-0.6V Dynamic Biosignal Front-End Architecture</text>
+  <text x="30" y="49" font-family="'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#9FA8DA">Continuous-Time Chopper Stabilization with Causal Switched-Capacitor Ripple Reduction Loop (RRL) in SkyWater SKY130</text>
+  <text x="1130" y="36" text-anchor="end" font-family="'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#FFD54F">IEEE SSCS ISSCC 2027</text>
+
+  <!-- 1. Bio-Potential Electrodes -->
+  <g transform="translate(30, 185)" filter="url(#card_shadow)">
+    <rect width="70" height="150" rx="8" fill="#FFFFFF" stroke="#90A4AE" stroke-width="1.5"/>
+    <circle cx="35" cy="35" r="16" fill="#ECEFF1" stroke="#455A64" stroke-width="2"/>
+    <text x="35" y="40" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1A237E">V<tspan dy="-4" font-size="9">+</tspan><tspan dy="4">in</tspan></text>
+    <circle cx="35" cy="115" r="16" fill="#ECEFF1" stroke="#455A64" stroke-width="2"/>
+    <text x="35" y="120" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1A237E">V<tspan dy="-4" font-size="9">-</tspan><tspan dy="4">in</tspan></text>
+    <text x="35" y="75" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#607D8B">EEG / ECG</text>
+  </g>
+
+  <!-- Routing: Electrodes to CHOP1 -->
+  <path d="M 100 220 L 140 220" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M 100 300 L 140 300" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="120" y="212" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#455A64">v<tspan dy="-3" font-size="7">+</tspan><tspan dy="3">in</tspan></text>
+  <text x="120" y="315" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#455A64">v<tspan dy="-3" font-size="7">-</tspan><tspan dy="3">in</tspan></text>
+
+  <!-- 2. BLOCK 1: Input Chopper (CHOP1) -->
+  <g transform="translate(145, 175)" filter="url(#card_shadow)">
+    <rect width="105" height="170" rx="8" fill="url(#grad_chop)" stroke="#0288D1" stroke-width="1.8"/>
+    <rect x="8" y="8" width="89" height="22" rx="4" fill="#0288D1"/>
+    <text x="52" y="23" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF">CHOP 1</text>
+    <text x="52" y="48" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#01579B">Modulator</text>
+    <text x="52" y="64" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#0277BD">Low-Vt CMOS (LVT)</text>
+    <!-- Switch Graphic -->
+    <rect x="18" y="76" width="69" height="48" rx="4" fill="#FFFFFF" stroke="#81D4FA" stroke-width="1"/>
+    <path d="M 25 89 L 43 89 L 53 81 L 78 81" fill="none" stroke="#0277BD" stroke-width="1.5"/>
+    <path d="M 25 111 L 43 111 L 53 119 L 78 119" fill="none" stroke="#0277BD" stroke-width="1.5"/>
+    <text x="52" y="103" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#E65100">Φ1, Φ2</text>
+    <text x="52" y="142" text-anchor="middle" font-family="sans-serif" font-size="9.5" font-weight="bold" fill="#01579B">f<tspan font-size="7.5">chop</tspan> = 4 kHz</text>
+    <text x="52" y="156" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#546E7A">R<tspan font-size="7">on</tspan> &lt; 18 kΩ</text>
+  </g>
+
+  <!-- Routing: CHOP1 to OTA Inputs -->
+  <path d="M 250 220 L 305 220" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M 250 300 L 305 300" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="278" y="212" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#2E7D32">v<tspan dy="-3" font-size="7">+</tspan><tspan dy="3">ch</tspan></text>
+  <text x="278" y="315" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#2E7D32">v<tspan dy="-3" font-size="7">-</tspan><tspan dy="3">ch</tspan></text>
+
+  <!-- 3. BLOCK 2: Fully-Differential Dynamic Subthreshold OTA -->
+  <g transform="translate(310, 150)" filter="url(#card_shadow)">
+    <!-- Trapezoidal amplifier symbol with clean flat output edge -->
+    <path d="M 0 25 L 140 25 L 180 80 L 180 160 L 140 215 L 0 215 Z" fill="url(#grad_ota)" stroke="#2E7D32" stroke-width="2"/>
+    <text x="75" y="60" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#1B5E20">Dynamic OTA</text>
+    <text x="75" y="78" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#2E7D32">Subthreshold (IC = 0.05)</text>
+    <text x="75" y="95" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#388E3C">g<tspan font-size="7">m</tspan>/I<tspan font-size="7">D</tspan> = 25.5 S/A</text>
+    <text x="75" y="111" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#388E3C">A<tspan font-size="7">v,DC</tspan> = 63.1 dB | UGF = 57.7 kHz</text>
+    <text x="75" y="127" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#388E3C">CMRR = 108.5 dB | PSRR = 88.2 dB</text>
+    <text x="75" y="143" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#1B5E20">V<tspan font-size="7">DD</tspan> = 0.60V | P<tspan font-size="7">core</tspan> = 86.6 nW (0.087 µW)</text>
+    <text x="75" y="159" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#2E7D32">Resistive CMFB (V<tspan font-size="7">cm</tspan> = 0.30V)</text>
+
+    <!-- Main Input Terminals on Left Edge -->
+    <text x="12" y="73" font-family="sans-serif" font-size="13" font-weight="bold" fill="#1B5E20">+</text>
+    <text x="12" y="153" font-family="sans-serif" font-size="13" font-weight="bold" fill="#1B5E20">-</text>
+
+    <!-- Output Terminals on Flat Right Face -->
+    <text x="168" y="99" font-family="sans-serif" font-size="13" font-weight="bold" fill="#1B5E20">+</text>
+    <text x="168" y="145" font-family="sans-serif" font-size="13" font-weight="bold" fill="#1B5E20">-</text>
+
+    <!-- Dedicated Auxiliary Input Ports on Bottom Edge (Directly above RRL) -->
+    <rect x="35" y="215" width="34" height="18" rx="3" fill="#FFE0B2" stroke="#E65100" stroke-width="1.5"/>
+    <text x="52" y="228" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#E65100">V<tspan font-size="7">aux</tspan>+</text>
+    <rect x="85" y="215" width="34" height="18" rx="3" fill="#FFE0B2" stroke="#E65100" stroke-width="1.5"/>
+    <text x="102" y="228" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#E65100">V<tspan font-size="7">aux</tspan>-</text>
+  </g>
+
+  <!-- Routing: OTA Outputs to CHOP2 Inputs -->
+  <path d="M 490 245 L 555 245" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M 490 285 L 555 285" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="522" y="237" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1B5E20">V<tspan dy="-3" font-size="7">+</tspan><tspan dy="3">o,amp</tspan></text>
+  <text x="522" y="300" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1B5E20">V<tspan dy="-3" font-size="7">-</tspan><tspan dy="3">o,amp</tspan></text>
+
+  <!-- 4. BLOCK 3: Output Chopper (CHOP2 Demodulator) -->
+  <g transform="translate(560, 195)" filter="url(#card_shadow)">
+    <rect width="105" height="140" rx="8" fill="url(#grad_chop)" stroke="#0288D1" stroke-width="1.8"/>
+    <rect x="8" y="8" width="89" height="22" rx="4" fill="#0288D1"/>
+    <text x="52" y="23" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF">CHOP 2</text>
+    <text x="52" y="48" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#01579B">Demodulator</text>
+    <text x="52" y="64" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#0277BD">Restores Baseband</text>
+    <rect x="18" y="74" width="69" height="36" rx="4" fill="#FFFFFF" stroke="#81D4FA" stroke-width="1"/>
+    <path d="M 25 86 L 43 86 L 53 79 L 78 79" fill="none" stroke="#0277BD" stroke-width="1.5"/>
+    <path d="M 25 100 L 43 100 L 53 107 L 78 107" fill="none" stroke="#0277BD" stroke-width="1.5"/>
+    <text x="52" y="96" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#E65100">Φ1, Φ2</text>
+    <text x="52" y="127" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#01579B">f<tspan font-size="7.5">chop</tspan> = 4 kHz</text>
+  </g>
+
+  <!-- Routing: CHOP2 Outputs to LPF Inputs -->
+  <path d="M 665 245 L 755 245" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M 665 285 L 755 285" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Taps for Switched-Capacitor Ripple Reduction Loop (RRL) -->
+  <circle cx="710" cy="245" r="4" fill="#E65100"/>
+  <circle cx="710" cy="285" r="4" fill="#E65100"/>
+  <!-- Pure orthogonal drop down into RRL input on right edge -->
+  <path d="M 710 245 L 730 245 L 730 435 L 690 435" fill="none" stroke="#E65100" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr_orange)"/>
+  <path d="M 710 285 L 715 285 L 715 455 L 690 455" fill="none" stroke="#E65100" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr_orange)"/>
+  <text x="735" y="360" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#E65100" transform="rotate(90, 735, 360)">Output Ripple Tap</text>
+
+  <!-- 5. BLOCK 4: Causal Switched-Capacitor Ripple Reduction Loop (RRL) -->
+  <!-- Positioned cleanly under the OTA and CHOP2 with ZERO wire crossings! -->
+  <g transform="translate(345, 400)" filter="url(#card_shadow)">
+    <rect width="340" height="95" rx="8" fill="url(#grad_rrl)" stroke="#FFA000" stroke-width="2"/>
+    <rect x="8" y="6" width="324" height="20" rx="3" fill="#FF8F00"/>
+    <text x="170" y="20" text-anchor="middle" font-family="sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF">Causal Switched-Capacitor Ripple Reduction Loop (RRL)</text>
+    
+    <!-- Sub-stages inside RRL -->
+    <rect x="12" y="32" width="90" height="34" rx="4" fill="#FFFFFF" stroke="#FFB300" stroke-width="1"/>
+    <text x="57" y="46" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#BF360C">Half-Period Diff</text>
+    <text x="57" y="58" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#E65100">ΔV = v(t)-v(t-T/2)</text>
+
+    <path d="M 102 49 L 118 49" fill="none" stroke="#E65100" stroke-width="1.5" marker-end="url(#arr_orange)"/>
+
+    <rect x="120" y="32" width="90" height="34" rx="4" fill="#FFFFFF" stroke="#FFB300" stroke-width="1"/>
+    <text x="165" y="46" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#BF360C">SC Demodulator</text>
+    <text x="165" y="58" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#E65100">× m(t) [@ 4 kHz]</text>
+
+    <path d="M 210 49 L 226 49" fill="none" stroke="#E65100" stroke-width="1.5" marker-end="url(#arr_orange)"/>
+
+    <rect x="228" y="32" width="98" height="34" rx="4" fill="#FFFFFF" stroke="#FFB300" stroke-width="1"/>
+    <text x="277" y="46" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#BF360C">SC Integrator</text>
+    <text x="277" y="58" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#E65100">τ = 2.5 ms (MIM)</text>
+
+    <text x="170" y="83" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#D84315">
+      Ripple Suppression: 62.3 dB | Residual DC Offset: 0.78 µV (σ = 0.28 µV)
+    </text>
+  </g>
+
+  <!-- PURE VERTICAL ORTHOGONAL FEEDBACK LINES INTO OTA AUXILIARY INPUTS -->
+  <!-- RRL is at X=345..685, Y=400. OTA aux inputs are at (345, 368) and (395, 368). -->
+  <!-- Direct straight vertical connections with ZERO crossovers! -->
+  <path d="M 362 400 L 362 383" fill="none" stroke="#E65100" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arr_orange)"/>
+  <circle cx="362" cy="400" r="3" fill="#E65100"/>
+  <text x="352" y="392" text-anchor="end" font-family="sans-serif" font-size="8" font-weight="bold" fill="#E65100">Vaux+</text>
+
+  <path d="M 412 400 L 412 383" fill="none" stroke="#E65100" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arr_orange)"/>
+  <circle cx="412" cy="400" r="3" fill="#E65100"/>
+  <text x="422" y="392" text-anchor="start" font-family="sans-serif" font-size="8" font-weight="bold" fill="#E65100">Vaux-</text>
+
+  <!-- 6. BLOCK 5: 3rd-Order Low-Pass Butterworth Filter -->
+  <g transform="translate(760, 200)" filter="url(#card_shadow)">
+    <rect width="115" height="130" rx="8" fill="url(#grad_lpf)" stroke="#546E7A" stroke-width="1.8"/>
+    <rect x="8" y="8" width="99" height="22" rx="4" fill="#546E7A"/>
+    <text x="57" y="23" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF">Low-Pass Filter</text>
+    <text x="57" y="50" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#263238">3rd-Order Butterworth</text>
+    <text x="57" y="68" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#37474F">f<tspan font-size="7">cutoff</tspan> = 1.2 kHz</text>
+    <text x="57" y="86" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#455A64">Attenuates 4 kHz Carrier</text>
+    <text x="57" y="110" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#1A237E">Noise: 0.79 µV<tspan font-size="7">rms</tspan></text>
+  </g>
+
+  <!-- Routing: LPF to ADC -->
+  <path d="M 875 245 L 920 245" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M 875 285 L 920 285" fill="none" stroke="#37474F" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="897" y="238" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#37474F">V<tspan dy="-3" font-size="7">+</tspan><tspan dy="3">flt</tspan></text>
+  <text x="897" y="298" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#37474F">V<tspan dy="-3" font-size="7">-</tspan><tspan dy="3">flt</tspan></text>
+
+  <!-- 7. BLOCK 6: Noise-Shaped Dynamic Quantizer (ADC) -->
+  <g transform="translate(925, 185)" filter="url(#card_shadow)">
+    <rect width="135" height="155" rx="8" fill="url(#grad_adc)" stroke="#5E35B1" stroke-width="2"/>
+    <rect x="8" y="8" width="119" height="22" rx="4" fill="#512DA8"/>
+    <text x="67" y="23" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF">Dynamic ADC</text>
+    <text x="67" y="48" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#311B92">Noise-Shaped SAR</text>
+    <text x="67" y="66" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#4527A0">Direct-Digitization</text>
+    <text x="67" y="82" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#4527A0">1st-Order EF-NS Loop</text>
+    <text x="67" y="102" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#1A237E">ENOB = 14.1 Bits</text>
+    <text x="67" y="118" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4527A0">SNDR = 86.8 dB</text>
+    <text x="67" y="136" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#5E35B1">f<tspan font-size="7">s</tspan> = 200 kS/s | OSR = 100</text>
+  </g>
+
+  <!-- Digital Data Output Bus -->
+  <path d="M 1060 265 L 1125 265" fill="none" stroke="#311B92" stroke-width="3.5" marker-end="url(#arr_purple)"/>
+  <line x1="1085" y1="258" x2="1095" y2="272" stroke="#311B92" stroke-width="1.8"/>
+  <text x="1092" y="253" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#311B92">14</text>
+  <text x="1092" y="287" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#311B92">D<tspan font-size="8">OUT</tspan>[13:0]</text>
+
+  <!-- Bottom Specification Banner -->
+  <g transform="translate(25, 515)">
+    <rect width="1110" height="32" rx="6" fill="#E8EAF6" stroke="#3F51B5" stroke-width="1.2"/>
+    <text x="555" y="21" text-anchor="middle" font-family="'Segoe UI', -apple-system, Roboto, sans-serif" font-size="10.5" font-weight="bold" fill="#1A237E">
+      Key Benchmarks: V<tspan font-size="7.5">DD</tspan>=0.60V | P<tspan font-size="7.5">core</tspan>=86.6nW (0.087µW) | P<tspan font-size="7.5">sys</tspan>=206.6nW (0.207µW) | A<tspan font-size="7.5">v</tspan>=63.1dB | IR Noise=0.79µV<tspan font-size="7.5">rms</tspan> | NEF=1.65 (Core) / 1.88 (Sys) | PEF=1.63 (Core) / 2.12 (Sys) | CMRR=108.5dB
+    </text>
+  </g>
+</svg>
