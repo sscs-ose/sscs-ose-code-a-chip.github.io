@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StartRight | Does reset still work after normal use?</title>
+<style>
+:root{color-scheme:light;--ink:#18323e;--muted:#526774;--teal:#086d77;--line:#d7e1e3;--paper:#f7f8f4;--soft:#e9f2ef;--orange:#a44b16}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:1120px;margin:auto;padding:32px 26px 64px}header{padding:24px 0 30px;border-bottom:1px solid var(--line)}.kicker{font-size:12px;font-weight:750;letter-spacing:.14em;color:var(--teal)}h1{font-size:clamp(30px,5vw,54px);line-height:1.12;max-width:850px;letter-spacing:-.035em;margin:16px 0}h2{font-size:27px;line-height:1.25;margin:0 0 16px}h3{font-size:17px;line-height:1.45;margin:0 0 12px}p{max-width:820px}.lead{font-size:19px;max-width:780px}.meta,.small{font-size:13px;color:var(--muted)}.tag{display:inline-block;padding:5px 10px;border:1px solid #b9cfcc;border-radius:5px;background:var(--soft);font-size:12px;font-weight:700}.section{padding-top:38px}.number{color:var(--teal);font-size:13px;font-weight:750;letter-spacing:.06em;margin-bottom:8px}.note{padding:15px 18px;border-left:4px solid var(--teal);background:#eaf2f0}.overview{margin:20px 0 0;padding:14px;background:white;border:1px solid var(--line);border-radius:10px}.overview img{display:block;width:100%;height:auto}.overview figcaption{font-size:13px;color:var(--muted);padding:10px 6px 2px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{padding:22px;background:white;border:1px solid var(--line);border-radius:9px}.card p{margin-top:0}.card label{display:block;font-size:14px;font-weight:650}select{width:100%;margin:8px 0;padding:10px 30px 10px 10px;background:white;color:var(--ink);border:1px solid #91a8b2;border-radius:5px;font:inherit;font-size:14px}button{padding:11px 19px;background:var(--teal);color:white;border:0;border-radius:6px;font:inherit;font-weight:650;cursor:pointer}button.secondary{color:var(--teal);background:#e6f0ed}button:hover{filter:brightness(.93)}:focus-visible{outline:3px solid #b45c15;outline-offset:3px}.feedback{font-size:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.feedback:empty{display:none}.feedback[data-correct="true"]{color:#225d45}.feedback[data-correct="false"]{color:#8e3618}.source{overflow-wrap:anywhere;font-size:12px;color:var(--muted)}.actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:18px}.presets{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}.presets button{font-size:14px}.requirements{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;margin:14px 0 22px}.requirements label{display:flex;align-items:flex-start;gap:9px;font-size:14px}.requirements input{margin-top:6px;accent-color:var(--teal)}.decision{background:#e6f0ed;border-radius:8px;padding:20px;margin-top:20px}.decision strong{font-size:21px}table{border-collapse:collapse;width:100%;font-size:14px;margin-top:18px}th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:12px;color:var(--muted)}.table-wrap{overflow-x:auto}a{color:#075e77;text-underline-offset:3px}footer{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.verdict{font-weight:750}.error{color:#953b1b}
+@media(max-width:720px){main{padding:20px 16px 40px}.grid,.requirements{grid-template-columns:1fr}.card{padding:18px}h2{font-size:24px}.overview{padding:4px}.actions{align-items:flex-start;flex-direction:column}th,td{padding:10px 7px}.section{padding-top:30px}}
+@media print{body{background:white}main{padding:0}.actions,.presets{display:none}.card,.overview{break-inside:avoid}select{border:none}}
+</style>
+</head>
+<body><main>
+<header>
+<div class="kicker">STARTRIGHT / OPEN CIRCUIT LESSON</div>
+<h1>Does reset still work after normal use?</h1>
+<p class="lead">Reset should restore a known state after normal use. First write the other state using the normal input. Check that the write worked, then lower the supply and bring it back.</p>
+<span class="tag">SAVED, AUDITED SKY130 SIMULATION</span>
+<p class="meta">Adnane Essoufi | solo project | Apache-2.0 | v0.21</p>
+<p class="small">This page opens without Python or a simulator. Its controls inspect existing evidence. They do not run SPICE or create new model conditions. <a href="StartRight.ipynb">The main notebook</a> makes six new latch simulations after <a href="README.md">setup</a>.</p>
+<p class="small"><a href="START_HERE.md">Short reading route and evidence map</a> · <a href="StartRight.ipynb">Executable notebook</a></p>
+</header>
+<section class="section" aria-labelledby="overview-title">
+<div class="number">01 / FOLLOW THE EVIDENCE</div><h2 id="overview-title">Check the state before and after the event</h2>
+<p>A power-on reset (POR) drives a flip-flop, which stores one bit called Q. Normal inputs write Q=1. At 125 C with a 1.35 V digital-supply dip, the original POR and added guard miss reset. The voltage-reference controller restores Q=0. A test without a dip asks whether Q=1 stays stored.</p>
+<figure class="overview"><a href="figures/decision_overview.png"><img src="figures/decision_overview.png" width="2112" height="1472" alt="Measured supply, consumer reset-bar and Q traces at TT, 125 C, beside seven sampled requirement outcomes and source-work bars for two separate working histories."></a><figcaption>Saved Windows data, regenerated and remeasured by the reference audit. The seven conditions are development samples, not a qualified temperature range. Click the figure to enlarge it.</figcaption></figure>
+<p class="note">A low final Q does not prove restoration if Q=1 was never established. Likewise, preserving Q=1 in a no-dip control is correct behavior. These verdicts describe different requirements.</p>
+</section>
+<section class="section" aria-labelledby="exercise-title">
+<div class="number">02 / MAKE A PREDICTION</div><h2 id="exercise-title">What does each test show?</h2>
+<p>Choose what happened in each test. The feedback shows the measured state and whether the requirement was met.</p>
+<div id="questions" class="grid"></div>
+<div class="actions"><button type="button" id="check-answers">Check my reasoning</button><button type="button" class="secondary" id="clear-answers">Clear answers</button><span id="score" role="status" aria-live="polite">No answers have been scored.</span></div>
+</section>
+<section class="section" aria-labelledby="decision-title">
+<div class="number">03 / CHOOSE FROM THE REQUIREMENTS</div><h2 id="decision-title">When is the extra controller justified?</h2>
+<p>First exclude circuits that lack required behavior or evidence. Then compare eligible circuits using <strong>27 C storage</strong> as the common energy comparison. A cheap failed circuit cannot win. This is the same ordinary selection rule used by the notebook.</p>
+<div class="presets" aria-label="Requirement presets"><button type="button" data-preset="limited">Storage only</button><button type="button" data-preset="nominal_reset">Add nominal reset</button><button type="button" data-preset="expanded">Add cold and hot requirements</button><button type="button" data-preset="unmeasured">Ask for unmeasured behavior</button></div>
+<div id="requirements" class="requirements"></div>
+<div class="decision" aria-live="polite"><div id="selected" class="verdict"></div><div id="selection-note" class="small"></div></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">Controller</th><th scope="col">Meets the requirements?</th><th scope="col">Why?</th><th scope="col">Energy in the same storage test</th></tr></thead><tbody id="candidate-rows"></tbody></table></div>
+<p class="small">Every cost includes startup and all four independent sources. The reference costs about 40.31% more than the original in nominal storage, but 19.80% less in the separate analog interruption. These histories are not a lifetime usage mix. Adding the benign-trough controls checks that a controller does not simply erase ordinary data.</p>
+</section>
+<section class="section" aria-labelledby="reuse-title"><div class="number">04 / TAKE THE QUESTION TO YOUR CIRCUIT</div><h2 id="reuse-title">Use your signals and state what must happen</h2>
+<p>The notebook maps named signals to voltage bands and observation windows. Establish a reachable different state through ordinary inputs, verify it before the event, and include a no-event storage control. An incomplete simulation has no verdict. A completed simulation can show a circuit failure.</p>
+<p><a href="StartRight.ipynb">Main notebook</a> | <a href="Reference_tradeoff.ipynb">Reference circuit explanation</a> | <a href="REUSE.md">Adapter interface</a> | <a href="REFERENCE.md">Sources and fresh reproduction</a> | <a href="lesson_view.json">Machine-readable lesson evidence</a></p>
+</section>
+<noscript><p class="note">The figure and explanations work without scripts. The prediction feedback and requirement controls need JavaScript. The notebook provides the executable Python route.</p></noscript>
+<section class="section" aria-labelledby="mechanism-title"><h2 id="mechanism-title">A correct node prediction still needs a state check</h2>
+<p>The executable notebook checks the RC explanation at two predeclared dip levels. It predicts the reset-node voltage before acquiring either SPICE case. A close node prediction does not establish latch restoration.</p>
+<p><a href="MECHANISM.md">Read the experiment and its limits</a>, or inspect the saved figure below. This page does not run those simulations.</p>
+<figure class="overview"><a href="figures/mechanism_check.png"><img src="figures/mechanism_check.png" alt="The same RC circuit has different recovery results after different ordinary prior states; two predicted reset-node voltages are compared with schematic SPICE measurements."></a><figcaption>Saved schematic data from the six-acquisition main lesson. Two node predictions do not qualify a reset threshold or voltage range.</figcaption></figure></section>
+<footer>These are finite schematic simulations. Added passives are ideal, source geometry is documented and gate tunnelling is disabled. Hardware retention and full process/voltage/temperature coverage are unverified. No independent human learner study has been done. AI assistance was used for code development and explanatory drafting.</footer>
+</main>
+<script type="application/json" id="lesson-data"><!--LESSON_DATA--></script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById('lesson-data').textContent);
+const byId=id=>document.getElementById(id);
+function element(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
+for(const [i,q] of data.questions.entries()){
+ const card=element('article',undefined,'card');card.append(element('h3',(i+1)+'. '+q.title));
+ const label=element('label','Your conclusion');label.htmlFor='answer-'+q.id;card.append(label);
+ const select=element('select');select.id='answer-'+q.id;
+ const empty=element('option','Choose a conclusion');empty.value='';select.append(empty);
+ for(const [code,label] of Object.entries(data.options)){const o=element('option',label);o.value=code;select.append(o);}
+ card.append(select);const feedback=element('div',undefined,'feedback');feedback.id='feedback-'+q.id;feedback.setAttribute('aria-live','polite');card.append(feedback);byId('questions').append(card);
+}
+byId('check-answers').addEventListener('click',()=>{
+ let attempted=0,correct=0;
+ for(const q of data.questions){const answer=byId('answer-'+q.id).value,box=byId('feedback-'+q.id);box.replaceChildren();delete box.dataset.correct;
+  if(!answer){box.append(element('p','Choose a conclusion first. This record has not been scored.'));continue;}
+  attempted++;const good=answer===q.expected;correct+=Number(good);box.dataset.correct=String(good);
+  box.append(element('p',(good?'Correct. ':'Recheck. ')+q.reason));
+  const w=q.witnesses;box.append(element('p','Startup passed: '+w.cold_ready+'. Q=1 was written: '+w.prior_Q1_verified+'. Requirement met: '+w.requirement_met+'. Final Q: '+w.final_Q_V.toFixed(6)+' V.'));
+  box.append(element('p','Evidence: '+q.source,'source'));
+ }
+ byId('score').textContent=correct+'/'+attempted+' attempted answers agree with the recorded evidence.';
+});
+byId('clear-answers').addEventListener('click',()=>{for(const q of data.questions){byId('answer-'+q.id).value='';byId('feedback-'+q.id).replaceChildren();delete byId('feedback-'+q.id).dataset.correct;}byId('score').textContent='No answers have been scored.';});
+const requirements=[['nominal_storage','27 C: preserve ordinary Q=1 (cost anchor)'],['nominal_shallow','27 C: reset after a 1.35 V dip'],['cold_shallow','-40 C: establish Q=1, then reset'],['hot_shallow','125 C: reset after a 1.35 V dip'],['trough_cold_storage','-40 C: preserve Q=1 through a benign 1.62 V trough'],['trough_hot_storage','125 C: preserve Q=1 through a benign 1.62 V trough'],['unmeasured_short_zero','An unmeasured short zero-volt history']];
+for(const [id,text] of requirements){const label=element('label');const input=element('input');input.type='checkbox';input.value=id;input.id='require-'+id;input.checked=id==='nominal_storage';input.disabled=id==='nominal_storage';input.addEventListener('change',updateDecision);label.append(input,element('span',text));byId('requirements').append(label);}
+function choose(required){
+ const candidates=data.variants.map(variant=>{
+  const reasons=[];
+  for(const name of required){const r=data.rows.find(r=>r.condition===name&&r.variant===variant);
+   if(!r)reasons.push(name+': no measured evidence');
+   else if(r.status!=='completed')reasons.push(name+': simulation incomplete');
+   else if(!r.cold_pass)reasons.push(name+': startup did not pass');
+   else if(!r.prior_verified)reasons.push(name+': Q=1 was not written');
+   else if(!r.functional_requirement_met)reasons.push(name+': requirement not met');
+  }
+  const anchor=data.rows.find(r=>r.condition==='nominal_storage'&&r.variant===variant);
+  return {variant,reasons,eligible:reasons.length===0,work:anchor.source_work_delivered_J};
+ });
+ const eligible=candidates.filter(c=>c.eligible&&Number.isFinite(c.work)&&c.work>=0).sort((a,b)=>a.work-b.work||a.variant.localeCompare(b.variant));
+ return {selected:eligible.length?eligible[0].variant:null,candidates};
+}
+function updateDecision(){
+ const required=[...document.querySelectorAll('#requirements input:checked')].map(e=>e.value),result=choose(required);
+ byId('selected').textContent=result.selected?'Selected: '+data.names[result.selected]:'No supported choice';
+ byId('selected').dataset.variant=result.selected||'none';
+ byId('selection-note').textContent=result.selected?'Lowest supplied energy in the same storage test among circuits that meet every selected requirement.':'None of these controllers has passing evidence for every requirement. Another circuit may still work.';
+ byId('candidate-rows').replaceChildren();
+ for(const c of result.candidates){const tr=element('tr');tr.append(element('td',data.names[c.variant]),element('td',c.eligible?'Yes':'No'),element('td',c.eligible?'All selected measured requirements met':c.reasons.join('; ')),element('td',(c.work*1e6).toFixed(6)+' uJ'));byId('candidate-rows').append(tr);}
+}
+for(const b of document.querySelectorAll('[data-preset]'))b.addEventListener('click',()=>{const required=data.presets[b.dataset.preset];for(const input of document.querySelectorAll('#requirements input'))input.checked=required.includes(input.value);updateDecision();});
+// Check each declared preset against the Python selector before enabling the lesson.
+for(const [key,required] of Object.entries(data.presets)){if(choose(required).selected!==data.expected_choices[key])throw new Error('Selection parity failed: '+key);}
+updateDecision();
+</script>
+</body></html>

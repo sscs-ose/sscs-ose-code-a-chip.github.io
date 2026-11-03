@@ -1,0 +1,378 @@
+{
+  "version": "0.21",
+  "variants": [
+    "original",
+    "digital_guard",
+    "reference_supervisor"
+  ],
+  "names": {
+    "original": "Published POR",
+    "digital_guard": "POR + guard",
+    "reference_supervisor": "Reference controller"
+  },
+  "options": {
+    "retention_only": "Restoration not exercised: desired state was already present",
+    "setup_missing": "The other state was not written",
+    "reset_missed": "The other state was written, but reset missed",
+    "restoration_observed": "Reset changed the written state to the target within the test limits",
+    "storage_preserved": "The stored data was kept in the no-event test",
+    "unresolved": "Simulation incomplete; no verdict"
+  },
+  "questions": [
+    {
+      "id": "cold_original",
+      "title": "Published POR: -40 C, reset after 1.35 V dip",
+      "source": "primary/cold_shallow_original",
+      "expected": "setup_missing",
+      "reason": "The trace does not establish cold readiness and a verified ordinary Q=1 write. Q ending near zero cannot demonstrate reset of Q=1.",
+      "witnesses": {
+        "cold_ready": false,
+        "prior_Q1_verified": false,
+        "requirement_met": false,
+        "final_Q_V": 6.166842268488732e-10,
+        "recovery_state_met": true
+      }
+    },
+    {
+      "id": "hot_original",
+      "title": "Published POR: 125 C, reset after 1.35 V dip",
+      "source": "primary/hot_shallow_original",
+      "expected": "reset_missed",
+      "reason": "Cold readiness and the ordinary Q=1 write are verified, but recovery fails the declared contract. A completed simulation and released reset do not establish Q=0.",
+      "witnesses": {
+        "cold_ready": true,
+        "prior_Q1_verified": true,
+        "requirement_met": false,
+        "final_Q_V": 1.799999916428766,
+        "recovery_state_met": false
+      }
+    },
+    {
+      "id": "hot_reference",
+      "title": "Reference controller: 125 C, reset after 1.35 V dip",
+      "source": "primary/hot_shallow_reference_supervisor",
+      "expected": "restoration_observed",
+      "reason": "Cold readiness and the ordinary Q=1 write are verified. Recovery reaches the declared Q=0 band and reset-release contract. This is finite schematic evidence.",
+      "witnesses": {
+        "cold_ready": true,
+        "prior_Q1_verified": true,
+        "requirement_met": true,
+        "final_Q_V": 1.2777157551073607e-07,
+        "recovery_state_met": true
+      }
+    },
+    {
+      "id": "storage_control",
+      "title": "Published POR: 27 C, store Q=1",
+      "source": "primary/nominal_storage_original",
+      "expected": "storage_preserved",
+      "reason": "This is a no-dip storage control. The ordinary write established Q=1 and the storage/reset-inactive checks pass. Restoring Q=0 would violate this requirement.",
+      "witnesses": {
+        "cold_ready": true,
+        "prior_Q1_verified": true,
+        "requirement_met": true,
+        "final_Q_V": 1.7999999995508145,
+        "recovery_state_met": false
+      }
+    }
+  ],
+  "presets": {
+    "limited": [
+      "nominal_storage"
+    ],
+    "nominal_reset": [
+      "nominal_storage",
+      "nominal_shallow"
+    ],
+    "expanded": [
+      "nominal_storage",
+      "cold_shallow",
+      "hot_shallow",
+      "trough_cold_storage",
+      "trough_hot_storage"
+    ],
+    "unmeasured": [
+      "nominal_storage",
+      "unmeasured_short_zero"
+    ]
+  },
+  "rows": [
+    {
+      "condition": "cold_storage",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": false,
+      "prior_verified": false,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 2.422849800194939e-07
+    },
+    {
+      "condition": "cold_storage",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.014634507805165e-06
+    },
+    {
+      "condition": "cold_shallow",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": false,
+      "prior_verified": false,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 2.4228500425370025e-07
+    },
+    {
+      "condition": "cold_shallow",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.0063177563976316e-06
+    },
+    {
+      "condition": "nominal_storage",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 8.944659672138323e-07
+    },
+    {
+      "condition": "nominal_storage",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.255021827903141e-06
+    },
+    {
+      "condition": "nominal_shallow",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 8.946526422980986e-07
+    },
+    {
+      "condition": "nominal_shallow",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.2466641280087653e-06
+    },
+    {
+      "condition": "hot_storage",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 6.164672525827064e-07
+    },
+    {
+      "condition": "hot_storage",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.5879719310562741e-06
+    },
+    {
+      "condition": "hot_shallow",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 6.164641642363711e-07
+    },
+    {
+      "condition": "hot_shallow",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.5796891748526232e-06
+    },
+    {
+      "condition": "nominal_analog",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.4807947256571763e-06
+    },
+    {
+      "condition": "nominal_analog",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.1875445919422237e-06
+    },
+    {
+      "condition": "cold_storage",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": false,
+      "prior_verified": false,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 2.5389780004208105e-07
+    },
+    {
+      "condition": "cold_shallow",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": false,
+      "prior_verified": false,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 2.5328132201325933e-07
+    },
+    {
+      "condition": "nominal_storage",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 9.069367454208334e-07
+    },
+    {
+      "condition": "nominal_shallow",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 9.069569318252966e-07
+    },
+    {
+      "condition": "hot_storage",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 6.359775105896031e-07
+    },
+    {
+      "condition": "hot_shallow",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 6.354985744167178e-07
+    },
+    {
+      "condition": "nominal_analog",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.4933713710442835e-06
+    },
+    {
+      "condition": "trough_cold_storage",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": false,
+      "prior_verified": false,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 2.4228481755926714e-07
+    },
+    {
+      "condition": "trough_cold_storage",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": false,
+      "prior_verified": false,
+      "functional_requirement_met": false,
+      "source_work_delivered_J": 2.5366090541301243e-07
+    },
+    {
+      "condition": "trough_cold_storage",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.0134311316711127e-06
+    },
+    {
+      "condition": "trough_nominal_storage",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 8.946526583990056e-07
+    },
+    {
+      "condition": "trough_nominal_storage",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 9.071470085535736e-07
+    },
+    {
+      "condition": "trough_nominal_storage",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.2538147379833199e-06
+    },
+    {
+      "condition": "trough_hot_storage",
+      "variant": "original",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 6.164665153190316e-07
+    },
+    {
+      "condition": "trough_hot_storage",
+      "variant": "digital_guard",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 6.35856480666715e-07
+    },
+    {
+      "condition": "trough_hot_storage",
+      "variant": "reference_supervisor",
+      "status": "completed",
+      "cold_pass": true,
+      "prior_verified": true,
+      "functional_requirement_met": true,
+      "source_work_delivered_J": 1.5867743730515194e-06
+    }
+  ],
+  "expected_choices": {
+    "limited": "original",
+    "nominal_reset": "digital_guard",
+    "expanded": "reference_supervisor",
+    "unmeasured": null
+  },
+  "scope": "Saved audited schematic data. Controls select and explain existing evidence; no fresh simulation, new temperature, physical qualification or lifetime ranking."
+}
