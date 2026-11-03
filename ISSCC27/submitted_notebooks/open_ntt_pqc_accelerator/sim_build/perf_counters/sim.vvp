@@ -1,0 +1,150 @@
+#! /usr/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/system.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2005_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/va_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2009.vpi";
+S_0x635dbfde04f0 .scope package, "$unit" "$unit" 2 1;
+ .timescale -9 -12;
+S_0x635dbfde06a0 .scope module, "perf_counters" "perf_counters" 3 9;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rst_n";
+    .port_info 2 /INPUT 1 "sample_en";
+    .port_info 3 /INPUT 1 "is_busy";
+    .port_info 4 /INPUT 1 "is_stall";
+    .port_info 5 /INPUT 24 "coeff_bus";
+    .port_info 6 /OUTPUT 32 "total_cycles";
+    .port_info 7 /OUTPUT 32 "compute_cycles";
+    .port_info 8 /OUTPUT 32 "stall_cycles";
+    .port_info 9 /OUTPUT 32 "toggle_count";
+P_0x635dbfde0830 .param/l "WIDTH" 0 3 10, +C4<00000000000000000000000000011000>;
+o0x7154f80b7138 .functor BUFZ 1, C4<z>; HiZ drive
+v0x635dbfe330b0_0 .net "clk", 0 0, o0x7154f80b7138;  0 drivers
+o0x7154f80b7168 .functor BUFZ 24, C4<zzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x635dbfe33190_0 .net "coeff_bus", 23 0, o0x7154f80b7168;  0 drivers
+v0x635dbfe33270_0 .var "compute_cycles", 31 0;
+o0x7154f80b71c8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x635dbfe33330_0 .net "is_busy", 0 0, o0x7154f80b71c8;  0 drivers
+o0x7154f80b71f8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x635dbfe333f0_0 .net "is_stall", 0 0, o0x7154f80b71f8;  0 drivers
+v0x635dbfe33500_0 .var "prev_coeff", 23 0;
+o0x7154f80b7258 .functor BUFZ 1, C4<z>; HiZ drive
+v0x635dbfe335e0_0 .net "rst_n", 0 0, o0x7154f80b7258;  0 drivers
+o0x7154f80b7288 .functor BUFZ 1, C4<z>; HiZ drive
+v0x635dbfe336a0_0 .net "sample_en", 0 0, o0x7154f80b7288;  0 drivers
+v0x635dbfe33760_0 .var "stall_cycles", 31 0;
+v0x635dbfe33840_0 .var "toggle_count", 31 0;
+v0x635dbfe33920_0 .var "total_cycles", 31 0;
+E_0x635dbfe1b150/0 .event negedge, v0x635dbfe335e0_0;
+E_0x635dbfe1b150/1 .event posedge, v0x635dbfe330b0_0;
+E_0x635dbfe1b150 .event/or E_0x635dbfe1b150/0, E_0x635dbfe1b150/1;
+S_0x635dbfe0a720 .scope function.vec4.s5, "count_toggles" "count_toggles" 3 28, 3 28 0, S_0x635dbfde06a0;
+ .timescale -9 -12;
+v0x635dbfe0a920_0 .var "cnt", 4 0;
+; Variable count_toggles is vec4 return value of scope S_0x635dbfe0a720
+v0x635dbfe32cd0_0 .var "curr", 23 0;
+v0x635dbfe32dc0_0 .var "diff", 23 0;
+v0x635dbfe32ea0_0 .var/i "i", 31 0;
+v0x635dbfe32fd0_0 .var "prev", 23 0;
+TD_perf_counters.count_toggles ;
+    %load/vec4 v0x635dbfe32cd0_0;
+    %load/vec4 v0x635dbfe32fd0_0;
+    %xor;
+    %store/vec4 v0x635dbfe32dc0_0, 0, 24;
+    %pushi/vec4 0, 0, 5;
+    %store/vec4 v0x635dbfe0a920_0, 0, 5;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x635dbfe32ea0_0, 0, 32;
+T_0.0 ;
+    %load/vec4 v0x635dbfe32ea0_0;
+    %cmpi/s 24, 0, 32;
+    %jmp/0xz T_0.1, 5;
+    %load/vec4 v0x635dbfe32dc0_0;
+    %load/vec4 v0x635dbfe32ea0_0;
+    %part/s 1;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.2, 8;
+    %load/vec4 v0x635dbfe0a920_0;
+    %addi 1, 0, 5;
+    %store/vec4 v0x635dbfe0a920_0, 0, 5;
+T_0.2 ;
+    %load/vec4 v0x635dbfe32ea0_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x635dbfe32ea0_0, 0, 32;
+    %jmp T_0.0;
+T_0.1 ;
+    %load/vec4 v0x635dbfe0a920_0;
+    %ret/vec4 0, 0, 5;  Assign to count_toggles (store_vec4_to_lval)
+    %end;
+    .scope S_0x635dbfde06a0;
+T_1 ;
+    %wait E_0x635dbfe1b150;
+    %load/vec4 v0x635dbfe335e0_0;
+    %nor/r;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x635dbfe33920_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x635dbfe33270_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x635dbfe33760_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x635dbfe33840_0, 0;
+    %pushi/vec4 0, 0, 24;
+    %assign/vec4 v0x635dbfe33500_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x635dbfe336a0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x635dbfe33920_0;
+    %addi 1, 0, 32;
+    %assign/vec4 v0x635dbfe33920_0, 0;
+    %load/vec4 v0x635dbfe33330_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_1.6, 9;
+    %load/vec4 v0x635dbfe333f0_0;
+    %nor/r;
+    %and;
+T_1.6;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.4, 8;
+    %load/vec4 v0x635dbfe33270_0;
+    %addi 1, 0, 32;
+    %assign/vec4 v0x635dbfe33270_0, 0;
+T_1.4 ;
+    %load/vec4 v0x635dbfe333f0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.7, 8;
+    %load/vec4 v0x635dbfe33760_0;
+    %addi 1, 0, 32;
+    %assign/vec4 v0x635dbfe33760_0, 0;
+T_1.7 ;
+    %load/vec4 v0x635dbfe33840_0;
+    %load/vec4 v0x635dbfe33190_0;
+    %load/vec4 v0x635dbfe33500_0;
+    %store/vec4 v0x635dbfe32fd0_0, 0, 24;
+    %store/vec4 v0x635dbfe32cd0_0, 0, 24;
+    %callf/vec4 TD_perf_counters.count_toggles, S_0x635dbfe0a720;
+    %pad/u 32;
+    %add;
+    %assign/vec4 v0x635dbfe33840_0, 0;
+    %load/vec4 v0x635dbfe33190_0;
+    %assign/vec4 v0x635dbfe33500_0, 0;
+T_1.2 ;
+T_1.1 ;
+    %jmp T_1;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "-";
+    "/home/faisal/vlsi_project/sscs-ose-code-a-chip.github.io/ISSCC27/submitted_notebooks/open_ntt_pqc_accelerator/src/perf_counters.v";
