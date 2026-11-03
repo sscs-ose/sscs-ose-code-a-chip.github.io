@@ -1,0 +1,228 @@
+{
+ "design": "q1_nvt1",
+ "final_pass": true,
+ "environment": {
+  "ngspice": "ngspice-42",
+  "sky130_sources": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+  "sky130_library": "sky130A/libs.tech/ngspice/sky130.lib.spice",
+  "python": "3.14.6",
+  "numpy": "2.5.4",
+  "matplotlib": "3.11.2"
+ },
+ "switch_params": "WS=4 MS=1",
+ "declared_set": {
+  "conditions": 45,
+  "supplies_V": [
+   1.6,
+   1.8,
+   1.95
+  ],
+  "temperatures_C": [
+   -40,
+   27,
+   125
+  ],
+  "corners": [
+   "tt",
+   "ss",
+   "ff",
+   "sf",
+   "fs"
+  ],
+  "sequences": [
+   "cal_alt",
+   "pair",
+   "stair",
+   "mem"
+  ],
+  "counted_samples": 5490
+ },
+ "checks": [
+  {
+   "check": "parent residual, primary timing, 45 conditions × 4 sequences (5490 counted samples), early and late windows",
+   "criterion": "max|r| ≤ 1 LSB",
+   "result": "0.319 LSB at fs_1.60V_+125C",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "25 mV levels at 4 conditions",
+   "criterion": "max|r| ≤ 1 LSB",
+   "result": "0.319 LSB at fs_1.60V_+125C",
+   "verdict": "PASS",
+   "role": "supporting"
+  },
+  {
+   "check": "sensitivities: edges 0.1/0.5 ns, φ/φ̄ skew ±50 ps, Iref ±20 %, Cs ±10 %",
+   "criterion": "max|r| ≤ 1 LSB",
+   "result": "0.482 LSB (iref_-20%, fs_1.60V_+125C)",
+   "verdict": "PASS",
+   "role": "supporting"
+  },
+  {
+   "check": "numerics at fs_1.60V_+125C (cal_alt): tmax 2 ps/reltol 1e-6; gear",
+   "criterion": "|Δ| ≤ 0.02 mV and margin > |Δ|",
+   "result": "Δ +0.003 / -0.006 µV; margin 0.399 mV",
+   "verdict": "PASS",
+   "role": "supporting"
+  },
+  {
+   "check": "driver loop, 135 condition/level points, acquisition and hold loads",
+   "criterion": "PM ≥ 45°, GM ≥ 10 dB",
+   "result": "PM ≥ 66.5°, GM ≥ 14.4 dB",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "driver saturation margins vds − vdsat (all non-diode-connected devices)",
+   "criterion": "design target ≥ 50 mV; bounded worst-corner reduction allowed if still saturated",
+   "result": "min 31 mV (xm2, sf_1.60V_+125C, 1.2 V); 2 point(s) below 50 mV — input pair at the top of the range, 1.60 V supply; still saturated",
+   "verdict": "PASS (bounded corner reduction)",
+   "role": "closure"
+  },
+  {
+   "check": "ringing in the read windows (peak-to-peak)",
+   "criterion": "≤ 0.1 LSB",
+   "result": "0.014 LSB",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "sampled noise, 90 condition/level points (switch at the kT/C floor, 1 mHz–50 GHz)",
+   "criterion": "≤ 146 µV rms (unresolved within 3 µV)",
+   "result": "130.2 µV (0.222 LSB) at sf_1.60V_+125C, 0.6 V",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "no-cancellation certificate (M = sum of component maxima)",
+   "criterion": "M ≤ 1 LSB; otherwise paired/pointwise analysis required",
+   "result": "max M 0.377 LSB; certified at every condition",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "STRESS timing (full-scale input step at switch closure)",
+   "criterion": "diagnostic",
+   "result": "2.8–22.2 LSB (fs_1.60V_+125C worst)",
+   "verdict": "reported",
+   "role": "diagnostic"
+  },
+  {
+   "check": "switch terminal voltages, steady (end of each clock phase)",
+   "criterion": "|VGS|,|VGD|,|VDS| within each device class's documented model-validity range (3.3 V native NMOS ≤ 3.30 V) (model validity)",
+   "result": "max 1.353 V of 3.30 V (MS vgs, ss_1.95V_-40C)",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "switch NMOS body-source voltage, reverse",
+   "criterion": "within each device class's documented model-validity range (3.3 V native NMOS ≥ −3.30 V)",
+   "result": "min -1.211 V (MS)",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "switch MOS body-source voltage, forward (all instants)",
+   "criterion": "within each device class's documented body-source model-validity range (3.3 V native NMOS ≤ +0.0 V) (A3)",
+   "result": "max -0.575 V vs +0.0 V (MS, ss_1.95V_-40C primary); 0.000 ns/cycle beyond the limit",
+   "verdict": "PASS",
+   "role": "closure"
+  },
+  {
+   "check": "switch terminal voltages, transient (all instants)",
+   "criterion": "reported (A8); |VGS|,|VGD|,|VDS| against each device class's documented model-validity range (3.3 V native NMOS ≤ 3.30 V)",
+   "result": "peak 1.37 V of 3.30 V (MS vgs, ss_1.95V_-40C); inside the domain at every instant",
+   "verdict": "reported",
+   "role": "diagnostic"
+  }
+ ],
+ "worst_parent": {
+  "tag": "fs_1.60V_+125C",
+  "max_abs_r_mV": 0.186685167415934,
+  "max_abs_r_LSB": 0.3186093523898607,
+  "components_mV": {
+   "rS": 0.2026280745340836,
+   "rP": 0.016434408943611027,
+   "rH": 0.0020645332583504265
+  },
+  "worst_cycle": {
+   "seq": "cal_alt",
+   "k": 5,
+   "u": 1.2,
+   "prev": 0.6,
+   "pre": 1.1986391907453415,
+   "yE": 1.194698988210894,
+   "yL": 1.19469894,
+   "ppE": 9.99999993922529e-09,
+   "ppL": 0.0,
+   "rE": 0.000186685167415934,
+   "rL": 0.000184630219780324,
+   "rS": 0.0002026280745340836,
+   "rP": -1.5942907118149602e-05,
+   "rH": -2.054947635609988e-06
+  }
+ },
+ "calibration_spread": {
+  "offset_mV": [
+   -6.87607606496754,
+   -3.09456756071963
+  ],
+  "gain_err_mV_per_V": [
+   1.3004351790774082,
+   2.6491887981011653
+  ]
+ },
+ "cost": {
+  "supply_current_uA_tt": 784,
+  "supply_current_uA_max": 977,
+  "driver_transistors": 22,
+  "driver_gate_area_um2": 1421.2,
+  "driver_ideal_C": "CC=5p CF3=2p CF4=2p CF1=2p CF2=2p CO=4p CF5=2p",
+  "driver_ideal_R": "RZ=0.3k RF3=100k RF4=100k RF1=100k RF2=100k RF5=100k",
+  "switch_transistors": 1,
+  "Cs_pF": 1.0,
+  "clock_phases": 2
+ },
+ "design_summary": {
+  "driver": "folded-cascode first stage (native-threshold NMOS pair), PMOS common-source second stage, Miller Cc + Rz, output capacitor; bias lines RC-filtered",
+  "sampling switch": "native thick-oxide NMOS (sky130_fd_pr__nfet_03v3_nvt, W 4 µm, L 0.5 µm), gate driven directly by the track clock; no bootstrap",
+  "Cs": "1 pF",
+  "clock": "two complementary phases, 0.2 ns edges, 100 ns period, 40 ns acquisition",
+  "supply current": "784 µA at tt (max 977 µA over the declared set)",
+  "devices": "driver 22 transistors, switch 1",
+  "ideal passives in the driver": "CC=5p CF3=2p CF4=2p CF1=2p CF2=2p CO=4p CF5=2p; RZ=0.3k RF3=100k RF4=100k RF1=100k RF2=100k RF5=100k"
+ },
+ "prose": {
+  "final_cycles": "5,490",
+  "final_conditions": "45",
+  "worst_r_lsb": "0.32",
+  "worst_tag": "fs_1.60V_+125C",
+  "worst_noise_uv": "130",
+  "i_tt_ua": "784",
+  "i_max_ua": "977",
+  "pm_min": "66",
+  "gm_min": "14",
+  "i_min_ua": "622",
+  "offset_range_mv": "-6.9 to -3.1",
+  "gain_range": "1.3 to 2.6",
+  "rp_max_mv": "0.021",
+  "rs_max_mv": "0.203",
+  "sat_min_mv": "31",
+  "sat_corner_r_lsb": "0.17",
+  "driver_transistors": "22",
+  "switch_transistors": "1",
+  "dev_peak_v": "1.37",
+  "cs_note": "; ±10 % verified",
+  "clock_note": "; 0.1–0.5 ns edges and ±50 ps phase skew verified",
+  "iref_note": "; ±20 % verified",
+  "numerics_note": "Rerunning the worst condition with a 2 ps step and tighter tolerances, and with Gear integration, changes the worst residual by less than 0.01 µV.",
+  "robustness_note": "Levels on a 25 mV grid at the worst conditions give at most 0.32 `VLSB`. Clock edges of 0.1 and 0.5 ns, ±50 ps phase skew, ±20 % bias current, and ±10 % `Cs` move the worst residual to at most 0.48 `VLSB`.",
+  "sens_sentence": "Sensitivity runs at nominal and the worst conditions vary the clock edges (0.1 and 0.5 ns), the skew between the two clock phases (±50 ps), the bias reference (±20 %), and `Cs` (±10 %).",
+  "numerics_method_sentence": "the worst condition is rerun with a 2 ps step and tighter tolerances, and with Gear instead of trapezoidal integration.",
+  "appendix_clock_note": " (the edge and skew sweeps of Section 3.5 stand in for them)",
+  "level_grids": "0.1 V pairs, 50 mV and 25 mV staircases",
+  "stress_source": "",
+  "stress_range_lsb": "2.8–22.2"
+ }
+}

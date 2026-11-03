@@ -1,0 +1,13 @@
+* Ideal reference driver for isolating the sampling network (R3 switch study).
+* Behavioural, not a circuit proposal: unity-gain command path with a single pole
+* (tau = 2 ns, -3 dB at 80 MHz), zero static error, and a frequency-flat 100 ohm output
+* resistance. Same ports as drv_f2 so it can replace it in shbench.
+* ibias is terminated by a resistor so that the bench's IREF has a DC path.
+.subckt drv_ideal vcmd fb out ibias vdd vss
+E1  x  vss vcmd vss 1
+RF  x  y   2k
+C1  y  vss 1p
+E2  z  vss y vss 1
+RO  z  out 100
+RB  ibias vss 10k
+.ends drv_ideal

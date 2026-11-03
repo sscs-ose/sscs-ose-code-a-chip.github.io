@@ -1,0 +1,24 @@
+* Small-step port comparison (SMALL_STEP_PORT_COMPARISON.md): input step, switch as R_if.
+* Cs is connected to the driver output through R_if throughout and settles with the
+* input at @VCMD0@ V; at 25 ns the input steps to @VTARGET@ V (0.1 ns ramp).
+.lib "@PDK_LIB@" @CORNER@
+.temp @TEMP@
+.include "@OUTDIR@/@SRCFILE@"
+.option reltol=@RELTOL@ vntol=1e-7 abstol=1e-13
+VDD vdd 0 1.8
+IREF vdd ibias @IREF@
+XSRC vcmd out out ibias vdd 0 src2
+VCMD vcmd 0 PWL(0 @VCMD0@ 25n @VCMD0@ 25.1n @VTARGET@)
+RIF out samp @RIF@
+CS samp 0 @CS@
+.control
+save v(out) v(samp) v(xsrc.x) v(vcmd) @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[id] @m.xsrc.xm7.msky130_fd_pr__nfet_01v8[id] @m.xsrc.xm1.msky130_fd_pr__nfet_01v8_lvt[id] @m.xsrc.xm2.msky130_fd_pr__nfet_01v8_lvt[id]
+tran 10p 225n 0 @TMAX@
+let i_m6 = @m.xsrc.xm6.msky130_fd_pr__pfet_01v8_lvt[id]
+let i_m7 = @m.xsrc.xm7.msky130_fd_pr__nfet_01v8[id]
+let i_m1 = @m.xsrc.xm1.msky130_fd_pr__nfet_01v8_lvt[id]
+let i_m2 = @m.xsrc.xm2.msky130_fd_pr__nfet_01v8_lvt[id]
+linearize v(out) v(samp) v(xsrc.x) v(vcmd) i_m6 i_m7 i_m1 i_m2
+wrdata @OUTDIR@/tran.dat v(out) v(samp) v(xsrc.x) v(vcmd) i_m6 i_m7 i_m1 i_m2
+.endc
+.end

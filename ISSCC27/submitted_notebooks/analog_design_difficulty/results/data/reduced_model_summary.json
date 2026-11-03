@@ -1,0 +1,206 @@
+{
+  "baseline": {
+    "A_e": 9.0,
+    "tau_d_ns": 20.0,
+    "Rout_ohm": 2000.0,
+    "Co_pF": 0.5,
+    "Cs_pF": 1.0,
+    "Ctotal_pF": 1.5,
+    "Vtarget_V": 0.9,
+    "epsilon_mV": 2.0,
+    "Tblk_ns": 80.0,
+    "representative_Tacq_ns": 29.999999999999996,
+    "representative_DeltaVprev_V": 0.3
+  },
+  "validation": {
+    "dc_equilibrium": {
+      "Vd_V": 0.9,
+      "Vout_V": 0.9,
+      "max_equation_residual_V_per_s": 1.0479906601782811e-08,
+      "max_relative_equation_residual": 2.3288681337295137e-17
+    },
+    "characteristic_denominator": {
+      "coefficients_descending": [
+        6e-17,
+        2.3e-08,
+        10.0
+      ],
+      "formula": "tau_d*Rout*C_T*s^2 + (tau_d + Rout*C_T)*s + (1 + A_e)"
+    },
+    "poles_rad_per_s": {
+      "from_denominator": [
+        [
+          -191666666.66666663,
+          -360458812.56470275
+        ],
+        [
+          -191666666.66666663,
+          360458812.56470275
+        ]
+      ],
+      "from_state_matrix": [
+        [
+          -191666666.6666667,
+          -360458812.5647028
+        ],
+        [
+          -191666666.6666667,
+          360458812.5647028
+        ]
+      ],
+      "max_abs_difference": 8.429369702178807e-08
+    },
+    "Gcmd": {
+      "numerator": [
+        10.0
+      ],
+      "denominator": [
+        6e-17,
+        2.3e-08,
+        10.0
+      ],
+      "max_complex_spotcheck_error": 2.220446049250313e-16
+    },
+    "Zout_cl": {
+      "numerator": [
+        4e-05,
+        2000.0
+      ],
+      "denominator": [
+        6e-17,
+        2.3e-08,
+        10.0
+      ],
+      "definition": "-Vout/Idist",
+      "max_complex_spotcheck_error_ohm": 1.1368683772161603e-13
+    },
+    "exact_vs_solve_ivp": {
+      "max_absolute_state_difference_V": 1.8042389804406866e-10,
+      "max_relative_difference": 6.014129934802288e-10
+    }
+  },
+  "cases": {
+    "input_step": {
+      "command_start_V": 0.6,
+      "Vtarget_V": 0.9,
+      "Tblk_ns": 80.0,
+      "Ecmd_mV": 7.427258896797184e-05,
+      "epsilon_mV": 2.0,
+      "pass": true
+    },
+    "zero_charge_control": {
+      "DeltaVprev_V": 0.0,
+      "Tacq_ns": 29.999999999999996,
+      "Eacq_mV": 0.0,
+      "pass": true
+    },
+    "connection": {
+      "DeltaVprev_V": 0.3,
+      "Vprev_V": 0.6000000000000001,
+      "Vout_0plus_V": 0.7000000000000001,
+      "initial_output_error_mV": 199.99999999999994,
+      "Tacq_ns": 29.999999999999996,
+      "Eacq_mV": 0.1309586872072499,
+      "epsilon_mV": 2.0,
+      "pass": true
+    },
+    "matched_comparison": {
+      "DeltaVprev_V": 0.3,
+      "matched_A0_command_start_V": 0.7000000000000001,
+      "matched_A0_command_amplitude_V": 0.19999999999999996,
+      "input_step_initial_output_error_mV": 199.99999999999994,
+      "connection_initial_output_error_mV": 199.99999999999994,
+      "initial_error_match_abs_uV": 0.0,
+      "same_Ctotal_pF": 1.5,
+      "comparison_interval_ns": 80.0,
+      "max_abs_normalized_Vout_difference": 0.4592725729654058,
+      "time_of_max_difference_ns": 3.0,
+      "normalized_Vout_at_30ns": {
+        "command": -0.0022399638993531134,
+        "disturbance": 0.0006547934360362424,
+        "abs_difference": 0.0028947573353893556
+      }
+    },
+    "acquisition_times": {
+      "DeltaVprev_V": 0.3,
+      "Tacq_ns": [
+        29.999999999999996,
+        45.0,
+        59.99999999999999,
+        80.0
+      ],
+      "Eacq_mV": [
+        0.1309586872072499,
+        0.024371688373769906,
+        0.002176746519588768,
+        2.7900021293270072e-05
+      ]
+    }
+  },
+  "local_sensitivity": [
+    {
+      "parameter": "A_e",
+      "factor": 0.8,
+      "value": 7.2,
+      "connection_error_at_30ns_mV": 0.6187046252918993,
+      "matched_max_abs_normalized_difference_0_40ns": 0.4840486389015326,
+      "matched_time_of_max_difference_ns": 3.2
+    },
+    {
+      "parameter": "A_e",
+      "factor": 1.2,
+      "value": 10.799999999999999,
+      "connection_error_at_30ns_mV": 0.6577592205749827,
+      "matched_max_abs_normalized_difference_0_40ns": 0.43861301073842907,
+      "matched_time_of_max_difference_ns": 2.8000000000000003
+    },
+    {
+      "parameter": "tau_d",
+      "factor": 0.8,
+      "value": 1.6e-08,
+      "connection_error_at_30ns_mV": 0.5533174348439918,
+      "matched_max_abs_normalized_difference_0_40ns": 0.42551888510684543,
+      "matched_time_of_max_difference_ns": 2.7
+    },
+    {
+      "parameter": "tau_d",
+      "factor": 1.2,
+      "value": 2.4e-08,
+      "connection_error_at_30ns_mV": 0.6242293824900713,
+      "matched_max_abs_normalized_difference_0_40ns": 0.48712887824747264,
+      "matched_time_of_max_difference_ns": 3.2
+    },
+    {
+      "parameter": "Rout",
+      "factor": 0.8,
+      "value": 1600.0,
+      "connection_error_at_30ns_mV": 0.18836405563849024,
+      "matched_max_abs_normalized_difference_0_40ns": 0.49339331925063024,
+      "matched_time_of_max_difference_ns": 2.6
+    },
+    {
+      "parameter": "Rout",
+      "factor": 1.2,
+      "value": 2400.0,
+      "connection_error_at_30ns_mV": 0.9069566772923476,
+      "matched_max_abs_normalized_difference_0_40ns": 0.43164475008237013,
+      "matched_time_of_max_difference_ns": 3.3000000000000003
+    },
+    {
+      "parameter": "Co",
+      "factor": 0.8,
+      "value": 4e-13,
+      "connection_error_at_30ns_mV": 0.25078182085214173,
+      "matched_max_abs_normalized_difference_0_40ns": 0.4697953138515145,
+      "matched_time_of_max_difference_ns": 2.9
+    },
+    {
+      "parameter": "Co",
+      "factor": 1.2,
+      "value": 6e-13,
+      "connection_error_at_30ns_mV": 0.08655816518887693,
+      "matched_max_abs_normalized_difference_0_40ns": 0.44945230191551977,
+      "matched_time_of_max_difference_ns": 3.1
+    }
+  ]
+}

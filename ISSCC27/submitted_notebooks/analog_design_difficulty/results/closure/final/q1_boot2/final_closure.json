@@ -1,0 +1,202 @@
+{
+ "design": "q1_boot2",
+ "final_pass": false,
+ "environment": {
+  "ngspice": "ngspice-42",
+  "sky130_sources": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+  "sky130_library": "sky130A/libs.tech/ngspice/sky130.lib.spice",
+  "python": "3.14.6",
+  "numpy": "2.5.4",
+  "matplotlib": "3.11.2"
+ },
+ "switch_params": "WS=2 MS=1 CB=0.2p CZ=50f",
+ "declared_set": {
+  "conditions": 45,
+  "supplies_V": [
+   1.6,
+   1.8,
+   1.95
+  ],
+  "temperatures_C": [
+   -40,
+   27,
+   125
+  ],
+  "corners": [
+   "tt",
+   "ss",
+   "ff",
+   "sf",
+   "fs"
+  ],
+  "sequences": [
+   "cal_alt",
+   "pair",
+   "stair",
+   "mem"
+  ],
+  "counted_samples": 5490
+ },
+ "checks": [
+  {
+   "check": "parent residual, primary timing, 45 conditions × 4 sequences (5490 counted samples), early and late windows",
+   "criterion": "max|r| ≤ 1 LSB",
+   "result": "0.146 LSB at fs_1.60V_+125C",
+   "verdict": "PASS"
+  },
+  {
+   "check": "25 mV levels at 4 conditions",
+   "criterion": "max|r| ≤ 1 LSB",
+   "result": "0.128 LSB at fs_1.60V_+125C",
+   "verdict": "PASS"
+  },
+  {
+   "check": "driver loop, 135 condition/level points, acquisition and hold loads",
+   "criterion": "PM ≥ 45°, GM ≥ 10 dB",
+   "result": "PM ≥ 66.3°, GM ≥ 14.4 dB",
+   "verdict": "PASS"
+  },
+  {
+   "check": "driver saturation margins vds − vdsat (all non-diode-connected devices)",
+   "criterion": "design target ≥ 50 mV; bounded worst-corner reduction allowed if still saturated",
+   "result": "min 31 mV (xm2, sf_1.60V_+125C, 1.2 V); 2 point(s) below 50 mV — input pair at the top of the range, 1.60 V supply; still saturated",
+   "verdict": "PASS (bounded corner reduction)"
+  },
+  {
+   "check": "ringing in the read windows (peak-to-peak)",
+   "criterion": "≤ 0.1 LSB",
+   "result": "0.000 LSB",
+   "verdict": "PASS"
+  },
+  {
+   "check": "sampled noise, 90 condition/level points (switch exactly kT/C, 1 mHz–50 GHz)",
+   "criterion": "≤ 146 µV rms (unresolved within 3 µV)",
+   "result": "136.4 µV (0.233 LSB) at ff_1.95V_+125C, 1.2 V",
+   "verdict": "PASS"
+  },
+  {
+   "check": "no-cancellation certificate (M = sum of component maxima)",
+   "criterion": "M ≤ 1 LSB; otherwise paired/pointwise analysis required",
+   "result": "max M 0.169 LSB; certified at every condition",
+   "verdict": "PASS"
+  },
+  {
+   "check": "STRESS timing (full-scale command step at switch closure)",
+   "criterion": "diagnostic",
+   "result": "2.0–11.6 LSB (sf_1.60V_+125C worst)",
+   "verdict": "reported"
+  },
+  {
+   "check": "switch terminal voltages, steady (end of each clock phase)",
+   "criterion": "|VGS|,|VGD|,|VDS| ≤ 1.95 V (model validity)",
+   "result": "max 1.950 V (MB0 vgs, fs_1.95V_-40C)",
+   "verdict": "PASS"
+  },
+  {
+   "check": "switch NMOS body-source voltage, reverse",
+   "criterion": "within the model range, ≥ −1.95 V",
+   "result": "min -1.950 V",
+   "verdict": "PASS"
+  },
+  {
+   "check": "switch MOS body-source voltage, forward (all instants)",
+   "criterion": "within the model range, NMOS ≤ +0.3 V, PMOS ≤ +0.1 V (A3)",
+   "result": "max +0.465 V vs +0.3 V (MXS, fs_1.95V_+27C stress); 0.018 ns/cycle beyond the limit",
+   "verdict": "FAIL"
+  },
+  {
+   "check": "switch terminal voltages, transient",
+   "criterion": "reported (A8); a peak above 1.95 V lies outside the published SKY130 SPICE-model domain",
+   "result": "peak 2.41 V (MXS vgs, fs_1.95V_+27C); longest above 1.96 V 0.20 ns/cycle (MTN vgs)",
+   "verdict": "reported"
+  }
+ ],
+ "worst_parent": {
+  "tag": "fs_1.60V_+125C",
+  "max_abs_r_mV": 0.08546960633543099,
+  "max_abs_r_LSB": 0.14586812814580224,
+  "components_mV": {
+   "rS": 0.09046060320272442,
+   "rP": 0.008837786892534928,
+   "rH": 1.6792546686571295e-05
+  },
+  "worst_cycle": {
+   "seq": "pair",
+   "k": 49,
+   "u": 0.6,
+   "prev": 1.2,
+   "pre": 0.5984638470124223,
+   "yE": 0.596689399723,
+   "yL": 0.5966893745954048,
+   "ppE": 5.999999941330714e-09,
+   "ppL": 3.000000026176508e-09,
+   "rE": -8.546960633543099e-05,
+   "rL": -8.546580532498016e-05,
+   "rS": -9.046060320272442e-05,
+   "rP": 4.990996867293429e-06,
+   "rH": 3.801010450832365e-09
+  }
+ },
+ "calibration_spread": {
+  "offset_mV": [
+   -3.2251306706646,
+   -1.2285152166415791
+  ],
+  "gain_err_mV_per_V": [
+   -0.9340468378312335,
+   -0.046558843078599775
+  ]
+ },
+ "cost": {
+  "supply_current_uA_tt": 785,
+  "supply_current_uA_max": 979,
+  "driver_transistors": 22,
+  "driver_gate_area_um2": 1421.2,
+  "driver_ideal_C": "CC=5p CF3=2p CF4=2p CF1=2p CF2=2p CO=4p CF5=2p",
+  "driver_ideal_R": "RZ=0.3k RF3=100k RF4=100k RF1=100k RF2=100k RF5=100k",
+  "switch_transistors": 12,
+  "Cs_pF": 1.0,
+  "clock_phases": 2
+ },
+ "design_summary": {
+  "driver": "folded-cascode first stage (native-threshold NMOS pair), PMOS common-source second stage, Miller Cc + Rz, output capacitor; bias lines RC-filtered",
+  "sampling switch": "bootstrapped NMOS (W 2 µm, L 0.15 µm), bootstrap capacitor 0.2 pF, clock-boosted charging device",
+  "Cs": "1 pF",
+  "clock": "two complementary phases, 0.2 ns edges, 100 ns period, 40 ns acquisition",
+  "supply current": "785 µA at tt (max 979 µA over the declared set)",
+  "devices": "driver 22 transistors, switch 12",
+  "ideal passives in the driver": "CC=5p CF3=2p CF4=2p CF1=2p CF2=2p CO=4p CF5=2p; RZ=0.3k RF3=100k RF4=100k RF1=100k RF2=100k RF5=100k"
+ },
+ "prose": {
+  "final_cycles": "5,490",
+  "final_conditions": "45",
+  "worst_r_lsb": "0.15",
+  "worst_tag": "fs_1.60V_+125C",
+  "worst_noise_uv": "136",
+  "i_tt_ua": "785",
+  "i_max_ua": "979",
+  "pm_min": "66",
+  "gm_min": "14",
+  "i_min_ua": "623",
+  "offset_range_mv": "-3.2 to -1.2",
+  "gain_range": "-0.9 to 0.0",
+  "rp_max_mv": "0.011",
+  "rs_max_mv": "0.090",
+  "sat_min_mv": "31",
+  "sat_corner_r_lsb": "0.14",
+  "driver_transistors": "22",
+  "switch_transistors": "12",
+  "dev_peak_v": "2.41",
+  "cs_note": "",
+  "clock_note": "",
+  "iref_note": "",
+  "numerics_note": "The final design was not rerun at finer settings; the 5 ps / 1e-5 default was chosen because it removed the 0.1 mV step artefacts that coarser settings produced with the bootstrapped switch.",
+  "robustness_note": "Levels on a 25 mV grid at the worst conditions give at most 0.13 `VLSB`.",
+  "sens_sentence": "Clock edges, phase skew, bias current, and `Cs` were held at their nominal values in this verification.",
+  "numerics_method_sentence": "for the first-cut transmission gate this setting agreed with finer ones within 0.003 mV, and for the bootstrapped switch it removed 0.1 mV artefacts of coarser settings.",
+  "appendix_clock_note": "",
+  "level_grids": "0.1 V pairs, 50 mV and 25 mV staircases",
+  "stress_source": "",
+  "stress_range_lsb": "2.0–11.6"
+ }
+}

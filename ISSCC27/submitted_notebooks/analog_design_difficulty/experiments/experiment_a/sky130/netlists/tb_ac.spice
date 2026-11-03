@@ -1,0 +1,41 @@
+* Driver bring-up: small-signal checks at Vcmd = Vtarget with the declared 1 pF load
+*  (1) loop gain: feedback opened for AC with a large inductor, AC drive at fb
+*  (2) closed-loop command transfer  Gcmd(f) = v(out)/v(vcmd)
+*  (3) closed-loop output impedance  Zout(f) = v(out)/i_test
+.lib "@PDK_LIB@" @CORNER@
+.temp @TEMP@
+.include "@OUTDIR@/@SRCFILE@"
+VDD vdd 0 1.8
+* --- (1) loop-gain bench
+IREF1 vdd ib1 @IREF@
+VC1 vc1 0 @VTARGET@
+XS1 vc1 fb1 o1 ib1 vdd 0 src2
+LBRK o1 fb1 1G
+CBRK fb1 inj 1
+VINJ inj 0 dc 0 ac 1
+CL1 o1 0 @CLOAD@
+* --- (2) command transfer bench
+IREF2 vdd ib2 @IREF@
+VC2 vc2 0 dc @VTARGET@ ac 1
+XS2 vc2 o2 o2 ib2 vdd 0 src2
+CL2 o2 0 @CLOAD@
+* --- (3) output impedance bench (1 A AC test current into the output)
+IREF3 vdd ib3 @IREF@
+VC3 vc3 0 @VTARGET@
+XS3 vc3 o3 o3 ib3 vdd 0 src2
+CL3 o3 0 @CLOAD@
+ITST 0 o3 dc 0 ac 1
+.control
+ac dec 40 1k 10G
+let lg = -v(o1)/v(fb1)
+let lgdb = db(lg)
+let lgph = 180/pi*cph(lg)
+meas ac f_unity when lgdb=0
+meas ac ph_unity find lgph when lgdb=0
+meas ac a0_db find lgdb at=1e3
+let gm180 = lgph+180
+meas ac f_180 when lgph=-180
+meas ac gmargin_db find lgdb when lgph=-180
+wrdata @OUTDIR@/ac.dat lgdb lgph db(v(o2)) 180/pi*cph(v(o2)) mag(v(o3)) 180/pi*cph(v(o3))
+.endc
+.end

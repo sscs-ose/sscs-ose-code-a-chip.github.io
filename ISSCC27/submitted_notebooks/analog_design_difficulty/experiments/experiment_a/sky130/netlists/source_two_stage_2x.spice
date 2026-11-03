@@ -1,0 +1,31 @@
+* Explanatory second-stage variation (DESIGN_BRIEF.md Section 5, conditional):
+* identical to source_two_stage.spice except that the second stage (M6, M7)
+* has twice the multiplicity, i.e. 200 uA instead of 100 uA. Cc and Rz unchanged.
+*
+* Generic two-stage Miller-compensated op-amp used as a unity-gain source
+* (SKY130 sample-and-hold experiment). Canonical textbook topology; sized from scratch.
+*
+* Ports: vcmd  - non-inverting (command) input
+*        fb    - inverting input (tie to out for unity-gain feedback)
+*        out   - output
+*        ibias - reference current input (sink an external current into this node)
+*        vdd, vss
+*
+* Device flavours: input pair nfet_01v8_lvt, PMOS loads/second stage
+* pfet_01v8_lvt, NMOS current sources nfet_01v8. Units: um.
+.subckt src2 vcmd fb out ibias vdd vss
+* bias mirror (diode-connected reference)
+XM8 ibias ibias vss vss sky130_fd_pr__nfet_01v8      W=5 L=1   m=1
+* first stage: tail, input pair, PMOS mirror load
+XM5 tail  ibias vss vss sky130_fd_pr__nfet_01v8      W=5 L=1   m=2
+XM1 d1    fb    tail vss sky130_fd_pr__nfet_01v8_lvt W=5 L=0.5 m=4
+XM2 x     vcmd  tail vss sky130_fd_pr__nfet_01v8_lvt W=5 L=0.5 m=4
+XM3 d1    d1    vdd vdd sky130_fd_pr__pfet_01v8_lvt  W=5 L=0.5 m=2
+XM4 x     d1    vdd vdd sky130_fd_pr__pfet_01v8_lvt  W=5 L=0.5 m=2
+* second stage: PMOS common source with NMOS current-source load
+XM6 out   x     vdd vdd sky130_fd_pr__pfet_01v8_lvt  W=5 L=0.5 m=40
+XM7 out   ibias vss vss sky130_fd_pr__nfet_01v8      W=5 L=1   m=20
+* Miller compensation with series (zero-moving) resistor; ideal passives
+RZ  x     xc    1.5k
+CC  xc    out   0.5p
+.ends src2
