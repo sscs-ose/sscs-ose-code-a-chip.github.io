@@ -1,0 +1,10 @@
+# capm.10 (SKY130 periphery rules): "capm must not straddle nwell, diff, tap, poly, li1 and met1".
+# Implemented as in the PDK's legacy sky130A.lydrc: any edge of those layers under a capm is flagged, so
+# nothing but met2 (and above) may sit under a MIM cap.  Not checked by sky130A_mr.drc or magic.
+source($input)
+report("capm.10", $report)
+capm = polygons(89, 44)
+{ "nwell" => [64, 20], "diff" => [65, 20], "tap" => [65, 44], "poly" => [66, 20], "li" => [67, 20],
+  "met1" => [68, 20] }.each do |name, (l, d)|
+  polygons(l, d).and(capm).edges.not(capm.edges).output("capm.10", "capm.10 : capm must not straddle #{name}")
+end
