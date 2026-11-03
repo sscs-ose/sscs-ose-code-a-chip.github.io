@@ -1,0 +1,799 @@
+# Fixed PREPARE-to-GDS Tasks; repairs append work to existing owners.
+name: specification-to-gds
+version: 2
+planner: {framework: codex, model: gpt-6.1-sol}
+parameters: {source: specification.source}
+tasks:
+  analyze-source:
+    role: specification-author
+    display_group: design_specification
+    intent: Classify the immutable input as requirements or detailed design and, for requirements input, build a complete
+      evidence-linked ledger whose reviewer-owned status fields are initially null.
+    permission:
+      read: [spec/**, .chip_nebula/ip-library/**]
+      write: [spec/requirements.ledger.json]
+      tools: [git, python3]
+    inputs:
+      source: {type: specification.source, from: $parameters.source}
+    outputs:
+      analysis:
+        type: specification.source-analysis
+        paths: [spec/requirements.ledger.json]
+    gates:
+    - name: ledger-shape
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: chip-nebula
+        arguments: [internal, specification, ledger-shape-gate]
+        expected: REQUIREMENTS_LEDGER_SHAPE_PASS
+        timeout: 120
+        level: L1
+        error_class: ledger_shape_violation
+    max_attempts: 8
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 3600}
+  generate-design-document:
+    role: specification-author
+    display_group: design_specification
+    intent: Turn the source and complete ledger into a detailed design whose interfaces, state, datapath, timing, edge behavior
+      and IP integration are explicit enough to guide implementation and verification.
+    permission:
+      read: [spec/**, .chip_nebula/ip-library/**]
+      write: [spec/design_doc.md]
+      tools: [git, python3]
+    inputs:
+      source: {type: specification.source, from: $parameters.source}
+      analysis: {type: specification.source-analysis, from: $tasks.analyze-source.outputs.analysis}
+    outputs:
+      design:
+        type: design.specification
+        paths: [spec/design_doc.md]
+    max_attempts: 8
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 3600}
+  generate-csir-draft:
+    role: specification-author
+    display_group: design_specification
+    intent: Encode every determined behavior and constraint from the detailed design into one traceable Compact SpecIR bundle,
+      preserving only genuine choices as structured questions and never self-awarding ledger status.
+    permission:
+      read: [spec/**, .chip_nebula/ip-library/**]
+      write: [spec/draft.specir, spec/provenance.json, spec/contracts.json, spec/questions.json]
+      tools: [git, python3]
+    inputs:
+      source: {type: specification.source, from: $parameters.source}
+      analysis: {type: specification.source-analysis, from: $tasks.analyze-source.outputs.analysis}
+      design: {type: design.specification, from: $tasks.generate-design-document.outputs.design}
+    outputs:
+      bundle:
+        type: specification.bundle
+        paths:
+        - spec/requirements.ledger.json
+        - spec/design_doc.md
+        - spec/draft.specir
+        - spec/provenance.json
+        - spec/contracts.json
+        - spec/questions.json
+    gates:
+    - name: ledger-status-protection
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: chip-nebula
+        arguments: [internal, specification, ledger-status-protection]
+        expected: LEDGER_STATUS_PROTECTION_PASS
+        timeout: 120
+        level: L1
+        error_class: ledger_status_violation
+    max_attempts: 10
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 3600}
+  review-requirements-closure:
+    role: requirements-closure-reviewer
+    display_group: design_specification
+    intent: Independently prove source-to-design and design-to-CSIR semantic coverage, update only existing ledger status
+      fields, and identify the earliest predefined Author Task that owns any blocking repair.
+    permission:
+      read: [spec/**, .chip_nebula/ip-library/**]
+      write: [spec/requirements.ledger.json, spec/requirements.review.json]
+      tools: [git, python3]
+    inputs:
+      source: {type: specification.source, from: $parameters.source}
+      analysis: {type: specification.source-analysis, from: $tasks.analyze-source.outputs.analysis}
+      design: {type: design.specification, from: $tasks.generate-design-document.outputs.design}
+      bundle: {type: specification.bundle, from: $tasks.generate-csir-draft.outputs.bundle}
+    outputs:
+      review:
+        type: requirements.review.report
+        paths: [spec/requirements.ledger.json, spec/requirements.review.json]
+    gates:
+    - name: review-integrity
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: chip-nebula
+        arguments: [internal, specification, review-integrity-gate]
+        expected: REQUIREMENTS_REVIEW_INTEGRITY_PASS
+        timeout: 120
+        level: L1
+        error_class: reviewer_write_violation
+    - name: requirements-closure
+      template: script-check
+      version: 1
+      on_failure: report
+      parameters:
+        script: chip-nebula
+        arguments: [internal, specification, ledger-closure-gate]
+        expected: REQUIREMENTS_LEDGER_CLOSURE_PASS
+        timeout: 120
+        level: L1
+        error_class: requirements_unsupported
+    max_attempts: 10
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 3600}
+  spec-compiler:
+    role: spec-compiler
+    display_group: design_specification
+    intent: Deterministically compile only a closure-reviewed bundle, preserving all Error/Warning diagnostics as human-decision
+      inputs without directly scheduling specification-author rework.
+    permission:
+      read: [spec/**]
+      write: []
+      tools: [chip-nebula, python3]
+    inputs:
+      bundle: {type: specification.bundle, from: $tasks.generate-csir-draft.outputs.bundle}
+      review:
+        type: requirements.review.report
+        from: $tasks.review-requirements-closure.outputs.review
+        release: {field: verdict, equals: passed}
+    outputs: {result: spec.compiler.report}
+    execution: {executor: tool, command: chip-nebula internal specification compiler-check, timeout_seconds: 300}
+  consolidate-spec-decisions:
+    role: project-decision-consolidator
+    display_group: design_specification
+    intent: On demand, consolidate Compiler diagnostics and Author questions into one complete non-duplicated human decision
+      batch without editing project files.
+    permission:
+      read: [spec/**]
+      write: []
+      tools: [git, python3]
+    inputs: {}
+    outputs:
+      request: {type: decision.request, schema_version: 2}
+    required: false
+    on_demand: true
+    max_attempts: 6
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 1800}
+  freeze-specification-baseline:
+    role: specification-readiness-auditor
+    display_group: design_specification
+    intent: Publish the signed specification baseline only when matching closure, Compiler and final signoff checks all pass.
+    permission:
+      read: [spec/**]
+      write: []
+      tools: [chip-nebula, python3]
+    inputs:
+      bundle: {type: specification.bundle, from: $tasks.generate-csir-draft.outputs.bundle}
+      review:
+        type: requirements.review.report
+        from: $tasks.review-requirements-closure.outputs.review
+        release: {field: verdict, equals: passed}
+      compiler_result:
+        type: spec.compiler.report
+        from: $tasks.spec-compiler.outputs.result
+        release: {field: failure_kind, equals: ''}
+    outputs:
+      baseline: specification.baseline
+      specification:
+        type: specification.csir
+        paths: [spec/draft.specir, spec/provenance.json, spec/contracts.json, spec/questions.json]
+    execution: {executor: tool, command: chip-nebula internal specification freeze-baseline, timeout_seconds: 300}
+  propose-project-constraint-decisions:
+    role: project-constraints-author
+    display_group: project_constraints
+    intent: Inspect the signed design, CSIR and installed platform inventory and enumerate every unresolved choice affecting
+      synthesis, STA, memory, physical implementation or signoff.
+    permission:
+      read: [spec/**, physical/chip-nebula/**, flow/**, .chip_nebula/ip-library/**]
+      write: [spec/project_constraints.questions.json]
+      tools: [git, python3, yosys, openroad]
+    inputs:
+      design: {type: design.specification, from: $tasks.generate-design-document.outputs.design}
+      bundle: {type: specification.bundle, from: $tasks.generate-csir-draft.outputs.bundle}
+      baseline: {type: specification.baseline, from: $tasks.freeze-specification-baseline.outputs.baseline}
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+    outputs:
+      candidates:
+        type: decision.request
+        schema_version: 2
+        paths: [spec/project_constraints.questions.json]
+    max_attempts: 6
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 3600}
+  consolidate-project-decisions:
+    role: project-decision-consolidator
+    display_group: project_constraints
+    intent: Audit and deduplicate the project-constraint candidate batch while retaining every engineering choice and its
+      exact source marker.
+    permission:
+      read: [spec/**, physical/chip-nebula/**, flow/**, .chip_nebula/ip-library/**]
+      write: []
+      tools: [git, python3]
+    inputs:
+      candidates: {type: decision.request, from: $tasks.propose-project-constraint-decisions.outputs.candidates}
+    outputs:
+      request: {type: decision.request, schema_version: 2}
+    max_attempts: 6
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 1800}
+  generate-project-constraints:
+    role: project-constraints-author
+    display_group: project_constraints
+    intent: After all implementation choices have human answers, materialize one editable draft implementation baseline and
+      matching SDC without guessing.
+    permission:
+      read: [spec/**, physical/chip-nebula/**, flow/**, .chip_nebula/ip-library/**]
+      write: [physical/chip-nebula/implementation.constraints.json, physical/chip-nebula/constraints.sdc]
+      tools: [git, python3, yosys, openroad]
+    inputs:
+      design: {type: design.specification, from: $tasks.generate-design-document.outputs.design}
+      bundle: {type: specification.bundle, from: $tasks.generate-csir-draft.outputs.bundle}
+      baseline: {type: specification.baseline, from: $tasks.freeze-specification-baseline.outputs.baseline}
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+      request: {type: decision.request, from: $tasks.consolidate-project-decisions.outputs.request}
+    outputs:
+      draft:
+        type: implementation.constraints
+        paths: [physical/chip-nebula/implementation.constraints.json, physical/chip-nebula/constraints.sdc]
+    max_attempts: 8
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 3600}
+  freeze-project-constraints:
+    role: prepare-baseline-freezer
+    display_group: project_constraints
+    intent: Wait for page-level confirmation, apply the confirmed edit exactly, validate it and publish frozen implementation
+      constraints.
+    permission:
+      read: [spec/**, physical/chip-nebula/**]
+      write: [physical/chip-nebula/implementation.constraints.json, physical/chip-nebula/constraints.sdc]
+      tools: [chip-nebula, python3]
+    inputs:
+      draft: {type: implementation.constraints, from: $tasks.generate-project-constraints.outputs.draft}
+    outputs:
+      constraints:
+        type: implementation.constraints
+        paths: [physical/chip-nebula/implementation.constraints.json, physical/chip-nebula/constraints.sdc]
+    execution: {executor: tool, command: chip-nebula internal specification freeze-project-constraints, timeout_seconds: 300}
+  generate-acceptance-plan:
+    role: project-verification-architect
+    display_group: acceptance_coverage
+    intent: Propose a measurable whole-project acceptance plan from the signed design, CSIR and frozen constraints, traced
+      only by stable requirement IDs and design groups.
+    permission:
+      read: [spec/**, physical/chip-nebula/**]
+      write: [spec/acceptance.plan.yaml]
+      tools: [git, python3]
+    inputs:
+      design: {type: design.specification, from: $tasks.generate-design-document.outputs.design}
+      bundle: {type: specification.bundle, from: $tasks.generate-csir-draft.outputs.bundle}
+      baseline: {type: specification.baseline, from: $tasks.freeze-specification-baseline.outputs.baseline}
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+      constraints: {type: implementation.constraints, from: $tasks.freeze-project-constraints.outputs.constraints}
+    outputs:
+      draft:
+        type: acceptance.plan
+        paths: [spec/acceptance.plan.yaml]
+    max_attempts: 8
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 3600}
+  freeze-acceptance-plan:
+    role: prepare-baseline-freezer
+    display_group: acceptance_coverage
+    intent: Wait for page-level confirmation, validate the confirmed plan edit and publish the frozen acceptance plan.
+    permission:
+      read: [spec/**, physical/chip-nebula/**]
+      write: [spec/acceptance.plan.yaml]
+      tools: [chip-nebula, python3]
+    inputs:
+      draft: {type: acceptance.plan, from: $tasks.generate-acceptance-plan.outputs.draft}
+      constraints: {type: implementation.constraints, from: $tasks.freeze-project-constraints.outputs.constraints}
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+    outputs:
+      acceptance:
+        type: acceptance.plan
+        paths: [spec/acceptance.plan.yaml]
+    execution: {executor: tool, command: chip-nebula internal specification freeze-acceptance-plan, timeout_seconds: 300}
+  rtl-implementation:
+    role: rtl-designer
+    display_group: rtl_hierarchy
+    intent: Implement the complete synthesizable RTL described by the signed design and CSIR while preserving existing valid
+      project work and external IP boundaries.
+    permission:
+      read: [spec/**, rtl/**, chisel/**, integration/**, vendor/**, ip/**, .chip_nebula/ip-library/**]
+      write: [rtl/**, chisel/**, build/rtl/**, docs/implementation/**]
+      tools: [git, make, python3, sbt, verilator, iverilog, yosys]
+    inputs:
+      design: {type: design.specification, from: $tasks.generate-design-document.outputs.design}
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+    outputs:
+      rtl:
+        type: rtl.snapshot
+        paths: [rtl/**, chisel/**, build/rtl/**, docs/implementation/**]
+    gates:
+    - name: synthesizable-rtl-present
+      kind: file_check
+      on_failure: retry
+      parameters:
+        paths: [rtl/**/*.sv, rtl/**/*.v, build/rtl/**/*.sv, build/rtl/**/*.v]
+        min_files: 1
+        level: L1
+        error_class: rtl_delivery_missing
+    max_attempts: 8
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 5400}
+  full-design-integration:
+    role: integration-engineer
+    display_group: ip_assembly
+    intent: Integrate the implemented RTL with the project's declared IP, memory, clock, reset and bus boundaries; deliver
+      a reproducible elaborated top and dependency lock.
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - chisel/**
+      - vendor/**
+      - ip/**
+      - integration/**
+      - build/rtl/**
+      - docs/implementation/**
+      - physical/chip-nebula/**
+      - .chip_nebula/ip-library/**
+      write: [rtl/integration/**, integration/**, build/integration/**]
+      tools: [git, make, python3, verilator, iverilog, yosys]
+    inputs:
+      design: {type: design.specification, from: $tasks.generate-design-document.outputs.design}
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+      constraints: {type: implementation.constraints, from: $tasks.freeze-project-constraints.outputs.constraints}
+      rtl: {type: rtl.snapshot, from: $tasks.rtl-implementation.outputs.rtl}
+    outputs:
+      integration:
+        type: rtl.integration
+        paths: [rtl/**, chisel/**, integration/**, build/integration/**]
+    max_attempts: 6
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 5400}
+  functional-performance-verify:
+    role: functional-performance-verifier
+    display_group: func_verify
+    intent: Build maintainable verification sources and produce a credible functional, acceptance-coverage and cycle-performance
+      report for the integrated design.
+    permission:
+      read: [spec/**, rtl/**, chisel/**, integration/**, build/integration/**, vendor/**, ip/**, verification/**, tb/**, tests/**]
+      write: [verification/**, tb/**, tests/**, build/verify/**, build/perf/**, reports/verification/**, reports/performance/**]
+      tools: [git, make, python3, verilator, iverilog, vvp]
+    inputs:
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+      acceptance: {type: acceptance.plan, from: $tasks.freeze-acceptance-plan.outputs.acceptance}
+      integration: {type: rtl.integration, from: $tasks.full-design-integration.outputs.integration}
+    outputs:
+      environment:
+        type: verification.environment
+        schema_version: 3
+        paths: [verification/**, tb/**, tests/**]
+      report:
+        type: verification.report
+        schema_version: 3
+        paths: [reports/verification/**, reports/performance/**]
+    gates:
+    - name: verification-result-summary
+      template: result-summary
+      version: 1
+      on_failure: retry
+      parameters:
+        source: reports/verification/result_summary.json
+        output: report
+        profile: verification
+        measured_metrics: [tests.total, tests.passed, tests.failed, acceptance.covered, acceptance.total]
+        error_class: verification_summary_invalid
+    - name: engineering-verdict
+      kind: report_verdict
+      on_failure: feedback
+      parameters: {source: reports/verification/report.json, level: L1, error_class: verification_failed}
+    max_attempts: 10
+    execution: {framework: codex, model: gpt-6.1-sol, reasoning_effort: medium, timeout_seconds: 5400}
+  failure-analysis:
+    role: failure-triager
+    display_group: func_verify
+    intent: >-
+      Diagnose execution failures even before any Artifact exists, and credible engineering failures
+      at every stage. Use captured failure_attempt evidence, WIP, frozen inputs and installed tool facts.
+      Choose exactly one existing executable repair owner from the frozen workflow task catalog;
+      preserve approved behavior, numeric thresholds, gates and permissions. Format/checker defects
+      belong to their producer; concrete design counterexamples belong to the evidenced upstream owner.
+      For platform defects or missing authorization with no executable project repair, choose human
+      and ask one precise question with the missing capability and next step. Never invent a Task.
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - chisel/**
+      - integration/**
+      - build/integration/**
+      - vendor/**
+      - ip/**
+      - verification/**
+      - tb/**
+      - tests/**
+      - reports/**
+      - physical/chip-nebula/**
+      - build/**
+      - docs/**
+      - .chip_nebula/ip-library/**
+      write: []
+      tools: [git, python3]
+    inputs: {}
+    outputs: {analysis: failure.report}
+    required: false
+    on_demand: true
+    max_attempts: 24
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 1800}
+  synthesize:
+    role: logic-synthesizer
+    display_group: logic_synthesis
+    intent: Synthesize the released integrated RTL under the frozen implementation constraints and deliver a reproducible
+      mapped netlist with closed pre-layout setup timing.
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - chisel/**
+      - integration/**
+      - build/integration/**
+      - vendor/**
+      - ip/**
+      - verification/**
+      - reports/verification/**
+      - reports/performance/**
+      - build/synth/**
+      - reports/synthesis/**
+      - physical/chip-nebula/**
+      write: [build/synth/**, reports/synthesis/**]
+      tools: [git, make, python3, yosys, opensta]
+    inputs:
+      integration: {type: rtl.integration, from: $tasks.full-design-integration.outputs.integration}
+      verification:
+        type: verification.report
+        from: $tasks.functional-performance-verify.outputs.report
+        release: {field: verdict, equals: passed}
+      acceptance: {type: acceptance.plan, from: $tasks.freeze-acceptance-plan.outputs.acceptance}
+      constraints: {type: implementation.constraints, from: $tasks.freeze-project-constraints.outputs.constraints}
+    outputs:
+      netlist:
+        type: netlist
+        paths: [build/synth/**, reports/synthesis/**]
+    gates:
+    - name: synthesis-result-summary
+      template: result-summary
+      version: 1
+      on_failure: retry
+      parameters:
+        source: reports/synthesis/result_summary.json
+        output: netlist
+        profile: synthesis
+        measured_metrics: [design.standard_cell_count, design.cell_area, design.macro_count]
+        error_class: synthesis_summary_invalid
+    - name: setup-timing-closure
+      kind: metric_check
+      on_failure: retry
+      parameters:
+        source: reports/synthesis/result_summary.json
+        metric: timing.setup_slack
+        operator: '>='
+        threshold: 0.0
+        level: L1
+        error_class: synthesis_timing_violation
+    max_attempts: 8
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 5400}
+  pnr:
+    role: pnr-engineer
+    display_group: place_route
+    intent: Complete floorplan, placement, CTS, routing, extraction and physical closure for the frozen netlist and constraints,
+      preserving resumable ODB checkpoints. When required by the frozen acceptance plan, prove the final exported
+      functional netlist against the mapped input netlist and archive synthesis/equivalence acceptance receipts for GDS audit.
+    permission:
+      read: [spec/**, build/synth/**, reports/synthesis/**, build/pnr/**, reports/pnr/**, physical/chip-nebula/**, flow/**]
+      write: [build/pnr/**, reports/pnr/**]
+      tools: [git, make, python3, yosys, openroad, klayout]
+    inputs:
+      netlist: {type: netlist, from: $tasks.synthesize.outputs.netlist}
+      acceptance: {type: acceptance.plan, from: $tasks.freeze-acceptance-plan.outputs.acceptance}
+      constraints: {type: implementation.constraints, from: $tasks.freeze-project-constraints.outputs.constraints}
+    outputs:
+      layout:
+        type: layout
+        paths: [build/pnr/**, reports/pnr/**]
+    gates:
+    - name: pnr-result-summary
+      template: result-summary
+      version: 1
+      on_failure: retry
+      parameters:
+        source: reports/pnr/result_summary.json
+        output: layout
+        profile: pnr
+        measured_metrics: [design.die_area, timing.setup_slack, timing.hold_slack, drc.violations, antenna.violations]
+        error_class: pnr_summary_invalid
+    - name: post-route-export-consistency
+      kind: post_route_consistency
+      on_failure: retry
+      parameters: {source: reports/pnr/post_route_export_consistency.json, threshold: 1.0e-06, level: L1, error_class: post_route_export_mismatch}
+    - name: post-route-setup-closure
+      kind: metric_check
+      on_failure: retry
+      parameters:
+        source: reports/pnr/result_summary.json
+        metric: timing.setup_slack
+        operator: '>='
+        threshold: 0.0
+        level: L1
+        error_class: physical_timing_violation
+    - name: post-route-hold-closure
+      kind: metric_check
+      on_failure: retry
+      parameters:
+        source: reports/pnr/result_summary.json
+        metric: timing.hold_slack
+        operator: '>='
+        threshold: 0.0
+        level: L1
+        error_class: physical_timing_violation
+    - name: detailed-route-drc-clean
+      kind: metric_check
+      on_failure: retry
+      parameters:
+        source: reports/pnr/result_summary.json
+        metric: drc.violations
+        operator: <=
+        threshold: 0
+        level: L1
+        error_class: physical_drc_violation
+    - name: antenna-clean
+      kind: metric_check
+      on_failure: retry
+      parameters:
+        source: reports/pnr/result_summary.json
+        metric: antenna.violations
+        operator: <=
+        threshold: 0
+        level: L1
+        error_class: physical_antenna_violation
+    - name: execution-status
+      kind: file_check
+      on_failure: retry
+      parameters:
+        paths: [reports/pnr/execution_status.json]
+        min_files: 1
+        level: L1
+        error_class: pnr_evidence_missing
+    max_attempts: 16
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 7200}
+  gds-export:
+    role: gds-exporter
+    display_group: gds_export
+    intent: Stream out the accepted layout as readable GDSII without changing the physical implementation. Complete
+      the frozen acceptance plan's installed-scope GDS DRC and device-extracted LVS, including required negative controls;
+      audit all required checkpoints using actual upstream evidence and the same final snapshot. Archive readable final
+      acceptance results at build/gds/project_acceptance.json and .md with an honest verdict and per-check results.
+      Missing or deferred mandatory evidence blocks project acceptance; disclose excluded rule/corner coverage and
+      never equate this core-level audit with formal tapeout release.
+    permission:
+      read: [spec/**, build/pnr/**, reports/pnr/**, reports/verification/**, reports/performance/**, flow/**, build/gds/**]
+      write: [build/gds/**]
+      tools: [git, make, python3, openroad, klayout]
+    inputs:
+      layout: {type: layout, from: $tasks.pnr.outputs.layout}
+      specification: {type: specification.csir, from: $tasks.freeze-specification-baseline.outputs.specification}
+      acceptance: {type: acceptance.plan, from: $tasks.freeze-acceptance-plan.outputs.acceptance}
+      verification:
+        type: verification.report
+        from: $tasks.functional-performance-verify.outputs.report
+        release: {field: verdict, equals: passed}
+    outputs:
+      gds:
+        type: gds
+        paths: [build/gds/**]
+    gates:
+    - name: gds-result-summary
+      template: result-summary
+      version: 1
+      on_failure: retry
+      parameters:
+        source: build/gds/result_summary.json
+        output: gds
+        profile: gds
+        measured_metrics: [gds.bytes, gds.top_cell, gds.readable]
+        error_class: gds_summary_invalid
+    - name: project-acceptance-verdict
+      kind: report_verdict
+      on_failure: retry
+      parameters: {source: build/gds/project_acceptance.json, level: L1, error_class: project_acceptance_failed}
+    max_attempts: 6
+    execution: {framework: codex, model: gpt-6.1-sol, timeout_seconds: 5400}
+feedback:
+- source: review-requirements-closure
+  verdict: fail
+  target: analyze-source
+  kind: feedback
+  summary: Repair the source inventory and ledger omissions found by review.
+  summary_field: review.repair_summary
+  when: {field: review.repair_target, equals: analyze-source}
+  propagate: true
+- source: review-requirements-closure
+  verdict: fail
+  target: generate-design-document
+  kind: feedback
+  summary: Repair the detailed-design omissions or contradictions found by review.
+  summary_field: review.repair_summary
+  when: {field: review.repair_target, equals: generate-design-document}
+  propagate: true
+- source: review-requirements-closure
+  verdict: fail
+  target: generate-csir-draft
+  kind: feedback
+  summary: Repair the CSIR representation defect found by review.
+  summary_field: review.repair_summary
+  when: {field: review.repair_target, equals: generate-csir-draft}
+  propagate: true
+- source: spec-compiler
+  verdict: fail
+  target: generate-csir-draft
+  kind: feedback
+  summary: Repair the CSIR source or sidecar that the Compiler could not parse.
+  summary_field: result.repair_summary
+  when: {field: result.failure_kind, equals: needs_repair}
+  propagate: true
+- source: spec-compiler
+  verdict: pass
+  target: consolidate-spec-decisions
+  kind: feedback
+  summary: Consolidate Compiler diagnostics and Author questions for human decision.
+  when: {field: result.failure_kind, equals: needs_decision}
+  propagate: false
+- source: spec-compiler
+  verdict: pass
+  target: freeze-specification-baseline
+  kind: feedback
+  summary: Continue baseline freezing after a clean completed Compiler check.
+  when: {field: result.failure_kind, equals: ''}
+  propagate: false
+- source: consolidate-spec-decisions
+  verdict: pass
+  target: generate-design-document
+  kind: human_question
+  summary: Resolve the consolidated specification choices before revising design and CSIR.
+  propagate: true
+- source: consolidate-project-decisions
+  verdict: pass
+  target: generate-project-constraints
+  kind: human_question
+  summary: Resolve the consolidated implementation choices before materializing constraints.
+  propagate: false
+- source: generate-project-constraints
+  verdict: pass
+  target: freeze-project-constraints
+  kind: human_question
+  summary: '{"presentation":"project_constraints_confirmation","title":"确认冻结项目约束","context":"请在 Project Constraints 页面检查或编辑已生成的实现基线，然后确认冻结。"}'
+  propagate: false
+- source: generate-acceptance-plan
+  verdict: pass
+  target: freeze-acceptance-plan
+  kind: human_question
+  summary: '{"presentation":"acceptance_plan_confirmation","title":"确认冻结项目验收计划","context":"请在 Acceptance Coverage 页面检查或编辑项目验收计划，然后确认冻结。"}'
+  propagate: false
+- source: functional-performance-verify
+  verdict: fail
+  target: failure-analysis
+  kind: feedback
+  summary: Diagnose the credible failed verification report and assign the repair to exactly one predefined owner based on
+    direct evidence.
+  propagate: false
+- source: failure-analysis
+  verdict: pass
+  target: rtl-implementation
+  kind: feedback
+  summary: Repair the RTL defect identified by failure analysis.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: rtl-implementation}
+  propagate: true
+- source: failure-analysis
+  verdict: pass
+  target: full-design-integration
+  kind: feedback
+  summary: Repair the integration defect identified by failure analysis.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: full-design-integration}
+  propagate: true
+- source: failure-analysis
+  verdict: pass
+  target: functional-performance-verify
+  kind: feedback
+  summary: Repair the verification environment or coverage gap identified by failure analysis.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: functional-performance-verify}
+  propagate: true
+- source: failure-analysis
+  verdict: pass
+  target: failure-analysis
+  kind: human_question
+  summary: The failure has no owner inside this frozen Workflow; human direction is required.
+  summary_field: analysis.question
+  when: {field: analysis.target_task, equals: human}
+  propagate: false
+- source: failure-analysis
+  verdict: pass
+  target: analyze-source
+  kind: feedback
+  summary: Repair only the evidenced upstream defect owned by analyze-source; preserve unaffected approved behavior and thresholds.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: analyze-source}
+  propagate: true
+- source: failure-analysis
+  verdict: pass
+  target: generate-design-document
+  kind: feedback
+  summary: Repair only the evidenced upstream defect owned by generate-design-document; preserve unaffected approved behavior
+    and thresholds.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: generate-design-document}
+  propagate: true
+- source: failure-analysis
+  verdict: pass
+  target: generate-csir-draft
+  kind: feedback
+  summary: Repair only the evidenced upstream defect owned by generate-csir-draft; preserve unaffected approved behavior and
+    thresholds.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: generate-csir-draft}
+  propagate: true
+- source: failure-analysis
+  verdict: pass
+  target: generate-project-constraints
+  kind: feedback
+  summary: Repair only the evidenced upstream defect owned by generate-project-constraints; preserve unaffected approved behavior
+    and thresholds.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: generate-project-constraints}
+  propagate: true
+- source: failure-analysis
+  verdict: pass
+  target: generate-acceptance-plan
+  kind: feedback
+  summary: Repair only the evidenced upstream defect owned by generate-acceptance-plan; preserve unaffected approved behavior
+    and thresholds.
+  summary_field: analysis.repair_summary
+  when: {field: analysis.target_task, equals: generate-acceptance-plan}
+  propagate: true
+- {source: analyze-source, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: generate-design-document, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: generate-csir-draft, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: review-requirements-closure, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: review-requirements-closure, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: review-requirements-closure}, propagate: true}
+- {source: spec-compiler, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: spec-compiler, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: spec-compiler}, propagate: true}
+- {source: consolidate-spec-decisions, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: consolidate-spec-decisions, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: consolidate-spec-decisions}, propagate: true}
+- {source: freeze-specification-baseline, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: freeze-specification-baseline, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: freeze-specification-baseline}, propagate: true}
+- {source: propose-project-constraint-decisions, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: propose-project-constraint-decisions, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: propose-project-constraint-decisions}, propagate: true}
+- {source: consolidate-project-decisions, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: consolidate-project-decisions, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: consolidate-project-decisions}, propagate: true}
+- {source: generate-project-constraints, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: freeze-project-constraints, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: freeze-project-constraints, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: freeze-project-constraints}, propagate: true}
+- {source: generate-acceptance-plan, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: freeze-acceptance-plan, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: freeze-acceptance-plan, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: freeze-acceptance-plan}, propagate: true}
+- {source: rtl-implementation, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: full-design-integration, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: functional-performance-verify, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: synthesize, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: synthesize, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: synthesize}, propagate: true}
+- {source: pnr, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: pnr, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: pnr}, propagate: true}
+- {source: gds-export, verdict: execution_fail, target: failure-analysis, kind: feedback, summary: Diagnose the captured failed Attempt and select its existing repair owner., propagate: false}
+- {source: failure-analysis, verdict: pass, target: gds-export, kind: feedback, summary: Repair the evidenced defect within the existing frozen task., summary_field: analysis.repair_summary, when: {field: analysis.target_task, equals: gds-export}, propagate: true}

@@ -1,0 +1,40 @@
+--- executed-v1/run_study_physical.py
++++ corrected-v2/run_study_physical.py
+@@ -19,6 +19,7 @@
+ from freeze_tool_workflow import freeze
+ from run_frequency_search import collect_failed
+ from study_protocol import BASELINE, config_tuple, digest, write_json
++from classify_study_failures import classify, read_reports
+ 
+ CASE = Path(__file__).resolve().parents[1]
+ 
+@@ -146,21 +147,17 @@
+             collect(project, 'study-physical', output / 'evidence', include_operators=True)
+         elif attempts:
+             collect_failed(project, attempts[-1], output / 'evidence')
+-    raw_files = list((output / 'evidence').glob('orfs-work/logs/**/6_report.json'))
+-    summary_path = output / 'evidence/summary.json'
+-    if summary_path.exists() and len(raw_files) == 1:
+-        summary = json.loads(summary_path.read_text())
+-        raw = json.loads(raw_files[0].read_text())
+-        row['metrics'] = summary['metrics']
+-        row['electrical_violations'] = {k: raw.get('finish__timing__drv__' + k) for k in ('max_slew', 'max_cap', 'max_fanout')}
+-        row['physical_qualified'] = (not timed_out and proc.returncode == 0 and all(v == 0 for v in row['electrical_violations'].values()))
+-        if any(v != 0 for v in row['electrical_violations'].values()): row['failure_classes'].append('electrical')
+-    else:
+-        row['failure_classes'].append('physical_execution')
++    raw, summary, report_errors = read_reports(output/'evidence')
++    row['metrics'] = summary.get('metrics', {})
++    row['electrical_violations'] = {k: raw.get('finish__timing__drv__' + k) for k in ('max_slew', 'max_cap', 'max_fanout')}
++    row['failure_classes'].extend(report_errors)
++    row['physical_qualified'] = (not timed_out and proc.returncode == 0 and row['task_state'] == 'satisfied'
++                                 and summary.get('status') in ('passed', 'physical_passed'))
+     row['frozen_inputs_unchanged'] = (digest(project / 'physical/chip-nebula/constraints.sdc') == manifest['sdc_sha256']
+                                     and digest(project / 'physical/chip-nebula/config.mk') == manifest['config_sha256']
+                                     and all(digest(project / p) == h for p, h in manifest['rtl_sha256'].items()))
+-    row['physical_qualified'] &= row['frozen_inputs_unchanged']
++    row['failure_classes'] = classify(row, raw, summary)
++    row['physical_qualified'] &= row['frozen_inputs_unchanged'] and not row['failure_classes']
+     write_json(output / 'summary.json', row)
+     write_json(output / 'state.json', {'state': 'physical_finished', 'summary': 'summary.json'})
+     print(json.dumps({'physical_finished': True, 'physical_qualified': row['physical_qualified'], 'output': str(output)}), flush=True)

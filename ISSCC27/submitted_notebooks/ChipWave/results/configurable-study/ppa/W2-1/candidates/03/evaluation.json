@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "physical_qualified": false,
+  "rank_eligible": false,
+  "configuration": {
+    "abc_area": 1,
+    "density": 0.55,
+    "repair_margin": 10,
+    "utilization": 40
+  },
+  "period_ps": 10526,
+  "physical_wall_seconds": 3674.636388276005,
+  "failure_classes": [
+    "electrical"
+  ],
+  "candidate_index": 3,
+  "cell_area_um2": 157230,
+  "die_area_um2": 371137,
+  "setup_slack_ns": 0.556154,
+  "hold_slack_ns": 0.0603264,
+  "electrical_violations": {
+    "max_slew": 2,
+    "max_cap": 0,
+    "max_fanout": 0
+  },
+  "energy_j": {},
+  "estimated_power_w": {},
+  "postprocessing_commands": [],
+  "physical_manifest": {
+    "schema_version": 1,
+    "configuration": {
+      "abc_area": 1,
+      "density": 0.55,
+      "repair_margin": 10,
+      "utilization": 40
+    },
+    "period_ps": 10526,
+    "rtl_sha256": {
+      "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+      "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+      "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+    },
+    "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+    "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+    "config_sha256": "7e6c5b88c3dea3fe8e719ee1255879a4d8f5fb49f6db04a03eb14ec9c50ccb56",
+    "physical_timeout_seconds": 14400,
+    "threads": 2,
+    "scope": "One fixed-RTL physical implementation; historical records are unchanged"
+  },
+  "postprocess_wall_seconds": 3.569875843822956e-07,
+  "total_wall_seconds": 3674.6363886329927,
+  "candidate_artifact": "artifact-1d02b7da8e6e4be9b716ab442f157445",
+  "proposal_rationale": "Read the frozen baseline/protocol and both captured feedback records; their histories match the immutable reports at b6206ed715a7cb01461b7c7b14e749de8941a317 and bc12440862e9c98d57d6530570dbd4d417562bf4:build/evaluation/report.json. Baseline (40,0.55,0,0) is qualified with cell area 161954 um2 and score 1.0. Candidate 1 (40,0.55,1,0) had area 157315 um2 but failed with 12 slew and 5 capacitance violations; energy is unavailable and it cannot rank. Candidate 2 (40,0.55,1,20) is physically and measurement qualified with zero electrical violations, setup/hold slack 0.570279/0.0621606 ns, cell area 157452 um2, area ratio 0.9722019832792027, energy ratio 1.0063543075757566, and score 0.9783796537067193. Its DOT64/GEMM8/CONV3 energies are 2.310204433331225e-7/1.7903212458084867e-6/1.1608990950821776e-6 J; activity coverage is 100% and eligible unannotated parasitic drivers are zero for each workload. Choose the untried in-domain tuple (40,0.55,1,10) for the third and final new candidate, changing only repair_margin to the intermediate allowed value. The observed endpoints justify testing whether less repair margin can preserve electrical qualification while reducing repair-related cell and switching overhead. The observed endpoint area difference is only 137 um2 and candidate 1 has no energy measurement, so the potential gain is modest and no monotonic area, energy, or qualification behavior is assumed. Candidate 2 remains the best measured qualified result; beating its unrounded score requires independent physical and workload evaluation. This choice uses the demonstrated repair sensitivity; the available reports contain no utilization or density comparison. All RTL, the 10526 ps period, libraries, thresholds, and shared budgets remain frozen. Energy comparisons cover only the specified Liberty estimates from zero-delay post-route activity and SPEF. No EDA, screening search, external model call, or agents were used. Local schema/domain/unseen checks passed. The required python3 tools/run_ppa.py validate invocation failed before validation with ModuleNotFoundError: run_ppa_workflow_study; no validator pass is claimed, and tools and permissions were preserved.",
+  "elapsed_search_seconds": 22033.96291659499
+}

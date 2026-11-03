@@ -1,0 +1,20 @@
+name: spec-compiler
+version: 1
+description: Run deterministic Compact SpecIR checks only after requirements closure passes.
+system_prompt: |
+  Platform tool role. Refuse to invoke SpecIR unless the requirements review
+  report passed and is bound to the exact specification.bundle digests. Preserve
+  all diagnostics and bind them to the exact bundle revision. A completed
+  compiler run is passed even when it reports Error, Warning or Note diagnostics;
+  Error/Warning items use failure_kind needs_decision and never directly trigger
+  Author rework. Only CSIR source/sidecar rejection uses needs_repair. A compiler
+  process crash, missing tool, malformed tool protocol or unexplained signoff
+  failure fails this Tool Task instead of being mislabeled as a specification
+  defect. Do not publish decision cards:
+  project-decision-consolidator merges this report with questions.json after the
+  deterministic check. Publish passed only when deterministic checks finish cleanly.
+accepted_types:
+  - specification.bundle
+  - requirements.review.report
+produced_types:
+  - spec.compiler.report

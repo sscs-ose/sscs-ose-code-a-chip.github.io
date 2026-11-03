@@ -1,0 +1,86 @@
+top_module: benchmark_counter
+top_parameters: {}
+source_globs:
+- '**/*.sv'
+- '**/*.v'
+- '**/*.svh'
+- '**/*.vh'
+- rtl/benchmark_counter.sv
+validation_mode: fileset
+design_files:
+- rtl/benchmark_counter.sv
+testbench_files:
+- tb/development_tb.sv
+simulation_assets: []
+include_dirs:
+- rtl
+defines: []
+filelists: []
+simulation_top: benchmark_check_tb
+write_paths:
+- rtl/**
+- src/**
+lint_command: verilator --lint-only -Wall -Wno-fatal --top-module benchmark_counter
+  -Irtl rtl/benchmark_counter.sv
+simulation_command: python3 tools/check.py
+workdir: .
+timeout: 900
+agent_timeout: 3600
+success_pattern: ''
+success_evidence: {}
+report_globs: []
+waveform_globs:
+- '**/*.vcd'
+- '**/*.fst'
+physical:
+  enabled: true
+  command: bash physical/chip-nebula/run.sh {mode}
+  workdir: .
+  timeout: 14400
+  platform: sky130hd
+  design: benchmark_counter
+  flow_variant: nebula
+  num_cores: 2
+  output_root: build/rtl-to-gds
+  summary_path: build/rtl-to-gds/run-summary.json
+  input_globs:
+  - rtl/benchmark_counter.sv
+  - physical/chip-nebula/**
+  - Makefile
+  - tb/**
+  - tbench/**
+  - scripts/**
+  - graph/source.json
+  - metadata.json
+  - '**/*.f'
+  - '**/*.flist'
+  - ip/nebula.lock.json
+  - spec/design.csir.yaml
+  required_inputs:
+  - rtl/benchmark_counter.sv
+  - physical/chip-nebula/flow-definition.json
+  - physical/chip-nebula/constraints.sdc
+  - physical/chip-nebula/config.mk
+  - physical/chip-nebula/run.sh
+  - physical/chip-nebula/prepare_orfs.py
+  - physical/chip-nebula/inspect_gds.py
+  - physical/chip-nebula/filter_lvs_cdl.py
+  - physical/chip-nebula/klayout.sh
+  - physical/chip-nebula/tool-versions.env
+  artifact_globs:
+  - build/rtl-to-gds/run-summary.json
+  - build/rtl-to-gds/gds-summary.json
+  - build/rtl-to-gds/simulation/build/*.log
+  - build/rtl-to-gds/simulation/build/*.vcd
+  - build/rtl-to-gds/orfs-work/results/**/1_2_yosys.v
+  - build/rtl-to-gds/orfs-work/results/**/6_final.*
+  - build/rtl-to-gds/orfs-work/objects/**/6_final_concat.cdl
+  - build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.cdl
+  - build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.manifest.json
+  - build/rtl-to-gds/orfs-work/reports/**/*.rpt
+  - build/rtl-to-gds/orfs-work/logs/**/*.log
+  - build/rtl-to-gds/orfs-work/logs/**/6_report.json
+  - build/rtl-to-gds/orfs-work/logs/**/5_2_route.json
+  toolchain_root: ''
+  orfs_root: ''
+  tool_versions_file: physical/chip-nebula/tool-versions.env

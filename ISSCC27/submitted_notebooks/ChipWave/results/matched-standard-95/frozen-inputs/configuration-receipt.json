@@ -1,0 +1,460 @@
+{
+  "detection": {
+    "schema_version": 1,
+    "source_authority": "workbench fileset",
+    "sources": [
+      "rtl/integration/nebula_cpu_npu_top.sv",
+      "rtl/nebula_npu_dot4.sv",
+      "rtl/rv32i_five_stage_cpu.sv"
+    ],
+    "include_dirs": [
+      "rtl",
+      "rtl/integration"
+    ],
+    "filelist_include_dirs": [],
+    "included_headers": [],
+    "input_issues": [],
+    "defines": [],
+    "top_candidates": [
+      {
+        "name": "nebula_cpu_npu_top",
+        "source": "rtl/integration/nebula_cpu_npu_top.sv",
+        "input_ports": [
+          "clk",
+          "rst_n",
+          "imem_rdata",
+          "dmem_req_ready",
+          "dmem_rsp_valid",
+          "dmem_rsp_rdata",
+          "dmem_rsp_err"
+        ],
+        "vector_input_ports": [
+          "imem_rdata",
+          "dmem_rsp_rdata"
+        ],
+        "clock_candidates": [
+          "clk"
+        ],
+        "detected_parameters": {}
+      }
+    ],
+    "suggested_top": "nebula_cpu_npu_top",
+    "suggested_clock": "clk",
+    "suggested_clock_period_ns": 10.0,
+    "suggested_top_parameters": {},
+    "memory_images": {},
+    "simulation_candidates": [],
+    "suggested_simulation_command": "",
+    "platforms": [
+      "sky130hd"
+    ],
+    "diagnostics": [],
+    "ready_for_review": true
+  },
+  "synthesis_preflight": {
+    "status": "passed",
+    "frontend": "slang",
+    "tool_version": "Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)",
+    "reason": "\u7cbe\u786e\u6e90\u7801\u96c6\u5408\u4e0e\u9876\u5c42\u5df2\u901a\u8fc7\u53ea\u8bfb\u5c55\u5f00\u68c0\u67e5",
+    "log_tail": "2.1. Analyzing design hierarchy..\nTop module:  \\nebula_cpu_npu_top\n\n2.2. Analyzing design hierarchy..\nTop module:  \\nebula_cpu_npu_top\nRemoved 0 unused modules.\n\nEnd of script. Logfile hash: 44bad5f8e2, time: 0.07s, user: 0.07s, system: 0.08s, MEM: 35.11 MB peak\nYosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)\nTime spent: 82% 2x read_slang (0 sec), 9% 1x opt_expr (0 sec), ..."
+  },
+  "definition": {
+    "schema_version": 1,
+    "generator": "chip-nebula-physical-project-v1",
+    "source_authority": "workbench fileset",
+    "top_module": "nebula_cpu_npu_top",
+    "top_parameters": {},
+    "memory_images": {},
+    "sources": [
+      "rtl/integration/nebula_cpu_npu_top.sv",
+      "rtl/nebula_npu_dot4.sv",
+      "rtl/rv32i_five_stage_cpu.sv"
+    ],
+    "compilation_units": [
+      "rtl/integration/nebula_cpu_npu_top.sv",
+      "rtl/nebula_npu_dot4.sv",
+      "rtl/rv32i_five_stage_cpu.sv"
+    ],
+    "headers": [],
+    "include_dirs": [
+      "rtl",
+      "rtl/integration"
+    ],
+    "defines": [],
+    "clock": {
+      "port": "clk",
+      "period_ns": 10.5263,
+      "constraint_status": "user-confirmed exploratory constraint"
+    },
+    "platform": "sky130hd",
+    "synthesis_frontend": "slang",
+    "synthesis_preflight": {
+      "status": "passed",
+      "frontend": "slang",
+      "tool_version": "Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)",
+      "reason": "\u7cbe\u786e\u6e90\u7801\u96c6\u5408\u4e0e\u9876\u5c42\u5df2\u901a\u8fc7\u53ea\u8bfb\u5c55\u5f00\u68c0\u67e5"
+    },
+    "simulation_command": "python3 scripts/run_kernels.py --project . --output build/operators"
+  },
+  "generated_files": [
+    "physical/chip-nebula/flow-definition.json",
+    "physical/chip-nebula/constraints.sdc",
+    "physical/chip-nebula/config.mk",
+    "physical/chip-nebula/run.sh",
+    "physical/chip-nebula/prepare_orfs.py",
+    "physical/chip-nebula/inspect_gds.py",
+    "physical/chip-nebula/filter_lvs_cdl.py",
+    "physical/chip-nebula/klayout.sh",
+    "physical/chip-nebula/tool-versions.env",
+    "physical/chip-nebula/README.md"
+  ],
+  "config_patch": {
+    "top_module": "nebula_cpu_npu_top",
+    "top_parameters": {},
+    "source_globs": [
+      "rtl/integration/nebula_cpu_npu_top.sv",
+      "rtl/nebula_npu_dot4.sv",
+      "rtl/rv32i_five_stage_cpu.sv"
+    ],
+    "simulation_command": "python3 scripts/run_kernels.py --project . --output build/operators",
+    "lint_command": "verilator --lint-only -Wall -Wno-fatal --top-module nebula_cpu_npu_top -Irtl -Irtl/integration rtl/integration/nebula_cpu_npu_top.sv rtl/nebula_npu_dot4.sv rtl/rv32i_five_stage_cpu.sv",
+    "physical": {
+      "enabled": true,
+      "command": "bash physical/chip-nebula/run.sh {mode}",
+      "workdir": ".",
+      "timeout": 14400,
+      "platform": "sky130hd",
+      "design": "nebula_cpu_npu_top",
+      "flow_variant": "nebula",
+      "num_cores": 2,
+      "output_root": "build/rtl-to-gds",
+      "summary_path": "build/rtl-to-gds/run-summary.json",
+      "input_globs": [
+        "rtl/integration/nebula_cpu_npu_top.sv",
+        "rtl/nebula_npu_dot4.sv",
+        "rtl/rv32i_five_stage_cpu.sv",
+        "physical/chip-nebula/**",
+        "Makefile",
+        "tb/**",
+        "tbench/**",
+        "scripts/**",
+        "graph/source.json",
+        "metadata.json",
+        "**/*.f",
+        "**/*.flist",
+        "ip/nebula.lock.json",
+        "spec/design.csir.yaml"
+      ],
+      "required_inputs": [
+        "rtl/integration/nebula_cpu_npu_top.sv",
+        "rtl/nebula_npu_dot4.sv",
+        "rtl/rv32i_five_stage_cpu.sv",
+        "physical/chip-nebula/flow-definition.json",
+        "physical/chip-nebula/constraints.sdc",
+        "physical/chip-nebula/config.mk",
+        "physical/chip-nebula/run.sh",
+        "physical/chip-nebula/prepare_orfs.py",
+        "physical/chip-nebula/inspect_gds.py",
+        "physical/chip-nebula/filter_lvs_cdl.py",
+        "physical/chip-nebula/klayout.sh",
+        "physical/chip-nebula/tool-versions.env"
+      ],
+      "tool_versions_file": "physical/chip-nebula/tool-versions.env"
+    }
+  },
+  "config": {
+    "top_module": "nebula_cpu_npu_top",
+    "top_parameters": {},
+    "source_globs": [
+      "rtl/**/*.sv",
+      "rtl/**/*.v",
+      "rtl/**/*.svh",
+      "rtl/**/*.vh",
+      "src/**/*.sv",
+      "src/**/*.v",
+      "src/**/*.svh",
+      "src/**/*.vh",
+      "rtl/integration/nebula_cpu_npu_top.sv",
+      "rtl/nebula_npu_dot4.sv",
+      "rtl/rv32i_five_stage_cpu.sv"
+    ],
+    "validation_mode": "fileset",
+    "design_files": [
+      "rtl/integration/nebula_cpu_npu_top.sv",
+      "rtl/nebula_npu_dot4.sv",
+      "rtl/rv32i_five_stage_cpu.sv"
+    ],
+    "testbench_files": [],
+    "simulation_assets": [],
+    "include_dirs": [
+      "rtl",
+      "rtl/integration"
+    ],
+    "defines": [],
+    "filelists": [],
+    "simulation_top": "",
+    "write_paths": [
+      "rtl/**",
+      "src/**",
+      "integration/**"
+    ],
+    "lint_command": "verilator --lint-only -Wall -Wno-fatal --top-module nebula_cpu_npu_top -Irtl -Irtl/integration rtl/integration/nebula_cpu_npu_top.sv rtl/nebula_npu_dot4.sv rtl/rv32i_five_stage_cpu.sv",
+    "simulation_command": "python3 scripts/run_kernels.py --project . --output build/operators",
+    "workdir": ".",
+    "timeout": 900,
+    "agent_timeout": 3600,
+    "success_pattern": "",
+    "success_evidence": {},
+    "report_globs": [],
+    "waveform_globs": [
+      "**/*.vcd",
+      "**/*.fst"
+    ],
+    "physical": {
+      "enabled": true,
+      "command": "bash physical/chip-nebula/run.sh {mode}",
+      "workdir": ".",
+      "timeout": 14400,
+      "platform": "sky130hd",
+      "design": "nebula_cpu_npu_top",
+      "flow_variant": "nebula",
+      "num_cores": 2,
+      "output_root": "build/rtl-to-gds",
+      "summary_path": "build/rtl-to-gds/run-summary.json",
+      "input_globs": [
+        "rtl/integration/nebula_cpu_npu_top.sv",
+        "rtl/nebula_npu_dot4.sv",
+        "rtl/rv32i_five_stage_cpu.sv",
+        "physical/chip-nebula/**",
+        "Makefile",
+        "tb/**",
+        "tbench/**",
+        "scripts/**",
+        "graph/source.json",
+        "metadata.json",
+        "**/*.f",
+        "**/*.flist",
+        "ip/nebula.lock.json",
+        "spec/design.csir.yaml"
+      ],
+      "required_inputs": [
+        "rtl/integration/nebula_cpu_npu_top.sv",
+        "rtl/nebula_npu_dot4.sv",
+        "rtl/rv32i_five_stage_cpu.sv",
+        "physical/chip-nebula/flow-definition.json",
+        "physical/chip-nebula/constraints.sdc",
+        "physical/chip-nebula/config.mk",
+        "physical/chip-nebula/run.sh",
+        "physical/chip-nebula/prepare_orfs.py",
+        "physical/chip-nebula/inspect_gds.py",
+        "physical/chip-nebula/filter_lvs_cdl.py",
+        "physical/chip-nebula/klayout.sh",
+        "physical/chip-nebula/tool-versions.env"
+      ],
+      "artifact_globs": [
+        "build/rtl-to-gds/run-summary.json",
+        "build/rtl-to-gds/gds-summary.json",
+        "build/rtl-to-gds/simulation/build/*.log",
+        "build/rtl-to-gds/simulation/build/*.vcd",
+        "build/rtl-to-gds/orfs-work/results/**/1_2_yosys.v",
+        "build/rtl-to-gds/orfs-work/results/**/6_final.*",
+        "build/rtl-to-gds/orfs-work/objects/**/6_final_concat.cdl",
+        "build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.cdl",
+        "build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.manifest.json",
+        "build/rtl-to-gds/orfs-work/reports/**/*.rpt",
+        "build/rtl-to-gds/orfs-work/logs/**/*.log",
+        "build/rtl-to-gds/orfs-work/logs/**/6_report.json",
+        "build/rtl-to-gds/orfs-work/logs/**/5_2_route.json"
+      ],
+      "toolchain_root": "",
+      "orfs_root": "",
+      "tool_versions_file": "physical/chip-nebula/tool-versions.env"
+    }
+  },
+  "environment": {
+    "configured": true,
+    "ready": true,
+    "profile": {
+      "enabled": true,
+      "command": "bash physical/chip-nebula/run.sh {mode}",
+      "workdir": ".",
+      "timeout": 14400,
+      "platform": "sky130hd",
+      "design": "nebula_cpu_npu_top",
+      "flow_variant": "nebula",
+      "num_cores": 2,
+      "output_root": "build/rtl-to-gds",
+      "summary_path": "build/rtl-to-gds/run-summary.json",
+      "input_globs": [
+        "rtl/integration/nebula_cpu_npu_top.sv",
+        "rtl/nebula_npu_dot4.sv",
+        "rtl/rv32i_five_stage_cpu.sv",
+        "physical/chip-nebula/**",
+        "Makefile",
+        "tb/**",
+        "tbench/**",
+        "scripts/**",
+        "graph/source.json",
+        "metadata.json",
+        "**/*.f",
+        "**/*.flist",
+        "ip/nebula.lock.json",
+        "spec/design.csir.yaml"
+      ],
+      "required_inputs": [
+        "rtl/integration/nebula_cpu_npu_top.sv",
+        "rtl/nebula_npu_dot4.sv",
+        "rtl/rv32i_five_stage_cpu.sv",
+        "physical/chip-nebula/flow-definition.json",
+        "physical/chip-nebula/constraints.sdc",
+        "physical/chip-nebula/config.mk",
+        "physical/chip-nebula/run.sh",
+        "physical/chip-nebula/prepare_orfs.py",
+        "physical/chip-nebula/inspect_gds.py",
+        "physical/chip-nebula/filter_lvs_cdl.py",
+        "physical/chip-nebula/klayout.sh",
+        "physical/chip-nebula/tool-versions.env"
+      ],
+      "artifact_globs": [
+        "build/rtl-to-gds/run-summary.json",
+        "build/rtl-to-gds/gds-summary.json",
+        "build/rtl-to-gds/simulation/build/*.log",
+        "build/rtl-to-gds/simulation/build/*.vcd",
+        "build/rtl-to-gds/orfs-work/results/**/1_2_yosys.v",
+        "build/rtl-to-gds/orfs-work/results/**/6_final.*",
+        "build/rtl-to-gds/orfs-work/objects/**/6_final_concat.cdl",
+        "build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.cdl",
+        "build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.manifest.json",
+        "build/rtl-to-gds/orfs-work/reports/**/*.rpt",
+        "build/rtl-to-gds/orfs-work/logs/**/*.log",
+        "build/rtl-to-gds/orfs-work/logs/**/6_report.json",
+        "build/rtl-to-gds/orfs-work/logs/**/5_2_route.json"
+      ],
+      "toolchain_root": "",
+      "orfs_root": "",
+      "tool_versions_file": "physical/chip-nebula/tool-versions.env"
+    },
+    "toolchain_root": "/tmp/chipnebula-pinned-tools",
+    "orfs": {
+      "root": "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs",
+      "flow_home": "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow",
+      "commit": "3a964e13f11a4e435aac01ffa14db0a7d2853720",
+      "expected_commit": "3a964e13f11a4e435aac01ffa14db0a7d2853720",
+      "version_match": true
+    },
+    "tools": {
+      "git": {
+        "path": "/tmp/chipnebula-tools/bin/git",
+        "version": "git version 2.43.0",
+        "expected": "",
+        "ready": true,
+        "version_match": true,
+        "source": "system"
+      },
+      "make": {
+        "path": "/usr/bin/make",
+        "version": "GNU Make 4.2.1",
+        "expected": "",
+        "ready": true,
+        "version_match": true,
+        "source": "system"
+      },
+      "python": {
+        "path": "/home/asic03/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12",
+        "version": "Python 3.12.15",
+        "expected": "",
+        "ready": true,
+        "version_match": true,
+        "source": "system"
+      },
+      "verilator": {
+        "path": "/tmp/chipnebula-pinned-tools/bin/verilator",
+        "version": "Verilator 5.048 2026-04-26 rev vUNKNOWN-built20261009",
+        "expected": "",
+        "ready": true,
+        "version_match": true,
+        "source": "bundled"
+      },
+      "iverilog": {
+        "path": "/tmp/chipnebula-pinned-tools/iverilog-13/bin/iverilog",
+        "version": "Icarus Verilog version 13.0 (stable) (v13_0)",
+        "expected": "",
+        "ready": true,
+        "version_match": true,
+        "source": "bundled"
+      },
+      "vvp": {
+        "path": "/tmp/chipnebula-pinned-tools/iverilog-13/bin/vvp",
+        "version": "Icarus Verilog runtime version 13.0 (stable) (v13_0)",
+        "expected": "",
+        "ready": true,
+        "version_match": true,
+        "source": "bundled"
+      },
+      "yosys": {
+        "path": "/tmp/chipnebula-pinned-tools/bin/yosys",
+        "version": "Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)",
+        "expected": "Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)",
+        "ready": true,
+        "version_match": true,
+        "source": "bundled"
+      },
+      "openroad": {
+        "path": "/tmp/chipnebula-pinned-tools/src/OpenROAD/build/bin/openroad",
+        "version": "4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca",
+        "expected": "4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca",
+        "ready": true,
+        "version_match": true,
+        "source": "bundled"
+      },
+      "klayout": {
+        "path": "/tmp/chipnebula-pinned-tools/bin/klayout",
+        "version": "KLayout 0.30.12",
+        "expected": "KLayout 0.30.12",
+        "ready": true,
+        "version_match": true,
+        "source": "bundled"
+      }
+    },
+    "platform_files": [
+      {
+        "path": "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/gds/sky130_fd_sc_hd.gds",
+        "ready": true
+      },
+      {
+        "path": "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/drc/sky130hd.lydrc",
+        "ready": true
+      },
+      {
+        "path": "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/lvs/sky130hd.lylvs",
+        "ready": true
+      },
+      {
+        "path": "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/cdl/sky130hd.cdl",
+        "ready": true
+      }
+    ],
+    "missing": [],
+    "mismatches": [],
+    "project_issues": [],
+    "input_audit": {
+      "ready": true,
+      "manifest_declared": true,
+      "checked": [
+        "rtl/integration/nebula_cpu_npu_top.sv",
+        "rtl/nebula_npu_dot4.sv",
+        "rtl/rv32i_five_stage_cpu.sv",
+        "physical/chip-nebula/flow-definition.json",
+        "physical/chip-nebula/constraints.sdc",
+        "physical/chip-nebula/config.mk",
+        "physical/chip-nebula/run.sh",
+        "physical/chip-nebula/prepare_orfs.py",
+        "physical/chip-nebula/inspect_gds.py",
+        "physical/chip-nebula/filter_lvs_cdl.py",
+        "physical/chip-nebula/klayout.sh",
+        "physical/chip-nebula/tool-versions.env"
+      ],
+      "issues": []
+    }
+  }
+}

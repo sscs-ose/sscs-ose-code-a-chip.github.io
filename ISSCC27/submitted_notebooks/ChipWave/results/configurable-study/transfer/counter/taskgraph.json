@@ -1,0 +1,918 @@
+{
+  "workflow": {
+    "id": "counter-transfer",
+    "recipe": "counter-transfer@2",
+    "goal": "Reuse the configurable workflow on a new counter contract",
+    "status": "complete",
+    "paused_reason": "",
+    "definition_digest": "sha256:66d09675d2a8272a7cfcd1fc8d3f6b2688d2dff6319cd497ae4754b53f10ed20",
+    "metadata": {
+      "baseline_commit": "e2f4298d8d6c4af9d8a8f160b2c62f848afb3552",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "source": "counter-contract"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/transfer/counter/project/.chip_nebula/recipes/counter-transfer.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-16T06:37:41.219601+00:00"
+  },
+  "tasks": [
+    {
+      "id": "counter-transfer:designer",
+      "workflow_id": "counter-transfer",
+      "key": "designer",
+      "role": "study-designer",
+      "role_version": 1,
+      "intent": "Read spec/counter.md and implement the complete counter in rtl/.\nDevelop with python3 tools/smoke.py and optional tests/designer/ tests.\nWrite only rtl/, tests/designer/ and build/. Preserve the supplied contract,\nchecker and workflow. Do not access other projects, credentials or final\nevaluators, and do not invoke additional agents/models. Repair actionable\nfeedback within your original task. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"counter\"}}.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "rtl/**",
+          "tests/designer/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "counter-contract",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "rtl",
+          "artifact_type": "rtl.snapshot",
+          "schema_version": 1,
+          "paths": [
+            "rtl/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Read spec/counter.md and implement the complete counter in rtl/.\nDevelop with python3 tools/smoke.py and optional tests/designer/ tests.\nWrite only rtl/, tests/designer/ and build/. Preserve the supplied contract,\nchecker and workflow. Do not access other projects, credentials or final\nevaluators, and do not invoke additional agents/models. Repair actionable\nfeedback within your original task. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"counter\"}}.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Read the fixed counter contract and use actual test evidence."
+        ],
+        "exclusions": [
+          "No contract, checker, permissions or IP changes."
+        ],
+        "completion_criteria": [
+          "Deliver correct RTL or an honest actionable verification report."
+        ],
+        "collaboration": [
+          "task:counter-transfer:verifier",
+          "task:counter-transfer:audit"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "counter-transfer:verifier",
+      "workflow_id": "counter-transfer",
+      "key": "verifier",
+      "role": "study-verifier",
+      "role_version": 1,
+      "intent": "Independently review and test the delivered counter against spec/counter.md.\nRun python3 tools/smoke.py, inspect boundary behavior, and optionally add tests\nunder tests/reviewer/. Do not change RTL, the contract or supplied checker,\nread other projects/final evaluators, access credentials, or invoke extra\nagents/models. Write reports/review.json with subject, passed/failed verdict\nand actionable repair_summary. Return those same fields in\nNEBULA_OUTPUT: {\"report\":{\"subject\":\"counter-rtl\",\"verdict\":\"passed or failed\",\"repair_summary\":\"findings\"}}.\nChoose an actual verdict; your budget is shared with the designer.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "tests/reviewer/**",
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "counter-contract",
+          "optional": false
+        }
+      ],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "counter-transfer:designer",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "reports/**",
+            "tests/reviewer/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Independently review and test the delivered counter against spec/counter.md.\nRun python3 tools/smoke.py, inspect boundary behavior, and optionally add tests\nunder tests/reviewer/. Do not change RTL, the contract or supplied checker,\nread other projects/final evaluators, access credentials, or invoke extra\nagents/models. Write reports/review.json with subject, passed/failed verdict\nand actionable repair_summary. Return those same fields in\nNEBULA_OUTPUT: {\"report\":{\"subject\":\"counter-rtl\",\"verdict\":\"passed or failed\",\"repair_summary\":\"findings\"}}.\nChoose an actual verdict; your budget is shared with the designer.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Read the fixed counter contract and use actual test evidence."
+        ],
+        "exclusions": [
+          "No contract, checker, permissions or IP changes."
+        ],
+        "completion_criteria": [
+          "Deliver correct RTL or an honest actionable verification report."
+        ],
+        "collaboration": [
+          "task:counter-transfer:designer",
+          "task:counter-transfer:audit"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "counter-transfer:audit",
+      "workflow_id": "counter-transfer",
+      "key": "audit",
+      "role": "study-auditor",
+      "role_version": 1,
+      "intent": "Replay unchanged public counter tests.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "counter-transfer:designer",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        },
+        {
+          "input_name": "review",
+          "upstream_task_id": "counter-transfer:verifier",
+          "output_name": "report",
+          "required_type": "verification.report",
+          "condition": {
+            "field": "verdict",
+            "equals": "passed"
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "build/audit/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/audit.py",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 8,
+      "timeout_seconds": 120,
+      "brief": {
+        "objective": "Replay unchanged public counter tests.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Read the fixed counter contract and use actual test evidence."
+        ],
+        "exclusions": [
+          "No contract, checker, permissions or IP changes."
+        ],
+        "completion_criteria": [
+          "Deliver correct RTL or an honest actionable verification report."
+        ],
+        "collaboration": [
+          "task:counter-transfer:designer",
+          "task:counter-transfer:verifier"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    }
+  ],
+  "roles": [
+    {
+      "name": "study-auditor",
+      "version": 1,
+      "instruction": "Replay the public checker and preserve its real outcome.",
+      "accepted_types": [
+        "rtl.snapshot",
+        "verification.report"
+      ],
+      "produced_types": [
+        "verification.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "study-designer",
+      "version": 1,
+      "instruction": "Read spec/counter.md and implement the complete counter in rtl/.\nDevelop with python3 tools/smoke.py and optional tests/designer/ tests.\nWrite only rtl/, tests/designer/ and build/. Preserve the supplied contract,\nchecker and workflow. Do not access other projects, credentials or final\nevaluators, and do not invoke additional agents/models. Repair actionable\nfeedback within your original task. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"counter\"}}.",
+      "accepted_types": [
+        "specification.source",
+        "verification.report"
+      ],
+      "produced_types": [
+        "rtl.snapshot"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "study-verifier",
+      "version": 1,
+      "instruction": "Independently review and test the delivered counter against spec/counter.md.\nRun python3 tools/smoke.py, inspect boundary behavior, and optionally add tests\nunder tests/reviewer/. Do not change RTL, the contract or supplied checker,\nread other projects/final evaluators, access credentials, or invoke extra\nagents/models. Write reports/review.json with subject, passed/failed verdict\nand actionable repair_summary. Return those same fields in\nNEBULA_OUTPUT: {\"report\":{\"subject\":\"counter-rtl\",\"verdict\":\"passed or failed\",\"repair_summary\":\"findings\"}}.\nChoose an actual verdict; your budget is shared with the designer.",
+      "accepted_types": [
+        "specification.source",
+        "rtl.snapshot"
+      ],
+      "produced_types": [
+        "verification.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    }
+  ],
+  "feedback": [
+    {
+      "source_task_id": "counter-transfer:verifier",
+      "verdict": "fail",
+      "target_task_id": "counter-transfer:designer",
+      "kind": "feedback",
+      "summary": "Repair the reported counter defect.",
+      "propagate_to_dependents": true,
+      "payload_field": "",
+      "payload_equals": null,
+      "summary_field": "report.repair_summary"
+    },
+    {
+      "source_task_id": "counter-transfer:audit",
+      "verdict": "fail",
+      "target_task_id": "counter-transfer:designer",
+      "kind": "feedback",
+      "summary": "Repair the reported counter defect.",
+      "propagate_to_dependents": true,
+      "payload_field": "",
+      "payload_equals": null,
+      "summary_field": "report.repair_summary"
+    }
+  ],
+  "attempts": [
+    {
+      "id": "attempt-fd197f79bbbd4457af6b5c4fd218e995",
+      "task_id": "counter-transfer:designer",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-47fb4c576cac449f832a941bd3a1aa4d"
+      ],
+      "input_deliveries": {
+        "source": "counter-contract"
+      },
+      "role": "study-designer",
+      "role_version": 1,
+      "role_instruction": "Read spec/counter.md and implement the complete counter in rtl/.\nDevelop with python3 tools/smoke.py and optional tests/designer/ tests.\nWrite only rtl/, tests/designer/ and build/. Preserve the supplied contract,\nchecker and workflow. Do not access other projects, credentials or final\nevaluators, and do not invoke additional agents/models. Repair actionable\nfeedback within your original task. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"counter\"}}.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Read spec/counter.md and implement the complete counter in rtl/.\nDevelop with python3 tools/smoke.py and optional tests/designer/ tests.\nWrite only rtl/, tests/designer/ and build/. Preserve the supplied contract,\nchecker and workflow. Do not access other projects, credentials or final\nevaluators, and do not invoke additional agents/models. Repair actionable\nfeedback within your original task. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"counter\"}}.",
+        "deliverables": [
+          "rtl: rtl.snapshot"
+        ],
+        "responsibilities": [
+          "Read the fixed counter contract and use actual test evidence."
+        ],
+        "exclusions": [
+          "No contract, checker, permissions or IP changes."
+        ],
+        "completion_criteria": [
+          "Deliver correct RTL or an honest actionable verification report."
+        ],
+        "collaboration": [
+          "task:counter-transfer:verifier",
+          "task:counter-transfer:audit"
+        ]
+      },
+      "brief_digest": "sha256:4f132f53c3949e9a68cadc1b347ace2e00fe63cb93ea37573f922da8a8fcb8f2",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "rtl/**",
+          "tests/designer/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a1436e-422e-7421-8506-02bc28c4c11c",
+      "workspace_commit": "939abe02fc405a6d88b1b4bd8ebf5b790cb1d3c1",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "rtl/counter.sv",
+          "build/smoke/sim"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"rtl\":{\"module\":\"counter\"}}\nTASK COMPLETED",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T06:38:16.882973+00:00",
+            "details": {
+              "validated_outputs": [
+                "rtl:rtl.snapshot@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 63413,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "e2f4298d8d6c4af9d8a8f160b2c62f848afb3552"
+      },
+      "created_at": "2026-10-16T06:37:41.392411+00:00",
+      "finished_at": "2026-10-16T06:38:16.911722+00:00"
+    },
+    {
+      "id": "attempt-bfe54e520560471abba56559c169dac9",
+      "task_id": "counter-transfer:verifier",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-4ee28f8813d743a9985dd60c42951bd5"
+      ],
+      "input_deliveries": {
+        "rtl": "artifact-c336b1f24b534801ba26a9ce06cace62",
+        "source": "counter-contract"
+      },
+      "role": "study-verifier",
+      "role_version": 1,
+      "role_instruction": "Independently review and test the delivered counter against spec/counter.md.\nRun python3 tools/smoke.py, inspect boundary behavior, and optionally add tests\nunder tests/reviewer/. Do not change RTL, the contract or supplied checker,\nread other projects/final evaluators, access credentials, or invoke extra\nagents/models. Write reports/review.json with subject, passed/failed verdict\nand actionable repair_summary. Return those same fields in\nNEBULA_OUTPUT: {\"report\":{\"subject\":\"counter-rtl\",\"verdict\":\"passed or failed\",\"repair_summary\":\"findings\"}}.\nChoose an actual verdict; your budget is shared with the designer.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "rtl.snapshot"
+      ],
+      "brief": {
+        "objective": "Independently review and test the delivered counter against spec/counter.md.\nRun python3 tools/smoke.py, inspect boundary behavior, and optionally add tests\nunder tests/reviewer/. Do not change RTL, the contract or supplied checker,\nread other projects/final evaluators, access credentials, or invoke extra\nagents/models. Write reports/review.json with subject, passed/failed verdict\nand actionable repair_summary. Return those same fields in\nNEBULA_OUTPUT: {\"report\":{\"subject\":\"counter-rtl\",\"verdict\":\"passed or failed\",\"repair_summary\":\"findings\"}}.\nChoose an actual verdict; your budget is shared with the designer.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Read the fixed counter contract and use actual test evidence."
+        ],
+        "exclusions": [
+          "No contract, checker, permissions or IP changes."
+        ],
+        "completion_criteria": [
+          "Deliver correct RTL or an honest actionable verification report."
+        ],
+        "collaboration": [
+          "task:counter-transfer:designer",
+          "task:counter-transfer:audit"
+        ]
+      },
+      "brief_digest": "sha256:f77c254ce1a8afef6ca827110499499f6c0ab981770e233dd78a93a4742f2586",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "tests/reviewer/**",
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a1436e-e5f9-7c02-89b2-36ba8b94c734",
+      "workspace_commit": "362c77db46dcc183df2b3e9874a2f9778747adef",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "reports/review.json",
+          "tests/reviewer/counter_boundary_tb.sv",
+          "build/reviewer/boundary.log",
+          "build/reviewer/boundary_sim",
+          "build/smoke/sim"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"report\":{\"subject\":\"counter-rtl\",\"verdict\":\"passed\",\"repair_summary\":\"No repair required. Delivered RTL matches its snapshot and spec/counter.md. python3 tools/smoke.py passed 131 checks. Independent tests/reviewer/counter_boundary_tb.sv passed 800052 assertions across 266512 clock transitions, covering every count/control combination, all load values, load priority, wrap-event clearing on idle/increment/load, repeated wraps, and asynchronous reset assertion/release with active controls. Evidence: build/reviewer/boundary.log. RTL, contract, and supplied checker unchanged.\"}}\nTASK COMPLETED",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T06:39:35.163627+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:verification.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 63413,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "c6811c07f28b2fdbdec28c874f193de8a6f0e7ee"
+      },
+      "created_at": "2026-10-16T06:38:19.059002+00:00",
+      "finished_at": "2026-10-16T06:39:35.194958+00:00"
+    },
+    {
+      "id": "attempt-15ab2f2b5ade4713b23ffc0db54155ee",
+      "task_id": "counter-transfer:audit",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-7f0113661cd44f1c95aa3dcf781340b9"
+      ],
+      "input_deliveries": {
+        "review": "artifact-6c47534bb872455094768dd70e415609",
+        "rtl": "artifact-c336b1f24b534801ba26a9ce06cace62"
+      },
+      "role": "study-auditor",
+      "role_version": 1,
+      "role_instruction": "Replay the public checker and preserve its real outcome.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "rtl.snapshot",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Replay unchanged public counter tests.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Read the fixed counter contract and use actual test evidence."
+        ],
+        "exclusions": [
+          "No contract, checker, permissions or IP changes."
+        ],
+        "completion_criteria": [
+          "Deliver correct RTL or an honest actionable verification report."
+        ],
+        "collaboration": [
+          "task:counter-transfer:designer",
+          "task:counter-transfer:verifier"
+        ]
+      },
+      "brief_digest": "sha256:0ce07b8342698146b1caf596fb172d150b72fe13199354c92e2f5bb6a36c3ab5",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "rtl/**",
+          "tb/**",
+          "tools/**",
+          "tests/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp",
+          "verilator",
+          "git",
+          "make"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/audit.py",
+      "timeout_seconds": 120,
+      "session_id": "",
+      "workspace_commit": "cd909c6b4e51d7957e29c8794bd5acd71cd235f6",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "build/audit/audit.log",
+          "build/audit/report.json",
+          "build/smoke/sim"
+        ],
+        "execution_log": "$ [audit] python3 tools/audit.py\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"counter-rtl\", \"verdict\": \"passed\", \"repair_summary\": \"COUNTER_CHECK_PASS checks=131\\ntb/counter_smoke_tb.sv:37: $finish called at 1312000 (1ps)\\n\"}}\n",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T06:39:35.499192+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:verification.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 63413,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "da61a1585242cc54d917bab0b233ab9e55abbe7e"
+      },
+      "created_at": "2026-10-16T06:39:35.207445+00:00",
+      "finished_at": "2026-10-16T06:39:35.531644+00:00"
+    }
+  ],
+  "work_items": [
+    {
+      "id": "work-47fb4c576cac449f832a941bd3a1aa4d",
+      "task_id": "counter-transfer:designer",
+      "kind": "initial",
+      "request_key": "initial:counter-transfer:designer",
+      "correlation_key": "initial",
+      "summary": "Read spec/counter.md and implement the complete counter in rtl/.\nDevelop with python3 tools/smoke.py and optional tests/designer/ tests.\nWrite only rtl/, tests/designer/ and build/. Preserve the supplied contract,\nchecker and workflow. Do not access other projects, credentials or final\nevaluators, and do not invoke additional agents/models. Repair actionable\nfeedback within your original task. End with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"counter\"}}.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-fd197f79bbbd4457af6b5c4fd218e995",
+      "resolved_attempt_id": "attempt-fd197f79bbbd4457af6b5c4fd218e995",
+      "created_at": "2026-10-16T06:37:41.227400+00:00"
+    },
+    {
+      "id": "work-4ee28f8813d743a9985dd60c42951bd5",
+      "task_id": "counter-transfer:verifier",
+      "kind": "initial",
+      "request_key": "initial:counter-transfer:verifier",
+      "correlation_key": "initial",
+      "summary": "Independently review and test the delivered counter against spec/counter.md.\nRun python3 tools/smoke.py, inspect boundary behavior, and optionally add tests\nunder tests/reviewer/. Do not change RTL, the contract or supplied checker,\nread other projects/final evaluators, access credentials, or invoke extra\nagents/models. Write reports/review.json with subject, passed/failed verdict\nand actionable repair_summary. Return those same fields in\nNEBULA_OUTPUT: {\"report\":{\"subject\":\"counter-rtl\",\"verdict\":\"passed or failed\",\"repair_summary\":\"findings\"}}.\nChoose an actual verdict; your budget is shared with the designer.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-bfe54e520560471abba56559c169dac9",
+      "resolved_attempt_id": "attempt-bfe54e520560471abba56559c169dac9",
+      "created_at": "2026-10-16T06:37:41.227776+00:00"
+    },
+    {
+      "id": "work-7f0113661cd44f1c95aa3dcf781340b9",
+      "task_id": "counter-transfer:audit",
+      "kind": "initial",
+      "request_key": "initial:counter-transfer:audit",
+      "correlation_key": "initial",
+      "summary": "Replay unchanged public counter tests.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-15ab2f2b5ade4713b23ffc0db54155ee",
+      "resolved_attempt_id": "attempt-15ab2f2b5ade4713b23ffc0db54155ee",
+      "created_at": "2026-10-16T06:37:41.228064+00:00"
+    }
+  ],
+  "deliveries": {
+    "counter-transfer:designer": {
+      "rtl": {
+        "task_id": "counter-transfer:designer",
+        "output_name": "rtl",
+        "artifact_id": "artifact-c336b1f24b534801ba26a9ce06cace62",
+        "attempt_id": "attempt-fd197f79bbbd4457af6b5c4fd218e995",
+        "accepted_at": "2026-10-16T06:38:16.911501+00:00"
+      }
+    },
+    "counter-transfer:verifier": {
+      "report": {
+        "task_id": "counter-transfer:verifier",
+        "output_name": "report",
+        "artifact_id": "artifact-6c47534bb872455094768dd70e415609",
+        "attempt_id": "attempt-bfe54e520560471abba56559c169dac9",
+        "accepted_at": "2026-10-16T06:39:35.194742+00:00"
+      }
+    },
+    "counter-transfer:audit": {
+      "report": {
+        "task_id": "counter-transfer:audit",
+        "output_name": "report",
+        "artifact_id": "artifact-6bffc24ab54a4ad5a17756aaade83384",
+        "attempt_id": "attempt-15ab2f2b5ade4713b23ffc0db54155ee",
+        "accepted_at": "2026-10-16T06:39:35.531435+00:00"
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "id": "counter-contract",
+      "type": "specification.source",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "external",
+        "task_id": "counter-contract",
+        "attempt_id": "frozen-input",
+        "role": "study-author",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "e2f4298d8d6c4af9d8a8f160b2c62f848afb3552",
+        "tree": "21f3cf3051bd1c100f1e6073bb08102d54baba5a",
+        "paths": [
+          "spec",
+          "tb",
+          "tools"
+        ]
+      },
+      "payload": {
+        "content": "Create synthesizable SystemVerilog module counter.\nPorts: input clk,rst_n,en,load; input [7:0] load_value;\noutput [7:0] count; output overflow.\nActive-low asynchronous reset sets both outputs to zero immediately.\nOn rising clock edges, load has priority over en: load sets count to\nload_value and overflow to zero. Otherwise en increments count modulo 256,\nwith overflow=1 exactly when that edge wraps previous count 255 to zero.\nWith neither load nor en, hold count and clear overflow to zero.\noverflow is a one-cycle wrap event, not a sticky status bit.\n",
+        "content_digest": "sha256:67abbfa49903217b6015f48654a07dee362c9cdf2984b0a8ef5edbf54818e722",
+        "media_type": "text/markdown",
+        "received_at": "2026-10-16T00:00:00+00:00",
+        "source_name": "Loadable enabled wrapping counter"
+      },
+      "input_artifact_ids": [],
+      "metadata": {},
+      "created_at": "2026-10-16T06:37:41.220091+00:00"
+    },
+    {
+      "id": "artifact-c336b1f24b534801ba26a9ce06cace62",
+      "type": "rtl.snapshot",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "counter-transfer",
+        "task_id": "counter-transfer:designer",
+        "attempt_id": "attempt-fd197f79bbbd4457af6b5c4fd218e995",
+        "role": "study-designer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "939abe02fc405a6d88b1b4bd8ebf5b790cb1d3c1",
+        "tree": "1ef36c36da8f860e0812d8a0fb33d4c4341e50b6",
+        "paths": [
+          "rtl/counter.sv"
+        ]
+      },
+      "payload": {
+        "commit": "939abe02fc405a6d88b1b4bd8ebf5b790cb1d3c1",
+        "module": "counter",
+        "paths": [
+          "rtl/counter.sv"
+        ]
+      },
+      "input_artifact_ids": [
+        "counter-contract"
+      ],
+      "metadata": {
+        "task_key": "designer",
+        "workflow_id": "counter-transfer"
+      },
+      "created_at": "2026-10-16T06:38:16.909376+00:00"
+    },
+    {
+      "id": "artifact-6c47534bb872455094768dd70e415609",
+      "type": "verification.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "counter-transfer",
+        "task_id": "counter-transfer:verifier",
+        "attempt_id": "attempt-bfe54e520560471abba56559c169dac9",
+        "role": "study-verifier",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "362c77db46dcc183df2b3e9874a2f9778747adef",
+        "tree": "0d150fd5bbad15fc7036e5f731ab1ac49ff8c124",
+        "paths": [
+          "reports/review.json",
+          "tests/reviewer/counter_boundary_tb.sv"
+        ]
+      },
+      "payload": {
+        "commit": "362c77db46dcc183df2b3e9874a2f9778747adef",
+        "paths": [
+          "reports/review.json",
+          "tests/reviewer/counter_boundary_tb.sv"
+        ],
+        "repair_summary": "No repair required. Delivered RTL matches its snapshot and spec/counter.md. python3 tools/smoke.py passed 131 checks. Independent tests/reviewer/counter_boundary_tb.sv passed 800052 assertions across 266512 clock transitions, covering every count/control combination, all load values, load priority, wrap-event clearing on idle/increment/load, repeated wraps, and asynchronous reset assertion/release with active controls. Evidence: build/reviewer/boundary.log. RTL, contract, and supplied checker unchanged.",
+        "subject": "counter-rtl",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-c336b1f24b534801ba26a9ce06cace62",
+        "counter-contract"
+      ],
+      "metadata": {
+        "task_key": "verifier",
+        "workflow_id": "counter-transfer"
+      },
+      "created_at": "2026-10-16T06:39:35.192418+00:00"
+    },
+    {
+      "id": "artifact-6bffc24ab54a4ad5a17756aaade83384",
+      "type": "verification.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "counter-transfer",
+        "task_id": "counter-transfer:audit",
+        "attempt_id": "attempt-15ab2f2b5ade4713b23ffc0db54155ee",
+        "role": "study-auditor",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "cd909c6b4e51d7957e29c8794bd5acd71cd235f6",
+        "tree": "b37f652ebcff2101a695a799687c66e803486843",
+        "paths": [
+          "build/audit/audit.log",
+          "build/audit/report.json"
+        ]
+      },
+      "payload": {
+        "commit": "cd909c6b4e51d7957e29c8794bd5acd71cd235f6",
+        "paths": [
+          "build/audit/audit.log",
+          "build/audit/report.json"
+        ],
+        "repair_summary": "COUNTER_CHECK_PASS checks=131\ntb/counter_smoke_tb.sv:37: $finish called at 1312000 (1ps)\n",
+        "subject": "counter-rtl",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-6c47534bb872455094768dd70e415609",
+        "artifact-c336b1f24b534801ba26a9ce06cace62"
+      ],
+      "metadata": {
+        "task_key": "audit",
+        "workflow_id": "counter-transfer"
+      },
+      "created_at": "2026-10-16T06:39:35.529180+00:00"
+    }
+  ],
+  "scope": "Frozen contracts, attempt decisions, engineering states, deliveries and captured/pending feedback evidence. WorkItem states are their exported final states. Private model-home and credentials excluded."
+}

@@ -1,0 +1,39 @@
+--- tools ---
+--- tools/capacity_bridge.py ---
+import json,socket,sys
+from pathlib import Path
+if sys.argv[1]=='result':
+ reply=json.loads(Path(sys.argv[2]).read_text())
+ print(reply['output'],end='')
+ raise SystemExit(reply['exit_code'])
+event=json.load(sys.stdin)
+try:
+ with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as connection:
+  connection.connect('/run/study-check.sock')
+  connection.sendall(json.dumps(event).encode()+b'\n')
+  connection.shutdown(socket.SHUT_WR)
+  chunks=[]
+  while True:
+   chunk=connection.recv(65536)
+   if not chunk:break
+   chunks.append(chunk)
+ reply=json.loads(b''.join(chunks))
+except Exception:
+ if event.get('hook_event_name')=='PreToolUse':
+  reply={'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny',
+   'permissionDecisionReason':'Protected tool controller unavailable; call rejected.'}}
+ else:
+  reply={'continue':False,'stopReason':'Protected tool observer unavailable.'}
+print(json.dumps(reply))
+
+--- tools/.capacity-results/exec-98d15d8d-eb7d-469b-8ead-93514f4f0548.json ---
+{
+  "exit_code": 0,
+  "output": "--- .nebula_inputs/artifact-a544bb177dcb441a8ce7f39ae6525850/artifact.json ---\n {\n  \"id\": \"artifact-a544bb177dcb441a8ce7f39ae6525850\",\n  \"type\": \"verification.report\",\n  \"schema_version\": 1,\n  \"producer\": {\n    \"workflow_id\": \"capacity\",\n    \"task_id\": \"capacity:verification\",\n    \"attempt_id\": \"attempt-1ef8edc5b0924f2588e2c2dab8609475\",\n    \"role\": \"capacity-verification\",\n    \"role_version\": 1\n  },\n  \"content\": {\n    \"kind\": \"git\",\n    \"commit\": \"c038cb7a38d567ae41bc371dc64d97df855b8421\",\n    \"tree\": \"e5037871c8dfaaf915d1254754c731ea3dca7cb1\",\n    \"paths\": [\n      \"reports/verification/report.json\",\n      \"tests/delay.py\"\n    ]\n  },\n  \"payload\": {\n    \"commit\": \"c038cb7a38d567ae41bc371dc64d97df855b8421\",\n    \"paths\": [\n      \"reports/verification/report.json\",\n      \"tests/delay.py\"\n    ],\n    \"repair_summary\": \"Identity wire verified\",\n    \"subject\": \"capacity_fixture\",\n    \"verdict\": \"passed\"\n  },\n  \"input_artifact_ids\": [\n    \"artifact-a908fb5e2e8e4319814a9ce9175dfb53\",\n    \"capacity-task\"\n  ],\n  \"metadata\": {\n    \"task_key\": \"verification\",\n    \"workflow_id\": \"capacity\"\n  },\n  \"created_at\": \"2026-10-27T02:54:15.851682+00:00\",\n  \"digest\": \"sha256:ce7648dfddb659b7a7d9d13f83db0166803b7518b9c507a6cf8f765098f9d3f0\"\n}\n--- .nebula_inputs/artifact-a908fb5e2e8e4319814a9ce9175dfb53/artifact.json ---\n {\n  \"id\": \"artifact-a908fb5e2e8e4319814a9ce9175dfb53\",\n  \"type\": \"rtl.snapshot\",\n  \"schema_version\": 1,\n  \"producer\": {\n    \"workflow_id\": \"capacity\",\n    \"task_id\": \"capacity:implementation\",\n    \"attempt_id\": \"attempt-990c5b21e96f4b6d82d8f1bda1dd49c1\",\n    \"role\": \"capacity-rtl\",\n    \"role_version\": 1\n  },\n  \"content\": {\n    \"kind\": \"git\",\n    \"commit\": \"38d51c01e2c278b1369c7d29f058285f6674aac9\",\n    \"tree\": \"e4ab65f9f4081ea71b16d43e1193de4acefd98c8\",\n    \"paths\": [\n      \"rtl/fixture.sv\"\n    ]\n  },\n  \"payload\": {\n    \"commit\": \"38d51c01e2c278b1369c7d29f058285f6674aac9\",\n    \"module\": \"capacity_fixture\",\n    \"paths\": [\n      \"rtl/fixture.sv\"\n    ]\n  },\n  \"input_artifact_ids\": [\n    \"capacity-task\"\n  ],\n  \"metadata\": {\n    \"task_key\": \"implementation\",\n    \"workflow_id\": \"capacity\"\n  },\n  \"created_at\": \"2026-10-27T02:53:46.153309+00:00\",\n  \"digest\": \"sha256:6bbdc89b8e674e42a0e0752d96aa84169171cdc7af820fff8df6c3a8ac8cb43b\"\n}\n--- .nebula_inputs/capacity-task/artifact.json ---\n {\n  \"id\": \"capacity-task\",\n  \"type\": \"specification.source\",\n  \"schema_version\": 1,\n  \"producer\": {\n    \"workflow_id\": \"external\",\n    \"task_id\": \"capacity-protocol\",\n    \"attempt_id\": \"frozen-input\",\n    \"role\": \"experiment-author\",\n    \"role_version\": 1\n  },\n  \"content\": {\n    \"kind\": \"git\",\n    \"commit\": \"59b7b189ee7790ec1a9586de98ea143c8826844d\",\n    \"tree\": \"ab4e78283d02188e625bd328cc5d7846880ae4e5\",\n    \"paths\": [\n      \"spec\",\n      \"tools\"\n    ]\n  },\n  \"payload\": {\n    \"content\": \"Authorized runtime fixture only. Deliver an identity wire y=a. Physical commands invoke deterministic substitutes, never EDA.\\n\",\n    \"content_digest\": \"sha256:5cd9d9d2e513d1c2ae08d07577ac986ee22fe676289412520177ab78428a1f0f\",\n    \"media_type\": \"text/markdown\",\n    \"received_at\": \"2026-10-21T00:00:00+00:00\",\n    \"source_name\": \"Frozen workload task\"\n  },\n  \"input_artifact_ids\": [],\n  \"metadata\": {},\n  \"created_at\": \"2026-10-27T02:52:27.140705+00:00\",\n  \"digest\": \"sha256:940613b67fad406c39fbc9fbda2d99da1bdb066bbc2562273eb6c92c0dc3caa9\"\n}\n"
+}
+
+--- rtl ---
+rtl/fixture.sv
+module capacity_fixture(input a,output y);assign y=a;endmodule
+// initial
+

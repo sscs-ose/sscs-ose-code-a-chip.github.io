@@ -1,0 +1,118 @@
+{
+  "workflow": "C3",
+  "baseline": "59b7b189ee7790ec1a9586de98ea143c8826844d",
+  "planner": "deterministic declared briefs; no model/planning invocation",
+  "briefs": {
+    "capacity:implementation": {
+      "objective": "Read inherited reports and rtl/fixture.sv if it exists. On the FIRST implementation create rtl/fixture.sv with module capacity_fixture(input a,output y);assign y=a;endmodule and // initial. Then run exactly python tests/delay.py with yield_time_ms 1000 and await its actual completion. On a FEEDBACK retry, read the physical fixture report and use apply_patch to replace // initial with // repaired without changing y=a. Do not invoke physical or other EDA. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}.",
+      "deliverables": [
+        "rtl: rtl.snapshot"
+      ],
+      "responsibilities": [
+        "Follow the common resource and tool contract; use actual captured reports."
+      ],
+      "exclusions": [
+        "Do not change hidden/frozen inputs or invoke other models."
+      ],
+      "completion_criteria": [
+        "Submit declared artifacts with truthful evidence and failure reports."
+      ],
+      "collaboration": [
+        "task:capacity:verification",
+        "task:capacity:integration_ppa",
+        "task:capacity:revision"
+      ]
+    },
+    "capacity:verification": {
+      "objective": "Read rtl/fixture.sv. Confirm y=a regardless of its comment. Write reports/verification/report.json with subject capacity_fixture, verdict passed, repair_summary Identity wire verified. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"passed\",\"repair_summary\":\"Identity wire verified\"}}. Do not edit RTL or invoke physical.",
+      "deliverables": [
+        "report: verification.report"
+      ],
+      "responsibilities": [
+        "Follow the common resource and tool contract; use actual captured reports."
+      ],
+      "exclusions": [
+        "Do not change hidden/frozen inputs or invoke other models."
+      ],
+      "completion_criteria": [
+        "Submit declared artifacts with truthful evidence and failure reports."
+      ],
+      "collaboration": [
+        "task:capacity:implementation",
+        "task:capacity:integration_ppa",
+        "task:capacity:revision"
+      ]
+    },
+    "capacity:integration_ppa": {
+      "objective": "Run exactly capacity-check physical once in a separate tool call. This is a deterministic fixture, not EDA. Read its returned report and write reports/integration_ppa/report.json reflecting its actual verdict. The first fixture deliberately fails until RTL contains // repaired. On failure return NEBULA_OUTPUT: {\"report\":{\"subject\":\"capacity_fixture\",\"verdict\":\"failed\",\"repair_summary\":\"Add // repaired to rtl/fixture.sv; preserve y=a\"}}. On pass return the same structure with verdict passed and repair_summary Fixture repaired. Do not edit RTL. Do not invoke physical a second time within this stage.",
+      "deliverables": [
+        "report: verification.report"
+      ],
+      "responsibilities": [
+        "Follow the common resource and tool contract; use actual captured reports."
+      ],
+      "exclusions": [
+        "Do not change hidden/frozen inputs or invoke other models."
+      ],
+      "completion_criteria": [
+        "Submit declared artifacts with truthful evidence and failure reports."
+      ],
+      "collaboration": [
+        "task:capacity:implementation",
+        "task:capacity:verification",
+        "task:capacity:revision"
+      ]
+    },
+    "capacity:revision": {
+      "objective": "Read the final reports and rtl/fixture.sv. Preserve // repaired and y=a. Return NEBULA_OUTPUT: {\"rtl\":{\"module\":\"capacity_fixture\"}}. No further physical command or changes.",
+      "deliverables": [
+        "rtl: rtl.snapshot"
+      ],
+      "responsibilities": [
+        "Follow the common resource and tool contract; use actual captured reports."
+      ],
+      "exclusions": [
+        "Do not change hidden/frozen inputs or invoke other models."
+      ],
+      "completion_criteria": [
+        "Submit declared artifacts with truthful evidence and failure reports."
+      ],
+      "collaboration": [
+        "task:capacity:implementation",
+        "task:capacity:verification",
+        "task:capacity:integration_ppa"
+      ]
+    }
+  },
+  "input_artifact": {
+    "id": "capacity-task",
+    "type": "specification.source",
+    "schema_version": 1,
+    "producer": {
+      "workflow_id": "external",
+      "task_id": "capacity-protocol",
+      "attempt_id": "frozen-input",
+      "role": "experiment-author",
+      "role_version": 1
+    },
+    "content": {
+      "kind": "git",
+      "commit": "59b7b189ee7790ec1a9586de98ea143c8826844d",
+      "tree": "ab4e78283d02188e625bd328cc5d7846880ae4e5",
+      "paths": [
+        "spec",
+        "tools"
+      ]
+    },
+    "payload": {
+      "source_name": "Frozen workload task",
+      "media_type": "text/markdown",
+      "content": "Authorized runtime fixture only. Deliver an identity wire y=a. Physical commands invoke deterministic substitutes, never EDA.\n",
+      "content_digest": "sha256:5cd9d9d2e513d1c2ae08d07577ac986ee22fe676289412520177ab78428a1f0f",
+      "received_at": "2026-10-21T00:00:00+00:00"
+    },
+    "input_artifact_ids": [],
+    "metadata": {},
+    "created_at": "2026-10-27T02:52:27.140705+00:00"
+  }
+}

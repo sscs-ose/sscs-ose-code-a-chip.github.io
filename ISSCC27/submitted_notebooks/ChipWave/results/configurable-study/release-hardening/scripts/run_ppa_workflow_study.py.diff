@@ -1,0 +1,23 @@
+--- run_ppa_workflow_study.py
++++ release/run_ppa_workflow_study.py
+@@ -20,6 +20,7 @@
+ from evaluate_study_physical import evaluate as evaluate_measurement
+ from run_study_physical import run as run_physical
+ from study_budget import BudgetPool
++from study_portability import private_context
+ from study_isolation import prepare_credentials
+ from study_protocol import BASELINE, MODEL, config_tuple, digest, ranking, rule_candidate, write_json
+ 
+@@ -312,10 +313,11 @@
+     if root.exists():raise ValueError('Existing session retained; inspect before recovery')
+     root.mkdir(parents=True);(root/'results').mkdir();(root/'candidates').mkdir()
+     metadata={'job':job,'baseline':str(baseline),'baseline_sha256':digest(baseline),
++              'source_bindings_sha256':digest(experiment/'ppa/source-bindings.json'),
+               'protocol':str(experiment/'protocol.json'),'rtl_source':str(CASE/'released_design'),
+               'started_monotonic':time.monotonic(),'started_at':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+     write_json(root/'session.json',metadata);prepare(root,metadata)
+-    private=Path('/tmp/chipnebula-ppa-study-user37-20261016')/job['id']
++    private=private_context(experiment,'ppa',job['id'])
+     if private.exists():raise ValueError('Prior private context retained; do not reuse a session')
+     command=[sys.executable,str(Path(__file__).resolve()),'--worker',str(root),'--private',str(private)]
+     with (root/'results/runner.log').open('w') as log:

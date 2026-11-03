@@ -1,0 +1,172 @@
+name: 03-check-before-review
+version: 2
+parameters:
+  source: specification.source
+tasks:
+  designer:
+    role: tutorial-designer
+    intent: 'Read spec/npu.md and spec/treatment.md. Deliver the complete implementation
+
+      under rtl/. Run python3 tools/smoke.py and develop additional tests if useful.
+
+      The smoke endpoint executes the published checker and retains trusted receipts.
+
+      You may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,
+
+      tools, the supplied testbench, task definitions or acceptance conditions.
+
+      Read actual feedback and repair the same assigned task. Do not invoke other
+
+      models/agents, access credentials, or attempt to inspect other trials or the
+
+      final evaluator. End with NEBULA_OUTPUT: {"rtl":{"module":"nebula_npu_dot4"}}.
+
+      '
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - ip/**
+      - tb/**
+      - tools/**
+      - tests/**
+      - build/**
+      write:
+      - rtl/**
+      - tests/designer/**
+      - build/**
+      tools: &id001
+      - python3
+      - iverilog
+      - vvp
+      - verilator
+      - git
+      - make
+    inputs:
+      source: &id002
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      rtl:
+        type: rtl.snapshot
+        paths:
+        - rtl/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1200
+    gates:
+    - name: rtl-present
+      kind: file_check
+      on_failure: retry
+      parameters:
+        paths:
+        - rtl/**/*.sv
+        - rtl/**/*.v
+        min_files: 1
+  verifier:
+    role: tutorial-reviewer
+    intent: 'Independently verify the delivered RTL against spec/npu.md and treatment.md.
+
+      Read the actual implementation, run python3 tools/smoke.py and add/run tests
+
+      under tests/reviewer/ when useful. You may write tests/reviewer/, reports/ and
+
+      build/ only; RTL and the contract/checker/IP are read-only. Record actionable
+
+      defects including reproduction steps. Do not repair RTL, weaken checks,
+
+      invoke other models/agents or inspect other trials or the final evaluator.
+
+      Write reports/review.json with subject, verdict (passed or failed),
+
+      repair_summary (a string), and executed commands. End with exactly
+
+      NEBULA_OUTPUT: {"report":{"subject":"generated-rtl","verdict":"passed or failed","repair_summary":"specific
+      findings or none"}}.
+
+      Do not literally copy the placeholder verdict above: select passed or failed.
+
+      '
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - ip/**
+      - tb/**
+      - tools/**
+      - tests/**
+      - build/**
+      write:
+      - tests/reviewer/**
+      - reports/**
+      - build/**
+      tools: *id001
+    inputs:
+      source: *id002
+      rtl:
+        type: rtl.snapshot
+        from: $tasks.designer.outputs.rtl
+      smoke:
+        type: verification.report
+        from: $tasks.audit.outputs.report
+        release:
+          field: verdict
+          equals: passed
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - reports/**
+        - tests/reviewer/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1200
+  audit:
+    role: study-auditor
+    intent: Execute common immutable development check; do not modify design.
+    permission:
+      read:
+      - rtl/**
+      - ip/**
+      - tb/**
+      - tools/**
+      - reports/**
+      - tests/**
+      write:
+      - build/**
+      tools: *id001
+    inputs:
+      rtl:
+        type: rtl.snapshot
+        from: $tasks.designer.outputs.rtl
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - build/audit/**
+    max_attempts: 8
+    execution:
+      executor: tool
+      command: python3 tools/audit.py
+      timeout_seconds: 180
+feedback:
+- source: verifier
+  verdict: fail
+  target: designer
+  kind: feedback
+  summary: Repair the independently reported defect.
+  summary_field: report.repair_summary
+  propagate: true
+- source: audit
+  verdict: fail
+  target: designer
+  kind: feedback
+  summary: Repair the common public checker failure.
+  summary_field: report.repair_summary
+  propagate: true

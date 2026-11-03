@@ -1,0 +1,19 @@
+{
+  "candidate_artifact": "artifact-4a732b3cb80a40fd8c336bedf9cf542a",
+  "candidate_index": 3,
+  "candidate": {
+    "configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 10
+    },
+    "rtl_actions": {
+      "operand_isolation": false,
+      "reduce_width": true
+    },
+    "rationale": "Choose this unseen tuple for the third and final candidate evaluation. Captured candidate 2 used the same RTL actions and physical settings except repair_margin=0: cell_area_um2=161973, die_area_um2=378736, setup_slack_ns=+0.105414, hold_slack_ns=+0.122652, max_slew=16, max_cap=6, max_fanout=0, failure_classes=[electrical], physical_qualified=false and rank_eligible=false. Increase repair_margin to 10 to target its observed electrical failure while limiting added buffering, cell area and switching relative to margin 20. Closure and its timing/energy consequences remain unmeasured. Retain utilization=40, density=0.55 and abc_area=0 to limit simultaneous changes and avoid additional area-mapping timing risk. Retain the proved exact signed 18-bit reduction with 32-bit sign extension and unchanged cycle contract. Keep operand isolation disabled: candidate 1 enabled both actions and reduced cell area to 160081 but failed with setup_slack_ns=-0.0262439 and failure_classes=[physical_execution,timing], despite hold_slack_ns=+0.0945523 and zero electrical violations. These runs do not isolate causality. Both candidates have empty energy_j and estimated_power_w, absent measurement_qualified and score, and no postprocessing commands; no energy or Q improvement is established. Candidate 2 area_ratio=1.0001173173 already exceeds baseline, so any repair overhead must be offset by measured workload energy savings. The qualified baseline remains incumbent at Q=1, cell_area_um2=161954, setup/hold slack=+0.19292/+0.114491 ns and zero electrical violations. Evaluate Q=(cell_area_um2/161954)*geometric_mean(E_DOT64/2.293945631906608e-7,E_GEMM8/1.7792685987008622e-6,E_CONV3/1.1542462882162743e-6) only after physical, measurement and ranking qualification; die area earns no direct credit. Report cell_area_um2, die_area_um2, all three energy_j and estimated_power_w values, area_ratio, energy_ratio, score, setup_slack_ns, hold_slack_ns, electrical_violations, activity_and_parasitic_annotation, qualification flags, failure_classes, manifests and execution costs; assess thresholds 1.0 and 0.98 and retain the best qualified result and all failures. Preserve candidate 1 physical/postprocess/total costs 3420.889992701006/4.1100429370999336e-7/3420.8899931120104 seconds and candidate 2 costs 4120.200828565983/3.839959390461445e-7/4120.200828949979 seconds, with elapsed_search_seconds=3585.433121506998 and 7873.277321411995 respectively. These EDA-inclusive elapsed fields do not establish consumption of the shared 1200-second agent budget; EDA wait is separate. Submit only this remaining evaluation. Energy scope remains Liberty-model estimates from zero-delay post-route activity and extracted SPEF, excluding silicon and SDF-delay/glitch claims. Only the protected evaluator may apply actions or run EDA; this proposal contains no new measurement."
+  },
+  "review_required": true,
+  "accepted_at": "2026-10-19T16:11:08.990104+00:00"
+}

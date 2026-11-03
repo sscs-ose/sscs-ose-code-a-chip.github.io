@@ -1,0 +1,33 @@
+{
+  "workflow": "C3",
+  "orchestration": "chipnebula",
+  "phases": [
+    {
+      "phase": "implementation",
+      "context": "rtl"
+    },
+    {
+      "phase": "verification",
+      "context": "verification"
+    },
+    {
+      "phase": "integration_ppa",
+      "context": "integration_ppa"
+    },
+    {
+      "phase": "revision",
+      "context": "rtl"
+    }
+  ],
+  "context_policy": "resume same context for same role; never share across trials",
+  "repair_context": "rtl",
+  "expert_materials": {
+    "implementation": "Implement the frozen workload and interface, including reset, cancel/flush and backpressure.",
+    "verification": "Check arithmetic/data integrity, ordering, bounds, fairness and progress; record reproducible failures.",
+    "integration_ppa": "Run integration checks; inspect synthesis and physical reports; diagnose timing, power and routing.",
+    "revision": "Repair evidence-backed defects without weakening contracts; select and explicitly submit matching artifacts."
+  },
+  "role_calls_parallel": false,
+  "physical_feedback": "same raw reports for every workflow; at most two attempts",
+  "status": "declaration; runtime execution still requires qualification"
+}

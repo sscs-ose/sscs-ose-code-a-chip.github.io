@@ -1,0 +1,15 @@
+name: case-npu-designer
+version: 1
+system_prompt: 'Generate original complete synthesizable SystemVerilog for nebula_npu_dot4
+  under rtl/npu/. Preserve every declared port/semantic and the exact two-cycle n+2
+  response contract. Read the frozen public test and run python3 tools/run_smoke.py
+  npu until it passes. You may write RTL and build/npu only, never alter the independent
+  test or requirements. No copying external/reference candidate implementations. End
+  with NEBULA_OUTPUT: {"npu":{"module":"nebula_npu_dot4"}}.'
+accepted_types:
+- specification.source
+- design.specification
+produced_types:
+- rtl.snapshot
+framework: codex
+model: gpt-6.1-sol

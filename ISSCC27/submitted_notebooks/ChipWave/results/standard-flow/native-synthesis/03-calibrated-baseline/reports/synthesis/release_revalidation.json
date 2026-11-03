@@ -1,0 +1,56 @@
+{
+  "verdict": "passed",
+  "current_baseline": "reports/synthesis/baseline_revalidation.json",
+  "prior_published_netlist_artifact_id": "artifact-eb1f96aad0b1499fa7ca53fe2826eb90",
+  "netlist_sha256": "a3c92f1bb9609445af213c8645de4c896a5f0d6e932bc6ec45b3154f28a87632",
+  "synthesis_rerun": true,
+  "sta_rerun": true,
+  "gates": [
+    {
+      "name": "synthesis-result-summary",
+      "exit_code": 0,
+      "command": [
+        "/tmp/chipnebula-public-repro-user37/bin/python",
+        "-m",
+        "chip_nebula.taskgraph.result_summary",
+        "reports/synthesis/result_summary.json",
+        "--profile",
+        "synthesis",
+        "--required",
+        "design.cell_area",
+        "--required",
+        "design.macro_count",
+        "--required",
+        "design.standard_cell_count",
+        "--required",
+        "timing.hold_slack",
+        "--required",
+        "timing.setup_slack",
+        "--measured",
+        "design.standard_cell_count",
+        "--measured",
+        "design.cell_area",
+        "--measured",
+        "design.macro_count"
+      ],
+      "evidence": "reports/synthesis/release_summary_gate.log"
+    },
+    {
+      "name": "setup-timing-closure",
+      "metric": "timing.setup_slack",
+      "actual_value": 39.721889496,
+      "operator": ">=",
+      "threshold": 0,
+      "passed": true
+    },
+    {
+      "name": "artifact-output-contract",
+      "validator": "chip_nebula.taskgraph.artifacts.default_schema_registry().validate",
+      "artifact_type": "netlist",
+      "schema_version": 1,
+      "path_string_payload_rejected": true,
+      "object_payload_passed": true,
+      "identity_test_basis": "Prior published identity used only for schema preflight; final commit/paths omitted for platform injection."
+    }
+  ]
+}

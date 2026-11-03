@@ -1,0 +1,92 @@
+[
+  {
+    "id": "AC-ORIGINAL",
+    "responsible_stage": "synthesize",
+    "reason": "RTL inventory and immutable checker audit measured; original-implementation synthesis confirmation requires mapped synthesis evidence.",
+    "original_frozen_detail": "Responsible stage: rtl-implementation. Configuration: both core configurations. Dependencies: captured ready specification and frozen constraints. Procedure: Audit the implementation history and authorized input/dependency inventory; compare the independent checker and fixture/config/seed hashes before and after all runs. Check original RTL elaborates and synthesizes. Pass condition: Fresh original synthesizable RTL; no copied reference/prior-candidate/private answer content in the workspace and zero checker/config/seed modifications to obtain PASS. Do not inspect excluded source to perform this audit. Evidence: Repository/dependency lineage, unchanged checker hashes and elaboration/synthesis logs."
+  },
+  {
+    "id": "AC-RESOURCES",
+    "responsible_stage": "rtl-implementation / platform accounting",
+    "reason": "Captured artifacts contain no development allocation, peak RAM/disk, cumulative token or full workflow wall-time receipts; verifier run time is not a substitute.",
+    "original_frozen_detail": "Responsible stage: rtl-implementation. Configuration: development attempt. Dependencies: captured ready specification and frozen constraints. Procedure: Obtain platform allocation, cumulative task wall-time/token accounting, memory peak and writable-disk usage for the development attempt; reconcile against declared resource limits. Pass condition: Allocation16vCPU, RAM<=32GiB, writable disk<=100GiB, development<=2h and same-model tokens<=1200000. Missing accounting is unavailable/pending, never fabricated PASS; these are development limits, not hardware targets. Evidence: Platform allocation and actual resource/time/token receipts linked to the attempt."
+  },
+  {
+    "id": "AC-EVALUATOR-RELEASE",
+    "responsible_stage": "independent evaluator owner / parent replay",
+    "reason": "Authorized resource excludes reference RTL and release mutation results; feedback requires parent-side independent fixed-checker replay after selected delivery.",
+    "original_frozen_detail": "Responsible stage: functional-performance-verify (independent evaluator owner). Configuration: independent evaluator release environment. Dependencies: AC-RUNTIME. Procedure: Evaluator owner executes A-D on independently known-working reference with full logs,>=1compilable mutant per hazard/exception/handshake class,allACT4scope audits and full comparator/Sail regression; replay first-mismatch artifacts. Pass condition: Known-good runs pass each family,each targeted mutant fails for the specified reason,all generated ELFs avoid excluded features/interrupts with inclusion/exclusion counts/reasons/hashes. Same programs used in complete regression and replay reproduces first mismatch. Reference-source/private-answer bodies stay outside tested implementation workspace; historical21mutant/reference data is no substitute for release evidence. Evidence: Owner-produced reference/run metadata,mutation matrix with compile/failure evidence,scope inventory,regression and replay report."
+  },
+  {
+    "id": "AC-PROJECT-COMPLETION",
+    "responsible_stage": "gds-export; failure-analysis",
+    "reason": "Full project joining, all 443 requirement closure and final physical/GDS acceptance belong after downstream execution.",
+    "original_frozen_detail": "Responsible stage: gds-export; failure-analysis. Configuration: whole project. Dependencies: every other item in this plan, as explicitly listed below. Procedure: GDS exporter resolves every item/configuration result and required adapter output into a same-baseline project acceptance record; reconcile covered requirement IDs and full run populations to this443-IDcatalog and37semantic groups. Failure-analysis owner retains failed run/counterexample evidence and links subsequent reruns without overwriting history. Pass condition: Every required item/configuration actually PASS with retrievable measurements; required adapters executed and typed operands joined,no pending/missing/invalid/timeout result or dropped failure. Report measured tests.total/passed/failed and acceptance.total/covered plus real line/branch/toggle/functional coverage in reports/verification/result_summary.json; missing coverage instrumentation explicitly unavailable,no invented threshold or local-count inflation. Complete physical/GDS evidence and score policy obeyed; report-only quantities retain honest availability. Only then build/gds/project_acceptance.json may verdictPASS. This draft itself executes none of these checks. Evidence: Per-check/configuration result map,443requirement-to-executed-evidence links,actual summary reports,same-run external adapter outputs and build/gds/project_acceptance.json with honest engineering verdict."
+  },
+  {
+    "id": "AC-PHYSICAL-INPUTS",
+    "responsible_stage": "synthesize; pnr",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: synthesize; pnr. Configuration: enabled physical top. Dependencies: AC-INTEGRATION, AC-STRUCTURE, AC-ACT4, AC-DIRECTED, AC-DIFFERENTIAL, AC-CYCLES, AC-XDOT, AC-DOT64, AC-GEMM8, AC-CONV3. Procedure: Before synthesis/PnR resolve the20manifest-bound views and compare actual bytes to frozen view_binding hashes; verify ORFS3a964e13f11a4e435aac01ffa14db0a7d2853720,TTLiberty/LEF/GDS/CDL cell sets/units and actual SDC digest. Inspect elaborated physical boundary. Pass condition: Sky130HD tt_025C_1v80,topnebula_cpu_npu_top/coreenabled,no pads/package/SRAM/external-memory arrays. All resource hashes/cell views match; missing/mismatched view blocks execution. clk100ns waveform0/50,setup/hold uncertainty0.1ns,source latency0,slew0.05ns,IOmin/max0.5ns,output0.005pFperbit. Apply all frozen ports incl observers; no false/multicycle/case/dont_touch/observer/reset exemptions. Protocol wait is not multicycle STA. Preserve async reset and nominal1.8V/25C. Evidence: Actual input/resource/tool hash manifest,view/cell/unit audit,physical port/hierarchy dump and serialized loaded SDC constraints."
+  },
+  {
+    "id": "AC-SYNTHESIS",
+    "responsible_stage": "synthesize",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: synthesize. Configuration: enabled physical top. Dependencies: AC-PHYSICAL-INPUTS. Procedure: Run frozen Yosys0.69+77 git9ff27d29c built-in read_slang (no external plugin),ABC_AREA=1/area-priority and combinational flattening; inspect resulting mapped netlist and run TTSTA with frozen SDC. Pass condition: No blackboxes/inferred RAM/SRAM/internal images;RF32x32flops/muxes; all functional cells characterized and not in exact DONT_USE list. Four pipeline groups,NPU n+2,CPU n+4,asyncreset,forwarding/cancellation and observer ports remain; no retiming,new sequential feature or latency change. Setup slack>=0ns. Report measured standard-cell/macro counts (macro0),mapped cell area,setup/hold,actual tool/constraint identity; downstream post-route hold remains required. Evidence: build/synth actual mapped netlist,logs,STA paths,cell/blackbox/hierarchy reports and reports/synthesis/result_summary.json with measured design.standard_cell_count/design.cell_area/design.macro_count,timing.setup_slack/timing.hold_slack."
+  },
+  {
+    "id": "AC-FLOORPLAN",
+    "responsible_stage": "pnr",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr. Configuration: enabled physical top. Dependencies: AC-SYNTHESIS. Procedure: Use actual mapped area A:side=sqrt(A/0.40),width=ceil(side/0.46)*0.46,height=ceil(side/2.72)*2.72; compare ODB core[10,10,10+width,10+height],die[0,0,width+20,height+20],row siteunithd and automatic top-bit pin placement. Pass condition: Geometry equals frozen rounding policy,initial40%utilization,aspect nominal1,10um margins and density0.55; report achieved rounded utilization/aspect. Pins on frozen horizontalmet3/verticalmet2 with legal spacing and every top bit located; no pad ring/macros/fixed-die budget/hidden CTS reserve. Area only reported separately,mapped/placed/core/die/support cells,no invented ceiling. Evidence: Actual mapped A,geometry calculations,ODB outlines/rows,pin location/legality inventory and measured area breakdown."
+  },
+  {
+    "id": "AC-PDN-ROUTING",
+    "responsible_stage": "pnr",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr. Configuration: enabled physical top. Dependencies: AC-FLOORPLAN. Procedure: Inspect actual power connectivity,tap/tie/fill/diode roster and routed layers/tracks against exact hashed pdn.tcl,tapcell.tcl,config.mk,fastroute.tcl,make_tracks.tcl and technologyLEF. Pass condition: VDD1.8/VSS0 connect VPWR/VPB and VGND/VNB correctly; approvedmet1followpin0.48um/5.44um,met4stripes1.6/27.14offset13.57,met5stripes1.6/27.2offset13.6 andmet1-met4/met4-met5connectivity;tapdistance14um and exact approved tie/fill/diode cells. Signalsmet1..5,clocksmet3..5,capacityadjustment0.2,legal manifest tracks/vias; no added layers/NDR/shielding/keepouts/low-power features. No missing PG connection or unapproved support-cell recipe. Evidence: ODB/netlist PG connectivity,PDN/tap/support-cell inventory,routing settings and actual route/layer legality checks."
+  },
+  {
+    "id": "AC-POSTROUTE-STA",
+    "responsible_stage": "pnr",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr. Configuration: enabled physical top. Dependencies: AC-PDN-ROUTING. Procedure: After CTS read frozen SDC then set_propagated_clock nebula_clock; extract actual final ODB with manifest setRC.tcl/rcx_patterns.rules. Analyze setup/hold using final functional netlist and matched SPEF,TTLiberty and every required endpoint. Pass condition: Setup/hold slack>=0ns at100ns,uncertainties0.1retained,source latency0 and CTS delay not double-counted. Early/lateR,Cand timingderates1.0,no invented corners or timing exception; observer/reset checks retained. CTS uses only approved clkbuf1/2/4/8/16; report actual skew/insertion with no extra ceiling. Nominal single-corner engineering result only. Evidence: Final ODB/netlist/SPEF/SDC/library hashes,CTS and path reports,unconstrained-path audit and reports/pnr/result_summary.json measured timing.setup_slack/timing.hold_slack."
+  },
+  {
+    "id": "AC-ELECTRICAL",
+    "responsible_stage": "pnr; functional-performance-verify",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr; functional-performance-verify. Configuration: enabled physical top. Dependencies: AC-POSTROUTE-STA, AC-RESET, AC-NPU-CANCEL. Procedure: Analyze all actual clock/data/observer/reset nets for characterized slew/capacitance/fanout limits; run recovery/removal/library pulse-width checks with propagated clock. Independently inspect external reset waveform. Pass condition: Slew/capacitance violations0; available library fanout violations0,where no characterized ceiling report structural fanout and limit unavailable. Recovery/removal/library pulse checks pass; external reset low>=200ns,deassert49..51ns afterclk rise incl+/-1ns skew (do not expand window),joint memory reset. No blanket reset false path or invented assertion phase/synchronizer; async assertion retained. Structural fixture loading SDC is not actual design STA closure. Evidence: Actual electrical violation reports,reset recovery/removal/min-pulse paths and environment waveform measurements."
+  },
+  {
+    "id": "AC-ROUTE-CLEAN",
+    "responsible_stage": "pnr",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr. Configuration: enabled physical top. Dependencies: AC-ELECTRICAL. Procedure: Run final detailed-route connectivity/DRC and antenna checks after all repairs using frozen allowed cells/rules; invalidate and rerun STA/export checks if repair changes design. Pass condition: RouterDRC violations0,antenna violations0,no unrouted functional net; actual final revision corresponds to timing/electrical evidence. Required execution_status records completed tool runs,not mere file existence. Evidence: Final router/antenna/connectivity logs,repair inventory,ODB hash,reports/pnr/result_summary.json measured drc.violations/antenna.violations/design.die_area and reports/pnr/execution_status.json."
+  },
+  {
+    "id": "AC-EXPORT-CONSISTENCY",
+    "responsible_stage": "pnr",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr. Configuration: enabled physical top. Dependencies: AC-ROUTE-CLEAN, AC-POSTROUTE-STA. Procedure: From final routed ODB regenerate functional STA netlist/SPEF and compare actual instances,cells,pins,nets/connectivity and parasitic ownership; rebuild identical STA scenario from exported artifacts. Pass condition: ODB/exported netlist/SPEF represent one actual final design,all functional nets have correct parasitic binding,zero unexplained instance/net/pin mismatch; reloaded timing matches within platform gate tolerance1e-6. Every hash points to same final revision; physical-only support cells explicitly accounted for. Evidence: reports/pnr/post_route_export_consistency.json with actual design/export hashes,comparison details and STA reload result; final retrievable exports."
+  },
+  {
+    "id": "AC-DRC-LVS",
+    "responsible_stage": "pnr; gds-export",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr; gds-export. Configuration: enabled physical top. Dependencies: AC-EXPORT-CONSISTENCY. Procedure: Run manifest-bound drc/sky130hd.lydrc and lvs/sky130hd.lylvs on final exported physical geometry with approved GDS/CDL/cell views and actual final functional netlist; resolve PG/physical-only-cell treatment per approved decks. Pass condition: Independent deckDRC violations0 and LVSmatches actual enabled top,not empty/dummy/fixture design. Deck/view/input hashes match frozen resources and final exports. Unsupported independent ERC,EM/IR,multi-corner/foundry/pad/package qualification explicitly unavailable,never fabricated PASS. Evidence: Actual KLayout deck commands/tool versions,input/deck/CDL/GDS hashes,complete marker and LVS comparison databases/reports."
+  },
+  {
+    "id": "AC-POWER-AREA",
+    "responsible_stage": "pnr",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: pnr. Configuration: enabled post-route top. Dependencies: AC-EXPORT-CONSISTENCY, AC-DOT64, AC-GEMM8, AC-CONV3. Procedure: Run DOT64,GEMM8,CONV3 on actual post-route functional design at100ns; capture eligible activity from reset deassertion through committed tohost completion,excluding reset/idle warm-up/external memories/pads/package; use only supported characterized models. Pass condition: Each workload functional output still passes. Report separately cycles,activity window boundaries/duration,annotation coverage,dynamic/leakage/total estimates and actual design/model hashes,no weighted aggregate. Missing model/activity explicitly unavailable,never measured-silicon power or fabricated number. Area mapped/placed/core/die/support-cell accounting includes CPU/NPU/RF and excludes external memory/pads/package. No area or power hard budget is inferred. Evidence: Actual gate/activity traces and mapping coverage,supported-model power reports or explicit unavailability reason,measured area breakdown with final design identity."
+  },
+  {
+    "id": "AC-GDS",
+    "responsible_stage": "gds-export",
+    "reason": "Requires actual synthesis, routed implementation, characterized timing/electrical, activity/model or GDS outputs; unavailable at pre-synthesis. Thresholds retained.",
+    "original_frozen_detail": "Responsible stage: gds-export. Configuration: enabled physical top. Dependencies: AC-DRC-LVS, AC-POWER-AREA, AC-EXPORT-CONSISTENCY. Procedure: Export actual routed enabled top with approved library geometry,open GDS in KLayout,enumerate top/hierarchy/bounds and join it to final ODB/netlist/SPEF/deck results; verify every final file is retrievable. Pass condition: GDSbytes>0,readable=true,correct topnebula_cpu_npu_top and populated actual functional geometry/hierarchy; no missing referenced cells,ports/memory boundary correct. Independent DRC/LVS and final STA/electrical/antenna results correspond to this export. No foundry authorization,tapeout,package or fabricated silicon claims. Evidence: Actual GDSbytes/hash/readability/top-cell report,final export lineage and build/gds/result_summary.json measured gds.bytes/gds.readable/gds.top_cell."
+  }
+]

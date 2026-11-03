@@ -1,0 +1,2475 @@
+{
+  "workflow": {
+    "id": "ppa-search",
+    "recipe": "bounded-ppa-search@2",
+    "goal": "Compare bounded PPA decision workflows on one fixed circuit",
+    "status": "complete",
+    "paused_reason": "",
+    "definition_digest": "sha256:afcd6a5eaf9888e13f6454cee4ecc56a706510403bf03ee0997c1f2a356fe248",
+    "metadata": {
+      "baseline_commit": "8c183bc9789be15962d0fb464ef314f56c556f10",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "source": "ppa-context"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/project/.chip_nebula/recipes/ppa-search.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-16T06:40:50.848470+00:00"
+  },
+  "tasks": [
+    {
+      "id": "ppa-search:proposer",
+      "workflow_id": "ppa-search",
+      "key": "proposer",
+      "role": "ppa-proposer",
+      "role_version": 1,
+      "intent": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "proposal/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "ppa-context",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "candidate",
+          "artifact_type": "ppa.candidate",
+          "schema_version": 1,
+          "paths": [
+            "proposal/**"
+          ]
+        }
+      ],
+      "hard_gates": [
+        {
+          "name": "bounded-unseen-candidate",
+          "kind": "tool_check",
+          "parameters": {
+            "command": "python3 tools/run_ppa.py validate",
+            "error_class": "invalid_ppa_candidate",
+            "expected": "PPA_CANDIDATE_VALID",
+            "level": "L1",
+            "metric": "",
+            "min_files": 0,
+            "must_match": false,
+            "must_not_match": true,
+            "operator": ">=",
+            "paths": [],
+            "pattern": "",
+            "source": "",
+            "threshold": 0.0,
+            "timeout": 30
+          },
+          "on_failure": "retry"
+        }
+      ],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 12,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+        "deliverables": [
+          "candidate: ppa.candidate"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "ppa-search:evaluator",
+      "workflow_id": "ppa-search",
+      "key": "evaluator",
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "intent": "Execute the captured immutable candidate under the protected physical budget.",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "candidate",
+          "upstream_task_id": "ppa-search:proposer",
+          "output_name": "candidate",
+          "required_type": "ppa.candidate",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "ppa.evaluation.report",
+          "schema_version": 1,
+          "paths": [
+            "build/evaluation/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 3,
+      "timeout_seconds": 16500,
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "ppa-search:finalizer",
+      "workflow_id": "ppa-search",
+      "key": "finalizer",
+      "role": "ppa-finalizer",
+      "role_version": 1,
+      "intent": "Record search completion and retain the best qualified result, if any.",
+      "permission": {
+        "read_paths": [
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/session/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "evaluation",
+          "upstream_task_id": "ppa-search:evaluator",
+          "output_name": "report",
+          "required_type": "ppa.evaluation.report",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "ppa.session.report",
+          "schema_version": 1,
+          "paths": [
+            "build/session/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py finalize",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": true,
+      "display_group": "",
+      "max_attempts": 1,
+      "timeout_seconds": 30,
+      "brief": {
+        "objective": "Record search completion and retain the best qualified result, if any.",
+        "deliverables": [
+          "report: ppa.session.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:evaluator"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    }
+  ],
+  "roles": [
+    {
+      "name": "ppa-evaluator",
+      "version": 1,
+      "instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "produced_types": [
+        "ppa.evaluation.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "ppa-finalizer",
+      "version": 1,
+      "instruction": "Record search completion separately from engineering acceptance.",
+      "accepted_types": [
+        "ppa.evaluation.report"
+      ],
+      "produced_types": [
+        "ppa.session.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "ppa-proposer",
+      "version": 1,
+      "instruction": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "accepted_types": [
+        "specification.source",
+        "ppa.evaluation.report",
+        "verification.report"
+      ],
+      "produced_types": [
+        "ppa.candidate"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    }
+  ],
+  "feedback": [
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "pass",
+      "target_task_id": "ppa-search:proposer",
+      "kind": "feedback",
+      "summary": "Continue bounded search.",
+      "propagate_to_dependents": true,
+      "payload_field": "report.continue_search",
+      "payload_equals": true,
+      "summary_field": ""
+    },
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "pass",
+      "target_task_id": "ppa-search:finalizer",
+      "kind": "feedback",
+      "summary": "Record terminal search observations.",
+      "propagate_to_dependents": false,
+      "payload_field": "report.continue_search",
+      "payload_equals": false,
+      "summary_field": ""
+    },
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "fail",
+      "target_task_id": "ppa-search:proposer",
+      "kind": "feedback",
+      "summary": "Continue bounded search.",
+      "propagate_to_dependents": true,
+      "payload_field": "report.continue_search",
+      "payload_equals": true,
+      "summary_field": ""
+    },
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "fail",
+      "target_task_id": "ppa-search:finalizer",
+      "kind": "feedback",
+      "summary": "Record terminal search observations.",
+      "propagate_to_dependents": false,
+      "payload_field": "report.continue_search",
+      "payload_equals": false,
+      "summary_field": ""
+    }
+  ],
+  "attempts": [
+    {
+      "id": "attempt-df10bdd3b715440aa58f73ca08bb4fbc",
+      "task_id": "ppa-search:proposer",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-bff3d67028514b80a62995ee5c799db1"
+      ],
+      "input_deliveries": {
+        "source": "ppa-context"
+      },
+      "role": "ppa-proposer",
+      "role_version": 1,
+      "role_instruction": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "ppa.evaluation.report",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+        "deliverables": [
+          "candidate: ppa.candidate"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:9d5f56fa3afae165ada8ff1daf6f743935bea0080287eaec8843bdf10e36a7d1",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "proposal/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a14371-2707-75c2-b2c1-8c2d4382f6c0",
+      "workspace_commit": "38589a9c8bf76a22ddf64d7720934327d09dfc8a",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "proposal/candidate.json",
+          "build/proposal_validation.json"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{\"utilization\":40,\"density\":0.55,\"abc_area\":1,\"repair_margin\":0},\"rationale\":\"The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen.\"}}\nTASK COMPLETED.",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T14:41:34.999433",
+            "details": {},
+            "evidence": "STDOUT:\nPPA_CANDIDATE_VALID\n\nSTDERR:\n",
+            "kind": "tool_check",
+            "name": "bounded-unseen-candidate",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          },
+          {
+            "checked_at": "2026-10-16T06:41:34.999471+00:00",
+            "details": {
+              "validated_outputs": [
+                "candidate:ppa.candidate@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 69755,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "8c183bc9789be15962d0fb464ef314f56c556f10"
+      },
+      "created_at": "2026-10-16T06:40:51.056166+00:00",
+      "finished_at": "2026-10-16T06:41:35.031592+00:00"
+    },
+    {
+      "id": "attempt-388a0c0bf90d4d2eb1b782b8ed3cd493",
+      "task_id": "ppa-search:proposer",
+      "ordinal": 2,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-b55e7a3c3b5447579246186bde867725"
+      ],
+      "input_deliveries": {
+        "source": "ppa-context"
+      },
+      "role": "ppa-proposer",
+      "role_version": 1,
+      "role_instruction": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "ppa.evaluation.report",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+        "deliverables": [
+          "candidate: ppa.candidate"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:9d5f56fa3afae165ada8ff1daf6f743935bea0080287eaec8843bdf10e36a7d1",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "proposal/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a143b1-82dc-7122-a12a-bc169955d499",
+      "workspace_commit": "6865777e79c38256300739321727519c3970b58a",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "proposal/candidate.json",
+          "build/proposal_validation.json"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{\"utilization\":40,\"density\":0.55,\"abc_area\":1,\"repair_margin\":10},\"rationale\":\"Read context/baseline.json, context/protocol.json, and the complete immutable feedback artifact artifact-4a1b4b8428d74453a4fc776a21cdb360, including build/evaluation/report.json at commit 7a85d34af02b69c6f2d5628c6eb52c53d1841042. Its history contains baseline (40,0.55,0,0) and candidate 1 (40,0.55,1,0); the proposed (40,0.55,1,10) is untried and within the frozen domain. Candidate 1 reduced cell area from 161954 to 157315 um2 (2.86%) and reported setup/hold slack of 0.423833/0.0655785 ns, but failed electrical qualification with 12 max_slew and 5 max_cap violations, zero max_fanout violations, and no measured workload energy. The qualified baseline remains the only rank-eligible result, with score 1.0 and no electrical violations. Retain utilization, density, and ABC area optimization to pursue the observed cell-area saving; increase repair_margin from 0 to 10 as the smallest positive allowed setting to target the observed electrical failure while limiting potential repair area and energy overhead. This is an engineering hypothesis: the reports give violation counts, not severities or evidence that margin 10 will suffice. Holding placement settings isolates this repair change. The objective uses cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy, so neither smaller die area nor candidate 1 area alone establishes a score improvement. Repair may consume its area saving or reduce hold slack; qualification and workload energy require independent evaluation. No candidate energy, qualification, or improved score is claimed. Energy comparisons retain the baseline Liberty-model, zero-delay gate-activity and extracted-SPEF scope. RTL, clock period 10526 ps, libraries, and acceptance thresholds remain frozen; no EDA, screening search, model, or agent was run. Local schema, domain, and captured-history uniqueness checks passed. The required validator could not execute because tools/run_ppa.py could not import run_ppa_workflow_study; the gate remains unverified, as recorded in build/proposal_validation.json.\"}}\nTASK COMPLETED.",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T15:52:35.083804",
+            "details": {},
+            "evidence": "STDOUT:\nPPA_CANDIDATE_VALID\n\nSTDERR:\n",
+            "kind": "tool_check",
+            "name": "bounded-unseen-candidate",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          },
+          {
+            "checked_at": "2026-10-16T07:52:35.083840+00:00",
+            "details": {
+              "validated_outputs": [
+                "candidate:ppa.candidate@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "resume_site": {
+          "attempt_id": "attempt-df10bdd3b715440aa58f73ca08bb4fbc",
+          "base_commit": "8c183bc9789be15962d0fb464ef314f56c556f10",
+          "modified_path_count": 2,
+          "modified_paths_sample": [
+            "proposal/candidate.json",
+            "build/proposal_validation.json"
+          ],
+          "workspace_commit": "38589a9c8bf76a22ddf64d7720934327d09dfc8a"
+        },
+        "runner_pid": 69755,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "8c183bc9789be15962d0fb464ef314f56c556f10"
+      },
+      "created_at": "2026-10-16T07:51:08.644450+00:00",
+      "finished_at": "2026-10-16T07:52:35.115665+00:00"
+    },
+    {
+      "id": "attempt-640c6e65deb64ed98d272473f327f474",
+      "task_id": "ppa-search:proposer",
+      "ordinal": 3,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-02a92532f614456fb6c8b9153367eda1",
+        "work-b55e7a3c3b5447579246186bde867725",
+        "work-fe293452796b41bfa681f82b8f8d5619"
+      ],
+      "input_deliveries": {
+        "source": "ppa-context"
+      },
+      "role": "ppa-proposer",
+      "role_version": 1,
+      "role_instruction": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "ppa.evaluation.report",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+        "deliverables": [
+          "candidate: ppa.candidate"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:9d5f56fa3afae165ada8ff1daf6f743935bea0080287eaec8843bdf10e36a7d1",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "proposal/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a143f1-f9e0-7192-98d7-74cb593893e8",
+      "workspace_commit": "1146dcbcba28ef4cf366dc9e04911face0d46352",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "proposal/candidate.json",
+          "build/proposal_validation.json"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{\"utilization\":40,\"density\":0.55,\"abc_area\":1,\"repair_margin\":20},\"rationale\":\"Read context/baseline.json, context/protocol.json, and both complete captured feedback records, including immutable build/evaluation/report.json at commits 7a85d34af02b69c6f2d5628c6eb52c53d1841042 and 7fa00985e4c08a46daf7f8c9ad407ce3643064e3. Their history contains baseline (40,0.55,0,0) and candidates (40,0.55,1,0) and (40,0.55,1,10); (40,0.55,1,20) is untried, within the frozen domain, and uses the third and final new physical candidate. Raising repair_margin from 0 to 10 reduced max_slew violations from 12 to 2 and max_cap violations from 5 to 0; max_fanout remained 0. Cell area changed from 157315 to 157230 um2, versus baseline 161954 um2, while setup/hold slack changed from 0.423833/0.0655785 to 0.556154/0.0603264 ns. Both candidates failed electrical qualification and have no workload energy measurements. Choose repair_margin=20, the next and largest allowed margin, to target the remaining slew failures while retaining the observed approximately 2.92% cell-area saving; hold utilization, density, and abc_area fixed to follow the observed repair response. Violation counts do not establish severity or guarantee that further margin will qualify, and repair may increase area or energy or reduce hold slack. The baseline remains the only rank-eligible result, with score 1.0. The objective is normalized cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy; no improved score, energy, or qualification is claimed before independent evaluation. Energy comparisons use the baseline Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. RTL, 10526 ps period, libraries, and acceptance thresholds remain frozen. No EDA, screening search, external model, or agent was invoked.\"}}\nTASK COMPLETED.",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T17:02:35.398084",
+            "details": {},
+            "evidence": "STDOUT:\nPPA_CANDIDATE_VALID\n\nSTDERR:\n",
+            "kind": "tool_check",
+            "name": "bounded-unseen-candidate",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          },
+          {
+            "checked_at": "2026-10-16T09:02:35.398132+00:00",
+            "details": {
+              "validated_outputs": [
+                "candidate:ppa.candidate@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "resume_site": {
+          "attempt_id": "attempt-388a0c0bf90d4d2eb1b782b8ed3cd493",
+          "base_commit": "8c183bc9789be15962d0fb464ef314f56c556f10",
+          "modified_path_count": 2,
+          "modified_paths_sample": [
+            "proposal/candidate.json",
+            "build/proposal_validation.json"
+          ],
+          "workspace_commit": "6865777e79c38256300739321727519c3970b58a"
+        },
+        "runner_pid": 69755,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "8c183bc9789be15962d0fb464ef314f56c556f10"
+      },
+      "created_at": "2026-10-16T09:01:33.570351+00:00",
+      "finished_at": "2026-10-16T09:02:35.435846+00:00"
+    },
+    {
+      "id": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c",
+      "task_id": "ppa-search:evaluator",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-d872060d97014371a266497394ece4ea"
+      ],
+      "input_deliveries": {
+        "candidate": "artifact-d5107ab7118f49ec8d20823b0e0072f9"
+      },
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "role_instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:3dfa9368caf97f4156f73124531447aa06f809fc9f575be4ceb02edb359d4e05",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "timeout_seconds": 16500,
+      "session_id": "",
+      "workspace_commit": "7a85d34af02b69c6f2d5628c6eb52c53d1841042",
+      "verdict": "fail",
+      "diagnostics": {
+        "changed_paths": [
+          "build/evaluation/report.json"
+        ],
+        "execution_log": "$ [evaluator] python3 tools/run_ppa.py evaluate\n{\n  \"workflow\": \"study-physical\",\n  \"baseline\": \"5ae54161922e85dbb7a15fbb04d748124ceb2a04\",\n  \"status\": \"ready\"\n}\n{\n  \"artifact\": \"artifact-50bd1ef86c49426eabe721917bdeed23\",\n  \"qualified\": true,\n  \"files\": 67,\n  \"output\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/01/physical/evidence\"\n}\n{\"physical_finished\": true, \"physical_qualified\": false, \"output\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/01/physical\"}\n{\"evaluation_finished\": true, \"rank_eligible\": false, \"score\": null, \"run\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/01/physical\"}\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"artifact-d5107ab7118f49ec8d20823b0e0072f9\", \"verdict\": \"failed\", \"continue_search\": true, \"repair_summary\": \"Choose the next untried configuration using the actual session history.\", \"candidate_index\": 1, \"history\": [{\"schema_version\": 1, \"physical_qualified\": true, \"rank_eligible\": true, \"configuration\": {\"utilization\": 40, \"density\": 0.55, \"abc_area\": 0, \"repair_margin\": 0}, \"period_ps\": 10526, \"physical_wall_seconds\": 3023.5607622529933, \"failure_classes\": [], \"candidate_index\": 0, \"cell_area_um2\": 161954, \"die_area_um2\": 377672, \"setup_slack_ns\": 0.19292, \"hold_slack_ns\": 0.114491, \"electrical_violations\": {\"max_slew\": 0, \"max_cap\": 0, \"max_fanout\": 0}, \"energy_j\": {\"DOT64\": 2.293945631906608e-07, \"GEMM8\": 1.7792685987008622e-06, \"CONV3\": 1.1542462882162743e-06}, \"estimated_power_w\": {\"DOT64\": 0.02359598875046, \"GEMM8\": 0.02383604645729, \"CONV3\": 0.02368602156639}, \"postprocessing_commands\": [{\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4\", \"--source\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/evidence\", \"--period-ps\", \"10526\"]}, {\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4/waveform-audit.json\"]}], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"utilization\": 40, \"density\": 0.55, \"abc_area\": 0, \"repair_margin\": 0}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"measurement_qualified\": true, \"power_scope\": \"Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.\", \"activity_and_parasitic_annotation\": [{\"workload\": \"DOT64\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"GEMM8\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"CONV3\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}], \"postprocess_wall_seconds\": 219.05201102500723, \"total_wall_seconds\": 3242.6127732780005, \"score\": 1.0, \"energy_ratio\": 1.0, \"area_ratio\": 1.0}, {\"schema_version\": 1, \"physical_qualified\": false, \"rank_eligible\": false, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 0, \"utilization\": 40}, \"period_ps\": 10526, \"physical_wall_seconds\": 4168.444133404002, \"failure_classes\": [\"electrical\"], \"candidate_index\": 1, \"cell_area_um2\": 157315, \"die_area_um2\": 371137, \"setup_slack_ns\": 0.423833, \"hold_slack_ns\": 0.0655785, \"electrical_violations\": {\"max_slew\": 12, \"max_cap\": 5, \"max_fanout\": 0}, \"energy_j\": {}, \"estimated_power_w\": {}, \"postprocessing_commands\": [], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 0, \"utilization\": 40}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"86c316a4ed7e354d2d284832e783a2870f10f438ab66e268949f233a266a31f5\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"postprocess_wall_seconds\": 4.3200270738452673e-07, \"total_wall_seconds\": 4168.444133836005, \"candidate_artifact\": \"artifact-d5107ab7118f49ec8d20823b0e0072f9\", \"proposal_rationale\": \"The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen.\", \"elapsed_search_seconds\": 4217.453121423998}]}}\n",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T07:51:08.458555+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:ppa.evaluation.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 69755,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "7cbcd6e536ffe66567c43084c53dc37134ec7669"
+      },
+      "created_at": "2026-10-16T06:41:35.042301+00:00",
+      "finished_at": "2026-10-16T07:51:08.523953+00:00"
+    },
+    {
+      "id": "attempt-0344dacfc6cb4c488181187a9abffc8e",
+      "task_id": "ppa-search:evaluator",
+      "ordinal": 2,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-fe293452796b41bfa681f82b8f8d5619",
+        "work-b55e7a3c3b5447579246186bde867725"
+      ],
+      "input_deliveries": {
+        "candidate": "artifact-a5eda547e59a4a95924518a0fad3a842"
+      },
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "role_instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:3dfa9368caf97f4156f73124531447aa06f809fc9f575be4ceb02edb359d4e05",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "timeout_seconds": 16500,
+      "session_id": "",
+      "workspace_commit": "7fa00985e4c08a46daf7f8c9ad407ce3643064e3",
+      "verdict": "fail",
+      "diagnostics": {
+        "changed_paths": [
+          "build/evaluation/report.json"
+        ],
+        "execution_log": "$ [evaluator] python3 tools/run_ppa.py evaluate\n{\n  \"workflow\": \"study-physical\",\n  \"baseline\": \"6e50fb91aea4229ecfde7114a9ac1cff8a554976\",\n  \"status\": \"ready\"\n}\n{\n  \"artifact\": \"artifact-405876fbc7e24c708872452e0f3343cf\",\n  \"qualified\": true,\n  \"files\": 67,\n  \"output\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/02/physical/evidence\"\n}\n{\"physical_finished\": true, \"physical_qualified\": false, \"output\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/02/physical\"}\n{\"evaluation_finished\": true, \"rank_eligible\": false, \"score\": null, \"run\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/02/physical\"}\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"artifact-a5eda547e59a4a95924518a0fad3a842\", \"verdict\": \"failed\", \"continue_search\": true, \"repair_summary\": \"Choose the next untried configuration using the actual session history.\", \"candidate_index\": 2, \"history\": [{\"schema_version\": 1, \"physical_qualified\": true, \"rank_eligible\": true, \"configuration\": {\"utilization\": 40, \"density\": 0.55, \"abc_area\": 0, \"repair_margin\": 0}, \"period_ps\": 10526, \"physical_wall_seconds\": 3023.5607622529933, \"failure_classes\": [], \"candidate_index\": 0, \"cell_area_um2\": 161954, \"die_area_um2\": 377672, \"setup_slack_ns\": 0.19292, \"hold_slack_ns\": 0.114491, \"electrical_violations\": {\"max_slew\": 0, \"max_cap\": 0, \"max_fanout\": 0}, \"energy_j\": {\"DOT64\": 2.293945631906608e-07, \"GEMM8\": 1.7792685987008622e-06, \"CONV3\": 1.1542462882162743e-06}, \"estimated_power_w\": {\"DOT64\": 0.02359598875046, \"GEMM8\": 0.02383604645729, \"CONV3\": 0.02368602156639}, \"postprocessing_commands\": [{\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4\", \"--source\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/evidence\", \"--period-ps\", \"10526\"]}, {\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4/waveform-audit.json\"]}], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"utilization\": 40, \"density\": 0.55, \"abc_area\": 0, \"repair_margin\": 0}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"measurement_qualified\": true, \"power_scope\": \"Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.\", \"activity_and_parasitic_annotation\": [{\"workload\": \"DOT64\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"GEMM8\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"CONV3\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}], \"postprocess_wall_seconds\": 219.05201102500723, \"total_wall_seconds\": 3242.6127732780005, \"score\": 1.0, \"energy_ratio\": 1.0, \"area_ratio\": 1.0}, {\"schema_version\": 1, \"physical_qualified\": false, \"rank_eligible\": false, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 0, \"utilization\": 40}, \"period_ps\": 10526, \"physical_wall_seconds\": 4168.444133404002, \"failure_classes\": [\"electrical\"], \"candidate_index\": 1, \"cell_area_um2\": 157315, \"die_area_um2\": 371137, \"setup_slack_ns\": 0.423833, \"hold_slack_ns\": 0.0655785, \"electrical_violations\": {\"max_slew\": 12, \"max_cap\": 5, \"max_fanout\": 0}, \"energy_j\": {}, \"estimated_power_w\": {}, \"postprocessing_commands\": [], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 0, \"utilization\": 40}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"86c316a4ed7e354d2d284832e783a2870f10f438ab66e268949f233a266a31f5\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"postprocess_wall_seconds\": 4.3200270738452673e-07, \"total_wall_seconds\": 4168.444133836005, \"candidate_artifact\": \"artifact-d5107ab7118f49ec8d20823b0e0072f9\", \"proposal_rationale\": \"The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen.\", \"elapsed_search_seconds\": 4217.453121423998}, {\"schema_version\": 1, \"physical_qualified\": false, \"rank_eligible\": false, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 10, \"utilization\": 40}, \"period_ps\": 10526, \"physical_wall_seconds\": 4131.700654058004, \"failure_classes\": [\"electrical\"], \"candidate_index\": 2, \"cell_area_um2\": 157230, \"die_area_um2\": 371137, \"setup_slack_ns\": 0.556154, \"hold_slack_ns\": 0.0603264, \"electrical_violations\": {\"max_slew\": 2, \"max_cap\": 0, \"max_fanout\": 0}, \"energy_j\": {}, \"estimated_power_w\": {}, \"postprocessing_commands\": [], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 10, \"utilization\": 40}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"7e6c5b88c3dea3fe8e719ee1255879a4d8f5fb49f6db04a03eb14ec9c50ccb56\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"postprocess_wall_seconds\": 4.310131771489978e-07, \"total_wall_seconds\": 4131.700654489017, \"candidate_artifact\": \"artifact-a5eda547e59a4a95924518a0fad3a842\", \"proposal_rationale\": \"Read context/baseline.json, context/protocol.json, and the complete immutable feedback artifact artifact-4a1b4b8428d74453a4fc776a21cdb360, including build/evaluation/report.json at commit 7a85d34af02b69c6f2d5628c6eb52c53d1841042. Its history contains baseline (40,0.55,0,0) and candidate 1 (40,0.55,1,0); the proposed (40,0.55,1,10) is untried and within the frozen domain. Candidate 1 reduced cell area from 161954 to 157315 um2 (2.86%) and reported setup/hold slack of 0.423833/0.0655785 ns, but failed electrical qualification with 12 max_slew and 5 max_cap violations, zero max_fanout violations, and no measured workload energy. The qualified baseline remains the only rank-eligible result, with score 1.0 and no electrical violations. Retain utilization, density, and ABC area optimization to pursue the observed cell-area saving; increase repair_margin from 0 to 10 as the smallest positive allowed setting to target the observed electrical failure while limiting potential repair area and energy overhead. This is an engineering hypothesis: the reports give violation counts, not severities or evidence that margin 10 will suffice. Holding placement settings isolates this repair change. The objective uses cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy, so neither smaller die area nor candidate 1 area alone establishes a score improvement. Repair may consume its area saving or reduce hold slack; qualification and workload energy require independent evaluation. No candidate energy, qualification, or improved score is claimed. Energy comparisons retain the baseline Liberty-model, zero-delay gate-activity and extracted-SPEF scope. RTL, clock period 10526 ps, libraries, and acceptance thresholds remain frozen; no EDA, screening search, model, or agent was run. Local schema, domain, and captured-history uniqueness checks passed. The required validator could not execute because tools/run_ppa.py could not import run_ppa_workflow_study; the gate remains unverified, as recorded in build/proposal_validation.json.\", \"elapsed_search_seconds\": 8442.419719030993}]}}\n",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T09:01:33.453753+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:ppa.evaluation.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "resume_site": {
+          "attempt_id": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c",
+          "base_commit": "7cbcd6e536ffe66567c43084c53dc37134ec7669",
+          "modified_path_count": 1,
+          "modified_paths_sample": [
+            "build/evaluation/report.json"
+          ],
+          "workspace_commit": "7a85d34af02b69c6f2d5628c6eb52c53d1841042"
+        },
+        "runner_pid": 69755,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "73e8c6d0c485b553a882e31ca02bff50d3675498"
+      },
+      "created_at": "2026-10-16T07:52:35.126668+00:00",
+      "finished_at": "2026-10-16T09:01:33.494228+00:00"
+    },
+    {
+      "id": "attempt-a51dea0ae78647c48cff01f1d9e50ac6",
+      "task_id": "ppa-search:evaluator",
+      "ordinal": 3,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-5af4f10782b64acda891c0a0f5acfaa4",
+        "work-b55e7a3c3b5447579246186bde867725",
+        "work-fe293452796b41bfa681f82b8f8d5619",
+        "work-02a92532f614456fb6c8b9153367eda1"
+      ],
+      "input_deliveries": {
+        "candidate": "artifact-58660e30f7fe4b66b9f3470f57813f81"
+      },
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "role_instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:3dfa9368caf97f4156f73124531447aa06f809fc9f575be4ceb02edb359d4e05",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "timeout_seconds": 16500,
+      "session_id": "",
+      "workspace_commit": "c96cee4f8150dfdb71e3a00e327dd167bdb598e7",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "build/evaluation/report.json"
+        ],
+        "execution_log": "$ [evaluator] python3 tools/run_ppa.py evaluate\n{\n  \"workflow\": \"study-physical\",\n  \"baseline\": \"fdc0ddd1944567c54f780122900103c4821e2164\",\n  \"status\": \"ready\"\n}\n{\n  \"artifact\": \"artifact-c23dedf156984835990e6958304f980b\",\n  \"qualified\": true,\n  \"files\": 67,\n  \"output\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/evidence\"\n}\n{\"physical_finished\": true, \"physical_qualified\": true, \"output\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical\"}\n{\"evaluation_finished\": true, \"rank_eligible\": true, \"score\": 0.9783796537067193, \"run\": \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical\"}\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"artifact-58660e30f7fe4b66b9f3470f57813f81\", \"verdict\": \"passed\", \"continue_search\": false, \"repair_summary\": \"Choose the next untried configuration using the actual session history.\", \"candidate_index\": 3, \"history\": [{\"schema_version\": 1, \"physical_qualified\": true, \"rank_eligible\": true, \"configuration\": {\"utilization\": 40, \"density\": 0.55, \"abc_area\": 0, \"repair_margin\": 0}, \"period_ps\": 10526, \"physical_wall_seconds\": 3023.5607622529933, \"failure_classes\": [], \"candidate_index\": 0, \"cell_area_um2\": 161954, \"die_area_um2\": 377672, \"setup_slack_ns\": 0.19292, \"hold_slack_ns\": 0.114491, \"electrical_violations\": {\"max_slew\": 0, \"max_cap\": 0, \"max_fanout\": 0}, \"energy_j\": {\"DOT64\": 2.293945631906608e-07, \"GEMM8\": 1.7792685987008622e-06, \"CONV3\": 1.1542462882162743e-06}, \"estimated_power_w\": {\"DOT64\": 0.02359598875046, \"GEMM8\": 0.02383604645729, \"CONV3\": 0.02368602156639}, \"postprocessing_commands\": [{\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4\", \"--source\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/evidence\", \"--period-ps\", \"10526\"]}, {\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4/waveform-audit.json\"]}], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"utilization\": 40, \"density\": 0.55, \"abc_area\": 0, \"repair_margin\": 0}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"measurement_qualified\": true, \"power_scope\": \"Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.\", \"activity_and_parasitic_annotation\": [{\"workload\": \"DOT64\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"GEMM8\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"CONV3\", \"activity\": {\"vcd_pins\": 53665, \"unannotated_pins\": 0, \"reported_pins\": 53665, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 329, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 220, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}], \"postprocess_wall_seconds\": 219.05201102500723, \"total_wall_seconds\": 3242.6127732780005, \"score\": 1.0, \"energy_ratio\": 1.0, \"area_ratio\": 1.0}, {\"schema_version\": 1, \"physical_qualified\": false, \"rank_eligible\": false, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 0, \"utilization\": 40}, \"period_ps\": 10526, \"physical_wall_seconds\": 4168.444133404002, \"failure_classes\": [\"electrical\"], \"candidate_index\": 1, \"cell_area_um2\": 157315, \"die_area_um2\": 371137, \"setup_slack_ns\": 0.423833, \"hold_slack_ns\": 0.0655785, \"electrical_violations\": {\"max_slew\": 12, \"max_cap\": 5, \"max_fanout\": 0}, \"energy_j\": {}, \"estimated_power_w\": {}, \"postprocessing_commands\": [], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 0, \"utilization\": 40}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"86c316a4ed7e354d2d284832e783a2870f10f438ab66e268949f233a266a31f5\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"postprocess_wall_seconds\": 4.3200270738452673e-07, \"total_wall_seconds\": 4168.444133836005, \"candidate_artifact\": \"artifact-d5107ab7118f49ec8d20823b0e0072f9\", \"proposal_rationale\": \"The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen.\", \"elapsed_search_seconds\": 4217.453121423998}, {\"schema_version\": 1, \"physical_qualified\": false, \"rank_eligible\": false, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 10, \"utilization\": 40}, \"period_ps\": 10526, \"physical_wall_seconds\": 4131.700654058004, \"failure_classes\": [\"electrical\"], \"candidate_index\": 2, \"cell_area_um2\": 157230, \"die_area_um2\": 371137, \"setup_slack_ns\": 0.556154, \"hold_slack_ns\": 0.0603264, \"electrical_violations\": {\"max_slew\": 2, \"max_cap\": 0, \"max_fanout\": 0}, \"energy_j\": {}, \"estimated_power_w\": {}, \"postprocessing_commands\": [], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 10, \"utilization\": 40}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"7e6c5b88c3dea3fe8e719ee1255879a4d8f5fb49f6db04a03eb14ec9c50ccb56\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"postprocess_wall_seconds\": 4.310131771489978e-07, \"total_wall_seconds\": 4131.700654489017, \"candidate_artifact\": \"artifact-a5eda547e59a4a95924518a0fad3a842\", \"proposal_rationale\": \"Read context/baseline.json, context/protocol.json, and the complete immutable feedback artifact artifact-4a1b4b8428d74453a4fc776a21cdb360, including build/evaluation/report.json at commit 7a85d34af02b69c6f2d5628c6eb52c53d1841042. Its history contains baseline (40,0.55,0,0) and candidate 1 (40,0.55,1,0); the proposed (40,0.55,1,10) is untried and within the frozen domain. Candidate 1 reduced cell area from 161954 to 157315 um2 (2.86%) and reported setup/hold slack of 0.423833/0.0655785 ns, but failed electrical qualification with 12 max_slew and 5 max_cap violations, zero max_fanout violations, and no measured workload energy. The qualified baseline remains the only rank-eligible result, with score 1.0 and no electrical violations. Retain utilization, density, and ABC area optimization to pursue the observed cell-area saving; increase repair_margin from 0 to 10 as the smallest positive allowed setting to target the observed electrical failure while limiting potential repair area and energy overhead. This is an engineering hypothesis: the reports give violation counts, not severities or evidence that margin 10 will suffice. Holding placement settings isolates this repair change. The objective uses cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy, so neither smaller die area nor candidate 1 area alone establishes a score improvement. Repair may consume its area saving or reduce hold slack; qualification and workload energy require independent evaluation. No candidate energy, qualification, or improved score is claimed. Energy comparisons retain the baseline Liberty-model, zero-delay gate-activity and extracted-SPEF scope. RTL, clock period 10526 ps, libraries, and acceptance thresholds remain frozen; no EDA, screening search, model, or agent was run. Local schema, domain, and captured-history uniqueness checks passed. The required validator could not execute because tools/run_ppa.py could not import run_ppa_workflow_study; the gate remains unverified, as recorded in build/proposal_validation.json.\", \"elapsed_search_seconds\": 8442.419719030993}, {\"schema_version\": 1, \"physical_qualified\": true, \"rank_eligible\": true, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 20, \"utilization\": 40}, \"period_ps\": 10526, \"physical_wall_seconds\": 3961.6428109710105, \"failure_classes\": [], \"candidate_index\": 3, \"cell_area_um2\": 157452, \"die_area_um2\": 371137, \"setup_slack_ns\": 0.570279, \"hold_slack_ns\": 0.0621606, \"electrical_violations\": {\"max_slew\": 0, \"max_cap\": 0, \"max_fanout\": 0}, \"energy_j\": {\"DOT64\": 2.310204433331225e-07, \"GEMM8\": 1.7903212458084867e-06, \"CONV3\": 1.1608990950821776e-06}, \"estimated_power_w\": {\"DOT64\": 0.02376323007047, \"GEMM8\": 0.02398411370814, \"CONV3\": 0.02382254227996}, \"postprocessing_commands\": [{\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/export_study_sta_views.py\", \"--run\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical\"]}, {\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/workloads\", \"--source\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/evidence\", \"--period-ps\", \"10526\"]}, {\"exit_code\": 0, \"timed_out\": false, \"command\": [\"/tmp/chipnebula-public-repro-user37/bin/python\", \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/workloads\", \"--output\", \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/workloads/waveform-audit.json\"]}], \"physical_manifest\": {\"schema_version\": 1, \"configuration\": {\"abc_area\": 1, \"density\": 0.55, \"repair_margin\": 20, \"utilization\": 40}, \"period_ps\": 10526, \"rtl_sha256\": {\"rtl/cpu/rv32i_five_stage_cpu.sv\": \"126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85\", \"rtl/integration/nebula_cpu_npu_top.sv\": \"1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d\", \"rtl/npu/nebula_npu_dot4.sv\": \"2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944\"}, \"source_design_delivery\": \"artifact-e628d2d80e2f49ce9cca5c228f9925b5\", \"sdc_sha256\": \"5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8\", \"config_sha256\": \"50a18320605d4f93371402e06c97dd6358dd0bd24df8bd26bb1196878ff473d6\", \"physical_timeout_seconds\": 14400, \"threads\": 2, \"scope\": \"One fixed-RTL physical implementation; historical records are unchanged\"}, \"measurement_qualified\": true, \"power_scope\": \"Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.\", \"activity_and_parasitic_annotation\": [{\"workload\": \"DOT64\", \"activity\": {\"vcd_pins\": 64122, \"unannotated_pins\": 0, \"reported_pins\": 64122, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 321, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 212, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"GEMM8\", \"activity\": {\"vcd_pins\": 64122, \"unannotated_pins\": 0, \"reported_pins\": 64122, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 321, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 212, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}, {\"workload\": \"CONV3\", \"activity\": {\"vcd_pins\": 64122, \"unannotated_pins\": 0, \"reported_pins\": 64122, \"percent\": 100.0, \"scope\": \"OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded\"}, \"parasitics\": {\"passed\": true, \"unannotated_drivers\": 321, \"constant_exemptions\": 32, \"unconnected_output_exclusions\": 212, \"unloaded_output_exclusions\": 77, \"eligible_unannotated_drivers\": 0}}], \"postprocess_wall_seconds\": 245.62056441800087, \"total_wall_seconds\": 4207.263375389011, \"score\": 0.9783796537067193, \"energy_ratio\": 1.0063543075757566, \"area_ratio\": 0.9722019832792027, \"candidate_artifact\": \"artifact-58660e30f7fe4b66b9f3470f57813f81\", \"proposal_rationale\": \"Read context/baseline.json, context/protocol.json, and both complete captured feedback records, including immutable build/evaluation/report.json at commits 7a85d34af02b69c6f2d5628c6eb52c53d1841042 and 7fa00985e4c08a46daf7f8c9ad407ce3643064e3. Their history contains baseline (40,0.55,0,0) and candidates (40,0.55,1,0) and (40,0.55,1,10); (40,0.55,1,20) is untried, within the frozen domain, and uses the third and final new physical candidate. Raising repair_margin from 0 to 10 reduced max_slew violations from 12 to 2 and max_cap violations from 5 to 0; max_fanout remained 0. Cell area changed from 157315 to 157230 um2, versus baseline 161954 um2, while setup/hold slack changed from 0.423833/0.0655785 to 0.556154/0.0603264 ns. Both candidates failed electrical qualification and have no workload energy measurements. Choose repair_margin=20, the next and largest allowed margin, to target the remaining slew failures while retaining the observed approximately 2.92% cell-area saving; hold utilization, density, and abc_area fixed to follow the observed repair response. Violation counts do not establish severity or guarantee that further margin will qualify, and repair may increase area or energy or reduce hold slack. The baseline remains the only rank-eligible result, with score 1.0. The objective is normalized cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy; no improved score, energy, or qualification is claimed before independent evaluation. Energy comparisons use the baseline Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. RTL, 10526 ps period, libraries, and acceptance thresholds remain frozen. No EDA, screening search, external model, or agent was invoked.\", \"elapsed_search_seconds\": 12717.163656129997}]}}\n",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T10:12:48.092040+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:ppa.evaluation.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "resume_site": {
+          "attempt_id": "attempt-0344dacfc6cb4c488181187a9abffc8e",
+          "base_commit": "73e8c6d0c485b553a882e31ca02bff50d3675498",
+          "modified_path_count": 1,
+          "modified_paths_sample": [
+            "build/evaluation/report.json"
+          ],
+          "workspace_commit": "7fa00985e4c08a46daf7f8c9ad407ce3643064e3"
+        },
+        "runner_pid": 69755,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "f611c5cc6e57fbad939cd672ccdc34761bab3484"
+      },
+      "created_at": "2026-10-16T09:02:35.450654+00:00",
+      "finished_at": "2026-10-16T10:12:48.150993+00:00"
+    },
+    {
+      "id": "attempt-3338f2d1a0a14fc0b138e848fd0a4f66",
+      "task_id": "ppa-search:finalizer",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-5df20689a00c44ceb352560a0cd0e169",
+        "work-b55e7a3c3b5447579246186bde867725",
+        "work-fe293452796b41bfa681f82b8f8d5619",
+        "work-02a92532f614456fb6c8b9153367eda1",
+        "work-5af4f10782b64acda891c0a0f5acfaa4"
+      ],
+      "input_deliveries": {
+        "evaluation": "artifact-487378eeb76e4d35ac4f92774b77dd2b"
+      },
+      "role": "ppa-finalizer",
+      "role_version": 1,
+      "role_instruction": "Record search completion separately from engineering acceptance.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "ppa.evaluation.report"
+      ],
+      "brief": {
+        "objective": "Record search completion and retain the best qualified result, if any.",
+        "deliverables": [
+          "report: ppa.session.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:evaluator"
+        ]
+      },
+      "brief_digest": "sha256:358aa2d161d7bdb633c2500594adf87fd9ac58cce8b102e8d421cdc62d5b6821",
+      "permission": {
+        "read_paths": [
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/session/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py finalize",
+      "timeout_seconds": 30,
+      "session_id": "",
+      "workspace_commit": "9a6d3a331580c39a2998b32ae88b666ee7078e06",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "build/session/report.json"
+        ],
+        "execution_log": "$ [finalizer] python3 tools/run_ppa.py finalize\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"W1-3\", \"verdict\": \"passed\", \"search_finished\": true, \"candidate_count\": 3}}\n",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T10:12:48.679181+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:ppa.session.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 69755,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "225a5dbf62208ad18ae51f9d7f18bc281137b6db"
+      },
+      "created_at": "2026-10-16T10:12:48.193119+00:00",
+      "finished_at": "2026-10-16T10:12:48.711934+00:00"
+    }
+  ],
+  "work_items": [
+    {
+      "id": "work-02a92532f614456fb6c8b9153367eda1",
+      "task_id": "ppa-search:proposer",
+      "kind": "feedback",
+      "request_key": "attempt-0344dacfc6cb4c488181187a9abffc8e:ppa-search:proposer:fail",
+      "correlation_key": "attempt-0344dacfc6cb4c488181187a9abffc8e:ppa-search:proposer:fail",
+      "summary": "Continue bounded search.",
+      "causal_correlation_keys": [
+        "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c:ppa-search:proposer:fail"
+      ],
+      "source_task_id": "ppa-search:evaluator",
+      "evidence_artifact_ids": [
+        "artifact-78ee4536104b458e854a9550c3405fab"
+      ],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 3,
+      "claimed_attempt_id": "attempt-640c6e65deb64ed98d272473f327f474",
+      "resolved_attempt_id": "attempt-640c6e65deb64ed98d272473f327f474",
+      "created_at": "2026-10-16T09:01:33.494919+00:00"
+    },
+    {
+      "id": "work-5af4f10782b64acda891c0a0f5acfaa4",
+      "task_id": "ppa-search:evaluator",
+      "kind": "reverify",
+      "request_key": "reverify:attempt-0344dacfc6cb4c488181187a9abffc8e:ppa-search:proposer:fail:ppa-search:evaluator",
+      "correlation_key": "attempt-0344dacfc6cb4c488181187a9abffc8e:ppa-search:proposer:fail",
+      "summary": "Revalidate after upstream change: Continue bounded search.",
+      "causal_correlation_keys": [
+        "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c:ppa-search:proposer:fail"
+      ],
+      "source_task_id": "ppa-search:proposer",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [
+        "work-02a92532f614456fb6c8b9153367eda1"
+      ],
+      "status": "resolved",
+      "created_sequence": 3,
+      "claimed_attempt_id": "attempt-a51dea0ae78647c48cff01f1d9e50ac6",
+      "resolved_attempt_id": "attempt-a51dea0ae78647c48cff01f1d9e50ac6",
+      "created_at": "2026-10-16T09:01:33.495453+00:00"
+    },
+    {
+      "id": "work-5df20689a00c44ceb352560a0cd0e169",
+      "task_id": "ppa-search:finalizer",
+      "kind": "feedback",
+      "request_key": "attempt-a51dea0ae78647c48cff01f1d9e50ac6:ppa-search:finalizer:pass",
+      "correlation_key": "attempt-a51dea0ae78647c48cff01f1d9e50ac6:ppa-search:finalizer:pass",
+      "summary": "Record terminal search observations.",
+      "causal_correlation_keys": [
+        "attempt-0344dacfc6cb4c488181187a9abffc8e:ppa-search:proposer:fail",
+        "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c:ppa-search:proposer:fail"
+      ],
+      "source_task_id": "ppa-search:evaluator",
+      "evidence_artifact_ids": [
+        "artifact-487378eeb76e4d35ac4f92774b77dd2b"
+      ],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-3338f2d1a0a14fc0b138e848fd0a4f66",
+      "resolved_attempt_id": "attempt-3338f2d1a0a14fc0b138e848fd0a4f66",
+      "created_at": "2026-10-16T10:12:48.151627+00:00"
+    },
+    {
+      "id": "work-b55e7a3c3b5447579246186bde867725",
+      "task_id": "ppa-search:proposer",
+      "kind": "feedback",
+      "request_key": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c:ppa-search:proposer:fail",
+      "correlation_key": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c:ppa-search:proposer:fail",
+      "summary": "Continue bounded search.",
+      "causal_correlation_keys": [],
+      "source_task_id": "ppa-search:evaluator",
+      "evidence_artifact_ids": [
+        "artifact-4a1b4b8428d74453a4fc776a21cdb360"
+      ],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 2,
+      "claimed_attempt_id": "attempt-388a0c0bf90d4d2eb1b782b8ed3cd493",
+      "resolved_attempt_id": "attempt-388a0c0bf90d4d2eb1b782b8ed3cd493",
+      "created_at": "2026-10-16T07:51:08.524594+00:00"
+    },
+    {
+      "id": "work-bff3d67028514b80a62995ee5c799db1",
+      "task_id": "ppa-search:proposer",
+      "kind": "initial",
+      "request_key": "initial:ppa-search:proposer",
+      "correlation_key": "initial",
+      "summary": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-df10bdd3b715440aa58f73ca08bb4fbc",
+      "resolved_attempt_id": "attempt-df10bdd3b715440aa58f73ca08bb4fbc",
+      "created_at": "2026-10-16T06:40:50.855918+00:00"
+    },
+    {
+      "id": "work-d872060d97014371a266497394ece4ea",
+      "task_id": "ppa-search:evaluator",
+      "kind": "initial",
+      "request_key": "initial:ppa-search:evaluator",
+      "correlation_key": "initial",
+      "summary": "Execute the captured immutable candidate under the protected physical budget.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c",
+      "resolved_attempt_id": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c",
+      "created_at": "2026-10-16T06:40:50.856287+00:00"
+    },
+    {
+      "id": "work-fe293452796b41bfa681f82b8f8d5619",
+      "task_id": "ppa-search:evaluator",
+      "kind": "reverify",
+      "request_key": "reverify:attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c:ppa-search:proposer:fail:ppa-search:evaluator",
+      "correlation_key": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c:ppa-search:proposer:fail",
+      "summary": "Revalidate after upstream change: Continue bounded search.",
+      "causal_correlation_keys": [],
+      "source_task_id": "ppa-search:proposer",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [
+        "work-b55e7a3c3b5447579246186bde867725"
+      ],
+      "status": "resolved",
+      "created_sequence": 2,
+      "claimed_attempt_id": "attempt-0344dacfc6cb4c488181187a9abffc8e",
+      "resolved_attempt_id": "attempt-0344dacfc6cb4c488181187a9abffc8e",
+      "created_at": "2026-10-16T07:51:08.525061+00:00"
+    }
+  ],
+  "deliveries": {
+    "ppa-search:proposer": {
+      "candidate": {
+        "task_id": "ppa-search:proposer",
+        "output_name": "candidate",
+        "artifact_id": "artifact-58660e30f7fe4b66b9f3470f57813f81",
+        "attempt_id": "attempt-640c6e65deb64ed98d272473f327f474",
+        "accepted_at": "2026-10-16T09:02:35.435462+00:00"
+      }
+    },
+    "ppa-search:evaluator": {
+      "report": {
+        "task_id": "ppa-search:evaluator",
+        "output_name": "report",
+        "artifact_id": "artifact-487378eeb76e4d35ac4f92774b77dd2b",
+        "attempt_id": "attempt-a51dea0ae78647c48cff01f1d9e50ac6",
+        "accepted_at": "2026-10-16T10:12:48.150651+00:00"
+      }
+    },
+    "ppa-search:finalizer": {
+      "report": {
+        "task_id": "ppa-search:finalizer",
+        "output_name": "report",
+        "artifact_id": "artifact-85a1a9a22ff146a08efbf9f1b246390f",
+        "attempt_id": "attempt-3338f2d1a0a14fc0b138e848fd0a4f66",
+        "accepted_at": "2026-10-16T10:12:48.711647+00:00"
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "id": "ppa-context",
+      "type": "specification.source",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "external",
+        "task_id": "common-ppa-input",
+        "attempt_id": "frozen-input",
+        "role": "study-author",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "8c183bc9789be15962d0fb464ef314f56c556f10",
+        "tree": "0bd7e726a80b428c06e08b66c25ee7a699a60125",
+        "paths": [
+          "context"
+        ]
+      },
+      "payload": {
+        "content": "{\n  \"sessions\": [\n    {\n      \"id\": \"W1-3\",\n      \"workflow\": \"W1\",\n      \"repetition\": 3\n    },\n    {\n      \"id\": \"W2-3\",\n      \"workflow\": \"W2\",\n      \"repetition\": 3\n    },\n    {\n      \"id\": \"W2-2\",\n      \"workflow\": \"W2\",\n      \"repetition\": 2\n    },\n    {\n      \"id\": \"W1-1\",\n      \"workflow\": \"W1\",\n      \"repetition\": 1\n    },\n    {\n      \"id\": \"W0-1\",\n      \"workflow\": \"W0\",\n      \"repetition\": 1\n    },\n    {\n      \"id\": \"W1-2\",\n      \"workflow\": \"W1\",\n      \"repetition\": 2\n    },\n    {\n      \"id\": \"W2-1\",\n      \"workflow\": \"W2\",\n      \"repetition\": 1\n    }\n  ],\n  \"new_candidates_per_session\": 3,\n  \"aggregate_agent_budget_seconds\": 1200,\n  \"physical_timeout_seconds\": 14400,\n  \"postprocess_timeout_seconds\": 1800,\n  \"period_ps\": 10526,\n  \"baseline_configuration\": {\n    \"utilization\": 40,\n    \"density\": 0.55,\n    \"abc_area\": 0,\n    \"repair_margin\": 0\n  },\n  \"parameter_keys\": [\n    \"utilization\",\n    \"density\",\n    \"abc_area\",\n    \"repair_margin\"\n  ],\n  \"parameter_domains\": [\n    [\n      30,\n      40,\n      50\n    ],\n    [\n      0.55,\n      0.65\n    ],\n    [\n      0,\n      1\n    ],\n    [\n      0,\n      10,\n      20\n    ]\n  ],\n  \"threads\": 2,\n  \"corner\": \"Sky130HD TT25C1.8V\",\n  \"workloads\": [\n    \"DOT64\",\n    \"GEMM8\",\n    \"CONV3\"\n  ],\n  \"io_delay_ns\": 0.5,\n  \"clock_uncertainty_ns\": 0.1,\n  \"score\": \"(cell_area / baseline_cell_area) * geometric_mean(workload_energy / baseline_workload_energy)\",\n  \"tie_order\": [\n    \"unrounded score\",\n    \"energy_ratio\",\n    \"cell_area_um2\",\n    \"candidate_index\"\n  ],\n  \"physical_launches_including_baseline_max\": 22\n}\n",
+        "content_digest": "sha256:943da7dd5a1447331c2c8a015fb0bb930c3135e61059cd2a89aa872fadfc8d17",
+        "media_type": "application/json",
+        "received_at": "2026-10-16T00:00:00+00:00",
+        "source_name": "Frozen physical optimization domain"
+      },
+      "input_artifact_ids": [],
+      "metadata": {},
+      "created_at": "2026-10-16T06:40:50.848795+00:00"
+    },
+    {
+      "id": "artifact-d5107ab7118f49ec8d20823b0e0072f9",
+      "type": "ppa.candidate",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:proposer",
+        "attempt_id": "attempt-df10bdd3b715440aa58f73ca08bb4fbc",
+        "role": "ppa-proposer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "38589a9c8bf76a22ddf64d7720934327d09dfc8a",
+        "tree": "4a1cff6ac6766fc139427e4b4469ef0a7d5a00be",
+        "paths": [
+          "proposal/candidate.json"
+        ]
+      },
+      "payload": {
+        "commit": "38589a9c8bf76a22ddf64d7720934327d09dfc8a",
+        "configuration": {
+          "abc_area": 1,
+          "density": 0.55,
+          "repair_margin": 0,
+          "utilization": 40
+        },
+        "paths": [
+          "proposal/candidate.json"
+        ],
+        "rationale": "The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen."
+      },
+      "input_artifact_ids": [
+        "ppa-context"
+      ],
+      "metadata": {
+        "task_key": "proposer",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T06:41:35.028906+00:00"
+    },
+    {
+      "id": "artifact-4a1b4b8428d74453a4fc776a21cdb360",
+      "type": "ppa.evaluation.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:evaluator",
+        "attempt_id": "attempt-dd7dd7a5e76d4a9fb7efe722023bdc8c",
+        "role": "ppa-evaluator",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "7a85d34af02b69c6f2d5628c6eb52c53d1841042",
+        "tree": "a55f1a08662bed1bc7705b38a64d360bb32609cb",
+        "paths": [
+          "build/evaluation/report.json"
+        ]
+      },
+      "payload": {
+        "candidate_index": 1,
+        "commit": "7a85d34af02b69c6f2d5628c6eb52c53d1841042",
+        "continue_search": true,
+        "history": [
+          {
+            "activity_and_parasitic_annotation": [
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "DOT64"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "GEMM8"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "CONV3"
+              }
+            ],
+            "area_ratio": 1.0,
+            "candidate_index": 0,
+            "cell_area_um2": 161954,
+            "configuration": {
+              "abc_area": 0,
+              "density": 0.55,
+              "repair_margin": 0,
+              "utilization": 40
+            },
+            "die_area_um2": 377672,
+            "electrical_violations": {
+              "max_cap": 0,
+              "max_fanout": 0,
+              "max_slew": 0
+            },
+            "energy_j": {
+              "CONV3": 1.1542462882162743e-06,
+              "DOT64": 2.293945631906608e-07,
+              "GEMM8": 1.7792685987008622e-06
+            },
+            "energy_ratio": 1.0,
+            "estimated_power_w": {
+              "CONV3": 0.02368602156639,
+              "DOT64": 0.02359598875046,
+              "GEMM8": 0.02383604645729
+            },
+            "failure_classes": [],
+            "hold_slack_ns": 0.114491,
+            "measurement_qualified": true,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff",
+              "configuration": {
+                "abc_area": 0,
+                "density": 0.55,
+                "repair_margin": 0,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": true,
+            "physical_wall_seconds": 3023.5607622529933,
+            "postprocess_wall_seconds": 219.05201102500723,
+            "postprocessing_commands": [
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4",
+                  "--source",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/evidence",
+                  "--period-ps",
+                  "10526"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              },
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4/waveform-audit.json"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "power_scope": "Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.",
+            "rank_eligible": true,
+            "schema_version": 1,
+            "score": 1.0,
+            "setup_slack_ns": 0.19292,
+            "total_wall_seconds": 3242.6127732780005
+          },
+          {
+            "candidate_artifact": "artifact-d5107ab7118f49ec8d20823b0e0072f9",
+            "candidate_index": 1,
+            "cell_area_um2": 157315,
+            "configuration": {
+              "abc_area": 1,
+              "density": 0.55,
+              "repair_margin": 0,
+              "utilization": 40
+            },
+            "die_area_um2": 371137,
+            "elapsed_search_seconds": 4217.453121423998,
+            "electrical_violations": {
+              "max_cap": 5,
+              "max_fanout": 0,
+              "max_slew": 12
+            },
+            "energy_j": {},
+            "estimated_power_w": {},
+            "failure_classes": [
+              "electrical"
+            ],
+            "hold_slack_ns": 0.0655785,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "86c316a4ed7e354d2d284832e783a2870f10f438ab66e268949f233a266a31f5",
+              "configuration": {
+                "abc_area": 1,
+                "density": 0.55,
+                "repair_margin": 0,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": false,
+            "physical_wall_seconds": 4168.444133404002,
+            "postprocess_wall_seconds": 4.3200270738452673e-07,
+            "postprocessing_commands": [],
+            "proposal_rationale": "The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen.",
+            "rank_eligible": false,
+            "schema_version": 1,
+            "setup_slack_ns": 0.423833,
+            "total_wall_seconds": 4168.444133836005
+          }
+        ],
+        "paths": [
+          "build/evaluation/report.json"
+        ],
+        "repair_summary": "Choose the next untried configuration using the actual session history.",
+        "subject": "artifact-d5107ab7118f49ec8d20823b0e0072f9",
+        "verdict": "failed"
+      },
+      "input_artifact_ids": [
+        "artifact-d5107ab7118f49ec8d20823b0e0072f9"
+      ],
+      "metadata": {
+        "task_key": "evaluator",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T07:51:08.489260+00:00"
+    },
+    {
+      "id": "artifact-a5eda547e59a4a95924518a0fad3a842",
+      "type": "ppa.candidate",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:proposer",
+        "attempt_id": "attempt-388a0c0bf90d4d2eb1b782b8ed3cd493",
+        "role": "ppa-proposer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "6865777e79c38256300739321727519c3970b58a",
+        "tree": "7c90b3f5b86542ae80900006a0bab2b44efe50fa",
+        "paths": [
+          "proposal/candidate.json"
+        ]
+      },
+      "payload": {
+        "commit": "6865777e79c38256300739321727519c3970b58a",
+        "configuration": {
+          "abc_area": 1,
+          "density": 0.55,
+          "repair_margin": 10,
+          "utilization": 40
+        },
+        "paths": [
+          "proposal/candidate.json"
+        ],
+        "rationale": "Read context/baseline.json, context/protocol.json, and the complete immutable feedback artifact artifact-4a1b4b8428d74453a4fc776a21cdb360, including build/evaluation/report.json at commit 7a85d34af02b69c6f2d5628c6eb52c53d1841042. Its history contains baseline (40,0.55,0,0) and candidate 1 (40,0.55,1,0); the proposed (40,0.55,1,10) is untried and within the frozen domain. Candidate 1 reduced cell area from 161954 to 157315 um2 (2.86%) and reported setup/hold slack of 0.423833/0.0655785 ns, but failed electrical qualification with 12 max_slew and 5 max_cap violations, zero max_fanout violations, and no measured workload energy. The qualified baseline remains the only rank-eligible result, with score 1.0 and no electrical violations. Retain utilization, density, and ABC area optimization to pursue the observed cell-area saving; increase repair_margin from 0 to 10 as the smallest positive allowed setting to target the observed electrical failure while limiting potential repair area and energy overhead. This is an engineering hypothesis: the reports give violation counts, not severities or evidence that margin 10 will suffice. Holding placement settings isolates this repair change. The objective uses cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy, so neither smaller die area nor candidate 1 area alone establishes a score improvement. Repair may consume its area saving or reduce hold slack; qualification and workload energy require independent evaluation. No candidate energy, qualification, or improved score is claimed. Energy comparisons retain the baseline Liberty-model, zero-delay gate-activity and extracted-SPEF scope. RTL, clock period 10526 ps, libraries, and acceptance thresholds remain frozen; no EDA, screening search, model, or agent was run. Local schema, domain, and captured-history uniqueness checks passed. The required validator could not execute because tools/run_ppa.py could not import run_ppa_workflow_study; the gate remains unverified, as recorded in build/proposal_validation.json."
+      },
+      "input_artifact_ids": [
+        "ppa-context",
+        "artifact-4a1b4b8428d74453a4fc776a21cdb360"
+      ],
+      "metadata": {
+        "task_key": "proposer",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T07:52:35.113001+00:00"
+    },
+    {
+      "id": "artifact-78ee4536104b458e854a9550c3405fab",
+      "type": "ppa.evaluation.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:evaluator",
+        "attempt_id": "attempt-0344dacfc6cb4c488181187a9abffc8e",
+        "role": "ppa-evaluator",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "7fa00985e4c08a46daf7f8c9ad407ce3643064e3",
+        "tree": "4cfa5773dbad08efd93f18cc572308bb073efb43",
+        "paths": [
+          "build/evaluation/report.json"
+        ]
+      },
+      "payload": {
+        "candidate_index": 2,
+        "commit": "7fa00985e4c08a46daf7f8c9ad407ce3643064e3",
+        "continue_search": true,
+        "history": [
+          {
+            "activity_and_parasitic_annotation": [
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "DOT64"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "GEMM8"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "CONV3"
+              }
+            ],
+            "area_ratio": 1.0,
+            "candidate_index": 0,
+            "cell_area_um2": 161954,
+            "configuration": {
+              "abc_area": 0,
+              "density": 0.55,
+              "repair_margin": 0,
+              "utilization": 40
+            },
+            "die_area_um2": 377672,
+            "electrical_violations": {
+              "max_cap": 0,
+              "max_fanout": 0,
+              "max_slew": 0
+            },
+            "energy_j": {
+              "CONV3": 1.1542462882162743e-06,
+              "DOT64": 2.293945631906608e-07,
+              "GEMM8": 1.7792685987008622e-06
+            },
+            "energy_ratio": 1.0,
+            "estimated_power_w": {
+              "CONV3": 0.02368602156639,
+              "DOT64": 0.02359598875046,
+              "GEMM8": 0.02383604645729
+            },
+            "failure_classes": [],
+            "hold_slack_ns": 0.114491,
+            "measurement_qualified": true,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff",
+              "configuration": {
+                "abc_area": 0,
+                "density": 0.55,
+                "repair_margin": 0,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": true,
+            "physical_wall_seconds": 3023.5607622529933,
+            "postprocess_wall_seconds": 219.05201102500723,
+            "postprocessing_commands": [
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4",
+                  "--source",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/evidence",
+                  "--period-ps",
+                  "10526"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              },
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4/waveform-audit.json"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "power_scope": "Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.",
+            "rank_eligible": true,
+            "schema_version": 1,
+            "score": 1.0,
+            "setup_slack_ns": 0.19292,
+            "total_wall_seconds": 3242.6127732780005
+          },
+          {
+            "candidate_artifact": "artifact-d5107ab7118f49ec8d20823b0e0072f9",
+            "candidate_index": 1,
+            "cell_area_um2": 157315,
+            "configuration": {
+              "abc_area": 1,
+              "density": 0.55,
+              "repair_margin": 0,
+              "utilization": 40
+            },
+            "die_area_um2": 371137,
+            "elapsed_search_seconds": 4217.453121423998,
+            "electrical_violations": {
+              "max_cap": 5,
+              "max_fanout": 0,
+              "max_slew": 12
+            },
+            "energy_j": {},
+            "estimated_power_w": {},
+            "failure_classes": [
+              "electrical"
+            ],
+            "hold_slack_ns": 0.0655785,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "86c316a4ed7e354d2d284832e783a2870f10f438ab66e268949f233a266a31f5",
+              "configuration": {
+                "abc_area": 1,
+                "density": 0.55,
+                "repair_margin": 0,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": false,
+            "physical_wall_seconds": 4168.444133404002,
+            "postprocess_wall_seconds": 4.3200270738452673e-07,
+            "postprocessing_commands": [],
+            "proposal_rationale": "The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen.",
+            "rank_eligible": false,
+            "schema_version": 1,
+            "setup_slack_ns": 0.423833,
+            "total_wall_seconds": 4168.444133836005
+          },
+          {
+            "candidate_artifact": "artifact-a5eda547e59a4a95924518a0fad3a842",
+            "candidate_index": 2,
+            "cell_area_um2": 157230,
+            "configuration": {
+              "abc_area": 1,
+              "density": 0.55,
+              "repair_margin": 10,
+              "utilization": 40
+            },
+            "die_area_um2": 371137,
+            "elapsed_search_seconds": 8442.419719030993,
+            "electrical_violations": {
+              "max_cap": 0,
+              "max_fanout": 0,
+              "max_slew": 2
+            },
+            "energy_j": {},
+            "estimated_power_w": {},
+            "failure_classes": [
+              "electrical"
+            ],
+            "hold_slack_ns": 0.0603264,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "7e6c5b88c3dea3fe8e719ee1255879a4d8f5fb49f6db04a03eb14ec9c50ccb56",
+              "configuration": {
+                "abc_area": 1,
+                "density": 0.55,
+                "repair_margin": 10,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": false,
+            "physical_wall_seconds": 4131.700654058004,
+            "postprocess_wall_seconds": 4.310131771489978e-07,
+            "postprocessing_commands": [],
+            "proposal_rationale": "Read context/baseline.json, context/protocol.json, and the complete immutable feedback artifact artifact-4a1b4b8428d74453a4fc776a21cdb360, including build/evaluation/report.json at commit 7a85d34af02b69c6f2d5628c6eb52c53d1841042. Its history contains baseline (40,0.55,0,0) and candidate 1 (40,0.55,1,0); the proposed (40,0.55,1,10) is untried and within the frozen domain. Candidate 1 reduced cell area from 161954 to 157315 um2 (2.86%) and reported setup/hold slack of 0.423833/0.0655785 ns, but failed electrical qualification with 12 max_slew and 5 max_cap violations, zero max_fanout violations, and no measured workload energy. The qualified baseline remains the only rank-eligible result, with score 1.0 and no electrical violations. Retain utilization, density, and ABC area optimization to pursue the observed cell-area saving; increase repair_margin from 0 to 10 as the smallest positive allowed setting to target the observed electrical failure while limiting potential repair area and energy overhead. This is an engineering hypothesis: the reports give violation counts, not severities or evidence that margin 10 will suffice. Holding placement settings isolates this repair change. The objective uses cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy, so neither smaller die area nor candidate 1 area alone establishes a score improvement. Repair may consume its area saving or reduce hold slack; qualification and workload energy require independent evaluation. No candidate energy, qualification, or improved score is claimed. Energy comparisons retain the baseline Liberty-model, zero-delay gate-activity and extracted-SPEF scope. RTL, clock period 10526 ps, libraries, and acceptance thresholds remain frozen; no EDA, screening search, model, or agent was run. Local schema, domain, and captured-history uniqueness checks passed. The required validator could not execute because tools/run_ppa.py could not import run_ppa_workflow_study; the gate remains unverified, as recorded in build/proposal_validation.json.",
+            "rank_eligible": false,
+            "schema_version": 1,
+            "setup_slack_ns": 0.556154,
+            "total_wall_seconds": 4131.700654489017
+          }
+        ],
+        "paths": [
+          "build/evaluation/report.json"
+        ],
+        "repair_summary": "Choose the next untried configuration using the actual session history.",
+        "subject": "artifact-a5eda547e59a4a95924518a0fad3a842",
+        "verdict": "failed"
+      },
+      "input_artifact_ids": [
+        "artifact-a5eda547e59a4a95924518a0fad3a842",
+        "artifact-4a1b4b8428d74453a4fc776a21cdb360"
+      ],
+      "metadata": {
+        "task_key": "evaluator",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T09:01:33.490053+00:00"
+    },
+    {
+      "id": "artifact-58660e30f7fe4b66b9f3470f57813f81",
+      "type": "ppa.candidate",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:proposer",
+        "attempt_id": "attempt-640c6e65deb64ed98d272473f327f474",
+        "role": "ppa-proposer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "1146dcbcba28ef4cf366dc9e04911face0d46352",
+        "tree": "4255e507985996383e5dcb6a8415d2b774b51137",
+        "paths": [
+          "proposal/candidate.json"
+        ]
+      },
+      "payload": {
+        "commit": "1146dcbcba28ef4cf366dc9e04911face0d46352",
+        "configuration": {
+          "abc_area": 1,
+          "density": 0.55,
+          "repair_margin": 20,
+          "utilization": 40
+        },
+        "paths": [
+          "proposal/candidate.json"
+        ],
+        "rationale": "Read context/baseline.json, context/protocol.json, and both complete captured feedback records, including immutable build/evaluation/report.json at commits 7a85d34af02b69c6f2d5628c6eb52c53d1841042 and 7fa00985e4c08a46daf7f8c9ad407ce3643064e3. Their history contains baseline (40,0.55,0,0) and candidates (40,0.55,1,0) and (40,0.55,1,10); (40,0.55,1,20) is untried, within the frozen domain, and uses the third and final new physical candidate. Raising repair_margin from 0 to 10 reduced max_slew violations from 12 to 2 and max_cap violations from 5 to 0; max_fanout remained 0. Cell area changed from 157315 to 157230 um2, versus baseline 161954 um2, while setup/hold slack changed from 0.423833/0.0655785 to 0.556154/0.0603264 ns. Both candidates failed electrical qualification and have no workload energy measurements. Choose repair_margin=20, the next and largest allowed margin, to target the remaining slew failures while retaining the observed approximately 2.92% cell-area saving; hold utilization, density, and abc_area fixed to follow the observed repair response. Violation counts do not establish severity or guarantee that further margin will qualify, and repair may increase area or energy or reduce hold slack. The baseline remains the only rank-eligible result, with score 1.0. The objective is normalized cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy; no improved score, energy, or qualification is claimed before independent evaluation. Energy comparisons use the baseline Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. RTL, 10526 ps period, libraries, and acceptance thresholds remain frozen. No EDA, screening search, external model, or agent was invoked."
+      },
+      "input_artifact_ids": [
+        "ppa-context",
+        "artifact-78ee4536104b458e854a9550c3405fab",
+        "artifact-4a1b4b8428d74453a4fc776a21cdb360"
+      ],
+      "metadata": {
+        "task_key": "proposer",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T09:02:35.432487+00:00"
+    },
+    {
+      "id": "artifact-487378eeb76e4d35ac4f92774b77dd2b",
+      "type": "ppa.evaluation.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:evaluator",
+        "attempt_id": "attempt-a51dea0ae78647c48cff01f1d9e50ac6",
+        "role": "ppa-evaluator",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "c96cee4f8150dfdb71e3a00e327dd167bdb598e7",
+        "tree": "cd415752f2a98e1b2bbc4e9615f8ef25883ebf1a",
+        "paths": [
+          "build/evaluation/report.json"
+        ]
+      },
+      "payload": {
+        "candidate_index": 3,
+        "commit": "c96cee4f8150dfdb71e3a00e327dd167bdb598e7",
+        "continue_search": false,
+        "history": [
+          {
+            "activity_and_parasitic_annotation": [
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "DOT64"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "GEMM8"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 53665,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 53665
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 329,
+                  "unconnected_output_exclusions": 220,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "CONV3"
+              }
+            ],
+            "area_ratio": 1.0,
+            "candidate_index": 0,
+            "cell_area_um2": 161954,
+            "configuration": {
+              "abc_area": 0,
+              "density": 0.55,
+              "repair_margin": 0,
+              "utilization": 40
+            },
+            "die_area_um2": 377672,
+            "electrical_violations": {
+              "max_cap": 0,
+              "max_fanout": 0,
+              "max_slew": 0
+            },
+            "energy_j": {
+              "CONV3": 1.1542462882162743e-06,
+              "DOT64": 2.293945631906608e-07,
+              "GEMM8": 1.7792685987008622e-06
+            },
+            "energy_ratio": 1.0,
+            "estimated_power_w": {
+              "CONV3": 0.02368602156639,
+              "DOT64": 0.02359598875046,
+              "GEMM8": 0.02383604645729
+            },
+            "failure_classes": [],
+            "hold_slack_ns": 0.114491,
+            "measurement_qualified": true,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "66632d3cae1473a7385bdd0c13d986867c0fcfe5d46c513e21d4111cad0839ff",
+              "configuration": {
+                "abc_area": 0,
+                "density": 0.55,
+                "repair_margin": 0,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": true,
+            "physical_wall_seconds": 3023.5607622529933,
+            "postprocess_wall_seconds": 219.05201102500723,
+            "postprocessing_commands": [
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4",
+                  "--source",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/evidence",
+                  "--period-ps",
+                  "10526"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              },
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/baseline/mhz95-run03/workloads-v4/waveform-audit.json"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "power_scope": "Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.",
+            "rank_eligible": true,
+            "schema_version": 1,
+            "score": 1.0,
+            "setup_slack_ns": 0.19292,
+            "total_wall_seconds": 3242.6127732780005
+          },
+          {
+            "candidate_artifact": "artifact-d5107ab7118f49ec8d20823b0e0072f9",
+            "candidate_index": 1,
+            "cell_area_um2": 157315,
+            "configuration": {
+              "abc_area": 1,
+              "density": 0.55,
+              "repair_margin": 0,
+              "utilization": 40
+            },
+            "die_area_um2": 371137,
+            "elapsed_search_seconds": 4217.453121423998,
+            "electrical_violations": {
+              "max_cap": 5,
+              "max_fanout": 0,
+              "max_slew": 12
+            },
+            "energy_j": {},
+            "estimated_power_w": {},
+            "failure_classes": [
+              "electrical"
+            ],
+            "hold_slack_ns": 0.0655785,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "86c316a4ed7e354d2d284832e783a2870f10f438ab66e268949f233a266a31f5",
+              "configuration": {
+                "abc_area": 1,
+                "density": 0.55,
+                "repair_margin": 0,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": false,
+            "physical_wall_seconds": 4168.444133404002,
+            "postprocess_wall_seconds": 4.3200270738452673e-07,
+            "postprocessing_commands": [],
+            "proposal_rationale": "The available evidence is context/baseline.json and context/protocol.json; reports/ contains no evaluation history. The only observed tuple is (40, 0.55, 0, 0), so (40, 0.55, 1, 0) is previously untried and within the frozen domain. The baseline is physical- and measurement-qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero reported electrical violations, and score 1.0. Its DOT64/GEMM8/CONV3 energies are 2.293945631906608e-7/1.7792685987008622e-6/1.1542462882162743e-6 J. Enable ABC area optimization as a single-variable attempt to reduce the cell-area factor of the specified area-times-geometric-mean-energy score. Retain baseline utilization and density to limit simultaneous placement changes, and retain repair_margin=0 because the baseline already qualifies and provides no evidence that additional repair margin is needed. Reducing die area alone does not directly improve the cell-area-based score. The narrow positive setup slack makes timing loss a material risk. No candidate area, energy, qualification, or score improvement is claimed before independent evaluation; energy remains limited to the baseline report model scope. RTL, period 10526 ps, libraries, and acceptance thresholds remain frozen.",
+            "rank_eligible": false,
+            "schema_version": 1,
+            "setup_slack_ns": 0.423833,
+            "total_wall_seconds": 4168.444133836005
+          },
+          {
+            "candidate_artifact": "artifact-a5eda547e59a4a95924518a0fad3a842",
+            "candidate_index": 2,
+            "cell_area_um2": 157230,
+            "configuration": {
+              "abc_area": 1,
+              "density": 0.55,
+              "repair_margin": 10,
+              "utilization": 40
+            },
+            "die_area_um2": 371137,
+            "elapsed_search_seconds": 8442.419719030993,
+            "electrical_violations": {
+              "max_cap": 0,
+              "max_fanout": 0,
+              "max_slew": 2
+            },
+            "energy_j": {},
+            "estimated_power_w": {},
+            "failure_classes": [
+              "electrical"
+            ],
+            "hold_slack_ns": 0.0603264,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "7e6c5b88c3dea3fe8e719ee1255879a4d8f5fb49f6db04a03eb14ec9c50ccb56",
+              "configuration": {
+                "abc_area": 1,
+                "density": 0.55,
+                "repair_margin": 10,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": false,
+            "physical_wall_seconds": 4131.700654058004,
+            "postprocess_wall_seconds": 4.310131771489978e-07,
+            "postprocessing_commands": [],
+            "proposal_rationale": "Read context/baseline.json, context/protocol.json, and the complete immutable feedback artifact artifact-4a1b4b8428d74453a4fc776a21cdb360, including build/evaluation/report.json at commit 7a85d34af02b69c6f2d5628c6eb52c53d1841042. Its history contains baseline (40,0.55,0,0) and candidate 1 (40,0.55,1,0); the proposed (40,0.55,1,10) is untried and within the frozen domain. Candidate 1 reduced cell area from 161954 to 157315 um2 (2.86%) and reported setup/hold slack of 0.423833/0.0655785 ns, but failed electrical qualification with 12 max_slew and 5 max_cap violations, zero max_fanout violations, and no measured workload energy. The qualified baseline remains the only rank-eligible result, with score 1.0 and no electrical violations. Retain utilization, density, and ABC area optimization to pursue the observed cell-area saving; increase repair_margin from 0 to 10 as the smallest positive allowed setting to target the observed electrical failure while limiting potential repair area and energy overhead. This is an engineering hypothesis: the reports give violation counts, not severities or evidence that margin 10 will suffice. Holding placement settings isolates this repair change. The objective uses cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy, so neither smaller die area nor candidate 1 area alone establishes a score improvement. Repair may consume its area saving or reduce hold slack; qualification and workload energy require independent evaluation. No candidate energy, qualification, or improved score is claimed. Energy comparisons retain the baseline Liberty-model, zero-delay gate-activity and extracted-SPEF scope. RTL, clock period 10526 ps, libraries, and acceptance thresholds remain frozen; no EDA, screening search, model, or agent was run. Local schema, domain, and captured-history uniqueness checks passed. The required validator could not execute because tools/run_ppa.py could not import run_ppa_workflow_study; the gate remains unverified, as recorded in build/proposal_validation.json.",
+            "rank_eligible": false,
+            "schema_version": 1,
+            "setup_slack_ns": 0.556154,
+            "total_wall_seconds": 4131.700654489017
+          },
+          {
+            "activity_and_parasitic_annotation": [
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 64122,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 64122
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 321,
+                  "unconnected_output_exclusions": 212,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "DOT64"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 64122,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 64122
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 321,
+                  "unconnected_output_exclusions": 212,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "GEMM8"
+              },
+              {
+                "activity": {
+                  "percent": 100.0,
+                  "reported_pins": 64122,
+                  "scope": "OpenSTA report_activity_annotation pin classes; sequential internal and hierarchical pins excluded",
+                  "unannotated_pins": 0,
+                  "vcd_pins": 64122
+                },
+                "parasitics": {
+                  "constant_exemptions": 32,
+                  "eligible_unannotated_drivers": 0,
+                  "passed": true,
+                  "unannotated_drivers": 321,
+                  "unconnected_output_exclusions": 212,
+                  "unloaded_output_exclusions": 77
+                },
+                "workload": "CONV3"
+              }
+            ],
+            "area_ratio": 0.9722019832792027,
+            "candidate_artifact": "artifact-58660e30f7fe4b66b9f3470f57813f81",
+            "candidate_index": 3,
+            "cell_area_um2": 157452,
+            "configuration": {
+              "abc_area": 1,
+              "density": 0.55,
+              "repair_margin": 20,
+              "utilization": 40
+            },
+            "die_area_um2": 371137,
+            "elapsed_search_seconds": 12717.163656129997,
+            "electrical_violations": {
+              "max_cap": 0,
+              "max_fanout": 0,
+              "max_slew": 0
+            },
+            "energy_j": {
+              "CONV3": 1.1608990950821776e-06,
+              "DOT64": 2.310204433331225e-07,
+              "GEMM8": 1.7903212458084867e-06
+            },
+            "energy_ratio": 1.0063543075757566,
+            "estimated_power_w": {
+              "CONV3": 0.02382254227996,
+              "DOT64": 0.02376323007047,
+              "GEMM8": 0.02398411370814
+            },
+            "failure_classes": [],
+            "hold_slack_ns": 0.0621606,
+            "measurement_qualified": true,
+            "period_ps": 10526,
+            "physical_manifest": {
+              "config_sha256": "50a18320605d4f93371402e06c97dd6358dd0bd24df8bd26bb1196878ff473d6",
+              "configuration": {
+                "abc_area": 1,
+                "density": 0.55,
+                "repair_margin": 20,
+                "utilization": 40
+              },
+              "period_ps": 10526,
+              "physical_timeout_seconds": 14400,
+              "rtl_sha256": {
+                "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+                "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+                "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+              },
+              "schema_version": 1,
+              "scope": "One fixed-RTL physical implementation; historical records are unchanged",
+              "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+              "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+              "threads": 2
+            },
+            "physical_qualified": true,
+            "physical_wall_seconds": 3961.6428109710105,
+            "postprocess_wall_seconds": 245.62056441800087,
+            "postprocessing_commands": [
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/export_study_sta_views.py",
+                  "--run",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              },
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_postroute_workloads.py",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/workloads",
+                  "--source",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/evidence",
+                  "--period-ps",
+                  "10526"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              },
+              {
+                "command": [
+                  "/tmp/chipnebula-public-repro-user37/bin/python",
+                  "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/check_postroute_waveforms.py",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/workloads",
+                  "--output",
+                  "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-3/candidates/03/physical/workloads/waveform-audit.json"
+                ],
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "power_scope": "Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. No SDF-delay/glitch, silicon-power, or energy-improvement claim. Windows start at reset deassertion and end at settled committed tohost completion.",
+            "proposal_rationale": "Read context/baseline.json, context/protocol.json, and both complete captured feedback records, including immutable build/evaluation/report.json at commits 7a85d34af02b69c6f2d5628c6eb52c53d1841042 and 7fa00985e4c08a46daf7f8c9ad407ce3643064e3. Their history contains baseline (40,0.55,0,0) and candidates (40,0.55,1,0) and (40,0.55,1,10); (40,0.55,1,20) is untried, within the frozen domain, and uses the third and final new physical candidate. Raising repair_margin from 0 to 10 reduced max_slew violations from 12 to 2 and max_cap violations from 5 to 0; max_fanout remained 0. Cell area changed from 157315 to 157230 um2, versus baseline 161954 um2, while setup/hold slack changed from 0.423833/0.0655785 to 0.556154/0.0603264 ns. Both candidates failed electrical qualification and have no workload energy measurements. Choose repair_margin=20, the next and largest allowed margin, to target the remaining slew failures while retaining the observed approximately 2.92% cell-area saving; hold utilization, density, and abc_area fixed to follow the observed repair response. Violation counts do not establish severity or guarantee that further margin will qualify, and repair may increase area or energy or reduce hold slack. The baseline remains the only rank-eligible result, with score 1.0. The objective is normalized cell area times geometric-mean normalized DOT64/GEMM8/CONV3 energy; no improved score, energy, or qualification is claimed before independent evaluation. Energy comparisons use the baseline Liberty-model estimates from zero-delay post-route gate activity and extracted SPEF. RTL, 10526 ps period, libraries, and acceptance thresholds remain frozen. No EDA, screening search, external model, or agent was invoked.",
+            "rank_eligible": true,
+            "schema_version": 1,
+            "score": 0.9783796537067193,
+            "setup_slack_ns": 0.570279,
+            "total_wall_seconds": 4207.263375389011
+          }
+        ],
+        "paths": [
+          "build/evaluation/report.json"
+        ],
+        "repair_summary": "Choose the next untried configuration using the actual session history.",
+        "subject": "artifact-58660e30f7fe4b66b9f3470f57813f81",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-58660e30f7fe4b66b9f3470f57813f81",
+        "artifact-4a1b4b8428d74453a4fc776a21cdb360",
+        "artifact-78ee4536104b458e854a9550c3405fab"
+      ],
+      "metadata": {
+        "task_key": "evaluator",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T10:12:48.135171+00:00"
+    },
+    {
+      "id": "artifact-85a1a9a22ff146a08efbf9f1b246390f",
+      "type": "ppa.session.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:finalizer",
+        "attempt_id": "attempt-3338f2d1a0a14fc0b138e848fd0a4f66",
+        "role": "ppa-finalizer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "9a6d3a331580c39a2998b32ae88b666ee7078e06",
+        "tree": "e270c33d260d00a59249fdc5cfd2b022da6c5e54",
+        "paths": [
+          "build/session/report.json"
+        ]
+      },
+      "payload": {
+        "candidate_count": 3,
+        "commit": "9a6d3a331580c39a2998b32ae88b666ee7078e06",
+        "paths": [
+          "build/session/report.json"
+        ],
+        "search_finished": true,
+        "subject": "W1-3",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-487378eeb76e4d35ac4f92774b77dd2b",
+        "artifact-4a1b4b8428d74453a4fc776a21cdb360",
+        "artifact-78ee4536104b458e854a9550c3405fab"
+      ],
+      "metadata": {
+        "task_key": "finalizer",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T10:12:48.709153+00:00"
+    }
+  ],
+  "scope": "Frozen contracts, attempt decisions, engineering states, deliveries and captured/pending feedback evidence. WorkItem states are their exported final states. Private model-home and credentials excluded."
+}

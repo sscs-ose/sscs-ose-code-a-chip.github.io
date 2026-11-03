@@ -1,0 +1,526 @@
+{
+  "workflow": "cpu-npu-ai-led",
+  "status": "complete",
+  "input": {
+    "id": "cpu-npu-requirements",
+    "type": "specification.source",
+    "schema_version": 1,
+    "producer": {
+      "workflow_id": "external",
+      "task_id": "case-source",
+      "attempt_id": "case-source",
+      "role": "codex-requirements-author",
+      "role_version": 1
+    },
+    "content": {
+      "kind": "git",
+      "commit": "991e86af716dc8d758554cbbd4ebaf7b5f55fec6",
+      "tree": "0942b24de113ce9f636845819a09c06548282e6c",
+      "paths": [
+        "spec/requirements.md",
+        "spec/t09-base-contract.md",
+        "spec/acceptance.json"
+      ]
+    },
+    "payload": {
+      "content": "# CPU/NPU case design contract v1\n\nThis is a detailed engineering input authorized by the project owner. Preserve the complete frozen T09 contract in t09-base-contract.md. CPU ports and public top module are those of public_cpu_tb.sv. Generate fresh original synthesizable RTL; do not inspect/copy the evaluator reference CPU, prior candidates, or private answer material.\n\nCPU module rv32i_five_stage_cpu has parameter ENABLE_XNEBULA=0. Default 0 must satisfy the unmodified base contract. When 1 it instantiates nebula_npu_dot4 inside an explicit generate block and implements xdot4. Preserve five real pipeline stages and exact base fetch-to-retire timing.\n\nNPU module nebula_npu_dot4 ports: input clk,rst_n,req_valid; output req_ready; input [31:0] req_a,req_b; output rsp_valid; input rsp_ready; output [31:0] rsp_data; input kill. Four parallel signed 8-bit products with widened signed reduction; lower byte is lane0. Accept at edge n when valid&ready; valid output after edge n+2. At most one operation outstanding; response and data stable until consumed. reset and kill cancel all work and dominate acceptance/response. No hidden accumulator/saturation/memory side effects.\n\nxdot4 rd,rs1,rs2 is R type opcode 0x0b funct3=0 funct7=0; returns signed INT32 sum of four signed INT8 products. Invalid extension encodings trap. rd=x0 discards write but still retires. Operands obey forwarding and load-use rules. Younger work stalls during NPU wait; killed or wrong-path instructions cannot write or retire. Exactly one commit per valid instruction. When disabled all custom-0 opcodes trap. NPU response must enter normal pipeline writeback, not fake commit delays.\n\nTop nebula_cpu_npu_top has exactly the same external port list as rv32i_five_stage_cpu; it instantiates core with ENABLE_XNEBULA=1. Memory remains external to the physical boundary. Supply integration/design.f and dependencies.lock.json with explicit ordered files, top and configuration.\n\nInitial physical condition Sky130HD tt_025C_1v80 and clock 100ns. No pads, package, SRAM macro, foundry authorization or fabricated-silicon claims.\n\nPrograms: DOT64, signed INT8 GEMM8, CONV3 (8x8 input,3x3 valid kernel). Result INT32, normal CPU ADD accumulation; no M extension. Independent checker remains immutable; do not weaken it to obtain a pass.\n\n## Base CPU contract\n\n# T09 \u00b7 RV32I \u4e94\u7ea7\u6d41\u6c34\u7ebf CPU\n\n**\u8bbe\u8ba1\u9700\u6c42**\uff1a\u5355\u53d1\u5c04\u3001\u987a\u5e8f\u63d0\u4ea4\u300132-bit RV32I \u6307\u4ee4\uff0c\u660e\u786e\u5206\u5f00\u7684 IF/ID\u3001ID/EX\u3001EX/MEM\u3001MEM/WB \u56db\u7ec4\u7ea7\u95f4\u5bc4\u5b58\u5668\uff1b\u4e0d\u5141\u8bb8\u4ee5\u5355\u6307\u4ee4\u591a\u5468\u671f\u63a7\u5236\u5668\u5192\u5145\u4e94\u7ea7\u6d41\u6c34\u7ebf\u3002\u652f\u6301 RV32I \u5168\u90e8\u6574\u6570\u7b97\u672f\u3001\u903b\u8f91\u3001\u79fb\u4f4d\u3001\u5206\u652f\u3001\u8df3\u8f6c\u3001\u5b57\u8282/\u534a\u5b57/\u5b57\u8bbf\u5b58\u3001LUI/AUIPC\u3001FENCE\u3001ECALL\u3001EBREAK\uff1b\u53e6\u652f\u6301 Zicsr \u516d\u79cd CSR \u64cd\u4f5c\u53ca MRET\u3002\u65e0 M/A/F/D/C\u3001\u65e0 MMU/\u7f13\u5b58/\u4e2d\u65ad\uff0c\u53ea\u6709 M-mode\u3002\u53d6\u6307\u5730\u5740\u548c\u8bbf\u5b58\u5730\u5740\u6309 ISA \u8981\u6c42\u68c0\u67e5\u5bf9\u9f50\uff1b\u4e0d\u652f\u6301\u975e\u5bf9\u9f50\u8bbf\u5b58\u3002`x0` \u6052\u4e3a 0\u3002JALR \u6e05\u76ee\u6807 bit0\u3002`FENCE` \u5bf9\u672c\u9898\u6709\u5e8f\u3001\u4e00\u6b21\u4e00\u7b14\u7684\u6570\u636e\u7aef\u53e3\u65e0\u989d\u5916\u53ef\u89c1\u52a8\u4f5c\uff1b`FENCE.I` \u4e0d\u652f\u6301\u5e76\u89e6\u53d1\u975e\u6cd5\u6307\u4ee4\u5f02\u5e38\u3002\n\n**\u590d\u4f4d\u4e0e\u603b\u7ebf**\uff1a`clk,rst_n`\uff0c\u590d\u4f4d PC=`0x8000_0000`\u3002\u6307\u4ee4\u7aef `imem_valid,imem_addr[31:0],imem_rdata[31:0]`\uff1b\u5f53\u5468\u671f\u7684 `imem_valid/imem_addr` \u5728\u4e0a\u5347\u6cbf\u91c7\u6837\uff0c\u4e0b\u4e00\u5468\u671f\u7ed9\u51fa\u5bf9\u5e94 `imem_rdata`\uff0c\u6bcf\u5468\u671f\u53ef\u63a5\u6536\u4e00\u7b14\uff0c\u54cd\u5e94\u4e25\u683c\u987a\u5e8f\u3001\u65e0\u53d6\u6307\u9519\u8bef\uff1b\u6ca1\u6709\u524d\u4e00\u5468\u671f\u6709\u6548\u8bf7\u6c42\u65f6\u6570\u636e\u4e0d\u9a8c\u6536\u3002\u5df2\u53d1\u51fa\u7684\u9519\u8bef\u8def\u5f84\u53d6\u6307\u54cd\u5e94\u53ef\u4ee5\u8fd4\u56de\uff0c\u4f46 CPU \u5fc5\u987b\u4e22\u5f03\u3002\u6570\u636e\u7aef `dmem_req_valid,dmem_req_ready,dmem_req_write,dmem_req_addr[31:0],dmem_req_wdata[31:0],dmem_req_wstrb[3:0]` \u4e0e `dmem_rsp_valid,dmem_rsp_ready,dmem_rsp_rdata[31:0],dmem_rsp_err`\uff1b\u6bcf\u7b14\u8bf7\u6c42\u88ab\u63a5\u53d7\u540e\uff0c\u5728 1\u20138 \u5468\u671f\u5185\u7ed9\u4e00\u6b21\u4fdd\u6301\u578b\u54cd\u5e94\uff0c\u5355\u6b21\u53ea\u5141\u8bb8\u4e00\u7b14\u672a\u5b8c\u6210\u3002\u6570\u636e\u7aef\u5730\u5740\u603b\u662f\u5bf9\u9f50\u7684 32-bit word \u5730\u5740\uff1a\u5b57\u8282/\u534a\u5b57\u8bbf\u95ee\u7531\u5730\u5740\u4f4e\u4f4d\u8ba1\u7b97 byte lane\u3001\u5199\u63a9\u7801\u548c\u653e\u5165\u5bf9\u5e94 lane \u7684\u5199\u6570\u636e\uff1b\u8bfb\u54cd\u5e94\u8fd4\u56de\u5b8c\u6574 32-bit word\uff0c\u7531 CPU \u622a\u53d6\u5e76\u7b26\u53f7\u6269\u5c55\u3002\u975e\u5bf9\u9f50\u8bbf\u95ee\u987b\u5728\u53d1\u8bf7\u6c42\u524d\u62a5\u5f02\u5e38\u3002\u9519\u8bef\u54cd\u5e94\u8868\u793a\u8be5\u7b14\u5199\u5165**\u6ca1\u6709\u5185\u5b58\u526f\u4f5c\u7528**\u3002\u5b58\u50a8\u5668\u4e0e CPU \u4e00\u8d77\u590d\u4f4d\uff0c\u590d\u4f4d\u671f\u95f4\u6e05\u7a7a\u5728\u9014\u4e8b\u52a1\u3002\u6307\u4ee4\u3001\u6570\u636e\u7a7a\u95f4\u5747\u6307\u5411\u5916\u90e8 256 KiB \u955c\u50cf\uff1bMMIO `0x8003_F000` \u4e3a `tohost`\uff0c\u5199\u5165 1 \u8868\u793a\u7a0b\u5e8f\u901a\u8fc7\uff0c\u5176\u4f59\u975e\u96f6\u8868\u793a\u5931\u8d25\uff0cCPU \u4e0d\u5f97\u786c\u7f16\u7801\u6b64\u5730\u5740\u7684\u884c\u4e3a\u3002\n\n**\u5f02\u5e38\u4e0e CSR**\uff1a\u975e\u6cd5\u6307\u4ee4\u3001\u6307\u4ee4\u5730\u5740\u975e\u5bf9\u9f50\u3001load/store \u975e\u5bf9\u9f50\u3001ECALL\u3001EBREAK\u3001\u6570\u636e\u7aef\u8bbf\u95ee\u9519\u8bef\u5747\u4e3a\u7cbe\u786e\u5f02\u5e38\uff1bfaulting \u6307\u4ee4\u4e0d\u5199\u56de\u5bc4\u5b58\u5668\u6216\u5185\u5b58\uff0c\u5e74\u8f7b\u6307\u4ee4\u5168\u90e8\u51b2\u5237\u3002\u5f02\u5e38 `mcause` \u7f16\u7801\uff1a\u6307\u4ee4\u5730\u5740\u975e\u5bf9\u9f50 0\uff0c\u975e\u6cd5\u6307\u4ee4 2\uff0cEBREAK 3\uff0cload \u975e\u5bf9\u9f50 4\uff0cload \u8bbf\u95ee\u9519\u8bef 5\uff0cstore \u975e\u5bf9\u9f50 6\uff0cstore \u8bbf\u95ee\u9519\u8bef 7\uff0cM-mode ECALL 11\u3002\u82e5\u540c\u4e00\u6307\u4ee4\u53ef\u80fd\u89e6\u53d1\u591a\u4e2a\u539f\u56e0\uff0c\u5148\u505a\u5730\u5740\u5bf9\u9f50\u68c0\u67e5\uff0c\u518d\u53d1\u603b\u7ebf\u8bf7\u6c42\uff0c\u56e0\u6b64\u975e\u5bf9\u9f50\u4f18\u5148\u4e8e\u8bbf\u95ee\u9519\u8bef\u3002`mepc` \u4fdd\u5b58 faulting \u6307\u4ee4 PC\uff1b`mtval` \u5bf9\u5730\u5740\u7c7b\u5f02\u5e38\u4fdd\u5b58\u6545\u969c\u5730\u5740\uff0c\u5bf9\u975e\u6cd5\u6307\u4ee4\u4fdd\u5b58 32-bit \u6307\u4ee4\u7f16\u7801\uff0c\u5bf9 ECALL/EBREAK \u4e3a 0\u3002\n\n**CSR \u7684\u786e\u5207\u8303\u56f4**\uff1a`mstatus(0x300)` \u4ec5 MIE(bit3)\u3001MPIE(bit7)\u3001MPP(bits12:11) \u53ef\u89c1\uff1b\u672c\u9898\u53ea\u6709 M-mode\uff0cMPP \u6052\u4e3a `2'b11`\u3002\u590d\u4f4d\u503c `0x0000_1800`\u3002\u8fdb\u5165\u5f02\u5e38\u65f6 `MPIE\u2190MIE,MIE\u21900,MPP\u21903`\uff1bMRET \u65f6 `MIE\u2190MPIE,MPIE\u21901,MPP\u21903,PC\u2190mepc`\u3002`mtvec(0x305)` \u4ec5 direct \u6a21\u5f0f\uff0c\u5199\u5165\u503c\u4f4e\u4e24\u4f4d\u5f3a\u5236 0\uff0c\u590d\u4f4d\u503c `0x8000_0000`\u3002`mscratch(0x340)`\u3001`mepc(0x341)`\u3001`mcause(0x342)`\u3001`mtval(0x343)` \u53ef\u8bfb\u5199\uff0c\u9664 `mepc` \u4f4e\u4e24\u4f4d\u5f3a\u5236 0 \u5916\u590d\u4f4d\u4e3a 0\uff1b\u53ea\u8bfb `misa(0x301)=0x4000_0100`\u3001`mhartid(0xF14)=0`\u3002\u5176\u4ed6 CSR \u5730\u5740\u548c\u5bf9\u53ea\u8bfb CSR \u7684\u5199\u64cd\u4f5c\u89e6\u53d1\u975e\u6cd5\u6307\u4ee4\u5f02\u5e38\uff1bCSRRS/CSRRC \u7684\u6e90\u4e3a x0\u3001\u7acb\u5373\u6570\u5f62\u5f0f\u6e90\u4e3a 0 \u65f6\u4e0d\u5199 CSR\u3002\u6240\u6709\u672a\u5217\u7684 `mstatus` \u4f4d\u8bfb 0\u3001\u5199\u5ffd\u7565\u3002\u5f02\u5e38/CSR \u7f16\u7801\u9075\u5faa\u9501\u5b9a\u7684[RISC-V ISA/\u7279\u6743\u89c4\u8303](https://github.com/riscv/riscv-isa-manual)\uff1bACT4 \u914d\u7f6e\u5fc5\u987b\u4e0e\u672c\u4efb\u52a1\u8303\u56f4\u4e00\u81f4\u3002\n\n**\u63d0\u4ea4\u89c2\u5bdf\u53e3**\uff1a\u6bcf\u6761\u6b63\u5e38\u9000\u4f11\u6307\u4ee4\u8f93\u51fa\u4e00\u4e2a\u5468\u671f\u7684 `commit_valid,commit_pc[31:0],commit_insn[31:0],commit_rd[4:0],commit_wdata[31:0],commit_mem_addr[31:0],commit_mem_wstrb[3:0],commit_mem_wdata[31:0]`\uff1b\u65e0\u5bc4\u5b58\u5668\u5199\u56de\u65f6 `commit_rd=0`\uff0c\u65e0\u5b58\u50a8\u5199\u65f6 `commit_mem_wstrb=0`\u3002\u5f02\u5e38\u4e8b\u4ef6\u8f93\u51fa\u72ec\u7acb `trap_valid,trap_pc[31:0],trap_cause[31:0],trap_tval[31:0]`\uff0c\u4e0d\u8ba1\u4e3a\u6b63\u5e38\u9000\u4f11\u3002\u8fd9\u4e9b\u662f CPU RTL \u7684\u8f7b\u91cf\u9000\u4f11\u89c2\u5bdf\u7aef\u53e3\uff0c\u4f9b\u8bc4\u6d4b\u65b9\u81ea\u884c\u91c7\u6837\uff1bAgent **\u4e0d\u9700**\u751f\u6210 trace \u6587\u4ef6\u6216\u7f16\u5199 trace \u91c7\u96c6\u5668\u3002\u89c2\u5bdf\u53e3\u53ea\u7528\u4e8e\u9a8c\u6536\uff0c\u4e0d\u5f97\u6210\u4e3a\u6267\u884c\u529f\u80fd\u7684\u8f93\u5165\u3002\n\n**\u53d6\u6307\u81f3\u9000\u4f11\u5ef6\u65f6\u4e0e\u8d44\u6e90\u8fb9\u754c**\uff1a\u5bc4\u5b58\u5668\u6587\u4ef6\u4ec5 32\u00d732 bit\uff1b\u7a0b\u5e8f/\u6570\u636e\u5b58\u50a8\u5668\u5747\u5728\u6838\u5916\u3002\u96f6\u7b49\u5f85\u3001\u65e0\u76f8\u5173\u7684\u8fde\u7eed 64 \u6761 ADDI \u7a0b\u5e8f\u4e2d\uff0c\u9010\u6761\u8bb0\u5f55\u53d6\u6307\u8bf7\u6c42\u88ab\u91c7\u6837\u7684\u4e0a\u5347\u6cbf `n`\uff1b\u8be5\u6307\u4ee4\u987b\u5728 `n+4` \u4e0a\u5347\u6cbf\u4e4b\u540e\u7684\u7a33\u5b9a\u89c2\u5bdf\u70b9\u8f93\u51fa `commit_valid` \u548c\u5bf9\u5e94 `commit_pc`\u3002\u8fd9\u8868\u793a\u4ece IF \u8bf7\u6c42\u5230 WB \u89c2\u5bdf\u8de8\u8d8a\u56db\u4e2a\u5b8c\u6574\u5468\u671f\u3001\u7ecf\u8fc7 `n..n+4` \u4e94\u4e2a\u8fb9\u6cbf\uff1b\u54cd\u5e94\u6309\u672c\u9898\u4e00\u5468\u671f\u6307\u4ee4\u5b58\u50a8\u5668\u65f6\u5e8f\u63d0\u4f9b\u3002\u4e0d\u5f97\u9760\u5ef6\u8fdf `commit_valid` \u4f2a\u9020\u6d41\u6c34\u7ea7\uff0c\u540e\u7ea7\u7684\u5bc4\u5b58\u5668\u5199\u56de\u548c\u5b58\u50a8\u5668\u526f\u4f5c\u7528\u4e5f\u5fc5\u987b\u4e0e\u63d0\u4ea4\u8f68\u8ff9\u4e00\u81f4\u3002\u672c\u95e8\u7981\u4e0d\u4f5c\u4e3a PPA \u6392\u540d\u3002\u5b9e\u73b0\u987b\u63d0\u4f9b\u5fc5\u8981\u7684\u65c1\u8def\u3001load-use \u505c\u987f\u3001\u5206\u652f/\u8df3\u8f6c\u51b2\u5237\u3001\u6570\u636e\u7aef\u7b49\u5f85\u505c\u987f\u3002\u65e0\u5206\u652f\u9884\u6d4b\u5668\u3001\u7f13\u5b58\u3001\u4e58\u9664\u6cd5\u5668\u6216\u64cd\u4f5c\u7cfb\u7edf\u3002\n\n**\u5468\u671f\u6027\u80fd\u8865\u5145\uff08port_timing_v1\uff0c2026-10-09\uff09**\uff1a\u4e0a\u8ff0 64 \u6761\u65e0\u76f8\u5173 ADDI \u7684\u53d6\u6307\u4e0e\u9000\u4f11\u5fc5\u987b\u5206\u522b\u8fde\u7eed\u3001\u7a33\u6001\u6bcf\u62cd\u4e00\u6761\uff0c\u9010\u6761 `n+4` \u5ef6\u65f6\u8981\u6c42\u4ecd\u4fdd\u7559\u3002\u65e0\u603b\u7ebf\u7b49\u5f85\u3001\u65e0\u63a7\u5236\u8f6c\u79fb\u7684\u666e\u901a ALU \u6570\u636e\u76f8\u5173\uff08\u7d27\u90bb\u3001\u9694\u4e00\u6761\u3001\u53cc\u6e90\u3001x0\uff09\u4e0d\u5f97\u56e0\u524d\u9012\u989d\u5916\u63d2\u5165\u6c14\u6ce1\uff1bload-use \u76f8\u6bd4\u76f8\u540c\u603b\u7ebf\u65f6\u5e8f\u7684\u65e0\u76f8\u5173\u5bf9\u7167\u6700\u591a\u589e\u52a0\u4e00\u62cd\uff0c\u5916\u90e8 ready/response \u7b49\u5f85\u53e6\u8ba1\u3002\u9a8c\u6536\u53e6\u5916\u56fa\u5b9a\u65e0\u63a7\u5236\u6d41\u5fae\u7a0b\u5e8f\u7684\u603b\u9000\u4f11\u8de8\u5ea6\u4e0a\u9650\uff0c\u9632\u6b62\u76f8\u5173/\u65e0\u76f8\u5173\u7248\u672c\u5171\u540c\u63d2\u5165\u989d\u5916\u6c14\u6ce1\u800c\u62b5\u6d88\u5dee\u503c\uff1b\u5177\u4f53\u9884\u7b97\u4e0e\u4e09\u79cd\u603b\u7ebf\u6761\u4ef6\u89c1[CPU \u9a8c\u6536\u8ba1\u5212](acceptance.md)\u3002\u5206\u652f/JAL/JALR \u7f5a\u62cd\u4ec5\u62a5\u544a\uff0c\u4e0d\u65b0\u589e\u672a\u7ea6\u5b9a\u7684\u4e0a\u9650\u3002\u6b64\u8865\u5145\u660e\u786e\u4e86\u65e7\u68c0\u67e5\u672a\u8986\u76d6\u3001\u90e8\u5206\u6b64\u524d\u672a\u91cf\u5316\u7684\u6027\u80fd\u7ea6\u675f\uff1b\u5386\u53f2\u6210\u7ee9\u4e0d\u5192\u5145\u65b0\u7248\u901a\u8fc7\uff0c\u53c2\u8003 RTL \u4e0e\u5019\u9009\u4f7f\u7528\u540c\u4e00\u89c4\u5219\u3002\n\n**\u8d44\u6e90\u4e0e\u65f6\u9650**\uff1a16 vCPU\u300132 GiB RAM\u3001100 GiB \u53ef\u5199\u76d8\uff1b\u5f00\u53d1\u65f6\u9650 2 \u5c0f\u65f6\uff0c\u540c\u6a21\u578b token \u4e0a\u9650 120 \u4e07\u3002\n\n**\u9a8c\u6536\u6743\u91cd\uff08t09_group_cycles10_v1\uff09**\uff1a75 \u70b9\u6309 `50/75` \u5f52\u4e00\u4e3a\u529f\u80fd 50 \u5206\uff1b\u539f\u6709\u529f\u80fd\u5b50\u9879\u6309\u539f\u6bd4\u4f8b\u7f29\u653e\u81f3\u5408\u8ba1 40 \u5206\uff0c\u72ec\u7acb\u5468\u671f\u68c0\u67e5\u7ec4\u5360 10 \u5206\u3002\u539f\u59cb F=48\uff1a\u6574\u6570\u4e0e\u63a7\u5236\u6d41 20\uff1b\u5927\u5c0f\u7aef/\u5b57\u8282\u4f7f\u80fd\u3001\u8bbf\u5b58\u4e0e\u7b26\u53f7\u6269\u5c55 12\uff1bCSR/\u5f02\u5e38/MRET 8\uff1b\u9501\u5b9a\u914d\u7f6e\u7684 ACT4 \u9002\u7528\u6d4b\u8bd5 8\u3002\u539f\u59cb P=27\uff1a\u6570\u636e\u76f8\u5173\u7684\u529f\u80fd\u7ed3\u679c 4.8\uff1b\u968f\u673a\u6570\u636e\u7b49\u5f85\u53ca\u80cc\u538b 4\uff1b\u51b2\u5237\u3001\u7cbe\u786e\u63d0\u4ea4\u548c\u53d6\u6307\u81f3\u9000\u4f11\u5ef6\u65f6\u95e8\u7981 3.2\uff1b\u72ec\u7acb\u5468\u671f\u68c0\u67e5 15\u3002\u5468\u671f\u7ec4\u56fa\u5b9a 22 \u9879\uff1a22 \u9879\u5168\u8fc7\u5f97\u5f52\u4e00\u5316 10 \u5206\uff0c\u901a\u8fc7 11\u201321 \u9879\u5f97 5 \u5206\uff0c\u901a\u8fc7 0\u201310 \u9879\u5f97 0 \u5206\uff1b\u5b89\u5168\u7f3a\u9677\u4ecd\u6309\u901a\u7528\u89c4\u5219\u4f7f\u6240\u5728\u5b50\u9879\u4e3a 0\u3002\u4e0d\u9010\u9879\u7d2f\u8ba1\u6263 5 \u5206\uff0c\u4e5f\u4e0d\u5c06\u5468\u671f\u5931\u8d25\u518d\u6b21\u5e76\u5165\u539f hazard/latency \u7ec4\u3002\u529f\u80fd\u90e8\u5206\u4ecd\u987b\u6ee1 50 \u5206\u624d\u542f\u7528 PPA\uff08\u6ee1\u5206 50\uff09\u548c\u65f6\u95f4\u5206\uff08\u6ee1\u5206 5\uff09\u3002\u8be6\u7ec6\u7a0b\u5e8f\u96c6\u3001\u5dee\u5206\u7b56\u7565\u3001\u8d85\u65f6\u4e0e\u901a\u8fc7\u6761\u4ef6\u89c1[CPU \u9a8c\u6536\u8ba1\u5212](acceptance.md)\u3002ACT4 \u5b50\u96c6\u901a\u8fc7\u4e0d\u7b49\u4e8e RISC-V \u5b98\u65b9\u8ba4\u8bc1\uff1b\u5386\u53f2\u6210\u7ee9\u987b\u533a\u5206\u8bc4\u5206\u7248\u672c\u3002\n",
+      "content_digest": "sha256:ba307c2b5ee170ee22b621bd80e0df4196f7fbceeba329ca4e7eac8ad7ccd33b",
+      "media_type": "text/markdown",
+      "received_at": "2026-10-12T11:46:29.843240+00:00",
+      "source_name": "Frozen CPU/NPU case detailed design"
+    },
+    "input_artifact_ids": [],
+    "metadata": {},
+    "created_at": "2026-10-12T11:46:29.858979+00:00"
+  },
+  "input_digest": "sha256:81bf7768669d7559ddb069b7267180b9101ebfe2165c185c5dec4171a3754d18",
+  "seed_baseline": "991e86af716dc8d758554cbbd4ebaf7b5f55fec6",
+  "seed_files": [
+    {
+      "path": ".chip_nebula/recipes/cpu-npu-generate.yaml",
+      "sha256": "a3da19f6d348a66615c0789a17f8fb5cd2fa0cf22f88b470dee9ff7a4ac201ad"
+    },
+    {
+      "path": ".chip_nebula/roles/case-architect.yaml",
+      "sha256": "6adaf5dc7d1ae6a714a80b1c32903ea65814ca34ce258a9f7c923b3d1638e7e2"
+    },
+    {
+      "path": ".chip_nebula/roles/case-classifier.yaml",
+      "sha256": "9e21c94d6d42b62031f4a2e57f96bb35ec0be8950c561e861865e444df45daa4"
+    },
+    {
+      "path": ".chip_nebula/roles/case-cpu-designer.yaml",
+      "sha256": "c18b2ad3cdcf34677232b36ca50963f0c6b2e17c8863158bfc268ab1eb5a7549"
+    },
+    {
+      "path": ".chip_nebula/roles/case-integrator.yaml",
+      "sha256": "f7697ea8facf8e087fad32ec1c7bb8b437a77cc127bf9d74b92770b023841e89"
+    },
+    {
+      "path": ".chip_nebula/roles/case-npu-designer.yaml",
+      "sha256": "459533c89bdefd7cd59374262b765781618055a101eff26c1c2c915eed9cbd4c"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "5f66bec1a9a17227730bf4f9df7e290ed7a134bfac170804aacdf7a127563d30"
+    },
+    {
+      "path": "cpu-npu-case.cnprj",
+      "sha256": "b8a3bcfc09f0ff98fe0ef44b5ee95f5647c19ccd3313ea3bdf10ffa27181edee"
+    },
+    {
+      "path": "spec/acceptance.json",
+      "sha256": "2747c05a92a4ebe0d624b8ec6ba6347f1dbd808c6bcfc344b2955efed6dfe8ee"
+    },
+    {
+      "path": "spec/requirements.md",
+      "sha256": "ba307c2b5ee170ee22b621bd80e0df4196f7fbceeba329ca4e7eac8ad7ccd33b"
+    },
+    {
+      "path": "spec/t09-base-contract.md",
+      "sha256": "1021e4b88446ed12c7b6a3cc6f46847f16a44c70a47660fff24f5f91ca778958"
+    },
+    {
+      "path": "tb/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tb/npu_smoke_tb.sv",
+      "sha256": "7bd593ba435cdfd6ef044df4ac9562349a5cea98fc407eaac7eb0af44e73143b"
+    },
+    {
+      "path": "tb/public_cpu_tb.sv",
+      "sha256": "058f7d46c174d485757e0b7b5501cdf9c550119aa642032bf519fe6d72fb8cbd"
+    },
+    {
+      "path": "tools/classify_source.py",
+      "sha256": "b896d32e9aa491bd66792bf05db270bc9d14c49f3839144b1236f025974b71f8"
+    },
+    {
+      "path": "tools/run_smoke.py",
+      "sha256": "07a9a4c8d002aa2b61e8bd66c1758fbc4d811aab76fb94903216a9588513d2c5"
+    },
+    {
+      "path": "workbench.yaml",
+      "sha256": "e0f2e1c6a8c3437d5d62bc684f2218aca108c3398a0e9c1d84f7969e8b59a8bd"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "cpu-npu-ai-led:classify",
+      "state": "satisfied",
+      "attempts": [
+        {
+          "id": "attempt-d43022005aba459084bd710af09f6bab",
+          "status": "succeeded",
+          "diagnostics": {
+            "changed_paths": [],
+            "execution_log": "$ [classify] python3 tools/classify_source.py\nNEBULA_OUTPUT: {\"analysis\": {\"document_kind\": \"detailed_design\", \"classification_summary\": \"Immutable CPU/NPU detailed design contains base ISA, interface, custom instruction, timing and physical boundaries.\"}}\n",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-12T11:48:32.119898+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "analysis:specification.source-analysis@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 103214,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "991e86af716dc8d758554cbbd4ebaf7b5f55fec6"
+          }
+        }
+      ],
+      "deliveries": {
+        "analysis": "artifact-1ef6aa62e169427a895856a858924777"
+      }
+    },
+    {
+      "id": "cpu-npu-ai-led:architecture",
+      "state": "satisfied",
+      "attempts": [
+        {
+          "id": "attempt-11d46652cff241aebf9f127f454897f3",
+          "status": "succeeded",
+          "diagnostics": {
+            "changed_paths": [
+              "spec/design_doc.md"
+            ],
+            "execution_log": "NEBULA_OUTPUT: {\"design\":{\"type\":\"design.specification\",\"schema_version\":1,\"source_artifact_id\":\"cpu-npu-requirements\",\"source_analysis_artifact_id\":\"artifact-1ef6aa62e169427a895856a858924777\",\"document_kind\":\"detailed_design\",\"design_document_path\":\"spec/design_doc.md\",\"design_digest\":\"sha256:c2ba7c66ec97505ad7271d0875856649655b587a5046b50e5e4cfa1abddec30c\",\"requirement_ids\":[\"D01\",\"D02\",\"D03\",\"D04\",\"D05\",\"D06\",\"D07\",\"D08\",\"D09\",\"D10\",\"D11\",\"D12\",\"D13\",\"D14\",\"D15\",\"D16\",\"D17\",\"D18\",\"D19\",\"D20\",\"D21\",\"D22\",\"D23\",\"D24\",\"D25\",\"D26\",\"D27\",\"D28\",\"D29\",\"D30\",\"D31\",\"D32\",\"D33\"],\"unresolved_items\":[\"D21: Referenced acceptance.md is absent from the captured artifact and frozen Git tree. Exact retirement-span budgets, microprograms, and three bus timing conditions remain unavailable; full contract closure cannot be asserted. Document consistency checks passed; RTL, software, and physical checks were not performed.\"]}}\nTASK COMPLETED.",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-12T11:59:55.093251+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "design:design.specification@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 103214,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "991e86af716dc8d758554cbbd4ebaf7b5f55fec6"
+          }
+        }
+      ],
+      "deliveries": {
+        "design": "artifact-735581b89e33404a85e542d03e67ce50"
+      }
+    },
+    {
+      "id": "cpu-npu-ai-led:npu",
+      "state": "satisfied",
+      "attempts": [
+        {
+          "id": "attempt-face87f736a34bfc87704eccb8e35442",
+          "status": "succeeded",
+          "diagnostics": {
+            "changed_paths": [
+              "rtl/npu/nebula_npu_dot4.sv",
+              "build/npu/protocol_check.log",
+              "build/npu/protocol_check_tb.sv",
+              "build/npu/protocol_sim",
+              "build/npu/sim",
+              "build/npu/verification.txt"
+            ],
+            "execution_log": "Implemented original synthesizable RTL with exact n+2 timing. `NPU_SMOKE_PASS`, 65,536 byte-pair checks, and ten cancellation cases passed.\n\nVerilator lint was blocked by tool-wrapper recursion; synthesis and integration were not checked.\n\nNEBULA_OUTPUT: {\"npu\":{\"module\":\"nebula_npu_dot4\"}}\nTASK COMPLETED.",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-12T20:04:06.199879",
+                "details": {},
+                "evidence": "STDOUT:\nNPU_SMOKE_PASS vectors=64 backpressure=covered kill=covered reset=covered\ntb/npu_smoke_tb.sv:107: $finish called at 3746000 (1ps)\n\nSTDERR:\n",
+                "kind": "tool_check",
+                "name": "npu-frozen-smoke",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              },
+              {
+                "checked_at": "2026-10-12T12:04:06.199955+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "npu:rtl.snapshot@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 103214,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "48dc6435aa263797434dcbfc7954d6c737011b34"
+          }
+        }
+      ],
+      "deliveries": {
+        "npu": "artifact-64647a5ab5ac449b98a3b90f88515596"
+      }
+    },
+    {
+      "id": "cpu-npu-ai-led:cpu",
+      "state": "satisfied",
+      "attempts": [
+        {
+          "id": "attempt-0792fe23ed8547fbad84b2a5a5d72853",
+          "status": "succeeded",
+          "diagnostics": {
+            "changed_paths": [
+              "rtl/cpu/rv32i_five_stage_cpu.sv",
+              "build/cpu/check_compile_0.log",
+              "build/cpu/check_compile_1.log",
+              "build/cpu/check_cpu.py",
+              "build/cpu/check_obj_0/Vcpu_check",
+              "build/cpu/check_obj_0/Vcpu_check.cpp",
+              "build/cpu/check_obj_0/Vcpu_check.d",
+              "build/cpu/check_obj_0/Vcpu_check.h",
+              "build/cpu/check_obj_0/Vcpu_check.mk",
+              "build/cpu/check_obj_0/Vcpu_check.o",
+              "build/cpu/check_obj_0/Vcpu_check__ALL.a",
+              "build/cpu/check_obj_0/Vcpu_check__ConstPool__0__Slow.cpp",
+              "build/cpu/check_obj_0/Vcpu_check__ConstPool__0__Slow.d",
+              "build/cpu/check_obj_0/Vcpu_check__ConstPool__0__Slow.o",
+              "build/cpu/check_obj_0/Vcpu_check__Syms.h",
+              "build/cpu/check_obj_0/Vcpu_check__Syms__Slow.cpp",
+              "build/cpu/check_obj_0/Vcpu_check__Syms__Slow.d",
+              "build/cpu/check_obj_0/Vcpu_check__Syms__Slow.o",
+              "build/cpu/check_obj_0/Vcpu_check___024root.h",
+              "build/cpu/check_obj_0/Vcpu_check___024root__0.cpp",
+              "build/cpu/check_obj_0/Vcpu_check___024root__0.d",
+              "build/cpu/check_obj_0/Vcpu_check___024root__0.o",
+              "build/cpu/check_obj_0/Vcpu_check___024root__0__Slow.cpp",
+              "build/cpu/check_obj_0/Vcpu_check___024root__0__Slow.d",
+              "build/cpu/check_obj_0/Vcpu_check___024root__0__Slow.o",
+              "build/cpu/check_obj_0/Vcpu_check___024root__1.cpp",
+              "build/cpu/check_obj_0/Vcpu_check___024root__1.d",
+              "build/cpu/check_obj_0/Vcpu_check___024root__1.o",
+              "build/cpu/check_obj_0/Vcpu_check___024root__Slow.cpp",
+              "build/cpu/check_obj_0/Vcpu_check___024root__Slow.d",
+              "build/cpu/check_obj_0/Vcpu_check___024root__Slow.o",
+              "build/cpu/check_obj_0/Vcpu_check__main.cpp",
+              "build/cpu/check_obj_0/Vcpu_check__main.d",
+              "build/cpu/check_obj_0/Vcpu_check__main.o",
+              "build/cpu/check_obj_0/Vcpu_check__pch.h",
+              "build/cpu/check_obj_0/Vcpu_check__pch.h.fast.d",
+              "build/cpu/check_obj_0/Vcpu_check__pch.h.fast.gch",
+              "build/cpu/check_obj_0/Vcpu_check__pch.h.slow.d",
+              "build/cpu/check_obj_0/Vcpu_check__pch.h.slow.gch",
+              "build/cpu/check_obj_0/Vcpu_check__ver.d",
+              "build/cpu/check_obj_0/Vcpu_check__verFiles.dat",
+              "build/cpu/check_obj_0/Vcpu_check_classes.mk",
+              "build/cpu/check_obj_0/verilated.d",
+              "build/cpu/check_obj_0/verilated.o",
+              "build/cpu/check_obj_0/verilated_threads.d",
+              "build/cpu/check_obj_0/verilated_threads.o",
+              "build/cpu/check_obj_0/verilated_timing.d",
+              "build/cpu/check_obj_0/verilated_timing.o",
+              "build/cpu/check_obj_1/Vcpu_check",
+              "build/cpu/check_obj_1/Vcpu_check.cpp",
+              "build/cpu/check_obj_1/Vcpu_check.d",
+              "build/cpu/check_obj_1/Vcpu_check.h",
+              "build/cpu/check_obj_1/Vcpu_check.mk",
+              "build/cpu/check_obj_1/Vcpu_check.o",
+              "build/cpu/check_obj_1/Vcpu_check__ALL.a",
+              "build/cpu/check_obj_1/Vcpu_check__ConstPool__0__Slow.cpp",
+              "build/cpu/check_obj_1/Vcpu_check__ConstPool__0__Slow.d",
+              "build/cpu/check_obj_1/Vcpu_check__ConstPool__0__Slow.o",
+              "build/cpu/check_obj_1/Vcpu_check__Syms.h",
+              "build/cpu/check_obj_1/Vcpu_check__Syms__Slow.cpp",
+              "build/cpu/check_obj_1/Vcpu_check__Syms__Slow.d",
+              "build/cpu/check_obj_1/Vcpu_check__Syms__Slow.o",
+              "build/cpu/check_obj_1/Vcpu_check___024root.h",
+              "build/cpu/check_obj_1/Vcpu_check___024root__0.cpp",
+              "build/cpu/check_obj_1/Vcpu_check___024root__0.d",
+              "build/cpu/check_obj_1/Vcpu_check___024root__0.o",
+              "build/cpu/check_obj_1/Vcpu_check___024root__0__Slow.cpp",
+              "build/cpu/check_obj_1/Vcpu_check___024root__0__Slow.d",
+              "build/cpu/check_obj_1/Vcpu_check___024root__0__Slow.o",
+              "build/cpu/check_obj_1/Vcpu_check___024root__1.cpp",
+              "build/cpu/check_obj_1/Vcpu_check___024root__1.d",
+              "build/cpu/check_obj_1/Vcpu_check___024root__1.o",
+              "build/cpu/check_obj_1/Vcpu_check___024root__Slow.cpp",
+              "build/cpu/check_obj_1/Vcpu_check___024root__Slow.d",
+              "build/cpu/check_obj_1/Vcpu_check___024root__Slow.o",
+              "build/cpu/check_obj_1/Vcpu_check__main.cpp",
+              "build/cpu/check_obj_1/Vcpu_check__main.d",
+              "build/cpu/check_obj_1/Vcpu_check__main.o",
+              "build/cpu/check_obj_1/Vcpu_check__pch.h",
+              "build/cpu/check_obj_1/Vcpu_check__pch.h.fast.d",
+              "build/cpu/check_obj_1/Vcpu_check__pch.h.fast.gch",
+              "build/cpu/check_obj_1/Vcpu_check__pch.h.slow.d",
+              "build/cpu/check_obj_1/Vcpu_check__pch.h.slow.gch",
+              "build/cpu/check_obj_1/Vcpu_check__ver.d",
+              "build/cpu/check_obj_1/Vcpu_check__verFiles.dat",
+              "build/cpu/check_obj_1/Vcpu_check_classes.mk",
+              "build/cpu/check_obj_1/verilated.d",
+              "build/cpu/check_obj_1/verilated.o",
+              "build/cpu/check_obj_1/verilated_threads.d",
+              "build/cpu/check_obj_1/verilated_threads.o",
+              "build/cpu/check_obj_1/verilated_timing.d",
+              "build/cpu/check_obj_1/verilated_timing.o",
+              "build/cpu/check_timing.py",
+              "build/cpu/cpu_check_0.sv",
+              "build/cpu/cpu_check_1.sv",
+              "build/cpu/cpu_elaboration",
+              "build/cpu/cpu_timing_tb.sv",
+              "build/cpu/frozen_smoke.log",
+              "build/cpu/iverilog_elaboration.log",
+              "build/cpu/obj/Vtb_T09",
+              "build/cpu/obj/Vtb_T09.cpp",
+              "build/cpu/obj/Vtb_T09.h",
+              "build/cpu/obj/Vtb_T09.mk",
+              "build/cpu/obj/Vtb_T09__ALL.a",
+              "build/cpu/obj/Vtb_T09__ALL.cpp",
+              "build/cpu/obj/Vtb_T09__ALL.d",
+              "build/cpu/obj/Vtb_T09__ALL.o",
+              "build/cpu/obj/Vtb_T09__ConstPool__0__Slow.cpp",
+              "build/cpu/obj/Vtb_T09__Syms.h",
+              "build/cpu/obj/Vtb_T09__Syms__Slow.cpp",
+              "build/cpu/obj/Vtb_T09___024root.h",
+              "build/cpu/obj/Vtb_T09___024root__0.cpp",
+              "build/cpu/obj/Vtb_T09___024root__0__Slow.cpp",
+              "build/cpu/obj/Vtb_T09___024root__Slow.cpp",
+              "build/cpu/obj/Vtb_T09__main.cpp",
+              "build/cpu/obj/Vtb_T09__pch.h",
+              "build/cpu/obj/Vtb_T09__ver.d",
+              "build/cpu/obj/Vtb_T09__verFiles.dat",
+              "build/cpu/obj/Vtb_T09_classes.mk",
+              "build/cpu/obj/verilated.d",
+              "build/cpu/obj/verilated.o",
+              "build/cpu/obj/verilated_threads.d",
+              "build/cpu/obj/verilated_threads.o",
+              "build/cpu/obj/verilated_timing.d",
+              "build/cpu/obj/verilated_timing.o",
+              "build/cpu/self_check_results.log",
+              "build/cpu/timing_compile_0.log",
+              "build/cpu/timing_compile_1.log",
+              "build/cpu/timing_full.log",
+              "build/cpu/timing_obj_0/Vcpu_timing",
+              "build/cpu/timing_obj_0/Vcpu_timing.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing.h",
+              "build/cpu/timing_obj_0/Vcpu_timing.mk",
+              "build/cpu/timing_obj_0/Vcpu_timing__ALL.a",
+              "build/cpu/timing_obj_0/Vcpu_timing__ALL.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing__ALL.d",
+              "build/cpu/timing_obj_0/Vcpu_timing__ALL.o",
+              "build/cpu/timing_obj_0/Vcpu_timing__ConstPool__0__Slow.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing__Syms.h",
+              "build/cpu/timing_obj_0/Vcpu_timing__Syms__Slow.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing___024root.h",
+              "build/cpu/timing_obj_0/Vcpu_timing___024root__0.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing___024root__0__Slow.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing___024root__Slow.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing__main.cpp",
+              "build/cpu/timing_obj_0/Vcpu_timing__pch.h",
+              "build/cpu/timing_obj_0/Vcpu_timing__ver.d",
+              "build/cpu/timing_obj_0/Vcpu_timing__verFiles.dat",
+              "build/cpu/timing_obj_0/Vcpu_timing_classes.mk",
+              "build/cpu/timing_obj_0/verilated.d",
+              "build/cpu/timing_obj_0/verilated.o",
+              "build/cpu/timing_obj_0/verilated_threads.d",
+              "build/cpu/timing_obj_0/verilated_threads.o",
+              "build/cpu/timing_obj_0/verilated_timing.d",
+              "build/cpu/timing_obj_0/verilated_timing.o",
+              "build/cpu/timing_obj_1/Vcpu_timing",
+              "build/cpu/timing_obj_1/Vcpu_timing.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing.h",
+              "build/cpu/timing_obj_1/Vcpu_timing.mk",
+              "build/cpu/timing_obj_1/Vcpu_timing__ALL.a",
+              "build/cpu/timing_obj_1/Vcpu_timing__ALL.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing__ALL.d",
+              "build/cpu/timing_obj_1/Vcpu_timing__ALL.o",
+              "build/cpu/timing_obj_1/Vcpu_timing__ConstPool__0__Slow.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing__Syms.h",
+              "build/cpu/timing_obj_1/Vcpu_timing__Syms__Slow.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing___024root.h",
+              "build/cpu/timing_obj_1/Vcpu_timing___024root__0.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing___024root__0__Slow.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing___024root__Slow.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing__main.cpp",
+              "build/cpu/timing_obj_1/Vcpu_timing__pch.h",
+              "build/cpu/timing_obj_1/Vcpu_timing__ver.d",
+              "build/cpu/timing_obj_1/Vcpu_timing__verFiles.dat",
+              "build/cpu/timing_obj_1/Vcpu_timing_classes.mk",
+              "build/cpu/timing_obj_1/verilated.d",
+              "build/cpu/timing_obj_1/verilated.o",
+              "build/cpu/timing_obj_1/verilated_threads.d",
+              "build/cpu/timing_obj_1/verilated_threads.o",
+              "build/cpu/timing_obj_1/verilated_timing.d",
+              "build/cpu/timing_obj_1/verilated_timing.o",
+              "build/cpu/timing_results.log",
+              "build/cpu/tool_lib/libatomic.so",
+              "build/cpu/verification.json"
+            ],
+            "execution_log": "Implemented CPU; `CPU_SMOKE_PASS` and local checks passed in both configurations.\n\nFull acceptance remains unverified: frozen span budgets are missing; extension checks used an NPU protocol model.\n\nNEBULA_OUTPUT: {\"cpu\":{\"module\":\"rv32i_five_stage_cpu\"}}\nTASK COMPLETED",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-12T20:19:49.558071",
+                "details": {},
+                "evidence": "STDOUT:\nmake: Entering directory '/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/design/.chip_nebula/taskgraph-v2/workspaces/attempt-0792fe23ed8547fbad84b2a5a5d72853/build/cpu/obj'\nmake: Nothing to be done for 'default'.\nmake: Leaving directory '/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/design/.chip_nebula/taskgraph-v2/workspaces/attempt-0792fe23ed8547fbad84b2a5a5d72853/build/cpu/obj'\n- V e r i l a t i o n   R\nSTDERR:\n",
+                "kind": "tool_check",
+                "name": "cpu-frozen-smoke",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              },
+              {
+                "checked_at": "2026-10-12T12:19:49.558182+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "cpu:rtl.snapshot@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 103214,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "48dc6435aa263797434dcbfc7954d6c737011b34"
+          }
+        }
+      ],
+      "deliveries": {
+        "cpu": "artifact-86163fcbd4c5475091b79350770577f0"
+      }
+    },
+    {
+      "id": "cpu-npu-ai-led:integration",
+      "state": "satisfied",
+      "attempts": [
+        {
+          "id": "attempt-45825038ccaa4ba1a248d7ecab9a1112",
+          "status": "succeeded",
+          "diagnostics": {
+            "changed_paths": [
+              "integration/dependencies.lock.json",
+              "integration/design.f",
+              "rtl/integration/nebula_cpu_npu_top.sv",
+              "build/integration/file-list-lint.log",
+              "build/integration/smoke-result.json",
+              "build/integration/smoke.log"
+            ],
+            "execution_log": "Created the wrapper, ordered source list, and provenance lockfile. Component RTL remains unchanged.\n\n`INTEGRATION_SMOKE_PASS` in 0.376 seconds with `VERILATOR_BIN` unset. Full behavioral and physical acceptance remain unchecked; `acceptance.md` is missing.\n\nNEBULA_OUTPUT: {\"integration\":{\"components\":[\"artifact-86163fcbd4c5475091b79350770577f0\",\"artifact-64647a5ab5ac449b98a3b90f88515596\"]}}\nTASK COMPLETED",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-12T20:24:42.149553",
+                "details": {},
+                "evidence": "STDOUT:\n- V e r i l a t i o n   R e p o r t: Verilator 5.048 2026-04-26 rev vUNKNOWN-built20261009\n- Verilator: Built from 0.140 MB sources in 4 modules, into 0.300 MB in 3 C++ files needing 0.000 MB\n- Verilator: Walltime 0.099 s (elab=0.011, cvt=0.059, bld=0.000); cpu 0.099 s on 1 threads; allocated 25.938 MB\nINTEGRATION_SMOKE_PASS\n\nSTDERR:\n",
+                "kind": "tool_check",
+                "name": "integration-frozen-smoke",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              },
+              {
+                "checked_at": "2026-10-12T12:24:42.149629+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "integration:rtl.integration@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 103214,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "3f9550eeb458868b900fb417ee3d06912e6f42a4"
+          }
+        }
+      ],
+      "deliveries": {
+        "integration": "artifact-e628d2d80e2f49ce9cca5c228f9925b5"
+      }
+    }
+  ]
+}

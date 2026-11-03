@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "type": "rtl.integration",
+  "top": "nebula_cpu_npu_top",
+  "file_list": "integration/design.f",
+  "file_list_base": "repository_root",
+  "sources": [
+    "rtl/npu/nebula_npu_dot4.sv",
+    "rtl/cpu/rv32i_five_stage_cpu.sv",
+    "rtl/integration/nebula_cpu_npu_top.sv"
+  ],
+  "configuration": {
+    "language": "SystemVerilog-2012",
+    "defines": [],
+    "include_directories": [],
+    "core": {
+      "instance": "core",
+      "module": "rv32i_five_stage_cpu",
+      "parameters": {
+        "ENABLE_XNEBULA": 1
+      }
+    },
+    "npu": {
+      "instance": "core.gen_xnebula.dot4",
+      "module": "nebula_npu_dot4",
+      "parameters": {}
+    },
+    "memory_boundary": "external instruction and data memory",
+    "initial_physical_target": {
+      "library": "Sky130HD",
+      "corner": "tt_025C_1v80",
+      "clock_port": "clk",
+      "clock_period_ns": 100
+    }
+  },
+  "base_verification_configuration": {
+    "top": "tb_T09",
+    "testbench": "tb/public_cpu_tb.sv",
+    "module": "rv32i_five_stage_cpu",
+    "parameters": {
+      "ENABLE_XNEBULA": 0
+    },
+    "sources": [
+      "rtl/npu/nebula_npu_dot4.sv",
+      "rtl/cpu/rv32i_five_stage_cpu.sv"
+    ]
+  },
+  "components": [
+    {
+      "name": "cpu",
+      "artifact_id": "artifact-86163fcbd4c5475091b79350770577f0",
+      "type": "rtl.snapshot",
+      "schema_version": 1,
+      "manifest_path": ".nebula_inputs/artifact-86163fcbd4c5475091b79350770577f0/artifact.json",
+      "manifest_sha256": "sha256:655c1928f10c7f0b73acdfe52aacfc719d680693e5c649c72e58af316305fcd5",
+      "artifact_digest": "sha256:41a197b2c80d82626b18bf827417e400eb925ae7b8d4650e60869a52d8ce4f29",
+      "producer": {
+        "workflow_id": "cpu-npu-ai-led",
+        "task_id": "cpu-npu-ai-led:cpu",
+        "attempt_id": "attempt-0792fe23ed8547fbad84b2a5a5d72853",
+        "role": "case-cpu-designer",
+        "role_version": 1
+      },
+      "created_at": "2026-10-12T12:19:49.618055+00:00",
+      "input_artifact_ids": [
+        "artifact-735581b89e33404a85e542d03e67ce50",
+        "cpu-npu-requirements"
+      ],
+      "content": {
+        "kind": "git",
+        "commit": "1b89271c914c3c33609d6e5ab0092199bf1c51e8",
+        "tree": "d46a6dd01e65f90446acd239b9f2d14ba2696457",
+        "paths": [
+          "rtl/cpu/rv32i_five_stage_cpu.sv"
+        ]
+      },
+      "payload": {
+        "commit": "1b89271c914c3c33609d6e5ab0092199bf1c51e8",
+        "module": "rv32i_five_stage_cpu",
+        "paths": [
+          "rtl/cpu/rv32i_five_stage_cpu.sv"
+        ]
+      },
+      "metadata": {
+        "task_key": "cpu",
+        "workflow_id": "cpu-npu-ai-led"
+      },
+      "files": [
+        {
+          "path": "rtl/cpu/rv32i_five_stage_cpu.sv",
+          "sha256": "sha256:126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+          "git_blob": "7a2d41de20cd9fc888d9ad99ca0141aeb46a64bc"
+        }
+      ]
+    },
+    {
+      "name": "npu",
+      "artifact_id": "artifact-64647a5ab5ac449b98a3b90f88515596",
+      "type": "rtl.snapshot",
+      "schema_version": 1,
+      "manifest_path": ".nebula_inputs/artifact-64647a5ab5ac449b98a3b90f88515596/artifact.json",
+      "manifest_sha256": "sha256:0149a988b605d9b849a477dcd157fc7575da49aea7d30206c2e2e14dc7d5dc92",
+      "artifact_digest": "sha256:249db8ad41c840162f98aaaa99f8201697c1ca73a95c9477beae570eeee46d29",
+      "producer": {
+        "workflow_id": "cpu-npu-ai-led",
+        "task_id": "cpu-npu-ai-led:npu",
+        "attempt_id": "attempt-face87f736a34bfc87704eccb8e35442",
+        "role": "case-npu-designer",
+        "role_version": 1
+      },
+      "created_at": "2026-10-12T12:04:06.254610+00:00",
+      "input_artifact_ids": [
+        "artifact-735581b89e33404a85e542d03e67ce50",
+        "cpu-npu-requirements"
+      ],
+      "content": {
+        "kind": "git",
+        "commit": "65ae37a125f78f5c1737fbc2634621b756b87876",
+        "tree": "f0ebfe7622f5d7c314e8d6ad9d13f423bda48f88",
+        "paths": [
+          "rtl/npu/nebula_npu_dot4.sv"
+        ]
+      },
+      "payload": {
+        "commit": "65ae37a125f78f5c1737fbc2634621b756b87876",
+        "module": "nebula_npu_dot4",
+        "paths": [
+          "rtl/npu/nebula_npu_dot4.sv"
+        ]
+      },
+      "metadata": {
+        "task_key": "npu",
+        "workflow_id": "cpu-npu-ai-led"
+      },
+      "files": [
+        {
+          "path": "rtl/npu/nebula_npu_dot4.sv",
+          "sha256": "sha256:2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944",
+          "git_blob": "1f297a34af84d5195da288fd6e08d547878aab76"
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "name": "source",
+      "artifact_id": "cpu-npu-requirements",
+      "type": "specification.source",
+      "schema_version": 1,
+      "manifest_path": ".nebula_inputs/cpu-npu-requirements/artifact.json",
+      "manifest_sha256": "sha256:eb08c195588fcb2ec50c707b49133062ad66a654453a4cf6338f404120c24f60",
+      "artifact_digest": "sha256:81bf7768669d7559ddb069b7267180b9101ebfe2165c185c5dec4171a3754d18",
+      "producer": {
+        "workflow_id": "external",
+        "task_id": "case-source",
+        "attempt_id": "case-source",
+        "role": "codex-requirements-author",
+        "role_version": 1
+      },
+      "created_at": "2026-10-12T11:46:29.858979+00:00",
+      "input_artifact_ids": [],
+      "content": {
+        "kind": "git",
+        "commit": "991e86af716dc8d758554cbbd4ebaf7b5f55fec6",
+        "tree": "0942b24de113ce9f636845819a09c06548282e6c",
+        "paths": [
+          "spec/requirements.md",
+          "spec/t09-base-contract.md",
+          "spec/acceptance.json"
+        ]
+      },
+      "payload": {
+        "content_digest": "sha256:ba307c2b5ee170ee22b621bd80e0df4196f7fbceeba329ca4e7eac8ad7ccd33b",
+        "media_type": "text/markdown",
+        "received_at": "2026-10-12T11:46:29.843240+00:00",
+        "source_name": "Frozen CPU/NPU case detailed design"
+      },
+      "metadata": {},
+      "files": [
+        {
+          "path": "spec/requirements.md",
+          "sha256": "sha256:ba307c2b5ee170ee22b621bd80e0df4196f7fbceeba329ca4e7eac8ad7ccd33b",
+          "git_blob": "c90910d6326df3e01fb3e1e520be50461eb3f684"
+        },
+        {
+          "path": "spec/t09-base-contract.md",
+          "sha256": "sha256:1021e4b88446ed12c7b6a3cc6f46847f16a44c70a47660fff24f5f91ca778958",
+          "git_blob": "6ed8ac1de60fc5d420e0d43897f707a0aaa393c7"
+        },
+        {
+          "path": "spec/acceptance.json",
+          "sha256": "sha256:2747c05a92a4ebe0d624b8ec6ba6347f1dbd808c6bcfc344b2955efed6dfe8ee",
+          "git_blob": "feb06e66c27448c89daad27c5f006c46a6ba643e"
+        }
+      ]
+    },
+    {
+      "name": "design",
+      "artifact_id": "artifact-735581b89e33404a85e542d03e67ce50",
+      "type": "design.specification",
+      "schema_version": 1,
+      "manifest_path": ".nebula_inputs/artifact-735581b89e33404a85e542d03e67ce50/artifact.json",
+      "manifest_sha256": "sha256:a770634ba59367c73b3031dc974b3b6b05bc75343376ef0c700b205403648459",
+      "artifact_digest": "sha256:8277baba46a05c9159eb2d92fe88d6d83aa28946d759ffaf6fe668492773068d",
+      "producer": {
+        "workflow_id": "cpu-npu-ai-led",
+        "task_id": "cpu-npu-ai-led:architecture",
+        "attempt_id": "attempt-11d46652cff241aebf9f127f454897f3",
+        "role": "case-architect",
+        "role_version": 1
+      },
+      "created_at": "2026-10-12T11:59:55.152894+00:00",
+      "input_artifact_ids": [
+        "artifact-1ef6aa62e169427a895856a858924777",
+        "cpu-npu-requirements"
+      ],
+      "content": {
+        "kind": "git",
+        "commit": "e3a879de9b59e96b0adbb03508e7046c274b3f2c",
+        "tree": "cfc790be59b4c115b281ddf198ad032c18a296d6",
+        "paths": [
+          "spec/design_doc.md"
+        ]
+      },
+      "payload": {
+        "commit": "e3a879de9b59e96b0adbb03508e7046c274b3f2c",
+        "design_digest": "sha256:c2ba7c66ec97505ad7271d0875856649655b587a5046b50e5e4cfa1abddec30c",
+        "design_document_path": "spec/design_doc.md",
+        "document_kind": "detailed_design",
+        "paths": [
+          "spec/design_doc.md"
+        ],
+        "requirement_ids": [],
+        "schema_version": 1,
+        "source_analysis_artifact_id": "artifact-1ef6aa62e169427a895856a858924777",
+        "source_artifact_id": "cpu-npu-requirements",
+        "type": "design.specification",
+        "unresolved_items": [
+          "D21: Referenced acceptance.md is absent from the captured artifact and frozen Git tree. Exact retirement-span budgets, microprograms, and three bus timing conditions remain unavailable; full contract closure cannot be asserted. Document consistency checks passed; RTL, software, and physical checks were not performed."
+        ]
+      },
+      "metadata": {
+        "task_key": "architecture",
+        "workflow_id": "cpu-npu-ai-led"
+      },
+      "files": [
+        {
+          "path": "spec/design_doc.md",
+          "sha256": "sha256:c2ba7c66ec97505ad7271d0875856649655b587a5046b50e5e4cfa1abddec30c",
+          "git_blob": "bd47ee443495f5fd5ee028f2be2fcd38ced8ba8e"
+        }
+      ]
+    }
+  ],
+  "generated_files": [
+    {
+      "path": "rtl/integration/nebula_cpu_npu_top.sv",
+      "sha256": "sha256:1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d"
+    },
+    {
+      "path": "integration/design.f",
+      "sha256": "sha256:cda8a5a5b73ff1f3ff8e1d65145efe2548b76bce7566a4d27c9d8f8fa611942f"
+    }
+  ],
+  "gate": {
+    "name": "integration-frozen-smoke",
+    "kind": "tool_check",
+    "parameters": {
+      "command": "python3 tools/run_smoke.py integration",
+      "error_class": "integration_smoke_failed",
+      "expected": "INTEGRATION_SMOKE_PASS",
+      "level": "L1",
+      "metric": "",
+      "min_files": 0,
+      "must_match": false,
+      "must_not_match": true,
+      "operator": ">=",
+      "paths": [],
+      "pattern": "",
+      "source": "",
+      "threshold": 0.0,
+      "timeout": 360
+    },
+    "on_failure": "retry"
+  },
+  "unresolved_items": [
+    "D21: Referenced acceptance.md is absent from the captured artifact and frozen Git tree. Exact retirement-span budgets, microprograms, and three bus timing conditions remain unavailable; full contract closure cannot be asserted. Document consistency checks passed; RTL, software, and physical checks were not performed."
+  ],
+  "verification_scope": "The frozen integration smoke is lint only; it does not establish full behavioral acceptance or physical closure.",
+  "execution_environment": {
+    "unset": [
+      "VERILATOR_BIN"
+    ],
+    "reason": "Use the Verilator launcher default compiled binary; the inherited VERILATOR_BIN points back to the launcher and causes recursion."
+  }
+}

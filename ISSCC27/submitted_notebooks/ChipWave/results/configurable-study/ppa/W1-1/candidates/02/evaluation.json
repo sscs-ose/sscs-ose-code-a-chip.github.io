@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "physical_qualified": false,
+  "rank_eligible": false,
+  "configuration": {
+    "abc_area": 1,
+    "density": 0.55,
+    "repair_margin": 10,
+    "utilization": 40
+  },
+  "period_ps": 10526,
+  "physical_wall_seconds": 13.149929447012255,
+  "failure_classes": [
+    "physical_execution"
+  ],
+  "candidate_index": 2,
+  "cell_area_um2": null,
+  "die_area_um2": null,
+  "setup_slack_ns": null,
+  "hold_slack_ns": null,
+  "electrical_violations": {
+    "max_slew": null,
+    "max_cap": null,
+    "max_fanout": null
+  },
+  "energy_j": {},
+  "estimated_power_w": {},
+  "postprocessing_commands": [],
+  "physical_manifest": {
+    "schema_version": 1,
+    "configuration": {
+      "abc_area": 1,
+      "density": 0.55,
+      "repair_margin": 10,
+      "utilization": 40
+    },
+    "period_ps": 10526,
+    "rtl_sha256": {
+      "rtl/cpu/rv32i_five_stage_cpu.sv": "126ae904b3904b9503e63cea478588679cf03c2e96ea6504329d157d26535c85",
+      "rtl/integration/nebula_cpu_npu_top.sv": "1f5ea16e1d8b9114049a4c34a7d349bd98be5a0af93bcce26870acf7a13c344d",
+      "rtl/npu/nebula_npu_dot4.sv": "2b8c3375f43c0c34718ab2fb11d2b659ed5546a7927daec6ed7522cd2d46b944"
+    },
+    "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5",
+    "sdc_sha256": "5d70238e8d99edcbcb973c439fc99455dd9ae1b9d763e8a82c5dabae222d83b8",
+    "config_sha256": "7e6c5b88c3dea3fe8e719ee1255879a4d8f5fb49f6db04a03eb14ec9c50ccb56",
+    "physical_timeout_seconds": 14400,
+    "threads": 2,
+    "scope": "One fixed-RTL physical implementation; historical records are unchanged"
+  },
+  "postprocess_wall_seconds": 7.199996616691351e-07,
+  "total_wall_seconds": 13.149930167011917,
+  "candidate_artifact": "artifact-c1da09814c324e5eb3e20d8574f43f50",
+  "proposal_rationale": "The immutable evaluator report at commit 4f69aba63e545a2d06c8cae8bf1a703b4e1d91f2 (build/evaluation/report.json), also captured in artifact-20295c9ad0eb464ba080307653ad594e, contains the baseline and candidate 1 history. The baseline (40, 0.55, 0, 0) is qualified with cell area 161954 um2 and score 1.0. Candidate 1 (40, 0.55, 1, 0) reduced cell area to 157315 um2, about 2.86%, with positive setup/hold slack of 0.423833/0.0655785 ns, but failed electrical qualification with 12 max-slew and 5 max-cap violations; max-fanout violations were zero. Its energy measurements are absent, so it has no qualified score or demonstrated energy improvement. Choose the previously untried (40, 0.55, 1, 10), changing only repair_margin to the smallest positive allowed value to target the observed electrical failure while limiting potential repair area and energy overhead. Retaining utilization, density and abc_area isolates this repair experiment and retains the mapping that produced the measured area reduction. Qualification and lower area-times-geometric-mean-energy score remain hypotheses for the independent evaluator; added repair may erase the area benefit or affect timing. The baseline remains the only qualified reference. This is the second new physical candidate requested against the three-candidate session limit; all frozen RTL, clock, libraries and acceptance thresholds remain unchanged. Local schema, domain and immutable-history uniqueness checks passed. The required python3 tools/run_ppa.py validate command exited 1 because its supplied wrapper cannot import run_ppa_workflow_study (ModuleNotFoundError); the official validation gate remains unverified.",
+  "elapsed_search_seconds": 4501.221227731003
+}

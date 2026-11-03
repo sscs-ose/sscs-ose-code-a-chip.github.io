@@ -1,0 +1,304 @@
+{
+  "workflow": {
+    "id": "study-physical",
+    "recipe": "cpu-npu-physical-acceptance@2",
+    "goal": "Physical acceptance of the frozen verified design",
+    "status": "paused",
+    "paused_reason": "attempt budget or operator pause: physical",
+    "definition_digest": "sha256:e5a7d86f5af7e573c0009e5029f4e4299be657ba423414b9033bc23a30cce964",
+    "metadata": {
+      "baseline_commit": "95aec59674d3ec012f6c789971f48451740169bd",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "rtl": "imported-main-rtl"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-1/candidates/02/physical/project/.chip_nebula/recipes/cpu-npu-physical.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-16T15:07:21.281891+00:00"
+  },
+  "tasks": [
+    {
+      "id": "study-physical:physical",
+      "workflow_id": "study-physical",
+      "key": "physical",
+      "role": "case-physical-tool",
+      "role_version": 1,
+      "intent": "One physical implementation at 10526 ps with explicit reset/IO constraints; no source or target changes.",
+      "permission": {
+        "read_paths": [
+          "rtl/**",
+          "spec/**",
+          "scripts/**",
+          "verification/**",
+          "physical/**",
+          "workbench.yaml",
+          "selected-delivery.json"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "bash",
+          "env",
+          "make",
+          "yosys",
+          "openroad",
+          "klayout",
+          "verilator",
+          "iverilog",
+          "vvp"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "rtl",
+          "required_type": "rtl.snapshot",
+          "artifact_id": "imported-main-rtl",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "physical.report",
+          "schema_version": 1,
+          "paths": [
+            "build/rtl-to-gds/**"
+          ]
+        }
+      ],
+      "hard_gates": [
+        {
+          "name": "independent-physical-verdict",
+          "kind": "tool_check",
+          "parameters": {
+            "command": "python3 -c 'import json; from pathlib import Path; r=json.loads(Path('\"'\"'build/rtl-to-gds/physical-report.json'\"'\"').read_text()); assert r['\"'\"'verdict'\"'\"']=='\"'\"'passed'\"'\"'; print('\"'\"'PHYSICAL_REPORT_PASSED'\"'\"')'",
+            "error_class": "physical_signoff_failed",
+            "expected": "PHYSICAL_REPORT_PASSED",
+            "level": "L1",
+            "metric": "",
+            "min_files": 0,
+            "must_match": false,
+            "must_not_match": true,
+            "operator": ">=",
+            "paths": [],
+            "pattern": "",
+            "source": "",
+            "threshold": 0.0,
+            "timeout": 30
+          },
+          "on_failure": "report"
+        }
+      ],
+      "executor": "tool",
+      "command": "python3 scripts/run_physical.py --subject imported-main-rtl",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 1,
+      "timeout_seconds": 14520,
+      "brief": {
+        "objective": "One physical implementation at 10526 ps with explicit reset/IO constraints; no source or target changes.",
+        "deliverables": [
+          "Produce the declared physical report and complete raw EDA evidence."
+        ],
+        "responsibilities": [
+          "Run only the declared deterministic command on immutable source and constraints."
+        ],
+        "exclusions": [
+          "Do not modify RTL, tests or physical targets; do not fabricate passed results."
+        ],
+        "completion_criteria": [
+          "Pass independent-physical-verdict using the exact frozen gate parameters."
+        ],
+        "collaboration": [
+          "No upstream or downstream Task collaborators; publish genuine evidence for workflow consumers."
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "paused"
+    }
+  ],
+  "roles": [
+    {
+      "name": "case-physical-tool",
+      "version": 1,
+      "instruction": "Execute the frozen verified CPU/NPU physical flow with independent functional acceptance and preserve real EDA evidence. No RTL or checker modifications.",
+      "accepted_types": [
+        "rtl.snapshot"
+      ],
+      "produced_types": [
+        "physical.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    }
+  ],
+  "feedback": [],
+  "attempts": [
+    {
+      "id": "attempt-ab21d52aa09d49789452eb46c049769c",
+      "task_id": "study-physical:physical",
+      "ordinal": 1,
+      "status": "failed",
+      "work_item_ids": [
+        "work-9b6e5e2785d847b5a9feed1332279c42"
+      ],
+      "input_deliveries": {
+        "rtl": "imported-main-rtl"
+      },
+      "role": "case-physical-tool",
+      "role_version": 1,
+      "role_instruction": "Execute the frozen verified CPU/NPU physical flow with independent functional acceptance and preserve real EDA evidence. No RTL or checker modifications.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "rtl.snapshot"
+      ],
+      "brief": {
+        "objective": "One physical implementation at 10526 ps with explicit reset/IO constraints; no source or target changes.",
+        "deliverables": [
+          "Produce the declared physical report and complete raw EDA evidence."
+        ],
+        "responsibilities": [
+          "Run only the declared deterministic command on immutable source and constraints."
+        ],
+        "exclusions": [
+          "Do not modify RTL, tests or physical targets; do not fabricate passed results."
+        ],
+        "completion_criteria": [
+          "Pass independent-physical-verdict using the exact frozen gate parameters."
+        ],
+        "collaboration": [
+          "No upstream or downstream Task collaborators; publish genuine evidence for workflow consumers."
+        ]
+      },
+      "brief_digest": "sha256:399246e262a3e85bba4edd9cd201cef35eb8e69b1a8882a186da8714a996e125",
+      "permission": {
+        "read_paths": [
+          "rtl/**",
+          "spec/**",
+          "scripts/**",
+          "verification/**",
+          "physical/**",
+          "workbench.yaml",
+          "selected-delivery.json"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "bash",
+          "env",
+          "make",
+          "yosys",
+          "openroad",
+          "klayout",
+          "verilator",
+          "iverilog",
+          "vvp"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 scripts/run_physical.py --subject imported-main-rtl",
+      "timeout_seconds": 14520,
+      "session_id": "",
+      "workspace_commit": "",
+      "verdict": "",
+      "diagnostics": {
+        "changed_paths": [],
+        "execution_log": "$ [physical] python3 scripts/run_physical.py --subject imported-main-rtl\nTraceback (most recent call last):\n  File \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-1/candidates/02/physical/project/.chip_nebula/taskgraph-v2/workspaces/attempt-ab21d52aa09d49789452eb46c049769c/scripts/run_physical.py\", line 52, in <module>\n    run(Path.cwd(), a.subject, a.mode)\n  File \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W1-1/candidates/02/physical/project/.chip_nebula/taskgraph-v2/workspaces/attempt-ab21d52aa09d49789452eb46c049769c/scripts/run_physical.py\", line 19, in run\n    raise RuntimeError('physical preflight failed: ' + json.dumps(environment))\nRuntimeError: physical preflight failed: {\"configured\": true, \"ready\": false, \"profile\": {\"enabled\": true, \"command\": \"bash physical/chip-nebula/run.sh {mode}\", \"workdir\": \".\", \"timeout\": 14400, \"platform\": \"sky130hd\", \"design\": \"nebula_cpu_npu_top\", \"flow_variant\": \"nebula\", \"num_cores\": 2, \"output_root\": \"build/rtl-to-gds\", \"summary_path\": \"build/rtl-to-gds/run-summary.json\", \"input_globs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/**\", \"Makefile\", \"tb/**\", \"tbench/**\", \"scripts/**\", \"graph/source.json\", \"metadata.json\", \"**/*.f\", \"**/*.flist\", \"ip/nebula.lock.json\", \"spec/design.csir.yaml\"], \"required_inputs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/flow-definition.json\", \"physical/chip-nebula/constraints.sdc\", \"physical/chip-nebula/config.mk\", \"physical/chip-nebula/run.sh\", \"physical/chip-nebula/prepare_orfs.py\", \"physical/chip-nebula/inspect_gds.py\", \"physical/chip-nebula/filter_lvs_cdl.py\", \"physical/chip-nebula/klayout.sh\", \"physical/chip-nebula/tool-versions.env\"], \"artifact_globs\": [\"build/rtl-to-gds/run-summary.json\", \"build/rtl-to-gds/gds-summary.json\", \"build/rtl-to-gds/simulation/build/*.log\", \"build/rtl-to-gds/simulation/build/*.vcd\", \"build/rtl-to-gds/orfs-work/results/**/1_2_yosys.v\", \"build/rtl-to-gds/orfs-work/results/**/6_final.*\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat.cdl\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.cdl\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.manifest.json\", \"build/rtl-to-gds/orfs-work/reports/**/*.rpt\", \"build/rtl-to-gds/orfs-work/logs/**/*.log\", \"build/rtl-to-gds/orfs-work/logs/**/6_report.json\", \"build/rtl-to-gds/orfs-work/logs/**/5_2_route.json\"], \"toolchain_root\": \"\", \"orfs_root\": \"\", \"tool_versions_file\": \"physical/chip-nebula/tool-versions.env\"}, \"toolchain_root\": \"/tmp/chipnebula-pinned-tools\", \"orfs\": {\"root\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs\", \"flow_home\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow\", \"commit\": \"3a964e13f11a4e435aac01ffa14db0a7d2853720\", \"expected_commit\": \"3a964e13f11a4e435aac01ffa14db0a7d2853720\", \"version_match\": true}, \"tools\": {\"git\": {\"path\": \"/tmp/chipnebula-tools/bin/git\", \"version\": \"git version 2.43.0\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"system\"}, \"make\": {\"path\": \"/usr/bin/make\", \"version\": \"GNU Make 4.2.1\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"system\"}, \"python\": {\"path\": \"/home/asic03/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12\", \"version\": \"Python 3.12.15\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"system\"}, \"verilator\": {\"path\": \"/tmp/chipnebula-pinned-tools/bin/verilator\", \"version\": \"Verilator 5.048 2026-04-26 rev vUNKNOWN-built20261009\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"iverilog\": {\"path\": \"/tmp/chipnebula-pinned-tools/iverilog-13/bin/iverilog\", \"version\": \"Icarus Verilog version 13.0 (stable) (v13_0)\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"vvp\": {\"path\": \"/tmp/chipnebula-pinned-tools/iverilog-13/bin/vvp\", \"version\": \"Icarus Verilog runtime version 13.0 (stable) (v13_0)\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"yosys\": {\"path\": \"/tmp/chipnebula-pinned-tools/bin/yosys\", \"version\": \"\", \"expected\": \"Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)\", \"ready\": false, \"version_match\": false, \"source\": \"bundled\"}, \"openroad\": {\"path\": \"/tmp/chipnebula-pinned-tools/src/OpenROAD/build/bin/openroad\", \"version\": \"4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca\", \"expected\": \"4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"klayout\": {\"path\": \"/tmp/chipnebula-pinned-tools/bin/klayout\", \"version\": \"KLayout 0.30.12\", \"expected\": \"KLayout 0.30.12\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}}, \"platform_files\": [{\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/gds/sky130_fd_sc_hd.gds\", \"ready\": true}, {\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/drc/sky130hd.lydrc\", \"ready\": true}, {\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/lvs/sky130hd.lylvs\", \"ready\": true}, {\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/cdl/sky130hd.cdl\", \"ready\": true}], \"missing\": [], \"mismatches\": [\"yosys: expected Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0), got unknown\"], \"project_issues\": [], \"input_audit\": {\"ready\": true, \"manifest_declared\": true, \"checked\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/flow-definition.json\", \"physical/chip-nebula/constraints.sdc\", \"physical/chip-nebula/config.mk\", \"physical/chip-nebula/run.sh\", \"physical/chip-nebula/prepare_orfs.py\", \"physical/chip-nebula/inspect_gds.py\", \"physical/chip-nebula/filter_lvs_cdl.py\", \"physical/chip-nebula/klayout.sh\", \"physical/chip-nebula/tool-versions.env\"], \"issues\": []}}\n",
+        "failure_reason": "command exited with 1",
+        "runner_pid": 57832,
+        "runner_state": "executing",
+        "session_reusable": false,
+        "workspace_base_commit": "95aec59674d3ec012f6c789971f48451740169bd"
+      },
+      "created_at": "2026-10-16T15:07:21.758937+00:00",
+      "finished_at": "2026-10-16T15:07:34.262858+00:00"
+    }
+  ],
+  "work_items": [
+    {
+      "id": "work-9b6e5e2785d847b5a9feed1332279c42",
+      "task_id": "study-physical:physical",
+      "kind": "initial",
+      "request_key": "initial:study-physical:physical",
+      "correlation_key": "initial",
+      "summary": "One physical implementation at 10526 ps with explicit reset/IO constraints; no source or target changes.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "pending",
+      "created_sequence": 1,
+      "claimed_attempt_id": "",
+      "resolved_attempt_id": "",
+      "created_at": "2026-10-16T15:07:21.290965+00:00"
+    }
+  ],
+  "deliveries": {
+    "study-physical:physical": {}
+  },
+  "artifacts": [
+    {
+      "id": "imported-main-rtl",
+      "type": "rtl.snapshot",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "external",
+        "task_id": "verified-rtl-import",
+        "attempt_id": "verified-rtl-import",
+        "role": "case-evidence-import",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "95aec59674d3ec012f6c789971f48451740169bd",
+        "tree": "65454c81a28e36439c6d687596982e9937050b5d",
+        "paths": [
+          "rtl",
+          "spec",
+          "scripts",
+          "verification",
+          "physical",
+          "workbench.yaml",
+          "selected-delivery.json"
+        ]
+      },
+      "payload": {
+        "commit": "95aec59674d3ec012f6c789971f48451740169bd",
+        "module": "nebula_cpu_npu_top",
+        "paths": [
+          "rtl",
+          "spec",
+          "scripts",
+          "verification",
+          "physical",
+          "workbench.yaml",
+          "selected-delivery.json"
+        ]
+      },
+      "input_artifact_ids": [],
+      "metadata": {
+        "planning": "deterministic frozen tool task",
+        "source_design_delivery": "artifact-e628d2d80e2f49ce9cca5c228f9925b5"
+      },
+      "created_at": "2026-10-16T15:07:21.282423+00:00"
+    }
+  ],
+  "scope": "Frozen contracts, attempt decisions, engineering states, deliveries and captured/pending feedback evidence. WorkItem states are their exported final states. Private model-home and credentials excluded."
+}

@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1",
+  "contracts": [
+    {
+      "id": "behavior",
+      "requirements": [
+        "REQ-BEHAVIOR"
+      ],
+      "evidence": [
+        "task.md",
+        "../tb/development_tb.sv"
+      ],
+      "semantics": {
+        "language": "English plus executable SystemVerilog scoreboard",
+        "body": "Implement benchmark_fifo, 4 entries of 8 bits, one rising-edge clock.\nActive-low asynchronous reset makes the FIFO empty. Read data is the current\nhead combinationally, and zero when empty. full/empty reflect current occupancy.\nAt an edge, accept push iff wr_en && !full; accept pop iff rd_en && !empty,\nusing flags BEFORE the edge. Thus simultaneous read/write on full accepts only\nthe read; on empty accepts only the write. No fall-through, overwrite or underflow.\nPreserve exact insertion order. Memory reset is not required; externally visible\noutputs after reset must meet the empty/zero contract."
+      },
+      "interface": {
+        "clk": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "rst_n": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "wr_en": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "rd_en": {
+          "mode": "observe",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "wr_data": {
+          "mode": "observe",
+          "type": {
+            "kind": "uint",
+            "width": 8
+          }
+        },
+        "rd_data": {
+          "mode": "constrain",
+          "type": {
+            "kind": "uint",
+            "width": 8
+          }
+        },
+        "full": {
+          "mode": "constrain",
+          "type": {
+            "kind": "bit"
+          }
+        },
+        "empty": {
+          "mode": "constrain",
+          "type": {
+            "kind": "bit"
+          }
+        }
+      },
+      "verification": {
+        "status": "executable",
+        "backend": "iverilog",
+        "adapter": "../tools/check.py"
+      }
+    }
+  ]
+}

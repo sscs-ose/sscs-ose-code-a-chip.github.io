@@ -1,0 +1,56 @@
+{
+  "scope": "fresh NPU RTL only, not a CPU/GDS reliability comparison",
+  "trials_per_treatment": 5,
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "total_trial_budget_seconds": 600,
+  "contract": "Design fresh original synthesizable SystemVerilog for nebula_npu_dot4.\nPorts: input clk,rst_n,req_valid; output req_ready; input [31:0] req_a,req_b;\noutput rsp_valid; input rsp_ready; output [31:0] rsp_data; input kill.\nCompute the signed INT32 sum of four signed INT8 products, lane0 in bits7:0.\nWiden products before reducing. Accept at edge n on req_valid&&req_ready,\nassert result after edge n+2, hold valid/data until consumed. At most one\noperation is outstanding. Reset and kill dominate all acceptance and output,\ncancel pending work, and allow correct recovery. No hidden accumulator,\nmemory, saturation or rounding. Use four parallel multipliers.\n",
+  "prompt": "Implement spec/npu.md under rtl/ only. Develop and repair using\npython3 tools/smoke.py; the checker is immutable. Write only rtl/** and build/**.\nDo not read other trials, supplied implementations, evaluator references or\nparent projects. Do not spawn agents or make subordinate model calls.\nUse the installed Icarus/Verilator and Python. No external IP is permitted in\neither treatment. The total trial budget, including planning and checking,\nis 600 seconds. Finish with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.\n",
+  "external_ip": false,
+  "public_checker": "64-vector development smoke",
+  "final_checker": "264202 frozen cases and 8 cancellation checks",
+  "final_checker_sha256": "cbac5c833eab1c8b97dfa9ccf13abed2249e737a28372beb985d3e3a10bbfafd",
+  "outcome": "all scheduled trials retained, including failures and deadlines",
+  "jobs": [
+    [
+      "direct",
+      1
+    ],
+    [
+      "platform",
+      1
+    ],
+    [
+      "platform",
+      2
+    ],
+    [
+      "direct",
+      2
+    ],
+    [
+      "direct",
+      3
+    ],
+    [
+      "platform",
+      3
+    ],
+    [
+      "platform",
+      4
+    ],
+    [
+      "direct",
+      4
+    ],
+    [
+      "direct",
+      5
+    ],
+    [
+      "platform",
+      5
+    ]
+  ]
+}

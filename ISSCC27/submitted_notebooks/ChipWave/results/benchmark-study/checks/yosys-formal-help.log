@@ -1,0 +1,66 @@
+
+-- Running command `help equiv_make; help equiv_induct; help equiv_status' --
+
+    equiv_make [options] gold_module gate_module equiv_module
+
+This creates a module annotated with $equiv cells from two presumably
+equivalent modules. Use commands such as 'equiv_simple' and 'equiv_status'
+to work with the created equivalent checking module.
+
+    -inames
+        Also match cells and wires with $... names.
+
+    -blacklist <file>
+        Do not match cells or signals that match the names in the file.
+
+    -encfile <file>
+        Match FSM encodings using the description from the file.
+        See 'help fsm_recode' for details.
+
+    -make_assert
+        Check equivalence with $assert cells instead of $equiv.
+        $eqx (===) is used to compare signals.
+Note: The circuit created by this command is not a miter (with something like
+a trigger output), but instead uses $equiv cells to encode the equivalence
+checking problem. Use 'miter -equiv' if you want to create a miter circuit.
+
+
+    equiv_induct [options] [selection]
+
+Uses a version of temporal induction to prove $equiv cells.
+
+Only selected $equiv cells are proven and only selected cells are used to
+perform the proof.
+
+    -undef
+        enable modelling of undef states
+
+    -seq <N>
+        the max. number of time steps to be considered (default = 4)
+
+    -set-assumes
+        set all assumptions provided via $assume cells
+
+    -ignore-unknown-cells
+        ignore all cells that can not be matched to a SAT model
+
+This command is very effective in proving complex sequential circuits, when
+the internal state of the circuit quickly propagates to $equiv cells.
+
+However, this command uses a weak definition of 'equivalence': This command
+proves that the two circuits will not diverge after they produce equal
+outputs (observable points via $equiv) for at least <N> cycles (the <N>
+specified via -seq).
+
+Combined with simulation this is very powerful because simulation can give
+you confidence that the circuits start out synced for at least <N> cycles
+after reset.
+
+
+    equiv_status [options] [selection]
+
+This command prints status information for all selected $equiv cells.
+
+    -assert
+        produce an error if any unproven $equiv cell is found
+

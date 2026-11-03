@@ -1,0 +1,802 @@
+{
+  "verdict": "passed",
+  "scope": "pre-synthesis RTL structure only",
+  "state_inventory": {
+    "IF/ID": [
+      "if_v",
+      "if_pc",
+      "if_word",
+      "if_held",
+      "if_fault"
+    ],
+    "ID/EX": [
+      "ex_v",
+      "ex"
+    ],
+    "EX/MEM": [
+      "mem_v",
+      "mem",
+      "mem_sent"
+    ],
+    "MEM/WB": [
+      "wb_v",
+      "wb"
+    ],
+    "register_file": "logic [31:0] rf [0:31]; combinational id_a/id_b; rising-edge wb_rf_write",
+    "reset": "always_ff @(posedge clk or negedge rst_n)",
+    "npu": "enabled_npu.npu generated only for ENABLE_XNEBULA == 1"
+  },
+  "elaboration": [
+    {
+      "configuration": "base",
+      "returncode": 0,
+      "command": [
+        "verilator",
+        "-Wall",
+        "-Wno-UNUSEDSIGNAL",
+        "--json-only",
+        "--top-module",
+        "rv32i_five_stage_cpu",
+        "-f",
+        "verification/design.f",
+        "--Mdir",
+        "build/verify/structure-base",
+        "--json-only-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/base.tree.json",
+        "--json-only-meta-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/base.meta.json"
+      ],
+      "modules": [
+        "rv32i_five_stage_cpu"
+      ],
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "imem_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "imem_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "imem_rdata",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_ready",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_write",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_wstrb",
+          "direction": "output",
+          "width": 4
+        },
+        {
+          "name": "dmem_rsp_valid",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "dmem_rsp_ready",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_rsp_rdata",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "dmem_rsp_err",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "commit_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "commit_pc",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_insn",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_rd",
+          "direction": "output",
+          "width": 5
+        },
+        {
+          "name": "commit_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_mem_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_mem_wstrb",
+          "direction": "output",
+          "width": 4
+        },
+        {
+          "name": "commit_mem_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "trap_pc",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_cause",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_tval",
+          "direction": "output",
+          "width": 32
+        }
+      ]
+    },
+    {
+      "configuration": "enabled",
+      "returncode": 0,
+      "command": [
+        "verilator",
+        "-Wall",
+        "-Wno-UNUSEDSIGNAL",
+        "--json-only",
+        "--top-module",
+        "rv32i_five_stage_cpu",
+        "-GENABLE_XNEBULA=1",
+        "-f",
+        "verification/design.f",
+        "--Mdir",
+        "build/verify/structure-enabled",
+        "--json-only-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/enabled.tree.json",
+        "--json-only-meta-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/enabled.meta.json"
+      ],
+      "modules": [
+        "rv32i_five_stage_cpu",
+        "nebula_npu_dot4"
+      ],
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "imem_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "imem_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "imem_rdata",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_ready",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_write",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_wstrb",
+          "direction": "output",
+          "width": 4
+        },
+        {
+          "name": "dmem_rsp_valid",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "dmem_rsp_ready",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_rsp_rdata",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "dmem_rsp_err",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "commit_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "commit_pc",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_insn",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_rd",
+          "direction": "output",
+          "width": 5
+        },
+        {
+          "name": "commit_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_mem_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_mem_wstrb",
+          "direction": "output",
+          "width": 4
+        },
+        {
+          "name": "commit_mem_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "trap_pc",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_cause",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_tval",
+          "direction": "output",
+          "width": 32
+        }
+      ]
+    },
+    {
+      "configuration": "top",
+      "returncode": 0,
+      "command": [
+        "verilator",
+        "-Wall",
+        "-Wno-UNUSEDSIGNAL",
+        "--json-only",
+        "--top-module",
+        "nebula_cpu_npu_top",
+        "-f",
+        "verification/design.f",
+        "--Mdir",
+        "build/verify/structure-top",
+        "--json-only-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/top.tree.json",
+        "--json-only-meta-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/top.meta.json"
+      ],
+      "modules": [
+        "nebula_cpu_npu_top",
+        "rv32i_five_stage_cpu",
+        "nebula_npu_dot4"
+      ],
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "imem_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "imem_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "imem_rdata",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_ready",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_write",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_req_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "dmem_req_wstrb",
+          "direction": "output",
+          "width": 4
+        },
+        {
+          "name": "dmem_rsp_valid",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "dmem_rsp_ready",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "dmem_rsp_rdata",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "dmem_rsp_err",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "commit_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "commit_pc",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_insn",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_rd",
+          "direction": "output",
+          "width": 5
+        },
+        {
+          "name": "commit_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_mem_addr",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "commit_mem_wstrb",
+          "direction": "output",
+          "width": 4
+        },
+        {
+          "name": "commit_mem_wdata",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "trap_pc",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_cause",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "trap_tval",
+          "direction": "output",
+          "width": 32
+        }
+      ]
+    },
+    {
+      "configuration": "npu",
+      "returncode": 0,
+      "command": [
+        "verilator",
+        "-Wall",
+        "-Wno-UNUSEDSIGNAL",
+        "--json-only",
+        "--top-module",
+        "nebula_npu_dot4",
+        "-f",
+        "verification/design.f",
+        "--Mdir",
+        "build/verify/structure-npu",
+        "--json-only-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/npu.tree.json",
+        "--json-only-meta-output",
+        "/home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-aa76541046b94139b4ef96797c86666e/reports/verification/structure/npu.meta.json"
+      ],
+      "modules": [
+        "nebula_npu_dot4"
+      ],
+      "ports": [
+        {
+          "name": "clk",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "rst_n",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "req_valid",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "req_ready",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "req_a",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "req_b",
+          "direction": "input",
+          "width": 32
+        },
+        {
+          "name": "rsp_valid",
+          "direction": "output",
+          "width": 1
+        },
+        {
+          "name": "rsp_ready",
+          "direction": "input",
+          "width": 1
+        },
+        {
+          "name": "rsp_data",
+          "direction": "output",
+          "width": 32
+        },
+        {
+          "name": "kill",
+          "direction": "input",
+          "width": 1
+        }
+      ]
+    }
+  ],
+  "frozen_inputs": [
+    {
+      "path": "spec/acceptance.plan.yaml",
+      "sha256": "f1f3673b55724b3b603bfe9d685812156c097cdfb7c30350fda176fa05c32331"
+    },
+    {
+      "path": "build/integration/.gitignore",
+      "sha256": "a105b8eb4e70d65f803947dc45557cc004486bbfcb747104ca821188d21e73c4"
+    },
+    {
+      "path": "build/integration/elaboration.log",
+      "sha256": "c01708bb32272ead6a4eb4b148122bb8095c583a49de59aca58d49dbc1648572"
+    },
+    {
+      "path": "build/integration/elaboration.meta.json",
+      "sha256": "fdd40d460a527f3ab62bcfb32a4e185ccd5d3376e59bfb5c26de98b99d0df0c3"
+    },
+    {
+      "path": "build/integration/elaboration.tree.json",
+      "sha256": "9272bfc05bee344e2932f705c55c172b523ed7fc457196033f534784ac58a35c"
+    },
+    {
+      "path": "build/integration/lint.log",
+      "sha256": "7aba40bf0dd36632ad83d8aaaaa9ec69655fd108c7cb9da50eeaa7075d7fe8e1"
+    },
+    {
+      "path": "build/integration/python_version.log",
+      "sha256": "9bdce2f3bc127762fcb79db8faf0385c42e81e916436db64486d7162bc1d04e0"
+    },
+    {
+      "path": "build/integration/report.json",
+      "sha256": "ad89726bf7b0bc18d17542f94642d5f6094845e89fcb9c3b7020625a1579f88f"
+    },
+    {
+      "path": "build/integration/smoke.log",
+      "sha256": "afee5d45d7a873c6c7e9f32dcfc1a1459f034d55912c7a43a23db3c9f894d3b2"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb.cpp",
+      "sha256": "2a01ebb266d97c6d4eda1e115349857672b4f1231e94f6be02e9922a0796446c"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb.h",
+      "sha256": "7ff203b33638a6628dadc36942ceb0abb817cacbf87c6c7e58a7f57daf695e1e"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb.mk",
+      "sha256": "4a483bd13cbc515c5bcb53665f7633db142ff724082427427f7e4e6f5d68ce42"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__ALL.a",
+      "sha256": "e461d36919a07cad28d9af68f08fd8b5f371726ab6eb04d3b579e70b14232c5d"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__ALL.cpp",
+      "sha256": "c9fc7f3cf3c74eec1a06474ca923f5209941ed0a588f127faaeca702b46e798a"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__ALL.d",
+      "sha256": "7c764910417c980d69a3cb69906fb815fa1741842bb76651ca663ca6969fb70f"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__ALL.o",
+      "sha256": "b61ef7d10ef3a445b30cc5ad45c5734d3346e55d9237b66bdafca7d9e5fc2cb6"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__ConstPool__0__Slow.cpp",
+      "sha256": "edae9e0a527c70af7f9ad5480210f8efbf1bee40673bb4cb6bb8c0adc9bbe9ef"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__Syms.h",
+      "sha256": "b8fc5ce623f791b3cbe37e8eadf79792e9585227fc83f5d4606ffa9b13cd97b8"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__Syms__Slow.cpp",
+      "sha256": "fd091ab6f9d8abc93af76e4a39e4af2c3e41c9cf61aeb46decafe3ce58062fbe"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb___024root.h",
+      "sha256": "d9698cb6f273d2f55d227953701012dca029311cb4c67fd7f29e0db1820c76db"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb___024root__0.cpp",
+      "sha256": "2cf79e76ca78de96ec75d727426691a4cb5fd0fd88ab4aa2b534177dc418ad8f"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb___024root__0__Slow.cpp",
+      "sha256": "2c0b8e820db55d2a6ad800b202d359eec9433e9f7a05873959d69c60500f5571"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb___024root__Slow.cpp",
+      "sha256": "598619fd6355133b1fc176946225c74ad2f1af36b704b50d611943b876c49461"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__main.cpp",
+      "sha256": "0008e0342ecc02d541991b5d8caac6d0037584fa31034e7235ae8a2e19730659"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__pch.h",
+      "sha256": "199562497491b070a4de91367988b98f32380a81dae7b6bab4aaf0bcf93e2455"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__ver.d",
+      "sha256": "1b5928668a43c94cf46da36a03c7a301cfbff5d34ff723876804cc33ffe49841"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb__verFiles.dat",
+      "sha256": "3ef6c561b471a3d60e68fd00a37a500e09965c49360089599f0ff2d183c98141"
+    },
+    {
+      "path": "build/integration/smoke/Vintegration_smoke_tb_classes.mk",
+      "sha256": "e78b3bee4f9edb8ba9b07cc7cd72253b1d8253b3ade667eb5ec4fa299ed519d0"
+    },
+    {
+      "path": "build/integration/smoke/sim",
+      "sha256": "bff35257b1b5c7d66f88c7ae5d99be297a9b90958c917e4320e371aa8f9bedbd"
+    },
+    {
+      "path": "build/integration/smoke/verilated.d",
+      "sha256": "440886911a7c5c9f5f1c2e28791155e0e4dec66d3ffa8e300d2696add809d0ac"
+    },
+    {
+      "path": "build/integration/smoke/verilated.o",
+      "sha256": "b4042cbab9332ea864d23ffa236fc6cefe39d49e166d09dcd5c63bff38371ca0"
+    },
+    {
+      "path": "build/integration/smoke/verilated_threads.d",
+      "sha256": "916038a0312408ff6d75dadaea8fe5833ba0162eb054612b6b2fdf7b9cdace7a"
+    },
+    {
+      "path": "build/integration/smoke/verilated_threads.o",
+      "sha256": "cd12916a899caa1a834dfb6bffe6a0b976b8c3da754a3c7a0c233372a4b0e77c"
+    },
+    {
+      "path": "build/integration/smoke/verilated_timing.d",
+      "sha256": "e8f90bc43043c26157908e1dbc0a418bfecc2f7f0a401401f9570769e8a07372"
+    },
+    {
+      "path": "build/integration/smoke/verilated_timing.o",
+      "sha256": "6fcff0505fc4e1ecd6dd523fbf1173e3ae0e4957e12804e9b9f7f58779abae63"
+    },
+    {
+      "path": "build/integration/smoke_build.log",
+      "sha256": "c4220625873f1e45ae8651bea6254e4b9d6526c607832bb506653b79686e591f"
+    },
+    {
+      "path": "build/integration/tool-libs/libatomic.so",
+      "sha256": "f60fb74acade3d2175965ccd73956c630acfce62dbd4687a65073771a1a25641"
+    },
+    {
+      "path": "build/integration/verilator_version.log",
+      "sha256": "cad9120a62c3f3eeeeea9cee810c14698c4f95dc519d8cd6567ac6f1ba060fc3"
+    },
+    {
+      "path": "integration/README.md",
+      "sha256": "a1674878eb4b000f7da5a885d69797ffafea944f250ec8591c845088f917cb25"
+    },
+    {
+      "path": "integration/address_map.json",
+      "sha256": "ba77645a2a2e9d8b6c41316c5dd8de3b3af515e149c486b228a01e8959aa6bff"
+    },
+    {
+      "path": "integration/check_integration.py",
+      "sha256": "429dcfd82a46612cffaa4c3ff668917ff1571e47a0171da8f65c95b307c19b64"
+    },
+    {
+      "path": "integration/dependencies.lock.json",
+      "sha256": "bf7b10c524a123bb437f7a266a5d55329d2398cbb7b71aa8cd226b891d91c5b2"
+    },
+    {
+      "path": "integration/design.f",
+      "sha256": "bdb9ca28b6f193b57d876c55c2660653f2abc6b0ff6129665e857a28260f7ac8"
+    },
+    {
+      "path": "integration/integration_smoke_tb.sv",
+      "sha256": "bacca25d010ca5a1530deeddd5124a0fb56204752572972de62c4f52ef796534"
+    },
+    {
+      "path": "rtl/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "rtl/integration/nebula_cpu_npu_top.sv",
+      "sha256": "9b947a59ded11782b90a72269ec38c08f6fe8587b6adb7d42841aca7230cf2d5"
+    },
+    {
+      "path": "rtl/nebula_npu_dot4.sv",
+      "sha256": "2effa66b015cd3d70b832c06fc838826e7f8a7a61ac17a573deafa52b2269dd5"
+    },
+    {
+      "path": "rtl/rv32i_five_stage_cpu.sv",
+      "sha256": "18dbf1f8c0c1e17176c4aec6c5d2dd04322c3a31313a95b4b8aad8ae6c6fb8e1"
+    },
+    {
+      "path": "spec/contracts.json",
+      "sha256": "312b5e50d29b212cdd2093934006bf717d236e5091f5253ace6ad471260c47df"
+    },
+    {
+      "path": "spec/draft.specir",
+      "sha256": "8466108d6952e7dd591323f2ba67842dea975c1a7fad12d70943416a71f5ccd9"
+    },
+    {
+      "path": "spec/provenance.json",
+      "sha256": "cf0277a7b93fa9205d82357798ac2852e9ca02b743f7d8aecef9731cd3c03cef"
+    },
+    {
+      "path": "spec/questions.json",
+      "sha256": "f908d55afd8d6b469c39284760d35bfd980bcc9f895ade98e83efe6b17c79c05"
+    }
+  ],
+  "excluded_resources_review": "CPU source contains decode, flop RF, four token groups and generated NPU; no internal program/data RAM, cache, predictor, divider or CPU M multiply.",
+  "downstream": "Mapped confirmation is AC-SYNTHESIS; no foundry input used."
+}

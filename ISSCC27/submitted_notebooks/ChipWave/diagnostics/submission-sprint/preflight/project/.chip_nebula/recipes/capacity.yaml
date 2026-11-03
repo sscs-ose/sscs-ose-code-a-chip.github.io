@@ -1,0 +1,210 @@
+name: capacity-C3
+version: 2
+parameters:
+  source: specification.source
+tasks:
+  implementation:
+    role: capacity-rtl
+    intent: 'Read inherited reports and rtl/fixture.sv if it exists. On the FIRST
+      implementation create rtl/fixture.sv with module capacity_fixture(input a,output
+      y);assign y=a;endmodule and // initial. Then run exactly python tests/delay.py
+      with yield_time_ms 1000 and await its actual completion. On a FEEDBACK retry,
+      read the physical fixture report and use apply_patch to replace // initial with
+      // repaired without changing y=a. Do not invoke physical or other EDA. Return
+      NEBULA_OUTPUT: {"rtl":{"module":"capacity_fixture"}}.'
+    inputs:
+      source:
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      rtl:
+        type: rtl.snapshot
+        paths:
+        - rtl/**
+        - configuration/**
+        - reports/**
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - configuration/**
+      - tools/**
+      - tb/**
+      - tests/**
+      - reports/**
+      - build/**
+      - expert-checklist.json
+      - workflow-definition.json
+      write:
+      - tests/**
+      - reports/**
+      - build/**
+      - rtl/**
+      - configuration/**
+      tools:
+      - python3
+      - git
+    execution:
+      framework: codex
+      model: gpt-6-luna
+      reasoning_effort: high
+      timeout_seconds: 1200
+    max_attempts: 2
+  verification:
+    role: capacity-verification
+    intent: 'Read rtl/fixture.sv. Confirm y=a regardless of its comment. Write reports/verification/report.json
+      with subject capacity_fixture, verdict passed, repair_summary Identity wire
+      verified. Return NEBULA_OUTPUT: {"report":{"subject":"capacity_fixture","verdict":"passed","repair_summary":"Identity
+      wire verified"}}. Do not edit RTL or invoke physical.'
+    inputs:
+      source:
+        type: specification.source
+        from: $parameters.source
+      rtl:
+        type: rtl.snapshot
+        from: $tasks.implementation.outputs.rtl
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - reports/verification/**
+        - tests/**
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - configuration/**
+      - tools/**
+      - tb/**
+      - tests/**
+      - reports/**
+      - build/**
+      - expert-checklist.json
+      - workflow-definition.json
+      write:
+      - tests/**
+      - reports/**
+      - build/**
+      tools:
+      - python3
+      - git
+    execution:
+      framework: codex
+      model: gpt-6-luna
+      reasoning_effort: high
+      timeout_seconds: 1200
+    max_attempts: 2
+  integration_ppa:
+    role: capacity-integration_ppa
+    intent: 'Run exactly capacity-check physical once in a separate tool call. This
+      is a deterministic fixture, not EDA. Read its returned report and write reports/integration_ppa/report.json
+      reflecting its actual verdict. The first fixture deliberately fails until RTL
+      contains // repaired. On failure return NEBULA_OUTPUT: {"report":{"subject":"capacity_fixture","verdict":"failed","repair_summary":"Add
+      // repaired to rtl/fixture.sv; preserve y=a"}}. On pass return the same structure
+      with verdict passed and repair_summary Fixture repaired. Do not edit RTL. Do
+      not invoke physical a second time within this stage.'
+    inputs:
+      source:
+        type: specification.source
+        from: $parameters.source
+      rtl:
+        type: rtl.snapshot
+        from: $tasks.implementation.outputs.rtl
+      review:
+        type: verification.report
+        from: $tasks.verification.outputs.report
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - reports/integration_ppa/**
+        - tests/**
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - configuration/**
+      - tools/**
+      - tb/**
+      - tests/**
+      - reports/**
+      - build/**
+      - expert-checklist.json
+      - workflow-definition.json
+      write:
+      - tests/**
+      - reports/**
+      - build/**
+      tools:
+      - python3
+      - git
+    execution:
+      framework: codex
+      model: gpt-6-luna
+      reasoning_effort: high
+      timeout_seconds: 1200
+    max_attempts: 2
+  revision:
+    role: capacity-rtl
+    intent: 'Read the final reports and rtl/fixture.sv. Preserve // repaired and y=a.
+      Return NEBULA_OUTPUT: {"rtl":{"module":"capacity_fixture"}}. No further physical
+      command or changes.'
+    inputs:
+      source:
+        type: specification.source
+        from: $parameters.source
+      rtl:
+        type: rtl.snapshot
+        from: $tasks.implementation.outputs.rtl
+      review:
+        type: verification.report
+        from: $tasks.integration_ppa.outputs.report
+    outputs:
+      rtl:
+        type: rtl.snapshot
+        paths:
+        - rtl/**
+        - configuration/**
+        - reports/**
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - configuration/**
+      - tools/**
+      - tb/**
+      - tests/**
+      - reports/**
+      - build/**
+      - expert-checklist.json
+      - workflow-definition.json
+      write:
+      - tests/**
+      - reports/**
+      - build/**
+      - rtl/**
+      - configuration/**
+      tools:
+      - python3
+      - git
+    execution:
+      framework: codex
+      model: gpt-6-luna
+      reasoning_effort: high
+      timeout_seconds: 1200
+    max_attempts: 2
+feedback:
+- source: verification
+  verdict: fail
+  target: implementation
+  kind: feedback
+  propagate: true
+  summary: Repair the concrete reported defect within unchanged shared budgets.
+  summary_field: report.repair_summary
+- source: integration_ppa
+  verdict: fail
+  target: implementation
+  kind: feedback
+  propagate: true
+  summary: Repair the concrete reported defect within unchanged shared budgets.
+  summary_field: report.repair_summary

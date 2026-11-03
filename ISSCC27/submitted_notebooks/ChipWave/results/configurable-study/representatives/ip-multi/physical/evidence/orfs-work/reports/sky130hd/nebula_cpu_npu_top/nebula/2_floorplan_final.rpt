@@ -1,0 +1,350 @@
+
+==========================================================================
+floorplan final report_tns
+--------------------------------------------------------------------------
+tns max 0.00
+
+==========================================================================
+floorplan final report_wns
+--------------------------------------------------------------------------
+wns max 0.00
+
+==========================================================================
+floorplan final report_worst_slack
+--------------------------------------------------------------------------
+worst slack max 93.16
+
+==========================================================================
+floorplan final report_clock_min_period
+--------------------------------------------------------------------------
+nebula_clock period_min = 6.84 fmax = 146.19
+
+==========================================================================
+floorplan final report_checks -path_delay min
+--------------------------------------------------------------------------
+Startpoint: rst_n (input port clocked by nebula_clock)
+Endpoint: core.commit_insn[0]$_DFFE_PN0P_
+          (removal check against rising-edge clock nebula_clock)
+Path Group: asynchronous
+Path Type: min
+
+Fanout     Cap    Slew   Delay    Time   Description
+-----------------------------------------------------------------------------
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                          0.50    0.50 ^ input external delay
+  2336    8.48    0.00    0.00    0.50 ^ rst_n (in)
+                                         rst_n (net)
+                  0.00    0.00    0.50 ^ core.commit_insn[0]$_DFFE_PN0P_/RESET_B (sky130_fd_sc_hd__dfrtp_1)
+                                  0.50   data arrival time
+
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                          0.10    0.10   clock uncertainty
+                          0.00    0.10   clock reconvergence pessimism
+                                  0.10 ^ core.commit_insn[0]$_DFFE_PN0P_/CLK (sky130_fd_sc_hd__dfrtp_1)
+                          0.30    0.40   library removal time
+                                  0.40   data required time
+-----------------------------------------------------------------------------
+                                  0.40   data required time
+                                 -0.50   data arrival time
+-----------------------------------------------------------------------------
+                                  0.10   slack (MET)
+
+
+Startpoint: core.commit_mem_addr[10]$_DFFE_PN0P_
+            (rising edge-triggered flip-flop clocked by nebula_clock)
+Endpoint: core.commit_mem_addr[10]$_DFFE_PN0P_
+          (rising edge-triggered flip-flop clocked by nebula_clock)
+Path Group: nebula_clock
+Path Type: min
+
+Fanout     Cap    Slew   Delay    Time   Description
+-----------------------------------------------------------------------------
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                  0.00    0.00    0.00 ^ core.commit_mem_addr[10]$_DFFE_PN0P_/CLK (sky130_fd_sc_hd__dfrtp_1)
+     2    0.00    0.04    0.29    0.29 ^ core.commit_mem_addr[10]$_DFFE_PN0P_/Q (sky130_fd_sc_hd__dfrtp_1)
+                                         commit_mem_addr[10] (net)
+                  0.04    0.00    0.29 ^ _21416_/A (sky130_fd_sc_hd__nand2_1)
+     1    0.00    0.03    0.04    0.33 v _21416_/Y (sky130_fd_sc_hd__nand2_1)
+                                         _13528_ (net)
+                  0.03    0.00    0.33 v _21418_/A (sky130_fd_sc_hd__nand2_1)
+     1    0.00    0.03    0.04    0.38 ^ _21418_/Y (sky130_fd_sc_hd__nand2_1)
+                                         _03316_ (net)
+                  0.03    0.00    0.38 ^ core.commit_mem_addr[10]$_DFFE_PN0P_/D (sky130_fd_sc_hd__dfrtp_1)
+                                  0.38   data arrival time
+
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                          0.10    0.10   clock uncertainty
+                          0.00    0.10   clock reconvergence pessimism
+                                  0.10 ^ core.commit_mem_addr[10]$_DFFE_PN0P_/CLK (sky130_fd_sc_hd__dfrtp_1)
+                         -0.04    0.06   library hold time
+                                  0.06   data required time
+-----------------------------------------------------------------------------
+                                  0.06   data required time
+                                 -0.38   data arrival time
+-----------------------------------------------------------------------------
+                                  0.31   slack (MET)
+
+
+
+==========================================================================
+floorplan final report_checks -path_delay max
+--------------------------------------------------------------------------
+Startpoint: rst_n (input port clocked by nebula_clock)
+Endpoint: core.gen_xnebula.dot4.state[0]$_DFF_PN1_
+          (recovery check against rising-edge clock nebula_clock)
+Path Group: asynchronous
+Path Type: max
+
+Fanout     Cap    Slew   Delay    Time   Description
+-----------------------------------------------------------------------------
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                          0.50    0.50 ^ input external delay
+  2336    8.48    0.00    0.00    0.50 ^ rst_n (in)
+                                         rst_n (net)
+                  0.00    0.00    0.50 ^ core.gen_xnebula.dot4.state[0]$_DFF_PN1_/SET_B (sky130_fd_sc_hd__dfstp_1)
+                                  0.50   data arrival time
+
+                  0.00  100.00  100.00   clock nebula_clock (rise edge)
+                          0.00  100.00   clock network delay (ideal)
+                         -0.10   99.90   clock uncertainty
+                          0.00   99.90   clock reconvergence pessimism
+                                 99.90 ^ core.gen_xnebula.dot4.state[0]$_DFF_PN1_/CLK (sky130_fd_sc_hd__dfstp_1)
+                          0.13  100.03   library recovery time
+                                100.03   data required time
+-----------------------------------------------------------------------------
+                                100.03   data required time
+                                 -0.50   data arrival time
+-----------------------------------------------------------------------------
+                                 99.53   slack (MET)
+
+
+Startpoint: core.gen_xnebula.dot4.a_saved[15]$_DFFE_PN0P_
+            (rising edge-triggered flip-flop clocked by nebula_clock)
+Endpoint: core.gen_xnebula.dot4.lanes[1].pe.accumulator[31]$_SDFFE_PP0P_
+          (rising edge-triggered flip-flop clocked by nebula_clock)
+Path Group: nebula_clock
+Path Type: max
+
+Fanout     Cap    Slew   Delay    Time   Description
+-----------------------------------------------------------------------------
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                  0.00    0.00    0.00 ^ core.gen_xnebula.dot4.a_saved[15]$_DFFE_PN0P_/CLK (sky130_fd_sc_hd__dfrtp_1)
+     9    0.02    0.15    0.38    0.38 ^ core.gen_xnebula.dot4.a_saved[15]$_DFFE_PN0P_/Q (sky130_fd_sc_hd__dfrtp_1)
+                                         core.gen_xnebula.dot4.a_saved[15] (net)
+                  0.15    0.00    0.38 ^ _20167_/B (sky130_fd_sc_hd__and2_1)
+    25    0.15    1.44    1.12    1.50 ^ _20167_/X (sky130_fd_sc_hd__and2_1)
+                                         _00009_ (net)
+                  1.44    0.00    1.50 ^ _29852_/B (sky130_fd_sc_hd__fa_1)
+     1    0.00    0.09    0.61    2.12 v _29852_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _14508_ (net)
+                  0.09    0.00    2.12 v _30051_/CIN (sky130_fd_sc_hd__fa_1)
+     1    0.00    0.07    0.50    2.62 ^ _30051_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15002_ (net)
+                  0.07    0.00    2.62 ^ _30205_/CIN (sky130_fd_sc_hd__fa_1)
+     1    0.01    0.09    0.43    3.04 v _30205_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15261_ (net)
+                  0.09    0.00    3.04 v _30322_/B (sky130_fd_sc_hd__fa_1)
+     1    0.01    0.08    0.54    3.58 ^ _30322_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15486_ (net)
+                  0.08    0.00    3.58 ^ _30382_/B (sky130_fd_sc_hd__fa_1)
+     1    0.00    0.08    0.42    4.00 v _30382_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15602_ (net)
+                  0.08    0.00    4.00 v _30492_/B (sky130_fd_sc_hd__ha_1)
+     3    0.01    0.08    0.32    4.31 v _30492_/SUM (sky130_fd_sc_hd__ha_1)
+                                         _00412_ (net)
+                  0.08    0.00    4.31 v _21069_/B1 (sky130_fd_sc_hd__o21a_1)
+     2    0.00    0.04    0.12    4.44 v _21069_/X (sky130_fd_sc_hd__o21a_1)
+                                         _13273_ (net)
+                  0.04    0.00    4.44 v _21070_/A2 (sky130_fd_sc_hd__a211oi_1)
+     2    0.00    0.23    0.25    4.69 ^ _21070_/Y (sky130_fd_sc_hd__a211oi_1)
+                                         _13274_ (net)
+                  0.23    0.00    4.69 ^ _21073_/A1 (sky130_fd_sc_hd__o21ai_0)
+     2    0.00    0.09    0.15    4.84 v _21073_/Y (sky130_fd_sc_hd__o21ai_0)
+                                         _13277_ (net)
+                  0.09    0.00    4.84 v _21079_/A2 (sky130_fd_sc_hd__a311oi_1)
+     2    0.00    0.25    0.30    5.14 ^ _21079_/Y (sky130_fd_sc_hd__a311oi_1)
+                                         _13282_ (net)
+                  0.25    0.00    5.14 ^ _21089_/A1 (sky130_fd_sc_hd__o21ai_0)
+     4    0.01    0.14    0.19    5.33 v _21089_/Y (sky130_fd_sc_hd__o21ai_0)
+                                         _13291_ (net)
+                  0.14    0.00    5.33 v _21098_/A1 (sky130_fd_sc_hd__a211oi_1)
+     2    0.01    0.31    0.32    5.65 ^ _21098_/Y (sky130_fd_sc_hd__a211oi_1)
+                                         _13300_ (net)
+                  0.31    0.00    5.65 ^ _21103_/A1 (sky130_fd_sc_hd__a21o_1)
+     3    0.01    0.09    0.20    5.84 ^ _21103_/X (sky130_fd_sc_hd__a21o_1)
+                                         _13304_ (net)
+                  0.09    0.00    5.84 ^ _21107_/A1 (sky130_fd_sc_hd__o21ai_0)
+     3    0.01    0.10    0.12    5.97 v _21107_/Y (sky130_fd_sc_hd__o21ai_0)
+                                         _13308_ (net)
+                  0.10    0.00    5.97 v _21116_/B (sky130_fd_sc_hd__and3_1)
+     1    0.00    0.03    0.18    6.14 v _21116_/X (sky130_fd_sc_hd__and3_1)
+                                         _13316_ (net)
+                  0.03    0.00    6.14 v _21122_/A1 (sky130_fd_sc_hd__o31ai_1)
+     1    0.00    0.24    0.26    6.41 ^ _21122_/Y (sky130_fd_sc_hd__o31ai_1)
+                                         _13321_ (net)
+                  0.24    0.00    6.41 ^ _21123_/B (sky130_fd_sc_hd__xor2_1)
+     1    0.00    0.11    0.16    6.57 ^ _21123_/X (sky130_fd_sc_hd__xor2_1)
+                                         _13322_ (net)
+                  0.11    0.00    6.57 ^ _21124_/B (sky130_fd_sc_hd__nor2_1)
+     1    0.00    0.06    0.04    6.61 v _21124_/Y (sky130_fd_sc_hd__nor2_1)
+                                         _03374_ (net)
+                  0.06    0.00    6.61 v core.gen_xnebula.dot4.lanes[1].pe.accumulator[31]$_SDFFE_PP0P_/D (sky130_fd_sc_hd__dfxtp_1)
+                                  6.61   data arrival time
+
+                  0.00  100.00  100.00   clock nebula_clock (rise edge)
+                          0.00  100.00   clock network delay (ideal)
+                         -0.10   99.90   clock uncertainty
+                          0.00   99.90   clock reconvergence pessimism
+                                 99.90 ^ core.gen_xnebula.dot4.lanes[1].pe.accumulator[31]$_SDFFE_PP0P_/CLK (sky130_fd_sc_hd__dfxtp_1)
+                         -0.13   99.77   library setup time
+                                 99.77   data required time
+-----------------------------------------------------------------------------
+                                 99.77   data required time
+                                 -6.61   data arrival time
+-----------------------------------------------------------------------------
+                                 93.16   slack (MET)
+
+
+
+==========================================================================
+floorplan final report_checks -unconstrained
+--------------------------------------------------------------------------
+Startpoint: rst_n (input port clocked by nebula_clock)
+Endpoint: core.gen_xnebula.dot4.state[0]$_DFF_PN1_
+          (recovery check against rising-edge clock nebula_clock)
+Path Group: asynchronous
+Path Type: max
+
+Fanout     Cap    Slew   Delay    Time   Description
+-----------------------------------------------------------------------------
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                          0.50    0.50 ^ input external delay
+  2336    8.48    0.00    0.00    0.50 ^ rst_n (in)
+                                         rst_n (net)
+                  0.00    0.00    0.50 ^ core.gen_xnebula.dot4.state[0]$_DFF_PN1_/SET_B (sky130_fd_sc_hd__dfstp_1)
+                                  0.50   data arrival time
+
+                  0.00  100.00  100.00   clock nebula_clock (rise edge)
+                          0.00  100.00   clock network delay (ideal)
+                         -0.10   99.90   clock uncertainty
+                          0.00   99.90   clock reconvergence pessimism
+                                 99.90 ^ core.gen_xnebula.dot4.state[0]$_DFF_PN1_/CLK (sky130_fd_sc_hd__dfstp_1)
+                          0.13  100.03   library recovery time
+                                100.03   data required time
+-----------------------------------------------------------------------------
+                                100.03   data required time
+                                 -0.50   data arrival time
+-----------------------------------------------------------------------------
+                                 99.53   slack (MET)
+
+
+Startpoint: core.gen_xnebula.dot4.a_saved[15]$_DFFE_PN0P_
+            (rising edge-triggered flip-flop clocked by nebula_clock)
+Endpoint: core.gen_xnebula.dot4.lanes[1].pe.accumulator[31]$_SDFFE_PP0P_
+          (rising edge-triggered flip-flop clocked by nebula_clock)
+Path Group: nebula_clock
+Path Type: max
+
+Fanout     Cap    Slew   Delay    Time   Description
+-----------------------------------------------------------------------------
+                  0.00    0.00    0.00   clock nebula_clock (rise edge)
+                          0.00    0.00   clock network delay (ideal)
+                  0.00    0.00    0.00 ^ core.gen_xnebula.dot4.a_saved[15]$_DFFE_PN0P_/CLK (sky130_fd_sc_hd__dfrtp_1)
+     9    0.02    0.15    0.38    0.38 ^ core.gen_xnebula.dot4.a_saved[15]$_DFFE_PN0P_/Q (sky130_fd_sc_hd__dfrtp_1)
+                                         core.gen_xnebula.dot4.a_saved[15] (net)
+                  0.15    0.00    0.38 ^ _20167_/B (sky130_fd_sc_hd__and2_1)
+    25    0.15    1.44    1.12    1.50 ^ _20167_/X (sky130_fd_sc_hd__and2_1)
+                                         _00009_ (net)
+                  1.44    0.00    1.50 ^ _29852_/B (sky130_fd_sc_hd__fa_1)
+     1    0.00    0.09    0.61    2.12 v _29852_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _14508_ (net)
+                  0.09    0.00    2.12 v _30051_/CIN (sky130_fd_sc_hd__fa_1)
+     1    0.00    0.07    0.50    2.62 ^ _30051_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15002_ (net)
+                  0.07    0.00    2.62 ^ _30205_/CIN (sky130_fd_sc_hd__fa_1)
+     1    0.01    0.09    0.43    3.04 v _30205_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15261_ (net)
+                  0.09    0.00    3.04 v _30322_/B (sky130_fd_sc_hd__fa_1)
+     1    0.01    0.08    0.54    3.58 ^ _30322_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15486_ (net)
+                  0.08    0.00    3.58 ^ _30382_/B (sky130_fd_sc_hd__fa_1)
+     1    0.00    0.08    0.42    4.00 v _30382_/SUM (sky130_fd_sc_hd__fa_1)
+                                         _15602_ (net)
+                  0.08    0.00    4.00 v _30492_/B (sky130_fd_sc_hd__ha_1)
+     3    0.01    0.08    0.32    4.31 v _30492_/SUM (sky130_fd_sc_hd__ha_1)
+                                         _00412_ (net)
+                  0.08    0.00    4.31 v _21069_/B1 (sky130_fd_sc_hd__o21a_1)
+     2    0.00    0.04    0.12    4.44 v _21069_/X (sky130_fd_sc_hd__o21a_1)
+                                         _13273_ (net)
+                  0.04    0.00    4.44 v _21070_/A2 (sky130_fd_sc_hd__a211oi_1)
+     2    0.00    0.23    0.25    4.69 ^ _21070_/Y (sky130_fd_sc_hd__a211oi_1)
+                                         _13274_ (net)
+                  0.23    0.00    4.69 ^ _21073_/A1 (sky130_fd_sc_hd__o21ai_0)
+     2    0.00    0.09    0.15    4.84 v _21073_/Y (sky130_fd_sc_hd__o21ai_0)
+                                         _13277_ (net)
+                  0.09    0.00    4.84 v _21079_/A2 (sky130_fd_sc_hd__a311oi_1)
+     2    0.00    0.25    0.30    5.14 ^ _21079_/Y (sky130_fd_sc_hd__a311oi_1)
+                                         _13282_ (net)
+                  0.25    0.00    5.14 ^ _21089_/A1 (sky130_fd_sc_hd__o21ai_0)
+     4    0.01    0.14    0.19    5.33 v _21089_/Y (sky130_fd_sc_hd__o21ai_0)
+                                         _13291_ (net)
+                  0.14    0.00    5.33 v _21098_/A1 (sky130_fd_sc_hd__a211oi_1)
+     2    0.01    0.31    0.32    5.65 ^ _21098_/Y (sky130_fd_sc_hd__a211oi_1)
+                                         _13300_ (net)
+                  0.31    0.00    5.65 ^ _21103_/A1 (sky130_fd_sc_hd__a21o_1)
+     3    0.01    0.09    0.20    5.84 ^ _21103_/X (sky130_fd_sc_hd__a21o_1)
+                                         _13304_ (net)
+                  0.09    0.00    5.84 ^ _21107_/A1 (sky130_fd_sc_hd__o21ai_0)
+     3    0.01    0.10    0.12    5.97 v _21107_/Y (sky130_fd_sc_hd__o21ai_0)
+                                         _13308_ (net)
+                  0.10    0.00    5.97 v _21116_/B (sky130_fd_sc_hd__and3_1)
+     1    0.00    0.03    0.18    6.14 v _21116_/X (sky130_fd_sc_hd__and3_1)
+                                         _13316_ (net)
+                  0.03    0.00    6.14 v _21122_/A1 (sky130_fd_sc_hd__o31ai_1)
+     1    0.00    0.24    0.26    6.41 ^ _21122_/Y (sky130_fd_sc_hd__o31ai_1)
+                                         _13321_ (net)
+                  0.24    0.00    6.41 ^ _21123_/B (sky130_fd_sc_hd__xor2_1)
+     1    0.00    0.11    0.16    6.57 ^ _21123_/X (sky130_fd_sc_hd__xor2_1)
+                                         _13322_ (net)
+                  0.11    0.00    6.57 ^ _21124_/B (sky130_fd_sc_hd__nor2_1)
+     1    0.00    0.06    0.04    6.61 v _21124_/Y (sky130_fd_sc_hd__nor2_1)
+                                         _03374_ (net)
+                  0.06    0.00    6.61 v core.gen_xnebula.dot4.lanes[1].pe.accumulator[31]$_SDFFE_PP0P_/D (sky130_fd_sc_hd__dfxtp_1)
+                                  6.61   data arrival time
+
+                  0.00  100.00  100.00   clock nebula_clock (rise edge)
+                          0.00  100.00   clock network delay (ideal)
+                         -0.10   99.90   clock uncertainty
+                          0.00   99.90   clock reconvergence pessimism
+                                 99.90 ^ core.gen_xnebula.dot4.lanes[1].pe.accumulator[31]$_SDFFE_PP0P_/CLK (sky130_fd_sc_hd__dfxtp_1)
+                         -0.13   99.77   library setup time
+                                 99.77   data required time
+-----------------------------------------------------------------------------
+                                 99.77   data required time
+                                 -6.61   data arrival time
+-----------------------------------------------------------------------------
+                                 93.16   slack (MET)
+
+
+
+==========================================================================
+floorplan final report_power
+--------------------------------------------------------------------------
+Group                  Internal  Switching    Leakage      Total
+                          Power      Power      Power      Power (Watts)
+----------------------------------------------------------------
+Sequential             1.18e-03   6.96e-05   3.24e-08   1.25e-03  47.7%
+Combinational          6.03e-04   7.64e-04   4.34e-08   1.37e-03  52.3%
+Clock                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Macro                  0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+Pad                    0.00e+00   0.00e+00   0.00e+00   0.00e+00   0.0%
+----------------------------------------------------------------
+Total                  1.78e-03   8.33e-04   7.58e-08   2.61e-03 100.0%
+                          68.1%      31.9%       0.0%

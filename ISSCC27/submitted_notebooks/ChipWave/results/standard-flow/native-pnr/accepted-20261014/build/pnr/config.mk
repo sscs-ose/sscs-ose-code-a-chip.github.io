@@ -1,0 +1,15 @@
+export SLEW_MARGIN = 16.959
+export CAP_MARGIN = 17.466
+export DESIGN_NAME = nebula_cpu_npu_top
+export PLATFORM = sky130hd
+export DESIGN_NICKNAME = nebula_cpu_npu_top
+export VERILOG_FILES = /home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-5774e9973ce243acb92d41324cc4dd84/build/synth/nebula_cpu_npu_top.v
+export SDC_FILE = /home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-5774e9973ce243acb92d41324cc4dd84/physical/chip-nebula/constraints.sdc
+export DIE_AREA = 0 0 585.800000 585.760000
+export CORE_AREA = 10 10 575.800000 575.760000
+export PLACE_DENSITY = 0.55
+export CTS_BUF_LIST = sky130_fd_sc_hd__clkbuf_1 sky130_fd_sc_hd__clkbuf_2 sky130_fd_sc_hd__clkbuf_4 sky130_fd_sc_hd__clkbuf_8 sky130_fd_sc_hd__clkbuf_16
+export PRE_GLOBAL_ROUTE_TCL = /home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-5774e9973ce243acb92d41324cc4dd84/build/pnr/route_checkpoints.tcl
+export PRE_DETAIL_ROUTE_TCL = /home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-5774e9973ce243acb92d41324cc4dd84/build/pnr/route_checkpoints.tcl
+export PRE_FINAL_REPORT_TCL = /home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-5774e9973ce243acb92d41324cc4dd84/build/pnr/rcx_compat.tcl
+export POST_FINAL_REPORT_TCL = /home/asic03/project/user37/CodeAChip_Experiments/NextStage_20261013/standard-flow/.chip_nebula/taskgraph-v2/workspaces/attempt-5774e9973ce243acb92d41324cc4dd84/build/pnr/no_auto_images.tcl

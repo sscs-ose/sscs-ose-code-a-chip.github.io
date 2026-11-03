@@ -1,0 +1,373 @@
+name: workflow-ppa
+version: 2
+parameters:
+  source: specification.source
+tasks:
+  optimizer:
+    role: ppa-optimizer
+    intent: 'You are the PPA optimizer for a five-stage RV32I CPU plus INT8 dot4 accelerator.
+
+      Read context/baseline.json and context/protocol.json. Before each later proposal,
+
+      inspect the captured real EDA/measurement history and feedback. Choose one untried
+
+      candidate using the common physical parameter domain and proved RTL actions.
+
+      Optimize qualified area-times-workload-energy Q, not empty floorplan or a timing
+
+      estimate. Explain tradeoffs and report fields. All workflows have identical
+      tools,
+
+      actions, budget, final acceptance and best-result retention. Only the protected
+
+      tool can execute EDA or apply the mechanical shared RTL actions. You may not
+      edit
+
+      RTL, constraints, permissions, checkers or budget, run extra models/agents/EDA,
+
+      or inspect other sessions. All roles share 1200 seconds and at most three accepted
+
+      candidate evaluations. EDA wait is separate. Write only proposal/ and build/.
+
+      Write proposal/candidate.json with exactly configuration (four physical parameters),
+
+      rtl_actions (explicit boolean operand_isolation and reduce_width), rationale.
+
+      Validate with python3 tools/run_ppa.py validate. Repair rejected proposals yourself.
+
+      Return the matching NEBULA_OUTPUT: {"candidate":{"configuration":{...},
+
+      "rtl_actions":{"operand_isolation":false,"reduce_width":false},"rationale":"..."}}.
+
+      '
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - proposal/**
+      - build/**
+      tools:
+      - python3
+      - git
+    inputs:
+      source: &id001
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      candidate:
+        type: ppa.candidate
+        paths:
+        - proposal/**
+    execution: &id003
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1200
+    max_attempts: 12
+    gates:
+    - name: common-valid-unseen-action
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: python3
+        arguments:
+        - tools/run_ppa.py
+        - validate
+        expected: PPA_CANDIDATE_VALID
+        timeout: 30
+        level: L1
+        error_class: invalid_candidate
+  router:
+    role: ppa-tool
+    intent: Route the candidate using frozen conditional review rules.
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - build/route/**
+      tools:
+      - python3
+      - git
+    inputs:
+      candidate: &id002
+        type: ppa.candidate
+        from: $tasks.optimizer.outputs.candidate
+    outputs:
+      report:
+        type: ppa.route.report
+        paths:
+        - build/route/**
+    execution:
+      executor: tool
+      command: python3 tools/run_ppa.py route
+      timeout_seconds: 30
+    max_attempts: 12
+  reviewer:
+    role: ppa-verifier
+    intent: 'Independently review the immutable candidate and captured report history
+
+      against context/baseline.json and context/protocol.json. Verify actual timing,
+
+      electrical and energy report interpretation, common action qualification, limits
+
+      and the candidate''s rationale. Do not invent results or reject simply because
+      a
+
+      valid experiment might fail; identify concrete errors or unsupported assumptions.
+
+      Do not change the candidate, run EDA/models, or read other trials. The optimizer
+
+      owns revisions. Your time and Tokens share the same 1200-second session budget.
+
+      Write reports/review.json with subject, verdict (passed or failed), repair_summary;
+
+      publish exactly those fields in NEBULA_OUTPUT: {"report":{...}}. Write only
+      reports/
+
+      and build/. Inspect prior evaluation evidence under .nebula_inputs/ before judging.
+
+      '
+    on_demand: true
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - reports/**
+      - build/**
+      tools:
+      - python3
+      - git
+    inputs:
+      source: *id001
+      candidate: *id002
+      route:
+        type: ppa.route.report
+        from: $tasks.router.outputs.report
+        release:
+          field: review_required
+          equals: true
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - reports/**
+    execution: *id003
+    max_attempts: 12
+  reviewed:
+    role: ppa-tool
+    intent: Evaluate one captured candidate with shared independent engineering gates.
+    on_demand: true
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - build/evaluation/**
+      tools:
+      - python3
+      - git
+    inputs:
+      candidate: *id002
+      route:
+        type: ppa.route.report
+        from: $tasks.router.outputs.report
+        release:
+          field: review_required
+          equals: true
+      review:
+        type: verification.report
+        from: $tasks.reviewer.outputs.report
+        release:
+          field: verdict
+          equals: passed
+    outputs:
+      report:
+        type: ppa.evaluation.report
+        paths:
+        - build/evaluation/**
+    execution:
+      executor: tool
+      command: python3 tools/run_ppa.py reviewed
+      timeout_seconds: 16500
+    max_attempts: 3
+  direct:
+    role: ppa-tool
+    intent: Evaluate one captured candidate with shared independent engineering gates.
+    on_demand: true
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - build/evaluation/**
+      tools:
+      - python3
+      - git
+    inputs:
+      candidate: *id002
+      route:
+        type: ppa.route.report
+        from: $tasks.router.outputs.report
+        release:
+          field: review_required
+          equals: false
+    outputs:
+      report:
+        type: ppa.evaluation.report
+        paths:
+        - build/evaluation/**
+    execution:
+      executor: tool
+      command: python3 tools/run_ppa.py direct
+      timeout_seconds: 16500
+    max_attempts: 3
+  finalizer:
+    role: ppa-tool
+    intent: Record terminal search state independently of chip qualification.
+    on_demand: true
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - build/session/**
+      tools:
+      - python3
+      - git
+    inputs: {}
+    outputs:
+      report:
+        type: ppa.session.report
+        paths:
+        - build/session/**
+    execution:
+      executor: tool
+      command: python3 tools/run_ppa.py finalize
+      timeout_seconds: 30
+    max_attempts: 1
+feedback:
+- source: router
+  verdict: pass
+  target: reviewer
+  kind: feedback
+  propagate: false
+  when:
+    field: report.review_required
+    equals: true
+  summary: Execute the frozen review branch.
+- source: router
+  verdict: pass
+  target: direct
+  kind: feedback
+  propagate: false
+  when:
+    field: report.review_required
+    equals: false
+  summary: Execute without an AI review.
+- source: reviewer
+  verdict: pass
+  target: reviewed
+  kind: feedback
+  propagate: false
+  summary: Evaluate the reviewed proposal.
+- source: reviewer
+  verdict: fail
+  target: optimizer
+  kind: feedback
+  propagate: true
+  summary: Repair concrete review findings.
+  summary_field: report.repair_summary
+- source: reviewed
+  verdict: pass
+  target: optimizer
+  kind: feedback
+  propagate: true
+  when:
+    field: report.continue_search
+    equals: true
+  summary: Continue from real measurements.
+- source: reviewed
+  verdict: pass
+  target: finalizer
+  kind: feedback
+  propagate: false
+  when:
+    field: report.continue_search
+    equals: false
+  summary: Record completed search.
+- source: reviewed
+  verdict: fail
+  target: optimizer
+  kind: feedback
+  propagate: true
+  when:
+    field: report.continue_search
+    equals: true
+  summary: Continue from real measurements.
+- source: reviewed
+  verdict: fail
+  target: finalizer
+  kind: feedback
+  propagate: false
+  when:
+    field: report.continue_search
+    equals: false
+  summary: Record completed search.
+- source: direct
+  verdict: pass
+  target: optimizer
+  kind: feedback
+  propagate: true
+  when:
+    field: report.continue_search
+    equals: true
+  summary: Continue from real measurements.
+- source: direct
+  verdict: pass
+  target: finalizer
+  kind: feedback
+  propagate: false
+  when:
+    field: report.continue_search
+    equals: false
+  summary: Record completed search.
+- source: direct
+  verdict: fail
+  target: optimizer
+  kind: feedback
+  propagate: true
+  when:
+    field: report.continue_search
+    equals: true
+  summary: Continue from real measurements.
+- source: direct
+  verdict: fail
+  target: finalizer
+  kind: feedback
+  propagate: false
+  when:
+    field: report.continue_search
+    equals: false
+  summary: Record completed search.

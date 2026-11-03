@@ -1,0 +1,475 @@
+{
+  "workflow": {
+    "id": "npu-pilot-3",
+    "recipe": "controlled-npu-pilot@2",
+    "goal": "Complete comparison for project platform-3",
+    "status": "complete",
+    "paused_reason": "",
+    "definition_digest": "sha256:b578df7c88e9f1632f0dc53ba64cab8dfc6b2bec1502f7a8e89cd42183014e9e",
+    "metadata": {
+      "baseline_commit": "f1f2b8d836846e33c6c29cdb2999246b4a71a513",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "source": "comparison-source"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/comparison/platform-3/.chip_nebula/recipes/comparison.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-12T12:46:33.262615+00:00"
+  },
+  "tasks": [
+    {
+      "id": "npu-pilot-3:design",
+      "workflow_id": "npu-pilot-3",
+      "key": "design",
+      "role": "comparison-npu",
+      "role_version": 1,
+      "intent": "Implement spec/npu.md under rtl/ only. Develop and repair using\npython3 tools/smoke.py; the checker is immutable. Write only rtl/** and build/**.\nDo not read other trials, supplied implementations, evaluator references or\nparent projects. Do not spawn agents or make subordinate model calls.\nUse the installed Icarus/Verilator and Python. No external IP is permitted in\neither treatment. The total trial budget, including planning and checking,\nis 600 seconds. Finish with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+      "permission": {
+        "read_paths": [
+          "spec/**",
+          "tb/**",
+          "tools/smoke.py",
+          "rtl/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "rtl/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git",
+          "iverilog",
+          "vvp",
+          "verilator"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "comparison-source",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "rtl",
+          "artifact_type": "rtl.snapshot",
+          "schema_version": 1,
+          "paths": [
+            "rtl/**"
+          ]
+        }
+      ],
+      "hard_gates": [
+        {
+          "name": "common-public-smoke",
+          "kind": "tool_check",
+          "parameters": {
+            "command": "python3 tools/smoke.py",
+            "error_class": "public_smoke_failed",
+            "expected": "NPU_SMOKE_PASS",
+            "level": "L1",
+            "metric": "",
+            "min_files": 0,
+            "must_match": false,
+            "must_not_match": true,
+            "operator": ">=",
+            "paths": [],
+            "pattern": "",
+            "source": "",
+            "threshold": 0.0,
+            "timeout": 120
+          },
+          "on_failure": "report"
+        }
+      ],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 1,
+      "timeout_seconds": 600,
+      "brief": {
+        "objective": "Deliver fresh, original, synthesizable SystemVerilog for nebula_npu_dot4 satisfying spec/npu.md for the platform-3 comparison.",
+        "deliverables": [
+          "rtl.snapshot schema version 1 named rtl, containing rtl/** and module nebula_npu_dot4.",
+          "Final output marker: NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}."
+        ],
+        "responsibilities": [
+          "Implement the specified ports: inputs clk, rst_n, req_valid, req_a[31:0], req_b[31:0], rsp_ready, kill; outputs req_ready, rsp_valid, rsp_data[31:0].",
+          "Compute the signed INT32 sum of four signed INT8 products using four parallel multipliers, with lane 0 in bits 7:0 and products widened before reduction.",
+          "Accept requests at edge n when req_valid && req_ready; assert the result after edge n+2 and hold response valid/data until consumed, with at most one operation outstanding.",
+          "Make reset and kill dominate acceptance and output, cancel pending work, and permit correct recovery.",
+          "Develop and repair using the immutable public checker within the total 600-second trial budget, including planning and checking."
+        ],
+        "exclusions": [
+          "No hidden accumulator, memory, saturation, rounding, or external IP.",
+          "No reading other trials, supplied implementations, evaluator references, or parent projects; no agents or subordinate model calls.",
+          "Read only spec/**, tb/**, tools/smoke.py, rtl/**, and build/**; write only rtl/** and build/**.",
+          "Use only permitted python3, git, iverilog, vvp, and verilator tools; do not modify the checker or author the independent audit report."
+        ],
+        "completion_criteria": [
+          "The delivered RTL meets all arithmetic, interface, timing, backpressure, cancellation, and recovery requirements.",
+          "Hard gate common-public-smoke: python3 tools/smoke.py produces NPU_SMOKE_PASS at level L1 within timeout 120 seconds; preserve the configured report-on-failure behavior.",
+          "The RTL snapshot and required final output marker are delivered within the 600-second total trial budget."
+        ],
+        "collaboration": [
+          "Provide the rtl output to task:npu-pilot-3:audit for independent public verification."
+        ]
+      },
+      "frozen": true,
+      "state": "satisfied",
+      "attempts": [
+        {
+          "id": "attempt-26ddc7ce230f42e09a4cdfd87e63a206",
+          "task_id": "npu-pilot-3:design",
+          "ordinal": 1,
+          "status": "succeeded",
+          "work_item_ids": [
+            "work-51f250cfe2d2466c86d7b75a2d5be51d"
+          ],
+          "input_deliveries": {
+            "source": "comparison-source"
+          },
+          "role": "comparison-npu",
+          "role_version": 1,
+          "role_instruction": "Implement spec/npu.md under rtl/ only. Develop and repair using\npython3 tools/smoke.py; the checker is immutable. Write only rtl/** and build/**.\nDo not read other trials, supplied implementations, evaluator references or\nparent projects. Do not spawn agents or make subordinate model calls.\nUse the installed Icarus/Verilator and Python. No external IP is permitted in\neither treatment. The total trial budget, including planning and checking,\nis 600 seconds. Finish with NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}.",
+          "role_skills": [],
+          "role_accepted_types": [
+            "specification.source"
+          ],
+          "brief": {
+            "objective": "Deliver fresh, original, synthesizable SystemVerilog for nebula_npu_dot4 satisfying spec/npu.md for the platform-3 comparison.",
+            "deliverables": [
+              "rtl.snapshot schema version 1 named rtl, containing rtl/** and module nebula_npu_dot4.",
+              "Final output marker: NEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}."
+            ],
+            "responsibilities": [
+              "Implement the specified ports: inputs clk, rst_n, req_valid, req_a[31:0], req_b[31:0], rsp_ready, kill; outputs req_ready, rsp_valid, rsp_data[31:0].",
+              "Compute the signed INT32 sum of four signed INT8 products using four parallel multipliers, with lane 0 in bits 7:0 and products widened before reduction.",
+              "Accept requests at edge n when req_valid && req_ready; assert the result after edge n+2 and hold response valid/data until consumed, with at most one operation outstanding.",
+              "Make reset and kill dominate acceptance and output, cancel pending work, and permit correct recovery.",
+              "Develop and repair using the immutable public checker within the total 600-second trial budget, including planning and checking."
+            ],
+            "exclusions": [
+              "No hidden accumulator, memory, saturation, rounding, or external IP.",
+              "No reading other trials, supplied implementations, evaluator references, or parent projects; no agents or subordinate model calls.",
+              "Read only spec/**, tb/**, tools/smoke.py, rtl/**, and build/**; write only rtl/** and build/**.",
+              "Use only permitted python3, git, iverilog, vvp, and verilator tools; do not modify the checker or author the independent audit report."
+            ],
+            "completion_criteria": [
+              "The delivered RTL meets all arithmetic, interface, timing, backpressure, cancellation, and recovery requirements.",
+              "Hard gate common-public-smoke: python3 tools/smoke.py produces NPU_SMOKE_PASS at level L1 within timeout 120 seconds; preserve the configured report-on-failure behavior.",
+              "The RTL snapshot and required final output marker are delivered within the 600-second total trial budget."
+            ],
+            "collaboration": [
+              "Provide the rtl output to task:npu-pilot-3:audit for independent public verification."
+            ]
+          },
+          "brief_digest": "sha256:25e39cc4faf14f9f9505fa2bc6c4ed34a607a48d568b9f0de1f039796c627fed",
+          "permission": {
+            "read_paths": [
+              "spec/**",
+              "tb/**",
+              "tools/smoke.py",
+              "rtl/**",
+              "build/**"
+            ],
+            "write_paths": [
+              "rtl/**",
+              "build/**"
+            ],
+            "tools": [
+              "python3",
+              "git",
+              "iverilog",
+              "vvp",
+              "verilator"
+            ]
+          },
+          "framework": "codex",
+          "model": "gpt-6.1-sol",
+          "reasoning_effort": "high",
+          "executor": "agent",
+          "command": "",
+          "timeout_seconds": 600,
+          "session_id": "01a13027-31c0-7a81-b5b6-6246e5a8599d",
+          "workspace_commit": "ebc422fb45ab7619aa497c76d8e133d87d5c5f7a",
+          "verdict": "pass",
+          "diagnostics": {
+            "changed_paths": [
+              "rtl/nebula_npu_dot4.sv",
+              "build/edge",
+              "build/edge.log",
+              "build/edge_tb.sv",
+              "build/smoke",
+              "build/smoke.log"
+            ],
+            "execution_log": "Implemented `rtl/nebula_npu_dot4.sv`. Public smoke and 612 additional arithmetic cases plus cancellation/recovery checks passed.\n\nVerilator lint was unavailable because its installed wrapper recursed; synthesis was not checked.\n\nNEBULA_OUTPUT: {\"rtl\":{\"module\":\"nebula_npu_dot4\"}}\nTASK COMPLETED.",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-12T20:49:32.784782",
+                "details": {},
+                "evidence": "STDOUT:\nNPU_SMOKE_PASS vectors=64 backpressure=covered kill=covered reset=covered\ntb/npu_smoke_tb.sv:107: $finish called at 3746000 (1ps)\n\nSTDERR:\n",
+                "kind": "tool_check",
+                "name": "common-public-smoke",
+                "on_failure": "report",
+                "passed": true,
+                "suggestion": ""
+              },
+              {
+                "checked_at": "2026-10-12T12:49:32.784818+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "rtl:rtl.snapshot@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 104469,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "f1f2b8d836846e33c6c29cdb2999246b4a71a513"
+          },
+          "created_at": "2026-10-12T12:47:16.465146+00:00",
+          "finished_at": "2026-10-12T12:49:32.823047+00:00"
+        }
+      ],
+      "pending_work": [],
+      "deliveries": {
+        "rtl": {
+          "task_id": "npu-pilot-3:design",
+          "output_name": "rtl",
+          "artifact_id": "artifact-0dbc6b8c803d485bbbde24bce64f16e5",
+          "attempt_id": "attempt-26ddc7ce230f42e09a4cdfd87e63a206",
+          "accepted_at": "2026-10-12T12:49:32.822728+00:00"
+        }
+      }
+    },
+    {
+      "id": "npu-pilot-3:audit",
+      "workflow_id": "npu-pilot-3",
+      "key": "audit",
+      "role": "comparison-public-auditor",
+      "role_version": 1,
+      "intent": "Independently replay public checks on the selected design Delivery. Report genuine passed or failed; no RTL/checker changes.",
+      "permission": {
+        "read_paths": [
+          "rtl/**",
+          "tb/**",
+          "tools/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "iverilog",
+          "vvp"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "rtl",
+          "upstream_task_id": "npu-pilot-3:design",
+          "output_name": "rtl",
+          "required_type": "rtl.snapshot",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "build/audit.json",
+            "build/audit.log"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/audit.py",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 1,
+      "timeout_seconds": 120,
+      "brief": {
+        "objective": "Independently verify the selected design delivery with the immutable public checker and retain its actual verdict for the platform-3 comparison.",
+        "deliverables": [
+          "verification.report schema version 1 named report, containing build/audit.json and build/audit.log with the actual public-check verdict and supporting log."
+        ],
+        "responsibilities": [
+          "Consume the rtl.snapshot from npu-pilot-3:design output rtl.",
+          "Execute the predefined tool command python3 tools/audit.py to replay the immutable public checks.",
+          "Report the genuine passed or failed verdict without altering the design or checker."
+        ],
+        "exclusions": [
+          "No RTL or checker changes, design repairs, or verdict substitution.",
+          "Read only rtl/**, tb/**, and tools/**; write only build/**.",
+          "Use only permitted python3, iverilog, and vvp tools."
+        ],
+        "completion_criteria": [
+          "The predefined audit command has replayed public checks on the selected design delivery.",
+          "Both required report files preserve the actual verdict and supporting log; either a genuine pass or genuine failure is reportable.",
+          "No additional hard gate is imposed."
+        ],
+        "collaboration": [
+          "Receive the selected rtl delivery from task:npu-pilot-3:design; this task owns independent verification only."
+        ]
+      },
+      "frozen": true,
+      "state": "satisfied",
+      "attempts": [
+        {
+          "id": "attempt-38eb2c4c73cd4cc898b2f90754696e39",
+          "task_id": "npu-pilot-3:audit",
+          "ordinal": 1,
+          "status": "succeeded",
+          "work_item_ids": [
+            "work-fad59c0e71304dad80fbf3f06a507cf7"
+          ],
+          "input_deliveries": {
+            "rtl": "artifact-0dbc6b8c803d485bbbde24bce64f16e5"
+          },
+          "role": "comparison-public-auditor",
+          "role_version": 1,
+          "role_instruction": "Replay the immutable public checker and retain its actual verdict.",
+          "role_skills": [],
+          "role_accepted_types": [
+            "rtl.snapshot"
+          ],
+          "brief": {
+            "objective": "Independently verify the selected design delivery with the immutable public checker and retain its actual verdict for the platform-3 comparison.",
+            "deliverables": [
+              "verification.report schema version 1 named report, containing build/audit.json and build/audit.log with the actual public-check verdict and supporting log."
+            ],
+            "responsibilities": [
+              "Consume the rtl.snapshot from npu-pilot-3:design output rtl.",
+              "Execute the predefined tool command python3 tools/audit.py to replay the immutable public checks.",
+              "Report the genuine passed or failed verdict without altering the design or checker."
+            ],
+            "exclusions": [
+              "No RTL or checker changes, design repairs, or verdict substitution.",
+              "Read only rtl/**, tb/**, and tools/**; write only build/**.",
+              "Use only permitted python3, iverilog, and vvp tools."
+            ],
+            "completion_criteria": [
+              "The predefined audit command has replayed public checks on the selected design delivery.",
+              "Both required report files preserve the actual verdict and supporting log; either a genuine pass or genuine failure is reportable.",
+              "No additional hard gate is imposed."
+            ],
+            "collaboration": [
+              "Receive the selected rtl delivery from task:npu-pilot-3:design; this task owns independent verification only."
+            ]
+          },
+          "brief_digest": "sha256:75d9229851c62f921dd1e704ce4c06f1a6189827a4c110202d0e525e364809f7",
+          "permission": {
+            "read_paths": [
+              "rtl/**",
+              "tb/**",
+              "tools/**"
+            ],
+            "write_paths": [
+              "build/**"
+            ],
+            "tools": [
+              "python3",
+              "iverilog",
+              "vvp"
+            ]
+          },
+          "framework": "codex",
+          "model": "gpt-6.1-sol",
+          "reasoning_effort": "",
+          "executor": "tool",
+          "command": "python3 tools/audit.py",
+          "timeout_seconds": 120,
+          "session_id": "",
+          "workspace_commit": "26f5d728193532fe44947235f7d56638ccf3520a",
+          "verdict": "pass",
+          "diagnostics": {
+            "changed_paths": [
+              "build/audit.json",
+              "build/audit.log",
+              "build/smoke",
+              "build/smoke.log"
+            ],
+            "execution_log": "$ [audit] python3 tools/audit.py\nNEBULA_OUTPUT: {\"report\": {\"subject\": \"generated-rtl\", \"verdict\": \"passed\", \"log\": \"build/audit.log\"}}\n",
+            "gate_reports": [
+              {
+                "checked_at": "2026-10-12T12:49:33.166148+00:00",
+                "details": {
+                  "validated_outputs": [
+                    "report:verification.report@1"
+                  ]
+                },
+                "evidence": "Artifact output contract passed",
+                "kind": "artifact_schema",
+                "name": "artifact-output-contract",
+                "on_failure": "retry",
+                "passed": true,
+                "suggestion": ""
+              }
+            ],
+            "runner_pid": 104469,
+            "runner_state": "executing",
+            "session_reusable": true,
+            "workspace_base_commit": "c9ce10b052db93b4438e653506188395a3810a03"
+          },
+          "created_at": "2026-10-12T12:49:32.835021+00:00",
+          "finished_at": "2026-10-12T12:49:33.205398+00:00"
+        }
+      ],
+      "pending_work": [],
+      "deliveries": {
+        "report": {
+          "task_id": "npu-pilot-3:audit",
+          "output_name": "report",
+          "artifact_id": "artifact-666a73fd11814f08a860aaf07e991ff3",
+          "attempt_id": "attempt-38eb2c4c73cd4cc898b2f90754696e39",
+          "accepted_at": "2026-10-12T12:49:33.205089+00:00"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source_task_id": "npu-pilot-3:design",
+      "target_task_id": "npu-pilot-3:audit",
+      "input_name": "rtl",
+      "output_name": "rtl",
+      "required_type": "rtl.snapshot",
+      "release": {
+        "field": "",
+        "equals": null
+      }
+    }
+  ]
+}

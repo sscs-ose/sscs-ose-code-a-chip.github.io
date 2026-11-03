@@ -1,0 +1,49 @@
+--- run_configuration_study.py
++++ release/run_configuration_study.py
+@@ -18,6 +18,7 @@
+ from chip_nebula.taskgraph.static_store import StaticTaskGraphStore
+ from study_budget import BudgetPool
+ from study_checks import CLIENT
++from study_portability import private_context
+ from study_isolation import prepare_credentials
+ from study_protocol import MODEL, digest, preregistration, write_json
+ 
+@@ -207,14 +208,10 @@
+     passed &= 'NPU_ACCEPTANCE_PASS cases=264202 cancellations=8' in (output/'acceptance.log').read_text() if (output/'acceptance.log').exists() else False
+     ip_instances = None
+     if passed and job['input'] == 'ip':
+-        modules = json.loads((output/'synthesis.json').read_text())['modules']
+-        def count_pe(name, stack=()):
+-            if name in stack: raise ValueError('Recursive synthesis hierarchy')
+-            return sum((1 if cell['type']=='gemm_pe' else 0) +
+-                       (count_pe(cell['type'], (*stack, name)) if cell['type'] in modules else 0)
+-                       for cell in modules[name].get('cells',{}).values())
+-        ip_instances = count_pe('nebula_npu_dot4')
+-        passed &= ip_instances == 4
++        from audit_study_ip import audit
++        proof=audit(destination,output/'ip-hierarchy-audit')
++        ip_instances=proof.get('reachable_pe_instances')
++        passed &= proof['passed']
+     return {'passed': bool(passed), 'command_exit_codes': codes, 'source_sha256': hashes,
+             'checker_sha256': digest(CASE/'verification/npu_acceptance_tb.sv'), 'source_delivery': artifact.id,
+             'reachable_supplied_pe_instances': ip_instances}
+@@ -256,7 +253,7 @@
+     folder = experiment/'generation'/job['id']; folder.mkdir(exist_ok=False)
+     root=folder/'project'; output=folder/'results'; output.mkdir()
+     prepare(root, job)
+-    private=Path(tempfile_root())/job['id']
++    private=private_context(experiment,'generation',job['id'])
+     if private.exists(): raise ValueError('Existing private session preserved; do not reuse a trial identifier')
+     start=time.monotonic(); timed_out=False
+     command=[sys.executable,str(Path(__file__).resolve()),'--worker',str(root),'--private',str(private),'--worker-output',str(output)]
+@@ -286,10 +283,6 @@
+     return row
+ 
+ 
+-def tempfile_root():
+-    # The private model sessions include authentication; never place them in exported results.
+-    return '/tmp/chipnebula-config-study-user37-20261016'
+-
+ 
+ if __name__=='__main__':
+     p=argparse.ArgumentParser(description=__doc__)

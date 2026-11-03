@@ -1,0 +1,2997 @@
+{
+  "schema_version": 1,
+  "verdict": "failed",
+  "engineering_verdict": "failed",
+  "accepted": false,
+  "publishable": false,
+  "summary": "Physical/export checks preserved as passed; whole-project verdict failed. Direct check outcomes: 44/48 passed, 2 pending, 2 failed. Typed adapters: 1/26 proven; no acceptance override.",
+  "scope": "Frozen installed-scope project acceptance; no formal tapeout release",
+  "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+  "acceptance_artifact_id": "artifact-8bfa326445194758816c2d0d07307a6f",
+  "acceptance_commit": "db1f3b08150b153955fcb4158d6c30262705857a",
+  "spec_digest": "sha256:9e2e4dc1c876bda98921b4d26ccea97cad53efc9e5064966c16cbc6a8f2ecec5",
+  "constraints_revision": 2,
+  "constraints_sha256": "752843a10754d7ea76453133701edd50150bc675ca04adc5562f7b33783609d7",
+  "physical_export_acceptance": {
+    "verdict": "passed",
+    "scope": "Unchanged accepted single-corner physical implementation and GDS installed-scope DRC/device LVS/negative controls; excludes workload/power and whole-project acceptance.",
+    "evidence": [
+      "build/gds/reuse_validation.json",
+      "reports/pnr/power_area/gate_preflight.json",
+      "build/gds/checks.json"
+    ]
+  },
+  "whole_project_acceptance": {
+    "verdict": "failed",
+    "blocking_checks": [
+      "AC-RESOURCES",
+      "AC-EVALUATOR-RELEASE",
+      "AC-PROJECT-COMPLETION",
+      "AC-POWER-AREA"
+    ],
+    "reason": "Historical resource exceedance plus unresolved mandatory owner evidence."
+  },
+  "prior_audit": "build/gds/history/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/project_acceptance.json",
+  "counts": {
+    "total": 48,
+    "passed": 44,
+    "deferred": 2,
+    "failed": 2,
+    "requirements_total": 443,
+    "acceptance_qualified_checks": 42,
+    "requirements_with_passing_check_evidence": 350,
+    "requirements_accepted": 149,
+    "adapters_total": 26,
+    "adapters_execution_proven": 1
+  },
+  "checks": [
+    {
+      "id": "AC-DELIVERY",
+      "title": "Deliver exact frozen base contract",
+      "responsible_stage": "full-design-integration",
+      "requirement_ids": [
+        "REQ-AB306F4AA831"
+      ],
+      "design_groups": [
+        "spec.authority"
+      ],
+      "dependencies": [],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "operator-delivered root/type/length/hash/source byte comparison and complete manifest/DUT binding; positive and negative checker fixtures"
+      ],
+      "reason": "Actual native 6930-byte root contract equals frozen source lines19..EOF; regular path, manifest, companion and source-identical RTL directly revalidated. Prior missing-input audit is preserved.",
+      "evidence": [
+        "build/gds/evidence/authorized-root-project-delivery/delivery/standard-project/t09-base-contract.md",
+        "build/gds/evidence/authorized-root-project-delivery/delivery/standard-project/project-delivery.manifest.json",
+        "spec/source-contract.md",
+        "build/gds/delivery_synthesis_revalidation.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "project delivery"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "build/gds/evidence/authorized-root-project-delivery/delivery/standard-project/t09-base-contract.md": "1021e4b88446ed12c7b6a3cc6f46847f16a44c70a47660fff24f5f91ca778958",
+        "build/gds/evidence/authorized-root-project-delivery/delivery/standard-project/project-delivery.manifest.json": "1189640a437e82f04e9b59a176ea46f1ce260e47595bc4b982edbde3fc728531",
+        "spec/source-contract.md": "ba307c2b5ee170ee22b621bd80e0df4196f7fbceeba329ca4e7eac8ad7ccd33b",
+        "build/gds/delivery_synthesis_revalidation.json": "6859fd808a18a505c981e1daf7908e6bec146664e5458653ea596098ce9e1cd6"
+      }
+    },
+    {
+      "id": "AC-ORIGINAL",
+      "title": "Original implementation and immutable checker",
+      "responsible_stage": "rtl-implementation",
+      "requirement_ids": [
+        "REQ-FDDBC67C954F",
+        "REQ-CC6F59551A30",
+        "REQ-3E3CE6190291",
+        "REQ-8E067BBEC910"
+      ],
+      "design_groups": [
+        "project.scope"
+      ],
+      "dependencies": [],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified verifier source/checker lineage and unchanged RTL inventory are now joined to the real captured synthesizable V2 mapped design; no new originality or reference-release claims inferred.",
+      "evidence": [
+        "reports/verification/structure/summary.json",
+        "reports/verification/fixed-final.json",
+        "reports/verification/baseline-revalidation.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/baseline_revalidation.json",
+        "build/gds/delivery_synthesis_revalidation.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/structure/summary.json": "5cb0fdcd9ef166427dbc8fcb0bf1b189dc6fe21096ddeb9238067770196e7f22",
+        "reports/verification/fixed-final.json": "01088f0c06417f9318f7213662bb745f47b0686c7d97ff8e6bf2430e988b4f1c",
+        "reports/verification/baseline-revalidation.json": "3fdae7fb7463b57d4aaba0473c7f22f8e297b9e1e8a76c6f2eff1216234b7bc1",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/baseline_revalidation.json": "7f422a41faeb5d1cb57e182f7a265c4ae2f3a7fa1fb8fc86e63813cdc028fb64",
+        "build/gds/delivery_synthesis_revalidation.json": "6859fd808a18a505c981e1daf7908e6bec146664e5458653ea596098ce9e1cd6"
+      }
+    },
+    {
+      "id": "AC-RESOURCES",
+      "title": "Measure development resource envelope",
+      "responsible_stage": "rtl-implementation",
+      "requirement_ids": [
+        "REQ-83E61D370EBF",
+        "REQ-264F9B513D18",
+        "REQ-2FC06D942B8A",
+        "REQ-6AC755A84F95",
+        "REQ-919A9AD6965D"
+      ],
+      "design_groups": [
+        "project.resources"
+      ],
+      "dependencies": [],
+      "verdict": "failed",
+      "execution_status": "FAIL",
+      "result_origin": "captured operator observation plus availability audit",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Captured operator observation confirms historical standard RTL development exceeds frozen 2h budget. Historical peak RAM/disk, cumulative tokens/allocation receipts remain unavailable; no retrospective rerun can erase the failure.",
+      "evidence": [
+        "build/gds/resource_audit.json",
+        "build/gds/operator_feedback.json",
+        "reports/verification/downstream-obligations.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "development attempt"
+      ],
+      "acceptance_verdict": "failed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "build/gds/resource_audit.json": "b6a783e570edb82707dfbb095f2fcde6d27619e9a8010541999af03e521dc0e4",
+        "build/gds/operator_feedback.json": "f3d4008da265d974c84564874bc04f4843764c5588bcdaa989f264c57e1f1a4a",
+        "reports/verification/downstream-obligations.json": "12d7bb820eafa221e9c558ef14696c799593334b53ade076cbbe2e5a4ee78969"
+      }
+    },
+    {
+      "id": "AC-PORTS",
+      "title": "Elaborate exact CPU and physical interfaces",
+      "responsible_stage": "full-design-integration",
+      "requirement_ids": [
+        "REQ-19FAECECF72B",
+        "REQ-30A1A8DECA35",
+        "REQ-B27BE9BD6285",
+        "REQ-FAC9A0F0E0BF",
+        "REQ-143CDF1DFBC8",
+        "REQ-11AF5B483862",
+        "REQ-D02A0AE3A2DB",
+        "REQ-0C7C339A0296",
+        "REQ-10E0F94E468C",
+        "REQ-6417D601B63D",
+        "REQ-30AD2C4048CF",
+        "REQ-068D962F5231",
+        "REQ-AC1AC629C70C",
+        "REQ-3E85D730A8FA",
+        "REQ-69E61BF1BC08",
+        "REQ-9EC2373BAC9D",
+        "REQ-30C1DFAE7EA0",
+        "REQ-57EC775000EC",
+        "REQ-B3A20700BE16",
+        "REQ-E6DDE0AC0E54",
+        "REQ-26ED58355F60",
+        "REQ-9F4CF352B4DC",
+        "REQ-9D645EA89DE9",
+        "REQ-54492583756F",
+        "REQ-A1CE7C077C49",
+        "REQ-C6D3D50DFCDB",
+        "REQ-B10CAB222D48",
+        "REQ-6EE114D5A075",
+        "REQ-4F68440231C9",
+        "REQ-307479DB8518",
+        "REQ-500FBFC04817",
+        "REQ-858FB2D8D1B2",
+        "REQ-4C17FDB4FCDB",
+        "REQ-FF0087FC5863"
+      ],
+      "design_groups": [
+        "cpu.interface"
+      ],
+      "dependencies": [
+        "AC-ORIGINAL"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "four RTL elaborations",
+        "public fixture default/enabled"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/structure/summary.json",
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/structure/summary.json": "5cb0fdcd9ef166427dbc8fcb0bf1b189dc6fe21096ddeb9238067770196e7f22",
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c"
+      }
+    },
+    {
+      "id": "AC-INTEGRATION",
+      "title": "Replay ordered integration and dependency locks",
+      "responsible_stage": "full-design-integration",
+      "requirement_ids": [
+        "REQ-2EFF5B9CB3EB",
+        "REQ-26835CBACE92",
+        "REQ-DBB27F6C2D3C"
+      ],
+      "design_groups": [
+        "integration.boundary"
+      ],
+      "dependencies": [
+        "AC-PORTS"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused plus affected replay",
+      "scenarios": [
+        "ordered source/hash replay",
+        "enabled-top smoke"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/candidate-view.json",
+        "reports/verification/structure/summary.json",
+        "reports/verification/regression-logs/integration-smoke-run.log",
+        "reports/verification/reset-waveform.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/candidate-view.json": "73829dab14b97ff295039b85c0f46936e49d9fbe0af971e6bbad0b7bec1b5c54",
+        "reports/verification/structure/summary.json": "5cb0fdcd9ef166427dbc8fcb0bf1b189dc6fe21096ddeb9238067770196e7f22",
+        "reports/verification/regression-logs/integration-smoke-run.log": "59ff7facfa3aba70b9213ba7fe2810539fc5bf407fa0ab25be078f806202d66d",
+        "reports/verification/reset-waveform.json": "4f347a4fc20b8ce83f46bf71b8fefad6bca378d5960be3db63b18549e61f6ea6"
+      }
+    },
+    {
+      "id": "AC-STRUCTURE",
+      "title": "Check real pipeline and architectural resource scope",
+      "responsible_stage": "rtl-implementation",
+      "requirement_ids": [
+        "REQ-269A92199F57",
+        "REQ-5A63794D81A1",
+        "REQ-009CFCC955AD",
+        "REQ-AD938E4C7993",
+        "REQ-260B7A7590D6",
+        "REQ-BFED1ACF2799",
+        "REQ-FB0A4C73634E",
+        "REQ-08F22F52719B",
+        "REQ-B6574FECD558",
+        "REQ-3EA8205B2DC9",
+        "REQ-12E4D8BD2FF9",
+        "REQ-79DCC08E60B9",
+        "REQ-DDA492CBD6C0",
+        "REQ-B327A59BB1D2",
+        "REQ-F7DB76DFE7F3"
+      ],
+      "design_groups": [
+        "cpu.structure",
+        "verification.structure"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "RTL source/state inventory",
+        "public 64-ADDI stage/RF observer"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/structure/summary.json",
+        "reports/verification/pipeline.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/structure/summary.json": "5cb0fdcd9ef166427dbc8fcb0bf1b189dc6fe21096ddeb9238067770196e7f22",
+        "reports/verification/pipeline.json": "bc84d0d8cf9752ecdb6b3915d2f2821ea6e220b5d528c3f4c4ccb0c7c4588673",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-ISA",
+      "title": "Exercise complete RV32I and excluded encodings",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-4B1E823D24A4",
+        "REQ-921715D8B2AF",
+        "REQ-89EDFB48B800",
+        "REQ-B59DA4519DD0",
+        "REQ-96DC594C97E2",
+        "REQ-566FB24D26E1",
+        "REQ-6D1464E99D6A",
+        "REQ-D3AB11D19072",
+        "REQ-E5694BFF2E04",
+        "REQ-A2D47806D5E6",
+        "REQ-B6E898125B0C",
+        "REQ-04D39DB4975F",
+        "REQ-28F20098C3A9",
+        "REQ-E50EA77579AB",
+        "REQ-04B19A02D3C3",
+        "REQ-E4EC71EEA384",
+        "REQ-C33AA043CC12",
+        "REQ-5D7FE0139BE5",
+        "REQ-EAFD9F729329",
+        "REQ-146C35547C54"
+      ],
+      "design_groups": [
+        "cpu.decode"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-FETCH",
+      "title": "Pair fetch responses and ignore unowned data",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-0392322ACD1C",
+        "REQ-2345EA643433",
+        "REQ-E6D7C96EB441",
+        "REQ-F4E79D888F4E",
+        "REQ-FCE03CABF728",
+        "REQ-4384ABA79FF2",
+        "REQ-CF49BA0213E9",
+        "REQ-3521529EFA27",
+        "REQ-17A77E0DD17F",
+        "REQ-A4D3EB46112F"
+      ],
+      "design_groups": [
+        "cpu.fetch"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "fixed directed/control and wait corpus",
+        "12 stale CSR/MRET redirect cases"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz",
+        "reports/verification/stale-fetch.json",
+        "reports/verification/stale-fetch-0-run.log",
+        "reports/verification/stale-fetch-1-run.log"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c",
+        "reports/verification/stale-fetch.json": "1d7da8eda714edaeae330ace0ca651849df03903d707d40b5f117ef52fa4d234",
+        "reports/verification/stale-fetch-0-run.log": "4e9e40c3b73a6548467a736f854194963b5cd615f91f8676ea7f6934eb6fda2f",
+        "reports/verification/stale-fetch-1-run.log": "b2db3f155a5d7b4c07d1545ad0cf3a0bbbc00b18fc093dc4d7a86dc1d4f515fd"
+      }
+    },
+    {
+      "id": "AC-RESET",
+      "title": "Cancel CPU and external-memory state on reset",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-D78B93943C97",
+        "REQ-6C39607BFF86",
+        "REQ-079A812CDD10",
+        "REQ-90E5A2708BE1",
+        "REQ-DEFCE26371DA",
+        "REQ-5711801822DF",
+        "REQ-0C97378EE39C"
+      ],
+      "design_groups": [
+        "cpu.reset",
+        "verification.reset"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused plus affected replay",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz",
+        "reports/verification/reset-waveform.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c",
+        "reports/verification/reset-waveform.json": "4f347a4fc20b8ce83f46bf71b8fefad6bca378d5960be3db63b18549e61f6ea6"
+      }
+    },
+    {
+      "id": "AC-MEMORY",
+      "title": "Verify byte lanes, ownership and error semantics",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-4D966719537C",
+        "REQ-0E3A6660BAD4",
+        "REQ-59AA63F02D48",
+        "REQ-E2490F44D4FE",
+        "REQ-6501DAE7C4FE",
+        "REQ-72865D64F290",
+        "REQ-469EDAA52B62",
+        "REQ-1784087D048A",
+        "REQ-BB13DC472AB4",
+        "REQ-7D6D658EA3CB",
+        "REQ-F3C9EF972C06",
+        "REQ-7C1169296FCF",
+        "REQ-C8E4CE003793",
+        "REQ-7895FFDD0093",
+        "REQ-5A8034DC909A"
+      ],
+      "design_groups": [
+        "cpu.memory"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-HAZARDS",
+      "title": "Forward newest values and bound dependency bubbles",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-C5A7D192B104",
+        "REQ-6922321A4B55",
+        "REQ-703BD08FBBAC",
+        "REQ-F6E424892CA2"
+      ],
+      "design_groups": [
+        "cpu.hazards"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-EXCEPTIONS",
+      "title": "Verify precise fault priority and trap metadata",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-337FF384F441",
+        "REQ-8F118A19392A",
+        "REQ-2A5B83FE5927",
+        "REQ-9286F4C274D2",
+        "REQ-271F9AAFC83A",
+        "REQ-AD49D324C64D",
+        "REQ-21315BABC6AC",
+        "REQ-1F2267160B22",
+        "REQ-B3CB51F9E330",
+        "REQ-E77C44483B33",
+        "REQ-737329EE7EAD",
+        "REQ-8A10CFB2386A",
+        "REQ-CB7CB45CEA41",
+        "REQ-537924B76D1B",
+        "REQ-843F67C8CA73",
+        "REQ-F9210FF2ABC9",
+        "REQ-C6B4DA5C12B8",
+        "REQ-F34E2E0A153C",
+        "REQ-602F477BB0C1",
+        "REQ-E23AA97A838B",
+        "REQ-15BED143CDD8",
+        "REQ-9092BC87EC32",
+        "REQ-E568FB7F5AF1",
+        "REQ-26EE8020D91F"
+      ],
+      "design_groups": [
+        "cpu.exceptions"
+      ],
+      "dependencies": [
+        "AC-ISA",
+        "AC-MEMORY"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-CSR",
+      "title": "Verify exact CSR masks and MRET ordering",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-8F60562C2372",
+        "REQ-E788EC39CBE4",
+        "REQ-B608E3CF8AA3",
+        "REQ-E91316DDE27F",
+        "REQ-6CF3405389C1",
+        "REQ-B719BE12CB31",
+        "REQ-7343B805DC84",
+        "REQ-D8A2CC7C8F53",
+        "REQ-8F2402C2FFF7",
+        "REQ-E8377268435D",
+        "REQ-78F670666B6D",
+        "REQ-6E408BD8CB60",
+        "REQ-0CEB9F126856",
+        "REQ-0B54DE06AEAC",
+        "REQ-A75F216EF6B9",
+        "REQ-D4F27EA9D2DF",
+        "REQ-94C010A2C5A1",
+        "REQ-38D57823D8BF",
+        "REQ-DF4622E245CC",
+        "REQ-CAC576682593",
+        "REQ-59E128C8F48E",
+        "REQ-06E2CF5F45F5",
+        "REQ-D8EAA8DAA33D",
+        "REQ-A70472E9A2F7",
+        "REQ-2B1C919C61DD",
+        "REQ-5E9C42E5E0AC"
+      ],
+      "design_groups": [
+        "cpu.csr"
+      ],
+      "dependencies": [
+        "AC-ISA",
+        "AC-EXCEPTIONS"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-RETIREMENT",
+      "title": "Correlate each event with architectural effects",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-E9119CE5C2CE",
+        "REQ-A8BF7C0F30A9",
+        "REQ-50A6C0331733",
+        "REQ-661B4B6071E7",
+        "REQ-080C908DD5DB",
+        "REQ-A0360E64E01A",
+        "REQ-32F76BF9D4D8",
+        "REQ-2636FF3C7C71",
+        "REQ-D447E2E7E8CF"
+      ],
+      "design_groups": [
+        "cpu.retirement"
+      ],
+      "dependencies": [
+        "AC-ISA",
+        "AC-MEMORY",
+        "AC-EXCEPTIONS"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-NPU-PORTS",
+      "title": "Elaborate standalone NPU interface",
+      "responsible_stage": "full-design-integration",
+      "requirement_ids": [
+        "REQ-B78161A158A3",
+        "REQ-C02E6748BCF7",
+        "REQ-71538667A027",
+        "REQ-EFAAE7C0F481"
+      ],
+      "design_groups": [
+        "npu.interface"
+      ],
+      "dependencies": [
+        "AC-ORIGINAL"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "standalone elaboration"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/structure/summary.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "standalone NPU"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/structure/summary.json": "5cb0fdcd9ef166427dbc8fcb0bf1b189dc6fe21096ddeb9238067770196e7f22"
+      }
+    },
+    {
+      "id": "AC-NPU-ARITH",
+      "title": "Compare signed four-lane dot arithmetic",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-8C1BEBF4607E",
+        "REQ-A69B163641AD",
+        "REQ-1B798F455119",
+        "REQ-24BC3958C44C",
+        "REQ-36D9A3F0A48F",
+        "REQ-5CF3F62C3E34"
+      ],
+      "design_groups": [
+        "npu.arithmetic"
+      ],
+      "dependencies": [
+        "AC-NPU-PORTS",
+        "AC-RUNTIME"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "264202 signed-lane arithmetic/backpressure/cancel vectors"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/regression-logs/npu-run.log",
+        "reports/verification/fixed-final.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "standalone NPU"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/regression-logs/npu-run.log": "0589aa8ae3b7e3d176e9382db84a66cb95d0a0b1bcf2f135cb0b17040916f7f8",
+        "reports/verification/fixed-final.json": "01088f0c06417f9318f7213662bb745f47b0686c7d97ff8e6bf2430e988b4f1c"
+      }
+    },
+    {
+      "id": "AC-NPU-PROTOCOL",
+      "title": "Measure exact n+2 response and held backpressure",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-F3718CC6C576",
+        "REQ-FE226BF78160",
+        "REQ-67BAF3B834D3",
+        "REQ-198A287E1CCB"
+      ],
+      "design_groups": [
+        "npu.protocol"
+      ],
+      "dependencies": [
+        "AC-NPU-ARITH"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "264202 fixed n+2/held-response vectors",
+        "enabled-top handshake smoke"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/regression-logs/npu-run.log",
+        "reports/verification/regression-logs/integration-smoke-run.log"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "standalone NPU"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/regression-logs/npu-run.log": "0589aa8ae3b7e3d176e9382db84a66cb95d0a0b1bcf2f135cb0b17040916f7f8",
+        "reports/verification/regression-logs/integration-smoke-run.log": "59ff7facfa3aba70b9213ba7fe2810539fc5bf407fa0ab25be078f806202d66d"
+      }
+    },
+    {
+      "id": "AC-NPU-CANCEL",
+      "title": "Cancel at every NPU phase and coincident handshake",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-47B47DDA5109",
+        "REQ-4187B6DAEA66"
+      ],
+      "design_groups": [
+        "npu.cancel"
+      ],
+      "dependencies": [
+        "AC-NPU-PROTOCOL"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "8 fixed phase cancellations",
+        "4 proposed acceptance/consumption boundary cancellations",
+        "6 integrated reset ages"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/regression-logs/npu-run.log",
+        "reports/verification/npu-cancellation-run.log",
+        "reports/verification/custom-reset.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "standalone NPU"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/regression-logs/npu-run.log": "0589aa8ae3b7e3d176e9382db84a66cb95d0a0b1bcf2f135cb0b17040916f7f8",
+        "reports/verification/npu-cancellation-run.log": "0d1594862f2ff4fead86a61ffac82bfa9ac1e1c2889160bf0409db8cf40b3f14",
+        "reports/verification/custom-reset.json": "7567e29be0a64ae009b8e9064a293f74355c4d50ed3c418dd20596a4a86953a3"
+      }
+    },
+    {
+      "id": "AC-XDOT",
+      "title": "Verify extension decode,ownership and ordinary WB",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-8C5A3CD2F539",
+        "REQ-118353E38607",
+        "REQ-E932851C3BC1",
+        "REQ-A23073562299",
+        "REQ-1659214BE95D",
+        "REQ-F89BABF3940C",
+        "REQ-6A23FA86F904",
+        "REQ-56C709B438F4",
+        "REQ-8D733FBB8902",
+        "REQ-73CFAA00F0B0",
+        "REQ-AF6A7C357E25",
+        "REQ-CE1DED6EF6ED",
+        "REQ-5A9FA832F2F3",
+        "REQ-043365985E5F"
+      ],
+      "design_groups": [
+        "cpu.xdot4"
+      ],
+      "dependencies": [
+        "AC-HAZARDS",
+        "AC-RETIREMENT",
+        "AC-NPU-CANCEL"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "XNEBULA program three seeds",
+        "all custom f3/f7 invalid encodings in both configurations",
+        "24 older memory/custom fault orderings"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/performance/workloads.json",
+        "reports/verification/regression-logs/custom_traps_tb-0-run.log",
+        "reports/verification/regression-logs/custom_traps_tb-1-run.log",
+        "reports/verification/regression-logs/precise_custom_tb-run.log"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/performance/workloads.json": "12ba8e53d7b48ef4c1a510afa00786bf1ac57b7df5eac8affece301f100e5f05",
+        "reports/verification/regression-logs/custom_traps_tb-0-run.log": "6bf226dd2fe4168f45a3bdf16296000ef7538b5048a2739f10924b60da4726bc",
+        "reports/verification/regression-logs/custom_traps_tb-1-run.log": "5fff4ba9b200fcc34b5645bff57df45431b240edac5bf6cff2a0a53f44f2bf26",
+        "reports/verification/regression-logs/precise_custom_tb-run.log": "0a4b2a020176659aa2619f840d9b5a0540efe0d6aa1997cf29847646d8eb5d9b"
+      }
+    },
+    {
+      "id": "AC-RUNTIME",
+      "title": "Qualify official runtime and exclude local coverage",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-ABAEDC5E100A",
+        "REQ-EA7B625ABEF0",
+        "REQ-D7E53423C050",
+        "REQ-DB8C2F370500",
+        "REQ-7C0B10687090",
+        "REQ-AB6D9B607E01",
+        "REQ-6A9CBCEDE20F",
+        "REQ-A4C9D314C614",
+        "REQ-D48B8A0A8BE7",
+        "REQ-66B1B136E39A",
+        "REQ-48D00D23F954",
+        "REQ-F356AFEF1518",
+        "REQ-507F3C986C6D",
+        "REQ-61E0F6BEFED4",
+        "REQ-0A79A337A5B8",
+        "REQ-6065C85E0ACD",
+        "REQ-1CB708E30983"
+      ],
+      "design_groups": [
+        "verification.reproducibility"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "pinned same-shell launch and child builds",
+        "frozen source/config/oracle identities"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/runtime.json",
+        "reports/verification/fixed-before.json",
+        "reports/verification/fixed-final.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "every formal common build/run"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/runtime.json": "f2162de744f31d9cc152eaf92e6598f0f4f0068aca73bf5a8740e969fc747f49",
+        "reports/verification/fixed-before.json": "57512476865d1ebe07691af6fc317fce0f1ebca7ea4e164422af4eaf226f6e8e",
+        "reports/verification/fixed-final.json": "01088f0c06417f9318f7213662bb745f47b0686c7d97ff8e6bf2430e988b4f1c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-ENVIRONMENT",
+      "title": "Bind full memory images and finite termination",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-1E1A1B96688F",
+        "REQ-1C86CC4C72D3",
+        "REQ-089C02F7655B",
+        "REQ-4A2B99BF2D4F",
+        "REQ-21D8E2024152",
+        "REQ-E5670A9E5233",
+        "REQ-FA20AA6E8F43",
+        "REQ-9067CD0E4AE7",
+        "REQ-392B59B6AF74",
+        "REQ-208698025E30",
+        "REQ-1494293713A7",
+        "REQ-10F9AEEE784D",
+        "REQ-4C6546ED46FD",
+        "REQ-E293DAA3EDCD",
+        "REQ-3F8F3008E7A1",
+        "REQ-322390401491",
+        "REQ-0364A64A3126",
+        "REQ-131729937901",
+        "REQ-ADE22725FB6F",
+        "REQ-0F5272F9CC16"
+      ],
+      "design_groups": [
+        "integration.memory_environment"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION",
+        "AC-RUNTIME"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "703 complete initial/final 256KiB comparisons",
+        "fixed tohost/drain/bus assertions"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/memory-comparison.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/memory-comparison.json": "0f1c96aa257e52fcbb7e30eb8418c6fc05967a6dc2b69694082ee831534aba30",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-TIMEOUT",
+      "title": "Freeze and enforce independent per-program cycle limits",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-58D073B3CDED",
+        "REQ-2A3DFA57F39A",
+        "REQ-ACFD27A4DF2E",
+        "REQ-2BFE93C224C5"
+      ],
+      "design_groups": [
+        "verification.timeouts"
+      ],
+      "dependencies": [
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-ACT4",
+      "title": "Execute every frozen applicable ACT4 ELF",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-E26D8D5FC2DE",
+        "REQ-DE2140A3B69D",
+        "REQ-50A82E9483D9",
+        "REQ-87962DDCB1B7",
+        "REQ-40857E12BFE6",
+        "REQ-08B8869F79AB",
+        "REQ-18BD9E1F9704",
+        "REQ-763603461F33",
+        "REQ-4D90424F7EFA",
+        "REQ-CFC8007861A0",
+        "REQ-DB908DF98081",
+        "REQ-A31DFEFC1259",
+        "REQ-A3876C9F628F",
+        "REQ-693267807090",
+        "REQ-495F708C14A0",
+        "REQ-0D51F220D6E6",
+        "REQ-9DF2BA15A118",
+        "REQ-11E8B8E83E3B",
+        "REQ-062FCDE66532",
+        "REQ-AD34FCA99747"
+      ],
+      "design_groups": [
+        "verification.functional"
+      ],
+      "dependencies": [
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT",
+        "AC-RETIREMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-DIRECTED",
+      "title": "Execute directed templates and all key-value variants",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-3888E9316EBC",
+        "REQ-F5119EF273ED",
+        "REQ-048B3610BE8D",
+        "REQ-0D35C0A5BD94",
+        "REQ-637A2C479BEE",
+        "REQ-E81B683539C8",
+        "REQ-46BFAE5AFC54",
+        "REQ-614D839A79C6",
+        "REQ-0A994E4E4F71",
+        "REQ-F0537F10247E",
+        "REQ-F9A5E46E627B",
+        "REQ-0B2A29BBC15C",
+        "REQ-7DE264240EC3",
+        "REQ-92BEA226669F",
+        "REQ-AF85A21FF988",
+        "REQ-5195A0ABC39B",
+        "REQ-D9130B2FA9F8",
+        "REQ-F1179F710B95",
+        "REQ-A7964968680B",
+        "REQ-5AC2AEA7626F",
+        "REQ-3D89EE290160",
+        "REQ-EB7F0D9F2CB7",
+        "REQ-F21CF4FCB931",
+        "REQ-68462EEFDEE0",
+        "REQ-9813F33887C5",
+        "REQ-4DC150E33BBD",
+        "REQ-6EBD97F59D93",
+        "REQ-A621CA5BC558",
+        "REQ-5AC64A8A9515",
+        "REQ-7525E5D6F64B",
+        "REQ-80DA52A06F33",
+        "REQ-1ED25FC13901",
+        "REQ-E82638145341",
+        "REQ-F6F0DAAE5FAF",
+        "REQ-2DD16DFA622F",
+        "REQ-1F76B21A3E76",
+        "REQ-345683224B61",
+        "REQ-3D2CE3573FA4",
+        "REQ-DBC595716C57",
+        "REQ-F6175E6EA689",
+        "REQ-8953929DBC9F",
+        "REQ-F6ED37F83E19",
+        "REQ-F46202F44F24",
+        "REQ-967538B0F376"
+      ],
+      "design_groups": [
+        "verification.directed"
+      ],
+      "dependencies": [
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT",
+        "AC-ISA",
+        "AC-HAZARDS",
+        "AC-EXCEPTIONS",
+        "AC-CSR"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-DIFFERENTIAL",
+      "title": "Execute fixed-seed bounded differential corpus",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-531A036BA724",
+        "REQ-B16900DB78E1",
+        "REQ-61EFF1B90AE2",
+        "REQ-9BDA4375093B",
+        "REQ-AC347C5C9A4D",
+        "REQ-E205DAA96DF2",
+        "REQ-7F673DF52686",
+        "REQ-3D763A14A85C",
+        "REQ-AFE5CBAF7519",
+        "REQ-FF9C94EF4446",
+        "REQ-94F8AA34E74F",
+        "REQ-E0133AEBAE8D",
+        "REQ-1D122929046F",
+        "REQ-C7FDC834D595",
+        "REQ-2AD4DE23D819",
+        "REQ-5D4302C35CEA",
+        "REQ-B783BFD32988",
+        "REQ-168298291FF1",
+        "REQ-1B18F657413D"
+      ],
+      "design_groups": [
+        "verification.differential"
+      ],
+      "dependencies": [
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT",
+        "AC-RETIREMENT",
+        "AC-TIMEOUT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-BOUNDARIES",
+      "title": "Use task-card oracle at known Sail differences",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-07F76FB404FE",
+        "REQ-04EAF62B38AA",
+        "REQ-2CE871394711"
+      ],
+      "design_groups": [
+        "verification.boundaries"
+      ],
+      "dependencies": [
+        "AC-CSR",
+        "AC-FLUSH",
+        "AC-RUNTIME"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-BUS",
+      "title": "Exercise fixed seeded wait schedules and store correlation",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-3CDB8C846B5E",
+        "REQ-16B9755F52FA",
+        "REQ-92BB4D8D5CAB",
+        "REQ-43AC93F82BCD",
+        "REQ-36405729B89B",
+        "REQ-530267985156",
+        "REQ-EE0CDA11C2F3",
+        "REQ-71D3B024FC98"
+      ],
+      "design_groups": [
+        "verification.bus"
+      ],
+      "dependencies": [
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT",
+        "AC-MEMORY",
+        "AC-RETIREMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-FLUSH",
+      "title": "Verify correct-path store markers after redirects",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-C6D95B0FEBF4"
+      ],
+      "design_groups": [
+        "verification.flush"
+      ],
+      "dependencies": [
+        "AC-FETCH",
+        "AC-EXCEPTIONS",
+        "AC-RETIREMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-EVALUATOR-RELEASE",
+      "title": "Validate evaluator detection and replay independently",
+      "responsible_stage": "functional-performance-verify (independent evaluator owner)",
+      "requirement_ids": [
+        "REQ-C48756C1830E",
+        "REQ-7EF5617E7736",
+        "REQ-578522414F8D",
+        "REQ-342AE06A54B4",
+        "REQ-3F57C0C9E7A2",
+        "REQ-054A022C992E",
+        "REQ-77818D8F0881"
+      ],
+      "design_groups": [
+        "verification.release"
+      ],
+      "dependencies": [
+        "AC-RUNTIME"
+      ],
+      "verdict": "deferred",
+      "execution_status": "PENDING",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Full source-bound known-reference hazard/exception/handshake evaluator-owner release audit is absent. Parent common-checker replay and three preset NPU faults do not satisfy this obligation.",
+      "evidence": [
+        "reports/verification/downstream-obligations.json",
+        "build/gds/operator_feedback.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "independent evaluator release environment"
+      ],
+      "acceptance_verdict": "deferred",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/downstream-obligations.json": "12d7bb820eafa221e9c558ef14696c799593334b53ade076cbbe2e5a4ee78969",
+        "build/gds/operator_feedback.json": "f3d4008da265d974c84564874bc04f4843764c5588bcdaa989f264c57e1f1a4a"
+      }
+    },
+    {
+      "id": "AC-PIPELINE",
+      "title": "Measure per-PC five-edge flow and effects",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-89D3BA17833E",
+        "REQ-FD64F59A9F1A",
+        "REQ-B39614D719F0",
+        "REQ-0C348358645A",
+        "REQ-D58FD55E7FD3",
+        "REQ-E2998F12B044",
+        "REQ-0F7329FEEA6B",
+        "REQ-27179AE580E7",
+        "REQ-D0755E26A106",
+        "REQ-3F6DE7EF1AC6",
+        "REQ-56CE793251EE"
+      ],
+      "design_groups": [
+        "cpu.pipeline"
+      ],
+      "dependencies": [
+        "AC-STRUCTURE",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "public 64-ADDI fixture per configuration",
+        "independent real stage/RF observer"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/pipeline.json",
+        "reports/performance/cycles-base.json",
+        "reports/performance/cycles-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/pipeline.json": "bc84d0d8cf9752ecdb6b3915d2f2821ea6e220b5d528c3f4c4ccb0c7c4588673",
+        "reports/performance/cycles-base.json": "24e102013ec855fb88dd9f4d94650569b5627e096139a63ee9f3770fb90e8dba",
+        "reports/performance/cycles-enabled.json": "8229aee43d3d07d7f119a35f88c0dbe84c9ffd6bb5ca5cf818ec947fd90849b6",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-PUBLIC-SMOKE",
+      "title": "Run frozen wildcard 64-ADDI public smoke",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-EE14DCD82F9D",
+        "REQ-0632F6E72529",
+        "REQ-14BFDDB3D9C0",
+        "REQ-E8652C149296",
+        "REQ-E7E7139855C9",
+        "REQ-7A81F1545181",
+        "REQ-227DE65963DC",
+        "REQ-A03E7F8EA91E",
+        "REQ-F154E7C95684",
+        "REQ-121328341A54",
+        "REQ-58B097F931C5",
+        "REQ-13B6671CEE13"
+      ],
+      "design_groups": [
+        "verification.public_smoke"
+      ],
+      "dependencies": [
+        "AC-PORTS",
+        "AC-RUNTIME"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-CYCLES",
+      "title": "Execute exact port_timing_v1 22-check set",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-B7BD505096AE",
+        "REQ-24B3FA3021E3",
+        "REQ-8E39D58A91B1",
+        "REQ-E1CF5533FD24",
+        "REQ-AC5DDC407906",
+        "REQ-D39019A3CFD8",
+        "REQ-5A631995F829",
+        "REQ-DD6D31288599",
+        "REQ-280D2A05F8AA",
+        "REQ-211D4C0B5236",
+        "REQ-5D1EB7BD76E1",
+        "REQ-BB9D0FFCA5D1",
+        "REQ-206267FD77CA",
+        "REQ-67D68C429EA8",
+        "REQ-2CD55DE58324",
+        "REQ-5F5F8E53BDA2",
+        "REQ-F7C63D530051",
+        "REQ-930A831E80DB",
+        "REQ-D8097CE0B9F1",
+        "REQ-ADDBCB23196D",
+        "REQ-E060B588934B",
+        "REQ-D391679F8906",
+        "REQ-22DDCC807C2F",
+        "REQ-D5301BBC4D00",
+        "REQ-65E7A16DB29B",
+        "REQ-A7F234D7A57F",
+        "REQ-06A20B213C24",
+        "REQ-47A8A62333AB",
+        "REQ-083131ED5BCB"
+      ],
+      "design_groups": [
+        "verification.cycles"
+      ],
+      "dependencies": [
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT",
+        "AC-PIPELINE",
+        "AC-HAZARDS",
+        "AC-BUS"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "exact port_timing_v1 22-check population per configuration"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/performance/cycles-base.json",
+        "reports/performance/cycles-enabled.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=0",
+        "rv32i_five_stage_cpu ENABLE_XNEBULA=1"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/performance/cycles-base.json": "24e102013ec855fb88dd9f4d94650569b5627e096139a63ee9f3770fb90e8dba",
+        "reports/performance/cycles-enabled.json": "8229aee43d3d07d7f119a35f88c0dbe84c9ffd6bb5ca5cf818ec947fd90849b6"
+      }
+    },
+    {
+      "id": "AC-DOT64",
+      "title": "Execute DOT64 end to end",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-9BBBD834A83C",
+        "REQ-5006BB8FC9D7",
+        "REQ-46BF76FC1DFC",
+        "REQ-B151009B056E",
+        "REQ-118353E38607",
+        "REQ-F89BABF3940C",
+        "REQ-6A23FA86F904",
+        "REQ-AF6A7C357E25",
+        "REQ-5A9FA832F2F3"
+      ],
+      "design_groups": [
+        "system.workloads",
+        "cpu.xdot4"
+      ],
+      "dependencies": [
+        "AC-XDOT",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "DOT64 scalar/xdot4 programs, seeds 20260925/17/37"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/performance/workloads.json",
+        "reports/verification/memory-comparison.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled core and physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/performance/workloads.json": "12ba8e53d7b48ef4c1a510afa00786bf1ac57b7df5eac8affece301f100e5f05",
+        "reports/verification/memory-comparison.json": "0f1c96aa257e52fcbb7e30eb8418c6fc05967a6dc2b69694082ee831534aba30",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-GEMM8",
+      "title": "Execute signed GEMM8 end to end",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-F332169E266A",
+        "REQ-5006BB8FC9D7",
+        "REQ-46BF76FC1DFC",
+        "REQ-B151009B056E",
+        "REQ-118353E38607",
+        "REQ-F89BABF3940C",
+        "REQ-6A23FA86F904",
+        "REQ-AF6A7C357E25",
+        "REQ-5A9FA832F2F3"
+      ],
+      "design_groups": [
+        "system.workloads",
+        "cpu.xdot4"
+      ],
+      "dependencies": [
+        "AC-XDOT",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "GEMM8 scalar/xdot4 programs, seeds 20260925/17/37"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/performance/workloads.json",
+        "reports/verification/memory-comparison.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled core and physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/performance/workloads.json": "12ba8e53d7b48ef4c1a510afa00786bf1ac57b7df5eac8affece301f100e5f05",
+        "reports/verification/memory-comparison.json": "0f1c96aa257e52fcbb7e30eb8418c6fc05967a6dc2b69694082ee831534aba30",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-CONV3",
+      "title": "Execute CONV3 valid kernel end to end",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-5EAE3E313E75",
+        "REQ-5006BB8FC9D7",
+        "REQ-46BF76FC1DFC",
+        "REQ-B151009B056E",
+        "REQ-118353E38607",
+        "REQ-F89BABF3940C",
+        "REQ-6A23FA86F904",
+        "REQ-AF6A7C357E25",
+        "REQ-5A9FA832F2F3"
+      ],
+      "design_groups": [
+        "system.workloads",
+        "cpu.xdot4"
+      ],
+      "dependencies": [
+        "AC-XDOT",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "CONV3 scalar/xdot4 programs, seeds 20260925/17/37"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/performance/workloads.json",
+        "reports/verification/memory-comparison.json",
+        "reports/verification/raw-run-evidence.tar.gz"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled core and physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/performance/workloads.json": "12ba8e53d7b48ef4c1a510afa00786bf1ac57b7df5eac8affece301f100e5f05",
+        "reports/verification/memory-comparison.json": "0f1c96aa257e52fcbb7e30eb8418c6fc05967a6dc2b69694082ee831534aba30",
+        "reports/verification/raw-run-evidence.tar.gz": "3e942213252d3acb0da2784ee80f350f2fb51ec1b4067863d64ccf4a4b16549c"
+      }
+    },
+    {
+      "id": "AC-SCORING",
+      "title": "Recompute exact versioned score without double counting",
+      "responsible_stage": "functional-performance-verify",
+      "requirement_ids": [
+        "REQ-5CFE1A7E01C1",
+        "REQ-14B6323ACB58",
+        "REQ-D56878A6A0EE",
+        "REQ-FB4B5BD37A8E",
+        "REQ-3369FF765E84",
+        "REQ-B581DB3F8A88",
+        "REQ-852029C93A29",
+        "REQ-1D0F0F7D3C62",
+        "REQ-1BC693FD835E",
+        "REQ-B154AE2CD880",
+        "REQ-422D1343D955",
+        "REQ-F0896C3C07C7",
+        "REQ-723FE432B3F3",
+        "REQ-74D63A25028B",
+        "REQ-BA9341D346D0",
+        "REQ-92139E24D912",
+        "REQ-99BE0C5F2E94",
+        "REQ-50311EBBD9DE",
+        "REQ-C52A2184393E",
+        "REQ-1D32C7AE14BA",
+        "REQ-9572AA12B1C9",
+        "REQ-C7E41A5AB030",
+        "REQ-58A1A115ABDC",
+        "REQ-EA6253E37CC9",
+        "REQ-BC3B040D1D56",
+        "REQ-EBFDF6FD9EF7",
+        "REQ-C2AEB83F6EB0",
+        "REQ-DA5EE6429873"
+      ],
+      "design_groups": [
+        "verification.scoring"
+      ],
+      "dependencies": [
+        "AC-ACT4",
+        "AC-DIRECTED",
+        "AC-DIFFERENTIAL",
+        "AC-CYCLES",
+        "AC-BUS",
+        "AC-FLUSH",
+        "AC-BOUNDARIES",
+        "AC-EVALUATOR-RELEASE"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused",
+      "scenarios": [
+        "same fixed group results",
+        "exact rational allocation and tier/safety boundary selfcheck"
+      ],
+      "reason": "Qualified original verification evidence retained without rerunning.",
+      "evidence": [
+        "reports/verification/scoring.json",
+        "reports/verification/t09-base.json",
+        "reports/verification/t09-enabled.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "project score report"
+      ],
+      "acceptance_verdict": "deferred",
+      "nonpassing_dependencies": [
+        "AC-EVALUATOR-RELEASE"
+      ],
+      "evidence_sha256": {
+        "reports/verification/scoring.json": "720ea140e635ef05734ecd2c6d1fc0fe141a82359efdec32a538a8a4d2e0c79c",
+        "reports/verification/t09-base.json": "1c190d39447ad1b5ab3ddeb8cc955df80d62bc5c2934b9179df41da72c53b68e",
+        "reports/verification/t09-enabled.json": "95730db8c125878dad93f8b7741d322a0533173a7c0ae6656c5851b2bdc4a35c"
+      }
+    },
+    {
+      "id": "AC-PROJECT-COMPLETION",
+      "title": "Join executed requirement coverage and project verdict",
+      "responsible_stage": "gds-export; failure-analysis",
+      "requirement_ids": [
+        "REQ-E26D8D5FC2DE",
+        "REQ-DE2140A3B69D",
+        "REQ-50A82E9483D9",
+        "REQ-87962DDCB1B7",
+        "REQ-40857E12BFE6",
+        "REQ-08B8869F79AB",
+        "REQ-18BD9E1F9704",
+        "REQ-763603461F33",
+        "REQ-4D90424F7EFA",
+        "REQ-CFC8007861A0",
+        "REQ-DB908DF98081",
+        "REQ-A31DFEFC1259",
+        "REQ-A3876C9F628F",
+        "REQ-693267807090",
+        "REQ-495F708C14A0",
+        "REQ-0D51F220D6E6",
+        "REQ-9DF2BA15A118",
+        "REQ-11E8B8E83E3B",
+        "REQ-062FCDE66532",
+        "REQ-AD34FCA99747",
+        "REQ-ABAEDC5E100A",
+        "REQ-EA7B625ABEF0",
+        "REQ-D7E53423C050",
+        "REQ-DB8C2F370500",
+        "REQ-7C0B10687090",
+        "REQ-AB6D9B607E01",
+        "REQ-6A9CBCEDE20F",
+        "REQ-A4C9D314C614",
+        "REQ-D48B8A0A8BE7",
+        "REQ-66B1B136E39A",
+        "REQ-48D00D23F954",
+        "REQ-F356AFEF1518",
+        "REQ-507F3C986C6D",
+        "REQ-61E0F6BEFED4",
+        "REQ-0A79A337A5B8",
+        "REQ-6065C85E0ACD",
+        "REQ-1CB708E30983",
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F",
+        "REQ-9BBBD834A83C",
+        "REQ-F332169E266A",
+        "REQ-5EAE3E313E75",
+        "REQ-5006BB8FC9D7",
+        "REQ-46BF76FC1DFC",
+        "REQ-B151009B056E"
+      ],
+      "design_groups": [
+        "verification.functional",
+        "verification.reproducibility",
+        "physical.scope",
+        "system.workloads"
+      ],
+      "dependencies": [
+        "AC-DELIVERY",
+        "AC-ORIGINAL",
+        "AC-RESOURCES",
+        "AC-PORTS",
+        "AC-INTEGRATION",
+        "AC-STRUCTURE",
+        "AC-ISA",
+        "AC-FETCH",
+        "AC-RESET",
+        "AC-MEMORY",
+        "AC-HAZARDS",
+        "AC-EXCEPTIONS",
+        "AC-CSR",
+        "AC-RETIREMENT",
+        "AC-NPU-PORTS",
+        "AC-NPU-ARITH",
+        "AC-NPU-PROTOCOL",
+        "AC-NPU-CANCEL",
+        "AC-XDOT",
+        "AC-RUNTIME",
+        "AC-ENVIRONMENT",
+        "AC-TIMEOUT",
+        "AC-ACT4",
+        "AC-DIRECTED",
+        "AC-DIFFERENTIAL",
+        "AC-BOUNDARIES",
+        "AC-BUS",
+        "AC-FLUSH",
+        "AC-EVALUATOR-RELEASE",
+        "AC-PIPELINE",
+        "AC-PUBLIC-SMOKE",
+        "AC-CYCLES",
+        "AC-DOT64",
+        "AC-GEMM8",
+        "AC-CONV3",
+        "AC-SCORING",
+        "AC-PHYSICAL-INPUTS",
+        "AC-SYNTHESIS",
+        "AC-FLOORPLAN",
+        "AC-PDN-ROUTING",
+        "AC-POSTROUTE-STA",
+        "AC-ELECTRICAL",
+        "AC-ROUTE-CLEAN",
+        "AC-EXPORT-CONSISTENCY",
+        "AC-DRC-LVS",
+        "AC-POWER-AREA",
+        "AC-GDS"
+      ],
+      "verdict": "failed",
+      "execution_status": "FAIL",
+      "result_origin": "new audit",
+      "scenarios": [
+        "V2 physical inputs and separate planned/native-row geometry; affected physical stages and final export revalidation"
+      ],
+      "reason": "Historical resource failure, pending evaluator release/power-area and unproven typed adapters prevent whole-project acceptance.",
+      "evidence": [
+        "build/gds/project_acceptance.json",
+        "build/gds/adapter_audit.json",
+        "build/gds/requirements_audit.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "whole project"
+      ],
+      "acceptance_verdict": "failed",
+      "nonpassing_dependencies": [
+        "AC-RESOURCES",
+        "AC-EVALUATOR-RELEASE",
+        "AC-POWER-AREA"
+      ],
+      "evidence_sha256": {
+        "build/gds/adapter_audit.json": "f18c23adfb90233f524512165b23f123f5634378329fb3a4952462d6aaf0dabb",
+        "build/gds/requirements_audit.json": "4532830afcba338439081fb5817d681a0925d9490e57aa04bea050578a5b7669"
+      }
+    },
+    {
+      "id": "AC-PHYSICAL-INPUTS",
+      "title": "Revalidate frozen platform and timing inputs",
+      "responsible_stage": "synthesize; pnr",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ],
+      "design_groups": [
+        "physical.scope"
+      ],
+      "dependencies": [
+        "AC-INTEGRATION",
+        "AC-STRUCTURE",
+        "AC-ACT4",
+        "AC-DIRECTED",
+        "AC-DIFFERENTIAL",
+        "AC-CYCLES",
+        "AC-XDOT",
+        "AC-DOT64",
+        "AC-GEMM8",
+        "AC-CONV3"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "V2 physical inputs and separate planned/native-row geometry; affected physical stages and final export revalidation"
+      ],
+      "reason": "Frozen V2 inputs, installed views, selected 4a7cf tool/2 threads and same-spec mapped input revalidated upstream; immutable reports verified here.",
+      "evidence": [
+        "reports/pnr/input_audit.json",
+        "reports/pnr/tool_identity.json",
+        "reports/pnr/orfs_flow_identity.json",
+        "reports/pnr/restored_snapshot_revalidation.json",
+        "reports/pnr/commands.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/input_audit.json": "e5096b12b75d245f80a9b90f2ace11b119f37ad3da40acd65b84ba27e8995dfb",
+        "reports/pnr/tool_identity.json": "f8efb8d4285a05d807d5c4033f73a3db57a683e556f97a44306316436f6799d6",
+        "reports/pnr/orfs_flow_identity.json": "9ddb4547073543f02a3438a6db5b74d8db8a10fae7267d60b3d7d9b39f0992a2",
+        "reports/pnr/restored_snapshot_revalidation.json": "a9f97d3bc0fd7b87ce91a505ab71a69fd3c198c5a1a697e6f18c280ef5233ff8",
+        "reports/pnr/commands.json": "b0b7bb675fef00924fc68b692ac818457acb63cdbafd4c8c54f03c16dea4a44e"
+      }
+    },
+    {
+      "id": "AC-SYNTHESIS",
+      "title": "Synthesize real functional top and close setup",
+      "responsible_stage": "synthesize",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F",
+        "REQ-269A92199F57",
+        "REQ-5A63794D81A1",
+        "REQ-009CFCC955AD",
+        "REQ-AD938E4C7993",
+        "REQ-260B7A7590D6",
+        "REQ-BFED1ACF2799",
+        "REQ-FB0A4C73634E",
+        "REQ-08F22F52719B",
+        "REQ-B6574FECD558",
+        "REQ-3EA8205B2DC9",
+        "REQ-89D3BA17833E",
+        "REQ-FD64F59A9F1A",
+        "REQ-B39614D719F0",
+        "REQ-0C348358645A",
+        "REQ-D58FD55E7FD3",
+        "REQ-E2998F12B044",
+        "REQ-0F7329FEEA6B",
+        "REQ-27179AE580E7",
+        "REQ-D0755E26A106",
+        "REQ-3F6DE7EF1AC6",
+        "REQ-56CE793251EE"
+      ],
+      "design_groups": [
+        "physical.scope",
+        "cpu.structure",
+        "cpu.pipeline"
+      ],
+      "dependencies": [
+        "AC-PHYSICAL-INPUTS"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Source-identical frozen V2 mapping directly checked: 16683 characterized cells, no macro/latch/unmapped/forbidden cells, exact ports, 1024 RF flops and nonempty pipeline/NPU state groups. Existing synthesis/STA logs pass; full formal RTL equivalence remains unexecuted.",
+      "evidence": [
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/build/synth/nebula_cpu_npu_top.v",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/build/synth/mapped.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/report.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/structure_audit.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/cell_audit.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/memory_mapping.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/timing_audit.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/yosys.log",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/sta.log",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/tool_identity.json",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/gates.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/build/synth/nebula_cpu_npu_top.v": "a3c92f1bb9609445af213c8645de4c896a5f0d6e932bc6ec45b3154f28a87632",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/build/synth/mapped.json": "0881be25c96bdee0584733b92198859d6308bc984f1c33db43a1b1f943a511b7",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/report.json": "95f432f7af1f1ff0b0c62e019aa7bfe65c6c7990a0d0151807cb94ead79af28b",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/structure_audit.json": "d502fb3cf8832334f13e4dc02df0a04e183fb31f45f4c8fcc1605b5a560baa55",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/cell_audit.json": "7fcfe3b7acbd6a4973801f518ed574e1071e88377aa2816d82be56e2a2969f8f",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/memory_mapping.json": "e98b4c1035ac9c410169be89739a2f8ab6a46504dac8b4d1a0209fc42a0c7ed6",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/timing_audit.json": "5416793debced0858655c3f58327e5d09784b09bf9c9bb860a53fe1b42eba85f",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/yosys.log": "39ba2b74e8cbf04525f7b2298b331cc7a63ef6f58aa9a29a4b6cee41782d346f",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/sta.log": "8b256cd13f6c8b58d3c6d85018ac60c8429f257f27c287cc3ff757aefb417b1a",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/tool_identity.json": "e73c9dff4cc1e5668991b0b2003317a288140323462ca599ac3d83db9924b533",
+        "build/gds/evidence/artifact-0b514721fd8641408ffcec0d7f4350ec/reports/synthesis/gates.json": "8fa8d91059bb206aefba80febae7f08f3a2757f935e529e291c7aaab68b66add"
+      }
+    },
+    {
+      "id": "AC-FLOORPLAN",
+      "title": "Validate planned geometry and native legal rows separately",
+      "responsible_stage": "pnr",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ],
+      "design_groups": [
+        "physical.scope"
+      ],
+      "dependencies": [
+        "AC-SYNTHESIS",
+        "AC-PHYSICAL-INPUTS"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "V2 physical inputs and separate planned/native-row geometry; affected physical stages and final export revalidation"
+      ],
+      "reason": "Native planned versus legal-row bounds, integer DBU, margins, sites, placement and pin legality pass at placement/final snapshot.",
+      "evidence": [
+        "reports/pnr/geometry_acceptance.json",
+        "reports/pnr/placement_geometry/geometry_acceptance.json",
+        "reports/pnr/database_rows.tsv",
+        "reports/pnr/database_pin_locations.tsv",
+        "reports/pnr/database_placed_instances.tsv",
+        "reports/pnr/floorplan.log"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top under calibrated-geometry-v2"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/geometry_acceptance.json": "8b850eacdb2efab5ac5ee18c4eca5b79b40e27e17628881f29bf269a095ed93e",
+        "reports/pnr/placement_geometry/geometry_acceptance.json": "d7683af86a0a0054a7e9bfc68f0082917c1b23360f50738ee7d9931a2fa5abd2",
+        "reports/pnr/database_rows.tsv": "c82e32f2577f1f2f863c69b493748d320d755c3e111d02710b887ababee58d70",
+        "reports/pnr/database_pin_locations.tsv": "15103a0dbbe6f826b3ddf54b04169a839114631bb65feb8c7e9739b41dadc9c8",
+        "reports/pnr/database_placed_instances.tsv": "9f015292f72a609ef1518888ba56cf2cc25bd771208574d2b1d281953ffca462",
+        "reports/pnr/floorplan.log": "84006f1cc0db9e61d551a871923075529a1dd19b9bb598d830722f5e42a14b4c"
+      }
+    },
+    {
+      "id": "AC-PDN-ROUTING",
+      "title": "Check approved PDN,cell recipes and routing policy",
+      "responsible_stage": "pnr",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ],
+      "design_groups": [
+        "physical.scope"
+      ],
+      "dependencies": [
+        "AC-FLOORPLAN"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Actual PG/support inventory, frozen PDN/track/route scripts and routed signal connectivity retained in the same snapshot.",
+      "evidence": [
+        "reports/pnr/database_power_connections.tsv",
+        "reports/pnr/geometry_acceptance.json",
+        "reports/pnr/database_instances.tsv",
+        "reports/pnr/input_audit.json",
+        "reports/pnr/grt.log",
+        "reports/pnr/route.log",
+        "reports/pnr/final_connectivity.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/database_power_connections.tsv": "8ca2b5b7e2b76dd2a5301762ca9d284645c9fca01e20bc8f103b99c2c8b0243b",
+        "reports/pnr/geometry_acceptance.json": "8b850eacdb2efab5ac5ee18c4eca5b79b40e27e17628881f29bf269a095ed93e",
+        "reports/pnr/database_instances.tsv": "11adb5962e1e83faef27977cd9d07e307c6da0ca921aeaa5bd91e6250ce0f43b",
+        "reports/pnr/input_audit.json": "e5096b12b75d245f80a9b90f2ace11b119f37ad3da40acd65b84ba27e8995dfb",
+        "reports/pnr/grt.log": "edfc9aa400da33b567a1adf4e03349dbe797bb77513228715b5430089e271687",
+        "reports/pnr/route.log": "dbe966d5321b11e137c8ec3be49f09c47c9529acf44161bf77d23da839b694f8",
+        "reports/pnr/final_connectivity.json": "e1938a217ed3c4445e3d503f6db71ee847fe89f111844bb32275d9d300934ca6"
+      }
+    },
+    {
+      "id": "AC-POSTROUTE-STA",
+      "title": "Close extracted propagated-clock TT timing",
+      "responsible_stage": "pnr",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ],
+      "design_groups": [
+        "physical.scope"
+      ],
+      "dependencies": [
+        "AC-PDN-ROUTING"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "TT 25C/1.8V, propagated 100 ns clock, uncertainty 0.1 ns, nominal R/C and derates 1.0; setup and hold pass. Single corner only.",
+      "evidence": [
+        "reports/pnr/sta_timing.json",
+        "reports/pnr/sta_setup_paths.rpt",
+        "reports/pnr/sta_hold_paths.rpt",
+        "reports/pnr/sta_unconstrained_paths.rpt",
+        "reports/pnr/cts.log",
+        "build/pnr/results/6_final.sta.v",
+        "build/pnr/results/6_final.spef",
+        "build/pnr/results/6_final.sdc"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/sta_timing.json": "d0e53f28d9a5a87451697cf80b54cffda16ace78ce9d4db9f2d5cc4f7a32496e",
+        "reports/pnr/sta_setup_paths.rpt": "e38d785803f2cb8fe3287632375373d144d5c9eff69d334c2177350f2c70fdda",
+        "reports/pnr/sta_hold_paths.rpt": "40eff0a2a63e05a29806bffa0f4312cc2107f1f044b71f24639dc5933f0e1c20",
+        "reports/pnr/sta_unconstrained_paths.rpt": "d499e2f0f26c1e0ce96aef04a49b99f6a9a1048db10f9ca246a748ceab1f58bb",
+        "reports/pnr/cts.log": "e77c9e2a00f350cd3fbde37a1223f2fcd9e6b3b2dcfbb3cb20e8e8311d96d494",
+        "build/pnr/results/6_final.sta.v": "b6e6e40bc13266ccd415422356b4a48d42c891efced69cc727bb2a6b392343da",
+        "build/pnr/results/6_final.spef": "8f56e2dd07c3e60026e0a3eb2873230c163cc8ed611850b1db650144bd7a9b0d",
+        "build/pnr/results/6_final.sdc": "2687c2c28d4db1e5ad89027cc4b353b5b4bc1e625bcfb14d552ab1efb6eb7bd2"
+      }
+    },
+    {
+      "id": "AC-ELECTRICAL",
+      "title": "Close characterized electrical and reset checks",
+      "responsible_stage": "pnr; functional-performance-verify",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F",
+        "REQ-D78B93943C97",
+        "REQ-6C39607BFF86",
+        "REQ-079A812CDD10",
+        "REQ-47B47DDA5109",
+        "REQ-4187B6DAEA66"
+      ],
+      "design_groups": [
+        "physical.scope",
+        "cpu.reset",
+        "npu.cancel"
+      ],
+      "dependencies": [
+        "AC-POSTROUTE-STA",
+        "AC-RESET",
+        "AC-NPU-CANCEL"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "V2 physical inputs and separate planned/native-row geometry; affected physical stages and final export revalidation",
+        "existing enabled-top smoke with independent reset VCD measurements"
+      ],
+      "reason": "Characterized slew/capacitance, recovery/removal/pulse checks and frozen external reset waveform pass; characterized fanout ceiling unavailable, structural maximum reported.",
+      "evidence": [
+        "reports/pnr/database_max_slew.rpt",
+        "reports/pnr/database_max_capacitance.rpt",
+        "reports/pnr/database_max_fanout.rpt",
+        "reports/pnr/database_recovery.rpt",
+        "reports/pnr/database_removal.rpt",
+        "reports/pnr/database_min_pulse_width.rpt",
+        "reports/pnr/external_reset_dependency.json",
+        "reports/pnr/reset_evidence/reset-waveform.vcd",
+        "reports/pnr/area_and_fanout.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/database_max_slew.rpt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "reports/pnr/database_max_capacitance.rpt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "reports/pnr/database_max_fanout.rpt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "reports/pnr/database_recovery.rpt": "21528e863825def7c9856e486de791b74520cbc4eae3996d83786f1dc4c13e3d",
+        "reports/pnr/database_removal.rpt": "21528e863825def7c9856e486de791b74520cbc4eae3996d83786f1dc4c13e3d",
+        "reports/pnr/database_min_pulse_width.rpt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "reports/pnr/external_reset_dependency.json": "9b0124cece2201b8349146177c913bffa103510d4868ecf2ac6202f4809c1d5a",
+        "reports/pnr/reset_evidence/reset-waveform.vcd": "e7f281dccffd9290ff11706da09852f34183cba43118b74a4300ec36de5cb72a",
+        "reports/pnr/area_and_fanout.json": "21e0e86bb783a39f3b769f62000d4f20b640361de7516a8ba7b6f0a11404b3e9"
+      }
+    },
+    {
+      "id": "AC-ROUTE-CLEAN",
+      "title": "Clear detailed routing DRC and antenna",
+      "responsible_stage": "pnr",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ],
+      "design_groups": [
+        "physical.scope"
+      ],
+      "dependencies": [
+        "AC-ELECTRICAL"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Final router DRC/antenna are zero, all functional nets routed, completed execution bound to unchanged final ODB.",
+      "evidence": [
+        "reports/pnr/5_2_route.log",
+        "reports/pnr/final_antenna.json",
+        "reports/pnr/final_connectivity.json",
+        "reports/pnr/execution_status.json",
+        "reports/pnr/result_summary.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/5_2_route.log": "381e8cc8cd7c6bdee43dee3fd7983ad6cc1bf87426347b2c5b08dfe0a2b19e27",
+        "reports/pnr/final_antenna.json": "6afb0dbeb03b325c8b00fd4737a28a2e994c1b80ecd38296b52725225aa36899",
+        "reports/pnr/final_connectivity.json": "e1938a217ed3c4445e3d503f6db71ee847fe89f111844bb32275d9d300934ca6",
+        "reports/pnr/execution_status.json": "d40ad141ed0c780b851ffbb4a2a829180b43e358b7fcc13adcdec7c239048a9b",
+        "reports/pnr/result_summary.json": "a9c1403d12cdb11d73df122ec80412aec5d4c8be25c4d51005da42257dfa823c"
+      }
+    },
+    {
+      "id": "AC-EXPORT-CONSISTENCY",
+      "title": "Check final ODB,STA netlist and SPEF identity",
+      "responsible_stage": "pnr",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ],
+      "design_groups": [
+        "physical.scope"
+      ],
+      "dependencies": [
+        "AC-ROUTE-CLEAN",
+        "AC-POSTROUTE-STA"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "revalidated upstream",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Final ODB versus STA netlist/SPEF identity, ownership/connectivity and 9734 path reload comparisons pass within 1e-6 ns.",
+      "evidence": [
+        "reports/pnr/post_route_export_consistency.json",
+        "reports/pnr/spef_binding_audit.json",
+        "reports/pnr/equivalence.json",
+        "reports/pnr/delivery_snapshot.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/post_route_export_consistency.json": "78bbd95dc254db9186472b24ed53459e4150e1386c0c8ad72ea18718586ebd8b",
+        "reports/pnr/spef_binding_audit.json": "645066c04c2b9ea887ad71d68d05b5a0da3d7cb992fb2cf587dc6a6be6ca712b",
+        "reports/pnr/equivalence.json": "2a6fb1070dc37d33bb1ae0933c343af0dd95e7301d379642d3d1ccbd31e01f2e",
+        "reports/pnr/delivery_snapshot.json": "93d23f02761ace730048026a4b5b550a7d27069b55a048128442568a95098220"
+      }
+    },
+    {
+      "id": "AC-DRC-LVS",
+      "title": "Run independent frozen deck DRC and LVS",
+      "responsible_stage": "pnr; gds-export",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F"
+      ],
+      "design_groups": [
+        "physical.scope"
+      ],
+      "dependencies": [
+        "AC-EXPORT-CONSISTENCY"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused completed prior attempt; exact binding revalidated",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Installed frozen decks on this exact export: DRC zero, nonempty MOS-device-extracted hierarchical LVS matched; metal-width and missing-poly negative controls detected. FEOL DRC/general density excluded.",
+      "evidence": [
+        "build/gds/checks.json",
+        "build/gds/drc.lyrdb",
+        "build/gds/lvs.lvsdb",
+        "build/gds/extracted.cir",
+        "build/gds/commands.json",
+        "build/gds/resources.json",
+        "build/gds/negative/mutations.json",
+        "build/gds/negative/drc_width.lyrdb",
+        "build/gds/negative/lvs_missing_gate.lvsdb",
+        "build/gds/reuse_validation.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "passed",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "build/gds/checks.json": "7dd5169b09a0bb7f9de5254b9b20e469c62d68216d7fe91510722ce44221a24d",
+        "build/gds/drc.lyrdb": "e0be8a4d8fbd52bd473ba283fa6dafab58054175e069e80b82e5c324ae99a03c",
+        "build/gds/lvs.lvsdb": "23ffbf8a47f96e74c0ed74a836baf88dd77e1bd35719175068d7d044248780df",
+        "build/gds/extracted.cir": "b6a4b6a83375b3cc86ca6495c939e09dab81e7dcbc681415d52ef752b365d0da",
+        "build/gds/commands.json": "95e4182fdb89a4e34e1fa650344e645bfda131d51bced3e2ce0d47a1bcfa9290",
+        "build/gds/resources.json": "dbe384dd716d722aed0b9db20f599f35e35470a2c01c1d9f44c0a1c095558c70",
+        "build/gds/negative/mutations.json": "96cd5f26189070d3033752cd2932900006056276b80536015fae886f1d2e0558",
+        "build/gds/negative/drc_width.lyrdb": "7bf8960a8488d6cbe5b84d241857e7de8e1b00021baa24665c9d6ab8ffc66c2e",
+        "build/gds/negative/lvs_missing_gate.lvsdb": "f061760b3f29481bac9be03cda3fd0380dd2c6a3cf81afb166539fea0e38bfab",
+        "build/gds/reuse_validation.json": "b4e326061663b2d3543441cc31b957b8939974ec558a96b10b3458b039032c63"
+      }
+    },
+    {
+      "id": "AC-POWER-AREA",
+      "title": "Report actual per-workload activity,power and area",
+      "responsible_stage": "pnr",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F",
+        "REQ-9BBBD834A83C",
+        "REQ-F332169E266A",
+        "REQ-5EAE3E313E75",
+        "REQ-5006BB8FC9D7",
+        "REQ-46BF76FC1DFC",
+        "REQ-B151009B056E"
+      ],
+      "design_groups": [
+        "physical.scope",
+        "system.workloads"
+      ],
+      "dependencies": [
+        "AC-EXPORT-CONSISTENCY",
+        "AC-DOT64",
+        "AC-GEMM8",
+        "AC-CONV3"
+      ],
+      "verdict": "deferred",
+      "execution_status": "PENDING",
+      "result_origin": "reused",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "PnR owner supplied exact-snapshot area/model/program/expected-output inventories. All three final-design workload runs/activity remain unavailable; report-only power unavailability cannot waive mandatory functional execution.",
+      "evidence": [
+        "reports/pnr/power_area.json",
+        "reports/pnr/power_area/input_inventory.json",
+        "reports/pnr/power_area/model_inventory.json",
+        "reports/pnr/power_area/DOT64.json",
+        "reports/pnr/power_area/GEMM8.json",
+        "reports/pnr/power_area/CONV3.json",
+        "build/gds/power_area.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled post-route top"
+      ],
+      "acceptance_verdict": "deferred",
+      "nonpassing_dependencies": [],
+      "evidence_sha256": {
+        "reports/pnr/power_area.json": "b5e9fe139a405dfb0b7704998da07a6cb684847833b930b931807968a9c33bb9",
+        "reports/pnr/power_area/input_inventory.json": "d54845ab4751c85d7f01d5e616dc663057f9bc17a25ab0a54d6532a34aecf176",
+        "reports/pnr/power_area/model_inventory.json": "895a8ee299efb0051dc1e8a4b8e906342dd9f9b54dee72817dfad88d42d7b321",
+        "reports/pnr/power_area/DOT64.json": "2af80478b444cbbdf70339cd3388d611170a99cb205c333740334e3852c32c9b",
+        "reports/pnr/power_area/GEMM8.json": "ff9987ab39dd736c317e9874a9243a6e69babc119919ccf9dc525797a7c1c26e",
+        "reports/pnr/power_area/CONV3.json": "706077374423124df8a2f989d608aaa89bdeeb019fd55ec48f0790ceb6ffc372",
+        "build/gds/power_area.json": "c59210e347686ddb38d78308a0369a85ffc611a70da9912522c1b64e5827f61f"
+      }
+    },
+    {
+      "id": "AC-GDS",
+      "title": "Read final GDS and reconcile project top",
+      "responsible_stage": "gds-export",
+      "requirement_ids": [
+        "REQ-BE04BC186AC6",
+        "REQ-C953E329C695",
+        "REQ-CAEE2894B770",
+        "REQ-F5F055C323E2",
+        "REQ-B3136724E4AB",
+        "REQ-17C25DACF539",
+        "REQ-68A4C372A16F",
+        "REQ-2EFF5B9CB3EB",
+        "REQ-26835CBACE92",
+        "REQ-DBB27F6C2D3C"
+      ],
+      "design_groups": [
+        "physical.scope",
+        "integration.boundary"
+      ],
+      "dependencies": [
+        "AC-DRC-LVS",
+        "AC-POWER-AREA",
+        "AC-EXPORT-CONSISTENCY"
+      ],
+      "verdict": "passed",
+      "execution_status": "PASS",
+      "result_origin": "reused completed prior attempt; exact binding revalidated",
+      "scenarios": [
+        "shared fixed ACT4/directed/differential/wait/reset/boundary/public/cycle regression, both configurations"
+      ],
+      "reason": "Streamed from read-only final ODB via byte-identical regenerated DEF; top/master multiplicities/port labels match; all GDS geometry equals accepted upstream export. AC-POWER-AREA remains a blocking dependency.",
+      "evidence": [
+        "build/gds/readability.json",
+        "build/gds/port_boundary.json",
+        "build/gds/geometry_comparison.json",
+        "build/gds/preservation.json",
+        "build/gds/result_summary.json",
+        "build/gds/nebula_cpu_npu_top.gds",
+        "build/gds/reuse_validation.json"
+      ],
+      "evidence_binding": "build/gds/upstream_binding.json",
+      "snapshot_id": "sha256:566e131368689aa75e7522817500b485883cf637f9c71787ad02ae56937afa74",
+      "configurations": [
+        "enabled physical top"
+      ],
+      "acceptance_verdict": "deferred",
+      "nonpassing_dependencies": [
+        "AC-POWER-AREA"
+      ],
+      "evidence_sha256": {
+        "build/gds/readability.json": "b7b3fed35dd8d5e2c7c900d65132be8f050ece9bc23f9fb5afa250aafe2ccf23",
+        "build/gds/port_boundary.json": "1ab8d07e4bff5b487a68336f17e42345322fcb729011ab83bfc7cd96ef7277f5",
+        "build/gds/geometry_comparison.json": "2c55ab79744076fcbbb225b549ce3864b11ab4e313e9b097fe8b275027af1d21",
+        "build/gds/preservation.json": "2ca0497c1eb1c80b582d4cf9162eb0d0fd0b55a99b832279eb89840482ebb792",
+        "build/gds/result_summary.json": "12855a6456d390a7b0625c1da59da3eac25f789233457a907e1aa2a7040fde9b",
+        "build/gds/nebula_cpu_npu_top.gds": "69c2adfec70706dc6e3af46f2d2255b2dcf074c6e9b2926be642ac8fb9ea90a5",
+        "build/gds/reuse_validation.json": "b4e326061663b2d3543441cc31b957b8939974ec558a96b10b3458b039032c63"
+      }
+    }
+  ],
+  "blocking_checks": [
+    "AC-RESOURCES",
+    "AC-EVALUATOR-RELEASE",
+    "AC-PROJECT-COMPLETION",
+    "AC-POWER-AREA"
+  ],
+  "adapter_audit": "build/gds/adapter_audit.json",
+  "requirements_audit": "build/gds/requirements_audit.json",
+  "limitations": [
+    "FEOL DRC disabled in frozen deck; general metal density not covered beyond vpp overlap rules.",
+    "Only Sky130HD tt_025C_1v80 nominal 100 ns scenario; no multi-corner STA/foundry signoff.",
+    "Independent ERC, EM/IR, pad/package qualification and foundry authorization unavailable.",
+    "Full RTL-to-synthesis formal equivalence was not supplied; mapped-to-post-route equivalence is retained.",
+    "No fabricated-silicon evidence or tapeout.release/signoff claim. Negative GDS files are deliberate corruptions for checker tests only."
+  ],
+  "upstream_binding": "build/gds/upstream_binding.json",
+  "functional_summary": {
+    "schema_version": 1,
+    "stage": "verification",
+    "status": "completed",
+    "summary": "Pre-synthesis stage passed: 265267 source-bound functional scenarios reused; 33/48 acceptance checks passed, 15 deferred. One enabled-top/reset-waveform replay and 12 delivery-checker cases passed under frozen V2 inputs.",
+    "metrics": [
+      {
+        "id": "tests.total",
+        "label": "\u6d4b\u8bd5\u7528\u4f8b",
+        "value": 265267,
+        "unit": "count",
+        "status": "measured",
+        "scope": "latest unique required functional scenario/configuration or NPU vector; historical infrastructure invalids kept separately; reused under V2 by exact source/spec/checker binding",
+        "evidence": [
+          "reports/verification/tests.json",
+          "reports/verification/baseline-revalidation.json"
+        ]
+      },
+      {
+        "id": "tests.passed",
+        "label": "\u901a\u8fc7\u7528\u4f8b",
+        "value": 265267,
+        "unit": "count",
+        "status": "measured",
+        "scope": "latest unique required functional scenario/configuration or NPU vector; historical infrastructure invalids kept separately; reused under V2 by exact source/spec/checker binding",
+        "evidence": [
+          "reports/verification/tests.json",
+          "reports/verification/baseline-revalidation.json"
+        ]
+      },
+      {
+        "id": "tests.failed",
+        "label": "\u5931\u8d25\u7528\u4f8b",
+        "value": 0,
+        "unit": "count",
+        "status": "measured",
+        "scope": "latest unique required functional scenario/configuration or NPU vector; historical infrastructure invalids kept separately; reused under V2 by exact source/spec/checker binding",
+        "evidence": [
+          "reports/verification/tests.json",
+          "reports/verification/baseline-revalidation.json"
+        ]
+      },
+      {
+        "id": "tests.executions",
+        "label": "\u6d4b\u8bd5\u6267\u884c\u6b21\u6570",
+        "value": 1566,
+        "unit": "count",
+        "status": "measured",
+        "scope": "actual simulator process launches including affected replays; differs from per-vector tests.total",
+        "evidence": [
+          "reports/verification/raw-run-evidence.tar.gz",
+          "reports/verification/tests.json",
+          "reports/verification/baseline-commands.json"
+        ]
+      },
+      {
+        "id": "acceptance.total",
+        "label": "\u9a8c\u6536\u70b9\u603b\u6570",
+        "value": 48,
+        "unit": "count",
+        "status": "measured",
+        "scope": "all frozen acceptance.plan checkpoints, including deferred project obligations",
+        "evidence": [
+          "reports/verification/traceability.json"
+        ]
+      },
+      {
+        "id": "acceptance.covered",
+        "label": "\u5df2\u9a8c\u8bc1\u9a8c\u6536\u70b9",
+        "value": 33,
+        "unit": "count",
+        "status": "measured",
+        "scope": "checkpoints with complete passing pre-synthesis verdict; failed/deferred excluded",
+        "evidence": [
+          "reports/verification/traceability.json"
+        ]
+      },
+      {
+        "id": "coverage.line",
+        "label": "Line Coverage",
+        "value": 95.65217391304348,
+        "unit": "%",
+        "status": "measured",
+        "scope": "union of unique Verilator 5.048 instrumented DUT source points across both core configurations and enabled physical-top RTL; testbench excluded; reused under V2 by exact source/spec/checker binding",
+        "evidence": [
+          "reports/verification/coverage.json",
+          "reports/verification/raw-run-evidence.tar.gz",
+          "reports/verification/baseline-revalidation.json"
+        ],
+        "numerator": 66,
+        "denominator": 69
+      },
+      {
+        "id": "coverage.branch",
+        "label": "Branch Coverage",
+        "value": 97.72727272727273,
+        "unit": "%",
+        "status": "measured",
+        "scope": "union of unique Verilator 5.048 instrumented DUT source points across both core configurations and enabled physical-top RTL; testbench excluded; reused under V2 by exact source/spec/checker binding",
+        "evidence": [
+          "reports/verification/coverage.json",
+          "reports/verification/raw-run-evidence.tar.gz",
+          "reports/verification/baseline-revalidation.json"
+        ],
+        "numerator": 129,
+        "denominator": 132
+      },
+      {
+        "id": "coverage.toggle",
+        "label": "Toggle Coverage",
+        "value": 81.53627888123226,
+        "unit": "%",
+        "status": "measured",
+        "scope": "union of unique Verilator 5.048 instrumented DUT source points across both core configurations and enabled physical-top RTL; testbench excluded; reused under V2 by exact source/spec/checker binding",
+        "evidence": [
+          "reports/verification/coverage.json",
+          "reports/verification/raw-run-evidence.tar.gz",
+          "reports/verification/baseline-revalidation.json"
+        ],
+        "numerator": 4023,
+        "denominator": 4934
+      },
+      {
+        "id": "coverage.functional",
+        "label": "Functional Coverage",
+        "value": 100.0,
+        "unit": "%",
+        "status": "measured",
+        "scope": "48 supported instruction families, 12 branch outcomes and 20 legal load/store lanes; actual qualified retirement/trap observations; no numerical threshold; reused under V2 by exact source/spec/checker binding",
+        "evidence": [
+          "reports/verification/coverage.json",
+          "reports/verification/raw-run-evidence.tar.gz",
+          "reports/verification/baseline-revalidation.json"
+        ],
+        "numerator": 80,
+        "denominator": 80
+      },
+      {
+        "id": "performance.latency",
+        "label": "\u5ef6\u8fdf",
+        "value": 4,
+        "unit": "cycle",
+        "status": "measured",
+        "scope": "64 independent ADDIs per core configuration, accepted pre-edge fetch to post-NBA retirement",
+        "evidence": [
+          "reports/performance/cycles-base.json",
+          "reports/performance/cycles-enabled.json"
+        ]
+      },
+      {
+        "id": "performance.throughput",
+        "label": "\u541e\u5410",
+        "value": 1,
+        "unit": "operation/cycle",
+        "status": "measured",
+        "scope": "steady independent ADDI retirement per core configuration",
+        "evidence": [
+          "reports/performance/cycles-base.json",
+          "reports/performance/cycles-enabled.json"
+        ]
+      },
+      {
+        "id": "custom.infrastructure_invalid",
+        "label": "\u4fdd\u7559\u57fa\u7840\u8bbe\u65bd\u65e0\u6548\u7ed3\u679c",
+        "value": 2,
+        "unit": "count",
+        "status": "measured",
+        "scope": "initial capture-directory failure and enabled public-fixture binding failure, superseded only by affected verified replays",
+        "evidence": [
+          "reports/verification/tests.json"
+        ]
+      },
+      {
+        "id": "custom.delivery_checker_total",
+        "label": "Delivery checker total",
+        "value": 12,
+        "unit": "count",
+        "status": "measured",
+        "scope": "AC-DELIVERY checker validation only; temporary publication fixtures, no DUT simulation or functional-coverage contribution; freshly replayed under V2 input context",
+        "evidence": [
+          "reports/verification/delivery-checker-tests.json"
+        ]
+      },
+      {
+        "id": "custom.delivery_checker_passed",
+        "label": "Delivery checker passed",
+        "value": 12,
+        "unit": "count",
+        "status": "measured",
+        "scope": "AC-DELIVERY checker validation only; temporary publication fixtures, no DUT simulation or functional-coverage contribution; freshly replayed under V2 input context",
+        "evidence": [
+          "reports/verification/delivery-checker-tests.json"
+        ]
+      },
+      {
+        "id": "custom.delivery_checker_failed",
+        "label": "Delivery checker failed",
+        "value": 0,
+        "unit": "count",
+        "status": "measured",
+        "scope": "AC-DELIVERY checker validation only; temporary publication fixtures, no DUT simulation or functional-coverage contribution; freshly replayed under V2 input context",
+        "evidence": [
+          "reports/verification/delivery-checker-tests.json"
+        ]
+      },
+      {
+        "id": "custom.reset_low_ns",
+        "label": "reset_low_ns",
+        "value": 300,
+        "unit": "ns",
+        "status": "measured",
+        "scope": "fresh reset environment waveform of enabled RTL top; independent VCD measurement",
+        "evidence": [
+          "reports/verification/reset-waveform.json",
+          "reports/verification/reset-waveform.vcd"
+        ]
+      },
+      {
+        "id": "custom.reset_release_phase_ns",
+        "label": "reset_release_phase_ns",
+        "value": 50,
+        "unit": "ns",
+        "status": "measured",
+        "scope": "fresh reset environment waveform of enabled RTL top; independent VCD measurement",
+        "evidence": [
+          "reports/verification/reset-waveform.json",
+          "reports/verification/reset-waveform.vcd"
+        ]
+      }
+    ]
+  },
+  "coverage": {
+    "line": {
+      "numerator": 66,
+      "denominator": 69,
+      "percent": 95.65217391304348,
+      "scope": "union of unique Verilator 5.048 instrumented DUT source points across both core configurations and enabled physical-top RTL; testbench excluded"
+    },
+    "branch": {
+      "numerator": 129,
+      "denominator": 132,
+      "percent": 97.72727272727273,
+      "scope": "union of unique Verilator 5.048 instrumented DUT source points across both core configurations and enabled physical-top RTL; testbench excluded"
+    },
+    "toggle": {
+      "numerator": 4023,
+      "denominator": 4934,
+      "percent": 81.53627888123226,
+      "scope": "union of unique Verilator 5.048 instrumented DUT source points across both core configurations and enabled physical-top RTL; testbench excluded"
+    },
+    "functional": {
+      "numerator": 80,
+      "denominator": 80,
+      "percent": 100.0,
+      "scope": "48 supported instruction families, 12 branch outcomes and 20 legal load/store lanes; actual qualified retirement/trap observations; no numerical threshold"
+    }
+  },
+  "tool_identity": "build/gds/tool_identity.json",
+  "prior_audits": [
+    "build/gds/history/attempt-7c5b8dafd74c4a8aa0b22ba361d3a618/project_acceptance.json",
+    "build/gds/history/attempt-b359169b76fd4574b921794913a4ad9c/project_acceptance.json"
+  ],
+  "continuation_audit": "build/gds/resume_validation.json",
+  "evidence_location_note": "Prior native capture paths are preserved in resume_validation.archive and now resolved to exact Git owner bytes under build/gds/evidence; no owner execution or verdict changed."
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Chip Nebula EDA result summary v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "stage", "status", "summary", "metrics"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "stage": {"type": "string", "minLength": 1},
+    "status": {"enum": ["completed", "partial", "not_run"]},
+    "summary": {"type": "string", "minLength": 1},
+    "metrics": {"type": "array", "items": {"$ref": "#/$defs/metric"}}
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "value", "unit", "status", "scope", "evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"},
+        "label": {"type": "string", "minLength": 1},
+        "value": {"type": ["number", "string", "boolean", "null"]},
+        "unit": {"type": "string", "minLength": 1},
+        "status": {"enum": ["measured", "not_measured", "not_applicable", "unsupported"]},
+        "scope": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "reason": {"type": "string", "minLength": 1},
+        "numerator": {"type": "number", "minimum": 0},
+        "denominator": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "allOf": [{
+        "if": {"properties": {"status": {"const": "measured"}}},
+        "then": {"properties": {"value": {"type": ["number", "string", "boolean"]}, "evidence": {"minItems": 1}}},
+        "else": {"required": ["reason"], "properties": {"value": {"type": "null"}}}
+      }]
+    }
+  },
+  "x-metrics": {
+    "tests.total": {"label": "测试用例", "unit": "count", "kind": "count"},
+    "tests.executions": {"label": "测试执行次数", "unit": "count", "kind": "count"},
+    "tests.passed": {"label": "通过用例", "unit": "count", "kind": "count"},
+    "tests.failed": {"label": "失败用例", "unit": "count", "kind": "count"},
+    "acceptance.covered": {"label": "已验证验收点", "unit": "count", "kind": "count"},
+    "acceptance.total": {"label": "验收点总数", "unit": "count", "kind": "count"},
+    "coverage.line": {"label": "Line Coverage", "unit": "%", "kind": "percent"},
+    "coverage.branch": {"label": "Branch Coverage", "unit": "%", "kind": "percent"},
+    "coverage.toggle": {"label": "Toggle Coverage", "unit": "%", "kind": "percent"},
+    "coverage.functional": {"label": "Functional Coverage", "unit": "%", "kind": "percent"},
+    "design.standard_cell_count": {"label": "标准单元", "unit": "count", "kind": "count"},
+    "design.macro_count": {"label": "Macro 数量", "unit": "count", "kind": "count"},
+    "design.cell_area": {"label": "Liberty 单元面积", "unit": "um2", "kind": "nonnegative"},
+    "design.total_footprint_area": {"label": "单元与 Macro 占地面积", "unit": "um2", "kind": "nonnegative"},
+    "design.die_area": {"label": "Die Area", "unit": "um2", "kind": "nonnegative"},
+    "design.latch_count": {"label": "Latch 数量", "unit": "count", "kind": "count"},
+    "timing.setup_slack": {"label": "Setup Slack", "unit": "ns", "kind": "number"},
+    "timing.hold_slack": {"label": "Hold Slack", "unit": "ns", "kind": "number"},
+    "timing.setup_tns": {"label": "Setup TNS", "unit": "ns", "kind": "number"},
+    "timing.hold_tns": {"label": "Hold TNS", "unit": "ns", "kind": "number"},
+    "timing.clock_period": {"label": "Clock Period", "unit": "ns", "kind": "nonnegative"},
+    "timing.unconstrained_paths": {"label": "未约束路径", "unit": "count", "kind": "count"},
+    "drc.violations": {"label": "DRC 违规", "unit": "count", "kind": "count"},
+    "antenna.violations": {"label": "天线违规", "unit": "count", "kind": "count"},
+    "lvs.matched": {"label": "LVS 一致", "unit": "boolean", "kind": "boolean"},
+    "gds.bytes": {"label": "GDS 文件大小", "unit": "byte", "kind": "count"},
+    "gds.top_cell": {"label": "GDS 顶层", "unit": "name", "kind": "string"},
+    "gds.readable": {"label": "GDS 可打开", "unit": "boolean", "kind": "boolean"},
+    "performance.latency": {"label": "延迟", "unit": "cycle", "kind": "nonnegative"},
+    "performance.throughput": {"label": "吞吐", "unit": "operation/cycle", "kind": "nonnegative"},
+    "power.total": {"label": "总功耗", "unit": "mW", "kind": "nonnegative"}
+  },
+  "x-profiles": {
+    "verification": {"artifact_types": ["verification.report"], "required_metrics": ["tests.total", "tests.passed", "tests.failed", "acceptance.covered", "acceptance.total", "coverage.line", "coverage.branch", "coverage.toggle", "coverage.functional"]},
+    "synthesis": {"artifact_types": ["netlist", "synthesis.report"], "required_metrics": ["design.standard_cell_count", "design.cell_area", "design.macro_count", "timing.setup_slack", "timing.hold_slack"]},
+    "netlist": {"artifact_types": ["netlist"], "required_metrics": ["design.standard_cell_count", "design.macro_count", "design.latch_count"]},
+    "pnr": {"artifact_types": ["layout", "physical.implementation"], "required_metrics": ["design.die_area", "timing.setup_slack", "timing.hold_slack", "drc.violations", "antenna.violations"]},
+    "sta": {"artifact_types": ["timing.report"], "required_metrics": ["timing.setup_slack", "timing.hold_slack", "timing.setup_tns", "timing.hold_tns", "timing.unconstrained_paths"]},
+    "gds": {"artifact_types": ["gds"], "required_metrics": ["gds.bytes", "gds.top_cell", "gds.readable"]},
+    "signoff": {"artifact_types": ["physical.report"], "required_metrics": ["timing.setup_slack", "timing.hold_slack", "drc.violations", "lvs.matched"]},
+    "performance": {"artifact_types": ["performance.report"], "required_metrics": ["performance.latency", "performance.throughput"]},
+    "power": {"artifact_types": ["power.report"], "required_metrics": ["power.total"]}
+  }
+}

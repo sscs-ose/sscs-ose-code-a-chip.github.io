@@ -1,0 +1,104 @@
+name: 01-custom-role
+version: 2
+parameters:
+  source: specification.source
+tasks:
+  designer:
+    role: tutorial-designer
+    intent: 'Read spec/npu.md and spec/treatment.md. Deliver the complete implementation
+
+      under rtl/. Run python3 tools/smoke.py and develop additional tests if useful.
+
+      The smoke endpoint executes the published checker and retains trusted receipts.
+
+      You may edit rtl/, tests/designer/ and build/ only. Do not alter spec, IP,
+
+      tools, the supplied testbench, task definitions or acceptance conditions.
+
+      Read actual feedback and repair the same assigned task. Do not invoke other
+
+      models/agents, access credentials, or attempt to inspect other trials or the
+
+      final evaluator. End with NEBULA_OUTPUT: {"rtl":{"module":"nebula_npu_dot4"}}.
+
+      '
+    permission:
+      read:
+      - spec/**
+      - rtl/**
+      - ip/**
+      - tb/**
+      - tools/**
+      - tests/**
+      - build/**
+      write:
+      - rtl/**
+      - tests/designer/**
+      - build/**
+      tools: &id001
+      - python3
+      - iverilog
+      - vvp
+      - verilator
+      - git
+      - make
+    inputs:
+      source:
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      rtl:
+        type: rtl.snapshot
+        paths:
+        - rtl/**
+    max_attempts: 8
+    execution:
+      framework: codex
+      model: gpt-6.1-sol
+      reasoning_effort: high
+      timeout_seconds: 1200
+    gates:
+    - name: rtl-present
+      kind: file_check
+      on_failure: retry
+      parameters:
+        paths:
+        - rtl/**/*.sv
+        - rtl/**/*.v
+        min_files: 1
+  audit:
+    role: study-auditor
+    intent: Execute common immutable development check; do not modify design.
+    permission:
+      read:
+      - rtl/**
+      - ip/**
+      - tb/**
+      - tools/**
+      - reports/**
+      - tests/**
+      write:
+      - build/**
+      tools: *id001
+    inputs:
+      rtl:
+        type: rtl.snapshot
+        from: $tasks.designer.outputs.rtl
+    outputs:
+      report:
+        type: verification.report
+        paths:
+        - build/audit/**
+    max_attempts: 8
+    execution:
+      executor: tool
+      command: python3 tools/audit.py
+      timeout_seconds: 180
+feedback:
+- source: audit
+  verdict: fail
+  target: designer
+  kind: feedback
+  summary: Repair the common public checker failure.
+  summary_field: report.repair_summary
+  propagate: true

@@ -1,0 +1,1127 @@
+{
+  "workflow": {
+    "id": "ppa-search",
+    "recipe": "bounded-ppa-search@2",
+    "goal": "Compare bounded PPA decision workflows on one fixed circuit",
+    "status": "paused",
+    "paused_reason": "attempt budget or operator pause: evaluator",
+    "definition_digest": "sha256:1acf3345b628c48509c441f90ea7f14c36ccc1b23a41fd1a706c6fdc946b997f",
+    "metadata": {
+      "baseline_commit": "aa69f22a24db6c43f11d49f3759cdaedc268a989",
+      "framework_override": "",
+      "model_override": "",
+      "parameters": {
+        "source": "ppa-context"
+      },
+      "reasoning_effort_override": "",
+      "recipe_path": "/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-2/project/.chip_nebula/recipes/ppa-search.yaml",
+      "workers": 1
+    },
+    "created_at": "2026-10-16T13:49:26.651189+00:00"
+  },
+  "tasks": [
+    {
+      "id": "ppa-search:proposer",
+      "workflow_id": "ppa-search",
+      "key": "proposer",
+      "role": "ppa-proposer",
+      "role_version": 1,
+      "intent": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "proposal/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "ppa-context",
+          "optional": false
+        }
+      ],
+      "dependencies": [],
+      "outputs": [
+        {
+          "name": "candidate",
+          "artifact_type": "ppa.candidate",
+          "schema_version": 1,
+          "paths": [
+            "proposal/**"
+          ]
+        }
+      ],
+      "hard_gates": [
+        {
+          "name": "bounded-unseen-candidate",
+          "kind": "tool_check",
+          "parameters": {
+            "command": "python3 tools/run_ppa.py validate",
+            "error_class": "invalid_ppa_candidate",
+            "expected": "PPA_CANDIDATE_VALID",
+            "level": "L1",
+            "metric": "",
+            "min_files": 0,
+            "must_match": false,
+            "must_not_match": true,
+            "operator": ">=",
+            "paths": [],
+            "pattern": "",
+            "source": "",
+            "threshold": 0.0,
+            "timeout": 30
+          },
+          "on_failure": "retry"
+        }
+      ],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 12,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+        "deliverables": [
+          "candidate: ppa.candidate"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:reviewer",
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "ppa-search:reviewer",
+      "workflow_id": "ppa-search",
+      "key": "reviewer",
+      "role": "ppa-verifier",
+      "role_version": 1,
+      "intent": "Independently review this PPA proposal against context/protocol.json,\nthe common baseline, and captured candidate/evaluation artifacts under\n.nebula_inputs/. Check its exact parameter tuple, previous trials in this\nsession, interpretation of actual timing/electrical/power evidence, and that\nit preserves frozen RTL, constraints and acceptance. Do not invent results\nor run EDA/model calls. Reject an invalid or unsupported proposal with\nactionable feedback; otherwise permit the experiment to measure it. The\noptimizer alone owns proposal changes. Write only reports/review.json and\noptional build/ notes. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"candidate\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete explanation\"}}.\nSelect one real verdict, never the placeholder string. Your time and Tokens\nare part of the same 1200-second budget as the optimizer.",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [
+        {
+          "name": "source",
+          "required_type": "specification.source",
+          "artifact_id": "ppa-context",
+          "optional": false
+        }
+      ],
+      "dependencies": [
+        {
+          "input_name": "candidate",
+          "upstream_task_id": "ppa-search:proposer",
+          "output_name": "candidate",
+          "required_type": "ppa.candidate",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "verification.report",
+          "schema_version": 1,
+          "paths": [
+            "reports/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "agent",
+      "command": "",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 12,
+      "timeout_seconds": 1200,
+      "brief": {
+        "objective": "Independently review this PPA proposal against context/protocol.json,\nthe common baseline, and captured candidate/evaluation artifacts under\n.nebula_inputs/. Check its exact parameter tuple, previous trials in this\nsession, interpretation of actual timing/electrical/power evidence, and that\nit preserves frozen RTL, constraints and acceptance. Do not invent results\nor run EDA/model calls. Reject an invalid or unsupported proposal with\nactionable feedback; otherwise permit the experiment to measure it. The\noptimizer alone owns proposal changes. Write only reports/review.json and\noptional build/ notes. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"candidate\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete explanation\"}}.\nSelect one real verdict, never the placeholder string. Your time and Tokens\nare part of the same 1200-second budget as the optimizer.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "satisfied"
+    },
+    {
+      "id": "ppa-search:evaluator",
+      "workflow_id": "ppa-search",
+      "key": "evaluator",
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "intent": "Execute the captured immutable candidate under the protected physical budget.",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "candidate",
+          "upstream_task_id": "ppa-search:proposer",
+          "output_name": "candidate",
+          "required_type": "ppa.candidate",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        },
+        {
+          "input_name": "review",
+          "upstream_task_id": "ppa-search:reviewer",
+          "output_name": "report",
+          "required_type": "verification.report",
+          "condition": {
+            "field": "verdict",
+            "equals": "passed"
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "ppa.evaluation.report",
+          "schema_version": 1,
+          "paths": [
+            "build/evaluation/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": false,
+      "display_group": "",
+      "max_attempts": 3,
+      "timeout_seconds": 16500,
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:reviewer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "paused"
+    },
+    {
+      "id": "ppa-search:finalizer",
+      "workflow_id": "ppa-search",
+      "key": "finalizer",
+      "role": "ppa-finalizer",
+      "role_version": 1,
+      "intent": "Record search completion and retain the best qualified result, if any.",
+      "permission": {
+        "read_paths": [
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/session/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "initial_inputs": [],
+      "dependencies": [
+        {
+          "input_name": "evaluation",
+          "upstream_task_id": "ppa-search:evaluator",
+          "output_name": "report",
+          "required_type": "ppa.evaluation.report",
+          "condition": {
+            "field": "",
+            "equals": null
+          },
+          "optional": false
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "artifact_type": "ppa.session.report",
+          "schema_version": 1,
+          "paths": [
+            "build/session/**"
+          ]
+        }
+      ],
+      "hard_gates": [],
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py finalize",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "required": true,
+      "on_demand": true,
+      "display_group": "",
+      "max_attempts": 1,
+      "timeout_seconds": 30,
+      "brief": {
+        "objective": "Record search completion and retain the best qualified result, if any.",
+        "deliverables": [
+          "report: ppa.session.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:reviewer",
+          "task:ppa-search:evaluator"
+        ]
+      },
+      "frozen": true,
+      "engineering_state": "idle"
+    }
+  ],
+  "roles": [
+    {
+      "name": "ppa-evaluator",
+      "version": 1,
+      "instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "produced_types": [
+        "ppa.evaluation.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "ppa-finalizer",
+      "version": 1,
+      "instruction": "Record search completion separately from engineering acceptance.",
+      "accepted_types": [
+        "ppa.evaluation.report"
+      ],
+      "produced_types": [
+        "ppa.session.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "ppa-proposer",
+      "version": 1,
+      "instruction": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "accepted_types": [
+        "specification.source",
+        "ppa.evaluation.report",
+        "verification.report"
+      ],
+      "produced_types": [
+        "ppa.candidate"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "name": "ppa-verifier",
+      "version": 1,
+      "instruction": "Independently review this PPA proposal against context/protocol.json,\nthe common baseline, and captured candidate/evaluation artifacts under\n.nebula_inputs/. Check its exact parameter tuple, previous trials in this\nsession, interpretation of actual timing/electrical/power evidence, and that\nit preserves frozen RTL, constraints and acceptance. Do not invent results\nor run EDA/model calls. Reject an invalid or unsupported proposal with\nactionable feedback; otherwise permit the experiment to measure it. The\noptimizer alone owns proposal changes. Write only reports/review.json and\noptional build/ notes. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"candidate\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete explanation\"}}.\nSelect one real verdict, never the placeholder string. Your time and Tokens\nare part of the same 1200-second budget as the optimizer.",
+      "accepted_types": [
+        "specification.source",
+        "ppa.candidate"
+      ],
+      "produced_types": [
+        "verification.report"
+      ],
+      "skills": [],
+      "framework": "codex",
+      "model": "gpt-6.1-sol"
+    }
+  ],
+  "feedback": [
+    {
+      "source_task_id": "ppa-search:reviewer",
+      "verdict": "fail",
+      "target_task_id": "ppa-search:proposer",
+      "kind": "feedback",
+      "summary": "Repair the rejected PPA proposal.",
+      "propagate_to_dependents": true,
+      "payload_field": "",
+      "payload_equals": null,
+      "summary_field": "report.repair_summary"
+    },
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "pass",
+      "target_task_id": "ppa-search:proposer",
+      "kind": "feedback",
+      "summary": "Continue bounded search.",
+      "propagate_to_dependents": true,
+      "payload_field": "report.continue_search",
+      "payload_equals": true,
+      "summary_field": ""
+    },
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "pass",
+      "target_task_id": "ppa-search:finalizer",
+      "kind": "feedback",
+      "summary": "Record terminal search observations.",
+      "propagate_to_dependents": false,
+      "payload_field": "report.continue_search",
+      "payload_equals": false,
+      "summary_field": ""
+    },
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "fail",
+      "target_task_id": "ppa-search:proposer",
+      "kind": "feedback",
+      "summary": "Continue bounded search.",
+      "propagate_to_dependents": true,
+      "payload_field": "report.continue_search",
+      "payload_equals": true,
+      "summary_field": ""
+    },
+    {
+      "source_task_id": "ppa-search:evaluator",
+      "verdict": "fail",
+      "target_task_id": "ppa-search:finalizer",
+      "kind": "feedback",
+      "summary": "Record terminal search observations.",
+      "propagate_to_dependents": false,
+      "payload_field": "report.continue_search",
+      "payload_equals": false,
+      "summary_field": ""
+    }
+  ],
+  "attempts": [
+    {
+      "id": "attempt-51791be8406649eea9fa18006a764a66",
+      "task_id": "ppa-search:proposer",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-b5468fdbb35049a381ee0af7608a3ec2"
+      ],
+      "input_deliveries": {
+        "source": "ppa-context"
+      },
+      "role": "ppa-proposer",
+      "role_version": 1,
+      "role_instruction": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "ppa.evaluation.report",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+        "deliverables": [
+          "candidate: ppa.candidate"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:reviewer",
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:f78d3f228c494e9c379285192e1ebf8b945765d956f11235f47e839fb05abda1",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "proposal/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a144f9-8b6d-7361-8adb-b381068542e2",
+      "workspace_commit": "cdcb081da4f1db33dd1e6cfc2a4157962e99a6c6",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "proposal/candidate.json"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{\"utilization\":40,\"density\":0.55,\"abc_area\":1,\"repair_margin\":0},\"rationale\":\"The available evidence is context/baseline.json; reports/ and build/ contain no evaluation report or candidate history. The baseline tuple (40, 0.55, 0, 0) is physically and measurement qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero slew/capacitance/fanout violations, and normalized area-times-energy score 1.0. Its DOT64, GEMM8 and CONV3 estimated energies are 2.293945631906608e-7, 1.7792685987008622e-6 and 1.1542462882162743e-6 J. Choose the previously untried, in-domain tuple (40, 0.55, 1, 0), changing only abc_area to test area-oriented mapping against the cell-area factor in the frozen score. Retaining baseline utilization, density and repair margin isolates this change and avoids adding repair overhead without observed violations. The small positive setup slack makes timing qualification a material risk; lower cell area or workload energy is a hypothesis, not a measured improvement. The independent evaluator must establish timing, electrical and measurement qualification and the resulting geometric-mean energy ratio before this candidate can outrank the baseline. The frozen RTL, 10526 ps period, libraries and acceptance thresholds remain unchanged; no hardware implementation or screening was run by the proposer.\"}}\nTASK COMPLETED.",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T21:51:07.028365",
+            "details": {},
+            "evidence": "STDOUT:\nPPA_CANDIDATE_VALID\n\nSTDERR:\n",
+            "kind": "tool_check",
+            "name": "bounded-unseen-candidate",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          },
+          {
+            "checked_at": "2026-10-16T13:51:07.028404+00:00",
+            "details": {
+              "validated_outputs": [
+                "candidate:ppa.candidate@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 25163,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "aa69f22a24db6c43f11d49f3759cdaedc268a989"
+      },
+      "created_at": "2026-10-16T13:49:26.861003+00:00",
+      "finished_at": "2026-10-16T13:51:07.062931+00:00"
+    },
+    {
+      "id": "attempt-fd1fd32f8b134ace8157a88a6a6e3ce7",
+      "task_id": "ppa-search:reviewer",
+      "ordinal": 1,
+      "status": "succeeded",
+      "work_item_ids": [
+        "work-787f6d46c0bc4622958748ada7710d17"
+      ],
+      "input_deliveries": {
+        "candidate": "artifact-c7543a4accac4c2cb64c2ae343525ef9",
+        "source": "ppa-context"
+      },
+      "role": "ppa-verifier",
+      "role_version": 1,
+      "role_instruction": "Independently review this PPA proposal against context/protocol.json,\nthe common baseline, and captured candidate/evaluation artifacts under\n.nebula_inputs/. Check its exact parameter tuple, previous trials in this\nsession, interpretation of actual timing/electrical/power evidence, and that\nit preserves frozen RTL, constraints and acceptance. Do not invent results\nor run EDA/model calls. Reject an invalid or unsupported proposal with\nactionable feedback; otherwise permit the experiment to measure it. The\noptimizer alone owns proposal changes. Write only reports/review.json and\noptional build/ notes. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"candidate\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete explanation\"}}.\nSelect one real verdict, never the placeholder string. Your time and Tokens\nare part of the same 1200-second budget as the optimizer.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "specification.source",
+        "ppa.candidate"
+      ],
+      "brief": {
+        "objective": "Independently review this PPA proposal against context/protocol.json,\nthe common baseline, and captured candidate/evaluation artifacts under\n.nebula_inputs/. Check its exact parameter tuple, previous trials in this\nsession, interpretation of actual timing/electrical/power evidence, and that\nit preserves frozen RTL, constraints and acceptance. Do not invent results\nor run EDA/model calls. Reject an invalid or unsupported proposal with\nactionable feedback; otherwise permit the experiment to measure it. The\noptimizer alone owns proposal changes. Write only reports/review.json and\noptional build/ notes. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"candidate\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete explanation\"}}.\nSelect one real verdict, never the placeholder string. Your time and Tokens\nare part of the same 1200-second budget as the optimizer.",
+        "deliverables": [
+          "report: verification.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:evaluator",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:3bfd7d6e39e4096a2760acb72500fd80e9edcef3f814fccbeb55c479cee56742",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "reports/**",
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "executor": "agent",
+      "command": "",
+      "timeout_seconds": 1200,
+      "session_id": "01a144fb-12dd-7962-93e1-c6e391c4ea8d",
+      "workspace_commit": "db17a25cc300d065546d92d84a2d0b926045eb9c",
+      "verdict": "pass",
+      "diagnostics": {
+        "changed_paths": [
+          "reports/review.json"
+        ],
+        "execution_log": "NEBULA_OUTPUT: {\"report\":{\"subject\":\"candidate\",\"verdict\":\"passed\",\"repair_summary\":\"Permit measuring tuple (40, 0.55, 1, 0): it is within the frozen domain, changes only abc_area, and has no duplicate in captured session history. Baseline claims match captured evidence; only the proposal file changed. No repair required. Candidate timing, electrical, measurement qualification and PPA improvement remain unmeasured. Review written to reports/review.json.\"}}\nTASK COMPLETED",
+        "gate_reports": [
+          {
+            "checked_at": "2026-10-16T13:52:19.497989+00:00",
+            "details": {
+              "validated_outputs": [
+                "report:verification.report@1"
+              ]
+            },
+            "evidence": "Artifact output contract passed",
+            "kind": "artifact_schema",
+            "name": "artifact-output-contract",
+            "on_failure": "retry",
+            "passed": true,
+            "suggestion": ""
+          }
+        ],
+        "runner_pid": 25163,
+        "runner_state": "executing",
+        "session_reusable": true,
+        "workspace_base_commit": "b51bfd639b99e4c8b090b5f7338187b96daecea5"
+      },
+      "created_at": "2026-10-16T13:51:07.075451+00:00",
+      "finished_at": "2026-10-16T13:52:19.529477+00:00"
+    },
+    {
+      "id": "attempt-6898c22657cd47749cbe66e5cc23de9e",
+      "task_id": "ppa-search:evaluator",
+      "ordinal": 1,
+      "status": "failed",
+      "work_item_ids": [
+        "work-9943232d12cd489da4a97501192a862c"
+      ],
+      "input_deliveries": {
+        "candidate": "artifact-c7543a4accac4c2cb64c2ae343525ef9",
+        "review": "artifact-362549f5460841b4aa091e037c414de9"
+      },
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "role_instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:reviewer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:37969c4082356f7e227f957e8765bbddf04d0b41db1dafb69fd06f015c19f604",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "timeout_seconds": 16500,
+      "session_id": "",
+      "workspace_commit": "",
+      "verdict": "",
+      "diagnostics": {
+        "changed_paths": [],
+        "execution_log": "$ [evaluator] python3 tools/run_ppa.py evaluate\nTraceback (most recent call last):\n  File \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-2/project/.chip_nebula/taskgraph-v2/workspaces/attempt-6898c22657cd47749cbe66e5cc23de9e/tools/run_ppa.py\", line 7, in <module>\n    tool_action(sys.argv[1],Path.cwd())\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_ppa_workflow_study.py\", line 186, in tool_action\n    report = evaluate_candidate(workspace)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_ppa_workflow_study.py\", line 139, in evaluate_candidate\n    run_physical(run, Path(metadata['rtl_source']), configuration, 10526)\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_study_physical.py\", line 119, in run\n    manifest = prepare(project, source, configuration, period_ps)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_study_physical.py\", line 58, in prepare\n    raise RuntimeError('Physical environment not ready: ' + json.dumps(receipt))\nRuntimeError: Physical environment not ready: {\"detection\": {\"schema_version\": 1, \"source_authority\": \"workbench fileset\", \"sources\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\"], \"include_dirs\": [\"rtl/cpu\", \"rtl/integration\", \"rtl/npu\"], \"filelist_include_dirs\": [], \"included_headers\": [], \"input_issues\": [], \"defines\": [], \"top_candidates\": [{\"name\": \"nebula_cpu_npu_top\", \"source\": \"rtl/integration/nebula_cpu_npu_top.sv\", \"input_ports\": [\"clk\", \"imem_rdata\", \"dmem_req_ready\", \"dmem_rsp_valid\", \"dmem_rsp_rdata\", \"dmem_rsp_err\"], \"vector_input_ports\": [\"imem_rdata\", \"dmem_rsp_rdata\"], \"clock_candidates\": [\"clk\"], \"detected_parameters\": {}}], \"suggested_top\": \"nebula_cpu_npu_top\", \"suggested_clock\": \"clk\", \"suggested_clock_period_ns\": 10.0, \"suggested_top_parameters\": {}, \"memory_images\": {}, \"simulation_candidates\": [], \"suggested_simulation_command\": \"\", \"platforms\": [\"sky130hd\"], \"diagnostics\": [], \"ready_for_review\": true}, \"synthesis_preflight\": {\"status\": \"passed\", \"frontend\": \"slang\", \"tool_version\": \"Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)\", \"reason\": \"\\u7cbe\\u786e\\u6e90\\u7801\\u96c6\\u5408\\u4e0e\\u9876\\u5c42\\u5df2\\u901a\\u8fc7\\u53ea\\u8bfb\\u5c55\\u5f00\\u68c0\\u67e5\", \"log_tail\": \"2.1. Analyzing design hierarchy..\\nTop module:  \\\\nebula_cpu_npu_top\\n\\n2.2. Analyzing design hierarchy..\\nTop module:  \\\\nebula_cpu_npu_top\\nRemoved 0 unused modules.\\n\\nEnd of script. Logfile hash: cac3a7fc01, time: 0.10s, user: 0.09s, system: 0.08s, MEM: 32.48 MB peak\\nYosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)\\nTime spent: 69% 2x read_slang (0 sec), 13% 1x proc_mux (0 sec), ...\"}, \"definition\": {\"schema_version\": 1, \"generator\": \"chip-nebula-physical-project-v1\", \"source_authority\": \"workbench fileset\", \"top_module\": \"nebula_cpu_npu_top\", \"top_parameters\": {}, \"memory_images\": {}, \"sources\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\"], \"compilation_units\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\"], \"headers\": [], \"include_dirs\": [\"rtl/cpu\", \"rtl/integration\", \"rtl/npu\"], \"defines\": [], \"clock\": {\"port\": \"clk\", \"period_ns\": 10.526, \"constraint_status\": \"user-confirmed exploratory constraint\"}, \"platform\": \"sky130hd\", \"synthesis_frontend\": \"slang\", \"synthesis_preflight\": {\"status\": \"passed\", \"frontend\": \"slang\", \"tool_version\": \"Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)\", \"reason\": \"\\u7cbe\\u786e\\u6e90\\u7801\\u96c6\\u5408\\u4e0e\\u9876\\u5c42\\u5df2\\u901a\\u8fc7\\u53ea\\u8bfb\\u5c55\\u5f00\\u68c0\\u67e5\"}, \"simulation_command\": \"python3 scripts/run_kernels.py --project . --output build/operators\"}, \"generated_files\": [\"physical/chip-nebula/flow-definition.json\", \"physical/chip-nebula/constraints.sdc\", \"physical/chip-nebula/config.mk\", \"physical/chip-nebula/run.sh\", \"physical/chip-nebula/prepare_orfs.py\", \"physical/chip-nebula/inspect_gds.py\", \"physical/chip-nebula/filter_lvs_cdl.py\", \"physical/chip-nebula/klayout.sh\", \"physical/chip-nebula/tool-versions.env\", \"physical/chip-nebula/README.md\"], \"config_patch\": {\"top_module\": \"nebula_cpu_npu_top\", \"top_parameters\": {}, \"source_globs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\"], \"simulation_command\": \"python3 scripts/run_kernels.py --project . --output build/operators\", \"lint_command\": \"verilator --lint-only -Wall -Wno-fatal --top-module nebula_cpu_npu_top -Irtl/cpu -Irtl/integration -Irtl/npu rtl/cpu/rv32i_five_stage_cpu.sv rtl/integration/nebula_cpu_npu_top.sv rtl/npu/nebula_npu_dot4.sv\", \"physical\": {\"enabled\": true, \"command\": \"bash physical/chip-nebula/run.sh {mode}\", \"workdir\": \".\", \"timeout\": 14400, \"platform\": \"sky130hd\", \"design\": \"nebula_cpu_npu_top\", \"flow_variant\": \"nebula\", \"num_cores\": 2, \"output_root\": \"build/rtl-to-gds\", \"summary_path\": \"build/rtl-to-gds/run-summary.json\", \"input_globs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/**\", \"Makefile\", \"tb/**\", \"tbench/**\", \"scripts/**\", \"graph/source.json\", \"metadata.json\", \"**/*.f\", \"**/*.flist\", \"ip/nebula.lock.json\", \"spec/design.csir.yaml\"], \"required_inputs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/flow-definition.json\", \"physical/chip-nebula/constraints.sdc\", \"physical/chip-nebula/config.mk\", \"physical/chip-nebula/run.sh\", \"physical/chip-nebula/prepare_orfs.py\", \"physical/chip-nebula/inspect_gds.py\", \"physical/chip-nebula/filter_lvs_cdl.py\", \"physical/chip-nebula/klayout.sh\", \"physical/chip-nebula/tool-versions.env\"], \"tool_versions_file\": \"physical/chip-nebula/tool-versions.env\"}}, \"config\": {\"top_module\": \"nebula_cpu_npu_top\", \"top_parameters\": {}, \"source_globs\": [\"rtl/**/*.sv\", \"rtl/**/*.v\", \"rtl/**/*.svh\", \"rtl/**/*.vh\", \"src/**/*.sv\", \"src/**/*.v\", \"src/**/*.svh\", \"src/**/*.vh\", \"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\"], \"validation_mode\": \"fileset\", \"design_files\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\"], \"testbench_files\": [], \"simulation_assets\": [], \"include_dirs\": [\"rtl/cpu\", \"rtl/integration\", \"rtl/npu\"], \"defines\": [], \"filelists\": [], \"simulation_top\": \"\", \"write_paths\": [\"rtl/**\", \"src/**\", \"integration/**\"], \"lint_command\": \"verilator --lint-only -Wall -Wno-fatal --top-module nebula_cpu_npu_top -Irtl/cpu -Irtl/integration -Irtl/npu rtl/cpu/rv32i_five_stage_cpu.sv rtl/integration/nebula_cpu_npu_top.sv rtl/npu/nebula_npu_dot4.sv\", \"simulation_command\": \"python3 scripts/run_kernels.py --project . --output build/operators\", \"workdir\": \".\", \"timeout\": 900, \"agent_timeout\": 3600, \"success_pattern\": \"\", \"success_evidence\": {}, \"report_globs\": [], \"waveform_globs\": [\"**/*.vcd\", \"**/*.fst\"], \"physical\": {\"enabled\": true, \"command\": \"bash physical/chip-nebula/run.sh {mode}\", \"workdir\": \".\", \"timeout\": 14400, \"platform\": \"sky130hd\", \"design\": \"nebula_cpu_npu_top\", \"flow_variant\": \"nebula\", \"num_cores\": 2, \"output_root\": \"build/rtl-to-gds\", \"summary_path\": \"build/rtl-to-gds/run-summary.json\", \"input_globs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/**\", \"Makefile\", \"tb/**\", \"tbench/**\", \"scripts/**\", \"graph/source.json\", \"metadata.json\", \"**/*.f\", \"**/*.flist\", \"ip/nebula.lock.json\", \"spec/design.csir.yaml\"], \"required_inputs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/flow-definition.json\", \"physical/chip-nebula/constraints.sdc\", \"physical/chip-nebula/config.mk\", \"physical/chip-nebula/run.sh\", \"physical/chip-nebula/prepare_orfs.py\", \"physical/chip-nebula/inspect_gds.py\", \"physical/chip-nebula/filter_lvs_cdl.py\", \"physical/chip-nebula/klayout.sh\", \"physical/chip-nebula/tool-versions.env\"], \"artifact_globs\": [\"build/rtl-to-gds/run-summary.json\", \"build/rtl-to-gds/gds-summary.json\", \"build/rtl-to-gds/simulation/build/*.log\", \"build/rtl-to-gds/simulation/build/*.vcd\", \"build/rtl-to-gds/orfs-work/results/**/1_2_yosys.v\", \"build/rtl-to-gds/orfs-work/results/**/6_final.*\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat.cdl\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.cdl\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.manifest.json\", \"build/rtl-to-gds/orfs-work/reports/**/*.rpt\", \"build/rtl-to-gds/orfs-work/logs/**/*.log\", \"build/rtl-to-gds/orfs-work/logs/**/6_report.json\", \"build/rtl-to-gds/orfs-work/logs/**/5_2_route.json\"], \"toolchain_root\": \"\", \"orfs_root\": \"\", \"tool_versions_file\": \"physical/chip-nebula/tool-versions.env\"}}, \"environment\": {\"configured\": true, \"ready\": false, \"profile\": {\"enabled\": true, \"command\": \"bash physical/chip-nebula/run.sh {mode}\", \"workdir\": \".\", \"timeout\": 14400, \"platform\": \"sky130hd\", \"design\": \"nebula_cpu_npu_top\", \"flow_variant\": \"nebula\", \"num_cores\": 2, \"output_root\": \"build/rtl-to-gds\", \"summary_path\": \"build/rtl-to-gds/run-summary.json\", \"input_globs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/**\", \"Makefile\", \"tb/**\", \"tbench/**\", \"scripts/**\", \"graph/source.json\", \"metadata.json\", \"**/*.f\", \"**/*.flist\", \"ip/nebula.lock.json\", \"spec/design.csir.yaml\"], \"required_inputs\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/flow-definition.json\", \"physical/chip-nebula/constraints.sdc\", \"physical/chip-nebula/config.mk\", \"physical/chip-nebula/run.sh\", \"physical/chip-nebula/prepare_orfs.py\", \"physical/chip-nebula/inspect_gds.py\", \"physical/chip-nebula/filter_lvs_cdl.py\", \"physical/chip-nebula/klayout.sh\", \"physical/chip-nebula/tool-versions.env\"], \"artifact_globs\": [\"build/rtl-to-gds/run-summary.json\", \"build/rtl-to-gds/gds-summary.json\", \"build/rtl-to-gds/simulation/build/*.log\", \"build/rtl-to-gds/simulation/build/*.vcd\", \"build/rtl-to-gds/orfs-work/results/**/1_2_yosys.v\", \"build/rtl-to-gds/orfs-work/results/**/6_final.*\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat.cdl\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.cdl\", \"build/rtl-to-gds/orfs-work/objects/**/6_final_concat_used.manifest.json\", \"build/rtl-to-gds/orfs-work/reports/**/*.rpt\", \"build/rtl-to-gds/orfs-work/logs/**/*.log\", \"build/rtl-to-gds/orfs-work/logs/**/6_report.json\", \"build/rtl-to-gds/orfs-work/logs/**/5_2_route.json\"], \"toolchain_root\": \"\", \"orfs_root\": \"\", \"tool_versions_file\": \"physical/chip-nebula/tool-versions.env\"}, \"toolchain_root\": \"/tmp/chipnebula-pinned-tools\", \"orfs\": {\"root\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs\", \"flow_home\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow\", \"commit\": \"3a964e13f11a4e435aac01ffa14db0a7d2853720\", \"expected_commit\": \"3a964e13f11a4e435aac01ffa14db0a7d2853720\", \"version_match\": true}, \"tools\": {\"git\": {\"path\": \"/tmp/chipnebula-tools/bin/git\", \"version\": \"git version 2.43.0\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"system\"}, \"make\": {\"path\": \"/usr/bin/make\", \"version\": \"GNU Make 4.2.1\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"system\"}, \"python\": {\"path\": \"/home/asic03/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12\", \"version\": \"Python 3.12.15\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"system\"}, \"verilator\": {\"path\": \"/tmp/chipnebula-pinned-tools/bin/verilator\", \"version\": \"Verilator 5.048 2026-04-26 rev vUNKNOWN-built20261009\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"iverilog\": {\"path\": \"/tmp/chipnebula-pinned-tools/iverilog-13/bin/iverilog\", \"version\": \"Icarus Verilog version 13.0 (stable) (v13_0)\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"vvp\": {\"path\": \"/tmp/chipnebula-pinned-tools/iverilog-13/bin/vvp\", \"version\": \"Icarus Verilog runtime version 13.0 (stable) (v13_0)\", \"expected\": \"\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"yosys\": {\"path\": \"/tmp/chipnebula-pinned-tools/bin/yosys\", \"version\": \"Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)\", \"expected\": \"Yosys 0.69+77 (git sha1 9ff27d29c, Release, GNU /usr/bin/c++ 11.4.0)\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"openroad\": {\"path\": \"/tmp/chipnebula-pinned-tools/src/OpenROAD/build/bin/openroad\", \"version\": \"4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca\", \"expected\": \"4a7cf9b22a5f24f32ce4f4eb1448fef4d2a367ca\", \"ready\": true, \"version_match\": true, \"source\": \"bundled\"}, \"klayout\": {\"path\": \"/tmp/chipnebula-pinned-tools/bin/klayout\", \"version\": \"\", \"expected\": \"KLayout 0.30.12\", \"ready\": false, \"version_match\": false, \"source\": \"bundled\"}}, \"platform_files\": [{\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/gds/sky130_fd_sc_hd.gds\", \"ready\": true}, {\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/drc/sky130hd.lydrc\", \"ready\": true}, {\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/lvs/sky130hd.lylvs\", \"ready\": true}, {\"path\": \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/toolchain/orfs/flow/platforms/sky130hd/cdl/sky130hd.cdl\", \"ready\": true}], \"missing\": [], \"mismatches\": [\"klayout: expected KLayout 0.30.12, got unknown\"], \"project_issues\": [], \"input_audit\": {\"ready\": true, \"manifest_declared\": true, \"checked\": [\"rtl/cpu/rv32i_five_stage_cpu.sv\", \"rtl/integration/nebula_cpu_npu_top.sv\", \"rtl/npu/nebula_npu_dot4.sv\", \"physical/chip-nebula/flow-definition.json\", \"physical/chip-nebula/constraints.sdc\", \"physical/chip-nebula/config.mk\", \"physical/chip-nebula/run.sh\", \"physical/chip-nebula/prepare_orfs.py\", \"physical/chip-nebula/inspect_gds.py\", \"physical/chip-nebula/filter_lvs_cdl.py\", \"physical/chip-nebula/klayout.sh\", \"physical/chip-nebula/tool-versions.env\"], \"issues\": []}}}\n",
+        "failure_reason": "command exited with 1",
+        "runner_pid": 25163,
+        "runner_state": "executing",
+        "session_reusable": false,
+        "workspace_base_commit": "877a26353def6f186bfc8c98dc2b48dda6b8d6e8"
+      },
+      "created_at": "2026-10-16T13:52:19.541342+00:00",
+      "finished_at": "2026-10-16T13:52:32.199638+00:00"
+    },
+    {
+      "id": "attempt-4ed9627a07384271aac5bcd31211571f",
+      "task_id": "ppa-search:evaluator",
+      "ordinal": 2,
+      "status": "failed",
+      "work_item_ids": [
+        "work-9943232d12cd489da4a97501192a862c"
+      ],
+      "input_deliveries": {
+        "candidate": "artifact-c7543a4accac4c2cb64c2ae343525ef9",
+        "review": "artifact-362549f5460841b4aa091e037c414de9"
+      },
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "role_instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:reviewer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:37969c4082356f7e227f957e8765bbddf04d0b41db1dafb69fd06f015c19f604",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "timeout_seconds": 16500,
+      "session_id": "",
+      "workspace_commit": "",
+      "verdict": "",
+      "diagnostics": {
+        "changed_paths": [],
+        "execution_log": "$ [evaluator] python3 tools/run_ppa.py evaluate\nTraceback (most recent call last):\n  File \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-2/project/.chip_nebula/taskgraph-v2/workspaces/attempt-4ed9627a07384271aac5bcd31211571f/tools/run_ppa.py\", line 7, in <module>\n    tool_action(sys.argv[1],Path.cwd())\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_ppa_workflow_study.py\", line 186, in tool_action\n    report = evaluate_candidate(workspace)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_ppa_workflow_study.py\", line 129, in evaluate_candidate\n    raise ValueError('Interrupted physical candidate retained; explicit recovery is required')\nValueError: Interrupted physical candidate retained; explicit recovery is required\n",
+        "failure_reason": "command exited with 1",
+        "runner_pid": 25163,
+        "runner_state": "executing",
+        "session_reusable": false,
+        "workspace_base_commit": "227e6ec546ea6ecbbc667219fab55bcab0aef272"
+      },
+      "created_at": "2026-10-16T13:52:32.216367+00:00",
+      "finished_at": "2026-10-16T13:52:32.694365+00:00"
+    },
+    {
+      "id": "attempt-26174a8fd95c4f15bffca4e8cdb28668",
+      "task_id": "ppa-search:evaluator",
+      "ordinal": 3,
+      "status": "failed",
+      "work_item_ids": [
+        "work-9943232d12cd489da4a97501192a862c"
+      ],
+      "input_deliveries": {
+        "candidate": "artifact-c7543a4accac4c2cb64c2ae343525ef9",
+        "review": "artifact-362549f5460841b4aa091e037c414de9"
+      },
+      "role": "ppa-evaluator",
+      "role_version": 1,
+      "role_instruction": "Execute exactly one protected candidate and report all engineering failures.",
+      "role_skills": [],
+      "role_accepted_types": [
+        "ppa.candidate",
+        "verification.report"
+      ],
+      "brief": {
+        "objective": "Execute the captured immutable candidate under the protected physical budget.",
+        "deliverables": [
+          "report: ppa.evaluation.report"
+        ],
+        "responsibilities": [
+          "Use captured inputs and preserve actual reports, frozen targets and shared budgets."
+        ],
+        "exclusions": [
+          "No RTL/checker/library edits, hidden EDA, external model calls or work from another session."
+        ],
+        "completion_criteria": [
+          "Publish declared outputs with honest engineering verdicts."
+        ],
+        "collaboration": [
+          "task:ppa-search:proposer",
+          "task:ppa-search:reviewer",
+          "task:ppa-search:finalizer"
+        ]
+      },
+      "brief_digest": "sha256:37969c4082356f7e227f957e8765bbddf04d0b41db1dafb69fd06f015c19f604",
+      "permission": {
+        "read_paths": [
+          "context/**",
+          "proposal/**",
+          "reports/**",
+          "tools/**",
+          "build/**"
+        ],
+        "write_paths": [
+          "build/**"
+        ],
+        "tools": [
+          "python3",
+          "git"
+        ]
+      },
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "executor": "tool",
+      "command": "python3 tools/run_ppa.py evaluate",
+      "timeout_seconds": 16500,
+      "session_id": "",
+      "workspace_commit": "",
+      "verdict": "",
+      "diagnostics": {
+        "changed_paths": [],
+        "execution_log": "$ [evaluator] python3 tools/run_ppa.py evaluate\nTraceback (most recent call last):\n  File \"/home/asic03/project/user37/CodeAChip_Experiments/Configurable_PPA_20261016/ppa/W2-2/project/.chip_nebula/taskgraph-v2/workspaces/attempt-26174a8fd95c4f15bffca4e8cdb28668/tools/run_ppa.py\", line 7, in <module>\n    tool_action(sys.argv[1],Path.cwd())\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_ppa_workflow_study.py\", line 186, in tool_action\n    report = evaluate_candidate(workspace)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/asic03/project/user37/CodeAChip_Submission/ISSCC27/submitted_notebooks/ChipNebula_CPU/scripts/run_ppa_workflow_study.py\", line 129, in evaluate_candidate\n    raise ValueError('Interrupted physical candidate retained; explicit recovery is required')\nValueError: Interrupted physical candidate retained; explicit recovery is required\n",
+        "failure_reason": "command exited with 1",
+        "runner_pid": 25163,
+        "runner_state": "executing",
+        "session_reusable": false,
+        "workspace_base_commit": "227e6ec546ea6ecbbc667219fab55bcab0aef272"
+      },
+      "created_at": "2026-10-16T13:52:32.706098+00:00",
+      "finished_at": "2026-10-16T13:52:33.169804+00:00"
+    }
+  ],
+  "work_items": [
+    {
+      "id": "work-787f6d46c0bc4622958748ada7710d17",
+      "task_id": "ppa-search:reviewer",
+      "kind": "initial",
+      "request_key": "initial:ppa-search:reviewer",
+      "correlation_key": "initial",
+      "summary": "Independently review this PPA proposal against context/protocol.json,\nthe common baseline, and captured candidate/evaluation artifacts under\n.nebula_inputs/. Check its exact parameter tuple, previous trials in this\nsession, interpretation of actual timing/electrical/power evidence, and that\nit preserves frozen RTL, constraints and acceptance. Do not invent results\nor run EDA/model calls. Reject an invalid or unsupported proposal with\nactionable feedback; otherwise permit the experiment to measure it. The\noptimizer alone owns proposal changes. Write only reports/review.json and\noptional build/ notes. Return NEBULA_OUTPUT: {\"report\":{\"subject\":\"candidate\",\n\"verdict\":\"passed or failed\",\"repair_summary\":\"concrete explanation\"}}.\nSelect one real verdict, never the placeholder string. Your time and Tokens\nare part of the same 1200-second budget as the optimizer.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-fd1fd32f8b134ace8157a88a6a6e3ce7",
+      "resolved_attempt_id": "attempt-fd1fd32f8b134ace8157a88a6a6e3ce7",
+      "created_at": "2026-10-16T13:49:26.658399+00:00"
+    },
+    {
+      "id": "work-9943232d12cd489da4a97501192a862c",
+      "task_id": "ppa-search:evaluator",
+      "kind": "initial",
+      "request_key": "initial:ppa-search:evaluator",
+      "correlation_key": "initial",
+      "summary": "Execute the captured immutable candidate under the protected physical budget.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "pending",
+      "created_sequence": 1,
+      "claimed_attempt_id": "",
+      "resolved_attempt_id": "",
+      "created_at": "2026-10-16T13:49:26.658682+00:00"
+    },
+    {
+      "id": "work-b5468fdbb35049a381ee0af7608a3ec2",
+      "task_id": "ppa-search:proposer",
+      "kind": "initial",
+      "request_key": "initial:ppa-search:proposer",
+      "correlation_key": "initial",
+      "summary": "You are the PPA implementation optimizer for one frozen CPU+NPU.\nRead context/baseline.json and context/protocol.json. Inspect the immutable\nfeedback evaluation report/history before every subsequent proposal. Choose\none previously untried tuple in the frozen parameter domain. The circuit RTL,\nclock, libraries and acceptance thresholds cannot change. No extra EDA calls,\nscreening searches, models or agents are allowed. Only the independent tool\nevaluator executes hardware implementation. Explain the decision using the\nactual available reports, and minimize the qualified area-times-energy score.\nWrite proposal/candidate.json containing exactly configuration (the four\nparameter keys) and rationale (string). Write only proposal/ and optional\nbuild/ notes. End with NEBULA_OUTPUT: {\"candidate\":{\"configuration\":{...},\n\"rationale\":\"your report-grounded explanation\"}} with matching file/payload.\nAfter review rejection, repair this proposal without changing permissions.\nThere are at most three new physical candidates and all AI roles together\nhave 1200 seconds; EDA waiting is outside that agent budget.",
+      "causal_correlation_keys": [],
+      "source_task_id": "",
+      "evidence_artifact_ids": [],
+      "evidence_attempt_ids": [],
+      "wait_for_work_item_ids": [],
+      "status": "resolved",
+      "created_sequence": 1,
+      "claimed_attempt_id": "attempt-51791be8406649eea9fa18006a764a66",
+      "resolved_attempt_id": "attempt-51791be8406649eea9fa18006a764a66",
+      "created_at": "2026-10-16T13:49:26.658049+00:00"
+    }
+  ],
+  "deliveries": {
+    "ppa-search:proposer": {
+      "candidate": {
+        "task_id": "ppa-search:proposer",
+        "output_name": "candidate",
+        "artifact_id": "artifact-c7543a4accac4c2cb64c2ae343525ef9",
+        "attempt_id": "attempt-51791be8406649eea9fa18006a764a66",
+        "accepted_at": "2026-10-16T13:51:07.062653+00:00"
+      }
+    },
+    "ppa-search:reviewer": {
+      "report": {
+        "task_id": "ppa-search:reviewer",
+        "output_name": "report",
+        "artifact_id": "artifact-362549f5460841b4aa091e037c414de9",
+        "attempt_id": "attempt-fd1fd32f8b134ace8157a88a6a6e3ce7",
+        "accepted_at": "2026-10-16T13:52:19.529261+00:00"
+      }
+    },
+    "ppa-search:evaluator": {},
+    "ppa-search:finalizer": {}
+  },
+  "artifacts": [
+    {
+      "id": "ppa-context",
+      "type": "specification.source",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "external",
+        "task_id": "common-ppa-input",
+        "attempt_id": "frozen-input",
+        "role": "study-author",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "aa69f22a24db6c43f11d49f3759cdaedc268a989",
+        "tree": "1b9e6afe8106edd5a5fb89d10391e221ff6d198b",
+        "paths": [
+          "context"
+        ]
+      },
+      "payload": {
+        "content": "{\n  \"sessions\": [\n    {\n      \"id\": \"W1-3\",\n      \"workflow\": \"W1\",\n      \"repetition\": 3\n    },\n    {\n      \"id\": \"W2-3\",\n      \"workflow\": \"W2\",\n      \"repetition\": 3\n    },\n    {\n      \"id\": \"W2-2\",\n      \"workflow\": \"W2\",\n      \"repetition\": 2\n    },\n    {\n      \"id\": \"W1-1\",\n      \"workflow\": \"W1\",\n      \"repetition\": 1\n    },\n    {\n      \"id\": \"W0-1\",\n      \"workflow\": \"W0\",\n      \"repetition\": 1\n    },\n    {\n      \"id\": \"W1-2\",\n      \"workflow\": \"W1\",\n      \"repetition\": 2\n    },\n    {\n      \"id\": \"W2-1\",\n      \"workflow\": \"W2\",\n      \"repetition\": 1\n    }\n  ],\n  \"new_candidates_per_session\": 3,\n  \"aggregate_agent_budget_seconds\": 1200,\n  \"physical_timeout_seconds\": 14400,\n  \"postprocess_timeout_seconds\": 1800,\n  \"period_ps\": 10526,\n  \"baseline_configuration\": {\n    \"utilization\": 40,\n    \"density\": 0.55,\n    \"abc_area\": 0,\n    \"repair_margin\": 0\n  },\n  \"parameter_keys\": [\n    \"utilization\",\n    \"density\",\n    \"abc_area\",\n    \"repair_margin\"\n  ],\n  \"parameter_domains\": [\n    [\n      30,\n      40,\n      50\n    ],\n    [\n      0.55,\n      0.65\n    ],\n    [\n      0,\n      1\n    ],\n    [\n      0,\n      10,\n      20\n    ]\n  ],\n  \"threads\": 2,\n  \"corner\": \"Sky130HD TT25C1.8V\",\n  \"workloads\": [\n    \"DOT64\",\n    \"GEMM8\",\n    \"CONV3\"\n  ],\n  \"io_delay_ns\": 0.5,\n  \"clock_uncertainty_ns\": 0.1,\n  \"score\": \"(cell_area / baseline_cell_area) * geometric_mean(workload_energy / baseline_workload_energy)\",\n  \"tie_order\": [\n    \"unrounded score\",\n    \"energy_ratio\",\n    \"cell_area_um2\",\n    \"candidate_index\"\n  ],\n  \"physical_launches_including_baseline_max\": 22\n}\n",
+        "content_digest": "sha256:943da7dd5a1447331c2c8a015fb0bb930c3135e61059cd2a89aa872fadfc8d17",
+        "media_type": "application/json",
+        "received_at": "2026-10-16T00:00:00+00:00",
+        "source_name": "Frozen physical optimization domain"
+      },
+      "input_artifact_ids": [],
+      "metadata": {},
+      "created_at": "2026-10-16T13:49:26.651586+00:00"
+    },
+    {
+      "id": "artifact-c7543a4accac4c2cb64c2ae343525ef9",
+      "type": "ppa.candidate",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:proposer",
+        "attempt_id": "attempt-51791be8406649eea9fa18006a764a66",
+        "role": "ppa-proposer",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "cdcb081da4f1db33dd1e6cfc2a4157962e99a6c6",
+        "tree": "49f13a9ed440e06d260374240ae68622c04eb8c4",
+        "paths": [
+          "proposal/candidate.json"
+        ]
+      },
+      "payload": {
+        "commit": "cdcb081da4f1db33dd1e6cfc2a4157962e99a6c6",
+        "configuration": {
+          "abc_area": 1,
+          "density": 0.55,
+          "repair_margin": 0,
+          "utilization": 40
+        },
+        "paths": [
+          "proposal/candidate.json"
+        ],
+        "rationale": "The available evidence is context/baseline.json; reports/ and build/ contain no evaluation report or candidate history. The baseline tuple (40, 0.55, 0, 0) is physically and measurement qualified, with cell area 161954 um2, setup slack 0.19292 ns, hold slack 0.114491 ns, zero slew/capacitance/fanout violations, and normalized area-times-energy score 1.0. Its DOT64, GEMM8 and CONV3 estimated energies are 2.293945631906608e-7, 1.7792685987008622e-6 and 1.1542462882162743e-6 J. Choose the previously untried, in-domain tuple (40, 0.55, 1, 0), changing only abc_area to test area-oriented mapping against the cell-area factor in the frozen score. Retaining baseline utilization, density and repair margin isolates this change and avoids adding repair overhead without observed violations. The small positive setup slack makes timing qualification a material risk; lower cell area or workload energy is a hypothesis, not a measured improvement. The independent evaluator must establish timing, electrical and measurement qualification and the resulting geometric-mean energy ratio before this candidate can outrank the baseline. The frozen RTL, 10526 ps period, libraries and acceptance thresholds remain unchanged; no hardware implementation or screening was run by the proposer."
+      },
+      "input_artifact_ids": [
+        "ppa-context"
+      ],
+      "metadata": {
+        "task_key": "proposer",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T13:51:07.060051+00:00"
+    },
+    {
+      "id": "artifact-362549f5460841b4aa091e037c414de9",
+      "type": "verification.report",
+      "schema_version": 1,
+      "producer": {
+        "workflow_id": "ppa-search",
+        "task_id": "ppa-search:reviewer",
+        "attempt_id": "attempt-fd1fd32f8b134ace8157a88a6a6e3ce7",
+        "role": "ppa-verifier",
+        "role_version": 1
+      },
+      "content": {
+        "kind": "git",
+        "commit": "db17a25cc300d065546d92d84a2d0b926045eb9c",
+        "tree": "19256ad6b326b5ee27928b7dc857683b8d8e66e9",
+        "paths": [
+          "reports/review.json"
+        ]
+      },
+      "payload": {
+        "commit": "db17a25cc300d065546d92d84a2d0b926045eb9c",
+        "paths": [
+          "reports/review.json"
+        ],
+        "repair_summary": "Permit measuring tuple (40, 0.55, 1, 0): it is within the frozen domain, changes only abc_area, and has no duplicate in captured session history. Baseline claims match captured evidence; only the proposal file changed. No repair required. Candidate timing, electrical, measurement qualification and PPA improvement remain unmeasured. Review written to reports/review.json.",
+        "subject": "candidate",
+        "verdict": "passed"
+      },
+      "input_artifact_ids": [
+        "artifact-c7543a4accac4c2cb64c2ae343525ef9",
+        "ppa-context"
+      ],
+      "metadata": {
+        "task_key": "reviewer",
+        "workflow_id": "ppa-search"
+      },
+      "created_at": "2026-10-16T13:52:19.526846+00:00"
+    }
+  ],
+  "scope": "Frozen contracts, attempt decisions, engineering states, deliveries and captured/pending feedback evidence. WorkItem states are their exported final states. Private model-home and credentials excluded."
+}

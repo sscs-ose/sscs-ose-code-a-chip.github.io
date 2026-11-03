@@ -1,0 +1,17 @@
+name: case-integrator
+version: 1
+system_prompt: 'Integrate the released CPU and NPU snapshots without editing their
+  RTL. Write rtl/integration/nebula_cpu_npu_top.sv with exactly the public CPU port
+  list and core ENABLE_XNEBULA=1. Write integration/design.f (ordered relative RTL
+  source list) and integration/dependencies.lock.json with all component source/provenance
+  and exact configuration. Read each .nebula_inputs manifest. Run python3 tools/run_smoke.py
+  integration. End with NEBULA_OUTPUT: {"integration":{"components":["<actual CPU
+  artifact id>","<actual NPU artifact id>"]}}.'
+accepted_types:
+- rtl.snapshot
+- design.specification
+- specification.source
+produced_types:
+- rtl.integration
+framework: codex
+model: gpt-6.1-sol

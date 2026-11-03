@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "campaign": "Benchmark_PPA_20261018",
+  "created_at": "2026-10-18T15:39:16.618684+00:00",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "seed": 20261018,
+  "tasks": [
+    {
+      "id": "counter8",
+      "family": "counter",
+      "width": 8
+    },
+    {
+      "id": "counter16",
+      "family": "counter",
+      "width": 16
+    },
+    {
+      "id": "fifo8x4",
+      "family": "fifo",
+      "width": 8,
+      "depth": 4
+    },
+    {
+      "id": "fifo16x8",
+      "family": "fifo",
+      "width": 16,
+      "depth": 8
+    },
+    {
+      "id": "dot2",
+      "family": "dot",
+      "lanes": 2
+    },
+    {
+      "id": "dot4",
+      "family": "dot",
+      "lanes": 4
+    }
+  ],
+  "demonstrations": [
+    "counter8",
+    "fifo8x4",
+    "dot2"
+  ],
+  "agent_budget_seconds": 1200,
+  "candidates_per_ppa_session": 3,
+  "physical_timeout_seconds": 14400,
+  "postprocess_timeout_seconds": 1800,
+  "period_ps": 10526,
+  "benchmark_period_ps": 100000,
+  "high_frequency_period_ps": 10000,
+  "threads": 2,
+  "corner": "Sky130HD TT25C1.8V",
+  "io_delay_ns": 0.5,
+  "clock_uncertainty_ns": 0.1,
+  "ppa_jobs": [
+    {
+      "id": "F2-1",
+      "workflow": "F2",
+      "repetition": 1
+    },
+    {
+      "id": "F1-1",
+      "workflow": "F1",
+      "repetition": 1
+    },
+    {
+      "id": "F0-1",
+      "workflow": "F0",
+      "repetition": 1
+    },
+    {
+      "id": "F2-2",
+      "workflow": "F2",
+      "repetition": 2
+    },
+    {
+      "id": "F1-2",
+      "workflow": "F1",
+      "repetition": 2
+    },
+    {
+      "id": "F0-2",
+      "workflow": "F0",
+      "repetition": 2
+    },
+    {
+      "id": "F1-3",
+      "workflow": "F1",
+      "repetition": 3
+    },
+    {
+      "id": "F0-3",
+      "workflow": "F0",
+      "repetition": 3
+    },
+    {
+      "id": "F2-3",
+      "workflow": "F2",
+      "repetition": 3
+    }
+  ],
+  "physical_budget": {
+    "reference": 6,
+    "demonstration": 3,
+    "common_baseline": 1,
+    "ppa": 27,
+    "high_frequency": 4,
+    "planned_total": 41,
+    "preformal_calibration": 3,
+    "absolute_total": 44
+  },
+  "action_policy": "Public correctness-qualified operand isolation and explicit reduction-width transforms; identical catalog for all workflows; no physical selection",
+  "review_policy": {
+    "F0": "no model reviewer",
+    "F1": "every accepted proposal",
+    "F2": "first proposal or previous candidate not rank eligible"
+  },
+  "completion": "all six benchmark reference qualifications; all scheduled sessions terminal; public lessons/manuscript/reproduction complete; fresh judge no must-fix",
+  "ppa": {
+    "allowed_rtl_actions": [
+      {
+        "operand_isolation": false,
+        "reduce_width": false
+      },
+      {
+        "operand_isolation": false,
+        "reduce_width": true
+      },
+      {
+        "operand_isolation": true,
+        "reduce_width": false
+      },
+      {
+        "operand_isolation": true,
+        "reduce_width": true
+      }
+    ],
+    "parameter_domains": {
+      "utilization": [
+        30,
+        40,
+        50
+      ],
+      "density": [
+        0.55,
+        0.65
+      ],
+      "abc_area": [
+        0,
+        1
+      ],
+      "repair_margin": [
+        0,
+        10,
+        20
+      ]
+    },
+    "aggregate_agent_budget_seconds": 1200,
+    "new_candidates_per_session": 3,
+    "period_ps": 10526,
+    "threads": 2,
+    "corner": "Sky130HD TT25C1.8V",
+    "clock_uncertainty_ns": 0.1,
+    "io_delay_ns": 0.5,
+    "workloads": [
+      "DOT64",
+      "GEMM8",
+      "CONV3"
+    ],
+    "objective": "qualified standard-cell-area ratio times geometric-mean workload energy ratio",
+    "action_semantics": {
+      "operand_isolation": "Mask multiply inputs to zero unless accepting a request; same registered protocol",
+      "reduce_width": "Exact signed 18-bit reduction, sign extended to 32 bits; unchanged cycle contract"
+    },
+    "unchanged": "CPU ISA/pipeline/memories/integration/interface latency, libraries, tools, checker and limits",
+    "baseline_configuration": {
+      "utilization": 40,
+      "density": 0.55,
+      "abc_area": 0,
+      "repair_margin": 0
+    },
+    "thresholds": [
+      1.0,
+      0.98
+    ],
+    "review_policy": {
+      "F0": "no model reviewer",
+      "F1": "every accepted proposal",
+      "F2": "first proposal or previous candidate not rank eligible"
+    }
+  }
+}

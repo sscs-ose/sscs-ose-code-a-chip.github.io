@@ -1,0 +1,163 @@
+
+-- Running command `help sim; help read_liberty' --
+
+    sim [options] [top-level]
+
+This command simulates the circuit using the given top-level module.
+
+    -vcd <filename>
+        write the simulation results to the given VCD file
+
+    -fst <filename>
+        write the simulation results to the given FST file
+
+    -aiw <filename>
+        write the simulation results to an AIGER witness file
+        (requires a *.aim file via -map)
+
+    -hdlname
+        use the hdlname attribute when writing simulation results
+        (preserves hierarchy in a flattened design)
+
+    -x
+        ignore constant x outputs in simulation file.
+
+    -date
+        include date and full version info in output.
+
+    -clock <portname>
+        name of top-level clock input
+
+    -clockn <portname>
+        name of top-level clock input (inverse polarity)
+
+    -multiclock
+        mark that witness file is multiclock.
+
+    -reset <portname>
+        name of top-level reset input (active high)
+
+    -resetn <portname>
+        name of top-level inverted reset input (active low)
+
+    -rstlen <integer>
+        number of cycles reset should stay active (default: 1)
+
+    -zinit
+        zero-initialize all uninitialized regs and memories
+
+    -timescale <string>
+        include the specified timescale declaration in the vcd
+
+    -n <integer>
+        number of clock cycles to simulate (default: 20)
+
+    -noinitstate
+        do not activate $initstate cells during the first cycle
+
+    -a
+        use all nets in VCD/FST operations, not just those with public names
+
+    -w
+        writeback mode: use final simulation state as new init state
+
+    -r <filename>
+        read simulation or formal results file
+            File formats supported: FST, VCD, AIW, WIT and .yw
+            Yosys witness (.yw) replay is preferred when possible.
+            VCD support requires vcd2fst external tool to be present
+
+    -no-undriven-check
+        skip undriven-signal checks for FST/VCD replay (can be expensive for large designs)
+
+    -undriven-warn
+        downgrade undriven-signal replay errors to warnings
+
+    -width <integer>
+        cycle width in generated simulation output (must be divisible by 2).
+
+    -append <integer>
+        number of extra clock cycles to simulate for a Yosys witness input
+
+    -summary <filename>
+        write a JSON summary to the given file
+
+    -map <filename>
+        read file with port and latch symbols, needed for AIGER witness input
+
+    -scope <name>
+        scope of simulation top model
+
+    -at <time>
+        sets start and stop time
+
+    -start <time>
+        start co-simulation in arbitary time (default 0)
+
+    -stop <time>
+        stop co-simulation in arbitary time (default END)
+
+    -sim
+        simulation with stimulus from FST (default)
+
+    -sim-cmp
+        co-simulation expect exact match
+
+    -sim-gold
+        co-simulation, x in simulation can match any value in FST
+
+    -sim-gate
+        co-simulation, x in FST can match any value in simulation
+
+    -assert
+        fail the simulation command if, in the course of simulating,
+        any of the asserts in the design fail
+
+    -fst-noinit
+        do not initialize latches and memories from an input FST or VCD file
+        (use the initial defined by the design instead)
+
+    -q
+        disable per-cycle/sample log message
+
+    -d
+        enable debug output
+
+
+    read_liberty [filename]
+
+Read cells from liberty file as modules into current design.
+
+    -lib
+        only create empty blackbox modules
+
+    -wb
+        mark imported cells as whiteboxes
+
+    -nooverwrite
+        ignore re-definitions of modules. (the default behavior is to
+        create an error message if the existing module is not a blackbox
+        module, and overwrite the existing module if it is  a blackbox module.)
+
+    -overwrite
+        overwrite existing modules with the same name
+
+    -ignore_miss_func
+        ignore cells with missing function specification of outputs
+
+    -ignore_miss_dir
+        ignore cells with a missing or invalid direction
+        specification on a pin
+
+    -ignore_miss_data_latch
+        ignore latches with missing data and/or enable pins
+
+    -ignore_buses
+        ignore cells with bus interfaces (wide ports)
+
+    -setattr <attribute_name>
+        set the specified attribute (to the value 1) on all loaded modules
+
+    -unit_delay
+        import combinational timing arcs under the unit delay model
+

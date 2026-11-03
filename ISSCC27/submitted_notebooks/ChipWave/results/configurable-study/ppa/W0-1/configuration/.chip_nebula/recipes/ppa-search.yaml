@@ -1,0 +1,169 @@
+name: bounded-ppa-search
+version: 2
+parameters:
+  source: specification.source
+tasks:
+  proposer:
+    role: ppa-proposer
+    intent: 'You are the PPA implementation optimizer for one frozen CPU+NPU.
+
+      Read context/baseline.json and context/protocol.json. Inspect the immutable
+
+      feedback evaluation report/history before every subsequent proposal. Choose
+
+      one previously untried tuple in the frozen parameter domain. The circuit RTL,
+
+      clock, libraries and acceptance thresholds cannot change. No extra EDA calls,
+
+      screening searches, models or agents are allowed. Only the independent tool
+
+      evaluator executes hardware implementation. Explain the decision using the
+
+      actual available reports, and minimize the qualified area-times-energy score.
+
+      Write proposal/candidate.json containing exactly configuration (the four
+
+      parameter keys) and rationale (string). Write only proposal/ and optional
+
+      build/ notes. End with NEBULA_OUTPUT: {"candidate":{"configuration":{...},
+
+      "rationale":"your report-grounded explanation"}} with matching file/payload.
+
+      After review rejection, repair this proposal without changing permissions.
+
+      There are at most three new physical candidates and all AI roles together
+
+      have 1200 seconds; EDA waiting is outside that agent budget.
+
+      '
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - proposal/**
+      - build/**
+      tools: &id001
+      - python3
+      - git
+    inputs:
+      source:
+        type: specification.source
+        from: $parameters.source
+    outputs:
+      candidate:
+        type: ppa.candidate
+        paths:
+        - proposal/**
+    execution:
+      executor: tool
+      command: python3 tools/run_ppa.py propose
+      timeout_seconds: 30
+    max_attempts: 12
+    gates:
+    - name: bounded-unseen-candidate
+      template: script-check
+      version: 1
+      on_failure: retry
+      parameters:
+        script: python3
+        arguments:
+        - tools/run_ppa.py
+        - validate
+        expected: PPA_CANDIDATE_VALID
+        timeout: 30
+        level: L1
+        error_class: invalid_ppa_candidate
+  evaluator:
+    role: ppa-evaluator
+    intent: Execute the captured immutable candidate under the protected physical
+      budget.
+    permission:
+      read:
+      - context/**
+      - proposal/**
+      - reports/**
+      - tools/**
+      - build/**
+      write:
+      - build/**
+      tools: *id001
+    inputs:
+      candidate:
+        type: ppa.candidate
+        from: $tasks.proposer.outputs.candidate
+    outputs:
+      report:
+        type: ppa.evaluation.report
+        paths:
+        - build/evaluation/**
+    execution:
+      executor: tool
+      command: python3 tools/run_ppa.py evaluate
+      timeout_seconds: 16500
+    max_attempts: 3
+  finalizer:
+    role: ppa-finalizer
+    intent: Record search completion and retain the best qualified result, if any.
+    on_demand: true
+    permission:
+      read:
+      - tools/**
+      - build/**
+      write:
+      - build/session/**
+      tools: *id001
+    inputs:
+      evaluation:
+        type: ppa.evaluation.report
+        from: $tasks.evaluator.outputs.report
+    outputs:
+      report:
+        type: ppa.session.report
+        paths:
+        - build/session/**
+    execution:
+      executor: tool
+      command: python3 tools/run_ppa.py finalize
+      timeout_seconds: 30
+    max_attempts: 1
+feedback:
+- source: evaluator
+  verdict: pass
+  target: proposer
+  kind: feedback
+  summary: Continue bounded search.
+  propagate: true
+  when:
+    field: report.continue_search
+    equals: true
+- source: evaluator
+  verdict: pass
+  target: finalizer
+  kind: feedback
+  summary: Record terminal search observations.
+  propagate: false
+  when:
+    field: report.continue_search
+    equals: false
+- source: evaluator
+  verdict: fail
+  target: proposer
+  kind: feedback
+  summary: Continue bounded search.
+  propagate: true
+  when:
+    field: report.continue_search
+    equals: true
+- source: evaluator
+  verdict: fail
+  target: finalizer
+  kind: feedback
+  summary: Record terminal search observations.
+  propagate: false
+  when:
+    field: report.continue_search
+    equals: false

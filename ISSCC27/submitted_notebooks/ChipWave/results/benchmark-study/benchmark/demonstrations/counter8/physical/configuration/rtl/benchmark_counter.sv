@@ -1,0 +1,24 @@
+module benchmark_counter (
+    input  wire       clk,
+    input  wire       rst_n,
+    input  wire       en,
+    input  wire       load,
+    input  wire [7:0] load_value,
+    output reg  [7:0] count,
+    output reg        overflow
+);
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            count    <= 8'd0;
+            overflow <= 1'b0;
+        end else if (load) begin
+            count    <= load_value;
+            overflow <= 1'b0;
+        end else if (en) begin
+            count    <= count + 8'd1;
+            overflow <= (count == 8'hff);
+        end else begin
+            overflow <= 1'b0;
+        end
+    end
+endmodule

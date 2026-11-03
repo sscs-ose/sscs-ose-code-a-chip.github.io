@@ -1,0 +1,1499 @@
+.option norvc
+.section .text.init
+.globl _start
+_start:
+la s0,scratch
+li t0,0x90000000
+li s1,2519166434
+li s2,472828026
+li s3,1846577989
+li s4,425338975
+li s5,2529543753
+or s1,s2,s1
+slli s2,s4,0
+ori s4,s4,1532
+xor s1,s3,s4
+add s4,s4,s1
+srl s2,s1,s4
+srl s5,s4,s2
+srl s4,s2,s2
+slli s3,s5,24
+sltu s1,s5,s1
+srl s4,s4,s4
+sll s5,s2,s5
+xor s4,s5,s2
+xor s3,s3,s5
+slt s5,s2,s3
+and s1,s4,s5
+slli s2,s1,2
+ori s4,s4,-900
+slt s5,s4,s5
+sub s4,s4,s4
+and s4,s4,s3
+xori s5,s5,-881
+srl s5,s3,s3
+addi s3,s1,-324
+or s5,s3,s5
+and s3,s5,s2
+bne s3,s3,rand_control_26
+addi s3,s3,1
+rand_control_26:
+sub s5,s3,s2
+sll s5,s4,s1
+xor s2,s4,s5
+add s5,s3,s5
+andi s5,s1,1148
+ori s2,s1,1546
+srli s1,s2,20
+beq s3,s3,rand_control_34
+addi s5,s5,1
+rand_control_34:
+slt s4,s1,s2
+sll s4,s5,s2
+or s5,s5,s4
+add s2,s3,s5
+xori s3,s2,-1878
+srai s4,s5,14
+addi s4,s5,1731
+ori s1,s5,-1076
+sltu s3,s3,s3
+or s5,s5,s3
+xor s3,s4,s5
+and s3,s3,s1
+addi s5,s1,-1439
+beq s2,s2,rand_control_48
+addi s1,s1,1
+rand_control_48:
+addi s4,s5,857
+srli s5,s5,19
+addi s3,s5,-535
+srl s4,s5,s1
+andi s5,s3,-542
+sll s5,s4,s1
+srai s5,s1,7
+sltu s2,s1,s1
+ori s5,s2,469
+srli s4,s5,1
+xor s1,s5,s3
+slli s4,s5,25
+sltu s4,s3,s4
+and s3,s5,s2
+or s2,s4,s1
+addi s1,s1,-1802
+add s2,s3,s3
+xori s3,s2,802
+addi s3,s1,-121
+sltu s5,s2,s4
+add s5,s4,s3
+xor s3,s3,s5
+srl s1,s4,s2
+add s3,s3,s5
+slli s4,s2,31
+xori s5,s1,1105
+addi s4,s2,1004
+srli s1,s2,13
+bne s4,s4,rand_control_77
+addi s5,s5,1
+rand_control_77:
+add s3,s1,s1
+beq s1,s1,rand_control_79
+addi s3,s3,1
+rand_control_79:
+srli s4,s5,14
+beq s4,s4,rand_control_81
+addi s4,s4,1
+rand_control_81:
+addi s2,s4,1373
+addi s1,s1,1524
+add s4,s5,s5
+srli s2,s5,26
+srl s4,s1,s4
+andi s3,s3,-184
+sltu s3,s5,s2
+slli s1,s4,26
+and s5,s5,s1
+beq s3,s3,rand_control_91
+addi s1,s1,1
+rand_control_91:
+xor s2,s5,s2
+srl s5,s1,s5
+sltu s4,s5,s2
+sub s4,s3,s4
+slli s2,s2,10
+sltu s1,s4,s5
+bne s2,s2,rand_control_98
+addi s1,s1,1
+rand_control_98:
+slli s1,s5,20
+add s1,s2,s3
+add s4,s4,s1
+sub s3,s1,s1
+andi s5,s4,1293
+sll s1,s3,s2
+addi s1,s4,76
+srli s1,s1,5
+sll s3,s4,s4
+or s3,s1,s1
+bne s3,s3,rand_control_109
+addi s1,s1,1
+rand_control_109:
+addi s2,s3,1998
+srl s2,s2,s2
+srl s1,s4,s2
+bne s1,s1,rand_control_113
+addi s4,s4,1
+rand_control_113:
+andi s2,s4,-934
+srli s1,s1,10
+srl s4,s1,s4
+andi s1,s1,-1588
+srl s5,s3,s1
+sub s3,s2,s4
+srl s4,s2,s1
+srli s5,s5,29
+srai s3,s3,9
+xor s3,s3,s4
+add s5,s1,s2
+or s3,s1,s1
+srli s1,s5,25
+or s3,s1,s2
+sub s2,s1,s1
+bne s5,s5,rand_control_129
+addi s4,s4,1
+rand_control_129:
+sltu s5,s5,s2
+slt s1,s1,s5
+xor s5,s5,s3
+sll s2,s3,s4
+beq s3,s3,rand_control_134
+addi s5,s5,1
+rand_control_134:
+ori s1,s1,-1794
+addi s3,s3,832
+slli s5,s5,26
+xori s1,s5,915
+srli s3,s4,28
+sll s5,s4,s1
+bne s1,s1,rand_control_141
+addi s4,s4,1
+rand_control_141:
+xori s3,s3,-662
+sltu s1,s3,s4
+xor s3,s3,s2
+beq s1,s1,rand_control_145
+addi s5,s5,1
+rand_control_145:
+addi s4,s5,-1172
+beq s3,s3,rand_control_147
+addi s4,s4,1
+rand_control_147:
+srai s3,s4,12
+add s1,s2,s3
+xor s2,s3,s3
+srl s1,s4,s5
+bne s4,s4,rand_control_152
+addi s2,s2,1
+rand_control_152:
+sll s2,s5,s1
+bne s1,s1,rand_control_154
+addi s5,s5,1
+rand_control_154:
+sll s3,s2,s5
+slli s1,s2,7
+bne s2,s2,rand_control_157
+addi s2,s2,1
+rand_control_157:
+beq s3,s3,rand_control_158
+addi s1,s1,1
+rand_control_158:
+sll s3,s5,s1
+slt s3,s2,s3
+sll s3,s3,s5
+xori s5,s2,1143
+slt s3,s3,s3
+slt s4,s4,s3
+beq s3,s3,rand_control_165
+addi s1,s1,1
+rand_control_165:
+ori s3,s1,-1294
+sltu s2,s4,s4
+and s1,s4,s2
+beq s4,s4,rand_control_169
+addi s2,s2,1
+rand_control_169:
+xori s4,s2,-154
+or s5,s2,s5
+xor s5,s5,s1
+sub s2,s3,s2
+slli s2,s1,10
+addi s3,s1,464
+sub s2,s3,s2
+sltu s1,s4,s4
+add s5,s1,s1
+srai s5,s2,17
+or s1,s2,s3
+slli s3,s4,26
+sltu s5,s1,s4
+sub s5,s2,s5
+bne s3,s3,rand_control_184
+addi s2,s2,1
+rand_control_184:
+and s5,s4,s5
+xori s4,s4,-1944
+xori s5,s2,312
+slli s2,s2,16
+srl s3,s4,s5
+or s4,s3,s5
+ori s1,s5,-1905
+xor s3,s4,s5
+slt s3,s2,s5
+and s2,s4,s2
+slt s1,s5,s1
+slli s5,s5,17
+addi s3,s3,1821
+srl s3,s1,s3
+xor s5,s3,s4
+sub s1,s4,s1
+bne s1,s1,rand_control_201
+addi s2,s2,1
+rand_control_201:
+andi s5,s3,302
+andi s1,s2,-1884
+or s1,s1,s4
+bne s1,s1,rand_control_205
+addi s5,s5,1
+rand_control_205:
+slli s3,s5,27
+beq s1,s1,rand_control_207
+addi s5,s5,1
+rand_control_207:
+sll s5,s3,s1
+xor s4,s4,s3
+and s3,s1,s3
+beq s5,s5,rand_control_211
+addi s5,s5,1
+rand_control_211:
+sub s2,s3,s1
+xor s5,s4,s1
+bne s3,s3,rand_control_214
+addi s3,s3,1
+rand_control_214:
+xori s4,s4,-410
+sll s5,s4,s2
+slt s4,s3,s4
+addi s1,s1,1222
+andi s4,s2,1644
+beq s3,s3,rand_control_220
+addi s1,s1,1
+rand_control_220:
+slli s4,s2,3
+ori s2,s4,-1103
+sub s2,s2,s3
+and s2,s3,s3
+slt s2,s5,s3
+xor s5,s2,s1
+or s3,s5,s2
+srl s4,s1,s1
+andi s5,s1,-1156
+and s5,s1,s5
+beq s2,s2,rand_control_231
+addi s2,s2,1
+rand_control_231:
+srl s5,s3,s4
+bne s2,s2,rand_control_233
+addi s2,s2,1
+rand_control_233:
+bne s1,s1,rand_control_234
+addi s4,s4,1
+rand_control_234:
+addi s4,s3,-1392
+slli s2,s5,17
+xori s1,s2,822
+and s2,s4,s1
+add s1,s2,s1
+andi s1,s5,-1575
+srai s4,s3,28
+sltu s2,s1,s2
+addi s5,s1,481
+or s1,s5,s5
+or s4,s5,s2
+add s4,s3,s2
+xor s2,s5,s3
+or s2,s2,s1
+sub s2,s1,s1
+sll s4,s4,s1
+bne s3,s3,rand_control_251
+addi s1,s1,1
+rand_control_251:
+sll s5,s5,s2
+slli s2,s5,1
+xor s2,s1,s2
+addi s5,s4,957
+xori s3,s5,268
+slt s3,s1,s4
+srli s3,s2,3
+sll s3,s5,s5
+bne s1,s1,rand_control_260
+addi s4,s4,1
+rand_control_260:
+or s3,s4,s2
+xori s2,s2,-1399
+beq s1,s1,rand_control_263
+addi s3,s3,1
+rand_control_263:
+andi s1,s2,288
+slt s4,s2,s2
+xori s1,s4,692
+sub s1,s5,s5
+sub s4,s3,s3
+srli s5,s4,22
+sltu s2,s4,s5
+bne s1,s1,rand_control_271
+addi s4,s4,1
+rand_control_271:
+andi s1,s4,687
+srli s5,s1,10
+xor s5,s3,s4
+addi s5,s3,1764
+add s4,s2,s4
+and s4,s5,s2
+xor s4,s5,s2
+beq s5,s5,rand_control_279
+addi s3,s3,1
+rand_control_279:
+slt s3,s2,s4
+xor s5,s3,s2
+and s3,s3,s2
+sub s5,s4,s5
+beq s2,s2,rand_control_284
+addi s3,s3,1
+rand_control_284:
+slt s2,s1,s3
+sltu s5,s5,s4
+srli s4,s2,11
+sub s3,s4,s5
+xori s1,s2,1233
+xor s2,s3,s5
+beq s1,s1,rand_control_291
+addi s2,s2,1
+rand_control_291:
+bne s4,s4,rand_control_292
+addi s5,s5,1
+rand_control_292:
+srl s5,s3,s4
+bne s2,s2,rand_control_294
+addi s2,s2,1
+rand_control_294:
+sub s3,s3,s5
+addi s4,s4,42
+slt s5,s1,s3
+addi s3,s5,-475
+sub s2,s1,s3
+bne s3,s3,rand_control_300
+addi s3,s3,1
+rand_control_300:
+addi s2,s3,-44
+or s3,s3,s3
+xor s3,s4,s5
+xori s4,s5,1458
+srli s3,s1,6
+sll s4,s5,s3
+sll s5,s1,s3
+sll s4,s5,s2
+or s5,s2,s2
+xor s2,s3,s3
+bne s5,s5,rand_control_311
+addi s3,s3,1
+rand_control_311:
+and s1,s1,s2
+bne s3,s3,rand_control_313
+addi s1,s1,1
+rand_control_313:
+srai s5,s3,17
+addi s2,s5,203
+srli s2,s1,23
+xor s5,s5,s3
+andi s1,s2,1299
+add s1,s5,s3
+beq s2,s2,rand_control_320
+addi s4,s4,1
+rand_control_320:
+ori s2,s5,1171
+addi s2,s5,-524
+slli s5,s3,1
+sltu s1,s4,s5
+sub s2,s1,s5
+beq s3,s3,rand_control_326
+addi s4,s4,1
+rand_control_326:
+slli s5,s4,21
+andi s4,s4,-2005
+addi s3,s4,-2008
+bne s3,s3,rand_control_330
+addi s5,s5,1
+rand_control_330:
+xori s1,s5,1180
+sll s1,s1,s2
+srl s2,s1,s2
+beq s3,s3,rand_control_334
+addi s5,s5,1
+rand_control_334:
+addi s5,s4,-105
+add s2,s4,s5
+srli s1,s1,24
+and s1,s3,s5
+sltu s2,s4,s1
+slt s1,s4,s3
+slt s5,s5,s1
+sll s1,s4,s2
+slt s3,s5,s4
+srli s5,s3,25
+srli s2,s3,0
+or s2,s4,s1
+xori s3,s4,1414
+xori s5,s5,986
+srl s4,s4,s4
+sltu s5,s3,s1
+srl s3,s2,s1
+xori s1,s2,1266
+ori s5,s2,1018
+andi s2,s2,661
+sltu s3,s2,s1
+sltu s2,s5,s5
+and s4,s5,s3
+srai s4,s2,14
+xori s4,s2,1684
+xori s2,s1,184
+sll s4,s1,s3
+srai s4,s4,23
+and s4,s3,s2
+ori s2,s1,734
+xor s2,s3,s1
+sub s4,s1,s4
+srli s5,s4,18
+or s2,s4,s5
+andi s3,s5,-886
+andi s4,s3,-145
+addi s2,s4,-605
+srl s1,s1,s3
+and s5,s2,s4
+xor s2,s2,s1
+ori s1,s1,1448
+sll s1,s4,s4
+sltu s5,s4,s4
+srl s3,s2,s1
+sub s5,s1,s5
+srai s2,s4,31
+bne s5,s5,rand_control_381
+addi s3,s3,1
+rand_control_381:
+andi s2,s1,-122
+and s5,s4,s5
+srli s5,s4,25
+sltu s1,s4,s3
+ori s1,s3,-1863
+or s4,s5,s3
+addi s1,s5,1583
+addi s3,s5,-521
+slli s1,s4,25
+slli s4,s1,21
+xor s4,s1,s4
+xori s2,s4,-649
+sltu s2,s4,s3
+add s2,s5,s2
+slt s4,s1,s1
+addi s5,s5,-1335
+and s4,s4,s2
+ori s5,s3,-1631
+srai s1,s5,28
+sltu s5,s1,s5
+xor s2,s4,s3
+xor s1,s2,s2
+andi s4,s2,-567
+or s4,s3,s5
+and s3,s4,s2
+sltu s1,s4,s2
+sltu s3,s4,s3
+srl s3,s5,s3
+sub s3,s4,s4
+and s2,s5,s4
+sltu s2,s5,s4
+add s1,s5,s5
+xori s1,s2,-748
+bne s2,s2,rand_control_415
+addi s2,s2,1
+rand_control_415:
+xor s4,s3,s1
+bne s5,s5,rand_control_417
+addi s1,s1,1
+rand_control_417:
+or s3,s1,s5
+or s4,s2,s3
+or s3,s3,s5
+srl s1,s1,s2
+beq s1,s1,rand_control_422
+addi s3,s3,1
+rand_control_422:
+sll s4,s5,s5
+srli s2,s1,8
+andi s1,s3,-1135
+and s1,s2,s1
+xor s4,s1,s4
+srl s1,s1,s5
+xori s4,s5,101
+srl s1,s1,s5
+ori s5,s3,1529
+xori s2,s1,1345
+andi s2,s5,-943
+ori s2,s1,-897
+srl s1,s4,s2
+add s1,s1,s1
+beq s3,s3,rand_control_437
+addi s4,s4,1
+rand_control_437:
+sub s3,s5,s3
+srl s2,s4,s3
+andi s3,s2,1627
+xor s1,s4,s4
+add s4,s3,s5
+add s3,s1,s1
+slt s1,s4,s2
+bne s5,s5,rand_control_445
+addi s5,s5,1
+rand_control_445:
+srl s5,s1,s4
+sub s3,s3,s2
+beq s3,s3,rand_control_448
+addi s1,s1,1
+rand_control_448:
+slt s3,s4,s4
+sll s5,s1,s4
+slt s5,s2,s1
+srli s3,s3,10
+beq s2,s2,rand_control_453
+addi s2,s2,1
+rand_control_453:
+ori s3,s3,1728
+sub s3,s3,s1
+and s5,s1,s3
+ori s5,s1,-1340
+ori s4,s3,680
+slt s5,s1,s5
+ori s1,s3,1523
+xori s2,s4,-416
+or s1,s4,s3
+slli s4,s4,30
+bne s3,s3,rand_control_464
+addi s5,s5,1
+rand_control_464:
+srli s3,s5,29
+sltu s2,s2,s3
+srli s2,s1,31
+xori s3,s4,-714
+and s3,s1,s5
+slli s4,s1,27
+andi s4,s4,1173
+xori s2,s5,1173
+andi s1,s2,-873
+andi s2,s2,158
+slt s4,s5,s5
+xori s3,s5,-1942
+and s5,s1,s4
+sub s4,s2,s2
+and s4,s3,s4
+beq s3,s3,rand_control_480
+addi s1,s1,1
+rand_control_480:
+srl s1,s1,s1
+add s4,s2,s5
+sub s4,s4,s3
+and s5,s5,s4
+and s2,s5,s5
+srl s5,s5,s5
+bne s2,s2,rand_control_487
+addi s4,s4,1
+rand_control_487:
+srl s2,s4,s4
+srl s5,s2,s1
+or s2,s4,s3
+add s3,s2,s3
+beq s4,s4,rand_control_492
+addi s2,s2,1
+rand_control_492:
+and s4,s2,s3
+andi s4,s2,-67
+andi s4,s2,-269
+and s3,s4,s3
+bne s3,s3,rand_control_497
+addi s1,s1,1
+rand_control_497:
+slt s1,s4,s1
+sub s3,s1,s1
+sll s5,s5,s3
+andi s3,s5,-557
+xori s1,s2,-1374
+srai s3,s2,0
+srai s5,s4,12
+sll s2,s4,s1
+or s3,s2,s4
+ori s3,s3,289
+srli s5,s5,17
+bne s5,s5,rand_control_509
+addi s5,s5,1
+rand_control_509:
+or s4,s3,s5
+xori s5,s3,1222
+sltu s1,s1,s2
+add s3,s1,s2
+sltu s3,s2,s1
+beq s1,s1,rand_control_515
+addi s1,s1,1
+rand_control_515:
+add s1,s1,s5
+srai s4,s1,30
+xor s4,s3,s1
+add s2,s5,s5
+andi s5,s5,1762
+bne s4,s4,rand_control_521
+addi s4,s4,1
+rand_control_521:
+slli s4,s5,12
+srl s1,s1,s5
+srl s3,s4,s4
+ori s4,s5,461
+slt s4,s5,s2
+beq s2,s2,rand_control_527
+addi s2,s2,1
+rand_control_527:
+addi s5,s1,861
+sll s1,s2,s1
+srli s5,s5,25
+sll s2,s4,s2
+addi s2,s2,-1731
+bne s3,s3,rand_control_533
+addi s4,s4,1
+rand_control_533:
+bne s5,s5,rand_control_534
+addi s1,s1,1
+rand_control_534:
+or s5,s5,s5
+srli s5,s4,1
+add s5,s5,s1
+or s2,s2,s2
+xor s1,s5,s5
+slt s3,s4,s3
+srai s2,s4,7
+slli s5,s1,20
+bne s3,s3,rand_control_543
+addi s5,s5,1
+rand_control_543:
+sub s2,s2,s2
+or s5,s1,s1
+beq s2,s2,rand_control_546
+addi s3,s3,1
+rand_control_546:
+srl s3,s5,s3
+xor s4,s5,s3
+xor s4,s3,s5
+add s1,s5,s4
+add s5,s5,s4
+srai s2,s3,9
+sll s3,s5,s1
+ori s1,s5,-2042
+slli s1,s2,23
+ori s1,s3,-956
+xor s4,s2,s3
+andi s2,s3,645
+slli s4,s2,21
+sll s5,s1,s2
+sub s4,s1,s2
+slli s5,s5,8
+beq s4,s4,rand_control_563
+addi s1,s1,1
+rand_control_563:
+srli s5,s4,29
+sll s1,s1,s5
+sll s3,s3,s1
+sub s1,s3,s3
+srli s4,s1,12
+addi s5,s1,388
+slt s4,s1,s4
+xor s3,s5,s1
+addi s3,s5,1385
+add s3,s1,s4
+sub s3,s4,s1
+andi s2,s1,504
+and s2,s1,s5
+sub s4,s3,s3
+srl s2,s2,s1
+slli s4,s3,11
+beq s2,s2,rand_control_580
+addi s2,s2,1
+rand_control_580:
+slli s1,s1,11
+slli s2,s2,19
+or s2,s4,s1
+xor s4,s4,s2
+beq s1,s1,rand_control_585
+addi s4,s4,1
+rand_control_585:
+andi s1,s1,-1773
+slt s5,s2,s5
+srl s3,s1,s1
+srli s1,s2,26
+addi s5,s4,-127
+and s2,s4,s1
+bne s1,s1,rand_control_592
+addi s3,s3,1
+rand_control_592:
+xor s5,s5,s3
+andi s2,s4,1565
+add s3,s5,s4
+slli s3,s4,25
+sll s2,s4,s1
+add s4,s1,s2
+and s4,s3,s3
+beq s2,s2,rand_control_600
+addi s1,s1,1
+rand_control_600:
+addi s4,s3,1558
+srli s5,s1,5
+slt s3,s1,s1
+xor s3,s1,s3
+and s2,s2,s2
+ori s3,s5,658
+sll s5,s4,s3
+xori s5,s1,-1171
+slli s4,s2,29
+bne s1,s1,rand_control_610
+addi s1,s1,1
+rand_control_610:
+beq s1,s1,rand_control_611
+addi s4,s4,1
+rand_control_611:
+or s4,s2,s2
+add s4,s3,s2
+slt s5,s5,s3
+sll s1,s1,s5
+or s2,s2,s2
+xor s2,s3,s5
+slt s2,s1,s4
+srl s3,s5,s5
+beq s5,s5,rand_control_620
+addi s4,s4,1
+rand_control_620:
+sub s3,s2,s2
+addi s2,s4,-1699
+xori s4,s5,-701
+xor s1,s3,s3
+beq s2,s2,rand_control_625
+addi s2,s2,1
+rand_control_625:
+addi s1,s3,-1814
+srli s4,s3,28
+sltu s1,s2,s5
+xori s2,s5,-844
+beq s2,s2,rand_control_630
+addi s1,s1,1
+rand_control_630:
+beq s3,s3,rand_control_631
+addi s2,s2,1
+rand_control_631:
+ori s1,s3,-323
+sltu s5,s4,s4
+slt s4,s2,s3
+or s1,s2,s1
+srai s4,s3,10
+slt s5,s1,s4
+and s4,s1,s4
+srl s4,s2,s3
+addi s2,s3,-909
+srl s3,s2,s5
+sub s5,s3,s2
+srai s5,s3,3
+xor s4,s5,s5
+sub s4,s4,s5
+ori s1,s1,-1830
+xori s4,s5,697
+slli s3,s4,10
+sltu s4,s4,s4
+sub s2,s4,s3
+srli s5,s3,11
+sltu s1,s5,s5
+xor s5,s2,s3
+sltu s3,s5,s4
+sub s4,s3,s1
+sltu s3,s5,s5
+srli s3,s2,3
+sll s3,s4,s4
+srli s3,s3,22
+sltu s2,s3,s2
+ori s5,s2,-194
+sub s1,s4,s4
+srl s1,s1,s5
+slt s5,s1,s2
+sltu s1,s2,s5
+slli s5,s2,12
+srai s3,s3,18
+ori s3,s4,-1617
+xor s5,s2,s3
+srli s1,s2,4
+srai s3,s5,25
+sltu s4,s5,s5
+beq s2,s2,rand_control_673
+addi s1,s1,1
+rand_control_673:
+srli s3,s1,16
+ori s5,s3,1365
+sub s4,s2,s3
+xori s2,s5,1395
+and s2,s3,s1
+slli s4,s4,12
+andi s2,s4,1142
+ori s5,s5,-436
+xor s1,s2,s1
+andi s3,s5,-1598
+add s5,s1,s4
+bne s3,s3,rand_control_685
+addi s4,s4,1
+rand_control_685:
+srai s5,s1,9
+ori s3,s5,-1842
+sltu s1,s2,s4
+sll s2,s4,s2
+srl s3,s1,s5
+andi s2,s2,-1388
+srai s1,s3,30
+sub s5,s1,s1
+slt s4,s1,s3
+slli s3,s5,5
+srl s1,s2,s2
+bne s3,s3,rand_control_697
+addi s2,s2,1
+rand_control_697:
+sll s4,s1,s3
+slt s3,s1,s4
+addi s3,s2,995
+andi s3,s5,-317
+and s2,s1,s1
+bne s3,s3,rand_control_703
+addi s1,s1,1
+rand_control_703:
+xor s3,s3,s2
+and s1,s2,s1
+beq s2,s2,rand_control_706
+addi s3,s3,1
+rand_control_706:
+add s4,s1,s5
+xor s1,s1,s1
+sub s2,s2,s2
+sll s3,s5,s5
+srl s5,s2,s2
+slt s5,s5,s4
+or s2,s2,s5
+xori s4,s2,-338
+or s5,s4,s4
+bne s5,s5,rand_control_716
+addi s2,s2,1
+rand_control_716:
+add s2,s2,s5
+and s2,s3,s1
+xori s3,s5,463
+or s2,s4,s3
+srl s3,s1,s5
+sltu s4,s3,s5
+ori s5,s2,-1936
+srli s4,s1,2
+add s4,s2,s1
+beq s3,s3,rand_control_726
+addi s1,s1,1
+rand_control_726:
+and s4,s1,s4
+sub s1,s5,s3
+sub s4,s1,s5
+sub s1,s4,s5
+srl s5,s3,s3
+srli s3,s4,28
+xor s3,s1,s2
+beq s3,s3,rand_control_734
+addi s4,s4,1
+rand_control_734:
+sub s1,s3,s4
+slt s4,s5,s5
+add s3,s4,s4
+addi s5,s1,-1702
+bne s2,s2,rand_control_739
+addi s5,s5,1
+rand_control_739:
+beq s4,s4,rand_control_740
+addi s4,s4,1
+rand_control_740:
+addi s3,s2,-11
+ori s4,s5,623
+slli s4,s1,27
+slt s2,s5,s5
+sll s5,s2,s1
+and s4,s5,s4
+srl s5,s2,s2
+sltu s5,s5,s5
+or s1,s2,s1
+srl s3,s2,s4
+srai s2,s2,22
+add s4,s3,s1
+slli s2,s2,16
+xor s3,s2,s4
+sltu s2,s3,s4
+sltu s4,s1,s5
+bne s1,s1,rand_control_757
+addi s3,s3,1
+rand_control_757:
+ori s4,s1,-841
+xori s5,s2,1232
+slli s3,s1,22
+or s1,s3,s4
+srli s5,s2,7
+xor s2,s5,s5
+and s3,s1,s4
+and s4,s4,s4
+bne s3,s3,rand_control_766
+addi s5,s5,1
+rand_control_766:
+andi s5,s2,-1316
+addi s1,s2,-125
+slli s3,s4,15
+srai s5,s5,10
+sltu s4,s3,s3
+sltu s1,s3,s2
+addi s4,s3,594
+bne s5,s5,rand_control_774
+addi s2,s2,1
+rand_control_774:
+xor s1,s1,s1
+andi s1,s2,707
+andi s3,s4,-1673
+xor s5,s2,s5
+srai s2,s5,3
+addi s4,s2,-1676
+and s1,s5,s2
+or s5,s1,s3
+srli s3,s1,21
+add s2,s2,s4
+slt s5,s1,s3
+xori s2,s5,-1866
+and s4,s2,s4
+xori s1,s4,-790
+sltu s4,s5,s3
+add s5,s4,s1
+srl s3,s5,s3
+or s4,s1,s4
+add s4,s1,s1
+add s3,s4,s2
+bne s5,s5,rand_control_795
+addi s3,s3,1
+rand_control_795:
+slli s4,s2,20
+addi s1,s2,1052
+addi s5,s4,748
+xori s3,s2,-1230
+srl s3,s2,s4
+ori s5,s2,1504
+add s3,s1,s1
+srli s1,s2,30
+bne s2,s2,rand_control_804
+addi s1,s1,1
+rand_control_804:
+srl s1,s1,s3
+add s4,s5,s4
+srl s3,s3,s1
+srl s3,s5,s4
+add s2,s4,s4
+bne s5,s5,rand_control_810
+addi s3,s3,1
+rand_control_810:
+slt s3,s2,s5
+sltu s1,s2,s4
+sltu s4,s2,s2
+addi s1,s1,-1965
+sltu s4,s2,s5
+srl s5,s1,s3
+add s3,s1,s5
+addi s1,s2,383
+or s5,s4,s4
+srli s3,s1,8
+beq s5,s5,rand_control_821
+addi s5,s5,1
+rand_control_821:
+and s5,s2,s2
+addi s4,s2,-584
+slli s1,s3,0
+or s4,s3,s3
+and s2,s2,s5
+sll s3,s4,s3
+beq s1,s1,rand_control_828
+addi s2,s2,1
+rand_control_828:
+slli s4,s4,18
+xori s3,s1,1541
+or s3,s2,s3
+sltu s1,s5,s2
+slli s5,s4,17
+sltu s1,s1,s5
+srli s4,s4,8
+addi s2,s3,1359
+srai s3,s3,22
+sub s3,s2,s3
+slli s1,s4,0
+sub s1,s5,s4
+srl s3,s2,s1
+add s3,s5,s2
+beq s5,s5,rand_control_843
+addi s1,s1,1
+rand_control_843:
+srai s5,s3,29
+beq s4,s4,rand_control_845
+addi s2,s2,1
+rand_control_845:
+srai s1,s2,1
+srli s5,s5,9
+or s3,s1,s1
+sltu s2,s4,s4
+add s5,s4,s5
+addi s5,s3,215
+srli s2,s1,2
+addi s2,s5,119
+sltu s1,s5,s1
+andi s4,s2,-805
+slt s4,s1,s1
+srli s2,s1,27
+beq s2,s2,rand_control_858
+addi s5,s5,1
+rand_control_858:
+bne s1,s1,rand_control_859
+addi s4,s4,1
+rand_control_859:
+srli s5,s2,25
+beq s2,s2,rand_control_861
+addi s5,s5,1
+rand_control_861:
+addi s2,s1,520
+andi s4,s5,140
+or s4,s1,s2
+slli s5,s3,2
+srli s2,s3,1
+andi s4,s2,842
+sltu s1,s5,s2
+slli s4,s3,28
+slli s1,s5,25
+xor s4,s3,s5
+xori s5,s1,-646
+sub s4,s4,s1
+or s5,s4,s3
+and s2,s3,s2
+sub s4,s1,s1
+sltu s3,s1,s2
+xori s2,s4,-1245
+srl s2,s2,s4
+xori s4,s1,880
+bne s3,s3,rand_control_881
+addi s5,s5,1
+rand_control_881:
+slt s4,s3,s3
+srl s3,s5,s4
+srai s3,s3,14
+or s5,s5,s3
+sltu s1,s3,s3
+beq s3,s3,rand_control_887
+addi s4,s4,1
+rand_control_887:
+srai s3,s2,25
+sub s2,s2,s1
+sub s1,s3,s3
+beq s3,s3,rand_control_891
+addi s5,s5,1
+rand_control_891:
+addi s3,s1,-979
+beq s4,s4,rand_control_893
+addi s4,s4,1
+rand_control_893:
+beq s3,s3,rand_control_894
+addi s5,s5,1
+rand_control_894:
+srli s5,s3,24
+xor s5,s2,s5
+srli s5,s2,5
+sltu s5,s4,s3
+slt s1,s4,s1
+sll s2,s5,s3
+slt s2,s1,s1
+srli s4,s1,0
+and s2,s5,s4
+beq s1,s1,rand_control_904
+addi s1,s1,1
+rand_control_904:
+andi s4,s1,-1827
+xor s5,s1,s1
+addi s2,s2,1512
+slli s4,s1,18
+xor s3,s2,s5
+sltu s4,s4,s5
+and s4,s5,s5
+srli s1,s4,21
+add s3,s2,s1
+and s2,s2,s1
+srai s4,s1,3
+slli s1,s3,5
+add s5,s1,s5
+or s3,s1,s1
+srl s1,s3,s3
+ori s4,s5,-432
+ori s4,s2,-484
+srai s2,s3,31
+bne s3,s3,rand_control_923
+addi s4,s4,1
+rand_control_923:
+andi s3,s4,246
+slli s5,s4,31
+addi s2,s1,-707
+srli s2,s5,0
+xori s2,s2,878
+andi s1,s4,-388
+sll s2,s1,s3
+beq s5,s5,rand_control_931
+addi s4,s4,1
+rand_control_931:
+addi s3,s3,-302
+ori s5,s5,-1247
+sub s5,s3,s5
+addi s3,s1,-1461
+beq s2,s2,rand_control_936
+addi s3,s3,1
+rand_control_936:
+xor s4,s3,s2
+xor s2,s5,s3
+srli s1,s2,16
+sll s1,s3,s1
+andi s4,s1,-1587
+sll s4,s4,s2
+or s2,s1,s3
+and s1,s5,s4
+slli s5,s4,10
+sll s4,s3,s3
+beq s4,s4,rand_control_947
+addi s1,s1,1
+rand_control_947:
+srai s2,s1,31
+beq s4,s4,rand_control_949
+addi s2,s2,1
+rand_control_949:
+andi s1,s2,772
+add s2,s4,s4
+bne s3,s3,rand_control_952
+addi s5,s5,1
+rand_control_952:
+srai s3,s2,20
+bne s3,s3,rand_control_954
+addi s2,s2,1
+rand_control_954:
+bne s3,s3,rand_control_955
+addi s1,s1,1
+rand_control_955:
+sll s4,s4,s5
+sltu s2,s1,s2
+or s5,s1,s2
+beq s2,s2,rand_control_959
+addi s3,s3,1
+rand_control_959:
+andi s2,s2,-228
+or s1,s2,s1
+andi s4,s4,32
+beq s3,s3,rand_control_963
+addi s2,s2,1
+rand_control_963:
+sub s1,s2,s4
+ori s5,s3,-661
+ori s4,s3,-943
+andi s3,s1,-1572
+add s1,s5,s5
+sltu s4,s1,s3
+beq s4,s4,rand_control_970
+addi s2,s2,1
+rand_control_970:
+andi s5,s2,1550
+slt s2,s3,s1
+xori s3,s4,1120
+srli s1,s2,14
+bne s2,s2,rand_control_975
+addi s3,s3,1
+rand_control_975:
+andi s3,s4,2005
+beq s3,s3,rand_control_977
+addi s3,s3,1
+rand_control_977:
+slt s1,s2,s2
+slli s5,s1,22
+xor s5,s3,s2
+slt s3,s2,s1
+andi s4,s1,-578
+add s1,s1,s2
+sub s2,s2,s2
+slt s5,s3,s2
+beq s2,s2,rand_control_986
+addi s4,s4,1
+rand_control_986:
+srli s3,s3,15
+sub s2,s2,s3
+ori s5,s4,1646
+srli s1,s5,18
+or s5,s4,s1
+add s5,s3,s2
+slli s2,s5,11
+slli s3,s3,27
+addi s2,s1,-951
+andi s4,s4,-1514
+or s1,s1,s2
+and s1,s1,s4
+ori s4,s5,-463
+ori s1,s4,1001
+xor s1,s1,s2
+add s5,s3,s2
+sll s1,s3,s5
+srl s4,s2,s4
+sub s1,s5,s3
+and s1,s3,s5
+ori s5,s3,-418
+sub s5,s3,s2
+ori s1,s3,-2013
+and s2,s5,s4
+sub s3,s3,s3
+xor s4,s5,s3
+sll s5,s4,s3
+sll s4,s2,s5
+srl s4,s4,s3
+xor s2,s3,s2
+sll s4,s1,s5
+and s5,s1,s3
+sll s4,s4,s3
+xori s2,s5,-676
+slli s2,s2,5
+or s5,s2,s3
+add s2,s1,s4
+sltu s4,s3,s2
+srli s3,s2,15
+srli s2,s2,8
+srai s2,s4,31
+and s2,s3,s1
+xori s1,s5,1005
+slt s4,s4,s5
+beq s1,s1,rand_control_1031
+addi s2,s2,1
+rand_control_1031:
+add s2,s2,s2
+srli s1,s4,25
+or s2,s2,s5
+sll s3,s1,s1
+xor s2,s1,s1
+addi s2,s5,1085
+addi s5,s3,-1128
+xori s2,s4,1863
+or s1,s5,s1
+srli s2,s1,1
+srai s1,s2,25
+or s4,s3,s2
+xor s3,s3,s1
+srl s5,s3,s4
+xor s1,s2,s3
+or s5,s5,s2
+sub s4,s5,s3
+xor s5,s2,s1
+xori s1,s2,-1959
+slt s4,s5,s1
+xor s2,s1,s5
+add s3,s1,s5
+xor s5,s5,s3
+add s2,s4,s3
+sub s3,s4,s1
+srai s2,s3,0
+xori s4,s4,-1559
+add s3,s4,s4
+or s1,s4,s1
+slt s1,s2,s2
+slli s3,s1,23
+srli s4,s4,5
+slli s1,s4,14
+srai s5,s3,18
+srl s5,s5,s2
+srli s2,s2,16
+andi s4,s5,-512
+slt s2,s4,s4
+beq s2,s2,rand_control_1070
+addi s3,s3,1
+rand_control_1070:
+xori s4,s3,27
+add s3,s1,s4
+xori s5,s2,-1154
+xori s1,s2,1842
+xor s1,s5,s3
+ori s4,s2,1504
+xor s1,s1,s4
+srli s2,s2,3
+sll s5,s1,s3
+sub s3,s1,s1
+ori s4,s4,1676
+sll s1,s3,s3
+srai s2,s4,4
+slt s3,s5,s1
+sltu s2,s5,s2
+sub s5,s5,s4
+srl s2,s4,s1
+ori s3,s3,1310
+srl s1,s1,s2
+xori s5,s2,1566
+addi s4,s4,-29
+xori s1,s4,-145
+add s3,s5,s4
+andi s1,s5,1068
+slt s4,s1,s3
+srl s1,s2,s2
+slt s3,s4,s5
+xori s2,s5,-503
+or s1,s3,s3
+sltu s4,s2,s5
+andi s1,s2,12
+slli s1,s2,6
+sll s2,s5,s2
+srl s5,s4,s3
+slt s5,s2,s4
+srai s1,s2,31
+slt s2,s2,s4
+xor s4,s3,s3
+and s5,s2,s3
+or s4,s5,s2
+bne s2,s2,rand_control_1111
+addi s5,s5,1
+rand_control_1111:
+srl s3,s1,s5
+and s5,s5,s4
+slli s3,s4,27
+or s4,s1,s4
+andi s2,s2,-907
+sltu s1,s1,s3
+sub s2,s3,s3
+or s4,s1,s4
+sub s1,s4,s5
+ori s4,s5,-1371
+srl s5,s1,s2
+srli s2,s3,8
+add s2,s5,s2
+beq s1,s1,rand_control_1125
+addi s3,s3,1
+rand_control_1125:
+addi s1,s1,-944
+sub s2,s2,s1
+srl s4,s1,s1
+srl s2,s2,s5
+srl s2,s2,s5
+bne s5,s5,rand_control_1131
+addi s3,s3,1
+rand_control_1131:
+xor s2,s2,s5
+sub s4,s1,s3
+add s3,s2,s2
+srai s1,s1,20
+sltu s1,s3,s2
+andi s4,s5,-252
+sub s1,s3,s3
+sub s1,s1,s5
+slt s1,s3,s1
+xori s5,s3,1728
+add s1,s5,s5
+srli s3,s4,3
+add s4,s1,s2
+xor s1,s4,s3
+srai s5,s5,6
+beq s5,s5,rand_control_1147
+addi s4,s4,1
+rand_control_1147:
+xori s2,s4,-1401
+ori s3,s3,1408
+addi s4,s3,941
+bne s3,s3,rand_control_1151
+addi s2,s2,1
+rand_control_1151:
+or s1,s3,s5
+beq s2,s2,rand_control_1153
+addi s3,s3,1
+rand_control_1153:
+xori s4,s5,697
+beq s5,s5,rand_control_1155
+addi s1,s1,1
+rand_control_1155:
+addi s2,s4,-332
+add s4,s4,s4
+sltu s5,s1,s2
+slt s3,s3,s5
+sub s2,s4,s1
+srli s2,s5,16
+srli s5,s1,3
+xor s1,s1,s2
+sll s5,s3,s2
+or s5,s2,s1
+srl s2,s1,s4
+xor s5,s3,s4
+sub s1,s5,s3
+sub s1,s5,s4
+slt s2,s2,s2
+srl s1,s3,s2
+beq s5,s5,rand_control_1172
+addi s4,s4,1
+rand_control_1172:
+srl s4,s4,s1
+xor s4,s3,s4
+sltu s1,s1,s4
+sub s3,s2,s4
+slli s3,s5,4
+xori s5,s4,43
+srl s2,s1,s1
+sub s2,s5,s3
+add s4,s5,s2
+xori s4,s1,-1787
+srli s4,s4,24
+andi s4,s3,1513
+srli s4,s1,21
+slli s2,s4,7
+slt s4,s4,s4
+beq s3,s3,rand_control_1188
+addi s4,s4,1
+rand_control_1188:
+srli s5,s2,31
+xori s5,s3,-633
+srl s3,s2,s2
+srl s4,s1,s3
+sub s1,s1,s4
+bne s1,s1,rand_control_1194
+addi s5,s5,1
+rand_control_1194:
+bne s2,s2,rand_control_1195
+addi s1,s1,1
+rand_control_1195:
+xori s1,s4,1543
+sub s4,s3,s3
+sltu s4,s1,s3
+xori s4,s4,1674
+
+  li a0, 1
+  li a1, 0x8003f000
+  sw a0, 0(a1)
+.globl halt_pass
+halt_pass:
+  j halt_pass
+fail:
+  li a0, 2
+  li a1, 0x8003f000
+  sw a0, 0(a1)
+fail_loop:
+  j fail_loop
+
+.section .data
+.balign 16
+scratch: .space 256
+
