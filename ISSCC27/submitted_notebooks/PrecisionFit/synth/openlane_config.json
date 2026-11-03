@@ -1,0 +1,31 @@
+{
+  "_comment": "LEGACY TEMPLATE (kept for reference): this was the original OpenLane 2 config. The committed physical-implementation results were produced with LibreLane 3.x from synth/ol_<design>.yaml instead -- use those. If you do run this file, CLOCK_PERIOD (14.6 ns, 68.5 MHz) matches the shared constraint in synth/constraints.sdc and must stay identical across all three headline runs. Licensed Apache-2.0, see repo LICENSE.",
+  "DESIGN_NAME": "fir_best_uniform",
+  "VERILOG_FILES": "dir::../src/verilog/rtl/fir_best_uniform.v",
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 14.6,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": "0 0 500 500",
+  "PL_TARGET_DENSITY": 0.5,
+  "SYNTH_STRATEGY": "AREA 0",
+  "RUN_CTS": true,
+  "configs_note": {
+    "conservative_uniform": {
+      "DESIGN_NAME": "fir_conservative_uniform",
+      "VERILOG_FILES": "dir::../src/verilog/rtl/fir_conservative_uniform.v"
+    },
+    "best_uniform": {
+      "DESIGN_NAME": "fir_best_uniform",
+      "VERILOG_FILES": "dir::../src/verilog/rtl/fir_best_uniform.v"
+    },
+    "sensitivity_guided": {
+      "DESIGN_NAME": "fir_sensitivity_guided",
+      "VERILOG_FILES": "dir::../src/verilog/rtl/fir_sensitivity_guided.v"
+    }
+  },
+  "configs_why": {
+    "SYNTH_STRATEGY": "AREA 0 makes Yosys/ABC optimize for area over speed, which is the metric being compared",
+    "DIE_AREA": "generous on purpose so placement congestion is not a confounder",
+    "CLOCK_PERIOD": "ONE shared period for all three, derived from the widest config (see synth/constraints.sdc)"
+  }
+}
