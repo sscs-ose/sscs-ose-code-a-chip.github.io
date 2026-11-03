@@ -1,0 +1,24 @@
+# SidecarCIM parameters (edited by Bao Vo only)
+array:
+  n_inputs: 32        # dot-product length (rows)
+  n_outputs: 8        # parallel output channels (columns)
+dense:
+  weight_bits: 4
+  act_bits: 4
+  signed: false       # start unsigned; signed is a stretch goal
+outlier:
+  weight_bits: 12     # side-path precision; Bao Vo, Oct 11: 16 -> 12 (within noise, python/out/alternatives.json)
+  budget_per_output: 2  # max outliers per output channel
+  threshold_sigma: 3.0  # |w| > k*std counts as outlier
+baselines:
+  - conventional_mac  # one MAC + separate register file
+  - dcim_4bit_uniform
+  - dcim_8bit_uniform
+workload:
+  model: gpt2         # GPT-2 small
+  layer: "transformer.h.0.mlp.c_fc"
+  eval_tokens: 2048
+flow:
+  pdk: sky130A
+  std_cell_lib: sky130_fd_sc_hd
+  clock_period_ns: 30   # Bao Vo, Oct 11: all designs must meet the slow ss corner

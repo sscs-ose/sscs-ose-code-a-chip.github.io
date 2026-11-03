@@ -1,0 +1,134 @@
+{
+ "written": "2026-10-18T00:31:01-0400",
+ "rule": "gain = ppl(W6A4) - ppl(SidecarCIM). Predict gain > 0 if migrated-weight kurtosis > 8.8792 and act max/std > 60.235; gain < 0 if both are below; uncertain if they disagree or act max/std is within 58.0..92.0. Splits frozen from the 14-model fit.",
+ "statistics": "tinylm.layer_stats on the MLP-input layers, first 512 WikiText-2 train tokens (calibration only; no test data used)",
+ "margin": "min(kurtosis / kurtosis split, act max/std / upper band edge); > 1 = clearly above the split",
+ "other_rules": {
+  "prediction_act_split_71_92": "act max/std alone: gain > 0 above 92, gain < 0 below 71, uncertain in between (the split used in the paper: largest ratio of a model that does not gain, smallest of one that does)",
+  "prediction_kurtosis_only": "kurtosis alone: gain > 0 above 8.8792"
+ },
+ "evaluation_plan": [
+  [
+   "qwen2.5-1.5b",
+   96
+  ],
+  [
+   "gpt2-medium",
+   null
+  ],
+  [
+   "bloom-1b1",
+   140
+  ],
+  [
+   "gpt2-large",
+   140
+  ]
+ ],
+ "models": [
+  {
+   "model": "qwen2.5-1.5b",
+   "hf_id": "Qwen/Qwen2.5-1.5B",
+   "params": 1543714304,
+   "w_kurtosis_mig": 47.6164,
+   "act_max_over_std_max": 95.57,
+   "w_kurtosis_raw": 0.399,
+   "pct_tilecols_over_k2_mig": 0.2111,
+   "prediction": "gain > 0",
+   "prediction_act_split_71_92": "gain > 0",
+   "prediction_kurtosis_only": "gain > 0",
+   "margin": 1.039
+  },
+  {
+   "model": "gpt2-medium",
+   "hf_id": "gpt2-medium",
+   "params": 354823168,
+   "w_kurtosis_mig": 24.2328,
+   "act_max_over_std_max": 83.13,
+   "w_kurtosis_raw": 0.2855,
+   "pct_tilecols_over_k2_mig": 0.0657,
+   "prediction": "uncertain",
+   "prediction_act_split_71_92": "uncertain",
+   "prediction_kurtosis_only": "gain > 0",
+   "margin": 0.904
+  },
+  {
+   "model": "bloom-1b1",
+   "hf_id": "bigscience/bloom-1b1",
+   "params": 1065314304,
+   "w_kurtosis_mig": 39.202,
+   "act_max_over_std_max": 54.39,
+   "w_kurtosis_raw": 0.3503,
+   "pct_tilecols_over_k2_mig": 0.0798,
+   "prediction": "uncertain",
+   "prediction_act_split_71_92": "gain < 0",
+   "prediction_kurtosis_only": "gain > 0",
+   "margin": 0.591
+  },
+  {
+   "model": "opt-1.3b",
+   "hf_id": "facebook/opt-1.3b",
+   "params": 1315758080,
+   "w_kurtosis_mig": 21.6943,
+   "act_max_over_std_max": 42.49,
+   "w_kurtosis_raw": 0.5048,
+   "pct_tilecols_over_k2_mig": 0.1739,
+   "prediction": "uncertain",
+   "prediction_act_split_71_92": "gain < 0",
+   "prediction_kurtosis_only": "gain > 0",
+   "margin": 0.462
+  },
+  {
+   "model": "phi-1.5",
+   "hf_id": "microsoft/phi-1_5",
+   "params": 1418270720,
+   "w_kurtosis_mig": 17.4223,
+   "act_max_over_std_max": 35.84,
+   "w_kurtosis_raw": 0.1561,
+   "pct_tilecols_over_k2_mig": 0.1145,
+   "prediction": "uncertain",
+   "prediction_act_split_71_92": "gain < 0",
+   "prediction_kurtosis_only": "gain > 0",
+   "margin": 0.39
+  },
+  {
+   "model": "bloom-560m",
+   "hf_id": "bigscience/bloom-560m",
+   "params": 559214592,
+   "w_kurtosis_mig": 23.7432,
+   "act_max_over_std_max": 34.84,
+   "w_kurtosis_raw": 0.389,
+   "pct_tilecols_over_k2_mig": 0.1124,
+   "prediction": "uncertain",
+   "prediction_act_split_71_92": "gain < 0",
+   "prediction_kurtosis_only": "gain > 0",
+   "margin": 0.379
+  },
+  {
+   "model": "tinyllama-1.1b",
+   "hf_id": "TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T",
+   "params": 1100048384,
+   "w_kurtosis_mig": 11.6485,
+   "act_max_over_std_max": 30.93,
+   "w_kurtosis_raw": 0.2838,
+   "pct_tilecols_over_k2_mig": 0.146,
+   "prediction": "uncertain",
+   "prediction_act_split_71_92": "gain < 0",
+   "prediction_kurtosis_only": "gain > 0",
+   "margin": 0.336
+  },
+  {
+   "model": "gpt2-large",
+   "hf_id": "gpt2-large",
+   "params": 774030080,
+   "w_kurtosis_mig": 1.6923,
+   "act_max_over_std_max": 25.88,
+   "w_kurtosis_raw": 0.1569,
+   "pct_tilecols_over_k2_mig": 0.055,
+   "prediction": "gain < 0",
+   "prediction_act_split_71_92": "gain < 0",
+   "prediction_kurtosis_only": "gain < 0",
+   "margin": 0.191
+  }
+ ]
+}

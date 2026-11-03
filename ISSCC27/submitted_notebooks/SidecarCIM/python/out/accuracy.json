@@ -1,0 +1,545 @@
+{
+  "model": "gpt2",
+  "layer": "transformer.h.0.mlp.c_fc",
+  "eval": "WikiText-2 raw test, first 2048 tokens, windows of 1024",
+  "calib": "WikiText-2 raw train, first 512 tokens",
+  "metric_err": "rel L2 of c_fc output incl. bias vs FP32, FP inputs",
+  "ppl_h0_only": "only spec layer replaced by integer path",
+  "ppl_all12_fc": "SECONDARY: all 12 blocks' mlp.c_fc replaced (alpha picked per layer)",
+  "tile_note": "tile = weight scale per 32-input tile column: one extra multiply per tile output (not zero hardware cost)",
+  "ppl_fp32": 24.5342,
+  "rows": [
+    {
+      "scheme": "W4A4",
+      "hardware": "4b DCIM",
+      "alpha_h0": null,
+      "err_calib_h0": 0.2593,
+      "err_eval_h0": 0.25417,
+      "pct_x_eq_zp_h0": 75.05,
+      "ppl_h0_only": 26.9038,
+      "ppl_all12_fc": 35420.0824,
+      "mean_err_eval_all12": 0.4471,
+      "alphas_all12": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 0,
+      "tile": false,
+      "clip": false
+    },
+    {
+      "scheme": "W8A8",
+      "hardware": "8b DCIM",
+      "alpha_h0": null,
+      "err_calib_h0": 0.01517,
+      "err_eval_h0": 0.0149,
+      "pct_x_eq_zp_h0": 5.51,
+      "ppl_h0_only": 24.5257,
+      "ppl_all12_fc": 24.7022,
+      "mean_err_eval_all12": 0.03201,
+      "alphas_all12": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "wbits": 8,
+      "abits": 8,
+      "k": 0,
+      "tile": false,
+      "clip": false
+    },
+    {
+      "scheme": "W4A4+sidecar",
+      "hardware": "SidecarCIM",
+      "alpha_h0": null,
+      "err_calib_h0": 0.25373,
+      "err_eval_h0": 0.24846,
+      "pct_x_eq_zp_h0": 75.05,
+      "ppl_h0_only": 26.6755,
+      "ppl_all12_fc": 32972.5901,
+      "mean_err_eval_all12": 0.44402,
+      "alphas_all12": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 2,
+      "tile": false,
+      "clip": false
+    },
+    {
+      "scheme": "W4A4+mig",
+      "hardware": "4b DCIM",
+      "alpha_h0": 0.9,
+      "err_calib_h0": 0.10599,
+      "err_eval_h0": 0.10499,
+      "pct_x_eq_zp_h0": 21.37,
+      "ppl_h0_only": 25.0121,
+      "ppl_all12_fc": 38.5933,
+      "mean_err_eval_all12": 0.15731,
+      "alphas_all12": [
+        0.9,
+        0.85,
+        0.85,
+        0.85,
+        0.85,
+        0.85,
+        0.85,
+        0.85,
+        0.85,
+        0.85,
+        0.85,
+        0.9
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 0,
+      "tile": false,
+      "clip": false
+    },
+    {
+      "scheme": "SidecarCIM",
+      "hardware": "SidecarCIM",
+      "alpha_h0": 1.0,
+      "err_calib_h0": 0.06222,
+      "err_eval_h0": 0.06277,
+      "pct_x_eq_zp_h0": 16.96,
+      "ppl_h0_only": 24.4447,
+      "ppl_all12_fc": 26.0343,
+      "mean_err_eval_all12": 0.08499,
+      "alphas_all12": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 2,
+      "tile": false,
+      "clip": false
+    },
+    {
+      "scheme": "W4A4+mig+clip",
+      "hardware": "4b DCIM",
+      "alpha_h0": 0.95,
+      "err_calib_h0": 0.09627,
+      "err_eval_h0": 0.09558,
+      "pct_x_eq_zp_h0": 19.04,
+      "ppl_h0_only": 24.7413,
+      "ppl_all12_fc": 31.4073,
+      "mean_err_eval_all12": 0.13153,
+      "alphas_all12": [
+        0.95,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.85,
+        0.85,
+        0.85,
+        0.9,
+        0.9,
+        0.95,
+        0.95
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 0,
+      "tile": false,
+      "clip": true
+    },
+    {
+      "scheme": "SidecarCIM+clip",
+      "hardware": "SidecarCIM",
+      "alpha_h0": 1.0,
+      "err_calib_h0": 0.0591,
+      "err_eval_h0": 0.05994,
+      "pct_x_eq_zp_h0": 16.96,
+      "ppl_h0_only": 24.3861,
+      "ppl_all12_fc": 25.507,
+      "mean_err_eval_all12": 0.08225,
+      "alphas_all12": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 2,
+      "tile": false,
+      "clip": true
+    },
+    {
+      "scheme": "W4A4+mig+tile",
+      "hardware": "4b DCIM+tile scale",
+      "alpha_h0": 1.0,
+      "err_calib_h0": 0.06302,
+      "err_eval_h0": 0.06352,
+      "pct_x_eq_zp_h0": 16.96,
+      "ppl_h0_only": 24.4161,
+      "ppl_all12_fc": 25.991,
+      "mean_err_eval_all12": 0.09026,
+      "alphas_all12": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 0,
+      "tile": true,
+      "clip": false
+    },
+    {
+      "scheme": "SidecarCIM+tile",
+      "hardware": "SidecarCIM+tile scale",
+      "alpha_h0": 1.0,
+      "err_calib_h0": 0.05565,
+      "err_eval_h0": 0.05649,
+      "pct_x_eq_zp_h0": 16.96,
+      "ppl_h0_only": 24.4383,
+      "ppl_all12_fc": 25.9843,
+      "mean_err_eval_all12": 0.07836,
+      "alphas_all12": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 2,
+      "tile": true,
+      "clip": false
+    },
+    {
+      "scheme": "W4A4+mig+tile+clip",
+      "hardware": "4b DCIM+tile scale",
+      "alpha_h0": 1.0,
+      "err_calib_h0": 0.06226,
+      "err_eval_h0": 0.06296,
+      "pct_x_eq_zp_h0": 16.96,
+      "ppl_h0_only": 24.3675,
+      "ppl_all12_fc": 25.461,
+      "mean_err_eval_all12": 0.08818,
+      "alphas_all12": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 0,
+      "tile": true,
+      "clip": true
+    },
+    {
+      "scheme": "SidecarCIM+tile+clip",
+      "hardware": "SidecarCIM+tile scale",
+      "alpha_h0": 1.0,
+      "err_calib_h0": 0.05517,
+      "err_eval_h0": 0.05611,
+      "pct_x_eq_zp_h0": 16.96,
+      "ppl_h0_only": 24.367,
+      "ppl_all12_fc": 25.5598,
+      "mean_err_eval_all12": 0.07801,
+      "alphas_all12": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "wbits": 4,
+      "abits": 4,
+      "k": 2,
+      "tile": true,
+      "clip": true
+    }
+  ],
+  "alpha_sweep_h0": [
+    {
+      "scheme": "W4A4+mig",
+      "alpha": 0.85,
+      "err_calib": 0.10669,
+      "err_eval": 0.10589,
+      "ppl_h0": 24.9878
+    },
+    {
+      "scheme": "W4A4+mig",
+      "alpha": 0.9,
+      "err_calib": 0.10599,
+      "err_eval": 0.10499,
+      "ppl_h0": 25.0121
+    },
+    {
+      "scheme": "W4A4+mig",
+      "alpha": 0.95,
+      "err_calib": 0.1068,
+      "err_eval": 0.10615,
+      "ppl_h0": 24.9953
+    },
+    {
+      "scheme": "W4A4+mig",
+      "alpha": 1.0,
+      "err_calib": 0.10978,
+      "err_eval": 0.1094,
+      "ppl_h0": 24.8322
+    },
+    {
+      "scheme": "SidecarCIM",
+      "alpha": 0.85,
+      "err_calib": 0.07818,
+      "err_eval": 0.0775,
+      "ppl_h0": 24.7909
+    },
+    {
+      "scheme": "SidecarCIM",
+      "alpha": 0.9,
+      "err_calib": 0.07232,
+      "err_eval": 0.07126,
+      "ppl_h0": 24.657
+    },
+    {
+      "scheme": "SidecarCIM",
+      "alpha": 0.95,
+      "err_calib": 0.06684,
+      "err_eval": 0.06633,
+      "ppl_h0": 24.6236
+    },
+    {
+      "scheme": "SidecarCIM",
+      "alpha": 1.0,
+      "err_calib": 0.06222,
+      "err_eval": 0.06277,
+      "ppl_h0": 24.4447
+    },
+    {
+      "scheme": "W4A4+mig+clip",
+      "alpha": 0.85,
+      "err_calib": 0.09931,
+      "err_eval": 0.0979
+    },
+    {
+      "scheme": "W4A4+mig+clip",
+      "alpha": 0.9,
+      "err_calib": 0.09722,
+      "err_eval": 0.09588
+    },
+    {
+      "scheme": "W4A4+mig+clip",
+      "alpha": 0.95,
+      "err_calib": 0.09627,
+      "err_eval": 0.09558
+    },
+    {
+      "scheme": "W4A4+mig+clip",
+      "alpha": 1.0,
+      "err_calib": 0.0973,
+      "err_eval": 0.09734
+    },
+    {
+      "scheme": "SidecarCIM+clip",
+      "alpha": 0.85,
+      "err_calib": 0.07566,
+      "err_eval": 0.07481
+    },
+    {
+      "scheme": "SidecarCIM+clip",
+      "alpha": 0.9,
+      "err_calib": 0.06964,
+      "err_eval": 0.06846
+    },
+    {
+      "scheme": "SidecarCIM+clip",
+      "alpha": 0.95,
+      "err_calib": 0.06387,
+      "err_eval": 0.06352
+    },
+    {
+      "scheme": "SidecarCIM+clip",
+      "alpha": 1.0,
+      "err_calib": 0.0591,
+      "err_eval": 0.05994
+    },
+    {
+      "scheme": "W4A4+mig+tile",
+      "alpha": 0.85,
+      "err_calib": 0.07835,
+      "err_eval": 0.07754
+    },
+    {
+      "scheme": "W4A4+mig+tile",
+      "alpha": 0.9,
+      "err_calib": 0.07263,
+      "err_eval": 0.07144
+    },
+    {
+      "scheme": "W4A4+mig+tile",
+      "alpha": 0.95,
+      "err_calib": 0.06737,
+      "err_eval": 0.06679
+    },
+    {
+      "scheme": "W4A4+mig+tile",
+      "alpha": 1.0,
+      "err_calib": 0.06302,
+      "err_eval": 0.06352
+    },
+    {
+      "scheme": "SidecarCIM+tile",
+      "alpha": 0.85,
+      "err_calib": 0.07323,
+      "err_eval": 0.0725
+    },
+    {
+      "scheme": "SidecarCIM+tile",
+      "alpha": 0.9,
+      "err_calib": 0.06692,
+      "err_eval": 0.06586
+    },
+    {
+      "scheme": "SidecarCIM+tile",
+      "alpha": 0.95,
+      "err_calib": 0.06082,
+      "err_eval": 0.06047
+    },
+    {
+      "scheme": "SidecarCIM+tile",
+      "alpha": 1.0,
+      "err_calib": 0.05565,
+      "err_eval": 0.05649
+    },
+    {
+      "scheme": "W4A4+mig+tile+clip",
+      "alpha": 0.85,
+      "err_calib": 0.07746,
+      "err_eval": 0.07636
+    },
+    {
+      "scheme": "W4A4+mig+tile+clip",
+      "alpha": 0.9,
+      "err_calib": 0.07159,
+      "err_eval": 0.07039
+    },
+    {
+      "scheme": "W4A4+mig+tile+clip",
+      "alpha": 0.95,
+      "err_calib": 0.06628,
+      "err_eval": 0.06585
+    },
+    {
+      "scheme": "W4A4+mig+tile+clip",
+      "alpha": 1.0,
+      "err_calib": 0.06226,
+      "err_eval": 0.06296
+    },
+    {
+      "scheme": "SidecarCIM+tile+clip",
+      "alpha": 0.85,
+      "err_calib": 0.07269,
+      "err_eval": 0.07182
+    },
+    {
+      "scheme": "SidecarCIM+tile+clip",
+      "alpha": 0.9,
+      "err_calib": 0.06627,
+      "err_eval": 0.06523
+    },
+    {
+      "scheme": "SidecarCIM+tile+clip",
+      "alpha": 0.95,
+      "err_calib": 0.06018,
+      "err_eval": 0.05993
+    },
+    {
+      "scheme": "SidecarCIM+tile+clip",
+      "alpha": 1.0,
+      "err_calib": 0.05517,
+      "err_eval": 0.05611
+    }
+  ]
+}
