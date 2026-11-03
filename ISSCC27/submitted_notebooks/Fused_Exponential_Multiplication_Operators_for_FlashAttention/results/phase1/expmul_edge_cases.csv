@@ -1,0 +1,16 @@
+case,x,v_bits,v,out_bits_nearest,out,L_nearest,note
+x_zero,0,3f800000,1,3f800000,1,0,identity: Out must equal V
+x_negzero,-0,3f800000,1,3f800000,1,0,identity
+x_tiny_neg,-9.99999972e-10,3f800000,1,3f800000,1,0,L=0 -> identity
+x_clip_min,-15,3f800000,1,34800000,2.38418579e-07,22,clip boundary
+x_below_clip,-20,3f800000,1,34800000,2.38418579e-07,22,clipped to -15
+x_positive,3,3f800000,1,3f800000,1,0,clipped to 0 (illegal input)
+x_nan,nan,3f800000,1,3f800000,1,0,must not produce NaN
+x_zero_v_zero,0,00000000,0,00000000,0,0,zero in -> zero out
+x_zero_v_negzero,0,80000000,-0,00000000,0,0,zero in -> +0 out
+v_neg,-1,c0200000,-2.5,bfa00000,-1.25,1,sign preserved
+v_flt_min,-1,00800000,1.17549435e-38,00000000,0,1,min normal, L=1 -> normal
+v_max,-15,7f7fffff,3.40282347e+38,747fffff,8.11296336e+31,22,max normal, L=22
+v_subnormal,0,000116c2,9.9999461e-41,00000000,0,0,subnormal input -> 0
+v_inf,0,7f800000,inf,7f800000,inf,0,inf passthrough
+v_subnormal_underflow,-5,000116c2,9.9999461e-41,00000000,0,7,input subnormal -> 0
