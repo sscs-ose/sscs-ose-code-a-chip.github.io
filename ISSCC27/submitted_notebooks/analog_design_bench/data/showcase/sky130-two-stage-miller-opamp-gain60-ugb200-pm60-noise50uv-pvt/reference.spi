@@ -1,0 +1,21 @@
+* Standard two-stage Miller op amp with one external current-reference input.
+* Every MOS uses an integer-micrometer unit-finger width (W/nf).
+.subckt two_stage_miller_opamp vss iref vdd vinn vinp vout
+* MOS terminal order: D G S B (drain gate source bulk/body).
+XREF iref iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=20 nf=5
+XTAIL tail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=42 nf=7
+
+XINN nleft vinn tail vss sky130_fd_pr__nfet_01v8 l=0.8 w=119 nf=17
+XINP stage1 vinp tail vss sky130_fd_pr__nfet_01v8 l=0.8 w=119 nf=17
+XLOADD nleft nleft vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=96 nf=24
+XLOADM stage1 nleft vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=96 nf=24
+
+* Current-derived PMOS bias for the second-stage load.
+XOBN obias iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=4
+XOBP obias obias vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=96 nf=24
+XSECOND vout stage1 vss vss sky130_fd_pr__nfet_01v8 l=0.3 w=80 nf=16
+XLOAD vout obias vdd vdd sky130_fd_pr__pfet_01v8 l=0.6 w=288 nf=48
+
+RZ stage1 comp 1.8k
+CCOMP comp vout 0.45p
+.ends two_stage_miller_opamp

@@ -1,0 +1,42 @@
+.subckt sampling_feedback_ota vss iref vdd vinn vinp vocm voutn voutp
+XREFN iref iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=10
+XBP nbp iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=10
+XREFP nbp nbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=20
+XBNC ncas nbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=20
+RNC ncas ncasdiode 7k
+XNCREF ncasdiode ncasdiode vss vss sky130_fd_pr__nfet_01v8 l=1 w=10
+RPC1 vdd pcas 180k
+RPC2 pcas vss 20k
+CPC pcas vss 1p
+XTAILP tail firstp vss vss sky130_fd_pr__nfet_01v8 l=0.5 w=50
+XTAILN tail firstn vss vss sky130_fd_pr__nfet_01v8 l=0.5 w=50
+XINP drainp vinp tail vss sky130_fd_pr__nfet_01v8 l=0.5 w=200
+XINN drainn vinn tail vss sky130_fd_pr__nfet_01v8 l=0.5 w=200
+XNCP firstp ncas drainp vss sky130_fd_pr__nfet_01v8_lvt l=1 w=640
+XNCN firstn ncas drainn vss sky130_fd_pr__nfet_01v8_lvt l=1 w=640
+XLP psourcep nbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=160
+XLN psourcen nbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=160
+XPCP firstp pcas psourcep vdd sky130_fd_pr__pfet_01v8 l=0.5 w=320
+XPCN firstn pcas psourcen vdd sky130_fd_pr__pfet_01v8 l=0.5 w=320
+XONP voutp firstp vss vss sky130_fd_pr__nfet_01v8 l=0.5 w=120
+XONN voutn firstn vss vss sky130_fd_pr__nfet_01v8 l=0.5 w=120
+XOPP voutp cmout vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=400
+XOPN voutn cmout vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=400
+RCOMP_P firstp comp_p 450
+RCOMP_N firstn comp_n 450
+CCOMP_P comp_p voutp 0.7p
+CCOMP_N comp_n voutn 0.7p
+RSENSEP voutp sense 10k
+RSENSEN voutn sense 10k
+CSENSEP voutp sense 0.2p
+CSENSEN voutn sense 0.2p
+XCM2TAIL cm2tail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=10
+XCM2S cm2mirror sense cm2tail vss sky130_fd_pr__nfet_01v8_lvt l=0.5 w=40
+XCM2R cmout vocm cm2tail vss sky130_fd_pr__nfet_01v8_lvt l=0.5 w=40
+XCM2PD cm2mirror cm2mirror vdd vdd sky130_fd_pr__pfet_01v8 l=0.5 w=40
+XCM2PO cmout cm2mirror vdd vdd sky130_fd_pr__pfet_01v8 l=0.5 w=40
+RCM2P cmout cm2compp 100
+RCM2N cmout cm2compn 100
+CCM2P cm2compp voutp 0.5p
+CCM2N cm2compn voutn 0.5p
+.ends sampling_feedback_ota

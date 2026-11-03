@@ -1,0 +1,54 @@
+* Fully differential sampling-feedback OTA.
+.subckt sampling_feedback_ota vss iref vdd vinn vinp vocm voutn voutp
+
+* IREF establishes matched NMOS and PMOS bias voltages.  The branch ratios
+* below keep the signal path in the sub-mA range at the nominal 50 uA input.
+XNR iref iref vss vss sky130_fd_pr__nfet_01v8 l=1.0 w=12.0 nf=8 mult=10000
+XNM ibias_p iref vss vss sky130_fd_pr__nfet_01v8 l=1.0 w=12.0 nf=8 mult=10000
+XPB ibias_p ibias_p vdd vdd sky130_fd_pr__pfet_01v8 l=1.0 w=12.0 nf=8 mult=10000
+
+* Matched active-load input stage.  The source-degenerated operating point
+* gives the following gain stages enough voltage headroom.
+XTAIL tail iref vss vss sky130_fd_pr__nfet_01v8 l=1.0 w=24.0 nf=8 mult=10000
+XINP n1 vinp tail vss sky130_fd_pr__nfet_01v8_lvt l=1.0 w=16.0 nf=8 mult=10000
+XINN n2 vinn tail vss sky130_fd_pr__nfet_01v8_lvt l=1.0 w=16.0 nf=8 mult=10000
+XLP1 n1 ibias_p vdd vdd sky130_fd_pr__pfet_01v8 l=1.0 w=12.0 nf=8 mult=10000
+XLP2 n2 ibias_p vdd vdd sky130_fd_pr__pfet_01v8 l=1.0 w=12.0 nf=8 mult=10000
+
+* A second common-source gain stage preserves the differential pair while
+* multiplying DC gain before the output drivers.
+X2N m1 n1 vss vss sky130_fd_pr__nfet_01v8_lvt l=2.0 w=16.0 nf=8 mult=10000
+X2P m2 n2 vss vss sky130_fd_pr__nfet_01v8_lvt l=2.0 w=16.0 nf=8 mult=10000
+X2LP m1 ibias_p vdd vdd sky130_fd_pr__pfet_01v8 l=2.0 w=26.0 nf=8 mult=10000
+X2LN m2 ibias_p vdd vdd sky130_fd_pr__pfet_01v8 l=2.0 w=26.0 nf=8 mult=10000
+
+* Direct cross-coupled output stage.  The first-stage nodes have the
+* required differential polarity and avoid the large-signal pole of the
+* second stage during capacitive sampling.
+XON voutn n2 vss vss sky130_fd_pr__nfet_01v8_lvt l=1.0 w=8.0 nf=8 mult=10000
+XOP voutp n1 vss vss sky130_fd_pr__nfet_01v8_lvt l=1.0 w=8.0 nf=8 mult=10000
+XON2 voutn m1 vss vss sky130_fd_pr__nfet_01v8_lvt l=10.0 w=4.0 nf=8 mult=10000
+XOP2 voutp m2 vss vss sky130_fd_pr__nfet_01v8_lvt l=10.0 w=4.0 nf=8 mult=10000
+XPP voutp cmfb vdd vdd sky130_fd_pr__pfet_01v8 l=1.0 w=36.0 nf=8 mult=10000
+XPN voutn cmfb vdd vdd sky130_fd_pr__pfet_01v8 l=1.0 w=36.0 nf=8 mult=10000
+
+* Nested Miller compensation places the dominant pole at the first-stage
+* nodes while closing around both voltage-gain stages.
+CCP voutp n1 1p
+CCN voutn n2 1p
+
+* Equal resistors form the arithmetic output average without relying on
+* square-law sensing, which remains accurate during a large differential
+* output excursion.
+RCP voutp cm_sense 100k
+RCN voutn cm_sense 100k
+
+* Low-impedance CMFB error amplifier.  Its PMOS mirror output rises when
+* the output average rises, reducing the output PMOS current.
+XCMTAIL cmtail iref vss vss sky130_fd_pr__nfet_01v8 l=1.0 w=48.0 nf=8 mult=10000
+XCM1 cm_d1 cm_sense cmtail vss sky130_fd_pr__nfet_01v8 l=1.0 w=24.0 nf=8 mult=10000
+XCM2 cmfb vocm cmtail vss sky130_fd_pr__nfet_01v8 l=1.0 w=24.0 nf=8 mult=10000
+XCML1 cm_d1 cm_d1 vdd vdd sky130_fd_pr__pfet_01v8 l=1.0 w=24.0 nf=8 mult=10000
+XCML2 cmfb cm_d1 vdd vdd sky130_fd_pr__pfet_01v8 l=1.0 w=24.0 nf=8 mult=10000
+
+.ends sampling_feedback_ota

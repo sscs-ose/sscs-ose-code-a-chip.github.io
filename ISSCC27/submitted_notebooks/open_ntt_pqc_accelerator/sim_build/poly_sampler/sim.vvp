@@ -1,0 +1,182 @@
+#! /usr/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/system.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2005_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/va_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2009.vpi";
+S_0x575f4e44a4c0 .scope package, "$unit" "$unit" 2 1;
+ .timescale -9 -12;
+S_0x575f4e44a650 .scope module, "poly_sampler" "poly_sampler" 3 14;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rst_n";
+    .port_info 2 /INPUT 1 "mode_cbd";
+    .port_info 3 /INPUT 2 "eta_param";
+    .port_info 4 /INPUT 1 "in_valid";
+    .port_info 5 /INPUT 24 "in_data";
+    .port_info 6 /OUTPUT 1 "in_ready";
+    .port_info 7 /OUTPUT 1 "out_valid";
+    .port_info 8 /OUTPUT 24 "out_coeff";
+    .port_info 9 /OUTPUT 1 "out_rejected";
+P_0x575f4e474f60 .param/l "Q" 0 3 16, C4<011111111110000000000001>;
+P_0x575f4e474fa0 .param/l "WIDTH" 0 3 15, +C4<00000000000000000000000000011000>;
+o0x74e94b689108 .functor BUFZ 1, C4<z>; HiZ drive
+v0x575f4e49fde0_0 .net "clk", 0 0, o0x74e94b689108;  0 drivers
+o0x74e94b689138 .functor BUFZ 2, C4<zz>; HiZ drive
+v0x575f4e49fec0_0 .net "eta_param", 1 0, o0x74e94b689138;  0 drivers
+o0x74e94b689168 .functor BUFZ 24, C4<zzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x575f4e49ffa0_0 .net "in_data", 23 0, o0x74e94b689168;  0 drivers
+L_0x74e94b640018 .functor BUFT 1, C4<1>, C4<0>, C4<0>, C4<0>;
+v0x575f4e4a0060_0 .net "in_ready", 0 0, L_0x74e94b640018;  1 drivers
+o0x74e94b6891c8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x575f4e4a0120_0 .net "in_valid", 0 0, o0x74e94b6891c8;  0 drivers
+o0x74e94b6891f8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x575f4e4a0230_0 .net "mode_cbd", 0 0, o0x74e94b6891f8;  0 drivers
+v0x575f4e4a02f0_0 .var "out_coeff", 23 0;
+v0x575f4e4a03d0_0 .var "out_rejected", 0 0;
+v0x575f4e4a0490_0 .var "out_valid", 0 0;
+o0x74e94b6892b8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x575f4e4a0550_0 .net "rst_n", 0 0, o0x74e94b6892b8;  0 drivers
+E_0x575f4e483870/0 .event negedge, v0x575f4e4a0550_0;
+E_0x575f4e483870/1 .event posedge, v0x575f4e49fde0_0;
+E_0x575f4e483870 .event/or E_0x575f4e483870/0, E_0x575f4e483870/1;
+S_0x575f4e475da0 .scope function.vec4.s24, "sample_cbd" "sample_cbd" 3 41, 3 41 0, S_0x575f4e44a650;
+ .timescale -9 -12;
+v0x575f4e475f80_0 .var "bits", 5 0;
+v0x575f4e49fa00_0 .var "eta", 1 0;
+; Variable sample_cbd is vec4 return value of scope S_0x575f4e475da0
+v0x575f4e49fbd0_0 .var "sum_a", 2 0;
+v0x575f4e49fcb0_0 .var "sum_b", 2 0;
+TD_poly_sampler.sample_cbd ;
+    %load/vec4 v0x575f4e49fa00_0;
+    %cmpi/e 2, 0, 2;
+    %jmp/0xz  T_0.0, 4;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 0, 2;
+    %pad/u 3;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 1, 2;
+    %pad/u 3;
+    %add;
+    %store/vec4 v0x575f4e49fbd0_0, 0, 3;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 2, 3;
+    %pad/u 3;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 3, 3;
+    %pad/u 3;
+    %add;
+    %store/vec4 v0x575f4e49fcb0_0, 0, 3;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 0, 2;
+    %pad/u 3;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 1, 2;
+    %pad/u 3;
+    %add;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 2, 3;
+    %pad/u 3;
+    %add;
+    %store/vec4 v0x575f4e49fbd0_0, 0, 3;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 3, 3;
+    %pad/u 3;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 4, 4;
+    %pad/u 3;
+    %add;
+    %load/vec4 v0x575f4e475f80_0;
+    %parti/s 1, 5, 4;
+    %pad/u 3;
+    %add;
+    %store/vec4 v0x575f4e49fcb0_0, 0, 3;
+T_0.1 ;
+    %load/vec4 v0x575f4e49fcb0_0;
+    %load/vec4 v0x575f4e49fbd0_0;
+    %cmp/u;
+    %flag_or 5, 4;
+    %jmp/0xz  T_0.2, 5;
+    %load/vec4 v0x575f4e49fbd0_0;
+    %pad/u 24;
+    %load/vec4 v0x575f4e49fcb0_0;
+    %pad/u 24;
+    %sub;
+    %ret/vec4 0, 0, 24;  Assign to sample_cbd (store_vec4_to_lval)
+    %jmp T_0.3;
+T_0.2 ;
+    %pushi/vec4 8380417, 0, 24;
+    %load/vec4 v0x575f4e49fcb0_0;
+    %pad/u 24;
+    %load/vec4 v0x575f4e49fbd0_0;
+    %pad/u 24;
+    %sub;
+    %sub;
+    %ret/vec4 0, 0, 24;  Assign to sample_cbd (store_vec4_to_lval)
+T_0.3 ;
+    %end;
+    .scope S_0x575f4e44a650;
+T_1 ;
+    %wait E_0x575f4e483870;
+    %load/vec4 v0x575f4e4a0550_0;
+    %nor/r;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x575f4e4a0490_0, 0;
+    %pushi/vec4 0, 0, 24;
+    %assign/vec4 v0x575f4e4a02f0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x575f4e4a03d0_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x575f4e4a0490_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x575f4e4a03d0_0, 0;
+    %load/vec4 v0x575f4e4a0120_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x575f4e4a0230_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.4, 8;
+    %load/vec4 v0x575f4e49ffa0_0;
+    %parti/s 6, 0, 2;
+    %load/vec4 v0x575f4e49fec0_0;
+    %store/vec4 v0x575f4e49fa00_0, 0, 2;
+    %store/vec4 v0x575f4e475f80_0, 0, 6;
+    %callf/vec4 TD_poly_sampler.sample_cbd, S_0x575f4e475da0;
+    %assign/vec4 v0x575f4e4a02f0_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x575f4e4a0490_0, 0;
+    %jmp T_1.5;
+T_1.4 ;
+    %load/vec4 v0x575f4e49ffa0_0;
+    %cmpi/u 8380417, 0, 24;
+    %jmp/0xz  T_1.6, 5;
+    %load/vec4 v0x575f4e49ffa0_0;
+    %assign/vec4 v0x575f4e4a02f0_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x575f4e4a0490_0, 0;
+    %jmp T_1.7;
+T_1.6 ;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x575f4e4a03d0_0, 0;
+T_1.7 ;
+T_1.5 ;
+T_1.2 ;
+T_1.1 ;
+    %jmp T_1;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "-";
+    "/home/faisal/vlsi_project/sscs-ose-code-a-chip.github.io/ISSCC27/submitted_notebooks/open_ntt_pqc_accelerator/src/poly_sampler.v";

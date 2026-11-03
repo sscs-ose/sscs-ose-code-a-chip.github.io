@@ -1,0 +1,77 @@
+* Fully differential, two-stage OTA for a 1 pF sampling-feedback network.
+* All current and cascode biases are derived from the single external IREF.
+.subckt sampling_feedback_ota vss iref vdd vinn vinp vocm voutn voutp
+
+* 50 uA NMOS reference and the complementary PMOS reference.
+XBN0 iref iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=12 nf=6
+XBNP pbias iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=12 nf=6
+XBP0 pbias pbias vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=24 nf=12
+
+* Cascode biases.  The PMOS cascode divider draws only a negligible current.
+XBCP ncas pbias vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=24 nf=12
+XBCN1 ncas ncas nbmid vss sky130_fd_pr__nfet_01v8 l=1 w=120 nf=60
+XBCN0 nbmid nbmid vss vss sky130_fd_pr__nfet_01v8 l=1 w=120 nf=60
+RPCUP pbias pcgate 7.5meg
+RPCDN pcgate vss 10meg
+
+* Differential input transconductor and cascoded active loads.
+XBTAIL tail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=48 nf=24
+XINP dp vinp tail vss sky130_fd_pr__nfet_01v8 l=2 w=120 nf=60
+XINN dn vinn tail vss sky130_fd_pr__nfet_01v8 l=2 w=120 nf=60
+XNCASP xp ncas dp vss sky130_fd_pr__nfet_01v8 l=1.5 w=120 nf=60
+XNCASN xn ncas dn vss sky130_fd_pr__nfet_01v8 l=1.5 w=120 nf=60
+XPCASP xp pcgate pp vdd sky130_fd_pr__pfet_01v8 l=1.5 w=240 nf=120
+XPCASN xn pcgate pn vdd sky130_fd_pr__pfet_01v8 l=1.5 w=240 nf=120
+XPLP pp xctrl vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=120 nf=60
+XPLN pn xctrl vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=120 nf=60
+
+* The ideal resistors define the otherwise high-impedance first-stage
+* common mode without materially reducing its differential DC gain.
+RXP xp vocm 500meg
+RXN xn vocm 500meg
+
+* A separate common-mode loop fixes the high-impedance first-stage nodes at
+* VOCM, avoiding a process-sensitive current-balance operating point.
+RXCMP xp xcms 1gig
+RXCMN xn xcms 1gig
+XXCTAIL xctail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=24 nf=12
+XXCMP xca xcms xctail vss sky130_fd_pr__nfet_01v8 l=2 w=160 nf=80
+XXCMN xctrl vocm xctail vss sky130_fd_pr__nfet_01v8 l=2 w=160 nf=80
+XXCLD xca xca vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=160 nf=80
+XXCLM xctrl xca vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=160 nf=80
+CXCM xctrl vss 20p
+
+* Common-source output stage.  CMFB controls both PMOS pull-up devices.
+XONP voutp xp vss vss sky130_fd_pr__nfet_01v8 l=0.5 w=24 nf=12
+XONN voutn xn vss vss sky130_fd_pr__nfet_01v8 l=0.5 w=24 nf=12
+XOPP voutp cmctrl vdd vdd sky130_fd_pr__pfet_01v8 l=0.5 w=90 nf=45
+XOPN voutn cmctrl vdd vdd sky130_fd_pr__pfet_01v8 l=0.5 w=90 nf=45
+XOSP voutp xp vdd vdd sky130_fd_pr__pfet_01v8_lvt l=0.5 w=10 nf=5
+XOSN voutn xn vdd vdd sky130_fd_pr__pfet_01v8_lvt l=0.5 w=10 nf=5
+
+* Local resistive common-mode restoration bounds the specified output
+* current-pulse excursion and gives the CMFB plant a well-defined fast pole.
+ROUTP voutp vocm 7.5k
+ROUTN voutn vocm 7.5k
+CTP vinp voutp 0.105f
+CTN vinn voutn 0.105f
+COP voutp vss 0.2p
+CON voutn vss 0.2p
+
+* Continuous-time output common-mode detector and error amplifier.
+RCMP voutp cms 100k
+RCMN voutn cms 100k
+XCMTAIL cmtail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=24 nf=12
+XCMP cma cms cmtail vss sky130_fd_pr__nfet_01v8 l=2 w=160 nf=80
+XCMN cmctrl vocm cmtail vss sky130_fd_pr__nfet_01v8 l=2 w=160 nf=80
+XCMLD cma cma vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=160 nf=80
+XCMLM cmctrl cma vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=160 nf=80
+CCM cmctrl vss 10p
+
+* Symmetric Miller compensation with lead-zero resistors.
+RZP xp czp 500
+CCP czp voutp 2p
+RZN xn czn 500
+CCN czn voutn 2p
+
+.ends sampling_feedback_ota

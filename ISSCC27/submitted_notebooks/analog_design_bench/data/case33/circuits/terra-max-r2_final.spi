@@ -1,0 +1,83 @@
+* Fully differential buffered-cascode OTA for capacitive sampling feedback.
+.subckt sampling_feedback_ota vss iref vdd vinn vinp vocm voutn voutp
+
+* Bias reference: 50 uA at iref makes a supply-tracking PMOS bias pbn.
+XMNREF  iref  iref  vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=8
+XMNPB   pbn   iref  vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=8
+XMPREF  pbn   pbn   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=80 nf=16
+CIREF   iref  vss   10p
+CBP     pbn   vss   2p
+
+* Low-voltage PMOS cascode bias for the preamplifier active loads.
+XMNPBC  pbcas iref  vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=8
+XMPBC   pbcas pbcas vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=7 nf=1
+CPBC    pbcas vss   1p
+XMNBP   nbcas pbn   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=80 nf=16
+XMNBC   nbcas nbcas vss vss sky130_fd_pr__nfet_01v8 l=1 w=1 nf=1
+CNBC    nbcas vss   1p
+
+* Long-channel differential preamplifier.  Its local CMFB holds xop/xon at
+* pbn so the PMOS output buffers have a reproducible quiescent current.
+XMTAIL  ntail iref  vss vss sky130_fd_pr__nfet_01v8 l=1 w=320 nf=64
+XMINP   ndp   vinp  ntail vss sky130_fd_pr__nfet_01v8 l=0.5 w=80 nf=16
+XMINP2  ndp   vinp  ntail vss sky130_fd_pr__nfet_01v8 l=0.5 w=80 nf=16
+XMINN   ndn   vinn  ntail vss sky130_fd_pr__nfet_01v8 l=0.5 w=80 nf=16
+XMINN2  ndn   vinn  ntail vss sky130_fd_pr__nfet_01v8 l=0.5 w=80 nf=16
+XMNCP   xop   nbcas ndp   vss sky130_fd_pr__nfet_01v8 l=0.5 w=40 nf=8
+XMNCP2  xop   nbcas ndp   vss sky130_fd_pr__nfet_01v8 l=0.5 w=40 nf=8
+XMNCN   xon   nbcas ndn   vss sky130_fd_pr__nfet_01v8 l=0.5 w=40 nf=8
+XMNCN2  xon   nbcas ndn   vss sky130_fd_pr__nfet_01v8 l=0.5 w=40 nf=8
+XMPLSP  nsp   pctrl vdd   vdd sky130_fd_pr__pfet_01v8 l=4 w=640 nf=128
+XMPLSP2 nsp   pctrl vdd   vdd sky130_fd_pr__pfet_01v8 l=4 w=640 nf=128
+XMPLCP  xop   pbcas nsp   vdd sky130_fd_pr__pfet_01v8 l=0.5 w=80 nf=16
+XMPLCP2 xop   pbcas nsp   vdd sky130_fd_pr__pfet_01v8 l=0.5 w=80 nf=16
+XMPLSN  nsn   pctrl vdd   vdd sky130_fd_pr__pfet_01v8 l=4 w=640 nf=128
+XMPLSN2 nsn   pctrl vdd   vdd sky130_fd_pr__pfet_01v8 l=4 w=640 nf=128
+XMPLCN  xon   pbcas nsn   vdd sky130_fd_pr__pfet_01v8 l=0.5 w=80 nf=16
+XMPLCN2 xon   pbcas nsn   vdd sky130_fd_pr__pfet_01v8 l=0.5 w=80 nf=16
+RXP     xop   pbn   10meg
+RXN     xon   pbn   10meg
+
+* Local CMFB fixes the preamplifier outputs at the PMOS buffer bias pbn.
+RXCP    xop   xcm   10meg
+RXCN    xon   xcm   10meg
+CXCP    xop   xcm   300f
+CXCN    xon   xcm   300f
+XPCMT   pct   iref  vss vss sky130_fd_pr__nfet_01v8 l=1 w=7 nf=1
+XPCM1   pca   xcm   pct vss sky130_fd_pr__nfet_01v8 l=1 w=14 nf=2
+XPCM2   pctrl pbn   pct vss sky130_fd_pr__nfet_01v8 l=1 w=14 nf=2
+XPCP1   pca   pca   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=7 nf=1
+XPCP2   pctrl pca   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=7 nf=1
+RPCTRL  pctrl iref  200k
+CPCTRL  pctrl vss   2p
+
+* Class-A PMOS output buffers.  A rise at vinp lowers xop and raises voutp,
+* giving the required positive differential OTA polarity.
+XMOP    voutp xop   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=640 nf=128
+XMON    voutn xon   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=640 nf=128
+XMNOP   voutp ncm  vss vss sky130_fd_pr__nfet_01v8 l=1 w=640 nf=128
+XMNON   voutn ncm  vss vss sky130_fd_pr__nfet_01v8 l=1 w=640 nf=128
+COUTP   voutp vss   4p
+COUTN   voutn vss   4p
+
+* Split Miller compensation for the two-stage differential path.
+RZP     xop   czp   450
+RZN     xon   czn   450
+CCP     czp   voutp 6.2p
+CCN     czn   voutn 6.2p
+
+* Continuous-time output common-mode feedback.  A 200 uA sensing pair gives
+* the CM loop enough authority to cancel simultaneous 50 uA output pulses.
+RCMP    voutp vcm   10meg
+RCMN    voutn vcm   10meg
+CCMP    voutp vcm   300f
+CCMN    voutn vcm   300f
+XMCMT   cmt   iref  vss vss sky130_fd_pr__nfet_01v8 l=1 w=160 nf=32
+XMCM1   cma   vcm   cmt vss sky130_fd_pr__nfet_01v8 l=1 w=320 nf=64
+XMCM2   ncm   vocm  cmt vss sky130_fd_pr__nfet_01v8 l=1 w=320 nf=64
+XMCP1   cma   cma   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=160 nf=32
+XMCP2   ncm   cma   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=160 nf=32
+RNCM    ncm   iref  1meg
+CCM     ncm   vss   300f
+
+.ends sampling_feedback_ota

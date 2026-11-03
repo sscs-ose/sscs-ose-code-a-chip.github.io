@@ -1,0 +1,19 @@
+* Public example: nominal LDO line regulation.
+.lib "/opt/sky130/continuous/sky130.lib.spice" tt
+.include "/app/circuit.spi"
+.options filetype=ascii reltol=2e-4 abstol=1e-12 vntol=1e-6
+.temp 27
+VSS vss 0 0
+VIN vin vss 1.8
+VREF vref vss 0.8
+IBIAS vin ibias 50u
+ILOAD vout vss 10m
+XLDO vin vout vss vref ibias fb_div gate_drive gate ldo_ota5
+RFBTOP vout fb_div 300k
+RFBBOT fb_div vss 600k
+VLOOP gate_drive gate 0
+RESR vout vcap 50m
+COUT vcap vss 1u
+.save v(vin) v(vout)
+.dc VIN 1.62 1.98 0.02
+.end

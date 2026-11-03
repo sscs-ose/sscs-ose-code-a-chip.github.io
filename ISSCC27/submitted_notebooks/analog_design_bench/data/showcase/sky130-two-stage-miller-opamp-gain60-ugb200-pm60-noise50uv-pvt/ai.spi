@@ -1,0 +1,13 @@
+.subckt two_stage_miller_opamp vss iref vdd vinn vinp vout
+XREF iref iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=4
+XTAIL tail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=64 nf=16
+XINN mirror vinn tail vss sky130_fd_pr__nfet_01v8_lvt l=0.5 w=60 nf=12
+XINP stage1 vinp tail vss sky130_fd_pr__nfet_01v8_lvt l=0.5 w=60 nf=12
+XLOAD1 mirror mirror vdd vdd sky130_fd_pr__pfet_01v8 l=0.35 w=45 nf=9
+XLOAD2 stage1 mirror vdd vdd sky130_fd_pr__pfet_01v8 l=0.35 w=45 nf=9
+XOUT vout stage1 vdd vdd sky130_fd_pr__pfet_01v8 l=0.35 w=270 nf=54
+XSINK vout iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=192 nf=48
+RZERO stage1 miller 700
+CCOMP miller vout 1.1p
+CBIAS iref vss 2p
+.ends two_stage_miller_opamp

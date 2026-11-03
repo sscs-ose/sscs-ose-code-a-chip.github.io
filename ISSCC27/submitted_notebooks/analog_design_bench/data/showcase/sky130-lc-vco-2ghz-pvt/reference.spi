@@ -1,0 +1,19 @@
+* Current-fed differential LC VCO using official Sky130 RF passive models.
+.subckt lc_vco_2ghz vss iref vctrl vdd outp outn
+* A PMOS mirror translates the only external current reference into tank bias.
+XREF iref iref vdd vdd sky130_fd_pr__pfet_01v8 l=0.50 w=10 nf=2
+XFEED tankct iref vdd vdd sky130_fd_pr__pfet_01v8 l=0.50 w=200 nf=40
+
+* Official center-tapped inductor, including winding and substrate loss.
+XTANK outp outn tankct vss sky130_fd_pr__ind_05_125
+
+* Fixed MIM loading and matched official LVT varactor arrays.
+XMIMP outp vss sky130_fd_pr__cap_mim_m3_1 w=20 l=25 mf=1
+XMIMN outn vss sky130_fd_pr__cap_mim_m3_1 w=20 l=25 mf=1
+XVARP vctrl outp vss sky130_fd_pr__cap_var_lvt w=5 l=0.5 vm=80
+XVARN vctrl outn vss sky130_fd_pr__cap_var_lvt w=5 l=0.5 vm=80
+
+* Cross-coupled NMOS pair supplies the negative resistance.
+XNEG_P outp outn vss vss sky130_fd_pr__nfet_01v8 l=0.15 w=160 nf=32
+XNEG_N outn outp vss vss sky130_fd_pr__nfet_01v8 l=0.15 w=160 nf=32
+.ends lc_vco_2ghz

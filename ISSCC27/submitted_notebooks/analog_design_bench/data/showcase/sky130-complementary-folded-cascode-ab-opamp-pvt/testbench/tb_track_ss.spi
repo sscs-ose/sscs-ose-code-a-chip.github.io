@@ -1,0 +1,42 @@
+* Loaded tracking, input range, and full-sweep static power at SS, 1.62 V, 125 C.
+.lib "/opt/sky130/continuous/sky130.lib.spice" ss
+.include "/app/circuit.spi"
+.options reltol=1e-4 abstol=1e-12 vntol=1e-6
+.temp 125
+.param supply=1.62
+VSS vss 0 0
+VDD vdd vss {supply}
+IREF vdd iref 20u
+VIN vinp vss {supply/2}
+RFB vout vinn 1m
+XAMP vss iref vdd vinn vinp vout complementary_folded_cascode_ab_opamp
+CL vout vss 4p
+RL vout vmid 10k
+VMID vmid vss {supply/2}
+
+.control
+set noaskquit
+op
+let quiescent_current_a = -vdd#branch
+let static_power_w = v(vdd)*quiescent_current_a
+print quiescent_current_a static_power_w
+dc VIN 0 1.62 0.005
+let tracking_error_v = abs(v(vout)-v(vinp))
+let sweep_power_w = v(vdd)*(-vdd#branch)
+meas dc track_error_band_v MAX tracking_error_v FROM=0.1 TO=1.52
+meas dc track_error_core_v MAX tracking_error_v FROM=0.2 TO=1.42
+meas dc output_low_v FIND v(vout) AT=0.1
+meas dc output_high_v FIND v(vout) AT=1.52
+meas dc tracking_power_w MAX sweep_power_w FROM=0 TO=1.62
+let input_common_mode_error_v = abs(v(vout)-v(vinp))
+meas dc icmr_error_at_zero_v FIND input_common_mode_error_v AT=0
+meas dc icmr_error_at_supply_v FIND input_common_mode_error_v AT=1.615
+meas dc icmr_max_error_v MAX input_common_mode_error_v FROM=0 TO=1.615
+if icmr_max_error_v > 0.02
+  meas dc icmr_low_cross_v WHEN input_common_mode_error_v=0.02 FALL=1
+  meas dc icmr_high_cross_v WHEN input_common_mode_error_v=0.02 RISE=1
+end
+print tracking_power_w
+quit
+.endc
+.end

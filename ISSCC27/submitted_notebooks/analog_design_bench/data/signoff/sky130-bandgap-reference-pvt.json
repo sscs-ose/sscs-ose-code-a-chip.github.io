@@ -1,0 +1,201 @@
+{
+ "task_slug": "sky130-bandgap-reference-pvt",
+ "spec": "The DUT is an untrimmed first-order `VBE + K*DeltaVBE` bandgap bias/reference core. `vref` is a high-impedance output driving 5 pF; DC load drive, precision trimming, and an output buffer are outside this task. It is therefore evaluated as an integrated bias/reference core, not as a precision ADC reference.\n\nDC signoff covers the declared representative nine-section PVT set `tt`, `ff`, `ss`, `fs`, `sf`, `ll`, `hh`, `hl`, and `lh`, at supplies 1.62, 1.8, and 1.98 V and temperatures -40, 27, and 125 C. The set samples active-device and passive-library variation independently to keep the reference signoff tractable; simultaneous MOS/passive extremes are outside this task's declared scope. This is 81 points and is not a Cartesian combination of independently selected MOS and passive corners. At every point, `vref` must remain between 1.18 and 1.26 V and VDD power must stay below 150 uW.\n\nAt 1.8 V, each corner is swept over the common characterization temperatures -40, 0, 27, 60, 100, and 125 C. Temperature coefficient, calculated as `(max(VREF)-min(VREF))/(mean(VREF)*165 C)`, must not exceed 50 ppm/C. At 27 C, line regulation over 1.62–1.98 V must not exceed 20 mV/V.\n\nDynamic signoff uses the paired low-headroom/hot, nominal, and high-supply/cold stresses: 1.62 V/125 C, 1.8 V/27 C, and 1.98 V/-40 C. Startup covers TT, SS, and FF; supply coupling and line steps cover all five active-device corners tt, ff, ss, fs, sf; output noise is integrated at TT. The declared nine-section DC sweep remains the passive-corner coverage.\n\n- For 1 and 10 us supply ramps, `vref` must enter the 1.18–1.26 V range by 10 us after each ramp completes and remain there through 20 us after completion. Overshoot above final value must not exceed 100 mV, peak supply current 1.5 mA, and positive startup energy 5 nJ.\n- Maximum small-signal VDD-to-VREF magnitude from 10 Hz through 100 MHz must not exceed 0.20 V/V.\n- Integrated output-referred noise from 10 Hz through 1 MHz must not exceed 500 uVrms.\n\nFull-range VDD-step signoff drives 1.8 to 1.98 to 1.62 V at -40, 27, and 125 C in the five active-device corners. Relative to the final value after either step, peak excursion must not exceed 100 mV and the response must enter and remain within 1 mV in no more than 10 us.\n\nAt 1.8 V/27 C, 30 fixed-seed process-plus-local-mismatch samples (seeds 61000 through 61029) require at least 90% of outputs between 1.15 and 1.28 V and sample sigma no greater than 30 mV. This is a reproducible robustness screen, not a production-yield confidence claim.",
+ "reference": {
+  "transistors": 12,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=189 groups={'pvt_op': 81, 'line': 27, 'temperature': 54, 'startup': 18, 'ac': 15, 'noise': 3, 'line_step': 15, 'monte_carlo': 30}"
+   },
+   {
+    "name": "pvt_reference_voltage",
+    "status": "passed",
+    "message": "VREF=1.222638..1.233071V"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "power_max=114.489uW"
+   },
+   {
+    "name": "temperature_coefficient",
+    "status": "passed",
+    "message": "per_corner_ppm_per_C={'tt': 16.223531496050665, 'ff': 15.756738920875723, 'ss': 16.899628380657383, 'fs': 15.907865863574072, 'sf': 16.52182252495599, 'll': 15.957648571412095, 'hh': 18.199499266917986, 'hl': 18.199499266917986, 'lh': 15.957648571412095} max=18.199"
+   },
+   {
+    "name": "line_regulation",
+    "status": "passed",
+    "message": "per_corner_mV_per_V={tt: 11.949, ff: 11.939, ss: 11.961, fs: 11.802, sf: 12.196, ll: 12.106, hh: 11.871, hl: 11.871, lh: 12.106} max=12.196"
+   },
+   {
+    "name": "multi_ramp_startup_settling",
+    "status": "passed",
+    "message": "continuous_window=1.222822..1.230723V after entry; endpoints=1.222822..1.230723V/1.222854..1.230723V"
+   },
+   {
+    "name": "startup_overshoot",
+    "status": "passed",
+    "message": "overshoot_max=17.276mV"
+   },
+   {
+    "name": "startup_inrush_and_energy",
+    "status": "passed",
+    "message": "peak_supply_current=0.879mA energy=1.760nJ"
+   },
+   {
+    "name": "supply_rejection",
+    "status": "passed",
+    "message": "VDD_to_VREF_gain_max=0.149045V/V"
+   },
+   {
+    "name": "integrated_output_noise",
+    "status": "passed",
+    "message": "noise_10Hz_to_1MHz=299.064uVrms"
+   },
+   {
+    "name": "supply_step_response",
+    "status": "passed",
+    "message": "excursion_max=56.959mV settling_max=5.236us within 1mV"
+   },
+   {
+    "name": "monte_carlo_reference_accuracy",
+    "status": "passed",
+    "message": "runs=30 mean=1.225834V sigma=14.067mV yield=1.000 in 1.15..1.28V"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 8,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=189 groups={'pvt_op': 81, 'line': 27, 'temperature': 54, 'startup': 18, 'ac': 15, 'noise': 3, 'line_step': 15, 'monte_carlo': 30}"
+   },
+   {
+    "name": "pvt_reference_voltage",
+    "status": "passed",
+    "message": "VREF=1.216654..1.233700V"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "power_max=98.454uW"
+   },
+   {
+    "name": "temperature_coefficient",
+    "status": "passed",
+    "message": "per_corner_ppm_per_C={'tt': 16.550310411584434, 'ff': 16.874505252813506, 'ss': 16.37228480366936, 'fs': 16.56490871836942, 'sf': 16.830573423332492, 'll': 19.27746415358289, 'hh': 25.09981519227885, 'hl': 25.09981519227885, 'lh': 19.27746415358289} max=25.100"
+   },
+   {
+    "name": "line_regulation",
+    "status": "passed",
+    "message": "per_corner_mV_per_V={tt: 5.738, ff: 6.028, ss: 5.576, fs: 6.588, sf: 5.320, ll: 5.736, hh: 5.744, hl: 5.744, lh: 5.736} max=6.588"
+   },
+   {
+    "name": "multi_ramp_startup_settling",
+    "status": "passed",
+    "message": "continuous_window=1.220403..1.243273V after entry; endpoints=1.221259..1.243273V/1.223811..1.228002V"
+   },
+   {
+    "name": "startup_overshoot",
+    "status": "passed",
+    "message": "overshoot_max=44.737mV"
+   },
+   {
+    "name": "startup_inrush_and_energy",
+    "status": "passed",
+    "message": "peak_supply_current=0.045mA energy=1.782nJ"
+   },
+   {
+    "name": "supply_rejection",
+    "status": "passed",
+    "message": "VDD_to_VREF_gain_max=0.168553V/V"
+   },
+   {
+    "name": "integrated_output_noise",
+    "status": "passed",
+    "message": "noise_10Hz_to_1MHz=181.210uVrms"
+   },
+   {
+    "name": "supply_step_response",
+    "status": "passed",
+    "message": "excursion_max=37.282mV settling_max=6.210us within 1mV"
+   },
+   {
+    "name": "monte_carlo_reference_accuracy",
+    "status": "passed",
+    "message": "runs=30 mean=1.227996V sigma=3.748mV yield=1.000 in 1.15..1.28V"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 13,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=189 groups={'pvt_op': 81, 'line': 27, 'temperature': 54, 'startup': 18, 'ac': 15, 'noise': 3, 'line_step': 15, 'monte_carlo': 30}"
+   },
+   {
+    "name": "pvt_reference_voltage",
+    "status": "passed",
+    "message": "VREF=1.210777..1.229650V"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "power_max=37.115uW"
+   },
+   {
+    "name": "temperature_coefficient",
+    "status": "passed",
+    "message": "per_corner_ppm_per_C={'tt': 14.317793026285939, 'ff': 14.454822988505088, 'ss': 14.279334670587868, 'fs': 14.675371700373027, 'sf': 14.03011544515708, 'll': 22.571324077839723, 'hh': 22.08474253106871, 'hl': 22.08474253106871, 'lh': 22.571324077839723} max=22.571"
+   },
+   {
+    "name": "line_regulation",
+    "status": "passed",
+    "message": "per_corner_mV_per_V={tt: 4.179, ff: 4.501, ss: 3.922, fs: 4.816, sf: 3.754, ll: 4.009, hh: 4.337, hl: 4.337, lh: 4.009} max=4.816"
+   },
+   {
+    "name": "multi_ramp_startup_settling",
+    "status": "passed",
+    "message": "continuous_window=1.218085..1.224203V after entry; endpoints=1.218085..1.224203V/1.218085..1.224203V"
+   },
+   {
+    "name": "startup_overshoot",
+    "status": "passed",
+    "message": "overshoot_max=0.000mV"
+   },
+   {
+    "name": "startup_inrush_and_energy",
+    "status": "passed",
+    "message": "peak_supply_current=0.056mA energy=0.652nJ"
+   },
+   {
+    "name": "supply_rejection",
+    "status": "passed",
+    "message": "VDD_to_VREF_gain_max=0.039950V/V"
+   },
+   {
+    "name": "integrated_output_noise",
+    "status": "passed",
+    "message": "noise_10Hz_to_1MHz=248.216uVrms"
+   },
+   {
+    "name": "supply_step_response",
+    "status": "passed",
+    "message": "excursion_max=4.043mV settling_max=0.592us within 1mV"
+   },
+   {
+    "name": "monte_carlo_reference_accuracy",
+    "status": "passed",
+    "message": "runs=30 mean=1.225378V sigma=6.143mV yield=1.000 in 1.15..1.28V"
+   }
+  ]
+ }
+}

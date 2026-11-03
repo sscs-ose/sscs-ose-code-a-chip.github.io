@@ -1,0 +1,201 @@
+{
+ "task_slug": "sky130-beta-multiplier-reference-pvt-mc",
+ "spec": "The nominal target is 40 uA with `iout` held at 0.9 V. At TT/1.8 V/27 C, output current must remain between 35 and 45 uA.\n\nComplete PVT signoff covers every Cartesian combination of process corners tt, ss, ff; supplies 1.62, 1.8, 1.98 V; and temperatures -40, 27, 125 C. At all 27 points:\n\n- Output current must remain between 20 and 60 uA.\n- `vref` must remain between 0.60 and 0.75 V.\n- Total DUT electrical power (`vdd` input power plus the power absorbed at the current-sink output held at 0.9 V) must not exceed 100 uW.\n- Sweeping `iout` from 0.4 to 1.6 V must keep peak-to-peak current variation divided by mean current below 8%.\n\nStartup signoff applies 1 and 10 us linear supply ramps in every corner at three paired supply/temperature stresses: 1.62 V/125 C, 1.8 V/27 C, and 1.98 V/-40 C. These pairs exercise low-headroom/hot, nominal, and high-supply/cold startup without redundantly repeating all nine DC points. Final current and `vref` must meet their PVT ranges. Settling time is measured from the end of the ramp to the first point after which output current remains within +/-10% of its final 1 us average and must not exceed 10 us. Peak output-current overshoot must stay below 1.5 times final current, peak positive VDD current below 100 uA, and positive energy drawn through ramp end plus 10 us below 1 nJ.\n\nAt 1.8 V/27 C, 50 deterministic combined process-and-local-mismatch samples require at least 90% of outputs between 30 and 50 uA and sample sigma no greater than 4 uA. The sample mean is reported but is not a separate pass condition.",
+ "reference": {
+  "transistors": 7,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=95 PVT=27/27 compliance=27/27 startup=18/18 MC=50/50"
+   },
+   {
+    "name": "pvt_output_current",
+    "status": "passed",
+    "message": "current=29.148..44.972uA"
+   },
+   {
+    "name": "nominal_current_accuracy",
+    "status": "passed",
+    "message": "TT/1.8V/27C current=36.109uA"
+   },
+   {
+    "name": "pvt_vref",
+    "status": "passed",
+    "message": "VREF=0.6334..0.7101V"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "power_max=64.97uW"
+   },
+   {
+    "name": "pvt_output_compliance",
+    "status": "passed",
+    "message": "current=28.477..45.679uA flatness_max=5.343%"
+   },
+   {
+    "name": "pvt_multi_ramp_startup_final",
+    "status": "passed",
+    "message": "final_current=30.267..43.892uA VREF=0.6334..0.7101V"
+   },
+   {
+    "name": "pvt_multi_ramp_startup_settling",
+    "status": "passed",
+    "message": "settling_time_max=5.812us"
+   },
+   {
+    "name": "startup_overshoot",
+    "status": "passed",
+    "message": "peak_to_final_current_ratio_max=1.2781"
+   },
+   {
+    "name": "startup_inrush_and_energy",
+    "status": "passed",
+    "message": "peak_supply_current=0.012mA energy=0.180nJ"
+   },
+   {
+    "name": "mc_current_yield",
+    "status": "passed",
+    "message": "samples=50 yield=100.0% in 30..50uA"
+   },
+   {
+    "name": "mc_current_sigma",
+    "status": "passed",
+    "message": "samples=50 sigma=1.048uA"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 8,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=95 PVT=27/27 compliance=27/27 startup=18/18 MC=50/50"
+   },
+   {
+    "name": "pvt_output_current",
+    "status": "passed",
+    "message": "current=31.569..51.081uA"
+   },
+   {
+    "name": "nominal_current_accuracy",
+    "status": "passed",
+    "message": "TT/1.8V/27C current=40.041uA"
+   },
+   {
+    "name": "pvt_vref",
+    "status": "passed",
+    "message": "VREF=0.6429..0.7159V"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "power_max=79.73uW"
+   },
+   {
+    "name": "pvt_output_compliance",
+    "status": "passed",
+    "message": "current=30.643..52.106uA flatness_max=6.448%"
+   },
+   {
+    "name": "pvt_multi_ramp_startup_final",
+    "status": "passed",
+    "message": "final_current=32.649..49.967uA VREF=0.6429..0.7159V"
+   },
+   {
+    "name": "pvt_multi_ramp_startup_settling",
+    "status": "passed",
+    "message": "settling_time_max=0.445us"
+   },
+   {
+    "name": "startup_overshoot",
+    "status": "passed",
+    "message": "peak_to_final_current_ratio_max=1.0028"
+   },
+   {
+    "name": "startup_inrush_and_energy",
+    "status": "passed",
+    "message": "peak_supply_current=0.015mA energy=0.308nJ"
+   },
+   {
+    "name": "mc_current_yield",
+    "status": "passed",
+    "message": "samples=50 yield=100.0% in 30..50uA"
+   },
+   {
+    "name": "mc_current_sigma",
+    "status": "passed",
+    "message": "samples=50 sigma=1.230uA"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 9,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=95 PVT=27/27 compliance=27/27 startup=18/18 MC=50/50"
+   },
+   {
+    "name": "pvt_output_current",
+    "status": "passed",
+    "message": "current=31.463..50.683uA"
+   },
+   {
+    "name": "nominal_current_accuracy",
+    "status": "passed",
+    "message": "TT/1.8V/27C current=39.872uA"
+   },
+   {
+    "name": "pvt_vref",
+    "status": "passed",
+    "message": "VREF=0.6371..0.7086V"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "power_max=70.81uW"
+   },
+   {
+    "name": "pvt_output_compliance",
+    "status": "passed",
+    "message": "current=30.738..51.467uA flatness_max=5.346%"
+   },
+   {
+    "name": "pvt_multi_ramp_startup_final",
+    "status": "passed",
+    "message": "final_current=32.775..49.426uA VREF=0.6370..0.7086V"
+   },
+   {
+    "name": "pvt_multi_ramp_startup_settling",
+    "status": "passed",
+    "message": "settling_time_max=5.982us"
+   },
+   {
+    "name": "startup_overshoot",
+    "status": "passed",
+    "message": "peak_to_final_current_ratio_max=1.0012"
+   },
+   {
+    "name": "startup_inrush_and_energy",
+    "status": "passed",
+    "message": "peak_supply_current=0.029mA energy=0.196nJ"
+   },
+   {
+    "name": "mc_current_yield",
+    "status": "passed",
+    "message": "samples=50 yield=100.0% in 30..50uA"
+   },
+   {
+    "name": "mc_current_sigma",
+    "status": "passed",
+    "message": "samples=50 sigma=0.803uA"
+   }
+  ]
+ }
+}

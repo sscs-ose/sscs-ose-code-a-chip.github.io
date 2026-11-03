@@ -1,0 +1,267 @@
+OpenROAD f552262465b0bfef8f097e258f94bc501d01e19d 
+Features included (+) or not (-): +GPU +GUI +Python
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+[INFO ORD-0030] Using 12 thread(s).
+read_liberty /opt/eda/orfs-6101364b/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_db /root/cac_runs/ntt_dp_15ns/results/sky130hd/cac_ntt_dp_15ns/base/3_place.odb
+read_sdc /root/cac_runs/ntt_dp_15ns/results/sky130hd/cac_ntt_dp_15ns/base/3_place.sdc
+source /opt/eda/orfs-6101364b/flow/platforms/sky130hd/setRC.tcl
+clock_tree_synthesis -sink_clustering_enable -repair_clock_nets
+[INFO CTS-0050] Root buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0051] Sink buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0052] The following clock buffers will be used for CTS:
+                    sky130_fd_sc_hd__clkbuf_16
+[INFO CTS-0049] Characterization buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0007] Net "clk" found for clock "clk".
+[INFO CTS-0010]  Clock net "clk" has 4277 sinks.
+[INFO CTS-0008] TritonCTS found 1 clock nets.
+[INFO CTS-0097] Characterization used 1 buffer(s) types.
+[INFO CTS-0201] 0 blockages from hard placement blockages and placed macros will be used.
+[INFO CTS-0027] Generating H-Tree topology for net clk.
+[INFO CTS-0028]  Total number of sinks: 4277.
+[INFO CTS-0090]  Sinks will be clustered based on buffer max cap.
+[INFO CTS-0030]  Number of static layers: 0.
+[INFO CTS-0020]  Wire segment unit: 13600  dbu (13 um).
+[INFO CTS-0206] Best clustering solution was found from max clustering size of 13 and max clustering diameter of 144.
+[INFO CTS-0019]  Total number of sinks after clustering: 440.
+[INFO CTS-0024]  Normalized sink region: [(0.962786, 0.802206), (54.439, 55.0333)].
+[INFO CTS-0025]     Width:  53.4762.
+[INFO CTS-0026]     Height: 54.2311.
+ Level 1
+    Direction: Vertical
+    Sinks per sub-region: 220
+    Sub-region size: 53.4762 X 27.1156
+[INFO CTS-0034]     Segment length (rounded): 14.
+ Level 2
+    Direction: Horizontal
+    Sinks per sub-region: 110
+    Sub-region size: 26.7381 X 27.1156
+[INFO CTS-0034]     Segment length (rounded): 14.
+ Level 3
+    Direction: Vertical
+    Sinks per sub-region: 55
+    Sub-region size: 26.7381 X 13.5578
+[INFO CTS-0034]     Segment length (rounded): 6.
+ Level 4
+    Direction: Horizontal
+    Sinks per sub-region: 28
+    Sub-region size: 13.3690 X 13.5578
+[INFO CTS-0034]     Segment length (rounded): 6.
+ Level 5
+    Direction: Vertical
+    Sinks per sub-region: 14
+    Sub-region size: 13.3690 X 6.7789
+[INFO CTS-0034]     Segment length (rounded): 4.
+[INFO CTS-0038]  Stop criterion found. Sink region hpwl is smaller than max wirelength (1911.535 um) and max number of sinks is 15.
+[INFO CTS-0035]  Number of sinks covered: 440.
+[INFO CTS-0018]     Created 477 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 4.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 4.
+[INFO CTS-0015]     Created 477 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 5:2, 6:6, 7:10, 8:44, 9:118, 10:146, 11:99, 12:21, 13:10, 14:1, 15:6, 16:6, 17:2, 22:1..
+[INFO CTS-0017]     Max level of the clock tree: 5.
+[INFO CTS-0098] Clock net "clk"
+[INFO CTS-0099]  Sinks 4710
+[INFO CTS-0100]  Leaf buffers 440
+[INFO CTS-0101]  Average sink wire length 1269.92 um
+[INFO CTS-0102]  Path depth 3 - 4
+[INFO CTS-0207]  Dummy loads inserted 433
+[INFO CTS-0500] Runtime: 5.44s
+Took 5 seconds: clock_tree_synthesis -sink_clustering_enable -repair_clock_nets
+estimate_parasitics -placement
+detailed_placement
+[INFO DPL-0006] Core area: 569088.30 um^2
+[INFO DPL-0007] Movable instances area: 276706.63 um^2
+[INFO DPL-0008] Fixed instances area within core: 9425.29 um^2
+[INFO DPL-0009] Utilization: 50.3%
+[INFO DPL-0005] Diamond search max displacement: +/- 500 sites horizontally, +/- 100 rows vertically.
+[INFO DPL-1102] Legalizing using negotiation legalizer.
+[INFO DPL-1103] Negotiation base search window: +/-20 sites horizontally, +/-5 rows vertically 
+	Automatic search window extension enabled.
+	Search window extendable up to the max displacement cap of +/-500 sites, +/-100 rows near walls.
+[INFO DPL-1104] NegotiationLegalizer DRC penalty: 5.
+[INFO DPL-0392] Negotiation cell height distribution (1 unique row-count(s)):
+[INFO DPL-0393]   height 1 row(s): 37486 cells
+          |      Total |  Illegal |  Illegal
+Iteration | Violations |    Cells |    Sites
+---------------------------------------------
+        0 |        102 |        20 |        82
+        1 |         28 |         4 |        24
+        2 |          0 |         0 |         0
+Negotiation phase 1 converged at iteration 2.
+[INFO DPL-0500] Runtime: 0.71s
+Placement Analysis
+---------------------------------
+total displacement      27258.7 u
+average displacement        0.7 u
+max displacement           24.2 u
+original HPWL          823613.4 u
+legalized HPWL         834212.5 u
+delta HPWL                    1 %
+
+estimate_parasitics -placement
+Warning: master sky130_ef_sc_hd__decap_12 has signal pins but no liberty cell
+repair_timing -setup_margin 0 -hold_margin 0 -repair_tns 100 -match_cell_footprint -verbose
+[INFO RSZ-0100] Repair move sequence: UnbufferMove SizeUpMove SwapPinsMove BufferMove CloneMove SplitLoadMove 
+[INFO RSZ-0094] Found 12 endpoints with setup violations.
+[INFO RSZ-0099] Repairing 12 out of 12 (100.00%) violating endpoints...
+   Iter   | Removed | Resized | Inserted | Cloned |  Pin  |   Area   |    WNS   |   StTNS    |   EnTNS    |  Viol  |  Worst  
+          | Buffers |  Gates  | Buffers  |  Gates | Swaps |          |          |            |            | Endpts | St/EnPt 
+------------------------------------------------------------------------------------------------------------------------------
+       0* |       0 |       0 |        0 |      0 |     0 |    +0.0% |   -7.206 |     -251.2 |      -86.1 |     12 | mul_reduced_q\[9\]$_DFFE_PN0P_/D
+      10* |       0 |       6 |        1 |      1 |     1 |    +0.0% |   -7.026 |     -244.5 |      -84.1 |     12 | mul_reduced_q\[3\]$_DFFE_PN0P_/D
+      20* |       0 |      10 |        3 |      1 |     5 |    +0.0% |   -6.925 |     -239.4 |      -82.6 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+      30* |       0 |      12 |        9 |      1 |     8 |    +0.1% |   -6.793 |     -233.7 |      -81.0 |     12 | mul_reduced_q\[3\]$_DFFE_PN0P_/D
+      40* |       0 |      17 |       10 |      1 |    12 |    +0.1% |   -6.814 |     -234.8 |      -81.3 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+      50* |       0 |      23 |       11 |      1 |    15 |    +0.1% |   -6.719 |     -230.0 |      -80.1 |     12 | mul_reduced_q\[3\]$_DFFE_PN0P_/D
+      60* |       0 |      24 |       12 |      1 |    23 |    +0.1% |   -6.603 |     -226.2 |      -78.8 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+      70* |       0 |      28 |       13 |      1 |    28 |    +0.1% |   -6.596 |     -227.3 |      -78.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+      80* |       0 |      30 |       13 |      1 |    36 |    +0.1% |   -6.696 |     -231.1 |      -79.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+      90* |       0 |      34 |       14 |      1 |    41 |    +0.1% |   -6.601 |     -228.2 |      -78.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     100* |       0 |      37 |       17 |      1 |    46 |    +0.1% |   -6.579 |     -226.8 |      -78.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     110* |       0 |      41 |       19 |      1 |    50 |    +0.1% |   -6.569 |     -227.2 |      -78.4 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     120* |       0 |      44 |       21 |      1 |    55 |    +0.1% |   -6.486 |     -224.0 |      -77.3 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     130* |       0 |      47 |       21 |      1 |    62 |    +0.2% |   -6.526 |     -225.5 |      -77.8 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     140* |       0 |      48 |       23 |      1 |    69 |    +0.2% |   -6.625 |     -230.3 |      -79.0 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     150* |       0 |      54 |       24 |      1 |    72 |    +0.2% |   -6.571 |     -227.6 |      -78.4 |     12 | mul_reduced_q\[3\]$_DFFE_PN0P_/D
+     160* |       0 |      60 |       25 |      1 |    75 |    +0.2% |   -6.682 |     -233.1 |      -79.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     170* |       0 |      65 |       29 |      1 |    77 |    +0.2% |   -6.618 |     -229.7 |      -79.0 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     176* |       0 |      47 |       21 |      1 |    58 |    +0.2% |   -6.447 |     -222.7 |      -76.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     180* |       0 |      48 |       21 |      1 |    60 |    +0.2% |   -6.449 |     -222.5 |      -76.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     190* |       0 |      54 |       23 |      1 |    62 |    +0.2% |   -6.393 |     -220.1 |      -76.3 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     200* |       0 |      60 |       24 |      1 |    65 |    +0.2% |   -6.465 |     -223.3 |      -77.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     210* |       0 |      61 |       27 |      1 |    71 |    +0.2% |   -6.531 |     -225.2 |      -77.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     220* |       0 |      69 |       28 |      1 |    72 |    +0.2% |   -6.459 |     -222.2 |      -77.0 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     230* |       0 |      71 |       28 |      1 |    80 |    +0.2% |   -6.416 |     -220.2 |      -76.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     240* |       5 |      71 |       33 |      1 |    80 |    +0.2% |   -6.416 |     -220.2 |      -76.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     245* |       0 |      58 |       23 |      1 |    63 |    +0.2% |   -6.375 |     -219.1 |      -76.0 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     250* |       0 |      59 |       25 |      1 |    64 |    +0.2% |   -6.368 |     -218.9 |      -76.0 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     260* |       0 |      67 |       27 |      1 |    64 |    +0.2% |   -6.414 |     -221.3 |      -76.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     270* |       3 |      70 |       29 |      1 |    66 |    +0.2% |   -6.521 |     -226.0 |      -77.8 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     280* |       8 |      70 |       34 |      1 |    66 |    +0.2% |   -6.521 |     -226.0 |      -77.8 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     290* |      13 |      70 |       39 |      1 |    66 |    +0.2% |   -6.521 |     -226.0 |      -77.8 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     300* |      18 |      70 |       44 |      1 |    66 |    +0.2% |   -6.521 |     -226.0 |      -77.8 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     302* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     310* |       0 |      66 |       27 |      1 |    64 |    +0.2% |   -6.406 |     -221.0 |      -76.4 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     320* |       3 |      70 |       30 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     330* |       8 |      70 |       35 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     340* |      13 |      70 |       40 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     350* |      18 |      70 |       45 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     353* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     360* |       0 |      65 |       27 |      1 |    64 |    +0.2% |   -6.409 |     -221.1 |      -76.4 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     370* |       3 |      70 |       29 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     380* |       8 |      70 |       34 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     390* |      13 |      70 |       39 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     400* |      18 |      70 |       44 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     404* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     410* |       0 |      64 |       27 |      1 |    64 |    +0.2% |   -6.413 |     -221.3 |      -76.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     420* |       2 |      70 |       29 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     430* |       7 |      70 |       34 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     440* |      12 |      70 |       39 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     450* |      17 |      70 |       44 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     455* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     460* |       0 |      63 |       27 |      1 |    64 |    +0.2% |   -6.422 |     -221.7 |      -76.6 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     470* |       2 |      70 |       28 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     480* |       7 |      70 |       33 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     490* |      12 |      70 |       38 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     500* |      17 |      70 |       43 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     506* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     510* |       0 |      62 |       27 |      1 |    64 |    +0.2% |   -6.432 |     -222.3 |      -76.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     520* |       1 |      70 |       28 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     530* |       6 |      70 |       33 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     540* |      11 |      70 |       38 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     550* |      16 |      70 |       43 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     557* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     560* |       0 |      62 |       26 |      1 |    64 |    +0.2% |   -6.434 |     -222.4 |      -76.8 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     570* |       1 |      70 |       27 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     580* |       6 |      70 |       32 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     590* |      11 |      70 |       37 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     600* |      16 |      70 |       42 |      1 |    64 |    +0.2% |   -6.496 |     -225.5 |      -77.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     608* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     610* |       0 |      61 |       26 |      1 |    64 |    +0.2% |   -6.416 |     -221.5 |      -76.5 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     620* |       0 |      70 |       27 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     630* |       5 |      70 |       32 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     640* |      10 |      70 |       37 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     650* |      15 |      70 |       42 |      1 |    64 |    +0.2% |   -6.381 |     -219.7 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     659* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     660* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     670* |       0 |      69 |       27 |      1 |    64 |    +0.2% |   -6.405 |     -220.9 |      -76.4 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     680* |       4 |      71 |       31 |      1 |    64 |    +0.2% |   -6.382 |     -219.8 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     690* |       9 |      71 |       36 |      1 |    64 |    +0.2% |   -6.382 |     -219.8 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     700* |      14 |      71 |       41 |      1 |    64 |    +0.2% |   -6.382 |     -219.8 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     710* |      19 |      71 |       46 |      1 |    64 |    +0.2% |   -6.382 |     -219.8 |      -76.1 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     710* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     720* |       3 |      62 |       30 |      1 |    64 |    +0.2% |   -6.432 |     -222.3 |      -76.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     730* |       8 |      62 |       35 |      1 |    64 |    +0.2% |   -6.432 |     -222.3 |      -76.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     740* |      13 |      62 |       40 |      1 |    64 |    +0.2% |   -6.432 |     -222.3 |      -76.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     750* |      18 |      62 |       45 |      1 |    64 |    +0.2% |   -6.432 |     -222.3 |      -76.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     760* |      23 |      62 |       50 |      1 |    64 |    +0.2% |   -6.432 |     -222.3 |      -76.7 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     761* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     761* |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     762+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     763+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     764+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     765+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     766+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     767+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     768+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     769+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     770+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     770+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     771+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     772+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+     773+ |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+    final |       0 |      60 |       26 |      1 |    64 |    +0.2% |   -6.362 |     -218.7 |      -75.9 |     12 | mul_reduced_q\[1\]$_DFFE_PN0P_/D
+------------------------------------------------------------------------------------------------------------------------------
+[INFO RSZ-0040] Inserted 26 buffers.
+[INFO RSZ-0051] Resized 60 instances: 60 up, 0 up match, 0 down, 0 VT
+[INFO RSZ-0043] Swapped pins on 64 instances.
+[INFO RSZ-0049] Cloned 1 instances.
+[WARNING RSZ-0062] Unable to repair all setup violations.
+[INFO RSZ-0505] Runtime: 107.32s
+[INFO RSZ-0033] No hold violations found.
+[INFO RSZ-0506] Runtime: 0.10s
+Took 112 seconds: repair_timing -setup_margin 0 -hold_margin 0 -repair_tns 100 -match_cell_footprint -verbose
+Warning: master sky130_ef_sc_hd__decap_12 has signal pins but no liberty cell
+Repair timing output passed lec test
+detailed_placement
+[INFO DPL-0006] Core area: 569088.30 um^2
+[INFO DPL-0007] Movable instances area: 277248.40 um^2
+[INFO DPL-0008] Fixed instances area within core: 9425.29 um^2
+[INFO DPL-0009] Utilization: 50.4%
+[INFO DPL-0005] Diamond search max displacement: +/- 500 sites horizontally, +/- 100 rows vertically.
+[INFO DPL-1102] Legalizing using negotiation legalizer.
+[INFO DPL-1103] Negotiation base search window: +/-20 sites horizontally, +/-5 rows vertically 
+	Automatic search window extension enabled.
+	Search window extendable up to the max displacement cap of +/-500 sites, +/-100 rows near walls.
+[INFO DPL-1104] NegotiationLegalizer DRC penalty: 5.
+[INFO DPL-0392] Negotiation cell height distribution (1 unique row-count(s)):
+[INFO DPL-0393]   height 1 row(s): 37513 cells
+          |      Total |  Illegal |  Illegal
+Iteration | Violations |    Cells |    Sites
+---------------------------------------------
+        0 |          0 |         0 |         0
+Negotiation phase 1 converged at iteration 0.
+[INFO DPL-0500] Runtime: 0.64s
+Placement Analysis
+---------------------------------
+total displacement        269.9 u
+average displacement        0.0 u
+max displacement           11.3 u
+original HPWL          834671.8 u
+legalized HPWL         834974.6 u
+delta HPWL                    0 %
+
+estimate_parasitics -placement
+Report metrics stage 4, cts final...
+
+==========================================================================
+cts final report_design_area
+--------------------------------------------------------------------------
+Design area 286674 um^2 50% utilization.
+write_db /root/cac_runs/ntt_dp_15ns/results/sky130hd/cac_ntt_dp_15ns/base/4_1_cts.odb
+write_sdc -no_timestamp /root/cac_runs/ntt_dp_15ns/results/sky130hd/cac_ntt_dp_15ns/base/4_cts.sdc
+Elapsed time: 2:37.61[h:]min:sec. CPU time: user 96.06 sys 33.06 (81%). Peak memory: 372348KB.
+Log                       Ext     Elapsed/s Peak Memory/MB sha1sum result [0:20)
+4_1_cts                   .odb          157            363 e1178752236ad8089d4a

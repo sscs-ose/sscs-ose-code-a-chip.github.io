@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glitchscope"
+version = "0.1.0"
+description = "Open, SPICE-validated, causal glitch-energy analysis for standard-cell CMOS (SKY130)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+dependencies = ["numpy", "scipy>=1.9"]
+
+[project.optional-dependencies]
+notebook = ["matplotlib", "pandas"]
+
+[project.scripts]
+glitchscope = "glitchscope.flow:main"
+
+[tool.setuptools.packages.find]
+include = ["glitchscope*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.csv", "*.cpp"]

@@ -1,0 +1,15 @@
+library (synthetic) {
+ time_unit : "1ns";
+ capacitive_load_unit (1, pf);
+ cell (INVX1) {
+  pin (A) { direction : input; capacitance : 0.002; }
+  pin (Y) { direction : output; function : "!A";
+   timing () { related_pin : "A"; timing_sense : negative_unate;
+    cell_rise (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.020, 0.040", "0.040, 0.060"); }
+    cell_fall (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.030, 0.050", "0.050, 0.070"); }
+    rise_transition (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.012, 0.016", "0.020, 0.024"); }
+    fall_transition (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.014, 0.018", "0.022, 0.026"); }
+   }
+  }
+ }
+}

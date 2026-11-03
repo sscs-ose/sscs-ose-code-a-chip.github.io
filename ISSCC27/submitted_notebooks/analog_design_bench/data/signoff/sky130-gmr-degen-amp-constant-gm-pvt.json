@@ -1,0 +1,81 @@
+{
+ "task_slug": "sky130-gmr-degen-amp-constant-gm-pvt",
+ "spec": "Implement `.subckt gmr_degen IREF VCM VDD VIN VIP VON VOP VSS`. The verifier runs the complete 15-point Cartesian product of five process corners (`tt`, `ff`, `ss`, `fs`, `sf`) and three temperatures (-40 C, 27 C, 85 C), all at `VDD = 1.80 V`. It supplies `IREF = 50 uA`, drives both input common-mode and `VCM` at 0.90 V, and connects 1 pF from each output to ground. `IREF` remains a required compatibility port even when a legal implementation obtains its local bias from `VCM`.\n\nOfficial Sky130 PDK subcircuits and finite positive resistors are admitted in the DUT. Local hierarchy is allowed. The generic circuit checker enforces only this element policy, not a particular GM-R topology.\n\nEvery process-temperature point must meet every requirement:\n\n- **Differential AC gain at 1 MHz (50% of score):** 1.98 to 2.02 V/V.\n- **Upper -3 dB differential bandwidth (1/6 of score):** greater than 60 MHz relative to the 1 MHz gain. A response still above that level at the 10 GHz check point is reported as at least 10 GHz.\n- **Total externally supplied DC power (1/6 of score):** less than 1.5 mW. The measurement sums the absolute DC power at `VDD`, `VCM`, `VIN`, and `VIP`; the 50 uA `IREF` path is already supplied through `VDD`.\n- **Large-signal SDR (1/6 of score):** greater than 60 dB for a 3 MHz, 100 mV-peak differential sine input, while its fitted fundamental gain remains from 1.90 to 2.10 V/V. Over the final 1 us of a 1.5 us transient, the verifier fits the differential output to DC plus 3 MHz sine and cosine terms, then computes `10*log10(fundamental power / residual mean-square power)`.\n\nThe complete in-range 1 MHz gain matrix is the functional prerequisite for bandwidth and power credit. The verifier runs one nominal AC/power gate, the remaining process-temperature points, and only then the longer SDR transients.\n\nThis signoff excludes supply-voltage variation, extracted interconnect parasitics, and statistical mismatch.",
+ "reference": {
+  "transistors": 15,
+  "checks": [
+   {
+    "name": "pvt_gain_1mhz",
+    "status": "passed",
+    "message": "min=1.98510 V/V at tt/-40C/1.80V; max=2.01577 V/V at fs/+85C/1.80V (requirement 1.98..2.02)"
+   },
+   {
+    "name": "pvt_bandwidth",
+    "status": "passed",
+    "message": "min=65.902 MHz at ss/-40C/1.80V (requirement >60 MHz)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "max=1.329 mW at ss/+85C/1.80V (requirement <1.5 mW)"
+   },
+   {
+    "name": "pvt_dynamic_range",
+    "status": "passed",
+    "message": "SDR min=60.98 dB at ff/-40C/1.80V (>60 dB); fundamental gain=1.9781..2.0117 V/V (1.90..2.10 V/V)"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 15,
+  "checks": [
+   {
+    "name": "pvt_gain_1mhz",
+    "status": "passed",
+    "message": "min=1.99935 V/V at sf/-40C/1.80V; max=2.00293 V/V at fs/-40C/1.80V (requirement 1.98..2.02)"
+   },
+   {
+    "name": "pvt_bandwidth",
+    "status": "passed",
+    "message": "min=170.482 MHz at ss/+85C/1.80V (requirement >60 MHz)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "max=1.171 mW at sf/+85C/1.80V (requirement <1.5 mW)"
+   },
+   {
+    "name": "pvt_dynamic_range",
+    "status": "passed",
+    "message": "SDR min=109.48 dB at sf/+85C/1.80V (>60 dB); fundamental gain=1.9997..2.0033 V/V (1.90..2.10 V/V)"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 29,
+  "checks": [
+   {
+    "name": "pvt_gain_1mhz",
+    "status": "passed",
+    "message": "min=1.99756 V/V at ff/+85C/1.80V; max=2.00242 V/V at ss/-40C/1.80V (requirement 1.98..2.02)"
+   },
+   {
+    "name": "pvt_bandwidth",
+    "status": "passed",
+    "message": "min=95.725 MHz at fs/+85C/1.80V (requirement >60 MHz)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "max=0.703 mW at ff/+85C/1.80V (requirement <1.5 mW)"
+   },
+   {
+    "name": "pvt_dynamic_range",
+    "status": "passed",
+    "message": "SDR min=83.80 dB at fs/+85C/1.80V (>60 dB); fundamental gain=1.9970..2.0022 V/V (1.90..2.10 V/V)"
+   }
+  ]
+ }
+}

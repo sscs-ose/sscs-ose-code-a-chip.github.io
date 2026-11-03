@@ -1,0 +1,30 @@
+* SKY130 PTAT core with a realizable first-order PMOS current-mirror bias.
+.lib "__MODEL_LIB__" __CORNER__
+.param VDDVAL=__VDDVAL__ IREF=__IREF__ LNS=__LNS__ WNS1=__WNS1__ WNS2=__WNS2__ LPM=__LPM__ WPM=__WPM__ PTEMP=-40
+.temp {PTEMP}
+VDD vdd 0 DC {VDDVAL}
+IREFBIAS pref 0 DC {IREF}
+XMPREF pref pref vdd vdd sky130_fd_pr__pfet_01v8 L={LPM} W={WPM}
+XMP1 p1 pref vdd vdd sky130_fd_pr__pfet_01v8 L={LPM} W={WPM}
+XMP2 p2 pref vdd vdd sky130_fd_pr__pfet_01v8 L={LPM} W={WPM}
+VPROBE1 p1 v1 DC 0
+VPROBE2 p2 v2 DC 0
+XMN1 v1 v1 0 0 sky130_fd_pr__nfet_01v8 L={LNS} W={WNS1}
+XMN2 v2 v2 0 0 sky130_fd_pr__nfet_01v8 L={LNS} W={WNS2}
+.control
+set noaskquit
+echo "temp_c,vgs_small_v,vgs_large_v,dvgs_v,supply_current_a,power_w,branch_small_a,branch_large_a" > results/__OUTPUT_CSV__
+foreach t -40 -20 0 25 50 75 100 125
+  alterparam PTEMP = $t
+  reset
+  op
+  let dvgs = v(v1)-v(v2)
+  let isupply = -i(VDD)
+  let psupply = v(vdd)*isupply
+  let ibranch1 = abs(i(VPROBE1))
+  let ibranch2 = abs(i(VPROBE2))
+  echo $t',' $&v(v1)',' $&v(v2)',' $&dvgs',' $&isupply',' $&psupply',' $&ibranch1',' $&ibranch2 >> results/__OUTPUT_CSV__
+end
+quit
+.endc
+.end

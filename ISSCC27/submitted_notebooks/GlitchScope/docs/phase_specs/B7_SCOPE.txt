@@ -1,0 +1,29 @@
+GlitchScope Phase B7 — M0 temporal-order support-domain closure
+
+Motivation:
+B6's 30-case real reconvergent sweep contained 19 supported cases and 11 cases
+that were rejected only later by the generic stable-final-state assertion.
+Those 11 arise when a later logical transition of the SAME cell receives an
+absolute output event time that is earlier than or equal to an already-pending
+output event from that cell. Under edge-dependent digital transport, this is
+an output-event overtaking corner requiring an additional pulse-resolution
+model; silently executing it can leave a stale event and corrupt the final
+state.
+
+B7 policy:
+- Preserve M0 exactly for FIFO-ordered pending output transitions.
+- Detect same-cell output event overtaking when scheduling.
+- Fail closed with TransportTemporalOrderError if:
+      new_event_time <= latest_pending_event_time
+- Do not invent clamping, reordering, cancellation, or analog behavior.
+- M1 remains unchanged and is still the simple event-inertial model.
+
+Real authority:
+- Re-run the 30-case B6 real reconvergent sweep.
+- Require 19 M0-supported cases.
+- Require 11 explicit M0 temporal-overtake rejections.
+- Require zero generic Timed/final mismatch failures.
+- Formalize a matched-output-load bracket in which increasing only the buffer
+  chain / reconvergent skew moves M1 from SUPPRESSED to SURVIVED.
+
+This closes the explicit digital support domain before M2/SPICE calibration.

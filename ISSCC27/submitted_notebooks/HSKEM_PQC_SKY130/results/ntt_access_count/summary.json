@@ -1,0 +1,14 @@
+{
+  "engine": "kyber_ntt_engine_packed2 (EXTRA_STAGE=1), SRAM ntt_pair_sram 128 x 24 bit, single port",
+  "testbench": "tb/tb_ntt_access_count.sv",
+  "command": "cd vectors && iverilog -g2012 -I . -DXSTAGE=1 -o acc.vvp ../rtl/kyber_pkg.sv ../rtl/barrett_reduce_1c.v ../rtl/kyber_ntt_engine_packed.sv ../rtl/kyber_ntt_engine_packed2.sv ../tb/tb_ntt_access_count.sv && vvp -n acc.vvp",
+  "method": "posedge-clk count of u_sram ce&we (write) and ce&!we&busy (read) from the start pulse until done; coefficient load and read-back outside the window are not counted. Idle-port reads (ce with busy=0, external raddr read, 2 per transform) are reported separately and excluded.",
+  "measured": {
+    "forward": {"sram_word_reads": 256, "sram_word_writes": 256, "idle_port_reads_excluded": 2, "cycles": 568},
+    "inverse": {"sram_word_reads": 256, "sram_word_writes": 256, "idle_port_reads_excluded": 2, "cycles": 569}
+  },
+  "analytic_layer_per_pass": {"reads": 896, "writes": 896, "basis": "7 layers x 128 words"},
+  "analytic_fused_two_pass": {"reads": 256, "writes": 256, "basis": "2 passes x 128 words"},
+  "ratio_layer_per_pass_over_measured": {"reads": 3.5, "writes": 3.5, "combined": 3.5},
+  "confirms_analytic": true
+}

@@ -1,0 +1,216 @@
+{
+ "task_slug": "sky130-fct-residue-amplifier-900msps",
+ "spec": "**What FCT means**\n\nFCT (floating charge transfer) is a three-phase sampled-data operation, not a continuous-time voltage amplifier:\n\n1. Before the first clock cycle, the fixed fixture applies a one-time 1 ns initialization precharge: it samples `vinp/vinn` relative to `vcm` onto its two flying capacitors and precharges the fixture outputs to `vocm`. During each later `sam` phase, it repeats that sampled-data operation.\n2. During `transfer`, the fixture reconnects its capacitor plates to `vcm` and to your `cinn/cinp` ports. Your active transistor core amplifies the transferred differential charge to `coutn/coutp`.\n3. During `sample_out`, the fixed fixture tracks `coutn/coutp` onto `voutn/voutp`, then releases them before the held-output measurement.\n\nThe submitted DUT is only the original `TEST_FCT` transistor-level core. The testbench owns all flying capacitors, ideal sampling/transfer switches, output precharge, output track-and-hold switches, stimulus, references, supplies, and output loads.\n\n**Operating contract**\n\nThe testbench provides `cinn/cinp`, `sam`, `transfer`, `vcm`, separate analog/digital supply and ground pins, and a 50 uA reference current. In the fixed fixture, `vddana` and `vdddig` are tied to the same 1.8 V DUT supply source, while `vssana` and `vssdig` are tied to the same ground. The DUT copies of `sam` and `transfer` use separate ideal sources with the same delays, rise/fall times, and pulse widths as the fixture clocks; this preserves the original zero-offset timing while allowing DUT clock power to be measured. The DUT `vcm` and `ib` sources are also separate from fixture references so their delivered power can be measured. The fixture owns the external input/output signals, 400 fF flying capacitors, output precharge, output hold path, and 50 fF output loads. Its startup-only 1 ns precharge is complete before cyclic 900 MS/s operation; the scored sample rate is 900 MS/s.\n\n- `sam`, `transfer`, and all sampled-data switching are fixed testbench conditions.\n- `cinn/cinp` are the transferred floating-capacitor nodes at your DUT boundary.\n- The fixture's `vinp/vinn` are centered at 1.0 V. `vocm` is a 0.9 V output-precharge reference, not a continuously regulated output common mode.\n- The nominal differential input is a coherent sine with 10 mV peak amplitude at FFT bin 5 (140.625 MHz). The 20 mV peak large-signal case uses bin 3 (84.375 MHz).\n\nFinal verification uses all five global transistor corners, `tt`, `ss`, `ff`, `fs`, and `sf`, at 1.8 V and 27 C. This is a deterministic process-corner sizing task rather than a complete PVT or yield sign-off: supply and temperature variation, local mismatch, passive variation, and extracted parasitics are outside its declared scope. The balanced and mixed global corners exercise slow, fast, and NMOS/PMOS-skewed charge-transfer behavior without claiming those excluded dimensions.\n\n**Electrical requirements**\n\nAt all five process corners for the 10 mV differential input:\n\n- sampled differential gain must be 5.5 to 6.5 V/V;\n- sampled SFDR must be at least 60 dB;\n- mean sampled output common mode must remain between 0.3 V and 1.2 V;\n- every sampled output must remain between 0.2 V and 1.6 V;\n- normalized differential hold-transition movement must not exceed 1.5%;\n- average total power delivered through all powered DUT ports must remain nonnegative and must not exceed 5 mW.\n\nAt all five process corners, the 20 mV differential-input case must also retain 5.5 to 6.5 V/V gain, at least 60 dB SFDR, the same output-range and hold-transition limits, and nonnegative average total delivered power no greater than 5 mW. Each transient first runs 64 startup cycles, then uses exactly 32 coherent held-output samples; no 256-point FFT is required. In each scored cycle, the fixture output is sampled while tracking at 0.78 ns and after release at 0.88 ns relative to the cycle boundary. Gain, SFDR, output common mode, and output range use the held `voutp/voutn` samples at 0.88 ns. Let `d_track[k]` and `d_held[k]` be the corresponding differential outputs. Hold-transition movement is `sqrt(sum((d_track-d_held)^2) / sum(d_held^2))` over all 32 cycles and must not exceed 0.015. It measures output movement across the public track-to-hold transition; it is not an absolute settling error to a commanded analog target. The RMS normalization avoids undefined pointwise relative errors near differential zero crossings. The DC term is removed only for the gain and SFDR FFT; gain is derived from the commanded differential input peak, and SFDR is the fundamental-to-largest-nonfundamental-bin ratio, including the Nyquist bin.\n\nPower is averaged from cycle 64 through cycle 96 and sums energy delivered through the common DUT 1.8 V source, the separate DUT `vcm` source, the direct DUT `sam` and `transfer` clock sources, and the 50 uA `ib` source. The common VDD term includes current entering both DUT supply pins. Bench-owned fixture switches, precharge, output hold, and signal sources use separate sources and are excluded.\n\nThe final sign-off first runs the 10 mV and 20 mV `tt` cases as a nominal electrical gate. Only a candidate that passes both proceeds to the remaining eight transients, for ten unique cases in total: 10 mV and 20 mV at each of `tt`, `ss`, `ff`, `fs`, and `sf`.",
+ "reference": {
+  "transistors": 104,
+  "checks": [
+   {
+    "name": "sampled_gain_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV range=5.7250..6.1577V/V (5.5..6.5)"
+   },
+   {
+    "name": "sfdr_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV min=61.368dB at tt (min 60dB)"
+   },
+   {
+    "name": "output_common_mode_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV mean range=0.7909..1.1891V (0.3..1.2V)"
+   },
+   {
+    "name": "output_headroom_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV sample range=0.7595..1.2281V (0.2..1.6V)"
+   },
+   {
+    "name": "hold_transition_movement_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV max=1.1510% at fs (max 1.5%)"
+   },
+   {
+    "name": "power_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV total delivered range=3.8711..4.1171mW (0..5mW)"
+   },
+   {
+    "name": "sampled_gain_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV range=5.7514..6.2025V/V (5.5..6.5)"
+   },
+   {
+    "name": "sfdr_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV min=61.593dB at tt (min 60dB)"
+   },
+   {
+    "name": "output_common_mode_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV mean range=0.7908..1.1886V (0.3..1.2V)"
+   },
+   {
+    "name": "output_headroom_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV sample range=0.7282..1.2565V (0.2..1.6V)"
+   },
+   {
+    "name": "hold_transition_movement_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV max=1.1343% at fs (max 1.5%)"
+   },
+   {
+    "name": "power_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV total delivered range=3.8717..4.1170mW (0..5mW)"
+   },
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "10/10 unique finite transients: tt/ss/ff/fs/sf at 10mV and 20mV"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 30,
+  "checks": [
+   {
+    "name": "sampled_gain_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV range=5.6534..6.0180V/V (5.5..6.5)"
+   },
+   {
+    "name": "sfdr_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV min=78.359dB at fs (min 60dB)"
+   },
+   {
+    "name": "output_common_mode_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV mean range=0.9450..1.0509V (0.3..1.2V)"
+   },
+   {
+    "name": "output_headroom_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV sample range=0.9154..1.0805V (0.2..1.6V)"
+   },
+   {
+    "name": "hold_transition_movement_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV max=1.0719% at sf (max 1.5%)"
+   },
+   {
+    "name": "power_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV total delivered range=4.0434..4.1840mW (0..5mW)"
+   },
+   {
+    "name": "sampled_gain_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV range=5.6506..6.0153V/V (5.5..6.5)"
+   },
+   {
+    "name": "sfdr_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV min=65.957dB at fs (min 60dB)"
+   },
+   {
+    "name": "output_common_mode_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV mean range=0.9452..1.0508V (0.3..1.2V)"
+   },
+   {
+    "name": "output_headroom_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV sample range=0.8863..1.1098V (0.2..1.6V)"
+   },
+   {
+    "name": "hold_transition_movement_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV max=1.0830% at sf (max 1.5%)"
+   },
+   {
+    "name": "power_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV total delivered range=4.0431..4.1837mW (0..5mW)"
+   },
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "10/10 unique finite transients: tt/ss/ff/fs/sf at 10mV and 20mV"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 27,
+  "checks": [
+   {
+    "name": "sampled_gain_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV range=5.9667..6.0631V/V (5.5..6.5)"
+   },
+   {
+    "name": "sfdr_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV min=79.664dB at sf (min 60dB)"
+   },
+   {
+    "name": "output_common_mode_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV mean range=0.9289..0.9391V (0.3..1.2V)"
+   },
+   {
+    "name": "output_headroom_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV sample range=0.8991..0.9687V (0.2..1.6V)"
+   },
+   {
+    "name": "hold_transition_movement_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV max=0.6660% at ss (max 1.5%)"
+   },
+   {
+    "name": "power_pvt_10mv",
+    "status": "passed",
+    "message": "10 mV total delivered range=3.9755..4.0221mW (0..5mW)"
+   },
+   {
+    "name": "sampled_gain_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV range=5.9640..6.0692V/V (5.5..6.5)"
+   },
+   {
+    "name": "sfdr_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV min=73.484dB at ff (min 60dB)"
+   },
+   {
+    "name": "output_common_mode_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV mean range=0.9290..0.9393V (0.3..1.2V)"
+   },
+   {
+    "name": "output_headroom_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV sample range=0.8697..0.9990V (0.2..1.6V)"
+   },
+   {
+    "name": "hold_transition_movement_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV max=0.6715% at ss (max 1.5%)"
+   },
+   {
+    "name": "power_pvt_20mv",
+    "status": "passed",
+    "message": "20 mV total delivered range=3.9755..4.0220mW (0..5mW)"
+   },
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "10/10 unique finite transients: tt/ss/ff/fs/sf at 10mV and 20mV"
+   }
+  ]
+ }
+}

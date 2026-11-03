@@ -1,0 +1,182 @@
+### 2026-09-28T18:55:42.833 BOOT
+
+### 2026-09-28T18:55:44.427 CMD 'help' host_elapsed_s=0.093
+
+--- TrustEdge ATM/bank demo menu (command + Enter) ---
+  bank open <amount>    prepare an authenticated withdrawal (10k..5m VND)
+  bank inspect          fetch public payload metadata; tag/key stay hidden
+  bank tamper <amount>  change amount while reusing the original tag
+  bank withdraw  submit the authentic withdrawal exactly once
+  bank replay    resend the accepted transaction; expect REPLAY_DETECTED
+  bank zeroize   erase the volatile HSM session key
+  bank resend    resend after zeroize; expect AUTH_REQUIRED
+  bank run       run the complete ordered ATM attack/defense scenario
+  status         check ESP32-to-FPGA communication
+  expert         show C6 candidate qualification commands
+------------------------------------------------
+
+### 2026-09-28T18:55:52.959 CMD 'status' host_elapsed_s=0.105
+STATUS ok, hub=0x00 (enrolled=0 session=0 ota_pending=0 ota_ok=0 ota_deny=0 verify_fail=0)
+STATUS latency=63225 us
+
+### 2026-09-28T18:55:54.646 CMD 'expert' host_elapsed_s=0.187
+
+--- TrustEdge expert diagnostics (letter + Enter) ---
+  f  full baseline + HSM-1 regression
+  entropy  C2A physical-RO health metadata (never exports raw entropy)
+  c2       full C2: health + reseed + internal d/z/m + ML-KEM + zeroize
+  c3       two logical roles: transport public key/ciphertext + independent decaps
+  c4       bind full internal ML-KEM K to HSM secure-frame session
+  c5       full integrated PUF/A-B vault + C4 security gate (SW0=1)
+  c6       final online adversarial qualification (SW0=1)
+  c6 cut   arm the real uncommitted-record power-cut gate (SW0=1)
+  c6 resume verify recovery after real power cycle (SW0=0)
+  demo     historical static-ticket HSM-4G flow; qualification SOF only
+  n  HSM-4B1A readiness + HSM-4F no-presence locks (SW0=0)
+  x  HSM-4F regression through PUF-bound commit (SW0=1)
+  g  HSM-4G phase 1: provision, seal, then physical power-cut (SW0=1)
+  q  HSM-4G phase 2: restore and same-key proof after power-cycle (SW0=0)
+  j  HSM-4D1 root: enroll once with SW0=1, then restore from NVS
+  o  HSM-4D1 wrong-helper/wrong-verifier negative flow
+  0  erase HSM-4D1 public helper and clear volatile root
+  4  HSM-4D2 restore newest committed encrypted A/B blob (SW0=0 OK)
+  5  HSM-4D2 fail-fast A/B write/tamper/same-boot selector (SW0=1)
+  6  erase only HSM-4D2 public A/B blobs + FPGA staging
+  3  HSM-4E standalone authenticated lifecycle (SW0=1)
+  7  SYSTEM Q0 preflight/non-persistent gates (SW0=0)
+  8  SYSTEM Q1 mutating vault qualification (SW0=1)
+  1  prepare uncommitted D2 record, then physically power-cut (SW0=1)
+  2  verify prepared record ignored after power cycle (SW0=0)
+  9  SYSTEM Q2 final restore/regression/clean reset (SW0=0)
+  s  STATUS
+  r  RESET all demo state and counters
+  h  public demo help
+  ?  legacy individual commands
+------------------------------------------------
+
+### 2026-09-28T18:56:17.566 CMD '?' host_elapsed_s=0.083
+
+--- TrustEdge menu (type letter + Enter) ---
+  s  STATUS
+  e  PUF enroll
+  v  PUF verify
+  k  Kyber NTT self-test
+  m  ML-KEM-512 partial self-test
+  p  ML-KEM K-PKE-prep primitive self-test
+  a  ML-KEM Encaps-stage data-path self-test
+  d  ML-KEM Decaps-stage validity/failure self-test
+  b  OTA begin allow-test (fixed test flag)
+  u  OTA begin unsigned test
+  c  OTA commit
+  r  RESET session/local nonce
+  i  HSM get info
+  z  HSM zeroize session
+  l  HSM audit read (oldest entry)
+  h  compact help; ? legacy command list
+--------------------------------------------
+
+### 2026-09-28T18:56:34.701 CMD 'k' host_elapsed_s=0.091
+KYBER_NTT_SELFTEST ...
+KYBER FAIL, digest=0x00000000, cycles=0
+C1_LEGACY_KYBER_OPCODE_LOCK: PASS fail_closed=1
+KYBER_LOCK latency=63200 us
+
+### 2026-09-28T18:56:41.314 CMD 'c2' host_elapsed_s=0.612
+=== C2 FULL INTERNAL ENTROPY + SHAKE256 + ML-KEM FLOW ===
+C2_CLAIM: ACADEMIC_PROTOTYPE_NO_SP800_90A_OR_90B_VALIDATION_CLAIM
+C2A_ENTROPY_HEALTH ...
+C2A_ENTROPY_HEALTH_RESULT: PASS ready=1 health=0x00 raw_samples=4294967295 conditioned_words=65535 raw_export=0 source=physical_ro_x8 health_tests=RCT64+APT512+continuous_word prototype_no_sp800_90b_claim
+C2A_ENTROPY_HEALTH latency=59511 us
+C2_RUN_1: PASS reseed=1 generate=1 fresh=1 independent_decaps=1 shared_secret_match=1 health=0x00 entropy_words_lsb=255 cycles=65535 internal_dzm=1 raw_export=0
+C2_RUN_2: PASS reseed=2 generate=2 fresh=1 independent_decaps=1 shared_secret_match=1 health=0x00 entropy_words_lsb=255 cycles=65535 internal_dzm=1 raw_export=0
+C2_ZEROIZE ...
+HSM_ZEROIZE OK, session=0 session_slot=0 zeroize_count=1
+C2_ZEROIZE latency=36617 us
+C2_RUN_AFTER_ZEROIZE: PASS reseed=1 generate=1 fresh=1 independent_decaps=1 shared_secret_match=1 health=0x00 entropy_words_lsb=190 cycles=65535 internal_dzm=1 raw_export=0
+C2_FULL_RESULT: PASS runs=3 reseed_sequence=1,2,1 generate_sequence=1,2,1 freshness=PASS zeroize=PASS independent_decaps=PASS shared_secret_match=PASS internal_dzm=1 deterministic_host_vectors=qualification_only raw_export=0
+C2_FULL latency=584576 us
+
+### 2026-09-28T18:56:55.969 CMD 'c3' host_elapsed_s=8.655
+=== C3 TIME-MULTIPLEXED TWO-ROLE ML-KEM TRANSPORT ===
+C3_CLAIM: ONE_FPGA_TWO_LOGICAL_ROLES_PUBLIC_KEY_AND_CIPHERTEXT_OVER_SPI_NO_TWO_DEVICE_CLAIM
+C3_RESET: PASS status=0xC3 digest_a=00000000 digest_b=00000000 cycles=0
+C3_KEYGEN: PASS status=0xC3 digest_a=E90F1D7A digest_b=682E3966 cycles=35662
+C3_PUBLIC_KEY_EXPORT: PASS chunks=25 bytes=800
+C3_PUBLIC_KEY_IMPORT: PASS chunks=25 bytes=800
+C3_PUBLIC_KEY_FINAL: PASS status=0xC3 digest_a=7D2E2A64 digest_b=0661B852 cycles=0
+C3_ENCAPS: PASS status=0xC3 digest_a=ADC16217 digest_b=C520A1F2 cycles=56177
+C3_CIPHERTEXT_EXPORT: PASS chunks=24 bytes=768
+C3_CIPHERTEXT_IMPORT: PASS chunks=24 bytes=768
+C3_CIPHERTEXT_FINAL: PASS status=0xC3 digest_a=99811D72 digest_b=F0FE02CC cycles=6148
+C3_DECAPS: PASS status=0xC3 digest_a=ADC16217 digest_b=ADC16217 cycles=65535
+C3_TWO_ROLE_RESULT: PASS pk_bytes=800 ct_bytes=768 public_roundtrip=PASS ciphertext_roundtrip=PASS independent_decaps=PASS shared_secret_match=PASS internal_entropy=1 time_multiplexed=1 raw_secret_export=0
+C3_TWO_ROLE latency=8625688 us
+
+### 2026-09-28T18:57:25.404 CMD 'c4' host_elapsed_s=23.434
+=== C4 INTERNAL ML-KEM K TO HSM SECURE FRAME ===
+C4_CLAIM: K_REMAINS_INSIDE_FPGA_ONLY_PUBLIC_PAYLOAD_AND_TAG_CROSS_SPI
+=== C3 TIME-MULTIPLEXED TWO-ROLE ML-KEM TRANSPORT ===
+C3_CLAIM: ONE_FPGA_TWO_LOGICAL_ROLES_PUBLIC_KEY_AND_CIPHERTEXT_OVER_SPI_NO_TWO_DEVICE_CLAIM
+C3_RESET: PASS status=0xC3 digest_a=00000000 digest_b=00000000 cycles=0
+C3_KEYGEN: PASS status=0xC3 digest_a=8C0361C5 digest_b=42E2A10A cycles=35643
+C3_PUBLIC_KEY_EXPORT: PASS chunks=25 bytes=800
+C3_PUBLIC_KEY_IMPORT: PASS chunks=25 bytes=800
+C3_PUBLIC_KEY_FINAL: PASS status=0xC3 digest_a=57E2B208 digest_b=A9F72983 cycles=0
+C3_ENCAPS: PASS status=0xC3 digest_a=06D456C8 digest_b=0F623843 cycles=56167
+C3_CIPHERTEXT_EXPORT: PASS chunks=24 bytes=768
+C3_CIPHERTEXT_IMPORT: PASS chunks=24 bytes=768
+C3_CIPHERTEXT_FINAL: PASS status=0xC3 digest_a=F6070463 digest_b=87BF686A cycles=6148
+C3_DECAPS: PASS status=0xC3 digest_a=06D456C8 digest_b=06D456C8 cycles=65535
+C3_TWO_ROLE_RESULT: PASS pk_bytes=800 ct_bytes=768 public_roundtrip=PASS ciphertext_roundtrip=PASS independent_decaps=PASS shared_secret_match=PASS internal_entropy=1 time_multiplexed=1 raw_secret_export=0
+C3_TWO_ROLE latency=8636236 us
+C4_WRONG_KEY_CT_IMPORT: PASS chunks=24 bytes=768
+C4_WRONG_KEY_CT_FINAL: PASS status=0xC3 digest_a=76070463 digest_b=7FBF686A cycles=6148
+C4_WRONG_KEY_DECAPS: PASS status=0xD6 digest_a=EE39E588 digest_b=06D456C8 cycles=65535
+HSM3_BIND_TEST tx=1 ...
+HSM3_BIND_TEST POLICY_DENIED
+C4_VALID_CT_IMPORT: PASS chunks=24 bytes=768
+C4_VALID_CT_FINAL: PASS status=0xC3 digest_a=F6070463 digest_b=87BF686A cycles=6148
+C4_VALID_DECAPS: PASS status=0xC3 digest_a=06D456C8 digest_b=06D456C8 cycles=65535
+HSM3_BIND_TEST tx=2 ...
+HSM3_BIND_TEST OK, handle=0xB17F source_slot=2 dest_slot=3 state=1 exportable=0 usage=1 epoch=5346323100000002
+C4_MLKEM_FRAME_SEAL tx=3 payload=1122334455667788 ...
+C4_MLKEM_FRAME_SEAL OK, echo=MATCH tag_bytes=16 raw_key_export=0
+HSM3_SECURE_FRAME tx=3 epoch=5346323100000002 payload=1122334455667788 ...
+HSM3_SECURE_FRAME AUTH_FAILED
+HSM3_SECURE_FRAME tx=3 epoch=5346323100000002 payload=1122334455667789 ...
+HSM3_SECURE_FRAME AUTH_FAILED
+HSM3_SECURE_FRAME tx=3 epoch=5346323100000002 payload=1122334455667788 ...
+HSM3_SECURE_FRAME OK, echo=MATCH
+HSM3_SECURE_FRAME tx=3 epoch=5346323100000002 payload=1122334455667788 ...
+HSM3_SECURE_FRAME REPLAY_DETECTED
+=== C3 TIME-MULTIPLEXED TWO-ROLE ML-KEM TRANSPORT ===
+C3_CLAIM: ONE_FPGA_TWO_LOGICAL_ROLES_PUBLIC_KEY_AND_CIPHERTEXT_OVER_SPI_NO_TWO_DEVICE_CLAIM
+C3_RESET: PASS status=0xC3 digest_a=00000000 digest_b=00000000 cycles=0
+C3_KEYGEN: PASS status=0xC3 digest_a=BCB4F9D7 digest_b=51A143EF cycles=35664
+C3_PUBLIC_KEY_EXPORT: PASS chunks=25 bytes=800
+C3_PUBLIC_KEY_IMPORT: PASS chunks=25 bytes=800
+C3_PUBLIC_KEY_FINAL: PASS status=0xC3 digest_a=44A150ED digest_b=EAEB301F cycles=0
+C3_ENCAPS: PASS status=0xC3 digest_a=50E1A9CD digest_b=BB6E2072 cycles=56171
+C3_CIPHERTEXT_EXPORT: PASS chunks=24 bytes=768
+C3_CIPHERTEXT_IMPORT: PASS chunks=24 bytes=768
+C3_CIPHERTEXT_FINAL: PASS status=0xC3 digest_a=D7F73711 digest_b=04425705 cycles=6148
+C3_DECAPS: PASS status=0xC3 digest_a=50E1A9CD digest_b=50E1A9CD cycles=65535
+C3_TWO_ROLE_RESULT: PASS pk_bytes=800 ct_bytes=768 public_roundtrip=PASS ciphertext_roundtrip=PASS independent_decaps=PASS shared_secret_match=PASS internal_entropy=1 time_multiplexed=1 raw_secret_export=0
+C3_TWO_ROLE latency=8625458 us
+HSM3_BIND_TEST tx=4 ...
+HSM3_BIND_TEST OK, handle=0xB179 source_slot=2 dest_slot=3 state=1 exportable=0 usage=2 epoch=5346323100000004
+HSM3_SECURE_FRAME tx=3 epoch=5346323100000002 payload=1122334455667788 ...
+HSM3_SECURE_FRAME AUTH_FAILED
+C4_MLKEM_FRAME_SEAL tx=5 payload=1122334455667788 ...
+C4_MLKEM_FRAME_SEAL OK, echo=MATCH tag_bytes=16 raw_key_export=0
+HSM3_SECURE_FRAME tx=5 epoch=5346323100000004 payload=1122334455667788 ...
+HSM3_SECURE_FRAME OK, echo=MATCH
+HSM3_CROSS_SESSION_REPLAY_RESULT: PASS old_epoch=5346323100000002 new_epoch=5346323100000004 stale_frame=AUTH_FAILED fresh_frame=OK
+C4_ZEROIZE ...
+HSM_ZEROIZE OK, session=0 session_slot=0 zeroize_count=2
+C4_ZEROIZE latency=36592 us
+HSM3_SECURE_FRAME tx=6 epoch=5346323100000004 payload=1122334455667788 ...
+HSM3_SECURE_FRAME AUTH_REQUIRED
+C4_INTERNAL_K_HSM_RESULT: PASS wrong_key=PASS bind=PASS seal_verify=PASS wrong_tag=PASS modified_payload=PASS replay=PASS cross_session_replay=PASS zeroize=PASS raw_secret_export=0
+C4_INTERNAL_K_HSM latency=23407730 us
+

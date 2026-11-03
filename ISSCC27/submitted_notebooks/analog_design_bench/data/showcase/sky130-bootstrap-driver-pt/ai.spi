@@ -1,0 +1,58 @@
+.param cboot=1n
+
+.subckt bd_inv DIN DOUT VPOS VNEG
+XP DOUT DIN VPOS VPOS sky130_fd_pr__pfet_01v8 l=0.15 w=2 nf=1
+XN DOUT DIN VNEG VNEG sky130_fd_pr__nfet_01v8 l=0.15 w=1 nf=1
+.ends bd_inv
+
+.subckt bd_nand DINA DINB DOUT VPOS VNEG
+XP1 DOUT DINA VPOS VPOS sky130_fd_pr__pfet_01v8 l=0.15 w=2 nf=1
+XP2 DOUT DINB VPOS VPOS sky130_fd_pr__pfet_01v8 l=0.15 w=2 nf=1
+XN1 DOUT DINA NS VNEG sky130_fd_pr__nfet_01v8 l=0.15 w=2 nf=1
+XN2 NS DINB VNEG VNEG sky130_fd_pr__nfet_01v8 l=0.15 w=2 nf=1
+.ends bd_nand
+
+.subckt bd_level CTRL CTRLB FOUT BOOT FLOAT GROUND
+XNA NA CTRL GROUND GROUND sky130_fd_pr__nfet_g5v0d10v5 l=0.5 w=5 nf=1 m=8
+XNB NB CTRLB GROUND GROUND sky130_fd_pr__nfet_g5v0d10v5 l=0.5 w=5 nf=1 m=8
+XPA NA NB BOOT BOOT sky130_fd_pr__pfet_g5v0d10v5 l=0.5 w=2 nf=1
+XPB NB NA BOOT BOOT sky130_fd_pr__pfet_g5v0d10v5 l=0.5 w=2 nf=1
+XPO FOUT NA BOOT BOOT sky130_fd_pr__pfet_g5v0d10v5 l=0.5 w=5 nf=1 m=8
+XNO FOUT NA FLOAT FLOAT sky130_fd_pr__nfet_g5v0d10v5 l=0.5 w=5 nf=1 m=8
+.ends bd_level
+
+.subckt bootstrap_driver GN GN2 IN VBST VDD VLX VSS VSW
+XREF VLX VSW sky130_fd_pr__res_generic_po w=1000 l=0.35
+XCB VBST CB sky130_fd_pr__cap_mim_m3_1 w=144 l=144 mult=1
+XRC CB VLX sky130_fd_pr__res_generic_po w=1.2 l=0.35
+XCD VDD VSS sky130_fd_pr__cap_mim_m3_1 w=100 l=100 mult=1
+XI0 IN IB VDD VSS bd_inv
+XI1 IB IP VDD VSS bd_inv
+XRH IP HR VSS sky130_fd_pr__res_high_po w=1 l=14
+XCH HR VSS sky130_fd_pr__cap_mim_m3_1 w=25 l=20 mult=1
+XH0 HR HDB VDD VSS bd_inv
+XH1 HDB HD VDD VSS bd_inv
+XHN IP HD HB VDD VSS bd_nand
+XHI HB HEN VDD VSS bd_inv
+XRL IB LR VSS sky130_fd_pr__res_high_po w=1 l=25
+XCL LR VSS sky130_fd_pr__cap_mim_m3_1 w=25 l=20 mult=1
+XL0 LR LDB VDD VSS bd_inv
+XL1 LDB LD VDD VSS bd_inv
+XLN IB LD LB VDD VSS bd_nand
+XLI LB LO VDD VSS bd_inv
+XLS HEN HB HF VBST VLX VSS bd_level
+XHP HP HF VBST VBST sky130_fd_pr__pfet_01v8 l=0.15 w=5 nf=1 m=8
+XHN0 HP HF VLX VLX sky130_fd_pr__nfet_01v8 l=0.15 w=5 nf=1 m=4
+XHOP GN HP VBST VBST sky130_fd_pr__pfet_01v8 l=0.15 w=5 nf=1 m=80
+XHON GN HP VLX VLX sky130_fd_pr__nfet_01v8 l=0.15 w=5 nf=1 m=64
+XLP LP LO VDD VDD sky130_fd_pr__pfet_01v8 l=0.15 w=5 nf=1 m=8
+XLNN LP LO VSS VSS sky130_fd_pr__nfet_01v8 l=0.15 w=5 nf=1 m=4
+XLOP GN2 LP VDD VDD sky130_fd_pr__pfet_01v8 l=0.15 w=5 nf=1 m=128
+XLON GN2 LP VSS VSS sky130_fd_pr__nfet_01v8 l=0.15 w=5 nf=1 m=64
+XBL LB LO BF VBST VLX VSS bd_level
+XBP BP BF VBST VBST sky130_fd_pr__pfet_01v8 l=0.15 w=5 nf=1 m=4
+XBN BP BF VLX VLX sky130_fd_pr__nfet_01v8 l=0.15 w=5 nf=1 m=2
+XBOP BG BP VBST VBST sky130_fd_pr__pfet_01v8 l=0.15 w=5 nf=1 m=16
+XBON BG BP VLX VLX sky130_fd_pr__nfet_01v8 l=0.15 w=5 nf=1 m=8
+XBC VDD BG VBST VBST sky130_fd_pr__pfet_01v8 l=0.15 w=5 nf=1 m=400
+.ends bootstrap_driver

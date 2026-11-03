@@ -1,0 +1,183 @@
+* Reference solution: Sky130 all-NMOS half-bridge bootstrap driver.
+* DUT ports: GN GN2 IN VBST VDD VLX VSS VSW
+*
+* The testbench connects a designable off-chip bootstrap capacitor between the
+* VBST and VLX pads through the wirebond parasitics. You choose its value by
+* declaring .param cboot=<value> (default 620 pF here, limit <= 100 nF).
+*   - GN   : high-side gate output (floating domain, referenced to VBST/VLX)
+*   - GN2  : low-side gate output (VDD/VSS domain)
+*   - IN   : PWM input
+*   - VBST : bootstrap cap top terminal
+*   - VDD  : driver supply
+*   - VLX  : floating reference for the bootstrap driving (bootstrap cap bottom)
+*   - VSS  : ground
+*   - VSW  : switch node (midpoint of the external half-bridge power stage)
+
+* Device policy:
+*   - The buffers that directly drive GN/GN2 use 1.8 V devices
+*     (sky130_fd_pr__pfet_01v8 / nfet_01v8_lvt).
+*   - The bootstrap charging path (PM2 VDD->VBST, NM1 VSW->VLX) and the level
+*     shifters use 5 V devices (sky130_fd_pr__pfet_g5v0d10v5 / nfet_g5v0d10v5).
+*   - The on-chip MIM bootstrap cap is sized 30x30 um x m=30 (27000 um^2). The
+*     expanded total on-chip device area (transistors + MIM cap) is ~33670 um^2,
+*     within the published 35000 um^2 budget (enforced by the area gate).
+*   - The designable off-chip bootstrap cap (cboot = 620 pF here, <= 100 nF)
+*     is connected by the testbench through the wirebond parasitics.
+*
+* Device voltage constraints (enforced by the verifier on external nodes):
+*   - v(VBST)-v(VLX) and v(GN2) peaks must stay < 2.15 V (1.8 V devices).
+*   - v(VBST) peak must stay < 5.65 V (5 V devices).
+*   - The testbench adds 0.3 nH / 3 mOhm off-chip parasitics on the VDD and
+*     VSS supply rails; the design must operate correctly with them.
+
+* Off-chip bootstrap capacitor value (design variable, <= 100 nF).
+.param cboot=620p
+
+* ============================================================
+* Subcircuit: inv (standard inverter, generic rails)
+* ============================================================
+.subckt inv in out vdd vss
+XMP0 out in vdd vdd sky130_fd_pr__pfet_01v8 w=0.55 l=0.15 m=1
+XMN0 out in vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 m=1
+.ends inv
+
+* ============================================================
+* Subcircuit: nand (2-input NAND)
+* ============================================================
+.subckt nand a b q vdd vss
+XMP1 q b vdd vdd sky130_fd_pr__pfet_01v8 w=0.55 l=0.15 m=1
+XMP0 q a vdd vdd sky130_fd_pr__pfet_01v8 w=0.55 l=0.15 m=1
+XMN1 net12 b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 m=1
+XMN0 q a net12 vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 m=1
+.ends nand
+
+* ============================================================
+* Subcircuit: delay_chain (8-stage inverter chain for dead-time)
+* ============================================================
+.subckt delay_chain in out vdd vss
+XMN7 out net045 vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMN6 net045 net043 vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMN5 net043 net041 vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMN4 net041 net039 vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMN3 net039 net9 vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMN2 net9 net7 vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMN1 net7 net5 vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMN0 net5 in vss vss sky130_fd_pr__nfet_01v8 w=1 l=1 m=1
+XMP7 out net045 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+XMP6 net045 net043 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+XMP5 net043 net041 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+XMP4 net041 net039 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+XMP3 net039 net9 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+XMP2 net9 net7 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+XMP1 net7 net5 vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+XMP0 net5 in vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=1 m=1
+.ends delay_chain
+
+* ============================================================
+* Subcircuit: non_overlap (dead-time generation)
+* ============================================================
+.subckt non_overlap clk p1 p2 vdd vss
+XI5 net03 p2 vdd vss inv
+XI0 clk net5 vdd vss inv
+XI3 p1 clk net4 vdd vss nand
+XI1 net5 net03 net6 vdd vss nand
+XI4 net4 net03 vdd vss delay_chain
+XI2 net6 p1 vdd vss delay_chain
+.ends non_overlap
+
+* ============================================================
+* Subcircuit: buffer (large gate driver, 4 stages, 1.8V devices)
+* ============================================================
+.subckt buffer in out vdd vss
+XMP4 net69 in vdd vdd sky130_fd_pr__pfet_01v8 w=12 l=0.15 m=1
+XMP3 net71 net69 vdd vdd sky130_fd_pr__pfet_01v8 w=50 l=0.15 m=1
+XMP2 net73 net71 vdd vdd sky130_fd_pr__pfet_01v8 w=50 l=0.15 m=4
+XMP1 out net73 vdd vdd sky130_fd_pr__pfet_01v8 w=50 l=0.15 m=16
+XMN2 net73 net71 vss vss sky130_fd_pr__nfet_01v8_lvt w=50 l=0.15 m=2
+XMN3 net71 net69 vss vss sky130_fd_pr__nfet_01v8_lvt w=25 l=0.15 m=1
+XMN4 net69 in vss vss sky130_fd_pr__nfet_01v8_lvt w=6 l=0.15 m=1
+XMN1 out net73 vss vss sky130_fd_pr__nfet_01v8_lvt w=50 l=0.15 m=8
+.ends buffer
+
+* ============================================================
+* Subcircuit: buffers (small gate driver, 4 stages, 1.8V devices)
+* ============================================================
+.subckt buffers in out vdd vss
+XMP4 net69 in vdd vdd sky130_fd_pr__pfet_01v8 w=1 l=0.15 m=1
+XMP3 net71 net69 vdd vdd sky130_fd_pr__pfet_01v8 w=4 l=0.15 m=1
+XMP2 net73 net71 vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=0.15 m=1
+XMP1 out net73 vdd vdd sky130_fd_pr__pfet_01v8 w=16 l=0.15 m=4
+XMN2 net73 net71 vss vss sky130_fd_pr__nfet_01v8_lvt w=8 l=0.15 m=1
+XMN3 net71 net69 vss vss sky130_fd_pr__nfet_01v8_lvt w=2 l=0.15 m=1
+XMN4 net69 in vss vss sky130_fd_pr__nfet_01v8_lvt w=1 l=0.15 m=1
+XMN1 out net73 vss vss sky130_fd_pr__nfet_01v8_lvt w=8 l=0.15 m=4
+.ends buffers
+
+* ============================================================
+* Subcircuit: lvl2 (level shifter, 5V devices)
+*   ports: in out vbst vdd vlx vss
+* ============================================================
+.subckt lvl2 in out vbst vdd vlx vss
+XINV0 net7 net15 vdd vss inv
+XINV1 net15 out vdd vss inv
+XINV2 in net16 vbst vlx inv
+XPM1 net17 in vbst vbst sky130_fd_pr__pfet_g5v0d10v5 w=0.5 l=0.5 m=1
+XPM0 net18 net16 vbst vbst sky130_fd_pr__pfet_g5v0d10v5 w=0.5 l=0.5 m=1
+XNM1 net17 vlx net8 vss sky130_fd_pr__nfet_g5v0d10v5 w=0.75 l=0.5 m=4
+XNM0 net18 vlx net7 vss sky130_fd_pr__nfet_g5v0d10v5 w=0.75 l=0.5 m=4
+XNM3 net7 net8 vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 m=2
+XNM2 net8 net8 vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 m=1
+.ends lvl2
+
+* ============================================================
+* Subcircuit: lvl3 (cross-coupled latch level shifter, 5V devices)
+*   ports: in out vdd1 vdd2 vss
+*   vdd1 = VDD (low domain), vdd2 = VBST (floating high domain)
+*   No VLX source follower: OUT is pulled up to vdd2 (VBST) and pulled
+*   down to vss, so the output does not degrade as the floating node rises.
+* ============================================================
+.subckt lvl3 in out vdd1 vdd2 vss
+XPM3 out net14 vdd2 vdd2 sky130_fd_pr__pfet_g5v0d10v5 w=0.5 l=0.5 m=1
+XPM1 net3 net14 vdd2 vdd2 sky130_fd_pr__pfet_g5v0d10v5 w=0.5 l=0.5 m=1
+XPM0 net14 net3 vdd2 vdd2 sky130_fd_pr__pfet_g5v0d10v5 w=0.5 l=0.5 m=1
+XNM0 net1 in vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 m=1
+XPM2 net1 in vdd1 vdd1 sky130_fd_pr__pfet_01v8 w=0.55 l=0.15 m=1
+XNM3 out net14 vss vss sky130_fd_pr__nfet_g5v0d10v5 w=0.75 l=0.5 m=1
+XNM2 net14 in vss vss sky130_fd_pr__nfet_g5v0d10v5 w=0.75 l=0.5 m=4
+XNM1 net3 net1 vss vss sky130_fd_pr__nfet_g5v0d10v5 w=0.75 l=0.5 m=4
+.ends lvl3
+
+* ============================================================
+* Top-level DUT: bootstrap_driver
+*   Ports: GN GN2 IN VBST VDD VLX VSS VSW
+*
+*   Charging path: PM2 (VDD->VBST) + NM1 (VSW->VLX), 5V devices.
+*   On-chip MIM bootstrap cap: 30x30 um x m=30 (27000 um^2); total on-chip device
+*   expanded area ~33670 um^2 is within the 35000 um^2 budget.
+*   Level shifters + floating buffer drive GN; buffer drives GN2.
+*   Non-overlap dead-time generation; the dead time is externally verified via
+*   the vgs = v(GN)-v(VSW) and v(GN2) timing.
+*   Off-chip bootstrap cap: designable via .param cboot (620 pF here, <= 100 nF).
+* ============================================================
+.subckt bootstrap_driver GN GN2 IN VBST VDD VLX VSS VSW
+XLVL2 GN net18 VBST VDD VLX VSS lvl2
+XLVL3 p1_int P1UP VDD VBST VSS lvl3
+XINV34 net03 net016 VBST VLX inv
+XINV31 net028 net02 VDD VSS inv
+XINV17 net08 p1_int VDD VSS inv
+XINV5 net19 net013 VDD VSS inv
+XINV4 net18 net19 VDD VSS inv
+XBUFF12 net028 GN2 VDD VSS buffer
+XBUFF11 net016 GN VBST VLX buffer
+XPM1 net7 net013 net17 VDD sky130_fd_pr__pfet_01v8 w=0.55 l=0.15 m=1
+XPM0 net17 net02 VDD VDD sky130_fd_pr__pfet_01v8 w=0.55 l=0.15 m=1
+XNM1 VLX net16 VSS VSS sky130_fd_pr__nfet_01v8 w=50 l=0.15 m=64
+XNM0 net7 net02 VSS VSS sky130_fd_pr__nfet_01v8 w=0.42 l=0.15 m=1
+XNM5 net03 P1UP VLX VLX sky130_fd_pr__nfet_g5v0d10v5 w=0.75 l=0.5 m=1
+XNM2 VSW GN VLX VSS sky130_fd_pr__nfet_g5v0d10v5 w=50 l=0.5 m=82
+XPM5 net03 P1UP VBST VBST sky130_fd_pr__pfet_g5v0d10v5 w=0.5 l=0.5 m=1
+XPM2 VDD GN VBST VBST sky130_fd_pr__pfet_g5v0d10v5 w=50 l=0.5 m=144
+XC0 VBST VLX sky130_fd_pr__cap_mim_m3_1 l=30 w=30 m=30
+XNON IN net08 net028 VDD VSS non_overlap
+XBUFF7 net7 net16 VDD VSS buffers
+.ends bootstrap_driver

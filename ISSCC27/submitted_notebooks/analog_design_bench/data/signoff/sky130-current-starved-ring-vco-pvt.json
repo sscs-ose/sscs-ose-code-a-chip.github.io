@@ -1,0 +1,156 @@
+{
+ "task_slug": "sky130-current-starved-ring-vco-pvt",
+ "spec": "The tuning, startup, waveform, and power requirements apply across all 27 combinations of tt, ss, ff; 1.62, 1.80, 1.98 V; and -40, 27, 125 C. `vout` drives 20 fF.\n\n- At every PVT point, the tuning range must include 25 MHz: `10 MHz <= f(0.9 V) <= 25 MHz` and `f(1.2 V) >= 25 MHz`. The tuning ratio `f(1.2 V)/f(0.9 V)` must be at least 1.5.\n- Frequency is averaged over five complete periods at each fixed-control plateau, beginning 300 ns after that plateau starts. Every measured edge must remain inside the 1 us plateau. Frequency must increase at every step; minimum KVCO >= 30 MHz/V and maximum/minimum KVCO <= 1.50.\n- Startup to the first rising half-supply crossing <= 100 ns. Frequency settling drift <= 0.10%, comparing two periods beginning 300 ns after each plateau starts with two periods beginning 300 ns before that plateau ends. Duty cycle at 1.1 V must be within 45--55%, and output swing must cross 10% and 90% of VDD.\n- Average VDD power at 1.2 V control <= 200 uW. Supply pushing <= 100%/V.\n- Supply pushing is measured at 27 C for each process corner, with `vctrl=1.1 V` and VDD at 1.71 and 1.89 V.\n- Ideal internal R and C elements are permitted for biasing and delay; no physical-passive or area constraint is evaluated.\n\nThe nominal tuning staircase runs first. Failure there blocks the remaining PVT matrix; failure of tuning PVT blocks the three process-corner pushing tests.",
+ "reference": {
+  "transistors": 28,
+  "checks": [
+   {
+    "name": "pvt_frequency_coverage",
+    "status": "passed",
+    "message": "f(0.9V)_range=12.55..20.68MHz; f(1.2V)_min=26.42MHz at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_tuning_ratio",
+    "status": "passed",
+    "message": "worst=1.791 at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_kvco_monotonic_linear",
+    "status": "passed",
+    "message": "KVCO_min=37.26MHz/V at ff/1.98V/+125C; linearity_max=1.095 at ss/1.98V/+125C"
+   },
+   {
+    "name": "pvt_frequency_settling",
+    "status": "passed",
+    "message": "worst=0.004786% at tt/1.62V/-40C"
+   },
+   {
+    "name": "pvt_duty_cycle",
+    "status": "passed",
+    "message": "range=0.486..0.4999"
+   },
+   {
+    "name": "pvt_startup",
+    "status": "passed",
+    "message": "worst=47.61ns at ss/1.62V/-40C"
+   },
+   {
+    "name": "pvt_output_swing",
+    "status": "passed",
+    "message": "low_max=0.0001658 at ff/1.98V/+125C; high_min=1.001 at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=151.6uW at ff/1.98V/+125C"
+   },
+   {
+    "name": "supply_pushing",
+    "status": "passed",
+    "message": "worst=88.9%/V at ff/27C"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 31,
+  "checks": [
+   {
+    "name": "pvt_frequency_coverage",
+    "status": "passed",
+    "message": "f(0.9V)_range=13.5..24.05MHz; f(1.2V)_min=26.16MHz at ss/1.62V/-40C"
+   },
+   {
+    "name": "pvt_tuning_ratio",
+    "status": "passed",
+    "message": "worst=1.658 at ss/1.62V/+125C"
+   },
+   {
+    "name": "pvt_kvco_monotonic_linear",
+    "status": "passed",
+    "message": "KVCO_min=32.74MHz/V at ss/1.62V/-40C; linearity_max=1.31 at ss/1.62V/-40C"
+   },
+   {
+    "name": "pvt_frequency_settling",
+    "status": "passed",
+    "message": "worst=0.004268% at ss/1.98V/+27C"
+   },
+   {
+    "name": "pvt_duty_cycle",
+    "status": "passed",
+    "message": "range=0.488..0.4995"
+   },
+   {
+    "name": "pvt_startup",
+    "status": "passed",
+    "message": "worst=50.79ns at ss/1.98V/-40C"
+   },
+   {
+    "name": "pvt_output_swing",
+    "status": "passed",
+    "message": "low_max=0.0001631 at ff/1.98V/+125C; high_min=1.001 at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=109uW at ff/1.98V/+125C"
+   },
+   {
+    "name": "supply_pushing",
+    "status": "passed",
+    "message": "worst=58.3%/V at ff/27C"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 40,
+  "checks": [
+   {
+    "name": "pvt_frequency_coverage",
+    "status": "passed",
+    "message": "f(0.9V)_range=15.16..20.75MHz; f(1.2V)_min=30.08MHz at ss/1.98V/+125C"
+   },
+   {
+    "name": "pvt_tuning_ratio",
+    "status": "passed",
+    "message": "worst=1.885 at ff/1.62V/+125C"
+   },
+   {
+    "name": "pvt_kvco_monotonic_linear",
+    "status": "passed",
+    "message": "KVCO_min=48.03MHz/V at ss/1.98V/+125C; linearity_max=1.071 at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_frequency_settling",
+    "status": "passed",
+    "message": "worst=0.01624% at ff/1.80V/+125C"
+   },
+   {
+    "name": "pvt_duty_cycle",
+    "status": "passed",
+    "message": "range=0.4918..0.4999"
+   },
+   {
+    "name": "pvt_startup",
+    "status": "passed",
+    "message": "worst=48.83ns at ss/1.62V/+27C"
+   },
+   {
+    "name": "pvt_output_swing",
+    "status": "passed",
+    "message": "low_max=0.0001629 at ff/1.98V/+125C; high_min=1.002 at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=107.7uW at ff/1.98V/+125C"
+   },
+   {
+    "name": "supply_pushing",
+    "status": "passed",
+    "message": "worst=43.92%/V at ff/27C"
+   }
+  ]
+ }
+}

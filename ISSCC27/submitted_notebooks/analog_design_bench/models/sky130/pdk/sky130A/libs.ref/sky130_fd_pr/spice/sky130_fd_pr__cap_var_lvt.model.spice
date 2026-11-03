@@ -1,0 +1,96 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+.subckt  sky130_fd_pr__cap_var_lvt c0 c1 b w=5 l=0.5 vm=1
++ wc='w*1' lc='l*1'
+* Corner Parameters
+*.param cnwvc_tox=41.6503
+*.param cnwvc_cdepmult=1
+*.param cnwvc_cintmult=1
+*.param cnwvc_vt1=0.3333
+*.param cnwvc_vt2=0.2380952
+*.param cnwvc_vtr=0.16
+*.param cnwvc_dwc=0.0
+*.param cnwvc_dlc=0.0
+*.param cnwvc_dld=0.0
+* Geometry Parameters
+.param
++ cnwvc_ldiff=0.15
++ wd='wc+2*cnwvc_dwc'
++ ld='lc+2*cnwvc_dlc'
++ ldd='0.018+2*cnwvc_dld'
++ dwr=-0.02
++ dwp=-0.5
++ dlr=0.02
++ wl='(wd-2*dwr)/(ld-2*dlr)'
++ wlwdiff='((0.5*(ld-2*dlr))+cnwvc_ldiff)/(2*(wd-2*dwr))'
+* Mismatch Parameters
++ sky130_fd_pr__cap_var_lvt__cmin_slope_l=1.1e-16
++ sky130_fd_pr__cap_var_lvt__cmin_slope_w=1.5e-16
++ sky130_fd_pr__cap_var_lvt__cmin_slope_wl=3.5e-16
++ sky130_fd_pr__cap_var_lvt__cmax_slope_l=7.0e-16
++ sky130_fd_pr__cap_var_lvt__cmax_slope_w=7.0e-16
++ sky130_fd_pr__cap_var_lvt__cmax_slope_wl=1.5e-15
+* Capacitance Model Parameters
+.param cnwvc_slope1=0.21875
+.param cnwvc_slope2=0.125
+.param
++ cm0='5.571e-16*cnwvc_cintmult'
++ cm1='4.775e-16+MC_MM_SWITCH*AGAUSS(0,1.0,1)*sky130_fd_pr__cap_var_lvt__cmin_slope_l/sqrt(2*ld*vm)'
++ cm2='2.019e-16+MC_MM_SWITCH*AGAUSS(0,1.0,1)*sky130_fd_pr__cap_var_lvt__cmin_slope_w/sqrt(2*wd*vm)'
++ cm3='6.529e-16*cnwvc_cdepmult+MC_MM_SWITCH*AGAUSS(0,1.0,1)*sky130_fd_pr__cap_var_lvt__cmin_slope_wl*cnwvc_cdepmult/sqrt(2*ld*wd*vm)'
++ cx0=6.261e-16
++ cx1='5.75e-16+MC_MM_SWITCH*AGAUSS(0,1.0,1)*sky130_fd_pr__cap_var_lvt__cmax_slope_l/sqrt(2*ld*vm)'
++ cx2='1.712e-16+MC_MM_SWITCH*AGAUSS(0,1.0,1)*sky130_fd_pr__cap_var_lvt__cmax_slope_w/sqrt(2*wd*vm)'
++ cx3='8.854e-14*3.9/cnwvc_tox+MC_MM_SWITCH*AGAUSS(0,1.0,1)*sky130_fd_pr__cap_var_lvt__cmax_slope_wl/sqrt(2*wd*ld*vm)'
++ sky130_fd_pr__cap_var_lvt__vgs_min_1 = '-2.071'
++ sky130_fd_pr__cap_var_lvt__vgs_max_1 = '-1*-2.071'
++ sky130_fd_pr__cap_var_lvt__tmax_vgs_1 = '100.001n'
++ sky130_fd_pr__cap_var_lvt__vgs_min_2 = '-2.161'
++ sky130_fd_pr__cap_var_lvt__vgs_max_2 = '-1*-2.161'
++ sky130_fd_pr__cap_var_lvt__tmax_vgs_2 = '20.001n'
++ sky130_fd_pr__cap_var_lvt__vgs_min = '-2.301'
++ sky130_fd_pr__cap_var_lvt__vgs_max = '-1*-2.301'
+* .SETSOA LABEL="MODEL_OOB_VG_1: sky130_fd_pr__cap_var_lvt Vg for Varactor" E v(c0, c1) =(sky130_fd_pr__cap_var_lvt__vgs_min_1, sky130_fd_pr__cap_var_lvt__vgs_max_1, sky130_fd_pr__cap_var_lvt__tmax_vgs_1 )
+* .SETSOA LABEL="MODEL_OOB_VG_2: sky130_fd_pr__cap_var_lvt Vg for Varactor" E v(c0, c1) =(sky130_fd_pr__cap_var_lvt__vgs_min_2, sky130_fd_pr__cap_var_lvt__vgs_max_2, sky130_fd_pr__cap_var_lvt__tmax_vgs_2 )
+* .SETSOA LABEL="MODEL_OOB_VG: sky130_fd_pr__cap_var_lvt Vg for Varactor" E v(c0, c1) =(sky130_fd_pr__cap_var_lvt__vgs_min, sky130_fd_pr__cap_var_lvt__vgs_max )
+.param
++ tref=30.0
++ cmin='cm0+cm1*ld+cm2*wd+cm3*wd*(ld-ldd)+cx3*wd*ldd'
++ cmax='cx0+cx1*ld+cx2*wd+cx3*wd*ld'
+cg c0 p2 q='cmin*vm*(v(c0)-v(p2))+((0.5*(cmax+cmin)-cmin)*(v(c0)-v(p2))+0.5*(cmax-cmin)*(1/1.9)*(cnwvc_slope1*log(cosh((v(c0)-v(p2)-cnwvc_vt1)/cnwvc_slope1))+0.9*cnwvc_slope2*log(cosh((v(c0)-v(p2)-cnwvc_vt2)/cnwvc_slope2))))*vm'
+c3 c0 b c='0.15e-15'
+c4 c1 b c='0.15e-15'
+* Resistance Model Parameters
+.param con_sp=0.17
+.param cnwvc_k=12
+.param cnwvc_n1=0.1
+.param cnwvc_n2=0.28
+.param apoly=1.15
+.param apolyc=1
+.param acon=1
+.param anwell=1
+.param bnwell=0.6
+.param cnwell=2
+.param n_pocon='max((lc-0.14)/(2*con_sp),1)'
+.param n_con='(wc-2*0.06+con_sp)/(2*con_sp)'
+.param rg_tc1=3e-3
+.param rg_tc2=0.0
+.param rg_tcmult='1+(temper-tref)*rg_tc1+(temper-tref)*(temper-tref)*rg_tc2'
+.param cnwvc_a='apoly*rp1*wl/cnwvc_k+apolyc*rcp1/n_pocon+acon*rcn/n_con+anwell*rnw*wlwdiff'
+.param cnwvc_b1='bnwell*rnw*wlwdiff'
+.param cnwvc_c='cnwell*rnw*((0.5*(ld-2*dlr))+cnwvc_ldiff)/(2*(wd-2*dwp))'
+rg p2 c1 r='(cnwvc_a+cnwvc_b1*(0.5*tanh((v(c0)-v(p2)-cnwvc_vtr)/cnwvc_n1)+0.5)+20*cnwvc_c*(0.5*tanh((v(c0)-v(p2)-cnwvc_vtr)/cnwvc_n1)+0.5)*exp(-abs((v(c0)-v(p2)-cnwvc_vtr)/cnwvc_n2)))/vm*rg_tcmult'
+.ends sky130_fd_pr__cap_var_lvt

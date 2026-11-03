@@ -1,0 +1,62 @@
+{
+ "tool": "SymbiYosys with smtbmc and Bitwuzla",
+ "design": "hsm_shell.sv of the chip's RTL root, TRUSTEDGE_REVC on, ENABLE_MLKEM_K_CHANNEL on, EXTERNAL_HMAC on (HMAC outputs are free inputs)",
+ "hsm_shell_sha256": "752fdd86870ff0e720fa2e18aa7b72cb6cce57c682609faf504e3ef920b0690b",
+ "rejection_limit_in_the_model": 2,
+ "rejection_limit_on_the_chip": 16,
+ "properties": {
+  "P1": "no bit of K reaches the host: two copies that differ only in K give identical responses",
+  "P2": "a sealed frame's counter is exactly the previous one plus one, starting at 1",
+  "P3": "an accepted frame carries the epoch of the current binding and a counter above the last accepted",
+  "P4": "after the rejection limit no frame is accepted until the next binding or zeroisation",
+  "P5": "a binding is refused as a replay only if an earlier successful command used that counter or a later one",
+  "P6": "a binding succeeds only with a nonce ready, returns that nonce as its epoch and consumes it"
+ },
+ "tasks": {
+  "props_cover": {
+   "checks": "reachability of a binding, a sealed frame, a received frame and the lock",
+   "depth": 40,
+   "status": "PASS",
+   "elapsed_s": 8,
+   "induction_step": null,
+   "basecase": null,
+   "cover_traces": 4
+  },
+  "props_bmc": {
+   "checks": "P2 to P6, bounded",
+   "depth": 48,
+   "status": "PASS",
+   "elapsed_s": 300,
+   "induction_step": null,
+   "basecase": null,
+   "cover_traces": null
+  },
+  "props_prove": {
+   "checks": "P2 to P6, k-induction",
+   "depth": 12,
+   "status": "UNKNOWN",
+   "elapsed_s": 9,
+   "induction_step": "FAIL",
+   "basecase": "pass",
+   "cover_traces": null
+  },
+  "miter_bmc": {
+   "checks": "P1, two copies differing only in K, bounded",
+   "depth": 48,
+   "status": "PASS",
+   "elapsed_s": 4573,
+   "induction_step": null,
+   "basecase": null,
+   "cover_traces": null
+  },
+  "miter_prove": {
+   "checks": "P1, k-induction",
+   "depth": 12,
+   "status": "UNKNOWN",
+   "elapsed_s": 33,
+   "induction_step": "FAIL",
+   "basecase": "pass",
+   "cover_traces": null
+  }
+ }
+}

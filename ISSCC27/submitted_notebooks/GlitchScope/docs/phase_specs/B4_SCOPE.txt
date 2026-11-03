@@ -1,0 +1,37 @@
+GlitchScope Phase B4 — M1 simple event-inertial pulse survival
+
+Frozen authority:
+- All B3H1 files are byte-for-byte unchanged.
+- M0 TransportSimulator remains the authoritative B3 transport model.
+
+New M1 model:
+- Separate InertialSimulator; M0 code is not modified.
+- Each cell may have at most one pending output transition.
+- If the cell logical output reverses before the pending transition fires,
+  that pending transition is canceled.
+- If the pending transition has already fired, the reverse transition is
+  scheduled normally.
+- External stimulus has priority at an exact time tie, so an input reversal
+  exactly at a pending output transition time cancels the pending transition.
+- Canceled transitions are retained in a deterministic suppression ledger with
+  original parents, cancellation parents, instance, net, target value,
+  scheduled time, cancellation time, epoch, and reason.
+
+Scientific validation:
+- Short pulse: M0 transports, M1 suppresses.
+- Exact-delay boundary: M1 suppresses under the documented tie policy.
+- Long pulse: M1 survives and matches M0 exactly.
+- Downstream stage can reject a pulse that survived an upstream stage.
+- Synthetic reconvergent glitch can be suppressed by an inertial output gate.
+- A surviving reconvergent glitch preserves A1/A2 lineage semantics.
+- Real SKY130 inverter: actual NLDM delays define short/boundary/long cases.
+
+Explicitly NOT in B4:
+- no SPICE-calibrated pulse threshold
+- no cell-specific pulse-width model
+- no analog pulse amplitude/degradation
+- no energy/power attribution
+- no real XOR/multi-arc timing disambiguation
+- no mapped-Verilog parser
+
+Those belong to later phases.

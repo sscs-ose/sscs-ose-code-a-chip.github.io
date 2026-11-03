@@ -1,0 +1,126 @@
+{
+ "task_slug": "sky130-ota-5t-gain40-pm60-noise50uv-pvt",
+ "spec": "The fixed load is 1 pF and the external reference current is 50 uA. The input common-mode voltage is VDD/2 at every PVT point. Gain, bandwidth, phase margin, power, and noise are checked across all 27 combinations of tt, ss, and ff; 1.62, 1.8, and 1.98 V; and -40, 27, and 125 C.\n\n- With the `vout`-to-`vinn` feedback path closed at DC, the double-injection Middlebrook loop gain must be >= 40 dB at 1 kHz, have UGB >= 100 MHz, and have phase margin >= 60 deg at the first 0 dB crossing.\n- Integrated input-referred noise <= 50 uVrms from 10 Hz to 10 MHz at the same DC unity-feedback operating point.\n- Total power including the reference branch <= 0.5 mW.\n\nMeeting both nominal TT/1.8 V/27 C loop-gain and UGB limits is the functional prerequisite for any score. If either nominal limit fails, the submission receives zero and the verifier does not run the remaining PVT or rejection analyses.\n\nOpen-loop CMRR at 1 kHz must be at least 50 dB and open-loop PSRR from either rail at 1 kHz must be at least 30 dB at tt/1.8 V/27 C, ss/1.62 V/125 C, and ff/1.98 V/-40 C. These rejection metrics are measured at the natural open-loop DC operating point with both inputs biased at VDD/2.",
+ "reference": {
+  "transistors": 6,
+  "checks": [
+   {
+    "name": "gain_40db",
+    "status": "passed",
+    "message": "worst=41.42dB at ff/1.62V/+125C (min 40dB)"
+   },
+   {
+    "name": "ugb_100mhz",
+    "status": "passed",
+    "message": "worst=111.3MHz at ss/1.62V/+125C (min 100MHz)"
+   },
+   {
+    "name": "phase_margin_60deg",
+    "status": "passed",
+    "message": "worst=66.52deg at ff/1.98V/-40C (min 60deg)"
+   },
+   {
+    "name": "power_0p5mw",
+    "status": "passed",
+    "message": "worst=0.4223mW at ff/1.98V/+125C (max 0.5mW)"
+   },
+   {
+    "name": "noise_50uvrms",
+    "status": "passed",
+    "message": "worst=38.6uVrms at ss/1.62V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "cmrr_50db",
+    "status": "passed",
+    "message": "worst=56.85dB at ss/1.62V/+125C (min 50dB)"
+   },
+   {
+    "name": "psrr_30db",
+    "status": "passed",
+    "message": "worst=40dB at ss/1.62V/+125C (min 30dB)"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 6,
+  "checks": [
+   {
+    "name": "gain_40db",
+    "status": "passed",
+    "message": "worst=41.36dB at ff/1.62V/+125C (min 40dB)"
+   },
+   {
+    "name": "ugb_100mhz",
+    "status": "passed",
+    "message": "worst=128MHz at ss/1.62V/+125C (min 100MHz)"
+   },
+   {
+    "name": "phase_margin_60deg",
+    "status": "passed",
+    "message": "worst=77.85deg at ff/1.98V/+27C (min 60deg)"
+   },
+   {
+    "name": "power_0p5mw",
+    "status": "passed",
+    "message": "worst=0.4764mW at ff/1.98V/+125C (max 0.5mW)"
+   },
+   {
+    "name": "noise_50uvrms",
+    "status": "passed",
+    "message": "worst=40.68uVrms at ss/1.62V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "cmrr_50db",
+    "status": "passed",
+    "message": "worst=52.71dB at ss/1.62V/+125C (min 50dB)"
+   },
+   {
+    "name": "psrr_30db",
+    "status": "passed",
+    "message": "worst=40.54dB at ss/1.62V/+125C (min 30dB)"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 6,
+  "checks": [
+   {
+    "name": "gain_40db",
+    "status": "passed",
+    "message": "worst=42dB at ff/1.62V/+125C (min 40dB)"
+   },
+   {
+    "name": "ugb_100mhz",
+    "status": "passed",
+    "message": "worst=133.9MHz at ss/1.62V/+125C (min 100MHz)"
+   },
+   {
+    "name": "phase_margin_60deg",
+    "status": "passed",
+    "message": "worst=84.44deg at ff/1.98V/+125C (min 60deg)"
+   },
+   {
+    "name": "power_0p5mw",
+    "status": "passed",
+    "message": "worst=0.4376mW at ff/1.98V/+125C (max 0.5mW)"
+   },
+   {
+    "name": "noise_50uvrms",
+    "status": "passed",
+    "message": "worst=35.19uVrms at ss/1.62V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "cmrr_50db",
+    "status": "passed",
+    "message": "worst=63.89dB at ss/1.62V/+125C (min 50dB)"
+   },
+   {
+    "name": "psrr_30db",
+    "status": "passed",
+    "message": "worst=38.81dB at ss/1.62V/+125C (min 30dB)"
+   }
+  ]
+ }
+}

@@ -1,0 +1,57 @@
+* Fully differential cascoded OTA with internal bias and continuous-time CMFB.
+.subckt sampling_feedback_ota vss iref vdd vinn vinp vocm voutn voutp
+
+* Reference current and differential input stage.
+XBN     iref    iref    vss vss sky130_fd_pr__nfet_01v8 l=1 w=20 nf=20
+XTAIL   tail    iref    vss vss sky130_fd_pr__nfet_01v8 l=1 w=80 nf=40
+XINP    dip     vinp    tail vss sky130_fd_pr__nfet_01v8 l=1 w=160 nf=80
+XINN    din     vinn    tail vss sky130_fd_pr__nfet_01v8 l=1 w=160 nf=80
+XNCP    n1p     vocm    dip  vss sky130_fd_pr__nfet_01v8_lvt l=1 w=360 nf=180
+XNCN    n1n     vocm    din  vss sky130_fd_pr__nfet_01v8_lvt l=1 w=360 nf=180
+
+* Supply-tracking bias and cascoded PMOS first-stage loads.
+RPBT    vdd     pcbias  52k
+RPBB    pcbias  vss     48k
+XPLP    psp     b1cm    vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=200 nf=100
+XPLN    psn     b1cm    vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=200 nf=100
+XPCP    n1p     pcbias  psp vdd sky130_fd_pr__pfet_01v8_lvt l=1 w=320 nf=160
+XPCN    n1n     pcbias  psn vdd sky130_fd_pr__pfet_01v8_lvt l=1 w=320 nf=160
+
+* Common-source differential output stage with linear range extension.
+XOUTP   voutp   n1p    vss vss sky130_fd_pr__nfet_01v8 l=1 w=20 nf=20
+XOUTN   voutn   n1n    vss vss sky130_fd_pr__nfet_01v8 l=1 w=20 nf=20
+XLOP    voutp   b2cm   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=160 nf=80
+XLON    voutn   b2cm   vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=160 nf=80
+RLP     voutp   vocm   90k
+RLN     voutn   vocm   90k
+
+* First-stage common-mode feedback.
+X1TP    t1p     iref   vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=16
+X1SP    c1d     n1p    t1p vss sky130_fd_pr__nfet_01v8 l=1 w=32 nf=16
+X1RP    b1cm    vocm   t1p vss sky130_fd_pr__nfet_01v8 l=1 w=32 nf=16
+X1TN    t1n     iref   vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=16
+X1SN    c1d     n1n    t1n vss sky130_fd_pr__nfet_01v8 l=1 w=32 nf=16
+X1RN    b1cm    vocm   t1n vss sky130_fd_pr__nfet_01v8 l=1 w=32 nf=16
+X1PD    c1d     c1d    vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=32 nf=16
+X1PO    b1cm    c1d    vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=32 nf=16
+
+* Resistive output-average sensor and output CMFB amplifier.
+RSP     voutp   vcms   160k
+RSN     voutn   vcms   160k
+X2T     t2      iref   vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=16
+X2S     c2d     vcms   t2  vss sky130_fd_pr__nfet_01v8 l=1 w=32 nf=16
+X2R     b2cm    vocm   t2  vss sky130_fd_pr__nfet_01v8 l=1 w=32 nf=16
+X2PD    c2d     c2d    vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=16 nf=16
+X2PO    b2cm    c2d    vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=16 nf=16
+
+* Common-mode and differential Miller compensation.
+RC2P    b2cm    c2p    3k
+CC2P    c2p     voutp  1.1p
+RC2N    b2cm    c2n    3k
+CC2N    c2n     voutn  1.1p
+RZP     voutp   czp    1.6k
+CCP     czp     n1p    2.3p
+RZN     voutn   czn    1.6k
+CCN     czn     n1n    2.3p
+
+.ends sampling_feedback_ota

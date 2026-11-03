@@ -1,0 +1,24 @@
+[tasks]
+cover
+bmc
+prove
+
+[options]
+bmc: mode bmc
+bmc: depth 48
+cover: mode cover
+cover: depth 40
+prove: mode prove
+prove: depth 12
+
+[engines]
+smtbmc bitwuzla
+
+[script]
+read -formal -DTRUSTEDGE_REVC -DREVC_FAIL_LIMIT=2 hsm_shell.sv
+read -formal -DTRUSTEDGE_REVC -DREVC_FAIL_LIMIT=2 hsm_session_props.sv
+prep -top hsm_session_props
+
+[files]
+hsm_shell.sv
+hsm_session_props.sv

@@ -1,0 +1,57 @@
+[15:37:45] INFO     Maximum number of jobs is 1.       parameter_manager.py:105
+[15:37:45] INFO     Working directory set to           parameter_manager.py:153
+                    'C:\Users\QuRYous\Documents\Codex\                         
+                    2026-10-13\open-source-analog-veri                         
+                    fication-opportunity-audit\work\cr                         
+                    \073744108516\cace\..'                                     
+                    ('C:\Users\QuRYous\Documents\Codex                         
+                    \2026-10-13\open-source-analog-ver                         
+                    ification-opportunity-audit\work\c                         
+                    r\073744108516').                                          
+[15:37:45] INFO     Starting a new run with tag        parameter_manager.py:624
+                    'RUN_2026-10-15_15-37-45'.                                 
+[15:37:45] INFO     PDK root is                        parameter_manager.py:637
+                    'C:\Users\QuRYous\Documents\Codex\                         
+                    2026-10-13\open-source-analog-veri                         
+                    fication-opportunity-audit\work\cr                         
+                    \073744108516\pdk'.                                        
+[15:37:45] INFO     Running parameters: startup_time            cace_cli.py:327
+[15:37:45] INFO     Generating simulation netlist from   cace_regenerate.py:554
+                    schematic…                                                 
+─────────────────────── Started Validated startup delay ───────────────────────
+[15:37:45] INFO     Parameter startup_time: Generating parameter_ngspice.py:211
+                    simulation files…                                          
+[15:37:45] INFO     Parameter startup_time: Running    parameter_ngspice.py:572
+                    simulations…                                               
+[15:38:58] INFO     Parameter startup_time: Collecting parameter_ngspice.py:671
+                    results…                                                   
+[15:38:59] INFO     Running user-defined script        parameter_ngspice.py:756
+                    'cace\scripts\cace_startup_gate.py                         
+                    '…                                                         
+[15:38:59] ERROR    Error in user script:              parameter_ngspice.py:800
+Traceback (most recent call last):
+  File "C:\Users\QuRYous\Documents\Codex\2026-10-13\open-source-analog-verification-opportunity-audit\work\clean_env\Lib\site-packages\cace\parameter\parameter_ngspice.py", line 792, in implementation
+    script_values = user_script.postprocess(
+        collated_values, condition_set
+    )
+  File "cace/scripts\cace_startup_gate.py", line 29, in postprocess
+    if not len(crossings):raise ValueError('Missing '+label+' rising event in declared window')
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Missing por rising event in declared window
+───────────────── Completed Validated startup delay: Error ❗ ─────────────────
+[15:38:59] INFO     Done with CACE simulations and evaluations  cace_cli.py:371
+                    in 0:01:13.                                                
+                      CACE Summary for sky130_ajc_ip__por                      
+
+netlist source: schematic                                                      
+
+                                                                               
+                            Min     Min     Typ    Typ     Max    Max          
+ Param…  Tool    Result   Limit   Value  Target  Value   Limit  Value  Status  
+ ───────────────────────────────────────────────────────────────────────────── 
+ Valid…  ngspi…  start…  0.5 ms        ​        ​       ​    2 ms       ​   Error  
+ start…                                                                  ❗    
+ delay                                                                         
+                                                                               
+[15:38:59] INFO     CACE failed, skipping documentation         cace_cli.py:404
+                    generation.                                                

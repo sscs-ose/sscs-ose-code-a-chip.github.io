@@ -1,0 +1,186 @@
+{
+ "task_slug": "sky130-two-stage-miller-opamp-gain70-ugb20-pm60-noise50uv-pvt",
+ "spec": "The primary PVT set is the complete 27-point Cartesian product of process corners `tt`, `ff`, and `ss`; supplies 1.62 V, 1.80 V, and 1.98 V; and temperatures -40 C, 27 C, and 125 C. The bench supplies a 50 uA reference, uses 0.9 V input common mode, and loads `vout` with 2 pF.\n\n- Low-frequency loop gain (measured at 10 Hz) >= 70 dB; UGB >= 20 MHz; return-ratio phase margin >= 60 deg. The loop-gain magnitude must not return above 0 dB beyond the unity-gain crossing.\n- Quiescent output error from 0.9 V <= 25 mV; total power <= 600 uW.\n- At every PVT point, input-referred integrated noise in a noise-gain-20 closed loop, from 10 Hz to that same point's measured closed-loop -3 dB bandwidth, must be <= 50 uVrms. The upper integration limit is measured independently at each point; it is neither fixed nor the open-loop UGB.\n- PSRR+ >= 65 dB at 1 kHz and >= 20 dB at 1 MHz; CMRR >= 60 dB at 1 kHz.\n- PSRR, CMRR, output range, settling, and slew are checked at three representative stresses: `tt`/1.80 V/27 C, `ss`/1.62 V/125 C, and `ff`/1.98 V/-40 C. At each point, unity-gain output range is the contiguous input interval whose closed-loop tracking error is at most 20 mV, and it must be >= 0.8 Vpp; a 100 mV step must settle within 30 ns, 2%, and 2 mV final error in both directions; 0.5 V slew rate must be >= 10 V/us in both directions.\n\nThe two-stage Miller description identifies the design goal. The stated external electrical measurements are the complete acceptance criteria: no device count, sizing, private-node naming, hierarchy, or internal connectivity is scored.",
+ "reference": {
+  "transistors": 12,
+  "checks": [
+   {
+    "name": "nominal_functional",
+    "status": "passed",
+    "message": "gain=76.60dB UGB=38.14MHz PM=73.68deg"
+   },
+   {
+    "name": "pvt_gain_bandwidth",
+    "status": "passed",
+    "message": "worst=73.63dB at ff/1.62V/-40C (min 70dB); worst=31.3MHz at ss/1.62V/+125C (min 20MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=70.68deg at ss/1.80V/+125C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=0.04558mV at ss/1.62V/-40C (max 25mV)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=517.4uW at ff/1.98V/+125C (max 600uW)"
+   },
+   {
+    "name": "pvt_input_noise",
+    "status": "passed",
+    "message": "worst=46.27uVrms integrated 10Hz-1.693MHz at ss/1.98V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "pvt_supply_rejection",
+    "status": "passed",
+    "message": "worst=75.4dB at ss/1.62V/+125C (min 65dB); worst=30.44dB at ss/1.62V/+125C (min 20dB)"
+   },
+   {
+    "name": "pvt_common_mode_rejection",
+    "status": "passed",
+    "message": "worst=77.61dB at ss/1.62V/+125C (min 60dB)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=1.193Vpp at ss/1.62V/+125C (min 0.8Vpp)"
+   },
+   {
+    "name": "closed_loop_settling",
+    "status": "passed",
+    "message": "time_max=17.24ns at ss/1.62V/+125C (max 30ns); final_max=0.0364% at ss/1.62V/+125C; static_max=0.0364mV at ss/1.62V/+125C"
+   },
+   {
+    "name": "slew_rate",
+    "status": "passed",
+    "message": "worst=27.66V/us at ss/1.62V/+125C (min 10V/us); worst=24.85V/us at ff/1.98V/-40C (min 10V/us)"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 11,
+  "checks": [
+   {
+    "name": "nominal_functional",
+    "status": "passed",
+    "message": "gain=77.94dB UGB=34.57MHz PM=68.72deg"
+   },
+   {
+    "name": "pvt_gain_bandwidth",
+    "status": "passed",
+    "message": "worst=74.63dB at ff/1.62V/+125C (min 70dB); worst=27.03MHz at ff/1.98V/+125C (min 20MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=61.99deg at ff/1.62V/+125C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=0.7637mV at ff/1.62V/+125C (max 25mV)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=526.8uW at ff/1.98V/+125C (max 600uW)"
+   },
+   {
+    "name": "pvt_input_noise",
+    "status": "passed",
+    "message": "worst=16.27uVrms integrated 10Hz-1.384MHz at ss/1.62V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "pvt_supply_rejection",
+    "status": "passed",
+    "message": "worst=79.24dB at ss/1.62V/+125C (min 65dB); worst=28.76dB at ss/1.62V/+125C (min 20dB)"
+   },
+   {
+    "name": "pvt_common_mode_rejection",
+    "status": "passed",
+    "message": "worst=76.34dB at ss/1.62V/+125C (min 60dB)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=1.2Vpp at tt/1.80V/+27C (min 0.8Vpp)"
+   },
+   {
+    "name": "closed_loop_settling",
+    "status": "passed",
+    "message": "time_max=24.22ns at ss/1.62V/+125C (max 30ns); final_max=0.64% at ss/1.62V/+125C; static_max=0.64mV at ss/1.62V/+125C"
+   },
+   {
+    "name": "slew_rate",
+    "status": "passed",
+    "message": "worst=18.07V/us at ss/1.62V/+125C (min 10V/us); worst=18.56V/us at ff/1.98V/-40C (min 10V/us)"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 12,
+  "checks": [
+   {
+    "name": "nominal_functional",
+    "status": "passed",
+    "message": "gain=88.13dB UGB=60.11MHz PM=81.89deg"
+   },
+   {
+    "name": "pvt_gain_bandwidth",
+    "status": "passed",
+    "message": "worst=77.66dB at ff/1.62V/+125C (min 70dB); worst=38.37MHz at ff/1.62V/+125C (min 20MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=76.46deg at ff/1.62V/-40C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=0.3825mV at ff/1.98V/+125C (max 25mV)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=497.3uW at ff/1.98V/+125C (max 600uW)"
+   },
+   {
+    "name": "pvt_input_noise",
+    "status": "passed",
+    "message": "worst=29.81uVrms integrated 10Hz-1.795MHz at ss/1.98V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "pvt_supply_rejection",
+    "status": "passed",
+    "message": "worst=81.26dB at ss/1.62V/+125C (min 65dB); worst=31.13dB at ss/1.62V/+125C (min 20dB)"
+   },
+   {
+    "name": "pvt_common_mode_rejection",
+    "status": "passed",
+    "message": "worst=76.43dB at ss/1.62V/+125C (min 60dB)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=1.2Vpp at tt/1.80V/+27C (min 0.8Vpp)"
+   },
+   {
+    "name": "closed_loop_settling",
+    "status": "passed",
+    "message": "time_max=18.7ns at ss/1.62V/+125C (max 30ns); final_max=0.1284% at ff/1.98V/-40C; static_max=0.1284mV at ff/1.98V/-40C"
+   },
+   {
+    "name": "slew_rate",
+    "status": "passed",
+    "message": "worst=23.82V/us at ss/1.62V/+125C (min 10V/us); worst=23.47V/us at ss/1.62V/+125C (min 10V/us)"
+   }
+  ]
+ }
+}

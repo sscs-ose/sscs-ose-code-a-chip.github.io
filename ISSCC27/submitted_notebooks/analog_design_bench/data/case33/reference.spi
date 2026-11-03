@@ -1,0 +1,67 @@
+* Sky130 fully differential two-stage Miller op amp with a folded-cascode first stage.
+* The implementation uses symmetric common-source output stages, series-RC
+* Miller compensation, and continuous-time transistor-level CMFB.
+.subckt sampling_feedback_ota vss iref vdd vinn vinp vocm voutn voutp
+* -- single-reference, all-MOS bias generation --
+XREF iref iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=4
+XNBP vbp iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=4
+XPBP vbp vbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=32 nf=8
+
+* PMOS folding-cascode replica.  The 25 uA branch copies both the current
+* density of the 100 uA top source (16/64 width scaling) and the 25 uA
+* signal cascode itself.  Its diode-connected cascode therefore generates
+* vpc from MOS VSG values instead of an IR level shift.
+XPCBIAS vpc iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=8 nf=2
+XPCSOURCE pcs vbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=16 nf=4
+XPCDIO vpc vpc pcs vdd sky130_fd_pr__pfet_01v8 l=0.25 w=24 nf=6
+
+* Low-voltage NMOS cascode replica.  The lower device copies the 25 uA
+* sink current density and the upper diode copies the signal cascode.
+* Finite output resistance places ncs close to the lower device's
+* saturation boundary, producing the standard wide-swing cascode rail.
+XNCSOURCE ncs iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=8 nf=2
+XNCDIO vcn vcn ncs vss sky130_fd_pr__nfet_01v8 l=0.25 w=4 nf=1
+XNCLOAD vcn vbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=16 nf=4
+
+* The high-current second-stage load uses a 50 uA same-L replica and
+* a legal 10:1 PMOS mirror to supply each output branch.
+XOBIASN vbpout iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=4
+XOBIASP vbpout vbpout vdd vdd sky130_fd_pr__pfet_01v8 l=0.5 w=12 nf=3
+
+* -- folded-cascode first stage --
+XTAIL tail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=80 nf=20
+XINP fp vinp tail vss sky130_fd_pr__nfet_01v8 l=1 w=192 nf=48
+XINN fn vinn tail vss sky130_fd_pr__nfet_01v8 l=1 w=192 nf=48
+XSOURCEP fp vbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=96 nf=24
+XSOURCEN fn vbp vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=96 nf=24
+XPCASP stagep vpc fp vdd sky130_fd_pr__pfet_01v8 l=0.25 w=24 nf=6
+XPCASN stagen vpc fn vdd sky130_fd_pr__pfet_01v8 l=0.25 w=24 nf=6
+XNCASP stagep vcn sinkp vss sky130_fd_pr__nfet_01v8 l=0.25 w=4 nf=1
+XNCASN stagen vcn sinkn vss sky130_fd_pr__nfet_01v8 l=0.25 w=4 nf=1
+XSINKP sinkp vcmfb vss vss sky130_fd_pr__nfet_01v8 l=1 w=8 nf=2
+XSINKN sinkn vcmfb vss vss sky130_fd_pr__nfet_01v8 l=1 w=8 nf=2
+
+* -- symmetric common-source second stage --
+XSECOND_P voutp stagep vss vss sky130_fd_pr__nfet_01v8 l=0.25 w=64 nf=16
+XSECOND_N voutn stagen vss vss sky130_fd_pr__nfet_01v8 l=0.25 w=64 nf=16
+XLOAD_P voutp vbpout vdd vdd sky130_fd_pr__pfet_01v8 l=0.5 w=120 nf=30
+XLOAD_N voutn vbpout vdd vdd sky130_fd_pr__pfet_01v8 l=0.5 w=120 nf=30
+
+* -- symmetric series-RC Miller compensation --
+RZP stagep zp 300
+CCP zp voutp 1.8p
+RZN stagen zn 300
+CCN zn voutn 1.8p
+
+* -- continuous-time output common-mode feedback --
+RCMP voutp vcms 100k
+RCMN voutn vcms 100k
+CCMP voutp vcms 100f
+CCMN voutn vcms 100f
+XCMTAIL cmtail iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=4
+XCMREF cma vocm cmtail vss sky130_fd_pr__nfet_01v8 l=0.5 w=20 nf=5
+XCMSENSE vcmfb vcms cmtail vss sky130_fd_pr__nfet_01v8 l=0.5 w=20 nf=5
+XCMDIO cma cma vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=16 nf=4
+XCMMIRROR vcmfb cma vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=18 nf=8
+XCMNDIO vcmfb vcmfb vss vss sky130_fd_pr__nfet_01v8 l=1 w=2 nf=1
+.ends sampling_feedback_ota

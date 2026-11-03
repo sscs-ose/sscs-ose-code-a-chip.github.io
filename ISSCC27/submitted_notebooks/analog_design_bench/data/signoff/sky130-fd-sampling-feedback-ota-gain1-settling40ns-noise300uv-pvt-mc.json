@@ -1,0 +1,246 @@
+{
+ "task_slug": "sky130-fd-sampling-feedback-ota-gain1-settling40ns-noise300uv-pvt-mc",
+ "spec": "- The feedback network is `Cs = Cf = 1 pF`; each output additionally drives `CL = 1 pF`.\n- A 0.9 V differential output step must have static error <= 0.01% and 40 ns dynamic error <= 0.1%, with both rising and falling settling times <= 40 ns.\n- Return-ratio phase margin >= 60 deg.\n- At nominal, the open-loop differential output swing must be at least 1.8 V, measured by sweeping the differential input DC bias and taking the span between the two output levels at which the local DC differential gain `d(voutp-voutn)/d(vinp-vinn)` is 3 dB below its peak.\n- At 10 Hz, CMRR must be >= 60 dB and PSRR from either rail must be >= 70 dB in every one of 20 fixed-seed nominal local-mismatch samples. The common numerator is the nominal-TT closed-loop differential gain; each mismatch sample measures only common-mode-input, positive-rail, and negative-rail feedthrough to the differential output `voutp-voutn`.\n- Under the supplied SKY130 compact model, the integrated differential output noise must be <= 300 uVrms from 10 Hz to 10 GHz.\n- The 30-point matrix contains all combinations of `tt`, `ff`, `ss`, `fs`, and `sf`; 1.80 and 1.98 V; and -20, 27, and 80 C. It covers stability, accuracy, settling, and noise; the open-loop 3 dB-compression swing is evaluated separately at nominal.\n- At zero differential input, output common-mode error must be <= 25 mV throughout the 30-point matrix.\n- At nominal, ss/1.80 V/80 C, and ff/1.98 V/-20 C, apply a simultaneous 50 uA sink-current pulse to each output for 20 ns with 100 ps edges. The common-mode deviation from an undisturbed identical instance must be <= 150 mV from pulse onset through 5 ns after release, <= 50 mV at 20 ns after release, and <= 20 mV at 100 ns after release.\n- All 20 nominal mismatch rejection samples must converge.\n- Total DC power across the 30-point PVT matrix, including reference-bias and common-mode-feedback branches, must be <= 5 mW.",
+ "reference": {
+  "transistors": 32,
+  "checks": [
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=74.9205deg at ss/1.80V/+80C; limit >=60deg"
+   },
+   {
+    "name": "pvt_output_common_mode",
+    "status": "passed",
+    "message": "worst=4.07273mV at ss/1.80V/+80C; limit <=25mV"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=3.07349mW at ff/1.98V/+80C; limit <=5mW"
+   },
+   {
+    "name": "pvt_static_accuracy",
+    "status": "passed",
+    "message": "worst=0.00516667% at ff/1.80V/+80C; limit <=0.01%"
+   },
+   {
+    "name": "pvt_dynamic_accuracy",
+    "status": "passed",
+    "message": "worst=0.0114556% at ff/1.80V/+80C; limit <=0.1%"
+   },
+   {
+    "name": "pvt_rise_settling",
+    "status": "passed",
+    "message": "worst=34.2647ns at sf/1.80V/+80C; limit <=40ns"
+   },
+   {
+    "name": "pvt_fall_settling",
+    "status": "passed",
+    "message": "worst=33.9096ns at sf/1.80V/+80C; limit <=40ns"
+   },
+   {
+    "name": "pvt_output_range",
+    "status": "passed",
+    "message": "3dB-compression differential range=2.16716V at tt/1.80V/+27C; limit >=1.8V"
+   },
+   {
+    "name": "pvt_output_noise",
+    "status": "passed",
+    "message": "worst=274.886uVrms at fs/1.80V/+80C; limit <=300uVrms"
+   },
+   {
+    "name": "mc_cmrr",
+    "status": "passed",
+    "message": "worst=66.3223dB at tt/1.80V/+27C/seed-41003; limit >=60dB"
+   },
+   {
+    "name": "mc_psrr_plus",
+    "status": "passed",
+    "message": "worst=74.4195dB at tt/1.80V/+27C/seed-41007; limit >=70dB"
+   },
+   {
+    "name": "mc_psrr_minus",
+    "status": "passed",
+    "message": "worst=74.4195dB at tt/1.80V/+27C/seed-41007; limit >=70dB"
+   },
+   {
+    "name": "cmfb_peak_deviation",
+    "status": "passed",
+    "message": "worst=8.33004mV at ss/1.80V/+80C; limit <=150mV"
+   },
+   {
+    "name": "cmfb_residual_20ns",
+    "status": "passed",
+    "message": "worst=0.0858042mV at ss/1.80V/+80C; limit <=50mV"
+   },
+   {
+    "name": "cmfb_residual_100ns",
+    "status": "passed",
+    "message": "worst=1.09021e-05mV at ss/1.80V/+80C; limit <=20mV"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 22,
+  "checks": [
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=75.3187deg at fs/1.80V/+80C; limit >=60deg"
+   },
+   {
+    "name": "pvt_output_common_mode",
+    "status": "passed",
+    "message": "worst=17.8317mV at sf/1.98V/+80C; limit <=25mV"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=3.30288mW at ff/1.98V/+80C; limit <=5mW"
+   },
+   {
+    "name": "pvt_static_accuracy",
+    "status": "passed",
+    "message": "worst=0.00676667% at sf/1.98V/+80C; limit <=0.01%"
+   },
+   {
+    "name": "pvt_dynamic_accuracy",
+    "status": "passed",
+    "message": "worst=0.00692222% at sf/1.98V/+80C; limit <=0.1%"
+   },
+   {
+    "name": "pvt_rise_settling",
+    "status": "passed",
+    "message": "worst=17.2563ns at sf/1.80V/+80C; limit <=40ns"
+   },
+   {
+    "name": "pvt_fall_settling",
+    "status": "passed",
+    "message": "worst=17.2062ns at sf/1.80V/+80C; limit <=40ns"
+   },
+   {
+    "name": "pvt_output_range",
+    "status": "passed",
+    "message": "3dB-compression differential range=2.114V at tt/1.80V/+27C; limit >=1.8V"
+   },
+   {
+    "name": "pvt_output_noise",
+    "status": "passed",
+    "message": "worst=234.885uVrms at fs/1.98V/+80C; limit <=300uVrms"
+   },
+   {
+    "name": "mc_cmrr",
+    "status": "passed",
+    "message": "worst=72.1836dB at tt/1.80V/+27C/seed-41009; limit >=60dB"
+   },
+   {
+    "name": "mc_psrr_plus",
+    "status": "passed",
+    "message": "worst=80.9011dB at tt/1.80V/+27C/seed-41004; limit >=70dB"
+   },
+   {
+    "name": "mc_psrr_minus",
+    "status": "passed",
+    "message": "worst=80.9011dB at tt/1.80V/+27C/seed-41004; limit >=70dB"
+   },
+   {
+    "name": "cmfb_peak_deviation",
+    "status": "passed",
+    "message": "worst=13.7054mV at ss/1.80V/+80C; limit <=150mV"
+   },
+   {
+    "name": "cmfb_residual_20ns",
+    "status": "passed",
+    "message": "worst=1.05611mV at ss/1.80V/+80C; limit <=50mV"
+   },
+   {
+    "name": "cmfb_residual_100ns",
+    "status": "passed",
+    "message": "worst=0.00115183mV at ss/1.80V/+80C; limit <=20mV"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 35,
+  "checks": [
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=69.3166deg at fs/1.80V/+80C; limit >=60deg"
+   },
+   {
+    "name": "pvt_output_common_mode",
+    "status": "passed",
+    "message": "worst=8.32068mV at fs/1.80V/+80C; limit <=25mV"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=2.83734mW at ff/1.98V/+80C; limit <=5mW"
+   },
+   {
+    "name": "pvt_static_accuracy",
+    "status": "passed",
+    "message": "worst=0.00666667% at sf/1.98V/+80C; limit <=0.01%"
+   },
+   {
+    "name": "pvt_dynamic_accuracy",
+    "status": "passed",
+    "message": "worst=0.0111556% at fs/1.80V/+80C; limit <=0.1%"
+   },
+   {
+    "name": "pvt_rise_settling",
+    "status": "passed",
+    "message": "worst=26.2409ns at sf/1.98V/+80C; limit <=40ns"
+   },
+   {
+    "name": "pvt_fall_settling",
+    "status": "passed",
+    "message": "worst=25.9753ns at sf/1.98V/+80C; limit <=40ns"
+   },
+   {
+    "name": "pvt_output_range",
+    "status": "passed",
+    "message": "3dB-compression differential range=2.02078V at tt/1.80V/+27C; limit >=1.8V"
+   },
+   {
+    "name": "pvt_output_noise",
+    "status": "passed",
+    "message": "worst=253.482uVrms at fs/1.80V/+80C; limit <=300uVrms"
+   },
+   {
+    "name": "mc_cmrr",
+    "status": "passed",
+    "message": "worst=74.1919dB at tt/1.80V/+27C/seed-41000; limit >=60dB"
+   },
+   {
+    "name": "mc_psrr_plus",
+    "status": "passed",
+    "message": "worst=89.4411dB at tt/1.80V/+27C/seed-41000; limit >=70dB"
+   },
+   {
+    "name": "mc_psrr_minus",
+    "status": "passed",
+    "message": "worst=89.4411dB at tt/1.80V/+27C/seed-41000; limit >=70dB"
+   },
+   {
+    "name": "cmfb_peak_deviation",
+    "status": "passed",
+    "message": "worst=17.5349mV at ss/1.80V/+80C; limit <=150mV"
+   },
+   {
+    "name": "cmfb_residual_20ns",
+    "status": "passed",
+    "message": "worst=5.17236mV at ss/1.80V/+80C; limit <=50mV"
+   },
+   {
+    "name": "cmfb_residual_100ns",
+    "status": "passed",
+    "message": "worst=0.0310482mV at tt/1.80V/+27C; limit <=20mV"
+   }
+  ]
+ }
+}
