@@ -1,0 +1,14 @@
+# synth.ys — Yosys synthesis for brick_sensor_if, SkyWater sky130_fd_sc_hd (TT corner)
+# Template: @PDK_LIB@ is substituted with the path to sky130_fd_sc_hd__tt_100C_1v80.lib
+#   (see run_synth.sh, which locates it via volare)
+#   (see run_synth.sh, which locates it via volare)
+read_verilog -sv rtl/spi_master.v rtl/can_framer.v rtl/brick_sensor_if.v
+hierarchy -check -top brick_sensor_if
+flatten
+proc; opt; fsm; opt; memory; opt; techmap; opt
+dfflibmap -liberty @PDK_LIB@
+abc -liberty @PDK_LIB@ -D 10000
+clean
+opt
+stat
+write_verilog -noattr synth/netlist.v
