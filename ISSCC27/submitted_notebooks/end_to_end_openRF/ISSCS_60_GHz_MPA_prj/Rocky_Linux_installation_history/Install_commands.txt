@@ -1,0 +1,455 @@
+# Extra repositories
+sudo dnf install -y epel-release
+sudo dnf config-manager --set-enabled crb
+
+# Refresh repository metadata
+sudo dnf makecache
+
+# Autoconf
+sudo dnf install -y autoconf271
+printf '\n# autoconf\nsource /opt/rh/autoconf271/enable\n' >> ~/.bashrc
+source ~/.bashrc
+
+# Basic build tools and compilers
+sudo dnf install -y \
+    gcc \
+    gcc-c++ \
+    gcc-gfortran \
+    clang \
+    make \
+    cmake \
+    binutils \
+    gdb \
+    glibc-devel \
+    libtool \
+    automake \
+    bison \
+    libtool \
+    gperf \
+    swig \
+    flex
+
+# Version control, patching and debugging
+sudo dnf install -y \
+    git \
+    patchutils \
+    diffstat \
+    strace \
+    ltrace \
+    valgrind \
+    valgrind-devel \
+    systemtap
+
+# Build and documentation tools
+sudo dnf install -y \
+    asciidoc \
+    source-highlight \
+    help2man \
+    groff \
+    perl \
+    perl-podlators
+
+# Fedora/RPM development tools
+sudo dnf install -y \
+    jna \
+    intltool \
+    perl-Fedora-VSP \
+    perl-generators \
+    pesign
+
+# Qt development - especially for Qucs-S and KLayout
+sudo dnf install -y \
+    qt5-qtbase-devel \
+    qt5-qtxmlpatterns \
+    qt5-qtxmlpatterns-devel \
+    qt5-qtmultimedia \
+    qt5-qtmultimedia-devel \
+    qt5-qtsvg \
+    qt5-qtsvg-devel \
+    qt5-qtbase-gui \
+    qt5-qttools \
+    qt5-qttools-devel
+
+
+# Python development
+sudo dnf install -y \
+    python3 \
+    python3-devel \
+    python3.12 \
+    python3.12-devel \
+    python3-pip \
+    python3-virtualenv \
+    python3-sphinx \
+    python3-tkinter \
+    python3-pytest \
+    python3-setuptools \
+    python3-setuptools_scm \
+    python3-Cython \
+    python3-numpy \
+    python3-h5py \
+    python3-matplotlib
+
+# Tcl/Tk
+sudo dnf install -y \
+    tcl \
+    tcl-devel \
+    tk \
+    tk-devel
+
+# X11, GUI and graphics libraries
+sudo dnf install -y \
+    libXpm \
+    libXpm-devel \
+    gtk3-devel \
+    libX11 \
+    libX11-devel \
+    libX11-xcb \
+    libXrender \
+    libXrender-devel \
+    libxcb \
+    libXaw-devel \
+    cairo \
+    cairo-devel \
+    libjpeg-turbo-devel \
+    libffi-devel \
+    libharu-devel
+
+# Compression, parsing and general libraries
+sudo dnf install -y \
+    zlib \
+    zlib-devel \
+    readline-devel \
+    gettext
+
+# Boost and C++ libraries
+sudo dnf install -y \
+    boost-system \
+    boost-devel \
+    boost-python3-devel \
+    boost-filesystem \
+    spdlog-devel \
+    eigen3-devel
+
+# Numerical and scientific libraries
+sudo dnf install -y \
+    fftw \
+    fftw-devel \
+    suitesparse \
+    suitesparse-devel \
+    gperftools-devel
+
+# XML and Git libraries
+sudo dnf install -y \
+    libgit2 \
+    libgit2-devel \
+    libxml2 \
+    perl-XML-LibXML
+
+# Image and plotting support
+sudo dnf install -y \
+    perl-GD
+
+# Graphs, visualization and utilities
+sudo dnf install -y \
+    graphviz \
+    tree \
+    btop \
+    xterm
+
+# Numerical computing, e.g. for openEMS
+sudo dnf install -y \
+    octave \
+    octave-devel
+
+# Ruby development
+sudo dnf install -y \
+    ruby \
+    ruby-devel
+
+# Miscellaneous utilities
+sudo dnf install -y \
+    curl \
+    time
+
+# LEMON
+mkdir ~/packages
+cd ~/packages
+wget http://lemon.cs.elte.hu/pub/sources/lemon-1.0.tar.gz
+tar xvzf lemon-1.0.tar.gz
+cd lemon-1.0
+./configure
+make -j$(nproc)
+sudo make install    
+
+# Not provided by a dnf repository
+sudo python3 -m pip install pandas
+sudo python3 -m pip install xdot
+
+# OpenVAF
+cd ~/packages
+wget https://openva.fra1.cdn.digitaloceanspaces.com/\
+openvaf_23_5_0_linux_amd64.tar.gz
+sudo mkdir -p /opt/openvaf
+tar xvzf openvaf_23_5_0_linux_amd64.tar.gz -C /opt/openvaf
+printf '\n# OpenVAF\nexport PATH="/opt/openvaf:$PATH"\n' >> ~/.bashrc
+source ~/.bashrc
+
+# ngspice
+cd ~/packages
+git clone https://git.code.sf.net/p/ngspice/ngspice ngspice-ngspice
+cd ngspice-ngspice
+./autogen.sh
+./configure --enable-osdi
+make -j$(nproc)
+sudo make install
+cd ..
+rm -rf ngspice-ngspice
+
+# ADMS
+cd ~/packages
+wget https://github.com/Qucs/ADMS/releases/\
+download/release-2.3.7/adms-2.3.7.tar.gz
+tar xvfz adms-2.3.7.tar.gz
+cd adms-2.3.7
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
+sudo make install
+
+# XYCE
+sudo dnf install -y \
+    blas \
+    blas-devel \
+    lapack \
+    lapack-devel \
+
+cd ~/packages
+git clone https://github.com/trilinos/Trilinos.git Trilinos
+cd Trilinos
+git checkout trilinos-release-12-12-1
+cd ..
+mkdir trilinos_build
+cd trilinos_build
+touch reconfigure.sh
+chmod +x reconfigure.sh
+
+cat > reconfigure.sh << 'EOF'
+#!/bin/sh
+SRCDIR="$HOME/packages/Trilinos/"
+ARCHDIR="/usr/local"
+FLAGS="-O3 -fPIC"
+cmake \
+-DCMAKE_C_COMPILER=gcc \
+-DCMAKE_CXX_COMPILER=g++ \
+-DCMAKE_Fortran_COMPILER=gfortran \
+-DCMAKE_CXX_FLAGS="$FLAGS" \
+-DCMAKE_C_FLAGS="$FLAGS" \
+-DCMAKE_Fortran_FLAGS="$FLAGS" \
+-DCMAKE_INSTALL_PREFIX=$ARCHDIR \
+-DCMAKE_MAKE_PROGRAM="make" \
+-DTrilinos_ENABLE_NOX=ON \
+  -DNOX_ENABLE_LOCA=ON \
+-DTrilinos_ENABLE_EpetraExt=ON \
+  -DEpetraExt_BUILD_BTF=ON \
+  -DEpetraExt_BUILD_EXPERIMENTAL=ON \
+  -DEpetraExt_BUILD_GRAPH_REORDERINGS=ON \
+-DTrilinos_ENABLE_TrilinosCouplings=ON \
+-DTrilinos_ENABLE_Ifpack=ON \
+-DTrilinos_ENABLE_AztecOO=ON \
+-DTrilinos_ENABLE_Belos=ON \
+-DTrilinos_ENABLE_Teuchos=ON \
+-DTrilinos_ENABLE_COMPLEX_DOUBLE=ON \
+-DTrilinos_ENABLE_Amesos=ON \
+  -DAmesos_ENABLE_KLU=ON \
+-DTrilinos_ENABLE_Amesos2=ON \
+ -DAmesos2_ENABLE_KLU2=ON \
+ -DAmesos2_ENABLE_Basker=ON \
+-DTrilinos_ENABLE_Sacado=ON \
+-DTrilinos_ENABLE_Stokhos=ON \
+-DTrilinos_ENABLE_Kokkos=ON \
+-DTrilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF \
+-DTrilinos_ENABLE_CXX11=ON \
+-DTPL_ENABLE_AMD=ON \
+-DAMD_LIBRARY_DIRS="/usr/lib" \
+-DTPL_AMD_INCLUDE_DIRS="/usr/include/suitesparse" \
+-DTPL_ENABLE_BLAS=ON \
+-DTPL_ENABLE_LAPACK=ON \
+$SRCDIR
+EOF
+
+./reconfigure.sh
+make -j$(nproc)
+sudo make install
+
+cd ~/packages
+git clone https://github.com/Xyce/Xyce.git
+cd Xyce
+git checkout Release-7.8.0
+./bootstrap
+cd ..
+mkdir xyce_build
+cd xyce_build
+touch reconfigure.sh
+chmod +x reconfigure.sh
+
+cat > reconfigure.sh << 'EOF'
+#!/bin/sh
+$HOME/packages/Xyce/configure \
+CXXFLAGS="-O3 -fPIC" \
+ARCHDIR="/usr/local" \
+CPPFLAGS="-I/usr/include/suitesparse" \
+--enable-stokhos \
+--enable-amesos2 \
+--enable-user-plugin \
+--enable-admsmodels \
+--enable-shared \
+--enable-xyce-shareable
+EOF
+
+./reconfigure.sh
+make -j$(nproc)
+sudo make install
+
+# Qucs-S
+sudo dnf install -y \
+    dos2unix \
+    xsd \
+    qt6-qtbase-devel \
+    qt6-qtsvg-devel \
+    qt6-qttools-devel \
+    qt6-qtcharts-devel
+
+cd ~/packages
+git clone https://github.com/beltoforion/muparser.git
+cd muparser/
+sudo cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr/local
+sudo cmake --build build -j"$(nproc)"
+sudo cmake --install build
+echo '/usr/local/lib64' | sudo tee /etc/ld.so.conf.d/muparser.conf
+sudo ldconfig
+
+# One might not need manual install of libxerces-c and libxerces-c-devel
+# since dnf should have taken care of these xsd dependencies
+# when 'sudo dnf install xsd' from further above.
+wget https://codesynthesis.com/download/xsd/4.2/\
+rhel/rhel9.2/x86_64/libxerces-c-3.2.4-3.el9.x86_64.rpm
+sudo dnf install libxerces-c-3.2.4-3.el9.x86_64.rpm
+
+wget https://codesynthesis.com/download/xsd/4.2/\
+rhel/rhel9.2/x86_64/libxerces-c-devel-3.2.4-3.el9.x86_64.rpm
+sudo dnf install libxerces-c-devel-3.2.4-3.el9.x86_64.rpm
+
+git clone --recurse-submodules --branch dev/xml_devices https://github.com/ra3xdh/qucs_s.git
+git submodule init
+git submodule update
+mkdir builddir
+cd builddir
+cmake ..  -DCMAKE_INSTALL_PREFIX=/usr/local
+make -j$(nproc)
+sudo make install
+
+# KLayout
+cd ~/packages
+wget https://www.klayout.org/downloads/source/klayout-0.30.12.tar.gz
+tar hzxvf klayout-0.30.12.tar.gz
+cd klayout-0.30.12
+./build.sh
+
+cat >> ~/.bashrc << 'EOF'
+
+# KLayout executable
+export PATH="$HOME/packages/klayout-0.30.12/build-release:$PATH"
+export LD_LIBRARY_PATH="$HOME/packages/klayout-0.30.12/build-release:"\
+"$LD_LIBRARY_PATH"
+EOF
+
+# openEMS
+sudo dnf install -y \
+    tinyxml-devel \
+    vtk-devel \
+    hdf5-devel \
+    CGAL-devel \
+    vtk-qt \
+    paraview \
+    gengetopt \
+    perl-pod2pdf
+
+cd ~/packages
+git clone --recursive https://github.com/thliebig/openEMS-Project.git
+cd openEMS-Project/
+./update_openEMS.sh ~/opt/openEMS --python
+
+cat >> ~/.bashrc << 'EOF'
+
+# openEMS executable
+export PATH="$HOME/opt/openEMS/bin:$PATH"
+EOF
+
+# IHP-Open-PDK
+mkdir ~/IHP_PDK
+cd ~/IHP_PDK
+git clone --branch dev --recurse-submodules \
+https://github.com/IHP-GmbH/IHP-Open-PDK.git
+
+cat >> ~/.bashrc << 'EOF'
+
+# IHP-Open-PDK environmental variables
+export PDK_ROOT=$HOME/IHP_PDK/IHP-Open-PDK
+export PDK=ihp-sg13g2
+export KLAYOUT_PATH="$HOME/.klayout:$PDK_ROOT/$PDK/libs.tech/klayout"
+export KLAYOUT_HOME=$HOME/.klayout
+EOF
+source ~/.bashrc
+
+# Verilog-A models compilation
+cd ~/IHP_PDK/IHP-Open-PDK/libs.tech/verilog-a
+source openvaf-compile-va.sh
+source adms-compile-va.sh
+
+# PDK Python environment
+python3.12 -m venv ~/IHP_PDK/venv
+
+cat >> ~/.bashrc << 'EOF'
+
+# PDK environment alias
+alias pdkenv='source ~/IHP_PDK/venv/bin/activate'
+EOF
+source ~/.bashrc
+
+pdkenv
+python -m pip install --upgrade pip
+pip install flake8 \
+    docopt \
+    pandas \
+    klayout=0.30.12 \
+    pyyaml \
+    gdstk \
+    tqdm \
+    termcolor
+pip install snp2le
+deactivate
+
+# gds2openEMS from PyPI
+cat >> ~/.bashrc << 'EOF'
+
+# openEMS environment alias
+alias openemsenv='source ~/opt/openEMS/venv/bin/activate'
+EOF
+source ~/.bashrc
+
+openemsenv
+python -m pip install --upgrade pip
+pip install gds2openEMS
+pip install -r ~/IHP_PDK/IHP-Open-PDK/requirements.txt
+deactivate
+
+# gds2openEMS from GitHub
+cd ~/IHP_PDK
+git clone https://github.com/VolkerMuehlhaus/gds2openEMS.git
+
+# PDK symlink creation
+pdkenv
+python ~/IHP_PDK/IHP-Open-PDK/libs.tech/ngspice/install.py
+python ~/IHP_PDK/IHP-Open-PDK/libs.tech/qucs-s/install.py

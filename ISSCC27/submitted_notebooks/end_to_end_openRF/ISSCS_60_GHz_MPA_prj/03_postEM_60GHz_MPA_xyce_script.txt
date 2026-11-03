@@ -1,0 +1,36 @@
+
+* --- Analysis type definition ---
+.HB 60e9
+
+* --- HB solver options ---
+.options hbint;
++ numfreq=10
++ STARTUPPERIODS=2 ; default: 2
++ numtpts=100 ; default: numfreq
++ TAHB=0 ; default: 1
+
+* --- DCOP nonlinear solver options ---
+.options nonlin 
++ abstol=1e-12 ; default: 1e-12
++ reltol=1e-3 ; default: 1e-3
++ rhstol=1e-6 ; default: 1e-6
++ nox=1 ; default: 1
++ nlstrategy=0 ; default: 0
++ searchmethod=0 ; default: 0
+
+* --- HB nonlinear solver options ---
+.options nonlin-hb
++ abstol=1e-9 ; default: 1e-9
++ reltol=1e-4 ; default: 1e-4
++ rhstol=1e-6 ; default: 1e-6
+
+* --- HB linear solver options ---
+
+* --- Parameter sweep ---
+.STEP LIN Irf_in 0.1e-3 35e-3 3.98e-4
+
+* --- Print output ---
+.PRINT HB
++ FORMAT=TECPLOT
++ FILE=/home/matthi/QucsWorkspace/ISSCS_60_GHz_MPA_prj/03_postEM_60GHz_MPA_xyce.txt
++ I(VIin) I(VIbase) I(VIout) V(Vin) V(Vbase) V(Vout) V(Vcc) I(VIdc_in) I(VIcollector) V(Vcollector)
