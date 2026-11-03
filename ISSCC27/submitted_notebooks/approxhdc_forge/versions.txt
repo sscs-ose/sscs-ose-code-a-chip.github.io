@@ -1,0 +1,27 @@
+# Tool versions used to develop and verify ApproxHDC-Forge (recorded 2026-10-07)
+
+## Physical flow, run inside the pinned Docker image (and, for the Colab test, the matching Nix environment)
+librelane            3.0.14   (docker: ghcr.io/librelane/librelane:3.0.14, image id sha256:f91b21d75f79871f9ccf37451020b5d2f7b3236881a997ff709c561e8280a30f)
+pdk                  sky130A via ciel, version 8afc8346a57fe1ab7934ba5a6056ea8b43078e71, library sky130_fd_sc_hd
+yosys (in image)     0.62 (git 7326bb7d6641500ecb285c291a54a662cb1e76cf)
+openroad (in image)  2026-02-17 build, git dcf36133a369abc8f3c5e5738cd4d82e4903c0e0
+opensta (in image)   2.7.0   (used for the activity-annotated power numbers)
+magic (in image)     8.3.623
+klayout (in image)   0.30.7
+netgen (in image)    1.5.316
+
+## Local simulation and checks
+verilator            5.053 devel (OSS CAD Suite 2026-10-03), main RTL verification
+icarus verilog       11.0 (system), cocotb 4-state cross-check of the RTL
+icarus verilog       14.0 devel (OSS CAD Suite 2026-10-03), gate-level simulation (Icarus 11 crashes compiling the netlist)
+yosys (local)        0.69+187 (OSS CAD Suite 2026-10-03), block-level area estimates
+cocotb               2.1.0
+
+## Python (3.10.12; the Colab notebook runs on whatever Python Colab provides)
+numpy 2.2.6, scipy 1.15.3, pandas 2.3.3, scikit-learn 1.7.2, matplotlib 3.10.9
+pymoo 0.6.2, optuna 5.0.0, PyYAML 6.0.3, ipywidgets 8.1.9, jupyterlab 4.6.4, nbconvert 7.17.1
+
+## Data
+dataset              UCI-HAR, https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip
+dataset sha256       c00b803081a5c797cd5e4b83700a9810b38d53d9d84e01917e090e1fdbc81031
+split                data/splits.json (subject-wise, fixed seed 2027)
