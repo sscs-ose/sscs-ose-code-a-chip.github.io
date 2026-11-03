@@ -1,0 +1,73 @@
+SIGN-OFF PROOF  2026-10-16 14:23  host native (author machine, gLayout venv)
+tools: KLayout 0.30.0 | magic 8.3.684 | Netgen 1.5.324 | PDK_ROOT=~/.ciel/ciel/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af
+
+== 0. Pre-flight ==
+verify12t: ~/glayout/vga12t/verify12t.py
+glayout: importable (~/glayout/.venv/lib/python3.11/site-packages/glayout)
+
+== 1. Fingerprints (sha256) - compare these with the files you received ==
+a1f3931c2e7e966509e8c2a227b2000982776b26060819d895ff1352f5c94191  layout/vga_core_12t.spice
+633a0bdc1730a79a188baadfa51bef6b961a04f8899518b1bc4981d457fad4a7  layout/vga_core_12t_sizes.json
+c61e0b8da3ca335562a80856bf2a47eb9f6aec760a8ad6baf69f25348d42aee3  layout/vga_core_12t.gds
+671b9d7e59fa172bf2341d6a070bf570ae65bed0442c3cacf49c0487bd71be29  ~/glayout/vga12t/verify12t.py
+
+== 2. Every device: netlist sizes vs JSON sizes ==
+dev   netlist  W / L / nf / m      JSON  W / L / nf / m         ok
+M1    640 / 0.5 / 128 / 1          640 / 0.5 / 128 / 1          OK
+M4    640 / 0.5 / 128 / 1          640 / 0.5 / 128 / 1          OK
+M2    640 / 8 / 128 / 1            640 / 8 / 128 / 1            OK
+M3    640 / 8 / 128 / 1            640 / 8 / 128 / 1            OK
+M6    20 / 2 / 4 / 1               20 / 2 / 4 / 1               OK
+M7    20 / 2 / 4 / 1               20 / 2 / 4 / 1               OK
+M8    20 / 2 / 4 / 1               20 / 2 / 4 / 1               OK
+M9    20 / 2 / 4 / 1               20 / 2 / 4 / 1               OK
+M5    40 / 8 / 8 / 14              40 / 8 / 8 / 14              OK
+M10   40 / 8 / 8 / 2               40 / 8 / 8 / 2               OK
+M11   40 / 8 / 8 / 2               40 / 8 / 8 / 2               OK
+M12   40 / 8 / 8 / 1               40 / 8 / 8 / 1               OK
+RESULT: netlist and JSON sizes IDENTICAL
+
+== 3. Fresh DRC and LVS (previous results deleted; LVS reference = layout/vga_core_12t.spice) ==
+DRC: PASS  (~/glayout/vga12t/verify_proof/drc_status.json)
+[klayout_official] deck ~/.ciel/ciel/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.tech/klayout/drc/sky130A_mr.drc
+  violations: 0
+[klayout_glayout] deck ~/glayout/.venv/lib/python3.11/site-packages/glayout/pdk/sky130_mapped/sky130.lydrc
+  violations: 0
+[magic_full] Magic drc(full), flattened
+  violations: 0
+RESULT: PASS
+LVS: PASS  (~/glayout/vga12t/verify_proof/lvs_status.json)
+Subcircuit summary:
+Circuit 1: vga_core_12t                    |Circuit 2: vga_core_12t                    
+-------------------------------------------|-------------------------------------------
+sky130_fd_pr__nfet_01v8 (424->10)          |sky130_fd_pr__nfet_01v8 (25->10)           
+sky130_fd_pr__pfet_01v8 (256->2)           |sky130_fd_pr__pfet_01v8 (2)                
+Number of devices: 12                      |Number of devices: 12                      
+Number of nets: 12                         |Number of nets: 12                         
+Netlists match uniquely.
+
+Subcircuit pins:
+Circuit 1: vga_core_12t                    |Circuit 2: vga_core_12t                    
+-------------------------------------------|-------------------------------------------
+iref                                       |iref                                       
+vdd                                        |vdd                                        
+vctrl_p                                    |vctrl_p                                    
+vctrl_n                                    |vctrl_n                                    
+gnd                                        |gnd                                        
+vin_n                                      |vin_n                                      
+vin_p                                      |vin_p                                      
+v_out                                      |v_out                                      
+Cell pin lists are equivalent.
+Device classes vga_core_12t and vga_core_12t are equivalent.
+
+Final result: Circuits match uniquely.
+No property (W/L/nf/m) errors
+
+== 4. Controls: the unchanged netlist must PASS; each netlist with ONE change must FAIL ==
+  unchanged netlist (positive control)     -> PASS (correctly accepted)
+  M5 copies m 14 -> 13                     -> FAIL (correctly rejected)
+  M10 copies m 2 -> 3                      -> FAIL (correctly rejected)
+  M1 length L 0.5 -> 1                     -> FAIL (correctly rejected)
+  M2 width W 640 -> 600                    -> FAIL (correctly rejected)
+  M6 fingers nf 4 -> 8 (W 20->40)          -> FAIL (correctly rejected)
+  M11 drain v_out -> net4 (wiring)         -> FAIL (correctly rejected)
