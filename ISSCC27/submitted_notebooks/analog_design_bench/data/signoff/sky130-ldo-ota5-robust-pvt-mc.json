@@ -1,0 +1,156 @@
+{
+ "task_slug": "sky130-ldo-ota5-robust-pvt-mc",
+ "spec": "The testbench applies `vref=0.8 V`, sources 50 uA from `vin` into `ibias`, and connects an external 300 kohm/600 kohm feedback divider for a 1.2 V target. The nominal external output network is 1 uF with 50 milliohm ESR; stability and dynamic robustness also use 0.8 and 1.2 uF with 20 and 100 milliohm ESR. These ideal elements represent specified board-level components and are not part of the on-chip DUT.\n\nDC signoff covers all 135 Cartesian combinations of tt, ff, ss, fs, sf; 1.62, 1.8, 1.98 V input; 1, 10, 30 mA load; and -40, 27, 125 C. The specified minimum load is 1 mA. At every point, `abs(vout-1.2 V)` must not exceed 20 mV. Quiescent input current, `abs(I(VIN))-ILOAD`, must not exceed 200 uA and must not be negative.\n\nAt 30 mA, input voltage is swept upward from 1.15 to 1.8 V at all five process corners and three temperatures. Dropout is the interpolated `VIN-VOUT` where `VOUT` first reaches and thereafter remains above 99% of 1.2 V; it must not exceed 250 mV.\n\nLoop return ratio is measured by differential series injection at `gate_drive`/`gate`. Require loop gain at 1 Hz of at least 40 dB, phase margin of at least 60 degrees, and unity-gain bandwidth of at least 50 kHz. Coverage includes TT/27 C over all supplies and loads; the five representative process/temperature/supply conditions listed under transient signoff at 1 and 30 mA with the nominal output network; and every one of those five conditions crossed with all four output-capacitance/ESR extremes at 1 and 30 mA. This explicitly checks the PVT-by-output-network stability interaction.\n\nAt TT/27 C over all supplies and loads, plus five representative process/temperature/supply extremes at 30 mA, PSRR must be at least 40 dB at 100 Hz and 1 kHz, 20 dB at 100 kHz, and 10 dB at 1 MHz. At TT/1.8 V/27 C and 10 mA, integrated device noise from 10 Hz through 1 MHz must not exceed 150 uVrms.\n\nStartup, load-step, and line-step signoff runs at TT/1.8 V/27 C, SS/1.62 V/125 C, FF/1.98 V/-40 C, SF/1.62 V/125 C, and FS/1.98 V/-40 C with the nominal output network. It is repeated at the low-headroom SS/1.62 V/125 C stress for all output-capacitance/ESR extremes.\n\n- With a 120 ohm startup load and a 20 us input ramp beginning at 1 us, output must reach and thereafter remain above 90% of 1.2 V by 30 us from transient start, and must enter and remain within +/-2% of 1.2 V no more than 10 us after the ramp; overshoot above 1.2 V must not exceed 50 mV.\n- A 1 to 25 mA to 1 mA load pulse with 200 ns edges must stay within 20 mV of the commanded 1.2 V output target and enter and remain within 15 mV of that target in no more than 5 us after either edge.\n- A 1.98 to 1.62 to 1.98 V line pulse with 200 ns edges at 10 mA must meet the same 20 mV excursion plus 15 mV / 5 us settling limits relative to the commanded 1.2 V target.\n\nAt 1.8 V/27 C and 10 mA, 30 deterministic process-plus-local-mismatch runs require at least 90% of outputs between 1.17 and 1.23 V.\n\n`testbench/` contains directly runnable TT or single-seed diagnostic decks for DC/PVT (`tb_pvt_dc_tt.spi`), dropout, loop return ratio, PSRR, output noise, startup, load transient, line transient, and mismatch (`tb_mc_op.spi`). They use the same DUT interface and measurement definitions as signoff, but are complementary diagnostics rather than the complete declared matrix. Run `python3 testbench/check_load_tran_tt.py` to preflight the public TT load-transient deck and DUT interface when only Python is available; run `ngspice -b testbench/tb_load_tran_tt.spi` in the supplied environment to simulate that deck.",
+ "reference": {
+  "transistors": 7,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=161 PVT=15/15 DC-points=135"
+   },
+   {
+    "name": "pvt_dc_regulation_and_iq",
+    "status": "passed",
+    "message": "error=14.201mV Iq=130.918uA..143.211uA"
+   },
+   {
+    "name": "dropout",
+    "status": "passed",
+    "message": "dropout=221.155mV"
+   },
+   {
+    "name": "loop_stability",
+    "status": "passed",
+    "message": "gain_min=47.254dB PM_min=64.694deg UGB_min=55.194kHz"
+   },
+   {
+    "name": "psrr_and_output_noise",
+    "status": "passed",
+    "message": "PSRR_min(100Hz/1kHz/100kHz/1MHz)=48.064dB/48.064dB/46.485dB/26.539dB noise=97.571uVrms"
+   },
+   {
+    "name": "startup",
+    "status": "passed",
+    "message": "sustained_t90=20.965us settling_after_ramp=0.675us overshoot=13.479mV"
+   },
+   {
+    "name": "load_transient",
+    "status": "passed",
+    "message": "excursion=9.194mV settling=0.000us"
+   },
+   {
+    "name": "line_transient",
+    "status": "passed",
+    "message": "excursion=9.966mV settling=0.000us"
+   },
+   {
+    "name": "monte_carlo_output",
+    "status": "passed",
+    "message": "samples=30/30 yield=100.000%"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 9,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=161 PVT=15/15 DC-points=135"
+   },
+   {
+    "name": "pvt_dc_regulation_and_iq",
+    "status": "passed",
+    "message": "error=14.468mV Iq=157.096uA..167.455uA"
+   },
+   {
+    "name": "dropout",
+    "status": "passed",
+    "message": "dropout=203.563mV"
+   },
+   {
+    "name": "loop_stability",
+    "status": "passed",
+    "message": "gain_min=48.287dB PM_min=67.623deg UGB_min=58.057kHz"
+   },
+   {
+    "name": "psrr_and_output_noise",
+    "status": "passed",
+    "message": "PSRR_min(100Hz/1kHz/100kHz/1MHz)=44.531dB/44.531dB/44.412dB/39.134dB noise=103.237uVrms"
+   },
+   {
+    "name": "startup",
+    "status": "passed",
+    "message": "sustained_t90=19.488us settling_after_ramp=0.000us overshoot=6.414mV"
+   },
+   {
+    "name": "load_transient",
+    "status": "passed",
+    "message": "excursion=8.854mV settling=0.000us"
+   },
+   {
+    "name": "line_transient",
+    "status": "passed",
+    "message": "excursion=8.987mV settling=0.000us"
+   },
+   {
+    "name": "monte_carlo_output",
+    "status": "passed",
+    "message": "samples=30/30 yield=100.000%"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 15,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "runs=161 PVT=15/15 DC-points=135"
+   },
+   {
+    "name": "pvt_dc_regulation_and_iq",
+    "status": "passed",
+    "message": "error=9.954mV Iq=69.358uA..168.953uA"
+   },
+   {
+    "name": "dropout",
+    "status": "passed",
+    "message": "dropout=187.656mV"
+   },
+   {
+    "name": "loop_stability",
+    "status": "passed",
+    "message": "gain_min=49.173dB PM_min=82.351deg UGB_min=157.082kHz"
+   },
+   {
+    "name": "psrr_and_output_noise",
+    "status": "passed",
+    "message": "PSRR_min(100Hz/1kHz/100kHz/1MHz)=46.023dB/46.023dB/45.915dB/40.832dB noise=78.288uVrms"
+   },
+   {
+    "name": "startup",
+    "status": "passed",
+    "message": "sustained_t90=23.325us settling_after_ramp=3.225us overshoot=0.000mV"
+   },
+   {
+    "name": "load_transient",
+    "status": "passed",
+    "message": "excursion=4.772mV settling=0.000us"
+   },
+   {
+    "name": "line_transient",
+    "status": "passed",
+    "message": "excursion=2.810mV settling=0.000us"
+   },
+   {
+    "name": "monte_carlo_output",
+    "status": "passed",
+    "message": "samples=30/30 yield=100.000%"
+   }
+  ]
+ }
+}

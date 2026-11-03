@@ -1,0 +1,12 @@
+.subckt ldo_ota5 vin vout vss vref ibias fb gate_drive gate
+XBIAS ibias ibias vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=8
+XTAIL tail ibias vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=4
+XINFB mirror fb tail vss sky130_fd_pr__nfet_01v8 l=0.6 w=24 nf=4
+XINREF error vref tail vss sky130_fd_pr__nfet_01v8 l=0.6 w=24 nf=4
+XLOADREF mirror mirror vin vin sky130_fd_pr__pfet_01v8 l=0.5 w=10 nf=2
+XLOADOUT error mirror vin vin sky130_fd_pr__pfet_01v8 l=0.5 w=10 nf=2
+XPULLDOWN gate_drive ibias vss vss sky130_fd_pr__nfet_01v8 l=1 w=72 nf=16
+XFOLLOW vin error gate_drive vss sky130_fd_pr__nfet_03v3_nvt l=0.5 w=40 nf=8
+XCOMP error vin sky130_fd_pr__cap_mim_m3_1 w=3 l=3
+XPASS vout gate vin vin sky130_fd_pr__pfet_01v8 l=0.15 w=1000 nf=200 m=10
+.ends ldo_ota5

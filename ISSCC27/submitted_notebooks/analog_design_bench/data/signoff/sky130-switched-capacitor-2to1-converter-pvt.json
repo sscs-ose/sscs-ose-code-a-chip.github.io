@@ -1,0 +1,156 @@
+{
+ "task_slug": "sky130-switched-capacitor-2to1-converter-pvt",
+ "spec": "The testbench powers `vdd`, drives `clk` with a 20 MHz rail-to-rail square wave whose high level follows the supply through 50 ohm source resistance, and loads `vout` resistively. The DUT derives complementary phases from `clk` and drives a 2:1 switched-capacitor power stage. Both flying and output capacitors are part of the DUT.\n\nComplete active-device signoff covers every Cartesian combination of tt, ss, ff, sf, fs; 1.62, 1.8, 1.98 V; and -40, 27, 125 C. Dedicated ll and hh runs at 1.8 V/27 C cover MIM/passive extremes. Metrics use the 0.3–0.7 us interval of a 0.7 us transient: eight complete 20 MHz clock periods beginning at 1.5 times the maximum allowed startup time. The transient maximum step is 2 ns, giving at least 25 points per clock period in addition to source breakpoints at clock edges.\n\n- With a 680 ohm heavy load, mean `vout/vdd` must remain between 0.42 and 0.51, efficiency between 70% and 100%, and ripple at or below 80 mVpp. `vout` must reach `0.378*vdd` within 200 ns and remain above that externally defined target for the rest of the transient; this is 90% of the published 0.42 heavy-load conversion-ratio floor.\n- Efficiency is mean load power divided by total mean input power: VDD delivery plus the mean of positive instantaneous power delivered by the clock source. Returned clock energy is not credited, and any result above 100% fails.\n- With a 6800 ohm light load, mean `vout/vdd` must remain between 0.45 and 0.51, efficiency must remain between 30% and 100%, and total input power must not exceed 500 uW.\n- Equivalent output resistance, `(Vlight-Vheavy)/(Iheavy-Ilight)`, must not exceed 100 ohm at each matched condition.\n\nNon-overlap is not scored as an inaccessible internal waveform. Shoot-through, clock-drive loss, and poor phase generation are instead exposed through efficiency, total input power, output ratio, ripple, and startup. Physical device noise is outside this task.",
+ "reference": {
+  "transistors": 56,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "heavy=47/47 light=47/47 unique matched points"
+   },
+   {
+    "name": "pvt_loaded_conversion_ratio",
+    "status": "passed",
+    "message": "ratio=0.43087 at fs/1.62V/-40C..0.46589 at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_efficiency",
+    "status": "passed",
+    "message": "efficiency=75.763% at fs/1.62V/-40C..83.447% at ff/1.80V/-40C"
+   },
+   {
+    "name": "pvt_output_ripple",
+    "status": "passed",
+    "message": "ripple_max=53.186mVpp at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_startup",
+    "status": "passed",
+    "message": "startup_max=35.410ns at ss/1.62V/-40C; post_200ns_margin_min=80.241mV at fs/1.62V/-40C"
+   },
+   {
+    "name": "pvt_light_conversion_ratio",
+    "status": "passed",
+    "message": "ratio=0.47422 at fs/1.62V/-40C..0.49434 at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_light_overhead_power",
+    "status": "passed",
+    "message": "input_power=208.101uW at ss/1.62V/-40C..367.013uW at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_light_efficiency",
+    "status": "passed",
+    "message": "efficiency=38.338% at ff/1.98V/+125C..44.698% at ll/1.80V/+27C"
+   },
+   {
+    "name": "pvt_output_resistance",
+    "status": "passed",
+    "message": "Rout=46.451ohm at ff/1.98V/-40C..78.082ohm at ss/1.62V/-40C"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 30,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "heavy=47/47 light=47/47 unique matched points"
+   },
+   {
+    "name": "pvt_loaded_conversion_ratio",
+    "status": "passed",
+    "message": "ratio=0.45080 at ss/1.62V/+125C..0.47639 at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_efficiency",
+    "status": "passed",
+    "message": "efficiency=84.349% at ss/1.62V/+125C..89.783% at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_output_ripple",
+    "status": "passed",
+    "message": "ripple_max=16.046mVpp at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_startup",
+    "status": "passed",
+    "message": "startup_max=62.389ns at ss/1.62V/+125C; post_200ns_margin_min=112.286mV at ss/1.62V/+125C"
+   },
+   {
+    "name": "pvt_light_conversion_ratio",
+    "status": "passed",
+    "message": "ratio=0.49040 at fs/1.62V/-40C..0.49758 at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_light_overhead_power",
+    "status": "passed",
+    "message": "input_power=151.178uW at sf/1.62V/-40C..274.083uW at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_light_efficiency",
+    "status": "passed",
+    "message": "efficiency=52.005% at ff/1.98V/+125C..62.822% at sf/1.62V/-40C"
+   },
+   {
+    "name": "pvt_output_resistance",
+    "status": "passed",
+    "message": "Rout=33.777ohm at ff/1.98V/-40C..72.192ohm at ss/1.62V/+125C"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 46,
+  "checks": [
+   {
+    "name": "complete_signoff",
+    "status": "passed",
+    "message": "heavy=47/47 light=47/47 unique matched points"
+   },
+   {
+    "name": "pvt_loaded_conversion_ratio",
+    "status": "passed",
+    "message": "ratio=0.47072 at ss/1.62V/+125C..0.48408 at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_efficiency",
+    "status": "passed",
+    "message": "efficiency=88.003% at fs/1.62V/+125C..92.307% at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_output_ripple",
+    "status": "passed",
+    "message": "ripple_max=24.073mVpp at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_startup",
+    "status": "passed",
+    "message": "startup_max=21.712ns at ss/1.62V/-40C; post_200ns_margin_min=144.135mV at ss/1.62V/+125C"
+   },
+   {
+    "name": "pvt_light_conversion_ratio",
+    "status": "passed",
+    "message": "ratio=0.49687 at ss/1.62V/+125C..0.49853 at ff/1.98V/-40C"
+   },
+   {
+    "name": "pvt_light_overhead_power",
+    "status": "passed",
+    "message": "input_power=148.018uW at ss/1.62V/-40C..277.234uW at ff/1.98V/+125C"
+   },
+   {
+    "name": "pvt_light_efficiency",
+    "status": "passed",
+    "message": "efficiency=51.603% at ff/1.98V/+125C..64.485% at ss/1.62V/-40C"
+   },
+   {
+    "name": "pvt_output_resistance",
+    "status": "passed",
+    "message": "Rout=22.626ohm at ff/1.98V/-40C..42.224ohm at ss/1.62V/+125C"
+   }
+  ]
+ }
+}

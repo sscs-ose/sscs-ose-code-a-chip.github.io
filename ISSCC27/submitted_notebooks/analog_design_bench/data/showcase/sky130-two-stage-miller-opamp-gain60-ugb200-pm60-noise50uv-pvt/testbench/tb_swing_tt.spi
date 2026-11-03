@@ -1,0 +1,50 @@
+* TT nominal unity-feedback output-range example (contiguous span).
+* The reported range is the contiguous span around the 0.9 V quiescent
+* input that tracks within 20 mV. The first out-of-tolerance sample on
+* each side cuts the segment; the 20 mV crossing is linearly interpolated
+* against its adjacent in-tolerance sample to avoid 10 mV-grid censoring.
+.lib "/opt/sky130/continuous/sky130.lib.spice" tt
+.include "/app/circuit.spi"
+.options filetype=ascii reltol=2e-4 abstol=1e-12 vntol=1e-6
+.temp 27
+VSS vss 0 0
+VDD vdd vss 1.8
+IREF vdd iref 50u
+VIN vinp vss 0.9
+VFB vout vinn 0
+XAMP vss iref vdd vinn vinp vout two_stage_miller_opamp
+CL vout vss 1p
+.control
+set noaskquit
+dc VIN 0.3 1.5 0.01
+let tracking_error = abs(v(vout) - v(vinp))
+let ok = tracking_error <= 0.02
+let bad = 1 - ok
+meas dc center_error find tracking_error at=0.9
+let center_ok = center_error <= 0.02
+let bad_above = bad * (v(vinp) ge 0.9)
+let bad_below = bad * (v(vinp) le 0.9)
+let cand_hi = v(vinp) + 1e6 * (1 - bad_above)
+meas dc bound_hi_raw min cand_hi
+let cand_lo = v(vinp) - 1e6 * (1 - bad_below)
+meas dc bound_lo_raw max cand_lo
+let range_step = 0.01
+let has_hi_bound = bound_hi_raw lt 100
+let has_lo_bound = bound_lo_raw gt -100
+let hi_bad_x = has_hi_bound * bound_hi_raw + (1 - has_hi_bound) * 1.5
+let hi_good_x = hi_bad_x - range_step * has_hi_bound
+let lo_bad_x = has_lo_bound * bound_lo_raw + (1 - has_lo_bound) * 0.3
+let lo_good_x = lo_bad_x + range_step * has_lo_bound
+meas dc hi_bad_error find tracking_error at=$&hi_bad_x
+meas dc hi_good_error find tracking_error at=$&hi_good_x
+meas dc lo_bad_error find tracking_error at=$&lo_bad_x
+meas dc lo_good_error find tracking_error at=$&lo_good_x
+let hi_fraction = (0.02 - hi_good_error) / (hi_bad_error - hi_good_error + 1e-30)
+let lo_fraction = (lo_bad_error - 0.02) / (lo_bad_error - lo_good_error + 1e-30)
+let range_high = hi_good_x + has_hi_bound * range_step * hi_fraction
+let range_low = lo_bad_x + has_lo_bound * range_step * lo_fraction
+let closed_loop_range_vpp = center_ok * (range_high - range_low)
+print closed_loop_range_vpp
+quit
+.endc
+.end

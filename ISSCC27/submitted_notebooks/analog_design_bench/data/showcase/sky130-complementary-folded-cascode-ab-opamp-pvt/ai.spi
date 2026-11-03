@@ -1,0 +1,34 @@
+.subckt complementary_folded_cascode_ab_opamp vss iref vdd vinn vinp vout
+XREF iref iref vss vss sky130_fd_pr__nfet_01v8 l=2 w=60 nf=12
+XBP pb iref vss vss sky130_fd_pr__nfet_01v8 l=2 w=60 nf=12
+XPB pb pb vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=120 nf=24
+XBCP pcb iref vss vss sky130_fd_pr__nfet_01v8 l=2 w=60 nf=12
+XPCB pcb pcb vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=16 nf=4
+XBCN ncb pb vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=120 nf=24
+XNCB ncb ncb vss vss sky130_fd_pr__nfet_01v8 l=2 w=5 nf=1
+RINP vinp inp 10k
+RBP inp vdd 10k
+RINN vinn inn 10k
+RBN inn vdd 10k
+XTAIL tail iref vss vss sky130_fd_pr__nfet_01v8 l=2 w=180 nf=30
+RSP sp tail 500
+RSN sn tail 500
+XINP dp inp sp vss sky130_fd_pr__nfet_01v8_lvt l=1 w=60 nf=12
+XINN dn inn sn vss sky130_fd_pr__nfet_01v8_lvt l=1 w=60 nf=12
+XFP dp pb vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=360 nf=60
+XFN dn pb vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=360 nf=60
+XFCP first pcb dp vdd sky130_fd_pr__pfet_01v8 l=1 w=180 nf=30
+XFCN mirror pcb dn vdd sky130_fd_pr__pfet_01v8 l=1 w=180 nf=30
+XM1 nm1 mirror vss vss sky130_fd_pr__nfet_01v8 l=2 w=60 nf=12
+XM2 nm2 mirror vss vss sky130_fd_pr__nfet_01v8 l=2 w=60 nf=12
+XMC1 mirror ncb nm1 vss sky130_fd_pr__nfet_01v8 l=1 w=120 nf=20
+XMC2 first ncb nm2 vss sky130_fd_pr__nfet_01v8 l=1 w=120 nf=20
+XOP vout pb vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=900 nf=150
+XON vout first vss vss sky130_fd_pr__nfet_01v8 l=1 w=600 nf=100
+RCOMP first comp 1k
+CCOMP comp vout 15p
+CBN iref vss 5p
+CBP pb vdd 5p
+CBCP pcb vdd 5p
+CBCN ncb vss 5p
+.ends complementary_folded_cascode_ab_opamp

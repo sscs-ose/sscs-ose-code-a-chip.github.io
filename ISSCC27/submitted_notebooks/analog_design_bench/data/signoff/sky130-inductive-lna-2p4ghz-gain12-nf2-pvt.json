@@ -1,0 +1,126 @@
+{
+ "task_slug": "sky130-inductive-lna-2p4ghz-gain12-nf2-pvt",
+ "spec": "Meet each RF requirement across all 27 combinations of tt, ss, ff; 1.62, 1.80, 1.98 V; and -40, 27, 125 C, unless its bullet explicitly names a narrower PVT scope. Both RF ports are driven and terminated in 50 ohms, and the bench supplies a 50 uA reference current.\n\n- Across 2.35--2.45 GHz, transducer gain must remain >= 12 dB, gain ripple must be <= 1.5 dB, and S11 and S22 must remain <= -10 dB.\n- Across 2.35--2.45 GHz, noise figure must be <= 2.0 dB and reverse isolation must be <= -30 dB.\n- Rollet K >= 1.2 and |delta| < 1.0 from 0.1--10 GHz.\n- Supply power <= 10 mW; `iref` must remain at least 0.40 V and at least 0.10 V below VDD.",
+ "reference": {
+  "transistors": 8,
+  "checks": [
+   {
+    "name": "band_transducer_gain",
+    "status": "passed",
+    "message": "gain_min=15.8dB at ff/1.62V/+125C; gain_max=19.1dB; ripple_max=0.458dB at tt/1.62V/-40C"
+   },
+   {
+    "name": "input_match",
+    "status": "passed",
+    "message": "S11_worst=-12.2dB at ff/1.62V/+125C"
+   },
+   {
+    "name": "output_match",
+    "status": "passed",
+    "message": "S22_worst=-12.4dB at ss/1.98V/+125C"
+   },
+   {
+    "name": "noise_figure",
+    "status": "passed",
+    "message": "NF_worst=1.98dB at ff/1.62V/+125C"
+   },
+   {
+    "name": "reverse_isolation",
+    "status": "passed",
+    "message": "S12_worst=-30.4dB at ff/1.62V/+125C"
+   },
+   {
+    "name": "unconditional_stability",
+    "status": "passed",
+    "message": "K_min=2.166 at ff/1.62V/-40C; delta_max=0.9847 at ff/1.62V/+27C"
+   },
+   {
+    "name": "power_and_bias_compliance",
+    "status": "passed",
+    "message": "power_max=6.003mW at ss/1.98V/+125C; iref_min=0.6338V; headroom_min=0.8215V"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 3,
+  "checks": [
+   {
+    "name": "band_transducer_gain",
+    "status": "passed",
+    "message": "gain_min=12.5dB at ff/1.62V/+125C; gain_max=15.3dB; ripple_max=0.299dB at ff/1.98V/+125C"
+   },
+   {
+    "name": "input_match",
+    "status": "passed",
+    "message": "S11_worst=-11.5dB at ff/1.62V/+125C"
+   },
+   {
+    "name": "output_match",
+    "status": "passed",
+    "message": "S22_worst=-13.4dB at ff/1.98V/+125C"
+   },
+   {
+    "name": "noise_figure",
+    "status": "passed",
+    "message": "NF_worst=1.937dB at ss/1.62V/+125C"
+   },
+   {
+    "name": "reverse_isolation",
+    "status": "passed",
+    "message": "S12_worst=-35.4dB at ff/1.98V/+125C"
+   },
+   {
+    "name": "unconditional_stability",
+    "status": "passed",
+    "message": "K_min=4.948 at ff/1.98V/+125C; delta_max=0.9774 at ff/1.62V/+125C"
+   },
+   {
+    "name": "power_and_bias_compliance",
+    "status": "passed",
+    "message": "power_max=8.201mW at ff/1.98V/+125C; iref_min=0.6428V; headroom_min=0.8117V"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 3,
+  "checks": [
+   {
+    "name": "band_transducer_gain",
+    "status": "passed",
+    "message": "gain_min=17.4dB at ff/1.62V/+125C; gain_max=19dB; ripple_max=0.369dB at ff/1.62V/+27C"
+   },
+   {
+    "name": "input_match",
+    "status": "passed",
+    "message": "S11_worst=-14.5dB at ss/1.98V/+125C"
+   },
+   {
+    "name": "output_match",
+    "status": "passed",
+    "message": "S22_worst=-14.7dB at ff/1.62V/+27C"
+   },
+   {
+    "name": "noise_figure",
+    "status": "passed",
+    "message": "NF_worst=1.531dB at ss/1.62V/+125C"
+   },
+   {
+    "name": "reverse_isolation",
+    "status": "passed",
+    "message": "S12_worst=-33.6dB at ff/1.62V/+125C"
+   },
+   {
+    "name": "unconditional_stability",
+    "status": "passed",
+    "message": "K_min=3.115 at ff/1.62V/+27C; delta_max=0.9817 at ff/1.62V/+125C"
+   },
+   {
+    "name": "power_and_bias_compliance",
+    "status": "passed",
+    "message": "power_max=9.59mW at ss/1.98V/+125C; iref_min=1.311V; headroom_min=0.2299V"
+   }
+  ]
+ }
+}

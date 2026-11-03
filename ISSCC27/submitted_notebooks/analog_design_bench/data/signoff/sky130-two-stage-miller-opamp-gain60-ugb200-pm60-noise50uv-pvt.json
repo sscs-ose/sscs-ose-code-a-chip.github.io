@@ -1,0 +1,186 @@
+{
+ "task_slug": "sky130-two-stage-miller-opamp-gain60-ugb200-pm60-noise50uv-pvt",
+ "spec": "- Provide `.subckt two_stage_miller_opamp vss iref vdd vinn vinp vout` with exactly this pin order. The testbench supplies a 50 µA reference current from `vdd` to `iref`; it uses 0.9 V input common mode and a 1 pF load from `vout` to `vss`.\n- Across all 27 combinations of `tt`, `ff`, and `ss`; 1.62, 1.80, and 1.98 V; and -40, 27, and 125 °C, require at least 60 dB open-loop DC gain, 200 MHz unity-gain bandwidth, 60° phase margin, output error no greater than 25 mV from 0.9 V, total power no greater than 2 mW, and no more than 50 µVrms input-referred noise. The loop-gain magnitude must not return above 0 dB beyond the unity-gain crossing.\n- Noise is measured in a noise-gain-20 closed loop from 10 Hz to that point's measured closed-loop -3 dB frequency.\n- At representative `tt/1.80 V/27 °C`, `ss/1.62 V/125 °C`, and `ff/1.98 V/-40 °C` stresses, require moderate positive-supply rejection of at least 35 dB at 1 kHz and 1 MHz, CMRR of at least 55 dB at 1 kHz, and a contiguous unity-feedback output range of at least 0.8 Vpp whose closed-loop tracking error is at most 20 mV.\n- At those same representative stresses, a 100 mV unity-follower step between 0.85 V and the explicit 0.95 V endpoint must settle within 20 ns, 2%, and 2 mV final error in both directions. A 0.65 V to 1.15 V unity-follower step must slew at least 50 V/µs in both directions.\n- The design may use hierarchy and any electrical implementation consistent with the interface. Use Sky130 1.8 V core MOS devices plus positive ideal resistors and capacitors; do not put independent, controlled, or behavioral sources in the DUT. Read `SKY130_NETLIST_GUIDE.md` in the starter before editing the circuit.\n\nFull signoff performs the complete 27-point gain/bandwidth/bias/power and noise matrices, plus the three stated representative dynamic and rejection stresses. Its informational report also includes `UGB × CL / IDD`, NEF, and PEF; these do not affect reward.",
+ "reference": {
+  "transistors": 10,
+  "checks": [
+   {
+    "name": "nominal_functional",
+    "status": "passed",
+    "message": "gain=76.31dB UGB=294.68MHz PM=70.34deg"
+   },
+   {
+    "name": "pvt_gain_bandwidth",
+    "status": "passed",
+    "message": "worst=72.71dB at ff/1.62V/+125C (min 60dB); worst=213.4MHz at ss/1.62V/+125C (min 200MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=63.72deg at ss/1.80V/-40C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=3.723mV at ss/1.62V/-40C (max 25mV)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=1861uW at ff/1.98V/+125C (max 2000uW)"
+   },
+   {
+    "name": "pvt_input_noise",
+    "status": "passed",
+    "message": "worst=47.75uVrms integrated 10Hz-14.94MHz at ss/1.98V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "pvt_supply_rejection",
+    "status": "passed",
+    "message": "worst=39.2dB at ss/1.62V/+125C (min 35dB); worst=39.19dB at ss/1.62V/+125C (min 35dB)"
+   },
+   {
+    "name": "pvt_common_mode_rejection",
+    "status": "passed",
+    "message": "worst=58.09dB at ss/1.62V/+125C (min 55dB)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=0.9739Vpp at ss/1.62V/+125C (min 0.8Vpp)"
+   },
+   {
+    "name": "closed_loop_settling",
+    "status": "passed",
+    "message": "time_max=5.467ns at ss/1.62V/+125C (max 20ns); final_max=1.031% at ss/1.62V/+125C; static_max=1.031mV at ss/1.62V/+125C"
+   },
+   {
+    "name": "slew_rate",
+    "status": "passed",
+    "message": "worst=223.8V/us at ss/1.62V/+125C (min 50V/us); worst=387.6V/us at ff/1.98V/-40C (min 50V/us)"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 8,
+  "checks": [
+   {
+    "name": "nominal_functional",
+    "status": "passed",
+    "message": "gain=65.87dB UGB=362.24MHz PM=79.22deg"
+   },
+   {
+    "name": "pvt_gain_bandwidth",
+    "status": "passed",
+    "message": "worst=61.32dB at ff/1.62V/-40C (min 60dB); worst=233.5MHz at ss/1.62V/+125C (min 200MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=62.87deg at ff/1.98V/-40C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=0.4495mV at ss/1.62V/-40C (max 25mV)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=1685uW at ss/1.98V/+125C (max 2000uW)"
+   },
+   {
+    "name": "pvt_input_noise",
+    "status": "passed",
+    "message": "worst=28.98uVrms integrated 10Hz-10.01MHz at tt/1.80V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "pvt_supply_rejection",
+    "status": "passed",
+    "message": "worst=61.29dB at ss/1.62V/+125C (min 35dB); worst=45.76dB at ss/1.62V/+125C (min 35dB)"
+   },
+   {
+    "name": "pvt_common_mode_rejection",
+    "status": "passed",
+    "message": "worst=72.21dB at ss/1.62V/+125C (min 55dB)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=1.011Vpp at ss/1.62V/+125C (min 0.8Vpp)"
+   },
+   {
+    "name": "closed_loop_settling",
+    "status": "passed",
+    "message": "time_max=4.374ns at ss/1.62V/+125C (max 20ns); final_max=0.2861% at ss/1.62V/+125C; static_max=0.2861mV at ss/1.62V/+125C"
+   },
+   {
+    "name": "slew_rate",
+    "status": "passed",
+    "message": "worst=168V/us at ss/1.62V/+125C (min 50V/us); worst=148.4V/us at ss/1.62V/+125C (min 50V/us)"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 18,
+  "checks": [
+   {
+    "name": "nominal_functional",
+    "status": "passed",
+    "message": "gain=87.85dB UGB=361.83MHz PM=76.79deg"
+   },
+   {
+    "name": "pvt_gain_bandwidth",
+    "status": "passed",
+    "message": "worst=82.73dB at ff/1.62V/+125C (min 60dB); worst=236MHz at ss/1.62V/+125C (min 200MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=72.98deg at ff/1.98V/-40C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=0.7279mV at ss/1.62V/+125C (max 25mV)"
+   },
+   {
+    "name": "pvt_power",
+    "status": "passed",
+    "message": "worst=1550uW at ff/1.98V/+125C (max 2000uW)"
+   },
+   {
+    "name": "pvt_input_noise",
+    "status": "passed",
+    "message": "worst=31.89uVrms integrated 10Hz-11.27MHz at ss/1.98V/+125C (max 50uVrms)"
+   },
+   {
+    "name": "pvt_supply_rejection",
+    "status": "passed",
+    "message": "worst=60.92dB at ss/1.62V/+125C (min 35dB); worst=60.95dB at ss/1.62V/+125C (min 35dB)"
+   },
+   {
+    "name": "pvt_common_mode_rejection",
+    "status": "passed",
+    "message": "worst=63.95dB at ss/1.62V/+125C (min 55dB)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=0.9448Vpp at ss/1.62V/+125C (min 0.8Vpp)"
+   },
+   {
+    "name": "closed_loop_settling",
+    "status": "passed",
+    "message": "time_max=3.899ns at ss/1.62V/+125C (max 20ns); final_max=0.7611% at ss/1.62V/+125C; static_max=0.7611mV at ss/1.62V/+125C"
+   },
+   {
+    "name": "slew_rate",
+    "status": "passed",
+    "message": "worst=68.37V/us at ss/1.62V/+125C (min 50V/us); worst=110.1V/us at ss/1.62V/+125C (min 50V/us)"
+   }
+  ]
+ }
+}

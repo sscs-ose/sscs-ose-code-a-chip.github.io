@@ -1,0 +1,47 @@
+.subckt test_fct cinn cinp coutn coutp ib sam transfer vcm
++ vddana vdddig vssana vssdig
+XCLK_N sam_b sam vssdig vssdig sky130_fd_pr__nfet_01v8 l=0.15 w=16
+XCLK_P sam_b sam vdddig vdddig sky130_fd_pr__pfet_01v8 l=0.15 w=32
+XIB ib ib vssana vssana sky130_fd_pr__nfet_01v8 l=0.5 w=10
+XIB_P pbias ib vssana vssana sky130_fd_pr__nfet_01v8 l=0.5 w=10
+XPBIAS pbias pbias vddana vddana sky130_fd_pr__pfet_01v8 l=0.15 w=3
+XCBIAS nbias pbias vddana vddana sky130_fd_pr__pfet_01v8 l=0.15 w=3
+XBIAS_LOW pcas pcas vssana vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=320
+XBIAS_HIGH nbias nbias pcas vssana sky130_fd_pr__nfet_01v8 l=0.15 w=0.6
+CIB ib vssana 1p
+CPBIAS pbias vddana 1p
+CNCAS nbias vssana 1p
+CPCAS pcas vssana 1p
+
+XIN_NN cinn sam vcm vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=32
+XIN_NP cinn sam_b vcm vddana sky130_fd_pr__pfet_01v8 l=0.15 w=48
+XIN_PN cinp sam vcm vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=32
+XIN_PP cinp sam_b vcm vddana sky130_fd_pr__pfet_01v8 l=0.15 w=48
+XEQ_NN cinn sam cinp vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=64
+XEQ_PN cinp sam cinn vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=64
+XEQ_NP cinn sam_b cinp vddana sky130_fd_pr__pfet_01v8 l=0.15 w=64
+XEQ_PP cinp sam_b cinn vddana sky130_fd_pr__pfet_01v8 l=0.15 w=64
+XCM_NN pgate_n sam pbias vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=24
+XCM_NP pgate_n sam_b pbias vddana sky130_fd_pr__pfet_01v8 l=0.15 w=16
+XCM_PN pgate_p sam pbias vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=24
+XCM_PP pgate_p sam_b pbias vddana sky130_fd_pr__pfet_01v8 l=0.15 w=16
+CF_N cinn coutn 58f
+CF_P cinp coutp 58f
+CGP_N cinn pgate_n 400f
+CGP_P cinp pgate_p 400f
+CCM_NN coutn pgate_n 10f
+CCM_NP coutp pgate_n 10f
+CCM_PN coutn pgate_p 10f
+CCM_PP coutp pgate_p 10f
+
+XRST_DIFF coutn sam coutp vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=16
+XTAIL tail ib vssana vssana sky130_fd_pr__nfet_01v8 l=0.5 w=440
+XAMP_NN lower_n cinn tail vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=180
+XAMP_NP upper_n pgate_n vddana vddana sky130_fd_pr__pfet_01v8 l=0.15 w=80
+XCAS_NN coutn nbias lower_n vssana sky130_fd_pr__nfet_01v8 l=0.3 w=80
+XCAS_NP coutn pcas upper_n vddana sky130_fd_pr__pfet_01v8 l=0.15 w=100
+XAMP_PN lower_p cinp tail vssana sky130_fd_pr__nfet_01v8_lvt l=0.15 w=180
+XAMP_PP upper_p pgate_p vddana vddana sky130_fd_pr__pfet_01v8 l=0.15 w=80
+XCAS_PN coutp nbias lower_p vssana sky130_fd_pr__nfet_01v8 l=0.3 w=80
+XCAS_PP coutp pcas upper_p vddana sky130_fd_pr__pfet_01v8 l=0.15 w=100
+.ends test_fct

@@ -1,0 +1,105 @@
+* Sky130 rail-to-rail input, class-AB output operational amplifier.
+* Complementary lvt input pairs with 1:1 tail-steering gm control,
+* folded-cascode summing stage, Monticelli floating class-AB bias,
+* common-source rail-to-rail output stage. Single 20 uA external reference.
+.subckt complementary_folded_cascode_ab_opamp vss iref vdd vinn vinp vout
+
+* W is total drawn channel width. nf partitions devices into no more than
+* approximately 8 um per finger for layout-plausible gate resistance and
+* diffusion geometry without changing the intended total channel width.
+
+* ---- bias core: iref is the NMOS mirror rail ----
+XMN1    iref iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=2
+XMN2    vbpd iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=2
+XMP1    vbpd vbpd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=48 nf=6
+
+* cascode gate bias generators
+XMP2    vcn  vbpd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=48 nf=6
+XMN3    vcn  vcn  vss vss sky130_fd_pr__nfet_01v8 l=2 w=4 nf=1
+XMN4    vcp  iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=2
+XMP3    vcp  vcp  vdd vdd sky130_fd_pr__pfet_01v8 l=2 w=10 nf=2
+
+* gm-control reference levels
+XMP4    vrefn vbpd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=24 nf=3
+XMN5    vrefn vrefn vss vss sky130_fd_pr__nfet_01v8_lvt l=1 w=3 nf=1
+XMN6    vrefp iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=8 nf=1
+XBIAS_P0 vrefp vrefp vdd vdd sky130_fd_pr__pfet_01v8_lvt l=1 w=8 nf=1
+
+* ---- complementary input pairs with tail steering ----
+* A long LVT tail device and modest source degeneration balance integrated
+* input noise against complementary-pair hand-off linearity.
+XMN7    ntail iref vss vss sky130_fd_pr__nfet_01v8_lvt l=20 w=88 nf=11
+XMN8    fp1 vinn ntail_n vss sky130_fd_pr__nfet_01v8_lvt l=1 w=512 nf=64
+XMN9    fp2 vinp ntail_p vss sky130_fd_pr__nfet_01v8_lvt l=1 w=512 nf=64
+RN8     ntail_n ntail 500
+RN9     ntail_p ntail 500
+XMP5    ptail vbpd vdd vdd sky130_fd_pr__pfet_01v8 l=20 w=480 nf=60
+XMP6    fn1 vinn ptail_n ptail sky130_fd_pr__pfet_01v8_lvt l=2 w=512 nf=64
+XMP7    fn2 vinp ptail_p ptail sky130_fd_pr__pfet_01v8_lvt l=2 w=512 nf=64
+RP6     ptail ptail_n 300
+RP7     ptail ptail_p 300
+
+* current switches divert unused tail current to the opposite pair
+XMN10   swnd vrefn ntail vss sky130_fd_pr__nfet_01v8_lvt l=1 w=128 nf=16
+XMP8    swnd swnd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=48 nf=6
+* A 1.5x steering mirror supplies the slow-P input path at low common mode
+* without increasing the mid-supply overlap current.
+XMP9    ptail swnd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=72 nf=9
+XMP10   swpd vrefp ptail ptail sky130_fd_pr__pfet_01v8_lvt l=2 w=256 nf=32
+XMN11   swpd swpd vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=2
+XMN12   ntail swpd vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=2
+
+* ---- folded-cascode summing stage ----
+* fold-sink bias rail tracks the steered tail currents so that the
+* cascode branch current stays constant over the input common-mode range
+XMP11   vbsink vbpd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=120 nf=15
+XMP12   vbsink swnd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=48 nf=6
+XMN13   vbsink swpd vss vss sky130_fd_pr__nfet_01v8 l=1 w=8 nf=1
+XMN14   vbsink vbsink vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=5
+* bottom current sinks
+XMN15   fn1 vbsink vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=5
+XMN16   fn2 vbsink vss vss sky130_fd_pr__nfet_01v8 l=1 w=40 nf=5
+* NMOS cascodes
+XBIAS_N1 ml  vcn fn1 vss sky130_fd_pr__nfet_01v8 l=4 w=64 nf=8
+XBIAS_N2 gn  vcn fn2 vss sky130_fd_pr__nfet_01v8 l=4 w=64 nf=8
+* top cascoded mirror
+XMP13   fp1 ml vdd vdd sky130_fd_pr__pfet_01v8 l=4 w=480 nf=60
+XMP14   fp2 ml vdd vdd sky130_fd_pr__pfet_01v8 l=4 w=480 nf=60
+XMP15   ml  vcp fp1 vdd sky130_fd_pr__pfet_01v8 l=6 w=240 nf=30
+XMP16   gp  vcp fp2 vdd sky130_fd_pr__pfet_01v8 l=6 w=240 nf=30
+
+* ---- Monticelli floating class-AB control ----
+* The reduced translinear control pair damps the otherwise hidden large-signal
+* relaxation mode while retaining push-pull output drive.
+XBIAS_N3 gp vabn gn vss sky130_fd_pr__nfet_01v8 l=8 w=64 nf=8
+XMP17   gn vabp gp vdd sky130_fd_pr__pfet_01v8_lvt l=8 w=128 nf=16
+* translinear bias stacks
+XMP18   vabn vbpd vdd vdd sky130_fd_pr__pfet_01v8 l=1 w=48 nf=6
+XLN1   vabn vabn x1 vss sky130_fd_pr__nfet_01v8 l=0.5 w=16 nf=2
+XLN2   x1 x1 vss vss sky130_fd_pr__nfet_01v8 l=0.5 w=8 nf=2
+XBIAS_N4 vabp iref vss vss sky130_fd_pr__nfet_01v8 l=1 w=16 nf=2
+XBIAS_P1 vabp vabp y1 vdd sky130_fd_pr__pfet_01v8_lvt l=0.5 w=32 nf=4
+XBIAS_P2 y1 y1 vdd vdd sky130_fd_pr__pfet_01v8_lvt l=0.5 w=24 nf=4
+
+* Symmetric local gate damping suppresses the hidden large-signal class-AB
+* relaxation mode without altering the DC output drive.
+CGP gp vdd 0.5p
+CGN gn vss 0.5p
+
+* ---- class-AB rail-to-rail output stage ----
+XMP19   vout gp vdd vdd sky130_fd_pr__pfet_01v8_lvt l=3 w=216 nf=27
+XMN17   vout gn vss vss sky130_fd_pr__nfet_01v8 l=3 w=512 nf=64
+
+* Symmetric RC bootstrapping makes the NMOS tail follow input common-mode at
+* high frequency. Differential components cancel at ntail, preserving gain.
+RCM1 vinn cmin 15k
+CCM1 cmin ntail 4p
+RCM2 vinp cmip 15k
+CCM2 cmip ntail 4p
+
+* Two series-RC Miller compensation paths, as in the reference schematic.
+CMP vout cmp_p 6p
+RCP cmp_p fp2 5k
+CMN vout cmp_n 6p
+RCN cmp_n fn2 5k
+.ends complementary_folded_cascode_ab_opamp

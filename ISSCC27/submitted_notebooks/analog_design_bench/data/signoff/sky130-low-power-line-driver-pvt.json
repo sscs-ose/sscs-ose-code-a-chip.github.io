@@ -1,0 +1,141 @@
+{
+ "task_slug": "sky130-low-power-line-driver-pvt",
+ "spec": "All requirements are evaluated over all 45 combinations of `tt`, `ff`, `ss`, `fs`, and `sf`; 1.62, 1.80, and 1.98 V supplies; and -40, 27, and 125 C. The testbench supplies 50 uA at `iref`. Closed-loop tests use two 10 kohm resistors for an inverting gain of -1 around a 0.9 V reference. The output drives a 1 uF coupling capacitor, 300 ohm line, and 200 pF lumped output/load parasitic.\n\n- Broken-loop gain at 10 Hz must be at least 40 dB, unity-gain bandwidth at least 0.5 MHz, and phase margin at least 60 degrees.\n- Quiescent output error from 0.9 V must be at most 20 mV, and quiescent VDD power at most 400 uW.\n- With a 20 kHz, 0.6 V-peak sine input, output fundamental must be at least 0.55 V and THD through the ninth harmonic at most 3%.\n- Peak VDD current during that sine test must be at least 2 mA and at least 10 times the quiescent supply current at the same PVT point.\n- A slow closed-loop sweep must provide at least 1.5 Vpp of output range with at most 20 mV tracking error.\n- Resistors and capacitors are ideal. Their variation and physical implementation are not modeled or graded; the stated 200 pF is the explicit lumped parasitic/load assumption.",
+ "reference": {
+  "transistors": 21,
+  "checks": [
+   {
+    "name": "pvt_loop_gain",
+    "status": "passed",
+    "message": "worst=52.32dB at ss/1.62V/-40C (min 40dB)"
+   },
+   {
+    "name": "pvt_bandwidth",
+    "status": "passed",
+    "message": "worst=0.5381MHz at ss/1.62V/-40C (min 0.5MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=65.13deg at fs/1.98V/-40C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=4.48mV at fs/1.98V/+125C (max 20mV)"
+   },
+   {
+    "name": "pvt_quiescent_power",
+    "status": "passed",
+    "message": "worst=347.8uW at fs/1.98V/+125C (max 400uW)"
+   },
+   {
+    "name": "line_distortion",
+    "status": "passed",
+    "message": "THD_max=0.572% at sf/1.62V/-40C (max 3%); fundamental_min=0.591V at sf/1.62V/-40C (min 0.55V)"
+   },
+   {
+    "name": "line_drive",
+    "status": "passed",
+    "message": "ipeak_min=2.16mA at ss/1.62V/-40C (min 2mA); drive_ratio_min=12.8 at fs/1.98V/+125C (min 10)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=1.536Vpp at tt/1.62V/-40C (min 1.5Vpp)"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 8,
+  "checks": [
+   {
+    "name": "pvt_loop_gain",
+    "status": "passed",
+    "message": "worst=63.94dB at sf/1.62V/+125C (min 40dB)"
+   },
+   {
+    "name": "pvt_bandwidth",
+    "status": "passed",
+    "message": "worst=0.6844MHz at fs/1.62V/+125C (min 0.5MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=85.28deg at sf/1.98V/-40C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=4.386mV at sf/1.62V/+125C (max 20mV)"
+   },
+   {
+    "name": "pvt_quiescent_power",
+    "status": "passed",
+    "message": "worst=343uW at sf/1.98V/+125C (max 400uW)"
+   },
+   {
+    "name": "line_distortion",
+    "status": "passed",
+    "message": "THD_max=0.412% at fs/1.98V/+125C (max 3%); fundamental_min=0.590V at sf/1.62V/+125C (min 0.55V)"
+   },
+   {
+    "name": "line_drive",
+    "status": "passed",
+    "message": "ipeak_min=2.12mA at sf/1.62V/-40C (min 2mA); drive_ratio_min=12.2 at sf/1.62V/+125C (min 10)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=1.534Vpp at tt/1.62V/-40C (min 1.5Vpp)"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 30,
+  "checks": [
+   {
+    "name": "pvt_loop_gain",
+    "status": "passed",
+    "message": "worst=68.42dB at ff/1.98V/+125C (min 40dB)"
+   },
+   {
+    "name": "pvt_bandwidth",
+    "status": "passed",
+    "message": "worst=0.7848MHz at sf/1.62V/+125C (min 0.5MHz)"
+   },
+   {
+    "name": "pvt_phase_margin",
+    "status": "passed",
+    "message": "worst=70.54deg at tt/1.98V/-40C (min 60deg)"
+   },
+   {
+    "name": "pvt_output_bias",
+    "status": "passed",
+    "message": "worst=1.69mV at ff/1.98V/+125C (max 20mV)"
+   },
+   {
+    "name": "pvt_quiescent_power",
+    "status": "passed",
+    "message": "worst=281.2uW at fs/1.98V/+125C (max 400uW)"
+   },
+   {
+    "name": "line_distortion",
+    "status": "passed",
+    "message": "THD_max=0.376% at sf/1.62V/-40C (max 3%); fundamental_min=0.597V at ff/1.62V/+125C (min 0.55V)"
+   },
+   {
+    "name": "line_drive",
+    "status": "passed",
+    "message": "ipeak_min=2.16mA at ss/1.62V/-40C (min 2mA); drive_ratio_min=15.6 at fs/1.98V/+125C (min 10)"
+   },
+   {
+    "name": "closed_loop_range",
+    "status": "passed",
+    "message": "worst=1.538Vpp at tt/1.62V/-40C (min 1.5Vpp)"
+   }
+  ]
+ }
+}

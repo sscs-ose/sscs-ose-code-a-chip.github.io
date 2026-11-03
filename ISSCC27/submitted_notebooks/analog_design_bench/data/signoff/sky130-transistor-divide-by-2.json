@@ -1,0 +1,81 @@
+{
+ "task_slug": "sky130-transistor-divide-by-2",
+ "spec": "Grading uses a 1 GHz clock at TT, 1.8 V, and 27 C with a 20 fF output load.\n\n- Reset must force `clkout` low within 100 ps. Releasing reset between clock edges must keep the output low until the next rising edge.\n- After reset release, `clkout` must be a 500 MHz output within +/-1%, with a 49% to 51% duty cycle and rising clock-to-output delay <= 400 ps.\n- Checked lows must be <= 0.36 V and highs >= 1.44 V.\n- The DUT may use ideal capacitor (`C`) primitives for internal state storage.\n- Ideal `R`, `L`, and `S` primitives are not permitted in the DUT.\n- The public benches provide the clock/reset sources, their series resistors, and the 20 fF output load.",
+ "reference": {
+  "transistors": 32,
+  "checks": [
+   {
+    "name": "reset",
+    "status": "passed",
+    "message": "delay=0.0773ns; pre/asserted/release/next=1.8/0.004928/0.002661/1.8V"
+   },
+   {
+    "name": "frequency",
+    "status": "passed",
+    "message": "input=1GHz; output=500MHz; ratio=2.00013"
+   },
+   {
+    "name": "duty_cycle",
+    "status": "passed",
+    "message": "high duty=49.901/49.891/49.891%; low duty=50.099/50.109/50.109%; levels passed"
+   },
+   {
+    "name": "clock_to_output_delay",
+    "status": "passed",
+    "message": "delays=251.992/252.386/252.386/252.386ps"
+   }
+  ]
+ },
+ "gpt-6-astra-thinking-max": {
+  "rollout": 1,
+  "transistors": 18,
+  "checks": [
+   {
+    "name": "reset",
+    "status": "passed",
+    "message": "delay=0.01771ns; pre/asserted/release/next=1.8/0.0006185/0.002332/1.8V"
+   },
+   {
+    "name": "frequency",
+    "status": "passed",
+    "message": "input=1GHz; output=500MHz; ratio=2"
+   },
+   {
+    "name": "duty_cycle",
+    "status": "passed",
+    "message": "high/low duty=50.3/50.3/50.3/49.7/49.7/49.7%; low/high=0.0004194/1.8V"
+   },
+   {
+    "name": "clock_to_output_delay",
+    "status": "passed",
+    "message": "delays=70.03/70.02/70.02/70.02ps"
+   }
+  ]
+ },
+ "claude-opus-5-5-max": {
+  "rollout": 1,
+  "transistors": 38,
+  "checks": [
+   {
+    "name": "reset",
+    "status": "passed",
+    "message": "delay=0.02035ns; pre/asserted/release/next=1.8/0.02074/0.0004508/1.8V"
+   },
+   {
+    "name": "frequency",
+    "status": "passed",
+    "message": "input=1GHz; output=500MHz; ratio=2"
+   },
+   {
+    "name": "duty_cycle",
+    "status": "passed",
+    "message": "high/low duty=49.94/49.95/49.95/50.06/50.05/50.05%; low/high=-1.349e-07/1.8V"
+   },
+   {
+    "name": "clock_to_output_delay",
+    "status": "passed",
+    "message": "delays=192/191.8/191.8/191.8ps"
+   }
+  ]
+ }
+}

@@ -1,0 +1,37 @@
+* Fixed FCT testbench fixture.  It is deliberately outside the submitted DUT.
+* The fixture owns sampling switches, flying capacitors, output precharge, and
+* output track-and-hold switches; test_fct remains transistor-level.
+.subckt fct_fixture_switch a b vss ctrl
+R1 b switch_series 1
+S1 switch_series a ctrl vss FCT_FIXTURE_SWITCH
+CA a vss 100a
+CB b vss 100a
+.ends fct_fixture_switch
+.model FCT_FIXTURE_SWITCH SW(Ron=0.1 Roff=1e12 Vt=0.9 Vh=0.0005)
+
+.subckt fct_fixture_clock_buffer a y vdd vss
+XN_OUTPUT vss buffer_mid y vss sky130_fd_pr__nfet_01v8 l=0.15 w=12.16 nf=1 as=1.8924 ad=1.7024 ps=18.66 pd=16.64
+XN_INPUT vss a buffer_mid vss sky130_fd_pr__nfet_01v8 l=0.15 w=3.04 nf=1 as=0.6156 ad=0.4256 ps=6.18 pd=4.16
+XP_OUTPUT y buffer_mid vdd vdd sky130_fd_pr__pfet_01v8 l=0.15 w=18.08 nf=1 as=2.813696 ad=2.5312 ps=25.32 pd=22.56
+XP_INPUT buffer_mid a vdd vdd sky130_fd_pr__pfet_01v8 l=0.15 w=4.52 nf=1 as=0.9153 ad=0.6328 ps=8.4 pd=5.64
+.ends fct_fixture_clock_buffer
+
+.subckt fct_fixture_sc sam init_precharge transfer vcm vinp vinn cinn cinp vdd vss
+CFLY_N fly_n_output_plate fly_n_input_plate {C_MSB}
+CFLY_P fly_p_output_plate fly_p_input_plate {C_MSB}
+XTRANSFER_COMPLEMENT_BUFFER transfer transfer_b vdd vss fct_fixture_clock_buffer
+XSW_P_TRANSFER_CM fly_p_input_plate vcm vss transfer fct_fixture_switch
+XSW_N_TRANSFER_CM vcm fly_n_input_plate vss transfer fct_fixture_switch
+XSW_N_SAMPLE_INPUT fly_n_input_plate vinn vss sam fct_fixture_switch
+XSW_P_SAMPLE_CM fly_p_output_plate vcm vss sam fct_fixture_switch
+XSW_P_TRANSFER_OUTPUT fly_p_output_plate cinp vss transfer_b fct_fixture_switch
+XSW_N_SAMPLE_CM vcm fly_n_output_plate vss sam fct_fixture_switch
+XSW_P_SAMPLE_INPUT vinp fly_p_input_plate vss sam fct_fixture_switch
+XSW_N_TRANSFER_OUTPUT cinn fly_n_output_plate vss transfer_b fct_fixture_switch
+* One startup-only precharge establishes the capacitor state before the first
+* 900 MS/s cycle; the regular sam-controlled switches remain unchanged.
+XINIT_SW_P_INPUT vinp fly_p_input_plate vss init_precharge fct_fixture_switch
+XINIT_SW_N_INPUT fly_n_input_plate vinn vss init_precharge fct_fixture_switch
+XINIT_SW_P_CM fly_p_output_plate vcm vss init_precharge fct_fixture_switch
+XINIT_SW_N_CM vcm fly_n_output_plate vss init_precharge fct_fixture_switch
+.ends fct_fixture_sc

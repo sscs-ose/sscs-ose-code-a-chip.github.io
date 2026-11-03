@@ -1,0 +1,98 @@
+* Public development testbench: all-NMOS half-bridge bootstrap high-side gate driver.
+* DUT: .subckt bootstrap_driver GN GN2 IN VBST VDD VLX VSS VSW
+* Single representative point: TT corner, 27 C, 1.8 V supply, 50 ns input pulse.
+* This bench mirrors the hidden verifier's measurement semantics for every scored
+* capability so you can check your design before submission:
+*   g1  dead time between high-side (vgs) and low-side (GN2) gate drives in [3,7] ns
+*   g2  driver power = |1.8*avg(I_VDDDUT)| < 3.5 mW (includes bootstrap charging)
+*   g3  high-side gate-drive voltage average in [1.65,1.85] V during VSW>0.9
+*   g4  gate-drive voltage transient peak < 2.15 V   (vgs = v(GN)-v(VSW))
+*   g5  peak high-side power current < 800 mA (severe shoot-through guardrail)
+*   g6  device node voltage limits: vbst-vlx, gn2 < 2.15 V; vbst < 5.65 V
+* The external power stage (two 450x50um 1.8V NMOS), the 3.6 ohm load, the
+* wirebond parasitics (2 nH / 5 mOhm) and the designable off-chip bootstrap
+* capacitor (cboot from the DUT's .param cboot, <= 100nF) are provided here.
+* Use this to verify your design before submission.
+*
+* NOTE: the hidden signoff runs the full 3 corners x 3 temps x 3 pulse widths
+* (9 points per corner) over the 0.5us-1us window. This public bench is a single
+* representative point to help you iterate; passing it is necessary but not sufficient.
+
+.lib "/opt/sky130/continuous/sky130.lib.spice" tt
+.include "../circuit.spi"
+.options reltol=1e-4 abstol=1e-10 vntol=1e-6 method=trap
+
+.param supply=1.8
+.param pw=50n
+.param temperature=27
+
+VSS vss 0 0
+VDD vdd 0 {supply}
+VDDDUT vdd_dut vdd 0
+VHS vdd_hs vdd 0
+VIN src 0 PULSE(0 {supply} 0 3n 3n {pw} 100n)
+RIN src in 50
+
+* Off-chip parasitic inductance/resistance on DUT supply rails (VDD, VSS): 0.3nH, 3mOhm
+LVDD vdd_dut vdd_pkg 0.3n
+RVDD vdd_pkg vdd_core 3m
+LVSS vss vss_pkg 0.3n
+RVSS vss_pkg vss_core 3m
+
+* DUT ports: GN GN2 IN VBST VDD VLX VSS VSW
+XBD hi_g lo_g in vbst vdd_core vlx vss_core vsw bootstrap_driver
+
+* External bootstrap network (designable off-chip cap from DUT's .param cboot + wirebond parasitics)
+L0 vbst net9 2n
+RL0 net9 net9b 5m
+L1 vlx ext_vlx 2n
+RL1 ext_vlx ext_vlx2 5m
+C0 net9b ext_vlx2 {cboot}
+
+* External power stage (1.8V NMOS, 450 fingers x 50um)
+XMN1 vdd_hs hi_g vsw ext_vlx2 sky130_fd_pr__nfet_01v8 w=50 l=0.15 m=450
+XMN0 vsw lo_g vss vss sky130_fd_pr__nfet_01v8 w=50 l=0.15 m=450
+
+* Load
+R0 vsw vss 3.6
+
+* Behavioral node: vgs = v(hi_g) - v(vsw)
+E_VGS vgs 0 value={v(hi_g)-v(vsw)}
+* Behavioral node: |high-side power NMOS current| (for shoot-through peak)
+E_ABS_HS abs_hs 0 value={abs(i(vhs))}
+* Behavioral node: bootstrap-cap voltage (1.8V device overstress check)
+E_VBST_CAP vbst_cap 0 value={v(vbst)-v(vlx)}
+
+.temp {temperature}
+
+.control
+set noaskquit
+set temp = 27
+tran 0.4n 1u 0.5u 0.4n
+* --- g4: gate-drive transient peak ---
+meas tran vgs_peak MAX v(vgs) from=0.5u to=1u
+* --- g5: high-side power current peak (shoot-through) ---
+meas tran hs_peak MAX v(abs_hs) from=0.5u to=1u
+meas tran vbst_peak MAX v(vbst_cap) from=0.5u to=1u
+meas tran gn2_peak MAX v(lo_g) from=0.5u to=1u
+meas tran vbst_top_peak MAX v(vbst) from=0.5u to=1u
+* --- g1: dead time (high->low: vgs falls, GN2 rises) ---
+meas tran dead_hl TRIG v(vgs) VAL=0.9 FALL=2 TARG v(lo_g) VAL=0.9 RISE=2 from=0.5u to=1u
+* --- g1: dead time (low->high: GN2 falls, vgs rises) ---
+meas tran dead_lh TRIG v(lo_g) VAL=0.9 FALL=2 TARG v(vgs) VAL=0.9 RISE=2 from=0.5u to=1u
+* --- g3: vgs_avg = time-weighted average during VSW>0.9 ---
+let vgsv = v(vgs)
+let hon = v(vsw) > 0.9
+let vgs_on = vgsv * hon
+let vgs_on_int = integ(vgs_on)
+let hon_int = integ(hon)
+let vgs_avg = vgs_on_int[length(vgs_on_int)-1] / hon_int[length(hon_int)-1]
+* --- g2: driver power = |1.8*avg(I_VDDDUT)| ---
+let pv = 1.8 * i(vdddut)
+let pv_int = integ(pv)
+let dt = time[length(time)-1] - time[0]
+let p_dut = abs(pv_int[length(pv_int)-1] / dt)
+print vgs_peak hs_peak dead_hl dead_lh vgs_avg p_dut vbst_peak gn2_peak vbst_top_peak
+quit
+.endc
+.end

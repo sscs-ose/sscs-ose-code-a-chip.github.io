@@ -1,0 +1,32 @@
+* TT nominal unity-follower 100 mV settling example, both directions.
+* The rising edge starts at 5 ns and is scored against 0.95 V inside the
+* 5-65 ns window; the falling edge starts at 66 ns and is scored against
+* 0.85 V inside the 66-130 ns window. Each window is three times the
+* 20 ns limit, and the emitted scalars are the worse of the two edges.
+.lib "/opt/sky130/continuous/sky130.lib.spice" tt
+.include "/app/circuit.spi"
+.options filetype=ascii reltol=2e-4 abstol=1e-12 vntol=1e-6
+.temp 27
+VSS vss 0 0
+VDD vdd vss 1.8
+IREF vdd iref 50u
+VIN vinp vss PULSE(0.85 0.95 5n 1n 1n 60n 130n)
+VFB vout vinn 0
+XAMP vss iref vdd vinn vinp vout two_stage_miller_opamp
+CL vout vss 1p
+.control
+set noaskquit
+tran 100p 130n
+let error_up = abs(v(vout) - 0.95)
+meas tran cross_up when error_up=2m cross=last to=65n
+meas tran final_up find v(vout) at=65n
+let error_down = abs(v(vout) - 0.85)
+meas tran cross_down when error_down=2m cross=last from=66n
+meas tran final_down find v(vout) at=130n
+let settling_time_s = max(max(0, cross_up - 5n), max(0, cross_down - 66n))
+let settling_static_error_v = max(abs(final_up - 0.95), abs(final_down - 0.85))
+let settling_error_fraction = settling_static_error_v / 0.1
+print settling_time_s settling_static_error_v settling_error_fraction
+quit
+.endc
+.end
