@@ -1,0 +1,41 @@
+CAPI=2:
+name: edabk:automx:mha:0.1.0
+description: Two-token, four-channel, two-head synthesizable MHA with CIM/SAR backend
+filesets:
+  rtl:
+    files: [rtl/automx_mha_ip.sv]
+    file_type: systemVerilogSource
+  mixed_top:
+    files:
+      - rtl/automx_cim_readout_seq.sv
+      - rtl/automx_cim_mixed_signal_proto.sv
+      - rtl/wrapper_blackboxes.sv
+    file_type: systemVerilogSource
+  digital_backend:
+    files: [rtl/automx_ternary_projection_digital.sv]
+    file_type: systemVerilogSource
+  physical_blackbox:
+    files:
+      - rtl/digital_blackboxes.sv
+      - rtl/wrapper_blackboxes.sv
+      - rtl/automx_cim_mixed_signal_proto.sv
+    file_type: systemVerilogSource
+  unit_tb:
+    files: [sim/tb_mha_ip.sv]
+    file_type: systemVerilogSource
+  integration_tb:
+    files: [sim/tb_mha_mixed_top.sv]
+    file_type: systemVerilogSource
+targets:
+  default:
+    filesets: [rtl]
+    toplevel: automx_mha_ip
+  mixed_top:
+    filesets: [rtl, mixed_top]
+    toplevel: automx_cim_mixed_signal_proto
+  digital_baseline:
+    filesets: [rtl, digital_backend]
+    toplevel: automx_mha_digital_top
+  physical_blackbox:
+    filesets: [physical_blackbox]
+    toplevel: automx_cim_mixed_signal_proto
