@@ -1,0 +1,335 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+******************************************************************
+******************************************************************
+*  *****************************************************
+*  04/22/2021 Usman Suriono
+*      Why     : New infrastructure of the ESD sky130_fd_pr__nfet_01v8 model.
+*      What    : Converted from nshortesd model into a continuous model.
+*
+*  *****************************************************
+*
+*  ESD Nmos Model
+*  -----------------------------------------------------
+
+.subckt  sky130_fd_pr__nfet_01v8_esd d g s b mult=1
++ 
+.param  l = 1 w = 1 nf = 1 ad = 0 as = 0 pd = 0 ps = 0 nrd = {0.14/w} nrs = {0.14/w} sa = 0 sb = 0 sd = 0
++ swx_nrds = {89.1*nf/w+443.5}
+* Corners and MC
++ swx_vth = {sw_vth0_sky130_fd_pr__nfet_01v8+sw_mm_vth0_sky130_fd_pr__nfet_01v8*mismatch_factor*MC_MM_SWITCH*AGAUSS(0,1.0,1)/sqrt(l*w*mult)+sw_vth0_sky130_fd_pr__nfet_01v8_mc}
+*
+* legacy fitting parameters from Cypress
++ nshortesd_vth0_diff_0 = -0.0084454
++ nshortesd_k2_diff_0 = 0.017628
++ nshortesd_vsat_diff_0 = -4452.6
++ nshortesd_u0_diff_0 = -0.0038175
++ nshortesd_ua_diff_0 = 3.4854e-11
++ nshortesd_ub_diff_0 = -3.6155e-19
++ nshortesd_nfactor_diff_0 = 0.0043861
+
+
+Msky130_fd_pr__nfet_01v8_esd d g s b nshortesd_model l = {l} w = {w} ad = {ad} as = {as} pd = {pd} ps = {ps} nrd = {nrd} nrs = {nrs} sa = {sa} sb = {sb} sd = {sd} nf = {nf}
+* + deltox = 0.3*(sw_tox_lv_corner - sw_tox_lv_nom) + sw_tox_lv_mc + sw_mm_tox_lv * mismatch_factor*MC_MM_SWITCH*AGAUSS(0,1.0,1)/sqrt(l*w*mult)
++ delvto = {-0.027+swx_vth*2.6+(0.2*(-0.165/l+1))}
+* + mulvsat = 0.75*sw_vsat_sky130_fd_pr__nfet_01v8**0.5
+* + mulu0  = 0.9*sw_u0_sky130_fd_pr__nfet_01v8
+
+
+*+ delvto  = -0.006 + 0.02*(1/l - 1/0.55) + swx_vth*1.35
+*+ mulvsat = 0.93 * (sw_vsat_sky130_fd_pr__nfet_g5v0d10v5**0.5) * (1 + 0.25*(1/l - 1/0.55))
+
+
+.model nshortesd_model nmos 
+*
+* DC IV MOS PARAMETERS
+*
++ lmin = 1.6e-07 lmax = 1.87e-07 wmin = 5.395e-06 wmax = 1.0355e-03
++ level = 54
++ tnom = 30
++ version = 4.5
++ toxm = 4.1482e-009
++ xj = 1.5e-007
++ lln = 1
++ lwn = 1
++ wln = 1
++ wwn = 1
++ lint = {1.2561e-008-sw_polycd}
++ ll = 0
++ lw = 0
++ lwl = 0
++ wint = {1.1879846e-008+sw_activecd}
++ wl = 0
++ ww = 0
++ wwl = 0
++ xl = 0
++ xw = 0
++ mobmod = 0
++ binunit = 2
++ dwg = 0
++ dwb = 0
+* NEW BSIM4 Parameters(Model Selectors)
++ igcmod = 0
++ igbmod = 0
++ rgatemod = 0
++ rbodymod = 1
++ trnqsmod = 0
++ acnqsmod = 0
++ fnoimod = 1
++ tnoimod = 1
++ permod = 1
++ geomod = 0
++ rdsmod = 0
++ tempmod = 0
+* ******
+* NEW BSIM4 Parameters(4.4 Version)
++ lintnoi = -1.0e-07
++ vfbsdoff = 0
++ lambda = 0
++ vtl = 200000
++ lc = 5e-009
++ xn = 3
++ rnoia = 0.577
++ rnoib = 0.5164
++ tnoia = 1.5
++ tnoib = 3.5
+* NEW BSIM4 Parameters(Process Parameters)
++ epsrox = 3.9
++ toxe = 4.1482e-009
++ dtox = 0
++ ndep = 1.7e+017
++ nsd = 1e+020
++ rshg = 0.1
+* ***
++ rsh = {swx_nrds}
+*
+*  THRESHOLD VOLTAGE PARAMETERS
+*
++ vth0 = {0.565+nshortesd_vth0_diff_0}
++ k1 = 0.50824
++ k2 = {-0.036074+nshortesd_k2_diff_0}
++ k3 = 0
++ dvt0 = 0
++ dvt1 = 0.53
++ dvt2 = -0.032
++ dvt0w = -3.58
++ dvt1w = 1670600
++ dvt2w = 0
++ w0 = 0
++ k3b = 0
+* NEW BSIM4 Parameters for Level 54
++ phin = 0
++ lpe0 = 8.8387e-008
++ lpeb = -7.1972e-008
++ vbm = -3
++ dvtp0 = 0
++ dvtp1 = 0
+*
+*  MOBILITY PARAMETERS
+*
++ vsat = {163960+nshortesd_vsat_diff_0}
++ ua = {-1.244e-009+nshortesd_ua_diff_0}
++ ub = {1.6282e-018+nshortesd_ub_diff_0}
++ uc = 1.9958e-011
++ rdsw = 174.5
++ prwb = -0.17995
++ prwg = 0.011
++ wr = 1
++ u0 = {0.028432+nshortesd_u0_diff_0}
++ a0 = 1.5
++ keta = 0.0873
++ a1 = 0
++ a2 = 0.42385546
++ ags = 0.4092
++ b0 = 0
++ b1 = 0
+* NEW BSIM4 Parameters(Mobility Parameters)
++ eu = 1.67
++ rdswmin = 0
++ rdw = 0
++ rdwmin = 0
++ rsw = 0
++ rswmin = 0
+* ****
+*
+*  SUBTHRESHOLD CURRENT PARAMETERS
+*
++ voff = -0.1848
++ nfactor = {2+nshortesd_nfactor_diff_0}
++ up = 0.0
++ ud = 0.0
++ lp = 1.0
++ tvfbsdoff = 0.0
++ tvoff = 0
++ cit = 0
++ cdsc = 0
++ cdscb = 0
++ cdscd = 0
++ eta0 = 0
++ etab = 0.001
++ dsub = 0.1
+* NEW BSIM4 Parameters(Sub-threshold parameters)
++ voffl = 5.8197729e-009
++ minv = 0
+* ****
+*
+*  ROUT PARAMETERS
+*
++ pclm = 0.17122
++ pdiblc1 = 0.10049528
++ pdiblc2 = 0.020103
++ pdiblcb = -1
++ drout = 0.48621
++ pscbe1 = 3.6928e+008
++ pscbe2 = 2.2e-006
++ pvag = 0
++ delta = 0.01184
++ alpha0 = 1.414e-006
++ alpha1 = 1.4744
++ beta0 = 17.6
+* NEW BSIM4 Parameters(ROUT Parameters)
++ fprout = 0
++ pdits = 3.041136e-013
++ pditsl = 0
++ pditsd = 0
+* ***
+* NEW BSIM4 Parameters(GATE INDUCED DRAIN LEAKAGE MODEL PARAMTERS)
++ agidl = 0
++ bgidl = 2.3e+009
++ cgidl = 0.5
++ egidl = 0.8
+* ***
+* NEW BSIM4 Parameters(Gate Leakage Current Parameters)
++ aigbacc = 1
++ bigbacc = 0
++ cigbacc = 0
++ nigbacc = 0
++ aigbinv = 0.35
++ bigbinv = 0.03
++ cigbinv = 0.006
++ eigbinv = 1.1
++ nigbinv = 0
++ aigc = 0.43
++ bigc = 0.054
++ cigc = 0.075
++ nigc = 0
++ aigsd = 0.43
++ bigsd = 0.054
++ cigsd = 0.075
++ dlcig = 0
++ poxedge = 1
++ pigcd = 1
++ ntox = 1
++ toxref = 4.1482e-009
+* ****
+*
+*  TEMPERATURE EFFECTS PARAMETERS
+*
++ kt1 = -0.29744
++ kt2 = -0.019143
++ at = 79266
++ ute = -1.6806
++ ua1 = 5.504e-010
++ ub1 = 2.7351e-019
++ uc1 = 1.6706e-010
++ kt1l = 0
++ prt = 0
+* NEW BSIM4 Parameters(HIGH SPEED RF MODEL PARAMETERS)
++ xrcrg1 = 12
++ xrcrg2 = 1
++ rbpb = 50
++ rbpd = 50
++ rbps = 50
++ rbdb = 50
++ rbsb = 50
++ gbmin = 1e-012
+* ***
+* NEW BSIM4 Parameters(FLICKER and THERMAL NOISE PARAMETERS)
++ noia = 2.5e+42
++ noib = 0.0
++ noic = 0.0
++ em = 4.1000000E+07
++ af = 1
++ ef = 0.84
++ kf = 0
++ ntnoi = 1
+* ****
+* NEW BSIM4 Parameters(LAYOUT DEPENDENT PARASITIC MODEL PARAMETERS)
++ dmcg = 0
++ dmcgt = 0
++ dmdg = 0
++ xgl = 0
++ ngcon = 1
+* ***
+*
+* DIODE DC IV PARAMTERS
+*
+* NEW BSIM4 Parameters(DIODE DC IV parameters)
++ diomod = 1
++ njs = 1.2928
++ jss = 0.0027500000000000003
++ jsws = 6e-10
++ xtis = 2
++ bvs = 11.7
++ xjbvs = 1
++ ijthsrev = 0.1
++ ijthsfwd = 0.1
+*
+*  DIODE and FET CAPACITANCE PARAMETERS
+*
++ tpb = 0.0012287
++ tpbsw = 0
++ tpbswg = 0
++ tcj = 0.000792
++ tcjsw = 1e-005
++ tcjswg = 0
++ cgdo = {3.2e-010*0.9842/sw_func_tox_lv_ratio}
++ cgso = {3.2e-010*0.9842/sw_func_tox_lv_ratio}
++ cgbo = 1e-013
++ capmod = 2
++ xpart = 0
++ cgsl = 0
++ cgdl = 0
++ cf = 1.4067e-012
++ clc = 1e-007
++ cle = 0.6
++ dlc = {1.8739e-008-0.61491e-9-sw_polycd}
++ dwc = {sw_activecd}
++ vfbcv = -1
++ acde = 0.4
++ moin = 6.9
++ noff = 3.621
++ voffcv = -0.1372
++ ngate = 1e+023
++ lwc = 0
++ llc = 0
++ lwlc = 0
++ wlc = 0
++ wwc = 0
++ wwlc = 0
+* NEW BSIM4 Parameters(FET and DIODE capacitance parameters)
++ ckappas = 0.6
++ cjs = {sw_nsd_pw_cj}
++ mjs = 0.44
++ pbs = 0.729
++ cjsws = {3.6001e-011*sw_func_nsd_pw_cj}
++ mjsws = 0.0009
++ pbsws = 0.2
++ cjswgs = {2.3347e-010*sw_func_nsd_pw_cj}
++ mjswgs = 0.8000
++ pbswgs = 0.95578
+
+.ends sky130_fd_pr__nfet_01v8_esd
+* *****

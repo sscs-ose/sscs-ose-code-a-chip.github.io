@@ -1,0 +1,110 @@
+{
+  "format": "trust-before-pass-browser-journal-v1",
+  "release": "0.4.0-rc1",
+  "record_type": "local learner-entered attempts; not automatically verified human-study data",
+  "evidence_manifest_sha256": "07ce8e74843b3737f7704b77e891a1b6d015137378f8efc3dcd6da76501dc294",
+  "attempts": [
+    {
+      "id": 1,
+      "task": "rules",
+      "key": "rules:1.5:0.9:1",
+      "prediction": {
+        "measurement": "VALID",
+        "functional": "PASS",
+        "scalar_spec": "FAIL"
+      },
+      "reason": "AUTOMATED UI TEST: only the scalar upper bound changed; the response contract did not.",
+      "created_at": "2026-10-16T03:03:41.501Z",
+      "settings": [
+        {
+          "observe_until_ms": 4,
+          "measurement_start_ms": 1.5,
+          "threshold_v": 0.9,
+          "scalar_max_ms": 1,
+          "deadline_ms": 2
+        }
+      ],
+      "sources": [
+        "f861eb240e04044c9c344afd8b3c10cbf480b439dd6ee3cab8b6321964f3b209"
+      ],
+      "actual": {
+        "measurement": "VALID",
+        "scalar_spec": "FAIL",
+        "functional": "PASS"
+      },
+      "explanation": "AUTOMATED UI TEST: both edges are visible and the response is within T1, but the measured delay exceeds 1 ms.",
+      "feedback": "Recorded execution: COMPLETE. Selected-window measurement: VALID (required ordered events observed). Scalar bounds: FAIL. T1 function: PASS. AVDD crosses 3.0 V at 1.818 ms, so the T1 deadline is 3.818 ms. A new POR edge is observed at 2.862 ms, within the deadline. This witnesses the narrow T1 response. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance.",
+      "comparisons": [
+        {
+          "dimension": "measurement",
+          "prediction": "VALID",
+          "actual": "VALID",
+          "matched": true
+        },
+        {
+          "dimension": "functional",
+          "prediction": "PASS",
+          "actual": "PASS",
+          "matched": true
+        },
+        {
+          "dimension": "scalar_spec",
+          "prediction": "FAIL",
+          "actual": "FAIL",
+          "matched": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "task": "challenge",
+      "key": "challenge:4.4",
+      "prediction": {
+        "measurement": "INVALID",
+        "functional": "INSUFFICIENT_EVIDENCE"
+      },
+      "reason": "AUTOMATED UI TEST: the supply trigger is later and the observation does not yet cover its deadline.",
+      "created_at": "2026-10-16T03:04:47.258Z",
+      "settings": [
+        {
+          "observe_until_ms": 4.4,
+          "measurement_start_ms": 1.5,
+          "threshold_v": 0.9,
+          "scalar_max_ms": 2,
+          "deadline_ms": 2
+        }
+      ],
+      "sources": [
+        "7b1e3aa35fe200e12769078597c9d23faf2f3df51520c07e29d9bc8e8e1a865a"
+      ],
+      "actual": {
+        "measurement": "INVALID",
+        "scalar_spec": "NOT_EVALUATED",
+        "functional": "INSUFFICIENT_EVIDENCE"
+      },
+      "next_evidence": "AUTOMATED UI TEST: request enough time to cover 5.636 ms.",
+      "proposed_check": "AUTOMATED UI TEST: require a new edge after a supply trigger, but abstain if the observation ends too soon.",
+      "explanation": "AUTOMATED UI TEST: at 4.4 ms the response has not appeared, but the deadline has not passed.",
+      "feedback": "Recorded execution: COMPLETE. Selected-window measurement: INVALID (no POR rising crossing of 0.9 V in the selected 1.5â€“4.4 ms window). Scalar bounds: NOT_EVALUATED. T1 function: INSUFFICIENT_EVIDENCE. AVDD crosses 3.0 V at 3.636 ms, so the T1 deadline is 5.636 ms. This view ends at 4.400 ms, before the deadline. Observe through the deadline before calling the missing response a failure. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance.",
+      "comparisons": [
+        {
+          "dimension": "measurement",
+          "prediction": "INVALID",
+          "actual": "INVALID",
+          "matched": true
+        },
+        {
+          "dimension": "functional",
+          "prediction": "INSUFFICIENT_EVIDENCE",
+          "actual": "INSUFFICIENT_EVIDENCE",
+          "matched": true
+        }
+      ],
+      "additional_evidence": {
+        "key": "challenge:6",
+        "explanation": "Recorded execution: COMPLETE. Selected-window measurement: VALID (required ordered events observed). Scalar bounds: PASS. T1 function: PASS. AVDD crosses 3.0 V at 3.636 ms, so the T1 deadline is 5.636 ms. A new POR edge is observed at 4.552 ms, within the deadline. This witnesses the narrow T1 response. T1 is an educational assumption; neither this status nor an unchanged simulator exit code establishes full circuit compliance."
+      }
+    }
+  ],
+  "validation_context": "Agent-operated software test, not a human reader session. Captured before final feedback wording refinement."
+}

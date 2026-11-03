@@ -1,0 +1,54 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+* statistics {
+*   mismatch {
+*   }
+* }
+* 4-terminal Vertical Parallel Plate Capacitor /w LI-M4 fingers and M5 Shield
+.subckt  sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv c0 c1 b m5
++ 
+.param  mult = 1.0
++ 
++ ctot_a_toplevel = {48.188e-15*cvpp2_nhvnative10x4_cor+0.0283/sqrt(2*3.6*3.6*mult)*48.188e-15*cvpp2_nhvnative10x4_cor*sky130_fd_pr__model__cap_vpp_only_p__slope}
++ cm5_c0_toplevel = {4.79e-15*c0m5m4_vpp}
++ cm5_c1_toplevel = {5.02e-15*c1m5m4_vpp}
++ rat_m3_toplevel = 0.5
++ rat_m4_toplevel = 0.5
++ cap_m3_toplevel = {rat_m3_toplevel*ctot_a_toplevel}
++ cap_m4_toplevel = {rat_m4_toplevel*ctot_a_toplevel}
++ lm3_toplevel = 3.91
++ lm4_toplevel = 4.8
++ wm3_toplevel = 0.300
++ wm4_toplevel = 0.300
++ nfm3_toplevel = 38.0
++ nfm4_toplevel = 30.0
++ nvia3_c0_toplevel = 43.0
++ nvia3_c1_toplevel = 96.0
++ nvia2_c0_toplevel = 43.0
++ nvia2_c1_toplevel = 44.0
+ccmvppx4_2xnhvnative10x4 m5 a0  c = {cm5_c0_toplevel}
+cm5_1 m5 a1 c = {cm5_c1_toplevel}
+rsm4 a0 a2 r = {rm4*lm4_toplevel/wm4_toplevel*(1/3)*(1/nfm4_toplevel)}
+cm4 a2 a1 c = {cap_m4_toplevel}
+rvia3_0 a0 b0 r = {rcvia3/nvia3_c0_toplevel}
+rvia3_1 a1 b1 r = {rcvia3/nvia3_c1_toplevel}
+rsm3 b0 b2 r = {rm3*lm3_toplevel/wm3_toplevel*(1/3)*(1/nfm3_toplevel)}
+cm3 b2 b1 c = {cap_m3_toplevel}
+rvia2_0 b0 c0 r = {rcvia2/nvia2_c0_toplevel}
+rvia2_1 b1 c1 r = {rcvia2/nvia2_c1_toplevel}
+xvpp1 c0 c1 c1 sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o1nhv mult = 4 m = 4.0
+xvpp2 c1 c0 c1 c1 sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv__base w = 10 l = 4 ad = 3.15 as = 4.75 pd = 10.63 ps = 20.95 mult = 2 m = 2.0
+.ends sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv

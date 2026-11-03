@@ -1,0 +1,29 @@
+* Copyright 2020 The SkyWater PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+* SKY130 Spice File.
+.subckt  sky130_fd_pr__cap_mim_m3_2 c0 c1 w=1 l=1 mf=1
+.param wc = 'w+m4_dw*1e6+tol_m4*1e6'
+.param lc = 'l+m4_dw*1e6+tol_m4*1e6'
+.param via4_spacing = '(0.28+0.31+0.140)*(0.28+0.31+0.140)'
+.param num_contacts = '(wc*lc/via4_spacing)'
+.param r1 = 'rm4*(lc)/(wc)'
+.param r2 = 'rcvia4/num_contacts'
+.param carea = 'camimc*(wc)*(lc)'
+.param cperim = 'cpmimc*((wc)+(lc))*2'
+.param czero = 'carea + cperim' dev/gauss='0.01*2.8*(carea + cperim)/sqrt(wc*lc*mf)'
+c1 c0       a 'czero' tc1 = 0 tc2 = 0.0
+rs1 a        b1 'r1' tc1 = {tc1rm4} tc2 = {tc2rm4}
+rs2 b1        c1 'r2' tc1 = {tc1rvia4} tc2 = {tc2rvia4}
+.ends sky130_fd_pr__cap_mim_m3_2
