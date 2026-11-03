@@ -1,0 +1,29 @@
+# Intrinsic diffusivity of boron in silicon.
+#
+# Source: Fair, "Concentration-Dependent Diffusion of Dopants in Silicon"
+#         (in R.B. Fair, ed., Impurity Doping Processes in Silicon, 1981);
+#         values also compiled in Plummer, Silicon VLSI Technology, Table 7.2.
+#
+# Form: D(T) = D0_cm2s * exp(-Ea_eV / (k_B · T))
+#
+# Fair's model for the full concentration-dependent diffusivity is
+#     D(n, p) = D_i + D_plus * (p / n_i)
+# — boron is an acceptor so hole-mediated diffusion dominates. Only the
+# intrinsic D_i part is used by Phase 2.3a; D_plus coefficients sit in
+# this YAML as placeholders for the Phase 2.3b upgrade.
+
+species: boron
+symbol: B
+target: Si
+dopant_kind: acceptor
+
+intrinsic:
+  D0_cm2s: 0.76        # pre-exponential  [cm² / s]
+  Ea_eV:   3.46        # activation energy [eV]
+
+# Fair concentration-dependent coefficients — placeholders.
+# Boron: D = D_i + D_plus * (p / n_i)
+fair:
+  D_plus:              # hole-mediated component
+    D0_cm2s: 0.95
+    Ea_eV:   3.46

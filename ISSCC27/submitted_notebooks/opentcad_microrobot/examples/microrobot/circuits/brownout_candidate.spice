@@ -1,0 +1,18 @@
+* DEVELOPMENT CANDIDATE: nominal operation only; corner startup fails.
+* Actuator-powered comparator. bn is the existing clock's NMOS bias output.
+* Reference tracks vact; this is not a compensated voltage reference.
+.subckt microrobot_brownout bn ready vact vss
+Xrt ref ref vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=8
+Xrb ref ref vss vss sky130_fd_pr__nfet_01v8 w=0.5 l=8
+Xfb ref bn fbs vss sky130_fd_pr__nfet_01v8 w=0.42 l=8
+Xfb_en fbs ready vss vss sky130_fd_pr__nfet_01v8 w=0.84 l=1
+Xtail tail bn vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=8
+Xref diode ref tail vss sky130_fd_pr__nfet_01v8 w=2 l=2
+Xsense sense bn tail vss sky130_fd_pr__nfet_01v8 w=2 l=2
+Xpm1 diode diode vact vact sky130_fd_pr__pfet_01v8 w=1 l=4
+Xpm2 sense diode vact vact sky130_fd_pr__pfet_01v8 w=1 l=4
+Xkeeper sense sense vact vact sky130_fd_pr__pfet_01v8 w=0.42 l=8
+Xp ready sense vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xn ready sense vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xcsense sense vss sky130_fd_pr__cap_mim_m3_1 w=2 l=2
+.ends microrobot_brownout

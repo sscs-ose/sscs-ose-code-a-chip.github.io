@@ -1,0 +1,17 @@
+* DEVELOPMENT candidate: actuator-domain two-inverter ready edge buffer.
+* Noninverting buffer feeds the original actuator-to-logic converter.
+* Original ready remains available to drive driver clamps independently.
+* Added buffer/input-inverter energy belongs to VACT, not the logic supply.
+* All dimensions in um; no Schmitt hysteresis or calibrated input thresholds.
+.subckt microrobot_ready_levelshift ready reset_n vact vlogic vss
+Xbufp0 buffer_b ready vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xbufn0 buffer_b ready vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xbufp1 ready_fast buffer_b vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xbufn1 ready_fast buffer_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xip input_b ready_fast vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xin input_b ready_fast vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xn0 output_b ready_fast vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xn1 reset_n input_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xp0 output_b reset_n vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.42 l=4
+Xp1 reset_n output_b vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.42 l=4
+.ends microrobot_ready_levelshift

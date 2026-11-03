@@ -1,0 +1,11 @@
+* DEVELOPMENT ordering control: actuator-powered noninverting driver-ready buffer.
+* First inverter P/N .42/1 um; second P .84/1 and N .42/1 um.
+* Input is native reset_n; output drives only the two real driver ready pins.
+* No Schmitt threshold guarantee, extra output capacitor or startup acceptance.
+* Input gate charge loads the weak current-limited native reset node.
+.subckt microrobot_ready_driver_buffer reset_raw driver_ready vact vss
+Xip ib reset_raw vact vact sky130_fd_pr__pfet_01v8 w=0.42 l=1
+Xin ib reset_raw vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xop driver_ready ib vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xon driver_ready ib vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+.ends microrobot_ready_driver_buffer

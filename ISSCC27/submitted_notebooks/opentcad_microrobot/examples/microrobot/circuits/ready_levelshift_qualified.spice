@@ -1,0 +1,44 @@
+* UNEXECUTED/SUPERSEDED design sketch: first-stage current limiting does not
+* bound final-stage slow-input crowbar. Prefer isolated Schmitt investigation.
+* DEVELOPMENT DESIGN ONLY: shared buffered reset/driver-enable candidate.
+* NOT simulated or accepted. No deterministic cold/dark-state POR claim.
+* Seven ports: original five plus existing clock bp AND bn bias nodes.
+* The internal weak node raw_reset must NOT drive the DFF or drivers directly.
+* Wire final reset_n to native DFF reset AND both actuator-driver ready inputs.
+* Shared net does not imply identical receiver switching thresholds.
+*
+* Converter follows ready_levelshift_current_limited.spice: a ~2nA nominal
+* bias-limited PMOS raises raw_reset when actuator-domain input_b goes low.
+* First logic inverter has short signal gates to avoid loading raw_reset with
+* long-channel gate area. Separate L8 bias transistors bound crowbar in this
+* FIRST stage. All dimensions already used in the existing clock/driver blocks.
+* Added bn port is necessary for the first-stage NMOS current limiter.
+* This is a current-starved inverter, not a Schmitt trigger or precision UVLO.
+*
+* Hand estimates only at settled TT bias, using ~8.2fF/um2 oxide capacitance:
+* raw_reset added signal-gate C ~5.2fF before overlap; at2nA,1.8V charge~4.7us.
+* Final inverter input C ~10.3fF; first-stage2nA charge~9.3us.
+* Each .42x8 bias gate adds~28fF to bn/bp; startup bias loading MUST be checked.
+* Final .84/.42x1 inverter uses the existing micro_inv sizing. Two driver-ready
+* ports add~.19pF oxide C, excluding overlap/routing and native DFF reset load.
+* Final load charging alone costs C*Vlogic^2 ~.62pJ at1.8V/.19pF.
+* Final-stage crowbar is NOT current-limited: slow first-stage slew may still
+* exceed the2pF reservoir energy budget. Measure total supply energy and slew.
+* No model guarantees for delay/current/terminal stress are implied by estimates.
+* Body connections explicit. Driver gate-only compatibility needs actual
+* VGS/VGD extrema review after integration, including actuator-supply collapse.
+.subckt microrobot_ready_levelshift ready reset_n vact vlogic vss bias_p bias_n
+* Existing nonregenerative actuator-to-logic conversion, now internal raw output.
+Xip input_b ready vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xin input_b ready vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xpullup raw_reset bias_p vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.42 l=8
+Xsink raw_reset input_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+* Small-input-cap current-starved receiver; both current paths limited.
+Xlimitp receiver_ps bias_p vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.42 l=8
+Xrecp reset_b raw_reset receiver_ps vlogic sky130_fd_pr__pfet_01v8 w=0.84 l=0.5
+Xrecn reset_b raw_reset receiver_ns vss sky130_fd_pr__nfet_01v8 w=0.42 l=0.5
+Xlimitn receiver_ns bias_n vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=8
+* Final shared output: drive native DFF reset and driver-ready gates together.
+Xoutp reset_n reset_b vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xoutn reset_n reset_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+.ends microrobot_ready_levelshift

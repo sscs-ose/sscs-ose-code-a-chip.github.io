@@ -1,0 +1,23 @@
+--- accepted_nominal_12p5ns/clock.spice
++++ hot85_fixed_PV26p85_12p5ns/clock.spice
+@@ -1,6 +1,6 @@
+ * Our low-power clock candidate; three scaled S2E-fit cells, optical ramp, chosen storage capacitor
+ .lib "/usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+-.temp 26.85
++.temp 85
+ * NGSPICE file created from microrobot_clock.ext - technology: sky130A
+ 
+ .subckt microrobot_clock clk vdd vss bias_n bias_p
+@@ -1275,9 +1275,9 @@
+ Bph1 0 pv1 I={4.0350658074e-08*v(illumination)/1000}
+ Bph2 pv1 pv2 I={4.0350658074e-08*v(illumination)/1000}
+ Bph3 pv2 supply I={4.0350658074e-08*v(illumination)/1000}
+-Dp1 pv1 0 fitted_pv
+-Dp2 pv2 pv1 fitted_pv
+-Dp3 supply pv2 fitted_pv
++Dp1 pv1 0 fitted_pv TEMP=26.85
++Dp2 pv2 pv1 fitted_pv TEMP=26.85
++Dp3 supply pv2 fitted_pv TEMP=26.85
+ Cstore supply 0 2e-12
+ Vsense supply vdd 0
+ Xclock clk vdd 0 bn bp microrobot_clock

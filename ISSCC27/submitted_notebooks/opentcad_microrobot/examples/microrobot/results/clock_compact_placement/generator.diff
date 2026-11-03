@@ -1,0 +1,63 @@
+--- accepted_stage_local/clock_layout.py
++++ compact_x/clock_layout.py
+@@ -49,16 +49,21 @@
+     return '\n'.join(lines+['.ends microrobot_clock','']), devices
+ 
+ 
+-def specs(devices):
+-    result=[];index=0
++def specs(devices, *, placement='baseline'):
++    if placement not in {'baseline', 'compact_x'}:
++        raise ValueError(f'Unknown clock placement variant: {placement}')
++    result=[];index=0;next_x=120
+     for name,nodes,model,params in devices:
+         if name in BIAS:continue
+         values=dict(p.split('=') for p in params)
+         if '__cap_' in model:
+             stage=int(name[-1])-1
+-            x,y=154+80*stage,35
++            x,y=(145.75+53*stage if placement=='compact_x' else 154+80*stage),35
+         else:
+-            x,y=120+20*index,10
++            x,y=(next_x if placement=='compact_x' else 120+20*index),10
++            # Actual PDK pins plus unchanged escape paint span x-2.485
++            # through x+L+3.915 um. This pitch leaves 2.6 um between them.
++            next_x=x+float(values['l'])+9
+             index+=1
+         result.append(dict(name=name,nodes=nodes,model=model,w=float(values['w']),
+                            l=float(values['l']),x=x,y=y))
+@@ -182,12 +187,12 @@
+     return result.returncode==0 and 'Circuits match uniquely.' in report and 'Property errors' not in report
+ 
+ 
+-def run(destination, *, physical_only=True, routing='baseline'):
++def run(destination, *, physical_only=True, routing='baseline', placement='baseline'):
+     dest=Path(destination).resolve()
+     if dest.exists():raise FileExistsError('Choose a fresh clock-layout destination')
+     dest.mkdir(parents=True)
+     pdk=Path(os.environ.get('PDK_ROOT','/usr/local/share/pdk'))/'sky130A'
+-    source,devices=physical_source();entries=specs(devices)
++    source,devices=physical_source();entries=specs(devices,placement=placement)
+     (dest/'physical_clock.spice').write_text(source)
+     bias=HERE/'results/layout/bias_reference_final/microrobot_bias.mag'
+     shutil.copy2(bias,dest/bias.name)
+@@ -195,9 +200,12 @@
+     report={'scope':__doc__,'canonical_source_sha256':CANONICAL_SHA,'physical_source_sha256':hashlib.sha256(source.encode()).hexdigest(),
+             'bias_mag_sha256':hashlib.sha256(bias.read_bytes()).hexdigest(),'physical_source_transform':'Remove ideal Vbias0V measurement source and alias ref_vdd to vdd; flatten five four-FET stages; no sizing changes',
+             'inventory':{'FET':29,'MIM':7,'total':36},'electrical_executed':False,'status':'Physical gates pending'}
++    if placement!='baseline':report['placement_variant']=placement
+     def save(): (dest/'report.json').write_text(json.dumps(report,indent=2)+'\n')
+     save();magic_run(dest,generate_script(pdk,entries),'generate_cells',pdk)
+     report['placement_drc']=(dest/'placement_drc.txt').read_text();save()
++    if placement!='baseline' and not report['placement_drc'].startswith('DRC_ERRORS 0'):
++        report['status']='Placement DRC failed; no routing/electrical promotion';save();return report
+     pins=read_pins(dest,entries)
+     (dest/'instance_pins.json').write_text(json.dumps(pins,indent=2)+'\n')
+     magic_run(dest,'load clock_cells\nselect top cell\nflatten microrobot_clock\nload microrobot_clock\nsave microrobot_clock','flatten',pdk)
+@@ -229,4 +237,5 @@
+     parser=argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--output',type=Path,required=True)
+     parser.add_argument('--routing',choices=['baseline','stage_local'],default='baseline')
+-    args=parser.parse_args();print(json.dumps(run(args.output,routing=args.routing),indent=2))
++    parser.add_argument('--placement',choices=['baseline','compact_x'],default='baseline')
++    args=parser.parse_args();print(json.dumps(run(args.output,routing=args.routing,placement=args.placement),indent=2))

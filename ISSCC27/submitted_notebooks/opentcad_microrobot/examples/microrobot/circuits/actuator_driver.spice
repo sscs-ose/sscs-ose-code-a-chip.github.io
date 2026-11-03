@@ -1,0 +1,40 @@
+* Our SKY130 actuator interface; not an extracted Reynolds schematic.
+* Pins: phase (logic domain), ready (actuator domain), electrode, logic supply,
+* actuator upper supply, actuator midpoint/Pt metal, common lower supply.
+* 1.8 V primitive dimensions in um. Body connections are explicit.
+.subckt microrobot_driver phase ready electrode vlogic vact vmid vss
+* Complementary logic input and static cross-coupled level converter.
+Xip phase_b phase vlogic vlogic sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xin phase_b phase vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xlsn phase_local_b phase vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xlsnb phase_local phase_b vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+Xlsp phase_local_b phase_local vact vact sky130_fd_pr__pfet_01v8 w=0.42 l=4
+Xlspb phase_local phase_local_b vact vact sky130_fd_pr__pfet_01v8 w=0.42 l=4
+* Actuator-domain logic: p_gate=!(ready & phase), n_gate=ready & !phase.
+Xhigh ready phase_local p_gate vact vss micro_nand2
+Xlow ready phase_local_b low_b vact vss micro_nand2
+Xlowinv low_b n_gate vact vss micro_inv
+Xoff ready off vact vss micro_inv
+Xdrivep electrode p_gate vact vact sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xdriven electrode n_gate vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+* A real transmission gate clamps the electrode to the Pt midpoint in reset.
+* Long-channel LVT clamp retains conduction at the ~0.6 V midpoint.
+* Standard-Vt clamps failed the 20 ms discharge limit in SS/FS.
+Xclampn electrode off vmid vss sky130_fd_pr__nfet_01v8_lvt w=0.42 l=8
+Xclampp electrode ready vmid vact sky130_fd_pr__pfet_01v8_lvt w=0.84 l=8
+* Explicit ~103 fF PDK MIM suppresses electrode gate-charge feedthrough.
+* This is our design component, not inferred electrode/PV capacitance.
+Xsnub electrode vmid sky130_fd_pr__cap_mim_m3_1 w=7 l=7
+.ends microrobot_driver
+
+.subckt micro_inv a y vdd vss
+Xp y a vdd vdd sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xn y a vss vss sky130_fd_pr__nfet_01v8 w=0.42 l=1
+.ends micro_inv
+
+.subckt micro_nand2 a b y vdd vss
+Xp1 y a vdd vdd sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xp2 y b vdd vdd sky130_fd_pr__pfet_01v8 w=0.84 l=1
+Xn1 y a series vss sky130_fd_pr__nfet_01v8 w=0.84 l=1
+Xn2 series b vss vss sky130_fd_pr__nfet_01v8 w=0.84 l=1
+.ends micro_nand2

@@ -1,0 +1,33 @@
+# Pearson-IV implant moments for boron in silicon.
+#
+# Source: Sze & Ng, Physics of Semiconductor Devices, 3rd ed., Table 14.4
+#         (with cross-checks against Plummer, Silicon VLSI Technology, ch. 8).
+# Amorphous target assumption; no channeling correction. Values reproduce
+# published tables to within ~10% across 10-200 keV.
+#
+# Columns:
+#   energy_keV   [keV]
+#   Rp_um        projected range               [um]
+#   dRp_um       longitudinal straggle (sigma) [um]
+#   gamma        skewness (3rd standardized moment)
+#   beta         kurtosis (4th standardized moment; requires beta > gamma^2 + 1)
+#
+# Notes:
+#   - Boron in Si has NEGATIVE skew above ~50 keV — the peak sits shallower
+#     than a Gaussian would predict, with a long tail into the substrate.
+#   - Kurtosis ~2.6-3.2 covers the ion-implant regime (Gaussian = 3.0).
+#   - Below 5 keV, sputtering yield and surface effects dominate; those
+#     energies are out of the amorphous-Pearson regime and not listed.
+
+species: boron
+symbol: B
+target: Si
+dopant_kind: acceptor
+moments:
+  -  {energy_keV:  10, Rp_um: 0.033, dRp_um: 0.014, gamma:  0.30, beta: 3.20}
+  -  {energy_keV:  30, Rp_um: 0.100, dRp_um: 0.037, gamma:  0.20, beta: 3.00}
+  -  {energy_keV:  50, Rp_um: 0.166, dRp_um: 0.055, gamma:  0.10, beta: 2.90}
+  -  {energy_keV:  70, Rp_um: 0.230, dRp_um: 0.070, gamma:  0.05, beta: 2.80}
+  -  {energy_keV: 100, Rp_um: 0.322, dRp_um: 0.087, gamma: -0.05, beta: 2.70}
+  -  {energy_keV: 150, Rp_um: 0.470, dRp_um: 0.113, gamma: -0.15, beta: 2.60}
+  -  {energy_keV: 200, Rp_um: 0.606, dRp_um: 0.135, gamma: -0.25, beta: 2.60}
