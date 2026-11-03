@@ -1,0 +1,119 @@
+Device fixture derivations
+
+All curves associated with these fixtures come from saved native ngspice compact model output. The equations below guide interpretation and initial sizing. They do not replace a circuit simulator, and they do not establish complete regulator performance.
+
+1. PFET dropout current capacity
+
+The source and body are held at 1.8 V. The gate is held at 1.8 V minus VSG. The drain is held at 1.8 V minus VSD. Therefore the source to gate and source to drain voltages are independently controlled. The fixture uses W = 5 um and L = 0.3 um.
+
+At a selected VSG, VSD, L and body bias, a first total width estimate is
+
+W_est = I_target / (I_SD / W)_lookup.
+
+This is an allocation based on native current density. A complete LDO would require the pass current to cover the external load and any current drawn from its output by internal circuitry. The 50 mA example in this device laboratory specifies device current capacity only.
+
+An implementation can use several identical fingers or devices in parallel. The final legal geometry, bias point and layout must be checked again. Scaling width in a compact model can also change geometry dependent corrections. The supplied native sizing history demonstrates why the first prediction must be followed by an actual geometry run.
+
+2. Static voltage drop and incremental output resistance
+
+The static ratio is
+
+R_static = VSD / I_SD.
+
+The small signal resistance is
+
+ro = (partial I_SD / partial VSD at fixed VSG and body bias)^(-1).
+
+They are different physical quantities. The first relates a DC voltage drop to a DC current. The second relates a small drain voltage change to a small current change around the chosen operating point.
+
+For long channel triode intuition only,
+
+I_SD = mu_p Cox (W/L) [(VSG - |VT|) VSD - VSD^2/2].
+
+Therefore
+
+R_static = 1 / {mu_p Cox (W/L) [VSG - |VT| - VSD/2]}
+
+and
+
+ro = 1 / {mu_p Cox (W/L) [VSG - |VT| - VSD]}.
+
+Their values approach one another only as VSD becomes small relative to the overdrive. The notebook uses native compact model results for numerical conclusions rather than this long channel formula.
+
+3. NFET gm over ID sizing
+
+The drain is held at 0.9 V and the source and body are grounded. A gate sweep determines the DC current and local transistor transconductance.
+
+gm = partial ID / partial VGS at fixed VDS and body bias.
+
+For a chosen transconductance and gm over ID target,
+
+ID_target = gm_target / (gm/ID)_target
+
+and
+
+W_est = ID_target / (ID/W)_lookup.
+
+The workflow is to select a characterized inversion bracket, predict a width, run that actual geometry, restore the desired gm over ID through gate bias, and check the resulting gm and current. No extrapolation outside the saved bias slice is required.
+
+4. Native gate terminal loading
+
+The NFET terminal fixture uses W = 5 um, L = 0.3 um, VG = 0.7365070315634882 V and VD = 0.9 V. Source and body are grounded. During gate injection the gate AC amplitude is 1 V and the drain AC amplitude is zero. A second run exchanges these AC amplitudes while preserving both DC biases.
+
+Currents ig and id are defined entering the transistor terminals. Thus they are the negatives of the currents into the positive terminals of their ideal bias voltage sources.
+
+At frequencies where the imaginary current is dominated by charge storage,
+
+Cgg_terminal = Im(ig / vg) / omega, with vd = 0
+
+Cgd_transfer = -Im(ig / vd) / omega, with vg = 0
+
+gm_terminal = Re(id / vg), with vd = 0
+
+ro_terminal = 1 / Re(id / vd), with vg = 0.
+
+The unit AC amplitude is a small signal normalization. It does not apply a 1 V large signal oscillation to the device.
+
+The gate charge parameter saved internally by the compact model need not equal the total gate loading seen through the external terminal. The latter includes the effects represented at the device boundary, including overlap contributions. The current measurements determine the loading relevant to an external gate driver.
+
+The reverse and forward charge transfer coefficients need not be equal in a transistor compact model. The separately extracted drain current under gate excitation must therefore be preserved rather than silently replacing it with the gate current coefficient under drain excitation.
+
+5. Finite gate driver resistance
+
+For a deliberately small hand model using Cgs and Cgd, the physical gate current balance is
+
+(vc - vg) / Rg = s Cgs (vg - vs) + s Cgd (vg - vd).
+
+Rearranging gives
+
+vg = [vc + s Rg Cgs vs + s Rg Cgd vd] / [1 + s Rg (Cgs + Cgd)].
+
+If the source and drain are AC fixed,
+
+vg / vc = 1 / [1 + s Rg (Cgs + Cgd)]
+
+and the corresponding gate pole is
+
+fg = 1 / [2 pi Rg (Cgs + Cgd)].
+
+For this boundary condition, the measured terminal gate capacitance provides the appropriate loading estimate. When the drain or source moves, the corresponding charge term must remain in the current balance. A gate pole inferred with an AC fixed drain must not be promoted directly to the pole of a complete amplifier or regulator.
+
+6. Finite charge and current
+
+With capacitances treated locally as constant,
+
+Delta Qg approximately equals Cgs Delta(vg - vs) + Cgd Delta(vg - vd).
+
+A driver whose available current magnitude cannot exceed I_drive_max requires at least
+
+t_change >= |Delta Qg| / I_drive_max.
+
+Similarly, before regulator current changes appreciably, an output current deficit gives
+
+Delta vo approximately equals -Delta I Delta t / Cout.
+
+These are charge budget relations. Their numerical use requires the actual voltage trajectory, available source and sink current, and all significant output capacitance. They are not measured transient responses and are not plotted as substitute simulation evidence.
+
+Figure provenance
+
+The public figures contain PNG previews, editable layout JSON and terminal check reports. Symbols come from the MIT licensed cirfig_gen snapshot identified in fixture_ATTRIBUTION.txt. Outlined font SVGs and font caches remain outside this public package.

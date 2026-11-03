@@ -1,0 +1,28 @@
+Terminal admittance of nmos
+.lib "${SKY130_MODEL}" tt
+.option scale=1e-6
+.temp 27
+Vs source 0 0
+Vg gate source dc 0.7365070315634882 ac 1
+Vd drain source dc 0.9 ac 0
+Xq drain gate source source sky130_fd_pr__nfet_01v8 w=5 l=.3 nf=1 ad=1.45 as=1.45 pd=10.58 ps=10.58 nrd=.058 nrs=.058
+.save all @m.xq.msky130_fd_pr__nfet_01v8[gm] @m.xq.msky130_fd_pr__nfet_01v8[gds] @m.xq.msky130_fd_pr__nfet_01v8[cgg]
+.control
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+op
+wrdata op.tsv v(gate) v(drain) i(Vd) @m.xq.msky130_fd_pr__nfet_01v8[gm] @m.xq.msky130_fd_pr__nfet_01v8[gds] @m.xq.msky130_fd_pr__nfet_01v8[cgg]
+ac dec 15 1k 100Meg
+let yg = -i(Vg)
+let yd = -i(Vd)
+wrdata gate.tsv real(yg) imag(yg) real(yd) imag(yd)
+alter Vg acmag=0
+alter Vd acmag=1
+ac dec 15 1k 100Meg
+let yg = -i(Vg)
+let yd = -i(Vd)
+wrdata drain.tsv real(yg) imag(yg) real(yd) imag(yd)
+quit
+.endc
+.end
