@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Viaduct tap (live bridge for agents)</description>
+ <version>1.0</version>
+ <category>pymacros</category>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <interpreter>python</interpreter>
+ <text>import os
+path = "/foss/designs/viaduct/taps/klayout/viaduct_tap.py"
+# Installed by `viaduct install`. Starts the tap in GUI sessions only; the tap
+# itself skips batch mode and an already-used port.
+if os.path.exists(path):
+    with open(path, encoding="utf-8") as f:
+        exec(compile(f.read(), path, "exec"), {"__file__": path, "__name__": "viaduct_tap"})
+</text>
+</klayout-macro>
