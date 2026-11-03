@@ -1,0 +1,63 @@
+Device terminal AC matrices at the complete circuit operating point
+.lib /home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.option scale=1e-6 reltol=1e-8 abstol=1e-14
+.temp 27
+XR1 r1_a r1_b r1_w sky130_fd_pr__res_high_po_0p35 L=8.67 mult=1 m=1
+XM1 m1_d m1_g m1_s m1_b sky130_fd_pr__nfet_01v8_lvt L=0.235 W=0.865 nf=1 ad='int(( 1 + 1 ) / 2 ) * 0.865 / 1 * 0.29' as='int(( 1 + 2 ) / 2 ) * 0.865 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 0.865 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 0.865 / 1 + 0.29 )' nrd='0.29 / 0.865 ' nrs='0.29 / 0.865 ' sa=0 sb=0 sd=0 mult=1 m=1
+vc_r1_a r1_a 0 DC 0.61369637172033031 AC 0
+vc_r1_b r1_b 0 DC 1.1523107468077693 AC 0
+vc_r1_w r1_w 0 DC 0.016115701384006392 AC 0
+vc_m1_d m1_d 0 DC 0.60771810594560316 AC 0
+vc_m1_g m1_g 0 DC 0.95472499999961358 AC 0
+vc_m1_s m1_s 0 DC 0.021525193366646943 AC 0
+vc_m1_b m1_b 0 DC 0.016106994543333329 AC 0
+.save all
+.control
+set filetype=ascii
+op
+write clamped.raw all
+alter vc_r1_a acmag = 1
+ac lin 1 1000 1000
+write base_0_0.raw all
+ac lin 1 25584151.790354129 25584151.790354129
+write base_0_1.raw all
+alter vc_r1_a acmag = 0
+alter vc_r1_b acmag = 1
+ac lin 1 1000 1000
+write base_1_0.raw all
+ac lin 1 25584151.790354129 25584151.790354129
+write base_1_1.raw all
+alter vc_r1_b acmag = 0
+alter vc_r1_w acmag = 1
+ac lin 1 1000 1000
+write base_2_0.raw all
+ac lin 1 25584151.790354129 25584151.790354129
+write base_2_1.raw all
+alter vc_r1_w acmag = 0
+alter vc_m1_d acmag = 1
+ac lin 1 1000 1000
+write base_3_0.raw all
+ac lin 1 25584151.790354129 25584151.790354129
+write base_3_1.raw all
+alter vc_m1_d acmag = 0
+alter vc_m1_g acmag = 1
+ac lin 1 1000 1000
+write base_4_0.raw all
+ac lin 1 25584151.790354129 25584151.790354129
+write base_4_1.raw all
+alter vc_m1_g acmag = 0
+alter vc_m1_s acmag = 1
+ac lin 1 1000 1000
+write base_5_0.raw all
+ac lin 1 25584151.790354129 25584151.790354129
+write base_5_1.raw all
+alter vc_m1_s acmag = 0
+alter vc_m1_b acmag = 1
+ac lin 1 1000 1000
+write base_6_0.raw all
+ac lin 1 25584151.790354129 25584151.790354129
+write base_6_1.raw all
+alter vc_m1_b acmag = 0
+quit
+.endc
+.end

@@ -1,0 +1,216 @@
+{
+  "name": "configured_common_source",
+  "technology": "sky130A",
+  "testbench": "common_source_amplifier/cs_tb.sch",
+  "subcircuit": "cs",
+  "layout": "common_source_amplifier/cs_ground.oas",
+  "top_cell": "CS",
+  "substrate_net": "VSS",
+  "pin_labels": {
+    "vdd": "VDD",
+    "vss": "VSS",
+    "in": "IN",
+    "out": "OUT"
+  },
+  "transfer": {
+    "input": [
+      "in",
+      "0"
+    ],
+    "output": [
+      "out",
+      "0"
+    ]
+  },
+  "metrics": {
+    "gain_dB": {
+      "label": "Gain at 1 kHz",
+      "target": 7.2,
+      "scale": 1.0,
+      "weight": 1.0,
+      "display_unit": "dB",
+      "display_scale": 1,
+      "constraints": {
+        "minimum": 3.0
+      },
+      "measurement": "gain_dB",
+      "frequency_Hz": 1000
+    },
+    "unity_Hz": {
+      "label": "Unity-gain frequency",
+      "target": 40000000.0,
+      "scale": 10000000.0,
+      "weight": 1.0,
+      "display_unit": "MHz",
+      "display_scale": 1e-06,
+      "constraints": {
+        "minimum": 15000000.0
+      },
+      "measurement": "unity_Hz"
+    }
+  },
+  "frequency_range_Hz": [
+    1000,
+    100000000000.0
+  ],
+  "mesh_step_um": 0.25,
+  "voltage_step_V": 0.0001,
+  "refine_count": null,
+  "verification_count": 2,
+  "actions": {
+    "nets": [
+      "vdd",
+      "0"
+    ],
+    "layers": [
+      "li",
+      "m1"
+    ],
+    "width_increments_um": [
+      0.01,
+      0.16,
+      0.32,
+      0.48,
+      0.8
+    ],
+    "budget_um2": 10,
+    "end_clearance_um": 0.5,
+    "minimum_length_um": 2.0,
+    "minimum_aspect_ratio": 3.0,
+    "exclude_boxes_um": []
+  },
+  "ground_aliases": [
+    "0",
+    "GND"
+  ],
+  "bias_residual_relative_limit": 0.05,
+  "_help": {
+    "purpose": "Runnable common-source example. Copy this file, change the design paths and settings, then run scripts/perfpdn.py run with its path. _help contains documentation only and does not affect calculations.",
+    "names_and_paths": "Paths are relative to this JSON file. Use lowercase SPICE names in transfer and actions.nets; use physical label spelling in pin_labels. Ground is 0. Moving this file requires updating relative design paths.",
+    "required": {
+      "name": "Output directory name; letters, numbers, underscores and hyphens.",
+      "technology": "sky130A is the implemented technology profile.",
+      "testbench": "Xschem .sch or exported SPICE containing one instance of the selected design.",
+      "subcircuit": "Flat design subcircuit name in the netlist.",
+      "layout": "OASIS or GDS file with one top cell.",
+      "top_cell": "Exact name of the layout top cell.",
+      "substrate_net": "Substrate label used by the native LVS deck.",
+      "pin_labels": "Map lowercase design pin names to physical labels.",
+      "transfer": "input and output each contain [positive_node, reference_node]. The input uses imposed sources with a nonzero AC difference. Output nodes are free nodes or ground.",
+      "metrics": "One or more named metric entries. Names are user-selected; measurement chooses the supported calculation.",
+      "actions": "Editable nets/layers, positive total width increments and positive added-area budget."
+    },
+    "optional": {
+      "ground_aliases": {
+        "default": [
+          "0",
+          "GND"
+        ],
+        "meaning": "Names treated as ground by the importer."
+      },
+      "mesh_step_um": {
+        "default": 0.25,
+        "meaning": "Positive local mesh-spacing setting in micrometres."
+      },
+      "frequency_range_Hz": {
+        "default": [
+          1000,
+          100000000000
+        ],
+        "meaning": "Positive increasing frequency range used for AC measurements and unity-crossing search."
+      },
+      "voltage_step_V": {
+        "default": 0.0001,
+        "meaning": "Positive central terminal-bias perturbation for device-admittance derivatives."
+      },
+      "refine_count": {
+        "default": 8,
+        "meaning": "Positive count of highest initial scores to refine; null refines all generated candidates."
+      },
+      "verification_count": {
+        "default": 1,
+        "meaning": "Positive count of eligible predictions to simulate completely; null verifies all eligible predictions."
+      },
+      "bias_residual_relative_limit": {
+        "default": 0.05,
+        "meaning": "Ratio used to flag finite-prediction DC imbalance relative to the largest baseline device-terminal current. A flag is recorded for native verification."
+      }
+    },
+    "metric_fields": {
+      "measurement": "Required: gain_dB or unity_Hz. All metrics use the configured transfer pair.",
+      "frequency_Hz": "Required for gain_dB: positive frequency at or below the upper frequency bound. unity_Hz uses the first descending unit-magnitude crossing.",
+      "target": "Required finite target in native units: dB or Hz.",
+      "scale": "Positive normalization scale in native units; default abs(target), so a zero target needs an explicit positive scale.",
+      "weight": "Required nonnegative weight in the sum of squared normalized target errors.",
+      "label": "Display label; default is the metric name.",
+      "display_unit": "Plot unit label; default empty.",
+      "display_scale": "Positive multiplier for displayed values; default 1. Use 1e-6 for Hz to MHz.",
+      "prediction_absolute_tolerance": "Absolute prediction-error floor in native units. Defaults: 0.001 dB or 1000 Hz. The comparison limit is max(floor, 3% of the measured metric change).",
+      "constraints": "Optional limits described below; omitted limits are inactive."
+    },
+    "constraint_fields": {
+      "minimum": "Optional lower bound in native units.",
+      "maximum": "Optional upper bound in native units.",
+      "max_error_percent": "Maximum 100 * abs(value-target) / scale. This is a percentage of scale, which can differ from the target.",
+      "no_worse_than_baseline": "Boolean, default false. Require absolute normalized target error no larger than the baseline error plus tolerance.",
+      "tolerance_percent": "Nonnegative allowance in percentage points of scale; default 0. Also adds scale*tolerance_percent/100 to native-unit bound margins."
+    },
+    "action_fields": {
+      "nets": "Required nonempty list of lowercase circuit net names; use 0 for ground.",
+      "layers": "Required nonempty subset of li, m1, m2, m3, m4, m5.",
+      "width_increments_um": "Required positive increases in total width, split equally between both edges. Each half-increment must be an integer layout database unit.",
+      "budget_um2": "Required positive budget on added polygon area for each individual alternative.",
+      "end_clearance_um": {
+        "default": 0.2,
+        "meaning": "Positive length removed from each end of a discovered straight run."
+      },
+      "minimum_length_um": {
+        "default": 2,
+        "meaning": "Minimum allowed span length after clearance."
+      },
+      "minimum_aspect_ratio": {
+        "default": 3,
+        "meaning": "Minimum span length divided by its original width."
+      },
+      "exclude_boxes_um": {
+        "default": [],
+        "meaning": "Extra protected rectangles [xmin, ymin, xmax, ymax] in layout micrometres, applied to the action search."
+      }
+    },
+    "examples": {
+      "gain_only": "Keep only the gain_dB metric to optimize gain at its stated frequency.",
+      "do_not_worsen_gain": {
+        "constraints": {
+          "minimum": 3.0,
+          "no_worse_than_baseline": true,
+          "tolerance_percent": 0.1
+        }
+      },
+      "bounded_unity_frequency": {
+        "constraints": {
+          "minimum": 15000000,
+          "maximum": 50000000,
+          "max_error_percent": 150,
+          "tolerance_percent": 0
+        }
+      },
+      "protect_rectangle": {
+        "exclude_boxes_um": [
+          [
+            10,
+            20,
+            15,
+            25
+          ]
+        ]
+      },
+      "all_candidates": {
+        "refine_count": null,
+        "verification_count": null
+      },
+      "other_circuit": "inverter_amplifier/project.json is a second complete design example with different sources, targets and width options."
+    },
+    "input_scope": "Flat supported SKY130 primitives; one finger and multiplicity one; Manhattan routing; numeric device/source parameters; one testbench design instance; ground-referenced voltage sources and constant load capacitors. Loads may join free nodes or AC-grounded boundaries.",
+    "operating_conditions": "Supply values, input bias, process corner, temperature, AC excitation and load capacitances are set in the testbench."
+  }
+}

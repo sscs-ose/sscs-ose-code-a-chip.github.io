@@ -1,0 +1,38 @@
+** sch_path: /home/gokalp/projects/PerfPDN/examples/common_source_amplifier/cs_tb.sch
+**.subckt cs_tb
+x1 vdd out in 0 cs
+Vin in 0 dc 0.954725 ac 1
+C1 out 0 1p m=1
+Vdd vdd 0 1.2
+**** begin user architecture code
+ .lib /home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+
+.option scale=1e-6 reltol=1e-8 abstol=1e-14
+.temp 27
+.control
+op
+ac dec 100 1k 10G
+let gain_db=db(v(out))
+wrdata cs_ac.txt gain_db
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  cs.sym # of pins=4
+** sym_path: /home/gokalp/projects/PerfPDN/examples/common_source_amplifier/cs.sym
+** sch_path: /home/gokalp/projects/PerfPDN/examples/common_source_amplifier/cs.sch
+.subckt cs vdd out in vss
+*.iopin vdd
+*.iopin vss
+*.ipin in
+*.opin out
+XR1 out vdd vss sky130_fd_pr__res_high_po_0p35 L=8.67 mult=1 m=1
+XM1 out in vss vss sky130_fd_pr__nfet_01v8_lvt L=0.235 W=0.865 nf=1 ad='int(( 1 + 1 ) / 2 ) * 0.865 / 1 * 0.29'
++ as='int(( 1 + 2 ) / 2 ) * 0.865 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 0.865 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 0.865 / 1 + 0.29 )'
++ nrd='0.29 / 0.865 ' nrs='0.29 / 0.865 ' sa=0 sb=0 sd=0 mult=1 m=1
+.ends
+
+.end

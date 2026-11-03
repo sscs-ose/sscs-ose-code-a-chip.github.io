@@ -1,0 +1,70 @@
+Device terminal AC matrices at the complete circuit operating point
+.lib /home/gokalp/.local/share/perfpdn/pdks/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.option scale=1e-6
+.temp 27
+XM1 m1_d m1_g m1_s m1_b sky130_fd_pr__pfet_01v8 L=0.15 W=6.325 nf=1 ad='int(( 1 + 1 ) / 2 ) * 6.325 / 1 * 0.29' as='int(( 1 + 2 ) / 2 ) * 6.325 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 6.325 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 6.325 / 1 + 0.29 )' nrd='0.29 / 6.325 ' nrs='0.29 / 6.325 ' sa=0 sb=0 sd=0 mult=1 m=1
+XM2 m2_d m2_g m2_s m2_b sky130_fd_pr__nfet_01v8 L=0.15 W=1.67 nf=1 ad='int(( 1 + 1 ) / 2 ) * 1.67 / 1 * 0.29' as='int(( 1 + 2 ) / 2 ) * 1.67 / 1 * 0.29' pd='2 * int(( 1 + 1 ) / 2 ) * ( 1.67 / 1 + 0.29 )' ps='2 * int(( 1 + 2 ) / 2 ) * ( 1.67 / 1 + 0.29 )' nrd='0.29 / 1.67 ' nrs='0.29 / 1.67 ' sa=0 sb=0 sd=0 mult=1 m=1
+vc_m1_d m1_d 0 DC 0.77734873284572137 AC 0
+vc_m1_g m1_g 0 DC 0.88999999999686152 AC 0
+vc_m1_s m1_s 0 DC 1.7536603310011902 AC 0
+vc_m1_b m1_b 0 DC 1.7555283184273951 AC 0
+vc_m2_d m2_d 0 DC 0.77278336358512745 AC 0
+vc_m2_g m2_g 0 DC 0.88999999999940993 AC 0
+vc_m2_s m2_s 0 DC 0.021198652266213109 AC 0
+vc_m2_b m2_b 0 DC 0.018661390483763592 AC 0
+.save all
+.control
+set filetype=ascii
+op
+write clamped.raw all
+alter vc_m1_d acmag = 1
+ac lin 1 1000 1000
+write base_0_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_0_1.raw all
+alter vc_m1_d acmag = 0
+alter vc_m1_g acmag = 1
+ac lin 1 1000 1000
+write base_1_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_1_1.raw all
+alter vc_m1_g acmag = 0
+alter vc_m1_s acmag = 1
+ac lin 1 1000 1000
+write base_2_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_2_1.raw all
+alter vc_m1_s acmag = 0
+alter vc_m1_b acmag = 1
+ac lin 1 1000 1000
+write base_3_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_3_1.raw all
+alter vc_m1_b acmag = 0
+alter vc_m2_d acmag = 1
+ac lin 1 1000 1000
+write base_4_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_4_1.raw all
+alter vc_m2_d acmag = 0
+alter vc_m2_g acmag = 1
+ac lin 1 1000 1000
+write base_5_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_5_1.raw all
+alter vc_m2_g acmag = 0
+alter vc_m2_s acmag = 1
+ac lin 1 1000 1000
+write base_6_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_6_1.raw all
+alter vc_m2_s acmag = 0
+alter vc_m2_b acmag = 1
+ac lin 1 1000 1000
+write base_7_0.raw all
+ac lin 1 843572840.16407275 843572840.16407275
+write base_7_1.raw all
+alter vc_m2_b acmag = 0
+quit
+.endc
+.end
