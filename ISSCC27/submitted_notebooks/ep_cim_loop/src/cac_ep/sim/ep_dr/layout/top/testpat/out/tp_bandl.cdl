@@ -1,0 +1,95 @@
+* tp_bandl — test pattern 블록 (testpat/gen_tp.py, 10/28). 패드 연결 없음, 핀 = 블록 변 met3.
+.subckt tp_ch_poly a b VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_poly
+.subckt tp_ch_ndiff a b VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_ndiff
+.subckt tp_ch_pdiff a b VDD VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_pdiff
+.subckt tp_ch_mcon a b VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_mcon
+.subckt tp_ch_via1 a b VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_via1
+.subckt tp_ch_via2 a b VSS
+* R0 = LVS 용 met3_res 표지 (사슬 자체가 아님): a·b 가 사슬로 한 넷이 되는 것을 나눔
+R0 a b $[res_generic_m3] $W=0.5u $L=1u
+.ends tp_ch_via2
+.subckt tp_1t1r s te wl VSS
+R0 te dn $[reram]
+M1 dn wl s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+M2 dn wl s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+.ends tp_1t1r
+.subckt tp_nacc s d g VSS
+M1 d g s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+M2 d g s VSS nfet_g5v0d10v5 w=1.5u l=0.5u
+.ends tp_nacc
+.subckt tp_kv_hpo0p35_l f1 s1 s2 f2 VSS
+R0 f1 s1 $SUB=VSS $[res_high_po_0p35] w=0.350u l=2.000u
+R1 s1 s2 $SUB=VSS $[res_high_po_0p35] w=0.350u l=20.000u
+R2 s2 f2 $SUB=VSS $[res_high_po_0p35] w=0.350u l=2.000u
+.ends tp_kv_hpo0p35_l
+.subckt tp_kv_hpo1p41_l f1 s1 s2 f2 VSS
+R0 f1 s1 $SUB=VSS $[res_high_po_1p41] w=1.410u l=2.000u
+R1 s1 s2 $SUB=VSS $[res_high_po_1p41] w=1.410u l=20.000u
+R2 s2 f2 $SUB=VSS $[res_high_po_1p41] w=1.410u l=2.000u
+.ends tp_kv_hpo1p41_l
+.subckt tp_kv_xpo0p35_l f1 s1 s2 f2 VSS
+R0 f1 s1 $SUB=VSS $[res_xhigh_po_0p35] w=0.350u l=2.000u
+R1 s1 s2 $SUB=VSS $[res_xhigh_po_0p35] w=0.350u l=20.000u
+R2 s2 f2 $SUB=VSS $[res_xhigh_po_0p35] w=0.350u l=2.000u
+.ends tp_kv_xpo0p35_l
+.subckt tp_kv_xpo1p41_l f1 s1 s2 f2 VSS
+R0 f1 s1 $SUB=VSS $[res_xhigh_po_1p41] w=1.410u l=2.000u
+R1 s1 s2 $SUB=VSS $[res_xhigh_po_1p41] w=1.410u l=20.000u
+R2 s2 f2 $SUB=VSS $[res_xhigh_po_1p41] w=1.410u l=2.000u
+.ends tp_kv_xpo1p41_l
+.subckt tp_kv_nd_l f1 s1 s2 f2 VSS
+R0 f1 s1 240 $[RES_GENERIC_ND] $W=1u $L=2u
+R1 s1 s2 2400 $[RES_GENERIC_ND] $W=1u $L=20u
+R2 s2 f2 240 $[RES_GENERIC_ND] $W=1u $L=2u
+.ends tp_kv_nd_l
+.subckt tp_kv_pd_l f1 s1 s2 f2 VSS VDD
+R0 f1 s1 394 $[RES_GENERIC_PD] $W=1u $L=2u
+R1 s1 s2 3940 $[RES_GENERIC_PD] $W=1u $L=20u
+R2 s2 f2 394 $[RES_GENERIC_PD] $W=1u $L=2u
+.ends tp_kv_pd_l
+.subckt tp_kv_m1_l f1 s1 s2 f2 VSS
+R0 f1 s1 $[res_generic_m1] $W=0.4u $L=2u
+R1 s1 s2 $[res_generic_m1] $W=0.4u $L=234.8u
+R2 s2 f2 $[res_generic_m1] $W=0.4u $L=2u
+.ends tp_kv_m1_l
+.subckt tp_kv_m2_l f1 s1 s2 f2 VSS
+R0 f1 s1 $[res_generic_m2] $W=0.4u $L=2u
+R1 s1 s2 $[res_generic_m2] $W=0.4u $L=234.8u
+R2 s2 f2 $[res_generic_m2] $W=0.4u $L=2u
+.ends tp_kv_m2_l
+
+.subckt tp_bandl ch_poly_1_a ch_poly_1_b ch_ndiff_1_a ch_ndiff_1_b ch_pdiff_1_a ch_pdiff_1_b ch_mcon_1_a ch_mcon_1_b ch_via1_1_a ch_via1_1_b ch_via2_1_a ch_via2_1_b rr_1_s rr_1_te rr_1_wl rr_2_s rr_2_te rr_2_wl nacc_1_s nacc_1_d nacc_1_g nacc_2_s nacc_2_d nacc_2_g kv_hpo0p35_l_1_f1 kv_hpo0p35_l_1_s1 kv_hpo0p35_l_1_s2 kv_hpo0p35_l_1_f2 kv_hpo1p41_l_1_f1 kv_hpo1p41_l_1_s1 kv_hpo1p41_l_1_s2 kv_hpo1p41_l_1_f2 kv_xpo0p35_l_1_f1 kv_xpo0p35_l_1_s1 kv_xpo0p35_l_1_s2 kv_xpo0p35_l_1_f2 kv_xpo1p41_l_1_f1 kv_xpo1p41_l_1_s1 kv_xpo1p41_l_1_s2 kv_xpo1p41_l_1_f2 kv_nd_l_1_f1 kv_nd_l_1_s1 kv_nd_l_1_s2 kv_nd_l_1_f2 kv_pd_l_1_f1 kv_pd_l_1_s1 kv_pd_l_1_s2 kv_pd_l_1_f2 kv_m1_l_1_f1 kv_m1_l_1_s1 kv_m1_l_1_s2 kv_m1_l_1_f2 kv_m2_l_1_f1 kv_m2_l_1_s1 kv_m2_l_1_s2 kv_m2_l_1_f2 VDD VSS
+Xch_poly_1 ch_poly_1_a ch_poly_1_b VSS tp_ch_poly
+Xch_ndiff_1 ch_ndiff_1_a ch_ndiff_1_b VSS tp_ch_ndiff
+Xch_pdiff_1 ch_pdiff_1_a ch_pdiff_1_b VDD VSS tp_ch_pdiff
+Xch_mcon_1 ch_mcon_1_a ch_mcon_1_b VSS tp_ch_mcon
+Xch_via1_1 ch_via1_1_a ch_via1_1_b VSS tp_ch_via1
+Xch_via2_1 ch_via2_1_a ch_via2_1_b VSS tp_ch_via2
+Xrr_1 rr_1_s rr_1_te rr_1_wl VSS tp_1t1r
+Xrr_2 rr_2_s rr_2_te rr_2_wl VSS tp_1t1r
+Xnacc_1 nacc_1_s nacc_1_d nacc_1_g VSS tp_nacc
+Xnacc_2 nacc_2_s nacc_2_d nacc_2_g VSS tp_nacc
+Xkv_hpo0p35_l_1 kv_hpo0p35_l_1_f1 kv_hpo0p35_l_1_s1 kv_hpo0p35_l_1_s2 kv_hpo0p35_l_1_f2 VSS tp_kv_hpo0p35_l
+Xkv_hpo1p41_l_1 kv_hpo1p41_l_1_f1 kv_hpo1p41_l_1_s1 kv_hpo1p41_l_1_s2 kv_hpo1p41_l_1_f2 VSS tp_kv_hpo1p41_l
+Xkv_xpo0p35_l_1 kv_xpo0p35_l_1_f1 kv_xpo0p35_l_1_s1 kv_xpo0p35_l_1_s2 kv_xpo0p35_l_1_f2 VSS tp_kv_xpo0p35_l
+Xkv_xpo1p41_l_1 kv_xpo1p41_l_1_f1 kv_xpo1p41_l_1_s1 kv_xpo1p41_l_1_s2 kv_xpo1p41_l_1_f2 VSS tp_kv_xpo1p41_l
+Xkv_nd_l_1 kv_nd_l_1_f1 kv_nd_l_1_s1 kv_nd_l_1_s2 kv_nd_l_1_f2 VSS tp_kv_nd_l
+Xkv_pd_l_1 kv_pd_l_1_f1 kv_pd_l_1_s1 kv_pd_l_1_s2 kv_pd_l_1_f2 VSS VDD tp_kv_pd_l
+Xkv_m1_l_1 kv_m1_l_1_f1 kv_m1_l_1_s1 kv_m1_l_1_s2 kv_m1_l_1_f2 VSS tp_kv_m1_l
+Xkv_m2_l_1 kv_m2_l_1_f1 kv_m2_l_1_s1 kv_m2_l_1_s2 kv_m2_l_1_f2 VSS tp_kv_m2_l
+.ends tp_bandl

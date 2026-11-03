@@ -1,0 +1,10 @@
+// RRAM 셀 읽기 법칙 (ep_dr circuit.py, solver.py cell_iv 와 같은 식): I = G·V_ref·sinh(V/V_ref)
+// ngspice 에서 B 소스 (식) 대신 쓰려고 OpenVAF 로 OSDI 컴파일 (10/25)
+`include "disciplines.vams"
+module sinhcell(p, n);
+  inout p, n;
+  electrical p, n;
+  (* type="instance" *) parameter real g = 1e-6 from [0:inf);
+  parameter real vref = 0.43 from (0:inf);
+  analog I(p, n) <+ g * vref * sinh(V(p, n) / vref);
+endmodule

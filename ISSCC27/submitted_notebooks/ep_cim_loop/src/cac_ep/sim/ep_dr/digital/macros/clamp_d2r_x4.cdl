@@ -1,0 +1,14 @@
+.SUBCKT clamp_d2r col vrailp vrailm VSS
+* δ clamp: col -R1- da -D_a-> vrailm ; vrailp -D_b-> db -R2- col  (VSS = 기판 tap, 소자 연결 없음)
+R1 col da 100 $[RES_GENERIC_ND] $W=1u $L=0.82u
+DDa da vrailm diode_pd2nw_11v0 2.548 7.97 m=1
+DDb vrailp db diode_pd2nw_11v0 2.548 7.97 m=1
+R2 db col 100 $[RES_GENERIC_ND] $W=1u $L=0.82u
+.ENDS clamp_d2r
+
+.SUBCKT clamp_d2r_x4 col0 col1 col2 col3 vrailp vrailm VSS
+X0 col0 vrailp vrailm VSS clamp_d2r
+X1 col1 vrailp vrailm VSS clamp_d2r
+X2 col2 vrailp vrailm VSS clamp_d2r
+X3 col3 vrailp vrailm VSS clamp_d2r
+.ENDS clamp_d2r_x4
