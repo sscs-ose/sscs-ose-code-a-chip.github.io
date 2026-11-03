@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1",
+  "project": {"id": "m2a-mac-node", "name": "M2-A INT8 MAC Candidate"},
+  "settings": {
+    "top_module": "m2a_mac_top", "clock_name": "clk", "clock_period_ns": 50,
+    "reset_name": "rst", "reset_active": "high", "reset_kind": "synchronous",
+    "rtl_language": "verilog_2005", "pdk": "sky130A", "cell_library": "sky130_fd_sc_hd"
+  },
+  "nodes": [
+    {
+      "id": "node-mac", "name": "INT8 MAC", "module_name": "m2a_mac",
+      "parent_id": null,
+      "behavior": "Use synchronous active-high reset to clear accumulator and output valid. pair_data packs signed INT8 operands a in bits [15:8] and b in bits [7:0]. On an input valid/ready handshake, add their signed product to the signed INT32 accumulator, modulo 2^32, and present the new accumulator on acc_data with valid high after the clock edge. pair_data_ready is !acc_data_valid || acc_data_ready. Hold output data/valid during backpressure. An output transfer without a new input clears valid; simultaneous output and input transfers replace the consumed result. Reset has priority. No implicit initial values.",
+      "test_expectations": "Future behavioral tests: mixed-sign products, repeated accumulation, reset, stalls, simultaneous transfers, and INT32 wraparound. These tests are not executed in M2-A.",
+      "constraints": {"latency_cycles": 1, "protocol": "valid_ready"},
+      "ports": [
+        {"id": "port-pair", "name": "pair_data", "direction": "input", "width": 16, "signed": false, "protocol": "valid_ready", "clock": "clk", "reset": "rst"},
+        {"id": "port-acc", "name": "acc_data", "direction": "output", "width": 32, "signed": true, "protocol": "valid_ready", "clock": "clk", "reset": "rst"}
+      ]
+    },
+    {
+      "id": "node-sink", "name": "Result Sink", "module_name": "m2a_sink",
+      "parent_id": null,
+      "behavior": "On reset clear count; otherwise keep data_in_ready high and increment a 32-bit internal count on each valid/ready transfer. This adjacent node is input data only; no RTL candidate is generated for it in the recorded M2-A run.",
+      "test_expectations": "Future test: count accepted MAC results. Not executed.",
+      "constraints": {"latency_cycles": 1, "protocol": "valid_ready"},
+      "ports": [
+        {"id": "port-sink", "name": "data_in", "direction": "input", "width": 32, "signed": true, "protocol": "valid_ready", "clock": "clk", "reset": "rst"}
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-mac-sink",
+      "source": {"node_id": "node-mac", "port_id": "port-acc"},
+      "target": {"node_id": "node-sink", "port_id": "port-sink"},
+      "behavior": "Transfer the signed 32-bit accumulated result when valid and ready are high; hold data and valid while stalled. Both endpoints share clk and synchronous active-high rst.",
+      "protocol": "valid_ready"
+    }
+  ],
+  "layout": {
+    "nodes": {"node-mac": {"x": 100, "y": 140}, "node-sink": {"x": 460, "y": 140}},
+    "viewport": {"x": 0, "y": 0, "zoom": 1}
+  }
+}

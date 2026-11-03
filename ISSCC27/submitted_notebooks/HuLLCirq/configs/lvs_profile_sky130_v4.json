@@ -1,0 +1,67 @@
+{
+  "profile_version": "hullcirq-sky130-lvs-v4",
+  "origin": "development_assistant_qualified_single_contiguous_SD_MOSCAP_recognition_original_S11_geometry_and_reference_netlist_unchanged",
+  "flow": ["Magic.SpiceExtraction", "Netgen.LVS"],
+  "jobs": 2,
+  "config": {
+    "MAGIC_EXT_USE_GDS": true,
+    "MAGIC_EXT_ABSTRACT": false,
+    "MAGIC_EXT_ABSTRACT_CELLS": null,
+    "MAGIC_EXT_UNIQUE": "all",
+    "MAGIC_EXT_SHORT_RESISTOR": false,
+    "LVS_FLATTEN_CELLS": null,
+    "LVS_IGNORE_CELLS": null,
+    "LVS_INCLUDE_MARCO_NETLISTS": false,
+    "VDD_NETS": ["VPWR"],
+    "GND_NETS": ["VGND"]
+  },
+  "deck_files": {
+    "libs.tech/magic/sky130A.magicrc": "c6f29a510b7014907a42b436610964157063c8b19d8e3bb582eaca2288fa7e05",
+    "libs.tech/magic/sky130A.tech": "d9ef56e3ab01b8fb605edf964fcfa01a0bf14ca8503f6ccecdecfd71f0907519",
+    "libs.tech/netgen/sky130A_setup.tcl": "7a33f3f54fab57a9d9b0887ac7b7b64ce6c454110e8b7f01f3cfb90a1282dc94",
+    "libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice": "304da9725492089107bb20840a4020558b028487d300f8df79bbbad5332aaa99",
+    "libs.ref/sky130_fd_sc_hd/gds/sky130_fd_sc_hd.gds": "c0cce10fedffd4f5b3eb4c95bbefd2b035c33bfb9264d35c8495743b3b852911"
+  },
+  "force_full_extraction": true,
+  "extraction_variant": {
+    "upstream_release": "3.0.16",
+    "upstream_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/magic/extract_spice.tcl",
+    "upstream_sha256": "461bf51e4226c283de33361bad02f48d0335ad7ab05965cbba43e2677e040660",
+    "script_path": "scripts/extract_spice_moscap_v4.tcl",
+    "script_sha256": "6452d32ac94770fffbab7772692d216739a6096bc6c3f26e52714f196b5b9bc4",
+    "launcher_path": "scripts/run_moscap_lvs_v4.py",
+    "launcher_sha256": "c0baa432de686ff9d830bb2a113c97000c518ff80f8aff54a0bb05d71037a5de",
+    "replacement": "full_cell_by_cell_with_qualified_moscap_style",
+    "reason": "Preserve the v3 failed native-definition check unchanged. Distinguish the complete source-GDS definition/child graph from preexisting, independently proven empty native definitions by retaining pre-GDS, post-GDS and post-port-annotation inventories. Never waive an unexpected new definition or any non-source paint, labels, children or selected instances. MOSCAP geometry/model qualification remains strict."
+  },
+  "terminal_recognition_variant": {
+    "schema": "hullcirq-qualified-moscap-recognition-v2",
+    "base_tech_sha256": "d9ef56e3ab01b8fb605edf964fcfa01a0bf14ca8503f6ccecdecfd71f0907519",
+    "helper_path": "scripts/lvs_moscap_v4.py",
+    "helper_sha256": "d3018f1d56560b7f314a428deb0e29ff840e57ab96f68a19a209823cac0880f8",
+    "wrapper_path": "scripts/lvs_moscap_models_v4.spice",
+    "wrapper_sha256": "c2722a6d6d4f16e756bc5cfca3e5f0d67b3a29f0276e249e1304f1d450ab0934",
+    "qualified_cell": "sky130_fd_sc_hd__decap_3",
+    "derived_style": "hullcirq_moscap_v4",
+    "base_tech": "source-sky130A.tech",
+    "derived_tech": "derived-sky130A-moscap-v4.tech",
+    "raw_spice": "extraction-raw.spice",
+    "comparison_spice": "extraction-comparison.spice",
+    "execution_log": "extraction-cell-log.json",
+    "proof": "extraction-model-proof.json",
+    "source_inventory_files": [
+      "source-inventory-pre_gds.json",
+      "source-inventory-post_gds.json",
+      "source-inventory-post_annotation.json"
+    ]
+  },
+  "limits": [
+    "This versioned repair profile is explicitly prepared from retained S13 missing-terminal and failed v3 native-inventory results and their exact adopted S11/S12 inputs. It changes no installed PDK/tool bytes, GDS/DEF geometry, powered netlist or comparison reference SPICE. Original v1/v2/v3 profiles and runs remain inspectable.",
+    "Three raw native inventories are retained before any inventory rejection. Every source-GDS definition and its child graph must match. Non-source definitions must have existed before GDS load and be independently empty of paint, labels, children and selected instances in every phase. Port annotation cannot change the definition set; no PDK-name or empty-cell wildcard waiver is used.",
+    "All reachable loaded GDS definitions are extracted exactly once, children first, into fresh retained files. Every ordinary cell uses the original pinned ngspice extraction style without changes. The separate derived style is used only for the complete decap_3 leaf whose full boundary geometry and attached labels match the pinned vendor GDS.",
+    "The separate style recognizes the single contiguous source/drain MOSCAP terminal. Two explicit three-pin models preserve the original NFET/PFET identities, port graph and exact width/length. Retained wrappers connect both original source and drain to that one physical terminal and forward all extracted geometry parameters. No device is deleted or inferred from the comparison result.",
+    "The original technology, vendor GDS/SPICE, derived deck, every cell extraction, feedback counts, raw ext2spice bytes, exact include-plus-raw comparison transform and model graph are retained and hash bound. Missing definitions, changed qualified geometry, unexpected models/terminals/W/L, alias leakage into ordinary cells or disappearing feedback fail closed.",
+    "No new abstraction, flatten, ignore, warning suppression, feedback filtering, waiver or blackbox is added. The pinned upstream Netgen blackbox invocation and PDK setup reductions/tolerances remain recorded comparison scope. Finite zero LVS error metrics, complete unique matches, zero illegal overlaps and zero device-missing-terminal feedback are mandatory.",
+    "This is fixed-input extraction/connectivity evidence, not foundry qualification, formal RTL equivalence, analog/junction-model qualification, extracted dynamic simulation, power integrity or dynamic SDF verification. The new recipe requires actual GUI execution and review before it can supply accepted evidence."
+  ]
+}

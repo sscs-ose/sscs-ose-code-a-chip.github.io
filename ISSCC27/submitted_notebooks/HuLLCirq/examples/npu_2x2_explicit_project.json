@@ -1,0 +1,961 @@
+{
+  "schema_version": "0.1",
+  "project": {
+    "id": "hullcirq-npu-2x2-explicit-proposal",
+    "name": "NPU 2x2 explicit"
+  },
+  "settings": {
+    "top_module": "hullcirq_npu2_top",
+    "clock_name": "clk",
+    "clock_period_ns": 50,
+    "reset_name": "rst",
+    "reset_active": "high",
+    "reset_kind": "synchronous",
+    "rtl_language": "verilog_2005",
+    "pdk": "sky130A",
+    "cell_library": "sky130_fd_sc_hd"
+  },
+  "design_intent": {
+    "origin": "development_assistant_design_proposal_under_explicit_user_authorization",
+    "purpose": "A new independent NPU with a different GUI node count, prepared for a future full-flow exercise.",
+    "matrix_rows": 2,
+    "matrix_columns": 2,
+    "operand_bits": 8,
+    "accumulator_bits": 32,
+    "k_min": 1,
+    "k_max": 8,
+    "pe_instances": 4,
+    "architecture": "four_explicit_parallel_output_stationary_MACs",
+    "reuse": {
+      "rtl": "none",
+      "generated_candidates": "none",
+      "verification_results": "none",
+      "adoption_history": "none"
+    },
+    "comparison": "Original baseline has six GUI nodes and sixteen hidden PE instances. This proposal has eleven GUI nodes including four explicit PEs."
+  },
+  "global_integration": {
+    "top_module": "hullcirq_npu2_top",
+    "one_instance_per_graph_node": true,
+    "public_streams": [
+      {
+        "node_id": "npu2-control",
+        "port": "config_data",
+        "direction": "input",
+        "width": 69
+      },
+      {
+        "node_id": "npu2-buffer",
+        "port": "load_data",
+        "direction": "input",
+        "width": 13
+      },
+      {
+        "node_id": "npu2-fifo",
+        "port": "output_data",
+        "direction": "output",
+        "width": 32,
+        "signed": true
+      }
+    ],
+    "public_status": [
+      {
+        "node_id": "npu2-control",
+        "port": "busy"
+      },
+      {
+        "node_id": "npu2-control",
+        "port": "job_done"
+      }
+    ],
+    "handshake_expansion": "For each valid_ready graph port use the same base name for payload plus <base>_valid and <base>_ready. Clock/reset are the shared settings, not additional graph edges.",
+    "external_load_rule": "Load the addresses used by the saved job before configuration; gate load handshake off while busy.",
+    "numerical_contract": "C[r,c] = signed32(sum_k(signed8(A[r,k])*signed8(B[k,c])) + signed32(bias[c])); ReLU, if configured, applies after the signed32 wrap.",
+    "reset_contract": "Synchronous high reset cancels all in-flight transfers and clears arithmetic/control/output state; operand register bank bytes are retained. No power-loss retention claim.",
+    "wiring_source": "The saved graph ports, edge language and node behavior are authoritative inputs for future local/global generation."
+  },
+  "preparation": {
+    "stage": "graph_editor",
+    "verification_executed": false,
+    "rtl_generated": false,
+    "eda_executed": false,
+    "adoption_transferred": false,
+    "contract_status": "draft_input_not_verified",
+    "future_adapter_work": [
+      "Accept arbitrary graph node IDs and unique per-instance module names.",
+      "Add saved 2x2 job and per-node verification adapters without substituting stage-specific fixture data.",
+      "Generalize global RTL generation, elaboration, synthesis and physical artifact manifests beyond original six-node/4x4 constants."
+    ]
+  },
+  "nodes": [
+    {
+      "id": "npu2-control",
+      "name": "Job control",
+      "module_name": "hullcirq_npu2_control",
+      "parent_id": null,
+      "behavior": "One matrix job in flight. config_data[3:0]=unsigned K in 1..8, [4]=ReLU, [36:5]=signed bias0, [68:37]=signed bias1. IDLE accepts a valid legal configuration and latches all 69 bits; invalid K is not accepted. SEND_CONFIG presents schedule_config=saved[3:0] and post_config=saved[68:4], with independent valid/ready handshakes and independent sent flags. Hold each channel stable until its own transfer; do not treat one ready as acceptance of both. Enter RUN only after both transfers. Count exactly four actual final external output_transfer pulses in RUN; ignore pulses before RUN. After fourth transfer assert job_done for one cycle, then return IDLE. busy is high from configuration acceptance through DONE and blocks new configuration. Synchronous high reset cancels the job, flags and output count; gate ready/valid/busy/done during reset. No arbitrary timeout completion.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "jobs_in_flight": 1,
+        "final_outputs_per_job": 4
+      },
+      "ports": [
+        {
+          "id": "npu2-control-config_data",
+          "name": "config_data",
+          "direction": "input",
+          "width": 69,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-control-schedule_config",
+          "name": "schedule_config",
+          "direction": "output",
+          "width": 4,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-control-post_config",
+          "name": "post_config",
+          "direction": "output",
+          "width": 65,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-control-output_transfer",
+          "name": "output_transfer",
+          "direction": "input",
+          "width": 1,
+          "signed": false,
+          "protocol": "raw",
+          "clock": "clk",
+          "reset": "rst",
+          "sideband": {
+            "kind": "pulse",
+            "associated_port_id": null,
+            "meaning": "Exactly one pulse for each external FIFO output valid && ready."
+          }
+        },
+        {
+          "id": "npu2-control-busy",
+          "name": "busy",
+          "direction": "output",
+          "width": 1,
+          "signed": false,
+          "protocol": "raw",
+          "clock": "clk",
+          "reset": "rst",
+          "sideband": {
+            "kind": "level",
+            "associated_port_id": null
+          }
+        },
+        {
+          "id": "npu2-control-job_done",
+          "name": "job_done",
+          "direction": "output",
+          "width": 1,
+          "signed": false,
+          "protocol": "raw",
+          "clock": "clk",
+          "reset": "rst",
+          "sideband": {
+            "kind": "pulse",
+            "associated_port_id": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "npu2-buffer",
+      "name": "Operand buffer",
+      "module_name": "hullcirq_npu2_buffer",
+      "parent_id": null,
+      "behavior": "Two banks of sixteen stored unsigned byte bit patterns. External load_data[7:0]=byte, [11:8]=address, [12]=bank (0=A,1=B). A[r,k] is at r*8+k; B[k,c] is at k*2+c. Read index k returns operands[7:0]=A[k], [15:8]=A[8+k], [23:16]=B[2*k], [31:24]=B[2*k+1]. One registered response slot; a read transfer produces a response on the following cycle. Load takes priority over a read; neither accepts while a response is pending. Hold operands and valid under response backpressure; do not replace a just-consumed response with a new read in that same cycle. Synchronous reset cancels pending response but retains bank bytes; no initial byte contents are assumed. Top-level environment must load every address for the chosen K before accepting a configuration and must not offer loads during busy. No SRAM macro or retention after power loss is claimed.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "bank_depth": 16,
+        "storage": "register_banks",
+        "uninitialized_reads": "forbidden"
+      },
+      "ports": [
+        {
+          "id": "npu2-buffer-load_data",
+          "name": "load_data",
+          "direction": "input",
+          "width": 13,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-buffer-read_index",
+          "name": "read_index",
+          "direction": "input",
+          "width": 3,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-buffer-operands",
+          "name": "operands",
+          "direction": "output",
+          "width": 32,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-scheduler",
+      "name": "2x2 scheduler",
+      "module_name": "hullcirq_npu2_scheduler",
+      "parent_id": null,
+      "behavior": "Accept schedule_config K1..8 only when idle. For k=0..K-1: transfer one read_index=k request, capture exactly one operands response, then transfer exactly one batch_data. batch_data[31:0]=captured operands, bit32=(k==0), bit33=(k==K-1). Hold request and batch data stable under stalls. Do not start a new k until the current batch transfers; at the last batch transfer return idle. Each job generates exactly K operand batches. Shared synchronous high reset cancels all pending transfers and iteration state. Dispatch completion is not final NPU completion; Job control counts actual external FIFO transfers.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready"
+      },
+      "ports": [
+        {
+          "id": "npu2-scheduler-schedule_config",
+          "name": "schedule_config",
+          "direction": "input",
+          "width": 4,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-scheduler-read_index",
+          "name": "read_index",
+          "direction": "output",
+          "width": 3,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-scheduler-operands",
+          "name": "operands",
+          "direction": "input",
+          "width": 32,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-scheduler-batch_data",
+          "name": "batch_data",
+          "direction": "output",
+          "width": 34,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-dispatcher",
+      "name": "Four-lane dispatcher",
+      "module_name": "hullcirq_npu2_dispatcher",
+      "parent_id": null,
+      "behavior": "One captured operand batch with four independent output transfers. Let a0=batch[7:0], a1=[15:8], b0=[23:16], b1=[31:24], first=batch[32], last=batch[33]. pair00={last,first,b0,a0}, pair01={last,first,b1,a0}, pair10={last,first,b0,a1}, pair11={last,first,b1,a1}. Each pair is 18 bits: a[7:0], b[15:8], first[16], last[17]. Keep a separate delivered flag for every lane. Assert each output valid until that lane alone accepts it, hold its payload stable, and never duplicate a delivered pair. Accept no new batch until all four lanes have transferred the current batch; no same-cycle batch replacement. No combinational broadcast of one ready signal. Reset clears pending batch and all lane flags.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "lane_count": 4
+      },
+      "ports": [
+        {
+          "id": "npu2-dispatcher-batch_data",
+          "name": "batch_data",
+          "direction": "input",
+          "width": 34,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-dispatcher-pair00",
+          "name": "pair00",
+          "direction": "output",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-dispatcher-pair01",
+          "name": "pair01",
+          "direction": "output",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-dispatcher-pair10",
+          "name": "pair10",
+          "direction": "output",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-dispatcher-pair11",
+          "name": "pair11",
+          "direction": "output",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe00",
+      "name": "PE 0,0",
+      "module_name": "hullcirq_npu2_pe00",
+      "parent_id": null,
+      "behavior": "Dedicated output-stationary MAC for C[0][0]. pair_data carries signed8 a[7:0], signed8 b[15:8], first[16], last[17]. Sign-extend the signed16 product to signed32. On an input transfer with first=1 replace the accumulator with that product; otherwise add the product modulo 2^32. first is data, never a reset pin. If last=1 publish the updated sum once in a registered output slot and hold output valid/data until accepted. first && last supports K=1. While an output is pending, accept no new pair; no same-cycle output-consume/new-pair replacement. Intermediate products do not emit partial output responses. Synchronous high reset clears accumulator, output valid and pending state. Each job has K input transfers and one final sum transfer.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "row": 0,
+        "column": 0,
+        "accumulator_bits": 32
+      },
+      "ports": [
+        {
+          "id": "npu2-pe00-pair_data",
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-pe00-sum_data",
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe01",
+      "name": "PE 0,1",
+      "module_name": "hullcirq_npu2_pe01",
+      "parent_id": null,
+      "behavior": "Dedicated output-stationary MAC for C[0][1]. pair_data carries signed8 a[7:0], signed8 b[15:8], first[16], last[17]. Sign-extend the signed16 product to signed32. On an input transfer with first=1 replace the accumulator with that product; otherwise add the product modulo 2^32. first is data, never a reset pin. If last=1 publish the updated sum once in a registered output slot and hold output valid/data until accepted. first && last supports K=1. While an output is pending, accept no new pair; no same-cycle output-consume/new-pair replacement. Intermediate products do not emit partial output responses. Synchronous high reset clears accumulator, output valid and pending state. Each job has K input transfers and one final sum transfer.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "row": 0,
+        "column": 1,
+        "accumulator_bits": 32
+      },
+      "ports": [
+        {
+          "id": "npu2-pe01-pair_data",
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-pe01-sum_data",
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe10",
+      "name": "PE 1,0",
+      "module_name": "hullcirq_npu2_pe10",
+      "parent_id": null,
+      "behavior": "Dedicated output-stationary MAC for C[1][0]. pair_data carries signed8 a[7:0], signed8 b[15:8], first[16], last[17]. Sign-extend the signed16 product to signed32. On an input transfer with first=1 replace the accumulator with that product; otherwise add the product modulo 2^32. first is data, never a reset pin. If last=1 publish the updated sum once in a registered output slot and hold output valid/data until accepted. first && last supports K=1. While an output is pending, accept no new pair; no same-cycle output-consume/new-pair replacement. Intermediate products do not emit partial output responses. Synchronous high reset clears accumulator, output valid and pending state. Each job has K input transfers and one final sum transfer.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "row": 1,
+        "column": 0,
+        "accumulator_bits": 32
+      },
+      "ports": [
+        {
+          "id": "npu2-pe10-pair_data",
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-pe10-sum_data",
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-pe11",
+      "name": "PE 1,1",
+      "module_name": "hullcirq_npu2_pe11",
+      "parent_id": null,
+      "behavior": "Dedicated output-stationary MAC for C[1][1]. pair_data carries signed8 a[7:0], signed8 b[15:8], first[16], last[17]. Sign-extend the signed16 product to signed32. On an input transfer with first=1 replace the accumulator with that product; otherwise add the product modulo 2^32. first is data, never a reset pin. If last=1 publish the updated sum once in a registered output slot and hold output valid/data until accepted. first && last supports K=1. While an output is pending, accept no new pair; no same-cycle output-consume/new-pair replacement. Intermediate products do not emit partial output responses. Synchronous high reset clears accumulator, output valid and pending state. Each job has K input transfers and one final sum transfer.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "row": 1,
+        "column": 1,
+        "accumulator_bits": 32
+      },
+      "ports": [
+        {
+          "id": "npu2-pe11-pair_data",
+          "name": "pair_data",
+          "direction": "input",
+          "width": 18,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-pe11-sum_data",
+          "name": "sum_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-collector",
+      "name": "Row-major collector",
+      "module_name": "hullcirq_npu2_collector",
+      "parent_id": null,
+      "behavior": "Four separate input streams, one combinational valid/ready output stream. Start at lane00 after reset and visit 00,01,10,11. Present acc_data/valid from only the current lane; propagate downstream ready only to that lane. All other input ready signals remain low. Advance on the actual acc_data valid && ready transfer; after lane11 wrap to lane00 for the next job. Do not drain, reorder or drop another lane's result early. The selected PE holds its registered final sum during downstream stall. Reset gates all valids/readies and returns selection to lane00. No new job may start before Job control sees four final external outputs.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 0,
+        "protocol": "valid_ready",
+        "lane_order": [
+          "00",
+          "01",
+          "10",
+          "11"
+        ]
+      },
+      "ports": [
+        {
+          "id": "npu2-collector-sum00",
+          "name": "sum00",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-collector-sum01",
+          "name": "sum01",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-collector-sum10",
+          "name": "sum10",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-collector-sum11",
+          "name": "sum11",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-collector-acc_data",
+          "name": "acc_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-post",
+      "name": "Bias and ReLU",
+      "module_name": "hullcirq_npu2_post",
+      "parent_id": null,
+      "behavior": "post_config[0]=ReLU, [32:1]=signed bias0, [64:33]=signed bias1. Latch configuration only between jobs when no output is pending and the four-result index is at zero. Process exactly four row-major acc_data transfers per configuration, applying bias for column index (result_index modulo2). Compute signed32 wrapped=(acc_data+bias[column]) modulo2^32, then output zero if ReLU and signed wrapped<0, otherwise wrapped. One registered result slot, stable while stalled. Support output consume/input replacement in the same cycle; do not accept acc_data when unconfigured or while a configuration transfer is pending. After the fourth accepted acc_data, require a fresh configuration before any fifth value. Reset clears configuration flag, result index and output valid.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "outputs_per_job": 4
+      },
+      "ports": [
+        {
+          "id": "npu2-post-post_config",
+          "name": "post_config",
+          "direction": "input",
+          "width": 65,
+          "signed": false,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-post-acc_data",
+          "name": "acc_data",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-post-result_data",
+          "name": "result_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        }
+      ]
+    },
+    {
+      "id": "npu2-fifo",
+      "name": "Output FIFO",
+      "module_name": "hullcirq_npu2_fifo",
+      "parent_id": null,
+      "behavior": "Depth-two signed32 FIFO. Preserve accepted input order; output valid whenever nonempty and not in reset. Input ready when not full, or when a valid current head is being popped in that cycle. Support full simultaneous pop+push and pointer wrap. An empty push becomes a registered output on a later cycle, with no combinational bypass. Hold head and output valid under external stall. Raw output_transfer is exactly external output_data_valid && output_data_ready, including consecutive transfers; Job control counts this pulse. Reset empties queue and resets pointers/count but need not clear storage bits.",
+      "test_expectations": "Planned checks only: derive stimulus, references and assertions from the single saved verification_jobs input and this node contract. Check signed arithmetic, transfer counts, reset cancellation, independent ready/valid stalls, stable payload while stalled and ordered job completion as relevant. No check has been executed and no RTL exists.",
+      "constraints": {
+        "latency_cycles": 1,
+        "protocol": "valid_ready",
+        "depth": 2
+      },
+      "ports": [
+        {
+          "id": "npu2-fifo-result_data",
+          "name": "result_data",
+          "direction": "input",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-fifo-output_data",
+          "name": "output_data",
+          "direction": "output",
+          "width": 32,
+          "signed": true,
+          "protocol": "valid_ready",
+          "clock": "clk",
+          "reset": "rst"
+        },
+        {
+          "id": "npu2-fifo-output_transfer",
+          "name": "output_transfer",
+          "direction": "output",
+          "width": 1,
+          "signed": false,
+          "protocol": "raw",
+          "clock": "clk",
+          "reset": "rst",
+          "sideband": {
+            "kind": "pulse",
+            "associated_port_id": "npu2-fifo-output_data",
+            "meaning": "output_data_valid && output_data_ready; consecutive transfer cycles produce consecutive high cycles."
+          }
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "npu2-edge-schedule",
+      "source": {
+        "node_id": "npu2-control",
+        "port_id": "npu2-control-schedule_config"
+      },
+      "target": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-schedule_config"
+      },
+      "protocol": "valid_ready",
+      "behavior": "One stable K1..8 configuration transfer per job; independent of post configuration acceptance."
+    },
+    {
+      "id": "npu2-edge-post-config",
+      "source": {
+        "node_id": "npu2-control",
+        "port_id": "npu2-control-post_config"
+      },
+      "target": {
+        "node_id": "npu2-post",
+        "port_id": "npu2-post-post_config"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Exactly the saved ReLU and two signed column biases; independent handshake before RUN."
+    },
+    {
+      "id": "npu2-edge-read-request",
+      "source": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-read_index"
+      },
+      "target": {
+        "node_id": "npu2-buffer",
+        "port_id": "npu2-buffer-read_index"
+      },
+      "protocol": "valid_ready",
+      "behavior": "k=0..K-1 requests one row/column operand bundle; no read before source-job addressed bytes are loaded."
+    },
+    {
+      "id": "npu2-edge-read-response",
+      "source": {
+        "node_id": "npu2-buffer",
+        "port_id": "npu2-buffer-operands"
+      },
+      "target": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-operands"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Response contains A0k,A1k,Bk0,Bk1 in declared low-to-high byte order, held until accepted."
+    },
+    {
+      "id": "npu2-edge-batch",
+      "source": {
+        "node_id": "npu2-scheduler",
+        "port_id": "npu2-scheduler-batch_data"
+      },
+      "target": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-batch_data"
+      },
+      "protocol": "valid_ready",
+      "behavior": "One operand bundle and first/last markers per k; stable under stall; all four lane transfers must complete before next batch."
+    },
+    {
+      "id": "npu2-edge-pair-00",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair00"
+      },
+      "target": {
+        "node_id": "npu2-pe00",
+        "port_id": "npu2-pe00-pair_data"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Dedicated lane00 stream; signed A(row0,k) and B(k,col0) with first/last bits, independent handshake."
+    },
+    {
+      "id": "npu2-edge-sum-00",
+      "source": {
+        "node_id": "npu2-pe00",
+        "port_id": "npu2-pe00-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum00"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Exactly one signed32 final MAC sum for C[0][0] per job; held until row-major collector selects this lane."
+    },
+    {
+      "id": "npu2-edge-pair-01",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair01"
+      },
+      "target": {
+        "node_id": "npu2-pe01",
+        "port_id": "npu2-pe01-pair_data"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Dedicated lane01 stream; signed A(row0,k) and B(k,col1) with first/last bits, independent handshake."
+    },
+    {
+      "id": "npu2-edge-sum-01",
+      "source": {
+        "node_id": "npu2-pe01",
+        "port_id": "npu2-pe01-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum01"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Exactly one signed32 final MAC sum for C[0][1] per job; held until row-major collector selects this lane."
+    },
+    {
+      "id": "npu2-edge-pair-10",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair10"
+      },
+      "target": {
+        "node_id": "npu2-pe10",
+        "port_id": "npu2-pe10-pair_data"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Dedicated lane10 stream; signed A(row1,k) and B(k,col0) with first/last bits, independent handshake."
+    },
+    {
+      "id": "npu2-edge-sum-10",
+      "source": {
+        "node_id": "npu2-pe10",
+        "port_id": "npu2-pe10-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum10"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Exactly one signed32 final MAC sum for C[1][0] per job; held until row-major collector selects this lane."
+    },
+    {
+      "id": "npu2-edge-pair-11",
+      "source": {
+        "node_id": "npu2-dispatcher",
+        "port_id": "npu2-dispatcher-pair11"
+      },
+      "target": {
+        "node_id": "npu2-pe11",
+        "port_id": "npu2-pe11-pair_data"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Dedicated lane11 stream; signed A(row1,k) and B(k,col1) with first/last bits, independent handshake."
+    },
+    {
+      "id": "npu2-edge-sum-11",
+      "source": {
+        "node_id": "npu2-pe11",
+        "port_id": "npu2-pe11-sum_data"
+      },
+      "target": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-sum11"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Exactly one signed32 final MAC sum for C[1][1] per job; held until row-major collector selects this lane."
+    },
+    {
+      "id": "npu2-edge-collected-sum",
+      "source": {
+        "node_id": "npu2-collector",
+        "port_id": "npu2-collector-acc_data"
+      },
+      "target": {
+        "node_id": "npu2-post",
+        "port_id": "npu2-post-acc_data"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Four final sums in 00,01,10,11 order; signed32; advance lane only on transfer."
+    },
+    {
+      "id": "npu2-edge-post-result",
+      "source": {
+        "node_id": "npu2-post",
+        "port_id": "npu2-post-result_data"
+      },
+      "target": {
+        "node_id": "npu2-fifo",
+        "port_id": "npu2-fifo-result_data"
+      },
+      "protocol": "valid_ready",
+      "behavior": "Four bias-adjusted and optionally ReLU-clamped signed32 values in the same row-major order."
+    },
+    {
+      "id": "npu2-edge-completion",
+      "source": {
+        "node_id": "npu2-fifo",
+        "port_id": "npu2-fifo-output_transfer"
+      },
+      "target": {
+        "node_id": "npu2-control",
+        "port_id": "npu2-control-output_transfer"
+      },
+      "protocol": "raw",
+      "behavior": "Count actual external transfers only; fourth pulse completes current job, independent of scheduler dispatch."
+    }
+  ],
+  "verification_jobs": [
+    {
+      "id": "matrix-job-2x2-k3-signed-v1",
+      "k": 3,
+      "A": [
+        [
+          -8,
+          3,
+          5
+        ],
+        [
+          7,
+          -2,
+          4
+        ]
+      ],
+      "B": [
+        [
+          6,
+          -1
+        ],
+        [
+          -3,
+          5
+        ],
+        [
+          2,
+          7
+        ]
+      ],
+      "bias": [
+        3,
+        -2
+      ],
+      "relu": false,
+      "scope": "New canonical input only. Reference results and all executed verification evidence are pending."
+    }
+  ],
+  "layout": {
+    "nodes": {
+      "npu2-control": {
+        "x": 290,
+        "y": 20
+      },
+      "npu2-buffer": {
+        "x": 30,
+        "y": 340
+      },
+      "npu2-scheduler": {
+        "x": 290,
+        "y": 340
+      },
+      "npu2-dispatcher": {
+        "x": 550,
+        "y": 340
+      },
+      "npu2-pe00": {
+        "x": 810,
+        "y": 60
+      },
+      "npu2-pe01": {
+        "x": 810,
+        "y": 245
+      },
+      "npu2-pe10": {
+        "x": 810,
+        "y": 430
+      },
+      "npu2-pe11": {
+        "x": 810,
+        "y": 615
+      },
+      "npu2-collector": {
+        "x": 1070,
+        "y": 340
+      },
+      "npu2-post": {
+        "x": 1330,
+        "y": 340
+      },
+      "npu2-fifo": {
+        "x": 1590,
+        "y": 340
+      }
+    },
+    "viewport": {
+      "x": 23.166671752929688,
+      "y": 112.375,
+      "zoom": 0.25
+    }
+  }
+}

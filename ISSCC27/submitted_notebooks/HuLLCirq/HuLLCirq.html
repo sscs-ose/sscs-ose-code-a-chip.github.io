@@ -1,0 +1,270 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HuLLCirq — final review</title><style>
+body{margin:0;color:#17263c;background:#f0f3f7;font:16px/1.65 system-ui,Segoe UI,Arial,sans-serif}main{max-width:1120px;margin:28px auto;background:white;padding:42px 50px;border-radius:12px;box-shadow:0 3px 20px #23334d14}a{color:#075ca8}h1,h2,h3{color:#102a4c;line-height:1.3}h1{font-size:32px}h2{margin-top:44px;border-top:1px solid #dce3ec;padding-top:26px}h3{margin-top:28px}.notice{background:#eaf4fb;border-left:4px solid #1481ad;padding:14px 20px;margin-bottom:28px}.table-scroll{overflow-x:auto;margin:18px 0}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;vertical-align:top;padding:9px 11px;border:1px solid #d8e1eb;min-width:75px;overflow-wrap:anywhere}th{background:#edf3f9}img{display:block;max-width:100%;height:auto;margin:22px auto;border:1px solid #e0e6ed}pre{white-space:pre;overflow:auto;background:#f5f7fa;border:1px solid #dce3ec;padding:16px;font:13px/1.55 Consolas,monospace}.output{background:#f1f8f5;border-left:4px solid #328362}code{font:0.88em Consolas,monospace;overflow-wrap:anywhere}details{margin:16px 0}summary{cursor:pointer;color:#36536f}.code summary{font-weight:600}@media(max-width:760px){main{padding:24px 16px;margin:0;border-radius:0}h1{font-size:27px}body{font-size:15px}}@media print{body{background:white}main{box-shadow:none;padding:10px}details{display:none}.notice{break-inside:avoid}img{break-inside:avoid}}
+</style></head><body><main><div class="notice"><strong>Final reading copy.</strong> The editable source is <a href="HuLLCirq.ipynb">HuLLCirq.ipynb</a>. Python outputs below were recorded by actually executing its read-only cells. Images use the saved circuit evidence. No model, simulator or EDA starts by opening this page. See the <a href="docs/final_submission_checklist.md">final submission checklist</a> and <a href="submission/PR_DESCRIPTION.md">prepared PR description</a>.</div><section class="markdown"><h1>HuLLCirq: Human–Local-LLM Collaborative Circuit Design</h1>
+<p><strong>ISSCC 2027 Code-a-Chip — final review edition.</strong></p>
+<p><strong>Author and attending representative:</strong> Ryotaro Kawashima</p>
+<p><strong>Affiliation:</strong> Department of Biomedical Engineering, Graduate School of Biomedical Engineering, Tohoku University</p>
+<p>HuLLCirq combines an English GUI, local-LLM RTL proposals, independent verification and source-bound execution history. This notebook walks through the original eleven-block NPU, independently calculates its expected outputs, and checks measured waveforms from three circuit stages. A separate reproducible example compiles and simulates the exact saved Counter RTL and synthesized netlist without asking a model to regenerate them.</p>
+<p><a href="HuLLCirq.html">Readable HTML copy</a> · <a href="README.md">Project README</a> · <a href="docs/final_submission_checklist.md">Final-review checklist</a> · <a href="docs/saved_rtl_replay.md">Saved-RTL replay</a> · <a href="LICENSE">Apache-2.0</a></p>
+<p>Running this notebook's cells performs saved-evidence and independent-reference checks. Actual new compilation/simulation uses the explicitly documented replay command; it is not started by opening the notebook.</p></section><details class="code"><summary>Executed Python cell 1</summary><pre>from pathlib import Path
+import hashlib
+import json
+import struct
+
+root = next((p for p in (Path.cwd(), *Path.cwd().parents)
+             if (p / &quot;HuLLCirq.ipynb&quot;).is_file()
+             and (p / &quot;LICENSE&quot;).is_file()), None)
+if root is None:
+    raise RuntimeError(&quot;Run this notebook inside the HuLLCirq project folder.&quot;)
+print(&quot;Project:&quot;, root.name)
+print(&quot;Mode: read-only saved-evidence inspection; no model or EDA execution&quot;)
+</pre></details><pre class="output">Project: HuLLCirq
+Mode: read-only saved-evidence inspection; no model or EDA execution
+</pre><section class="markdown"><h2>1. Design problem and method</h2>
+<p>Text-only model interaction leaves circuit structure, interface contracts, changing source versions and downstream failures difficult to track. HuLLCirq makes those boundaries explicit. A person defines blocks, external terminals, behavior, timing and data transfers. A local model proposes RTL; ordinary software manages frozen inputs and history; independent references and EDA determine the result.</p>
+<div class="table-scroll"><table><thead><tr><th>Participant</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td>Human</td><td>Define intent and acceptance criteria, authorize adoption policy and inspect results</td></tr>
+<tr><td>Development assistant</td><td>Implement the application, operate GUI validation and provide explicitly attributed implementation/repair guidance</td></tr>
+<tr><td>Local LLM</td><td>Propose node RTL and integration RTL through the recorded local API</td></tr>
+<tr><td>Ordinary software</td><td>Validate contracts, freeze the original job, enforce source freshness and preserve successful and failed histories</td></tr>
+<tr><td>EDA</td><td>Compile, simulate, synthesize, map, place/route, extract parasitics, run DRC/LVS and evaluate routed function and static timing</td></tr>
+</tbody></table></div>
+<p>This is a collaborative design method. Some model instructions contain development-assistant code guidance; those attempts are not autonomous model successes. Automatic adoption records prior user authorization. Development-assistant review is not relabelled as human review.</p></section><section class="markdown"><h2>2. One source chain through fourteen GUI stages</h2>
+<div class="table-scroll"><table><thead><tr><th>Stages</th><th>Work and retained evidence</th></tr></thead><tbody>
+<tr><td>S01–S03</td><td>Graph and external-terminal validation, specification and frozen verification contract</td></tr>
+<tr><td>S04–S07</td><td>Node RTL generation/repair, generic synthesis, node-netlist verification and evidence-backed implementation specifications</td></tr>
+<tr><td>S08–S10</td><td>Integration RTL generation, global synthesis and global-netlist verification using the original job</td></tr>
+<tr><td>S11–S14</td><td>Mixed-cell physical implementation, DRC, LVS, routed-netlist functional simulation and extracted STA</td></tr>
+</tbody></table></div>
+<p>S06/S10/S14 provide timing-diagram inspection of recorded VCD observations. The file view exposes generated artifacts and permits direct selection. Stage navigation and evidence inspection do not save circuit drafts or rerun tools. Explicit Save, Run and Review actions preserve input and result lineage. Physical failures expose a diagnosis and an appropriate return path; a new result must establish its own source-bound checks and adoption.</p>
+<p>Shared PE definitions can expand to multiple instances. Mixed standard-cell placement remains the selected mode; experimental block-region runs are retained without making them the active placement. Functional Maps annotate existing placed-cell footprints and expose source-confirmed, inferred, shared and unknown evidence separately.</p></section><section class="markdown"><h2>3. Worked circuit: eleven-block explicit 2x2 NPU</h2>
+<p>The main design computes a 2x3 by 3x2 signed matrix product, adds one bias per output column and optionally applies ReLU. This original job uses K=3 and disables ReLU. Four distinct PE instances compute the four dot products. The GUI saves eleven node definitions and the explicit connections shown below.</p>
+<p><img loading="lazy" alt="Logical blocks and dataflow of the saved NPU" src="submission/presentation/npu_architecture.svg"></p>
+<p>This is a <strong>logical connection diagram</strong>, not a physical floorplan or hardened-macro arrangement. Configuration and output-transfer feedback are distinguished from the operand/result path. The machine-readable graph and all port widths are retained in <a href="submission/presentation/npu_worked_example.json">the worked-example data</a>.</p>
+<div class="table-scroll"><table><thead><tr><th>Block</th><th>Saved responsibility</th><th>Public payload widths (bits)</th></tr></thead><tbody>
+<tr><td>Job control</td><td>Latch one job; distribute independent scheduler/post configuration; complete only after four external transfers.</td><td>config_data:69, schedule_config:4, post_config:65, output_transfer:1, busy:1, job_done:1</td></tr>
+<tr><td>Operand buffer</td><td>Two banks of 16 byte registers; produce A0k, A1k, Bk0, Bk1 in one 32-bit response.</td><td>load_data:13, read_index:3, operands:32</td></tr>
+<tr><td>2x2 scheduler</td><td>For each k request one bundle, then send one 34-bit bundle with first/last markers.</td><td>schedule_config:4, read_index:3, operands:32, batch_data:34</td></tr>
+<tr><td>Four-lane dispatcher</td><td>Deliver four independent 18-bit pairs exactly once per operand batch.</td><td>batch_data:34, pair00:18, pair01:18, pair10:18, pair11:18</td></tr>
+<tr><td>PE 0,0</td><td>Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.</td><td>pair_data:18, sum_data:32</td></tr>
+<tr><td>PE 0,1</td><td>Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.</td><td>pair_data:18, sum_data:32</td></tr>
+<tr><td>PE 1,0</td><td>Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.</td><td>pair_data:18, sum_data:32</td></tr>
+<tr><td>PE 1,1</td><td>Output-stationary signed8 x signed8 MAC with signed32 wrap; one final sum per K transfers.</td><td>pair_data:18, sum_data:32</td></tr>
+<tr><td>Row-major collector</td><td>Serialize the four final sums in row-major 00,01,10,11 order.</td><td>sum00:32, sum01:32, sum10:32, sum11:32, acc_data:32</td></tr>
+<tr><td>Bias and ReLU</td><td>Add the signed32 column bias with wrap, then optionally apply ReLU.</td><td>post_config:65, acc_data:32, result_data:32</td></tr>
+<tr><td>Output FIFO</td><td>Depth-two signed32 output queue; report actual external valid-and-ready transfers.</td><td>result_data:32, output_data:32, output_transfer:1</td></tr>
+</tbody></table></div>
+<h3>Original inputs and arithmetic</h3>
+<pre>A = [[-8,  3, 5],       B = [[ 6, -1],       column bias = [3, -2]
+     [ 7, -2, 4]]            [-3,  5],       ReLU = false
+                             [ 2,  7]]</pre>
+<p>For row i and column j, the result is <code>wrap32(sum(A[i][k]*B[k][j]) + bias[j])</code>, followed by ReLU only when enabled. Inputs are signed 8-bit values, products are signed 16-bit, and the MAC/post-processing arithmetic preserves signed 32-bit wrap semantics. No saturation or unsigned reinterpretation is substituted for this original job.</p>
+<div class="table-scroll"><table><thead><tr><th>Output (row-major)</th><th>Three signed products</th><th>MAC</th><th>Column bias</th><th>Expected output</th><th>Recorded receive cycle</th></tr></thead><tbody>
+<tr><td>C00</td><td>-48, -9, 10</td><td>-47</td><td>3</td><td>-44</td><td>44</td></tr>
+<tr><td>C01</td><td>8, 15, 35</td><td>58</td><td>-2</td><td>56</td><td>45</td></tr>
+<tr><td>C10</td><td>42, 6, 8</td><td>56</td><td>3</td><td>59</td><td>47</td></tr>
+<tr><td>C11</td><td>-7, -10, 28</td><td>11</td><td>-2</td><td>9</td><td>49</td></tr>
+</tbody></table></div>
+<p>The receive cycles use the original testbench's numbering and observed handshakes; they are not an inferred throughput or maximum-frequency claim. The next cell independently evaluates the saved input matrices, then compares that calculation with the unchanged expected values and recorded functional observations. It does not evaluate the DUT to create its own golden reference.</p></section><details class="code"><summary>Executed Python cell 2</summary><pre>worked = json.loads((root / &quot;submission/presentation/npu_worked_example.json&quot;).read_text(encoding=&quot;utf-8&quot;))
+job = worked[&quot;job&quot;]
+A, B, bias = job[&quot;A&quot;], job[&quot;B&quot;], job[&quot;bias&quot;]
+wrap32 = lambda x: (x + (1 &lt;&lt; 31)) % (1 &lt;&lt; 32) - (1 &lt;&lt; 31)
+calculated = []
+for i in range(2):
+    for j in range(2):
+        products = [A[i][k] * B[k][j] for k in range(job[&quot;k&quot;])]
+        mac = wrap32(sum(products))
+        value = wrap32(mac + bias[j])
+        value = max(0, value) if job[&quot;relu&quot;] else value
+        calculated.append(value)
+        print(f&quot;C{i}{j}: products={products}, MAC={mac}, bias={bias[j]}, result={value}&quot;)
+assert calculated == worked[&quot;arithmetic&quot;][&quot;expected_outputs&quot;]
+assert calculated == [sample[&quot;value&quot;] for sample in worked[&quot;functional_observations&quot;]]
+print(&quot;Independent original-job reference:&quot;, calculated, &quot;Passed&quot;)</pre></details><pre class="output">C00: products=[-48, -9, 10], MAC=-47, bias=3, result=-44
+C01: products=[8, 15, 35], MAC=58, bias=-2, result=56
+C10: products=[42, 6, 8], MAC=56, bias=3, result=59
+C11: products=[-7, -10, 28], MAC=11, bias=-2, result=9
+Independent original-job reference: [-44, 56, 59, 9] Passed
+</pre><section class="markdown"><h3>Design decisions and their boundaries</h3>
+<div class="table-scroll"><table><thead><tr><th>Choice</th><th>Role in the demonstration</th><th>Boundary</th></tr></thead><tbody>
+<tr><td>Explicit four-PE graph</td><td>Makes each PE's ports, routing contract and source lineage inspectable</td><td>This example is not a demonstrated systolic fabric; the separate P3 example tests shared definitions</td></tr>
+<tr><td>Separate dispatch/collection stages</td><td>Converts saved scheduling and handshakes to four lanes and returns row-major results</td><td>Finite saved backpressure cases do not prove every possible schedule</td></tr>
+<tr><td>Independent saved vectors</td><td>Keep expectations fixed while changing RTL, netlist or physical source</td><td>Passing the finite job is not exhaustive equivalence</td></tr>
+<tr><td>Mixed standard-cell placement</td><td>Preserves the selected placement mode after the block-region experiment produced unwanted whitespace</td><td>The functional-role overlay is not a physical partitioning constraint</td></tr>
+<tr><td>50 ns target (20 MHz)</td><td>Original saved clock target retained throughout corrections</td><td>This was not selected through a documented optimization study, and is not a measured maximum frequency</td></tr>
+<tr><td>Pinned SKY130 HD flow</td><td>Gives a concrete open-PDK physical implementation</td><td>This does not qualify arbitrary PDKs or foundry signoff</td></tr>
+</tbody></table></div>
+<h3>Physical result of this exact design</h3>
+<p>The final accepted S11/S12/S13/S14 chain is <code>4e818ce3905c4bd1ad0e9b50033271cb</code> / <code>d794d07e3d1348dda7062b5b6d59a44b</code> / <code>924d261f490a4188b976ef35e0a0e663</code> / <code>6d844bfc545146738b088129ddf68564</code>, with each stage prefix recorded in the <a href="submission/evidence_index.json">evidence index</a>. The physical view has 33,681 placed-cell footprints. All seven required S14 checks passed across nine STA corners; worst setup/hold slack was 23.3823065306 / 0.0951505568 ns. DRC passed, and LVS had Unique match with required difference counts zero, while three non-overlap extraction feedback items remain disclosed.</p>
+<p><img loading="lazy" alt="Actual source-bound NPU Functional Map" src="results/gui_s14_20261021/loop-07-map-filter-zoom-pan.png"></p>
+<p>This actual screenshot shows a role overlay on the saved placement, not a placement algorithm or proof of exclusive cell ownership. Older layouts, the two failed physical corrections and their original input/output history remain preserved. Finite routed-netlist functional simulation and extracted STA are distinct from dynamic SDF simulation.</p></section><section class="markdown"><h2>4. Non-NPU GUI validation</h2>
+<div class="table-scroll"><table><thead><tr><th>Case</th><th>Preserved input and finite result</th></tr></thead><tbody>
+<tr><td>P1 Counter</td><td>Synchronous active-high reset, 14 cycles, 42 expected output comparisons and 50 ns. A new GUI-only S01–S14 flow completed on 2026-10-31. S06/S10/S14 each compared 42 outputs with zero mismatches and zero missing observations. Magic/KLayout DRC had zero violations; source-specific LVS correction produced zero feedback and Unique match.</td></tr>
+<tr><td>P2 FIFO → XOR</td><td>A separate saved multiple-block, non-NPU contract completed the positive S01–S14 GUI flow. Earlier rejected model candidates and explicit repair guidance remain retained.</td></tr>
+<tr><td>P3 shared 2×2 signed saturating lanes</td><td>One definition, four members, 24 cycles and 288 expected outputs; positive S01–S14 GUI flow completed. A later map retained the same 725 footprints and exposed 33 checked-inference cells per member.</td></tr>
+</tbody></table></div>
+<p>These circuits do not replace the NPU's original inputs or inherit its adopted results. P1's warning-free LVS correction does not remove historical extraction feedback from other designs. Results apply to their exact saved sources and finite verification jobs.</p>
+<p><img loading="lazy" alt="Actual final P1 GUI state: fourteen completed stages" src="results/gui_release_closure_20261031/p1-final-14of14.png"></p></section><section class="markdown"><h2>5. Inspect measured timing diagrams at S06, S10 and S14</h2>
+<p>The following Counter diagrams are regenerated from the <strong>original saved VCD files</strong>, not fabricated from the expected values. The unmodified independent vectors supply comparison samples after each rising edge. Source hashes, testbench port bindings, comparison times and all 42 samples per stage are in <a href="submission/presentation/waveform_summary.json">the waveform summary</a>.</p>
+<p><img loading="lazy" alt="Measured S06 node-netlist waveforms" src="submission/presentation/counter_s06_waveform.svg"></p>
+<p><img loading="lazy" alt="Measured S10 global-netlist waveforms" src="submission/presentation/counter_s10_waveform.svg"></p>
+<p><img loading="lazy" alt="Measured S14 routed-netlist functional waveforms" src="submission/presentation/counter_s14_waveform.svg"></p>
+<p>S06/S10 are zero-delay generic-netlist observations. S14 uses routed-netlist functional models without SDF delay annotation; separate extracted STA checks timing. Similar functional traces across these stages do not measure propagation delay or prove timing equivalence.</p>
+<p>The next cell reparses the original VCDs and specifications and verifies the published derived JSON/SVG files. This is a saved-observation check, with no new simulation.</p></section><details class="code"><summary>Executed Python cell 3</summary><pre>import subprocess
+import sys
+checked = subprocess.run([sys.executable, &quot;-B&quot;, &quot;-X&quot;, &quot;utf8&quot;, &quot;scripts/render_submission_figures.py&quot;, &quot;--check&quot;], cwd=root, capture_output=True, text=True, check=True)
+print(checked.stdout.strip())</pre></details><pre class="output">{
+  &quot;mode&quot;: &quot;read_only_check&quot;,
+  &quot;derived_files&quot;: 6,
+  &quot;arithmetic_outputs&quot;: [
+    -44,
+    56,
+    59,
+    9
+  ],
+  &quot;waveform_checks&quot;: [
+    {
+      &quot;stage&quot;: &quot;S06&quot;,
+      &quot;comparisons&quot;: 42,
+      &quot;mismatches&quot;: 0,
+      &quot;missing&quot;: 0
+    },
+    {
+      &quot;stage&quot;: &quot;S10&quot;,
+      &quot;comparisons&quot;: 42,
+      &quot;mismatches&quot;: 0,
+      &quot;missing&quot;: 0
+    },
+    {
+      &quot;stage&quot;: &quot;S14&quot;,
+      &quot;comparisons&quot;: 42,
+      &quot;mismatches&quot;: 0,
+      &quot;missing&quot;: 0
+    }
+  ],
+  &quot;model_or_eda_started&quot;: false
+}
+</pre><details class="code"><summary>Executed Python cell 4</summary><pre>waveforms = json.loads((root / &quot;submission/presentation/waveform_summary.json&quot;).read_text(encoding=&quot;utf-8&quot;))
+print(&quot;Stage | compared | mismatches | missing | method&quot;)
+for stage in waveforms[&quot;stages&quot;]:
+    assert stage[&quot;comparisons&quot;] == 42 and not stage[&quot;mismatches&quot;] and stage[&quot;missing&quot;] == 0
+    print(stage[&quot;stage&quot;], stage[&quot;comparisons&quot;], len(stage[&quot;mismatches&quot;]), stage[&quot;missing&quot;], stage[&quot;observed_kind&quot;], sep=&quot; | &quot;)
+    assert all(sample[&quot;match&quot;] for sample in stage[&quot;samples&quot;])
+print(&quot;All 126 stage-output samples agree with the independent saved expectations.&quot;)</pre></details><pre class="output">Stage | compared | mismatches | missing | method
+S06 | 42 | 0 | 0 | Generic node-netlist simulation; zero delay; no PDK/SDF
+S10 | 42 | 0 | 0 | Generic global-netlist simulation; zero delay; no PDK/SDF
+S14 | 42 | 0 | 0 | Routed-netlist functional simulation; original PDK functional models; no SDF
+All 126 stage-output samples agree with the independent saved expectations.
+</pre><section class="markdown"><h2>6. Reproduce a result from exact saved RTL, without LLM generation</h2>
+<p>The <a href="docs/saved_rtl_replay.md">saved-RTL replay guide</a> gives exact files and commands for the submitted Counter. Its <code>release_counter.v</code> and <code>release_counter_top.v</code> are the adopted saved RTL; <code>global_netlist.v</code> is the saved S10 generic netlist. Both reuse the original <code>contract_tb.v</code>, verification plan, 14 cycles, 42 independent expected outputs and 50 ns clock. Their source hashes and adopted lineage are pinned in <a href="submission/reproduction/p1_counter/provenance.json">the replay provenance</a>.</p>
+<p>The script verifies those inputs before invoking a separately installed trusted Icarus Verilog 12 runtime. It checks an RTL build and a generic-netlist build, with no new model request, synthesis or physical run. The replay is isolated from original stores and does not adopt a result or modify historical acceptance. A source/hash mismatch fails rather than silently updating the expected contract.</p>
+<p>This exact replay was executed during this submission revision. Its new results below are separate from the earlier GUI/native runs. The notebook reads the retained replay result; to run the simulator yourself, use the explicit command in the guide. Opening the notebook never starts compilation.</p></section><details class="code"><summary>Executed Python cell 5</summary><pre>replay = json.loads((root / &quot;submission/reproduction/p1_counter/verification-result.json&quot;).read_text(encoding=&quot;utf-8&quot;))
+assert replay[&quot;validation_status&quot;] == &quot;Passed&quot;
+assert replay[&quot;model_requests&quot;] == 0 and replay[&quot;new_synthesis_or_physical_runs&quot;] == 0
+assert replay[&quot;historical_adoption_modified&quot;] is False
+print(&quot;New finite replay of the exact saved sources:&quot;)
+for result in replay[&quot;results&quot;]:
+    assert result[&quot;validation_status&quot;] == &quot;Passed&quot;
+    assert result[&quot;checked_output_samples&quot;] == result[&quot;required_output_samples&quot;] == 42
+    assert result[&quot;mismatches&quot;] == result[&quot;missing&quot;] == 0
+    print(result[&quot;mode&quot;], &quot;cycles:&quot;, result[&quot;vector_count&quot;], &quot;output comparisons:&quot;, result[&quot;checked_output_samples&quot;], &quot;mismatches:&quot;, result[&quot;mismatches&quot;], &quot;missing:&quot;, result[&quot;missing&quot;])
+print(&quot;No LLM regeneration, synthesis, physical run or historical adoption change.&quot;)</pre></details><pre class="output">New finite replay of the exact saved sources:
+rtl cycles: 14 output comparisons: 42 mismatches: 0 missing: 0
+generic_netlist cycles: 14 output comparisons: 42 mismatches: 0 missing: 0
+No LLM regeneration, synthesis, physical run or historical adoption change.
+</pre><section class="markdown"><h2>7. Historical GUI verification results, failures and intervention accounting</h2>
+<p>The final local closure records <strong>113 GUI scenarios</strong>: 65 earlier scenarios plus 48 continuation scenarios, <strong>not 113 full circuit flows</strong>. The continuation includes <strong>one new P1 S01–S14 flow</strong>, six local-model requests and 37 executed outer native commands, all exit zero. The local provider reported 9,244 tokens; this is not Codex consumption. Eight production intervention packages, I13–I20, retain timestamps, changes, results, problems and causes in the evidence ledgers.</p>
+<p>The P1 model initially emitted an asynchronous reset contrary to the saved synchronous-reset contract. The bad candidate was retained and rejected. A GUI repair instruction changed the sensitivity list while retaining the contract and independent expectations. Initial LVS extraction warnings were retained unadopted, then resolved using a new source-bound correction rather than by editing old records or waiving checks.</p>
+<p>At source snapshot I19/Q6, the software suite recorded 3,077 executed tests, zero failures/errors and 36 skip records. I20 subsequently changed browser-state projection; a separate 56-test selection and actual fresh GUI reloads confirmed 14/14. No new full software suite was run after I20. Software fixtures, GUI scenarios, actual native commands and model requests are counted separately.</p>
+<p>The <a href="submission/evidence_index.json">evidence index</a> identifies the selected source material and public derivatives. Original failures and intermediate checkpoints are history; the final declared checkpoint controls the result. Redacted public derivatives are not represented as byte-identical originals.</p></section><section class="markdown"><h2>Retained-evidence file checks</h2>
+<p>These final cells read the saved result assets, hashes and image headers. They provide file-integrity and readability evidence in addition to the arithmetic, VCD and replay checks above. Historical screenshot names ending in <code>.png</code> contain JPEG bytes; the actual format is reported without changing their original bytes. Use <code>python scripts/verify_submission.py</code> for the full submitted-file manifest.</p></section><details class="code"><summary>Executed Python cell 6</summary><pre>files = (
+    &quot;LICENSE&quot;,
+    &quot;results/gui_s14_20261021/README.md&quot;,
+    &quot;results/gui_s14_20261021/loop-07-map-filter-zoom-pan.png&quot;,
+    &quot;results/gui_release_closure_20261031/README.md&quot;,
+    &quot;results/gui_release_closure_20261031/p1-final-14of14.png&quot;,
+)
+
+def image_details(data):
+    if data[:8] == bytes((137, 80, 78, 71, 13, 10, 26, 10)):
+        return &quot;PNG&quot;, struct.unpack(&quot;&gt;II&quot;, data[16:24])
+    if data[:2] == bytes((255, 216)):
+        position = 2
+        while position &lt; len(data):
+            if data[position] != 255:
+                position += 1
+                continue
+            while position &lt; len(data) and data[position] == 255:
+                position += 1
+            marker = data[position]
+            position += 1
+            if marker in (216, 217):
+                continue
+            length = struct.unpack(&quot;&gt;H&quot;, data[position:position + 2])[0]
+            if marker in (192, 193, 194, 195, 197, 198, 199,
+                          201, 202, 203, 205, 206, 207):
+                height, width = struct.unpack(&quot;&gt;HH&quot;, data[position + 3:position + 7])
+                return &quot;JPEG&quot;, (width, height)
+            if length &lt; 2:
+                raise ValueError(&quot;Invalid JPEG segment length.&quot;)
+            position += length
+    raise ValueError(&quot;Unsupported or invalid image header.&quot;)
+
+for relative in files:
+    data = (root / relative).read_bytes()
+    print(relative)
+    print(&quot;  bytes:&quot;, len(data), &quot;sha256:&quot;, hashlib.sha256(data).hexdigest())
+    if relative.endswith(&quot;.png&quot;):
+        image_format, (width, height) = image_details(data)
+        print(&quot;  Actual format and dimensions:&quot;, image_format, width, &quot;x&quot;, height)
+print(&quot;All listed files were read successfully.&quot;)
+</pre></details><pre class="output">LICENSE
+  bytes: 11758 sha256: 57fc2a2a84bb04fb71e24fdd6c133412ba67b65816d33c1c11fc9de5ef87aebd
+results/gui_s14_20261021/README.md
+  bytes: 42680 sha256: babb74f75336c6660205a50a108dd05a0a68e609c19d6ec86de53ca214baf97b
+results/gui_s14_20261021/loop-07-map-filter-zoom-pan.png
+  bytes: 212402 sha256: 559fb99918ef314a898e579f5fbf6dc52882f9cb65b018310b26159d43285845
+  Actual format and dimensions: JPEG 1265 x 712
+results/gui_release_closure_20261031/README.md
+  bytes: 35881 sha256: 776da836be0891935a43c74b41f756c05a4d55abe56c21e4a65b8858ddf12026
+results/gui_release_closure_20261031/p1-final-14of14.png
+  bytes: 88885 sha256: 8b8bfefe155c7e13059f34296cd4a8fee4101df615760b9571a1f9d8059495c4
+  Actual format and dimensions: JPEG 828 x 868
+All listed files were read successfully.
+</pre><details class="code"><summary>Executed Python cell 7</summary><pre>index_path = root / &quot;submission&quot; / &quot;evidence_index.json&quot;
+if index_path.is_file():
+    data = index_path.read_bytes()
+    index = json.loads(data.decode(&quot;utf-8-sig&quot;))
+    print(&quot;Public evidence index bytes:&quot;, len(data))
+    print(&quot;SHA-256:&quot;, hashlib.sha256(data).hexdigest())
+    if isinstance(index, dict):
+        print(&quot;Top-level sections:&quot;, &quot;, &quot;.join(sorted(index)))
+    elif isinstance(index, list):
+        print(&quot;Top-level entries:&quot;, len(index))
+    else:
+        raise ValueError(&quot;The evidence index must be an object or array.&quot;)
+else:
+    print(&quot;Public evidence index has not been staged in this working copy.&quot;)
+    print(&quot;See the submission guide; the retained-file checks above remain separate.&quot;)
+</pre></details><pre class="output">Public evidence index bytes: 154490
+SHA-256: 36788f7818c46d0cbde791f4ef28da69cdc5f4d3bccd885a1fd72a420700b12d
+Top-level sections: bytes, cases, created_at, derivative_notice, file_count, image_review, input_only_backup_qualification, method, missing_artifacts, privacy_policy, publication_privacy_refinement, schema_version, screenshots
+</pre><section class="markdown"><h2>Reproduction routes and scope</h2>
+<ol><li><strong>Inspect and calculate:</strong> run this notebook from top to bottom; verify the original matrices, source pins and VCD comparisons. No model or simulator is started.</li><li><strong>Replay exact saved sources:</strong> follow <a href="docs/saved_rtl_replay.md">saved-RTL replay</a>, using the supplied adopted Counter RTL and original testbench. This establishes a new finite circuit-verification result.</li><li><strong>Generate a new design:</strong> follow <a href="docs/submission_guide.md">fresh environment and GUI instructions</a>, restore an input-only example, Duplicate and explicitly request model generation. This is stochastic new work, and does not reproduce the saved candidate by itself.</li></ol>
+<p>The Python service is part of the browser application's local runtime. Large tool/PDK/model installations are separately acquired from the pinned public distributions; no private cache is required by the fresh-install route. Independent clean-PC qualification remains unverified.</p>
+<p>Original input/specification/expected values and successful/failed histories remain preserved. The public histories are explicitly labelled redacted inspection derivatives. They are not byte-identical original private evidence backups and do not transfer acceptance to an imported editable project.</p></section><section class="markdown"><h2>Recommended and recorded tool versions</h2>
+<div class="table-scroll"><table><thead><tr><th>Scope</th><th>Version</th></tr></thead><tbody>
+<tr><td>Application and read-only notebook</td><td>Python 3.12.10 / Python 3.12 standard library</td></tr>
+<tr><td>Fresh local inference route</td><td>Ollama 0.32.15; Qwen2.5-Coder 7B Q4_K_M; individual historical profiles remain recorded separately</td></tr>
+<tr><td>Generic verification/synthesis</td><td>Icarus Verilog 12.0; Yosys 0.33</td></tr>
+<tr><td>Physical environment</td><td>LibreLane 3.0.16; physical Yosys 0.62; OpenROAD commit <code>dcf36133a369abc8f3c5e5738cd4d82e4903c0e0</code></td></tr>
+<tr><td>DRC/LVS tools</td><td>Magic 8.3.623; KLayout 0.30.7; Netgen 1.5.316</td></tr>
+<tr><td>PDK</td><td>SKY130A / sky130_fd_sc_hd; pinned Ciel revision <code>8afc8346a57fe1ab7934ba5a6056ea8b43078e71</code></td></tr>
+</tbody></table></div>
+<p>Generic Yosys and physical Yosys are different installations. Per-stage tool-version files remain authoritative for the original run. <a href="docs/fresh_install.md">First-use setup</a> provides acquisition, prerequisite and license steps; <a href="docs/third_party_submission.md">third-party notices</a> preserve the distribution boundary. This revision's replay used the existing trusted generic Icarus 12 installation, rather than claiming a newly tested independent PC.</p></section><section class="markdown"><h2>8. Qualified scope and remaining conditions</h2>
+<p>The S14 method is <strong>routed-netlist functional simulation plus extracted static timing analysis</strong> (<code>post_route_functional_plus_sta</code>). It is not dynamic SDF simulation. Finite waveform comparisons are not formal equivalence or exhaustive behavior proof. DRC/LVS/STA passes are not foundry or tapeout approval.</p>
+<p>The demonstrations cover supported synchronous digital RTL with explicit ports, connections and independent cycle contracts. Analog circuits, CDC qualification, arbitrary PDKs and formal equivalence are outside the implemented result. Independent clean-PC installation, actual human usability review, maximum-scale native circuits and a genuine eligible repeated electrical-only generic-v2 correction case remain unqualified. Input limits tested with GUI or software fixtures are distinguished from maximum-scale native execution.</p>
+<p>No controlled study established learning benefit, time saving, model superiority or comparative advantage. HuLLCirq is a provisional name; trademark clearance is not established. Author, affiliation and attending-representative declarations were confirmed by the submitter.</p></section><section class="markdown"><h2>9. Tools, references and licensing</h2>
+<p>The recorded execution uses open-source EDA tools including <a href="https://github.com/steveicarus/iverilog">Icarus Verilog</a>, <a href="https://github.com/YosysHQ/yosys">Yosys</a>, <a href="https://github.com/The-OpenROAD-Project/OpenROAD">OpenROAD</a>, <a href="https://github.com/RTimothyEdwards/magic">Magic</a>, <a href="https://www.klayout.de/">KLayout</a> and <a href="https://github.com/RTimothyEdwards/netgen">Netgen</a>, with <a href="https://github.com/librelane/librelane">LibreLane</a> and the <a href="https://github.com/google/skywater-pdk">SKY130 PDK</a>. Local inference uses recorded <a href="https://github.com/ollama/ollama">Ollama</a> profiles and <a href="https://github.com/QwenLM/Qwen2.5-Coder">Qwen</a> model versions. Exact versions, artifact hashes and retrieval instructions belong to each retained run and the reproduction guide; different designs must not silently share a different historical tool claim.</p>
+<p>HuLLCirq's original source and documentation are <a href="LICENSE">Apache-2.0</a>. Third-party licenses and attribution remain applicable. Runtime binaries, PDK libraries and model weights are not redistributed here. Running a model locally does not itself establish its redistribution license.</p>
+<p>Related work includes <a href="https://arxiv.org/abs/2305.13243">Chip-Chat</a>, an example of conversational hardware design. This submission does not claim to reproduce that paper's experiment. <a href="https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io">Code-a-Chip official program information</a> describes the notebook-driven open-source design submission context.</p></section></main></body></html>

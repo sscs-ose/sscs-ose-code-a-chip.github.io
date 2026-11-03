@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hullcirq:design:0.1",
+  "title": "HuLLCirq M1 editable design input",
+  "description": "Structural shape only. Electrically invalid drafts remain editable and are diagnosed by the stage validators. Additional fields are preserved. This schema is documentation; the stdlib domain validator enforces M1 runtime shape.",
+  "type": "object",
+  "required": ["schema_version", "project", "settings", "nodes", "edges", "layout"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "project": {
+      "type": "object", "required": ["id", "name"],
+      "properties": {"id": {"type": "string"}, "name": {"type": "string"}}
+    },
+    "settings": {
+      "type": "object",
+      "required": ["top_module", "clock_name", "clock_period_ns", "reset_name", "reset_active", "reset_kind", "rtl_language", "pdk", "cell_library"],
+      "properties": {
+        "top_module": {"type": "string"}, "clock_name": {"type": "string"},
+        "clock_period_ns": {"type": "number"}, "reset_name": {"type": "string"},
+        "reset_active": {"type": "string"}, "reset_kind": {"type": "string"},
+        "rtl_language": {"type": "string"}, "pdk": {"type": "string"},
+        "cell_library": {"type": "string"}
+      }
+    },
+    "nodes": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/node"}},
+    "edges": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/edge"}},
+    "layout": {
+      "type": "object", "required": ["nodes", "viewport"],
+      "properties": {
+        "nodes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/position"}},
+        "viewport": {
+          "type": "object", "required": ["x", "y", "zoom"],
+          "properties": {"x": {"type": "number"}, "y": {"type": "number"}, "zoom": {"type": "number", "exclusiveMinimum": 0}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object", "required": ["x", "y"],
+      "properties": {"x": {"type": "number"}, "y": {"type": "number"}}
+    },
+    "port": {
+      "type": "object", "required": ["id", "name", "direction", "width", "signed", "protocol", "clock", "reset"],
+      "properties": {
+        "id": {"type": "string"}, "name": {"type": "string"}, "direction": {"type": "string"},
+        "width": {"type": "integer"}, "signed": {"type": "boolean"}, "protocol": {"type": "string"},
+        "clock": {"type": "string"}, "reset": {"type": "string"},
+        "sideband": {
+          "type": "object", "required": ["kind", "associated_port_id"],
+          "description": "Explicit raw public control/metadata declaration; additional fields are preserved. Metadata association and electrical rules are checked separately.",
+          "properties": {
+            "kind": {"type": "string"},
+            "associated_port_id": {"type": ["string", "null"]},
+            "meaning": {"type": "string"}
+          }
+        }
+      }
+    },
+    "node": {
+      "type": "object", "required": ["id", "name", "module_name", "parent_id", "behavior", "test_expectations", "constraints", "ports"],
+      "properties": {
+        "id": {"type": "string"}, "name": {"type": "string"}, "module_name": {"type": "string"},
+        "parent_id": {"type": ["string", "null"]}, "behavior": {"type": "string"},
+        "test_expectations": {"type": "string"},
+        "constraints": {
+          "type": "object", "required": ["latency_cycles", "protocol"],
+          "properties": {"latency_cycles": {"type": "integer"}, "protocol": {"type": "string"}}
+        },
+        "ports": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/port"}}
+      }
+    },
+    "endpoint": {
+      "type": "object", "required": ["node_id", "port_id"],
+      "properties": {"node_id": {"type": "string"}, "port_id": {"type": "string"}}
+    },
+    "edge": {
+      "type": "object", "required": ["id", "source", "target", "behavior", "protocol"],
+      "properties": {
+        "id": {"type": "string"}, "source": {"$ref": "#/$defs/endpoint"}, "target": {"$ref": "#/$defs/endpoint"},
+        "behavior": {"type": "string"}, "protocol": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "profile_version": "hullcirq-sky130-route-repair-npu2v2",
+  "origin": "development_assistant_standard_NPU2_non_delay_buffer_repair_after_recorded_GUI_electrical_failure",
+  "original_GUI_settings_inherited": [
+    "top_module", "clock_name", "clock_period_ns", "reset_name", "reset_active", "reset_kind", "pdk", "cell_library"
+  ],
+  "additional_conditions_origin": "same_npu2v1_optimization_plus_standard_EXTRA_EXCLUDED_CELLS_for_new_buffer_selection_not_original_GUI_fields",
+  "flow": "HuLLCirqNpu2RouteClosureV2",
+  "stop_after": "KLayout.Render",
+  "jobs": 2,
+  "config": {
+    "FP_CORE_UTIL": 35,
+    "IO_DELAY_CONSTRAINT": 20.0,
+    "CLOCK_UNCERTAINTY_CONSTRAINT": 0.25,
+    "CLOCK_TRANSITION_CONSTRAINT": 0.15,
+    "TIME_DERATING_CONSTRAINT": 5.0,
+    "DEFAULT_CORNER": "nom_tt_025C_1v80",
+    "STA_CORNERS": [
+      "nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95",
+      "min_tt_025C_1v80", "min_ss_100C_1v60", "min_ff_n40C_1v95",
+      "max_tt_025C_1v80", "max_ss_100C_1v60", "max_ff_n40C_1v95"
+    ],
+    "STA_THREADS": 1,
+    "DRT_THREADS": 2,
+    "RUN_POST_GRT_DESIGN_REPAIR": true,
+    "RUN_POST_GRT_RESIZER_TIMING": true,
+    "CTS_SINK_CLUSTERING_SIZE": 8,
+    "CTS_DISTANCE_BETWEEN_BUFFERS": 50,
+    "PNR_CORNERS": ["max_ss_100C_1v60"],
+    "RSZ_CORNERS": ["max_ss_100C_1v60"],
+    "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 60,
+    "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+    "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.1,
+    "EXTRA_EXCLUDED_CELLS": ["sky130_fd_sc_hd__clkdlybuf*"]
+  },
+  "SDC_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/base.sdc",
+  "SDC_sha256": "34c8f331c366db51a78ed8a0d2a7bbac3b6c1cfe0277a04c6aca9ba4948e7f78",
+  "implementation_kind": "resume_first_NPU2_repair_post_GRT_checkpoint_before_OpenROAD.RepairDesignPostGRT",
+  "required_additional_checks": ["max_slew_violations_zero", "max_capacitance_violations_zero", "max_fanout_violations_zero"],
+  "optimization_conditions": {
+    "pnr_max_fanout": 8,
+    "final_max_fanout": 10,
+    "signoff_constraints_changed": false,
+    "pnr_sdc": "original_base_SDC_plus_fixed_fanout8_override",
+    "pnr_slew_margin_percent": 60,
+    "pnr_hold_slack_margin_ns": 0.1,
+    "new_optimization_excluded_cells": ["sky130_fd_sc_hd__clkdlybuf*"],
+    "existing_instances_removed": false,
+    "timing_models_excluded": false
+  },
+  "checkpoint_origin": {
+    "run_id": "physical-workflow-124ca1012520439c97ca35b56518824d",
+    "stage": "05-openroad-globalrouting",
+    "adopted": false,
+    "validation_status": "Failed",
+    "original_GUI_job_changed": false,
+    "state_sha256": "07ed6c04f5d5b08cabd0313815cde9eebc0710e79820e83db693a76b5ebf8fe8",
+    "input_manifest_sha256": "da946574bb920aafee4b022fc1894f1d7590a294b3020d9b0113e44f1e9eb538",
+    "source_execution_sha256": "319be892ec86a37d70c10e89fa3d90bf561e38be7c63692351dda49e4e68ac72"
+  },
+  "per_step_override": {
+    "OpenROAD.ResizerTimingPostGRT": {
+      "RSZ_CORNERS": [
+        "nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95",
+        "min_tt_025C_1v80", "min_ss_100C_1v60", "min_ff_n40C_1v95",
+        "max_tt_025C_1v80", "max_ss_100C_1v60", "max_ff_n40C_1v95"
+      ]
+    }
+  },
+  "fixed_launcher_sha256": "d9c6a709eea2360afa8386fecc6f4ae5ca98d434fb6eca9471f69ccd27baf24f",
+  "standard_tool_sources": [
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/config/flow.py",
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/steps/openroad.py",
+    "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/openroad/common/io.tcl"
+  ],
+  "limits": [
+    "The first GUI repair completed routing and setup/hold checks but retained 445 extracted max_ss slew violations, 0 capacitance and 0 fanout violations. Its failed evidence remains preserved and is not adopted.",
+    "Five worst data-distribution driver instances were absent before the first post-GRT design repair and appeared as clkdlybuf4s25_1 after it. This version changes standard new-optimization cell selection; it does not claim a fully established internal resizer defect or predict success.",
+    "The standard EXTRA_EXCLUDED_CELLS wildcard prevents new clkdlybuf-family selections during optimization. It does not remove existing instances, omit timing models, waive violations or modify the saved RTL/netlist as text.",
+    "The exact first-repair global-route checkpoint reuses its mapping, placement and improved clock tree before the weak-buffer insertion stage. Standard design repair, all-nine-corner timing repair, detailed routing, extraction and stream-out execute again.",
+    "The original 50 ns GUI clock, final base SDC, fanout limit 10, 0.75 ns slew limit, capacitance constraints and all nine signoff corners remain unchanged. New full extracted setup/hold/electrical checks are mandatory.",
+    "Every changed layout requires new S12 DRC, S13 LVS and S14 routed-functional/extracted-STA evidence. Finite verification is not dynamic SDF verification, formal equivalence or fabrication readiness.",
+    "The source is bound by its immutable execution hash and current raw self-checksum. Later ordinary review metadata may change its full raw record hash without changing the executed source."
+  ]
+}

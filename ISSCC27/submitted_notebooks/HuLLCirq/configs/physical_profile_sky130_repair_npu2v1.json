@@ -1,0 +1,77 @@
+{
+  "profile_version": "hullcirq-sky130-route-repair-npu2v1",
+  "origin": "development_assistant_fixed_NPU2_physical_repair_under_user_authorized_GUI_completion",
+  "original_GUI_settings_inherited": [
+    "top_module", "clock_name", "clock_period_ns", "reset_name",
+    "reset_active", "reset_kind", "pdk", "cell_library"
+  ],
+  "additional_conditions_origin": "35_percent_prior_project_selection_and_explicit_LibreLane_3.0.16_timing_defaults_not_original_GUI_fields",
+  "flow": "HuLLCirqRouteClosureV5",
+  "stop_after": "KLayout.Render",
+  "jobs": 2,
+  "config": {
+    "FP_CORE_UTIL": 35,
+    "IO_DELAY_CONSTRAINT": 20.0,
+    "CLOCK_UNCERTAINTY_CONSTRAINT": 0.25,
+    "CLOCK_TRANSITION_CONSTRAINT": 0.15,
+    "TIME_DERATING_CONSTRAINT": 5.0,
+    "DEFAULT_CORNER": "nom_tt_025C_1v80",
+    "STA_CORNERS": [
+      "nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95",
+      "min_tt_025C_1v80", "min_ss_100C_1v60", "min_ff_n40C_1v95",
+      "max_tt_025C_1v80", "max_ss_100C_1v60", "max_ff_n40C_1v95"
+    ],
+    "STA_THREADS": 1,
+    "DRT_THREADS": 2,
+    "RUN_POST_GRT_DESIGN_REPAIR": true,
+    "RUN_POST_GRT_RESIZER_TIMING": true,
+    "CTS_SINK_CLUSTERING_SIZE": 8,
+    "CTS_DISTANCE_BETWEEN_BUFFERS": 50,
+    "PNR_CORNERS": ["max_ss_100C_1v60"],
+    "RSZ_CORNERS": ["max_ss_100C_1v60"],
+    "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 60,
+    "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+    "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.1
+  },
+  "SDC_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/base.sdc",
+  "SDC_sha256": "34c8f331c366db51a78ed8a0d2a7bbac3b6c1cfe0277a04c6aca9ba4948e7f78",
+  "implementation_kind": "resume_original_NPU2_pre_CTS_checkpoint_from_OpenROAD.CTS",
+  "required_additional_checks": [
+    "max_slew_violations_zero", "max_capacitance_violations_zero", "max_fanout_violations_zero"
+  ],
+  "optimization_conditions": {
+    "pnr_max_fanout": 8,
+    "final_max_fanout": 10,
+    "signoff_constraints_changed": false,
+    "pnr_sdc": "original_base_SDC_plus_fixed_fanout8_override",
+    "pnr_slew_margin_percent": 60,
+    "pnr_hold_slack_margin_ns": 0.1
+  },
+  "checkpoint_origin": {
+    "run_id": "physical-workflow-7490fdd470a941c9b097033613816d72",
+    "stage": "34-openroad-detailedplacement",
+    "adopted": true,
+    "original_GUI_job_changed": false,
+    "state_sha256": "43a86aab6073e22c325e167fab44e7a7cf114a7cf2ee76f44d8c589ab5b1efe8",
+    "input_manifest_sha256": "c058e9ef5ce214a4814975f96b5c72cf88a6b7b64151620f7d9a5c58c7e428cc"
+  },
+  "per_step_override": {
+    "OpenROAD.ResizerTimingPostGRT": {
+      "RSZ_CORNERS": [
+        "nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95",
+        "min_tt_025C_1v80", "min_ss_100C_1v60", "min_ff_n40C_1v95",
+        "max_tt_025C_1v80", "max_ss_100C_1v60", "max_ff_n40C_1v95"
+      ]
+    }
+  },
+  "fixed_launcher_sha256": "4b863a00b212d4cabe94e268fae3857ac345f0a92df705152bb2c121eaca84cc",
+  "limits": [
+    "This version accepts only the exact adopted 11-node NPU 2x2 explicit source record and its retained pre-CTS checkpoint. No six-node checkpoint is reused.",
+    "Earlier technology mapping and placement are reused. This run performs new CTS, standard post-GRT electrical repair, all-nine-corner timing repair, detailed routing, extraction and stream-out. No fresh synthesis is claimed.",
+    "CTS cluster size 8 and buffer distance 50 address the saved clock fanout and capacitance violations; success is determined by the new extracted reports, never inferred from these settings.",
+    "The PnR-only fanout limit 8 and slew/capacitance repair margins provide optimization headroom. Original final SDC, 50 ns GUI clock, fanout limit 10, 0.75 ns slew limit, capacitance limits and all nine signoff corners are unchanged. No violation is waived.",
+    "Checkpoint state and input hashes were retained by the original S11. Intermediate checkpoint view hashes are observed when copied for the repair, not retrospectively claimed as original S11 retained hashes.",
+    "Every changed layout requires new S12 DRC, S13 LVS and S14 routed-functional/extracted-STA evidence before completion. This profile is a repair method, not evidence of success.",
+    "No false path is added for the synchronous reset. Finite functional verification and extracted static timing do not establish dynamic SDF verification, formal equivalence or fabrication readiness."
+  ]
+}

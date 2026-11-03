@@ -1,0 +1,70 @@
+{
+  "profile_version": "hullcirq-sky130-lvs-v7",
+  "origin": "development_assistant_qualified_single_contiguous_SD_MOSCAP_recognition_original_S11_geometry_and_reference_netlist_unchanged",
+  "flow": ["Magic.SpiceExtraction", "Netgen.LVS"],
+  "jobs": 2,
+  "config": {
+    "MAGIC_EXT_USE_GDS": true,
+    "MAGIC_EXT_ABSTRACT": false,
+    "MAGIC_EXT_ABSTRACT_CELLS": null,
+    "MAGIC_EXT_UNIQUE": "all",
+    "MAGIC_EXT_SHORT_RESISTOR": false,
+    "LVS_FLATTEN_CELLS": null,
+    "LVS_IGNORE_CELLS": null,
+    "LVS_INCLUDE_MARCO_NETLISTS": false,
+    "VDD_NETS": ["VPWR"],
+    "GND_NETS": ["VGND"]
+  },
+  "deck_files": {
+    "libs.tech/magic/sky130A.magicrc": "c6f29a510b7014907a42b436610964157063c8b19d8e3bb582eaca2288fa7e05",
+    "libs.tech/magic/sky130A.tech": "d9ef56e3ab01b8fb605edf964fcfa01a0bf14ca8503f6ccecdecfd71f0907519",
+    "libs.tech/netgen/sky130A_setup.tcl": "7a33f3f54fab57a9d9b0887ac7b7b64ce6c454110e8b7f01f3cfb90a1282dc94",
+    "libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice": "304da9725492089107bb20840a4020558b028487d300f8df79bbbad5332aaa99",
+    "libs.ref/sky130_fd_sc_hd/gds/sky130_fd_sc_hd.gds": "c0cce10fedffd4f5b3eb4c95bbefd2b035c33bfb9264d35c8495743b3b852911"
+  },
+  "force_full_extraction": true,
+  "extraction_variant": {
+    "upstream_release": "3.0.16",
+    "upstream_source": "https://github.com/librelane/librelane/blob/3.0.16/librelane/scripts/magic/extract_spice.tcl",
+    "upstream_sha256": "461bf51e4226c283de33361bad02f48d0335ad7ab05965cbba43e2677e040660",
+    "script_path": "scripts/extract_spice_moscap_v7.tcl",
+    "script_sha256": "b74817aebee6932247a4de8050a6122003649b1bd7e7f19c1d5a8095980a3cbf",
+    "launcher_path": "scripts/run_moscap_lvs_v7.py",
+    "launcher_sha256": "7b16fee9a5e43bc54b0d624f1d9af29d9302ade7b4a63aab20b7aabe36019416",
+    "replacement": "full_cell_by_cell_with_qualified_moscap_style",
+    "reason": "Preserve all earlier native failures and the v6 Netgen zero-default property mismatch unchanged. Avoid nested wrapper parameter propagation: deterministically expand only the two qualified raw three-pin alias records to original four-pin D=SD/G/S=SD/B records, retaining all raw parameter tokens and every other raw byte. No dimensions are supplied from the reference netlist, no include or wrapper is read by Netgen, and exact geometry/model/terminal/WL proof remains mandatory."
+  },
+  "terminal_recognition_variant": {
+    "schema": "hullcirq-qualified-moscap-recognition-v5",
+    "base_tech_sha256": "d9ef56e3ab01b8fb605edf964fcfa01a0bf14ca8503f6ccecdecfd71f0907519",
+    "helper_path": "scripts/lvs_moscap_v7.py",
+    "helper_sha256": "f6354287077620b53955d6e07be3ded696b86807c1e152093c5dd04d5b660f3b",
+    "wrapper_path": "scripts/lvs_moscap_models_v7.spice",
+    "wrapper_sha256": "5e82da4cebdf0071175a65e067fcd8623d9eeb0efe7e5c41c2e0ae662bee4ef0",
+    "qualified_cell": "sky130_fd_sc_hd__decap_3",
+    "derived_style": "hullcirq_moscap_v7",
+    "base_tech": "source-sky130A.tech",
+    "derived_tech": "derived-sky130A-moscap-v7.tech",
+    "raw_spice": "extraction-raw.spice",
+    "comparison_spice": "extraction-comparison.spice",
+    "execution_log": "extraction-cell-log.json",
+    "proof": "extraction-model-proof.json",
+    "source_inventory_files": [
+      "source-inventory-pre_gds.json",
+      "source-inventory-post_gds.json",
+      "source-inventory-post_annotation.json"
+    ]
+  },
+  "limits": [
+    "This versioned repair profile is explicitly prepared from retained S13 missing-terminal and failed native-inventory/selection/model-range/Netgen-parameter results and their exact adopted S11/S12 inputs. It changes no installed PDK/tool bytes, GDS/DEF geometry, powered netlist or comparison reference SPICE. Original v1/v2/v3/v4/v5/v6 profiles and runs remain inspectable.",
+    "Three raw native inventories are retained before any inventory rejection. Every source-GDS definition and its child graph must match. Non-source definitions must have existed before GDS load and be independently empty of paint, labels, children and selected instances in every phase. Port annotation cannot change the definition set; no PDK-name or empty-cell wildcard waiver is used.",
+    "Each source definition is explicitly selected after loading its extraction style. Native selected-cell identity must exactly match the planned source cell and is retained in the complete extraction execution log. Merely loading a cell, a wrong selection, a missing selected-cell record or a missing fresh extraction file cannot pass.",
+    "Only the qualified separate style changes all four relevant main/narrow width-variant SD signatures consistently. Both original w>=0.42 and w<0.42 conditions and both special model names remain. No width limit is broadened and no rule is removed. Actual qualified devices must still resolve to the two expected main aliases, original models, exact terminal graph and exact W/L; the failed v5 four-pin special fallback is rejected.",
+    "This version also rejects known unresolved native diagnostics in the complete retained extraction log, independently of zero feedback: freeMagic called with NULL argument, Device parameters do not match any extraction model, and No cell selected. The NULL diagnostic was present in the historical v2 and v5 runs; its exact native cause is not claimed established or fixed before execution. No inflight log hash is frozen into the proof; complete final log bytes are sealed by the adapter manifest and rechecked on every validation.",
+    "All reachable loaded GDS definitions are extracted exactly once, children first, into fresh retained files. Every ordinary cell uses the original pinned ngspice extraction style without changes. The separate derived style is used only for the complete decap_3 leaf whose full boundary geometry and attached labels match the pinned vendor GDS.",
+    "The separate style recognizes the single contiguous source/drain MOSCAP terminal. Exactly two qualified raw three-pin alias records are expanded to original NFET/PFET four-pin records with D and S both connected to their actual extracted SD. Original G/B, model identity and raw W/L/AP parameter tokens are retained. No device is deleted or inferred from the comparison result, and no wrapper defaults or reference-derived dimensions enter Netgen.",
+    "The original technology, vendor GDS/SPICE, derived deck, every cell extraction, feedback counts, raw ext2spice bytes, exact two-record comparison transform and model graph are retained and hash bound. Every other raw byte remains unchanged. Each changed record has raw/comparison hashes, terminal mapping and raw parameter tokens in the proof. The comments-only model descriptor is not included by Netgen. Missing definitions, changed qualified geometry, unexpected models/terminals/W/L, alias leakage or disappearing feedback fail closed.",
+    "No new abstraction, flatten, ignore, warning suppression, feedback filtering, waiver or blackbox is added. The pinned upstream Netgen blackbox invocation and PDK setup reductions/tolerances remain recorded comparison scope. Finite zero LVS error metrics, complete unique matches, zero illegal overlaps and zero device-missing-terminal feedback are mandatory.",
+    "This is fixed-input extraction/connectivity evidence, not foundry qualification, formal RTL equivalence, analog/junction-model qualification, extracted dynamic simulation, power integrity or dynamic SDF verification. The new recipe requires actual GUI execution and review before it can supply accepted evidence."
+  ]
+}
