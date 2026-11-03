@@ -1,0 +1,60 @@
+{
+  "source": "NIST FIPS 180-4 Secure Hash Standard (SHS), Appendix examples and NIST CAVP",
+  "standard": "FIPS 180-4",
+  "algorithm": "SHA-256",
+  "digest_bits": 256,
+  "digest_bytes": 32,
+  "byte_order": "digest_hex is big-endian (byte 0 = digest[255:224])",
+  "vectors": [
+    {
+      "id": "nist-abc",
+      "description": "FIPS 180-4 A.1: three-byte message 'abc' (partial final word, tkeep=4'b1110)",
+      "message_ascii": "abc",
+      "message_hex": "616263",
+      "message_bits": 24,
+      "digest_hex": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    },
+    {
+      "id": "nist-empty",
+      "description": "FIPS 180-4: empty (zero-length) message; exercises the one-block padding boundary",
+      "message_ascii": "",
+      "message_hex": "",
+      "message_bits": 0,
+      "digest_hex": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "nist-56",
+      "description": "FIPS 180-4 A.2: 56-byte message; forces delimiter and 64-bit length into a second block (multi-block chaining)",
+      "message_ascii": "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+      "message_hex": "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+      "message_bits": 448,
+      "digest_hex": "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+    },
+    {
+      "id": "nist-112",
+      "description": "FIPS 180-4 B.2: 112-byte two-block message",
+      "message_ascii": "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+      "message_hex": "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475",
+      "message_bits": 896,
+      "digest_hex": "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
+    },
+    {
+      "id": "nist-alphabet",
+      "description": "26-byte lowercase alphabet; used by the nano_hash top-level testbench",
+      "message_ascii": "abcdefghijklmnopqrstuvwxyz",
+      "message_hex": "6162636465666768696a6b6c6d6e6f707172737475767778797a",
+      "message_bits": 208,
+      "digest_hex": "71c480df93d6ae2f1efad1447c66c9525e316218cf51fc8d9ed832f2daf18b73"
+    },
+    {
+      "id": "nist-million-a",
+      "description": "FIPS 180-4 B.3: one million 'a' characters (8,000,000-bit message)",
+      "message_repeat": {
+        "char": "a",
+        "count": 1000000
+      },
+      "message_bits": 8000000,
+      "digest_hex": "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0"
+    }
+  ]
+}
