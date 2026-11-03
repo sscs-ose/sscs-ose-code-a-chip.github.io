@@ -1,0 +1,25 @@
+--- FlexDR_init.cpp.orig_t3	2026-10-11 18:21:12.274388835 +0700
++++ FlexDR_init.cpp	2026-10-11 18:21:12.274898439 +0700
+@@ -1266,7 +1266,6 @@
+                                        const std::string& name,
+                                        const odb::dbTransform& shiftXform)
+ {
+-  dNet->addFrNetTerm(term);
+   auto dPin = std::make_unique<drPin>();
+   dPin->setFrTerm(term);
+   int pinIdx = 0;
+@@ -1319,8 +1318,13 @@
+   }
+ 
+   if (dPin->getAccessPatterns().empty()) {
+-    logger_->error(DRT, 1231, "Pin {} does not have access point", name);
++    // local patch (HSKEM tier 3): none of the pin's access points lies in this worker's route box (after reloading a
++    // routed design the term can enter a box through its existing wire); treat the term as outside this worker
++    // instead of aborting. A worker whose box holds an access point still handles the pin.
++    logger_->warn(DRT, 1231, "Pin {} has no access point in this worker; skipped here", name);
++    return;
+   }
++  dNet->addFrNetTerm(term);
+   dPin->setId(pinCnt_++);
+   dNet->addPin(std::move(dPin));
+ }

@@ -1,0 +1,22 @@
+tb_revc_session: rev C build
+  PASS S1 bind: epoch is the fresh nonce
+SEAL_LOG K=0484d60931f0566386b97b0dc6df998d32c284650937521280f3e30186d7cd0d E=9215352440895e81 C=00000001 P=0123456789abcdef T=acc5306fad8e2c86fe77b953193855c7
+  PASS S2 seal counter 1
+  PASS S2 seal counter 3 after 1 refused (gap)
+SEAL_LOG K=0484d60931f0566386b97b0dc6df998d32c284650937521280f3e30186d7cd0d E=9215352440895e81 C=00000002 P=2222222222222222 T=8a8df56f499b82e428c25769b2d8c5a1
+  PASS S2 seal counter 2 accepted
+  PASS S3 sealed frame accepted
+  PASS S3 receive counts: 1 accepted, 0 rejected
+  PASS S3 replay refused
+  PASS S4 16th rejected tag sets the lock
+  PASS S4 locked: no further tag is checked
+  PASS S5 binding with mismatched K refused
+  PASS S5 the refused binding left counter 20 unused
+  PASS S5 new binding, new epoch
+  PASS S5 new binding clears the lock
+  PASS S6 after reset: new epoch, pre-reset frame refused
+  PASS S7 locked again
+SEAL_LOG K=0484d60931f0566386b97b0dc6df998d32c284650937521280f3e30186d7cd0d E=fcfde9f9633724c6 C=00000001 P=fedcba9876543210 T=578ce1fb60183e0d19d34bc6fa700539
+  PASS S7 zeroise and rebind: receive path open
+TB_REVC_SESSION_RESULT: ALL PASS (16 checks, 0 errors)
+/mnt/d/TKVM_ATTT_2026_test/hskem_revc/tb/tb_revc_session.sv:201: $finish called at 102186000 (1ps)

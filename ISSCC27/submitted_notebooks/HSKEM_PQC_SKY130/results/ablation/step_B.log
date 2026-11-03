@@ -1,0 +1,52 @@
+case=step_B config=asic defines= -DTRUSTEDGE_PACKED_NTT -DTRUSTEDGE_HASH_OVERLAP -DTRUSTEDGE_STREAM_IO -DTRUSTEDGE_FAST_BASEMUL -DTRUSTEDGE_FAST_FEED -DTRUSTEDGE_STREAM_OUT -DTRUSTEDGE_FOLD_READBACK -DTRUSTEDGE_PREFETCH -DTRUSTEDGE_TIGHT_LOOPS -DTRUSTEDGE_FAST_CHECK -DTRUSTEDGE_FAST_Y -DTRUSTEDGE_PACKED2 -DTRUSTEDGE_FAST_PRF -DTRUSTEDGE_FUSED_CMP -DTRUSTEDGE_FAST_READ -DTRUSTEDGE_PIPE_CHECK -DTRUSTEDGE_PAIR_PORT -DTRUSTEDGE_DEFER_J -DTRUSTEDGE_PIPE_MAC -DTRUSTEDGE_FAST_HASH -DTRUSTEDGE_DEC_STREAM -DTRUSTEDGE_SEG_CHECK -DTRUSTEDGE_BG_PRF -DTRUSTEDGE_STREAM_INV -DTRUSTEDGE_STREAM_FWD -DTRUSTEDGE_PRF_TO_NTT -DTRUSTEDGE_STREAM_DEC_INV -DTRUSTEDGE_PRF_FINE_HOLD -DTRUSTEDGE_POLY_GUARD
+/tmp/tmp.v2No9xR5nl/hskem_rtl: 8 files edited, diff 2860 lines
+rtl/mlkem512/mlkem512_cbd.sv:19: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_a[31:0]').
+rtl/mlkem512/mlkem512_cbd.sv:20: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_b[31:0]').
+rtl/mlkem512/mlkem512_cbd.sv:45: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_a[23:0]').
+rtl/mlkem512/mlkem512_cbd.sv:46: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_b[23:0]').
+rtl/mlkem512/mlkem512_bytecodec.sv:16: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'coeff[word=+i[31:0]][15:0]').
+rtl/mlkem512/mlkem512_bytecodec.sv:16: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'coeff[word=+i[31:0]][15:0]').
+rtl/mlkem512/mlkem512_bytecodec.sv:16: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'coeff[word=+i[31:0]][15:0]').
+rtl/mlkem512/mlkem512_cbd.sv:19: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_a[31:0]').
+rtl/mlkem512/mlkem512_cbd.sv:20: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_b[31:0]').
+rtl/mlkem512/mlkem512_cbd.sv:45: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_a[23:0]').
+rtl/mlkem512/mlkem512_cbd.sv:46: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_b[23:0]').
+rtl/mlkem512/mlkem512_bytecodec.sv:16: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'coeff[word=+i[31:0]][15:0]').
+rtl/mlkem512/mlkem512_bytecodec.sv:16: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'coeff[word=+i[31:0]][15:0]').
+rtl/mlkem512/mlkem512_bytecodec.sv:16: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'coeff[word=+i[31:0]][15:0]').
+rtl/mlkem512/mlkem512_cbd.sv:45: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_a[23:0]').
+rtl/mlkem512/mlkem512_cbd.sv:46: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_b[23:0]').
+rtl/mlkem512/mlkem512_cbd.sv:19: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_a[31:0]').
+rtl/mlkem512/mlkem512_cbd.sv:20: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_b[31:0]').
+rtl/mlkem512/mlkem512_cbd.sv:45: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_a[23:0]').
+rtl/mlkem512/mlkem512_cbd.sv:46: sorry: constant selects in always_* processes are not fully supported (the process will be sensitive to all bits in 'shifted_b[23:0]').
+
+real	3m35.586s
+user	3m35.500s
+sys	0m0.020s
+  PASS runtime_mlkem_encaps_fips_flow_spi input_m=32 h_ek=2e782439 g=55853ebd h_c=bc3dc488 k=27033e5e ciphertext_bytes=768 key_source=internal_ekpke raw_export=0 cycles=8898 fips203_alg17_k_direct=1 qualification_only=1 no_validation_claim
+  PASS runtime_mlkem_decaps_fips_flow_spi message_digest=45abb036 h_ek=2e782439 h_c=bc3dc488 g=55853ebd k=27033e5e j_computed=1 compare_bytes=768 match=1 cycles_ge_65535 raw_export=0 fips203_alg18_select=1 qualification_only=1 no_validation_claim
+  PASS U1 Decaps busy latency valid/implicit-rejection=9316 cycles permutations=26
+  PASS runtime_mlkem_decaps_implicit_rejection j_z_c=578e4ba1 match=0 compare_bytes=768 z_source=runtime_keygen_internal z_export=0 no_validity_error_oracle=1 fips203_alg18_j=1 qualification_only=1 no_validation_claim
+TB_TRUSTEDGE_SPI_RESULT: ALL PASS (baseline + D1/D2 internal restore + HSM-4E auth + HSM-4F legacy lock)
+NTT_PACKED_CHECK writes=7168 starts=63 violations=0
+===== testbench log =====
+  INFO fips_ntt_digest=fc3b59fc kyber_cycles=1083 polyvec_digest=a8981500 mlkem_cycles=3829
+  PASS A25 KeyGen cycle oracle cycles=24699 permutations=36 extra_permutation_cycles=144
+  PASS runtime_keygen_spi vectors=2 malformed_len_reject=1 stale_epoch_invalidated=1 public_outputs=g+ekpke_fingerprints dkpke+z=internal_not_exported
+TB_SPI_HSM4F_UNAUTH_STAGING_COMMIT_RESULT: PASS
+TB_SPI_HSM4G_SAME_KEY_RESULT: PASS token=56711b0c5de704ef3f2a857c0c088211
+  PASS runtime_encrypt_no_key_reject status=0 digest=0/0 cycles=2
+  PASS A25 Encrypt cycle oracle cycles=4895 permutations=7 extra_permutation_cycles=144
+  PASS runtime_encrypt_bound_keygen_spi transpose=A^T v0=497bf105/a29eedfa v1=838e41a7/340c0118 cycles=4895 codec_decode_roundtrip=1
+  PASS runtime_mlkem_encaps_fips_flow_spi input_m=32 h_ek=2e782439 g=55853ebd h_c=bc3dc488 k=27033e5e ciphertext_bytes=768 key_source=internal_ekpke raw_export=0 cycles=8898 fips203_alg17_k_direct=1 qualification_only=1 no_validation_claim
+  PASS A25 Encaps cycle oracle cycles=8898 permutations=20 extra_permutation_cycles=144
+  PASS runtime_encrypt_spi payload=64 malformed_len_reject=1 message+coins+internal_ekpke_bound=1
+  MLKEM_STAGE cmd=18 RX: a5 19 00 0c 00 00 00 00 00 00 00 00 00 00 00 01 97 26 00 00 00 00 00 00
+  PASS runtime_decaps_missing_z_reject fail_closed=1 raw_z_export=0
+  PASS runtime_mlkem_decaps_fips_flow_spi message_digest=45abb036 h_ek=2e782439 h_c=bc3dc488 g=55853ebd k=27033e5e j_computed=1 compare_bytes=768 match=1 cycles_ge_65535 raw_export=0 fips203_alg18_select=1 qualification_only=1 no_validation_claim
+  PASS U1 Decaps busy latency valid/implicit-rejection=9316 cycles permutations=26
+  PASS runtime_mlkem_decaps_implicit_rejection j_z_c=578e4ba1 match=0 compare_bytes=768 z_source=runtime_keygen_internal z_export=0 no_validity_error_oracle=1 fips203_alg18_j=1 qualification_only=1 no_validation_claim
+TB_TRUSTEDGE_SPI_RESULT: ALL PASS (baseline + D1/D2 internal restore + HSM-4E auth + HSM-4F legacy lock)
+sim/tb/tb_trustedge_spi.sv:2648: $finish called at 52348655000 (1ps)
+NTT_PACKED_CHECK writes=7168 starts=63 violations=0

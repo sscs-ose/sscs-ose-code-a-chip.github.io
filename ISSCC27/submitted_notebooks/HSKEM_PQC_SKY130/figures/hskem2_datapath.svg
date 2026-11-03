@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 630" width="1120" height="630" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"><rect width="1120" height="630" fill="#fcfcfb"/>
+<text x="16" y="28" font-size="19" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="start">HSKEM-2: blocks, the 18 SRAM macros and the data buses</text>
+<text x="16" y="49" font-size="12.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="start">Every macro is single-port, bits × words. Blue carries coefficient pairs, orange the bytes of the shared sponge.</text>
+<rect x="16" y="66" width="188" height="496" rx="7" fill="none" stroke="#486886" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="25" y="82" font-size="12" fill="#486886" font-weight="bold" font-style="normal" text-anchor="start">Host interface and policy</text>
+<rect x="32" y="92" width="156" height="52" rx="5" fill="#f6f3ee" stroke="#898781" stroke-width="1.3"/>
+<text x="110.0" y="114.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">SPI front end</text>
+<text x="110.0" y="129.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">framing, CRC-16</text>
+<rect x="32" y="156" width="156" height="52" rx="5" fill="#f6f3ee" stroke="#898781" stroke-width="1.3"/>
+<text x="110.0" y="178.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Command bridge</text>
+<text x="110.0" y="193.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">opcodes, responses</text>
+<rect x="32" y="220" width="156" height="66" rx="5" fill="#f6f3ee" stroke="#898781" stroke-width="1.3"/>
+<text x="110.0" y="242.0" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">HSM policy shell</text>
+<text x="110.0" y="257.0" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">key slots, counters,</text>
+<text x="110.0" y="272.0" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">session, lock</text>
+<rect x="32" y="298" width="156" height="52" rx="5" fill="#f6f3ee" stroke="#898781" stroke-width="1.3"/>
+<text x="110.0" y="320.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">HMAC-SHA-256</text>
+<text x="110.0" y="335.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">frames, vault</text>
+<rect x="32" y="362" width="156" height="52" rx="5" fill="#f6f3ee" stroke="#898781" stroke-width="1.3"/>
+<text x="110.0" y="384.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">SHAKE DRBG</text>
+<text x="110.0" y="399.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">coins from the TRNG</text>
+<rect x="32" y="426" width="156" height="52" rx="5" fill="#f6f3ee" stroke="#898781" stroke-width="1.3"/>
+<text x="110.0" y="448.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">PUF root, key vault</text>
+<text x="110.0" y="463.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">device root key</text>
+<rect x="32" y="496" width="156" height="46" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="110.0" y="515.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">public-key buffer</text>
+<text x="110.0" y="530.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">24 × 256</text>
+<polyline points="110,144 110,156" fill="none" stroke="#486886" stroke-width="1.6"/>
+<polygon points="110,156 106.15,149.0 113.85,149.0" fill="#486886"/>
+<polyline points="110,208 110,220" fill="none" stroke="#486886" stroke-width="1.6"/>
+<polygon points="110,220 106.15,213.0 113.85,213.0" fill="#486886"/>
+<polyline points="110,286 110,298" fill="none" stroke="#486886" stroke-width="1.6"/>
+<polygon points="110,298 106.15,291.0 113.85,291.0" fill="#486886"/>
+<rect x="222" y="66" width="882" height="148" rx="7" fill="none" stroke="#898781" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="231" y="82" font-size="12" fill="#898781" font-weight="bold" font-style="normal" text-anchor="start">Shared engines, requested by one controller at a time</text>
+<rect x="240" y="94" width="330" height="106" rx="5" fill="#fdf0ea" stroke="#eb6834" stroke-width="2.4"/>
+<text x="405.0" y="136.0" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Keccak sponge</text>
+<text x="405.0" y="151.0" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">one round per clock, 24 cycles per permutation</text>
+<text x="405.0" y="166.0" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">1600-bit state, byte stream in and out, SHA-3 and SHAKE</text>
+<rect x="590" y="94" width="330" height="106" rx="5" fill="#eaf2fb" stroke="#2a78d6" stroke-width="2.4"/>
+<text x="755.0" y="136.0" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Packed NTT engine</text>
+<text x="755.0" y="151.0" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">two butterfly lanes, two 16-word register banks</text>
+<text x="755.0" y="166.0" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">seven layers fused into two passes</text>
+<rect x="948" y="128" width="136" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="1016.0" y="143.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">NTT pairs</text>
+<text x="1016.0" y="158.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">24 × 128</text>
+<polyline points="920,140 948,140" fill="none" stroke="#2a78d6" stroke-width="3.2"/>
+<polygon points="948,140 941.0,136.15 941.0,143.85" fill="#2a78d6"/>
+<polyline points="948,156 920,156" fill="none" stroke="#2a78d6" stroke-width="3.2"/>
+<polygon points="920,156 927.0,159.85 927.0,152.15" fill="#2a78d6"/>
+<text x="934" y="124" font-size="10" fill="#2a78d6" font-weight="bold" font-style="normal" text-anchor="middle">24</text>
+<rect x="222" y="262" width="340" height="300" rx="7" fill="none" stroke="#1d7874" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="231" y="278" font-size="12" fill="#1d7874" font-weight="bold" font-style="normal" text-anchor="start">K-PKE and matrix: A, s, e, keys</text>
+<rect x="236" y="412" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="288.0" y="427.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">matrix even</text>
+<text x="288.0" y="442.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 512</text>
+<rect x="344" y="412" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="396.0" y="427.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">matrix odd</text>
+<text x="396.0" y="442.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 512</text>
+<rect x="452" y="412" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="504.0" y="427.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">secret even</text>
+<text x="504.0" y="442.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 256</text>
+<rect x="236" y="458" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="288.0" y="473.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">secret odd</text>
+<text x="288.0" y="488.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 256</text>
+<rect x="344" y="458" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="396.0" y="473.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">error even</text>
+<text x="396.0" y="488.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 256</text>
+<rect x="452" y="458" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="504.0" y="473.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">error odd</text>
+<text x="504.0" y="488.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 256</text>
+<rect x="236" y="504" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="288.0" y="519.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">noise bytes</text>
+<text x="288.0" y="534.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">8 × 768</text>
+<rect x="344" y="504" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="396.0" y="519.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">ek pairs</text>
+<text x="396.0" y="534.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">24 × 256</text>
+<rect x="452" y="504" width="104" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="504.0" y="519.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">dk pairs</text>
+<text x="504.0" y="534.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">24 × 256</text>
+<rect x="236" y="290" width="312" height="48" rx="5" fill="#f6f3ee" stroke="#1d7874" stroke-width="1.3"/>
+<text x="392.0" y="310.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">KeyGen controller</text>
+<text x="392.0" y="325.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">SampleNTT, CBD samplers, matrix product</text>
+<rect x="236" y="346" width="312" height="48" rx="5" fill="#f6f3ee" stroke="#1d7874" stroke-width="1.3"/>
+<text x="392.0" y="366.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Key encode and decode</text>
+<text x="392.0" y="381.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12-bit coefficients to bytes and back</text>
+<rect x="576" y="262" width="300" height="300" rx="7" fill="none" stroke="#1d7874" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="585" y="278" font-size="12" fill="#1d7874" font-weight="bold" font-style="normal" text-anchor="start">Encapsulation</text>
+<rect x="590" y="290" width="272" height="48" rx="5" fill="#f6f3ee" stroke="#1d7874" stroke-width="1.3"/>
+<text x="726.0" y="310.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Encrypt controller</text>
+<text x="726.0" y="325.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">noise streams into the NTT, u and v</text>
+<rect x="590" y="346" width="272" height="48" rx="5" fill="#f6f3ee" stroke="#1d7874" stroke-width="1.3"/>
+<text x="726.0" y="366.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Ciphertext codec</text>
+<text x="726.0" y="381.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">compress, encode, decode</text>
+<rect x="590" y="412" width="132" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="656.0" y="427.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">noise even</text>
+<text x="656.0" y="442.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 640</text>
+<rect x="730" y="412" width="132" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="796.0" y="427.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">noise odd</text>
+<text x="796.0" y="442.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 640</text>
+<rect x="590" y="458" width="132" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="656.0" y="473.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">coefficients</text>
+<text x="656.0" y="488.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 768</text>
+<rect x="730" y="458" width="132" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="796.0" y="473.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">decoded</text>
+<text x="796.0" y="488.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">12 × 768</text>
+<rect x="590" y="504" width="132" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="656.0" y="519.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">ciphertext</text>
+<text x="656.0" y="534.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">8 × 768</text>
+<rect x="890" y="262" width="214" height="300" rx="7" fill="none" stroke="#1d7874" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="899" y="278" font-size="12" fill="#1d7874" font-weight="bold" font-style="normal" text-anchor="start">Decapsulation</text>
+<rect x="904" y="290" width="186" height="48" rx="5" fill="#f6f3ee" stroke="#1d7874" stroke-width="1.3"/>
+<text x="997.0" y="310.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Decaps controller</text>
+<text x="997.0" y="325.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">decrypt, hashes</text>
+<rect x="904" y="346" width="186" height="48" rx="5" fill="#f6f3ee" stroke="#1d7874" stroke-width="1.3"/>
+<text x="997.0" y="366.5" font-size="12.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">Fused comparison</text>
+<text x="997.0" y="381.5" font-size="10.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">re-encryption vs c</text>
+<rect x="930" y="412" width="134" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="997.0" y="427.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">products</text>
+<text x="997.0" y="442.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">24 × 128</text>
+<rect x="930" y="458" width="134" height="38" rx="3" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="997.0" y="473.5" font-size="10.5" fill="#0b0b0b" font-weight="bold" font-style="normal" text-anchor="middle">ciphertext ref.</text>
+<text x="997.0" y="488.5" font-size="8.5" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="middle">8 × 768</text>
+<polyline points="405,200 405,222 392,222 392,262" fill="none" stroke="#eb6834" stroke-width="2.6"/>
+<polygon points="392,262 388.15,255.0 395.85,255.0" fill="#eb6834"/>
+<polyline points="405,222 726,222 726,262" fill="none" stroke="#eb6834" stroke-width="2.6"/>
+<polygon points="726,262 722.15,255.0 729.85,255.0" fill="#eb6834"/>
+<polyline points="726,222 960,222 960,262" fill="none" stroke="#eb6834" stroke-width="2.6"/>
+<polygon points="960,262 956.15,255.0 963.85,255.0" fill="#eb6834"/>
+<text x="415" y="237" font-size="10.5" fill="#eb6834" font-weight="bold" font-style="normal" text-anchor="start">8-bit byte stream</text>
+<polyline points="755,200 755,248 440,248 440,262" fill="none" stroke="#2a78d6" stroke-width="3.4"/>
+<polygon points="440,262 436.15,255.0 443.85,255.0" fill="#2a78d6"/>
+<polyline points="755,248 800,248 800,262" fill="none" stroke="#2a78d6" stroke-width="3.4"/>
+<polygon points="800,262 796.15,255.0 803.85,255.0" fill="#2a78d6"/>
+<polyline points="755,248 1040,248 1040,262" fill="none" stroke="#2a78d6" stroke-width="3.4"/>
+<polygon points="1040,262 1036.15,255.0 1043.85,255.0" fill="#2a78d6"/>
+<text x="545" y="243" font-size="10.5" fill="#2a78d6" font-weight="bold" font-style="normal" text-anchor="start">24-bit coefficient pairs, one per cycle</text>
+<polyline points="204,280 222,280" fill="none" stroke="#486886" stroke-width="1.6" stroke-dasharray="5 4"/>
+<polygon points="222,280 215.0,276.15 215.0,283.85" fill="#486886"/>
+<polyline points="240,590 290,590" fill="none" stroke="#2a78d6" stroke-width="3.4"/>
+<polygon points="290,590 283.0,586.15 283.0,593.85" fill="#2a78d6"/>
+<text x="298" y="594" font-size="11" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="start">24-bit pair bus</text>
+<polyline points="420,590 470,590" fill="none" stroke="#eb6834" stroke-width="2.6"/>
+<polygon points="470,590 463.0,586.15 463.0,593.85" fill="#eb6834"/>
+<text x="478" y="594" font-size="11" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="start">8-bit sponge stream</text>
+<polyline points="630,590 680,590" fill="none" stroke="#486886" stroke-width="1.6" stroke-dasharray="5 4"/>
+<polygon points="680,590 673.0,586.15 673.0,593.85" fill="#486886"/>
+<text x="688" y="594" font-size="11" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="start">commands</text>
+<rect x="780" y="576" width="22" height="26" rx="2" fill="#f2cc8f" stroke="#b5833b" stroke-width="1.3"/>
+<text x="810" y="594" font-size="11" fill="#52514e" font-weight="normal" font-style="normal" text-anchor="start">single-port OpenRAM macro (18 in all)</text>
+</svg>

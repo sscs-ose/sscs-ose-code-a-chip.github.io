@@ -1,0 +1,269 @@
+{
+ "method": "Mutation test of the block testbenches: does the verification catch a wrong design?\n\nEach mutant is one deliberate, plausible bug in a copy of the RTL (a wrong twiddle factor, an off-by-one bound in\na modular correction, a lost +q, a wrong twiddle index, a wrong rotation offset or round constant, a lost NOT in\nchi). The unchanged testbench of Section 4 runs on the mutant with the committed golden vectors; a mutant is caught\nwhen the testbench reports an error. The unmutated design (the control) must pass.",
+ "control": {
+  "packed2_x1": {
+   "compiled": true,
+   "result": "NTT_RESULT vectors=204 coeffs_checked=104448 errors=0 cycles_fwd=568 cycles_inv=569 timing_variations=0",
+   "errors": 0,
+   "caught": false,
+   "how": "passes"
+  },
+  "keccak_round": {
+   "compiled": true,
+   "result": "KECCAK_RESULT serial=0 vectors=202 errors=0 cycles=25 timing_variations=0",
+   "errors": 0,
+   "caught": false,
+   "how": "passes"
+  },
+  "keccak_serial": {
+   "compiled": true,
+   "result": "KECCAK_RESULT serial=1 vectors=202 errors=0 cycles=169 timing_variations=0",
+   "errors": 0,
+   "caught": false,
+   "how": "passes"
+  }
+ },
+ "mutants": [
+  {
+   "mutant": "zeta_value",
+   "block": "ntt",
+   "file": "rtl/kyber_pkg.sv",
+   "models": "one twiddle factor off by one",
+   "original": "7'd5: kyber_zeta = 16'd630;",
+   "mutated": "7'd5: kyber_zeta = 16'd631;",
+   "runs": {
+    "packed2_x1": {
+     "compiled": true,
+     "result": "NTT_RESULT vectors=204 coeffs_checked=104448 errors=38644 cycles_fwd=568 cycles_inv=569 timing_variations=0",
+     "errors": 38644,
+     "caught": true,
+     "how": "38644 mismatching vectors"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "barrett_bound",
+   "block": "ntt",
+   "file": "rtl/barrett_reduce_1c.v",
+   "models": "the final correction misses r = q",
+   "original": "(r0 >= Q) ? (r0 - Q) : r0",
+   "mutated": "(r0 > Q) ? (r0 - Q) : r0",
+   "runs": {
+    "packed2_x1": {
+     "compiled": true,
+     "result": "NTT_RESULT vectors=204 coeffs_checked=104448 errors=0 cycles_fwd=568 cycles_inv=569 timing_variations=0",
+     "errors": 0,
+     "caught": false,
+     "how": "passes"
+    }
+   },
+   "caught_by_simulation": false,
+   "formal": {
+    "proof": "fails (counterexample found)",
+    "caught": true
+   },
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "sum_bound",
+   "block": "ntt",
+   "file": "rtl/kyber_ntt_engine_packed2.sv",
+   "models": "modular addition misses a + b = q",
+   "original": "(sum_w >= Q13) ? (sum_w - Q13)",
+   "mutated": "(sum_w > Q13) ? (sum_w - Q13)",
+   "runs": {
+    "packed2_x1": {
+     "compiled": true,
+     "result": "NTT_RESULT vectors=204 coeffs_checked=104448 errors=0 cycles_fwd=568 cycles_inv=569 timing_variations=0",
+     "errors": 0,
+     "caught": false,
+     "how": "passes"
+    }
+   },
+   "caught_by_simulation": false,
+   "equivalent": "the sum feeds only the inverse transform, where it is added, subtracted or multiplied again and the final scaling multiplies every coefficient, so a stored q behaves exactly as 0",
+   "caught": false
+  },
+  {
+   "mutant": "diff_no_q",
+   "block": "ntt",
+   "file": "rtl/kyber_ntt_engine_packed2.sv",
+   "models": "modular subtraction without +q",
+   "original": "{1'b0, opb[gh]} + Q13 - opa[gh]",
+   "mutated": "{1'b0, opb[gh]} - opa[gh]",
+   "runs": {
+    "packed2_x1": {
+     "compiled": true,
+     "result": "NTT_RESULT vectors=204 coeffs_checked=104448 errors=50727 cycles_fwd=568 cycles_inv=569 timing_variations=0",
+     "errors": 50727,
+     "caught": true,
+     "how": "50727 mismatching vectors"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "fsum_bound",
+   "block": "ntt",
+   "file": "rtl/kyber_ntt_engine_packed2.sv",
+   "models": "the forward butterfly's modular addition misses x + r = q",
+   "original": "(f_sum_w >= Q13) ? (f_sum_w - Q13)",
+   "mutated": "(f_sum_w > Q13) ? (f_sum_w - Q13)",
+   "runs": {
+    "packed2_x1": {
+     "compiled": true,
+     "result": "NTT_RESULT vectors=204 coeffs_checked=104448 errors=9 cycles_fwd=568 cycles_inv=569 timing_variations=0",
+     "errors": 9,
+     "caught": true,
+     "how": "9 mismatching vectors"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "zeta_index",
+   "block": "ntt",
+   "file": "rtl/kyber_ntt_engine_packed2.sv",
+   "models": "forward twiddle index shifted by one level",
+   "original": "(w_lo >> (3'd7 - m_fwd))",
+   "mutated": "(w_lo >> (3'd6 - m_fwd))",
+   "runs": {
+    "packed2_x1": {
+     "compiled": true,
+     "result": "NTT_RESULT vectors=204 coeffs_checked=104448 errors=50893 cycles_fwd=568 cycles_inv=569 timing_variations=0",
+     "errors": 50893,
+     "caught": true,
+     "how": "50893 mismatching vectors"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "rho_offset",
+   "block": "keccak",
+   "file": "rtl/keccak_f1600_iter.sv",
+   "models": "one lane rotated by 61 instead of 62",
+   "original": "2: rho_offset = 62;",
+   "mutated": "2: rho_offset = 61;",
+   "runs": {
+    "keccak_round": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=0 vectors=202 errors=202 cycles=25 timing_variations=0",
+     "errors": 202,
+     "caught": true,
+     "how": "202 mismatching vectors"
+    },
+    "keccak_serial": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=1 vectors=202 errors=202 cycles=169 timing_variations=0",
+     "errors": 202,
+     "caught": true,
+     "how": "202 mismatching vectors"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "round_constant",
+   "block": "keccak",
+   "file": "rtl/keccak_f1600_iter.sv",
+   "models": "one bit of the last round constant",
+   "original": "64'h8000000080008008",
+   "mutated": "64'h8000000080008009",
+   "runs": {
+    "keccak_round": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=0 vectors=202 errors=202 cycles=25 timing_variations=0",
+     "errors": 202,
+     "caught": true,
+     "how": "202 mismatching vectors"
+    },
+    "keccak_serial": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=1 vectors=202 errors=202 cycles=169 timing_variations=0",
+     "errors": 202,
+     "caught": true,
+     "how": "202 mismatching vectors"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "chi_not_lane",
+   "block": "keccak",
+   "file": "rtl/keccak_f1600_iter.sv",
+   "models": "chi without its NOT (lane-indexed form)",
+   "original": "((~b[((x+1)%5)+5*y]) & b[((x+2)%5)+5*y])",
+   "mutated": "((b[((x+1)%5)+5*y]) & b[((x+2)%5)+5*y])",
+   "runs": {
+    "keccak_round": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=0 vectors=202 errors=202 cycles=25 timing_variations=0",
+     "errors": 202,
+     "caught": true,
+     "how": "202 mismatching vectors"
+    },
+    "keccak_serial": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=1 vectors=202 errors=0 cycles=169 timing_variations=0",
+     "errors": 0,
+     "caught": false,
+     "how": "passes"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  },
+  {
+   "mutant": "chi_not_row",
+   "block": "keccak",
+   "file": "rtl/keccak_f1600_iter.sv",
+   "models": "chi without its NOT (row form)",
+   "original": "a[x] = b[x] ^ ((~b[(x+1)%5]) & b[(x+2)%5]);",
+   "mutated": "a[x] = b[x] ^ ((b[(x+1)%5]) & b[(x+2)%5]);",
+   "runs": {
+    "keccak_round": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=0 vectors=202 errors=0 cycles=25 timing_variations=0",
+     "errors": 0,
+     "caught": false,
+     "how": "passes"
+    },
+    "keccak_serial": {
+     "compiled": true,
+     "result": "KECCAK_RESULT serial=1 vectors=202 errors=202 cycles=169 timing_variations=0",
+     "errors": 202,
+     "caught": true,
+     "how": "202 mismatching vectors"
+    }
+   },
+   "caught_by_simulation": true,
+   "equivalent": null,
+   "caught": true
+  }
+ ],
+ "base_formal": {
+  "proof": "holds",
+  "caught": false
+ },
+ "caught": 9,
+ "total": 10,
+ "caught_by_simulation": 8,
+ "equivalent": 1,
+ "control_passes": true
+}

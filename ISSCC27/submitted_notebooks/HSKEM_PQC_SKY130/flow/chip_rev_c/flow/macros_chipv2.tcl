@@ -1,0 +1,19 @@
+# Chip v2: the A25-P4 macro coordinates; the two-lane NTT store (24 x 128) takes the top row right of the product RAM.
+place_macro -macro_name {u_common.u_c3_pk_pair_sram.g_24x256.u_macro} -location {41.655 765.89} -orientation R180
+place_macro -macro_name {u_common.u_mlkem512_decaps_partial.u_ciphertext_ref_sram.g_8x768.u_macro} -location {41.415 3.395} -orientation R180
+place_macro -macro_name {u_common.u_mlkem512_decaps_partial.u_product_pair_sram.g_24x128.u_macro} -location {594.85 3102.285} -orientation R0
+place_macro -macro_name {u_common.u_mlkem512_encaps_partial.u_codec.u_ciphertext_sram.g_8x768.u_macro} -location {436.095 3.395} -orientation R180
+place_macro -macro_name {u_common.u_mlkem512_encaps_partial.u_codec.u_coeff_sram.g_12x768.u_macro} -location {2913.99 1054.675} -orientation MX
+place_macro -macro_name {u_common.u_mlkem512_encaps_partial.u_codec.u_decoded_coeff_sram.g_12x768.u_macro} -location {2437.43 677.955} -orientation MX
+place_macro -macro_name {u_common.u_mlkem512_encaps_partial.u_noise_even_sram.g_12x640.u_macro} -location {2913.99 675.515} -orientation MX
+place_macro -macro_name {u_common.u_mlkem512_encaps_partial.u_noise_odd_sram.g_12x640.u_macro} -location {2913.99 296.755} -orientation MX
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_dkpke_pair_sram.g_24x256.u_macro} -location {41.655 459.89} -orientation R180
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_ekpke_pair_sram.g_24x256.u_macro} -location {41.655 1488.05} -orientation R180
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_error_even_sram.g_12x256.u_macro} -location {41.415 2210.78} -orientation MY
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_error_odd_sram.g_12x256.u_macro} -location {41.415 2504.54} -orientation MY
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_matrix_even_sram.g_12x512.u_macro} -location {2437.43 340.555} -orientation MX
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_matrix_odd_sram.g_12x512.u_macro} -location {2437.43 3.275} -orientation MX
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_noise_byte_sram.g_8x768.u_macro} -location {41.415 1031.555} -orientation R180
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_secret_even_sram.g_12x256.u_macro} -location {41.415 2797.62} -orientation MY
+place_macro -macro_name {u_common.u_mlkem512_kpke_partial.u_matrix_mac.u_secret_odd_sram.g_12x256.u_macro} -location {2920.39 42.775} -orientation MX
+place_macro -macro_name {u_common.u_shared_ntt.u_sram.u_macro} -location {1315.485 3102.285} -orientation R0
