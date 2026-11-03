@@ -1,0 +1,2155 @@
+{
+  "schema_version": 2,
+  "run_id": "PHYS_002_RUN_002",
+  "design": "phase0_counter",
+  "selection": {
+    "path": "results/raw/phase0/selection.json",
+    "sha256": "8661c5e78c1b166a59e57d8193dea028147de26d85ee6129c1e9ae41b28421da",
+    "size_bytes": 1809
+  },
+  "parser": {
+    "path": "scripts/collect_phase0_metrics.py",
+    "sha256": "807b001ba1fbf6a33474da2733e7ca544aca2147e163b23571438d3ab00313e2"
+  },
+  "errors": [],
+  "simulation": {
+    "pass": true,
+    "compile": {
+      "record": "results/raw/phase0/SIM_001/compile.command.json",
+      "argv": [
+        "wsl",
+        "-d",
+        "Ubuntu",
+        "--exec",
+        "verilator",
+        "--binary",
+        "--timing",
+        "--top-module",
+        "tb_phase0_counter",
+        "--Mdir",
+        "results/raw/phase0/SIM_001/obj_dir",
+        "phase0/smoke/rtl/phase0_counter.v",
+        "phase0/smoke/tb/tb_phase0_counter.v"
+      ],
+      "returncode": 0,
+      "log": {
+        "path": "results/raw/phase0/SIM_001/compile.log",
+        "sha256": "725297c2029dfd706cc1fbc1e58247e2a1911a53ea5a84bbb1adc3e2afae6b7a",
+        "size_bytes": 2911
+      },
+      "started_at": "2026-09-27T08:44:47.638164+00:00",
+      "finished_at": "2026-09-27T08:44:57.362848+00:00"
+    },
+    "execution": {
+      "record": "results/raw/phase0/SIM_001/simulation.command.json",
+      "argv": [
+        "wsl",
+        "-d",
+        "Ubuntu",
+        "--exec",
+        "results/raw/phase0/SIM_001/obj_dir/Vtb_phase0_counter"
+      ],
+      "returncode": 0,
+      "log": {
+        "path": "results/raw/phase0/SIM_001/simulation.log",
+        "sha256": "1864214ed4b99edf6a741adf4dd7b19d7764eadc240f8d754c942aaff5af963a",
+        "size_bytes": 74
+      },
+      "started_at": "2026-09-27T08:45:17.016763+00:00",
+      "finished_at": "2026-09-27T08:45:17.194817+00:00"
+    },
+    "tool_version": {
+      "output": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)",
+      "command": [
+        "wsl",
+        "-d",
+        "Ubuntu",
+        "--exec",
+        "verilator",
+        "--version"
+      ],
+      "source": {
+        "path": "results/raw/phase0/diagnostics/verilator_version.log",
+        "sha256": "26daf9ad1ba36ee1c20cab9a869d0a1fbb8117230c80c78ec2d8cf597f64c4a5",
+        "size_bytes": 48
+      }
+    }
+  },
+  "synthesis": {
+    "pass": true,
+    "execution": {
+      "record": "results/raw/phase0/SYN_001/yosys.command.json",
+      "argv": [
+        "wsl",
+        "-d",
+        "Ubuntu",
+        "--exec",
+        "bash",
+        "scripts/phase0_docker.sh",
+        "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e",
+        "/home/huawei/.local/share/model2gds-codex/pdks",
+        "yosys",
+        "-s",
+        "phase0/smoke/yosys/synth.ys"
+      ],
+      "returncode": 0,
+      "log": {
+        "path": "results/raw/phase0/SYN_001/yosys.log",
+        "sha256": "0dca1308c890513153381d7c5b86edbb3178deb8c7ebf43786c74b3aa54cbfdc",
+        "size_bytes": 6222
+      },
+      "started_at": "2026-09-27T08:51:02.567242+00:00",
+      "finished_at": "2026-09-27T08:51:03.957503+00:00"
+    },
+    "netlist": {
+      "path": "results/raw/phase0/SYN_001/phase0_counter_synth.v",
+      "sha256": "0da64d085dce409bce7cba224fafc258e1db45b930303bb5756a8832c7acefae",
+      "size_bytes": 433
+    },
+    "container_image_digest": "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e"
+  },
+  "physical_flow": {
+    "pass": true,
+    "run_id": "RUN_002",
+    "execution": {
+      "record": "results/raw/phase0/PHYS_002/openlane.command.json",
+      "argv": [
+        "wsl",
+        "-d",
+        "Ubuntu",
+        "--exec",
+        "bash",
+        "scripts/phase0_docker.sh",
+        "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e",
+        "/home/huawei/.local/share/model2gds-codex/pdks",
+        "openlane",
+        "--manual-pdk",
+        "--pdk-root",
+        "/pdk",
+        "--pdk",
+        "sky130A",
+        "--scl",
+        "sky130_fd_sc_hd",
+        "--flow",
+        "Classic",
+        "--jobs",
+        "2",
+        "--run-tag",
+        "RUN_002",
+        "--hide-progress-bar",
+        "results/raw/phase0/PHYS_002/smoke/openlane/config.json"
+      ],
+      "returncode": 0,
+      "log": {
+        "path": "results/raw/phase0/PHYS_002/openlane.log",
+        "sha256": "67e17bf705b770e1886ec4844492cd6faa74dc63fc94f7ee6c4a843326150117",
+        "size_bytes": 1114161
+      },
+      "started_at": "2026-09-27T08:52:38.874172+00:00",
+      "finished_at": "2026-09-27T08:53:54.909379+00:00"
+    },
+    "final_state": {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/74-misc-reportmanufacturability/state_out.json",
+      "sha256": "ae5419fe960fb7139f24d50cabe14d9a5f9bf5589d83f9dd46bedb381b8f3ee8",
+      "size_bytes": 22147
+    },
+    "resolved_config": {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/resolved.json",
+      "sha256": "64c23419ef5e8d3836a0dfa81d0f17635a862fcdb649641f9d66fb72ebd4fd77",
+      "size_bytes": 90601
+    },
+    "pdk": "sky130A",
+    "standard_cell_library": "sky130_fd_sc_hd",
+    "clock_period": {
+      "value": 20,
+      "units": "ns",
+      "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/resolved.json",
+      "source_key": "CLOCK_PERIOD"
+    },
+    "post_route_timing": {
+      "stage": "OpenROAD.STAPostPNR",
+      "quantities": [
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns",
+          "corner": "aggregate"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:max_ff_n40C_1v95",
+          "corner": "max_ff_n40C_1v95"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:max_ss_100C_1v60",
+          "corner": "max_ss_100C_1v60"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:max_tt_025C_1v80",
+          "corner": "max_tt_025C_1v80"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:min_ff_n40C_1v95",
+          "corner": "min_ff_n40C_1v95"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:min_ss_100C_1v60",
+          "corner": "min_ss_100C_1v60"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:min_tt_025C_1v80",
+          "corner": "min_tt_025C_1v80"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:nom_ff_n40C_1v95",
+          "corner": "nom_ff_n40C_1v95"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:nom_ss_100C_1v60",
+          "corner": "nom_ss_100C_1v60"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__tns__corner:nom_tt_025C_1v80",
+          "corner": "nom_tt_025C_1v80"
+        },
+        {
+          "value": 0.10927944969351737,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws",
+          "corner": "aggregate"
+        },
+        {
+          "value": 0.11258480577591325,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:max_ff_n40C_1v95",
+          "corner": "max_ff_n40C_1v95"
+        },
+        {
+          "value": 0.9115758406137136,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:max_ss_100C_1v60",
+          "corner": "max_ss_100C_1v60"
+        },
+        {
+          "value": 0.33363751594696645,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:max_tt_025C_1v80",
+          "corner": "max_tt_025C_1v80"
+        },
+        {
+          "value": 0.10927944969351737,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:min_ff_n40C_1v95",
+          "corner": "min_ff_n40C_1v95"
+        },
+        {
+          "value": 0.9033357095807476,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:min_ss_100C_1v60",
+          "corner": "min_ss_100C_1v60"
+        },
+        {
+          "value": 0.32861903017797206,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:min_tt_025C_1v80",
+          "corner": "min_tt_025C_1v80"
+        },
+        {
+          "value": 0.1111232248782335,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:nom_ff_n40C_1v95",
+          "corner": "nom_ff_n40C_1v95"
+        },
+        {
+          "value": 0.9078543729299198,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:nom_ss_100C_1v60",
+          "corner": "nom_ss_100C_1v60"
+        },
+        {
+          "value": 0.331369496776967,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__hold__ws__corner:nom_tt_025C_1v80",
+          "corner": "nom_tt_025C_1v80"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns",
+          "corner": "aggregate"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:max_ff_n40C_1v95",
+          "corner": "max_ff_n40C_1v95"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:max_ss_100C_1v60",
+          "corner": "max_ss_100C_1v60"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:max_tt_025C_1v80",
+          "corner": "max_tt_025C_1v80"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:min_ff_n40C_1v95",
+          "corner": "min_ff_n40C_1v95"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:min_ss_100C_1v60",
+          "corner": "min_ss_100C_1v60"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:min_tt_025C_1v80",
+          "corner": "min_tt_025C_1v80"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:nom_ff_n40C_1v95",
+          "corner": "nom_ff_n40C_1v95"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:nom_ss_100C_1v60",
+          "corner": "nom_ss_100C_1v60"
+        },
+        {
+          "value": 0,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__tns__corner:nom_tt_025C_1v80",
+          "corner": "nom_tt_025C_1v80"
+        },
+        {
+          "value": 14.048809624390445,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws",
+          "corner": "aggregate"
+        },
+        {
+          "value": 15.154224970493047,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:max_ff_n40C_1v95",
+          "corner": "max_ff_n40C_1v95",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/ws.max.rpt",
+            "sha256": "62b2d889d0b94de99238f73d8f8da777be0f995d759918420cb9f6dcdab646d3",
+            "size_bytes": 211
+          }
+        },
+        {
+          "value": 14.048809624390445,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:max_ss_100C_1v60",
+          "corner": "max_ss_100C_1v60",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/ws.max.rpt",
+            "sha256": "885b5c94abaed35febe4c7cb25695612426237c61cd70a1ce9a4d08678f25edd",
+            "size_bytes": 211
+          }
+        },
+        {
+          "value": 14.860928908087853,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:max_tt_025C_1v80",
+          "corner": "max_tt_025C_1v80",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/ws.max.rpt",
+            "sha256": "e32d60504fc8afaef7262b4f28f4100ebf8ba18a0e9bb10cd5dbd530137e06b4",
+            "size_bytes": 211
+          }
+        },
+        {
+          "value": 15.16217772028796,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:min_ff_n40C_1v95",
+          "corner": "min_ff_n40C_1v95",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/ws.max.rpt",
+            "sha256": "fb8f2b1833714691a9b56fe64133e1cc0d267612c5d358474822334aade3ad30",
+            "size_bytes": 210
+          }
+        },
+        {
+          "value": 14.064433571413266,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:min_ss_100C_1v60",
+          "corner": "min_ss_100C_1v60",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/ws.max.rpt",
+            "sha256": "74047046d2c6a4bec8e90dd38f8dbe2580beab448b3352c3594586b004a3d3ac",
+            "size_bytes": 211
+          }
+        },
+        {
+          "value": 14.87123000169087,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:min_tt_025C_1v80",
+          "corner": "min_tt_025C_1v80",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/ws.max.rpt",
+            "sha256": "fe2e07fbfe43880b94ce22be83e5f723f729f4f11b8701279d1d5c1eae6bcd3f",
+            "size_bytes": 210
+          }
+        },
+        {
+          "value": 15.158505990597076,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:nom_ff_n40C_1v95",
+          "corner": "nom_ff_n40C_1v95",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/ws.max.rpt",
+            "sha256": "4e96395ce7ff7aa925b281dc473c24884e25684fb217d727f8965a46071aeafc",
+            "size_bytes": 211
+          }
+        },
+        {
+          "value": 14.056770367791364,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:nom_ss_100C_1v60",
+          "corner": "nom_ss_100C_1v60",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/ws.max.rpt",
+            "sha256": "0b709dcadd392516609261f751e34dbabf3102b5241926ad27d64d9d37451ce7",
+            "size_bytes": 211
+          }
+        },
+        {
+          "value": 14.866316598534128,
+          "units": "ns",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup__ws__corner:nom_tt_025C_1v80",
+          "corner": "nom_tt_025C_1v80",
+          "report_source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/ws.max.rpt",
+            "sha256": "50f51e832d0db8c6bb546aeb71ec5a8c497c8bde93ce81f6e007dfd4cec9f099",
+            "size_bytes": 211
+          }
+        }
+      ],
+      "reports": [
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/checks.rpt",
+          "sha256": "b24193c8da664dc15df5676e6ab1a69d73599945b8377aab5ddfb0a53d560489",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/clock.rpt",
+          "sha256": "b3b70d0acba8ec64d291e3c5cfe5c73623ebc2aa5cf2e2062383be6abac208a5",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/max.rpt",
+          "sha256": "bcc0faee346c85b57abdb1c7d1c4b6136943c41bcb97c60c4efabbd960390cdd",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/min.rpt",
+          "sha256": "8cc9da7b4d09a65d82f13008512bc08517df7532fdc25c58ef0d28d0b885dd13",
+          "size_bytes": 75035
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/tns.max.rpt",
+          "sha256": "76a5c15ea700725ae9635019a6ed2ca07f8d16855059a033824c06d80e376ffe",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/tns.min.rpt",
+          "sha256": "af5565e24e34574afef2b3450a406f96bd53b88ad55e3b6e6e3dbff8dedd2219",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/ws.max.rpt",
+          "sha256": "62b2d889d0b94de99238f73d8f8da777be0f995d759918420cb9f6dcdab646d3",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/ws.min.rpt",
+          "sha256": "558543a393491df84fef1e0b4ce07244649729698ce6ac2f3b7828fd73653dd8",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/checks.rpt",
+          "sha256": "aeab6455a92f27ee081944f773118f9c90f8860d7b14183cfcf6b90969418eaa",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/clock.rpt",
+          "sha256": "6965a7cc26c5c1e1d7fb10a037400d16c8f0568c8948e2dd9fc7f11a693c3e4e",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/max.rpt",
+          "sha256": "54b369331428a8e7296d1686c0fe9b675088f5f94f95e3b4672f24e38567861a",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/min.rpt",
+          "sha256": "fbb763617307997b7cd270119a9b1f30028a4cf5dbcceb8ecff1f40065364fec",
+          "size_bytes": 75035
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/tns.max.rpt",
+          "sha256": "96969700a310391e17cecb00ab857ed8d0bdb72825a212e14f42c3e74629e7e6",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/tns.min.rpt",
+          "sha256": "43631fe1f7fcc9c60ec0a22c6d28e4da03dd569319aeb2deaeffef9de76c51f6",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/ws.max.rpt",
+          "sha256": "885b5c94abaed35febe4c7cb25695612426237c61cd70a1ce9a4d08678f25edd",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/ws.min.rpt",
+          "sha256": "17240b7299d0be0f0ea9b1b34231ccc868812b3268c0bd1b73892d84ab07109a",
+          "size_bytes": 210
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/checks.rpt",
+          "sha256": "7be4abdd70458dc04d3db7154691a3a873b3b3e5da7077dad8fe3c0a7a4b206d",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/clock.rpt",
+          "sha256": "2b63c8bdebfc1042a662cbf6da809452eae2e8fd9297918d7d62e9bd5416e6ff",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/max.rpt",
+          "sha256": "b993e2f50abc5d7c14f4140d18f8ced573b012c601ea2a79a73495b4740bcfd3",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/min.rpt",
+          "sha256": "e285b9705199f6e0354b1fed95efad91c8e3df386ccdfc3f4e8ac494ff5daf67",
+          "size_bytes": 75036
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/tns.max.rpt",
+          "sha256": "418d2bede20e19a164a9f2ed3c09b9256673107c2b48cf89799c610ff1d7802d",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/tns.min.rpt",
+          "sha256": "579c652f679fe33e8e5cfe4529e51f8736e0c2b82bb72e0994c4c9a8f4cb4bca",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/ws.max.rpt",
+          "sha256": "e32d60504fc8afaef7262b4f28f4100ebf8ba18a0e9bb10cd5dbd530137e06b4",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/ws.min.rpt",
+          "sha256": "e6a0bcdbaf7782ece419658e7f7fa12dcb7e06a9d544565ed9643c0ad3c49267",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/checks.rpt",
+          "sha256": "65019a08c397b433d80e71e14e1f58b33fd8c0ff3d33898c7d0f373f55874cd0",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/clock.rpt",
+          "sha256": "e161ad31a3bbc87c26cefbd4af21440dfa2e543d0f62d85feaa42aac35d4ce94",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/max.rpt",
+          "sha256": "44e3c8f578346db1e0f7fa8624b19e0d9149ef8a41d02b26c0959a7d68f34d98",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/min.rpt",
+          "sha256": "73e75a1aea92f3774ce8b8bba8371583acf2c7c8de2da3dc99819b2d9fbd1887",
+          "size_bytes": 75035
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/tns.max.rpt",
+          "sha256": "b048d22ca86dd0023ba3329e6564cee43717a28106510e57795e70fa246e9747",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/tns.min.rpt",
+          "sha256": "587f0c55fe0209a2d348fab9ff63c908110343280555acfa493a9971d66953ec",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/ws.max.rpt",
+          "sha256": "fb8f2b1833714691a9b56fe64133e1cc0d267612c5d358474822334aade3ad30",
+          "size_bytes": 210
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/ws.min.rpt",
+          "sha256": "14edfd749f9e503370917c21837a76426035592824ea4f12285d29cf033a3950",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/checks.rpt",
+          "sha256": "e8c8aa68830ab2eec3da15034816510a88dc83d232bd9cef76ae4add2f178707",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/clock.rpt",
+          "sha256": "cc5c862306425c12e9d3f210e86a78f587f58aaa9e9a913eed7ccf55b0c05ebc",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/max.rpt",
+          "sha256": "b2051c912f42b8d056beed16ea379b8bfd92ea9f06a63f57d07ebcec56f2a358",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/min.rpt",
+          "sha256": "896217be667ac74c4ac031005eaf990740060350c5390dac13ac8369d2f7f71e",
+          "size_bytes": 75035
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/tns.max.rpt",
+          "sha256": "6f18a61253ea77b5afc13830c1748f07d9504986ffa6c49d0984e3f13b084e6f",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/tns.min.rpt",
+          "sha256": "dba5c13a2470404ab1f7490957a18cca7d263df13784af820bd441fc120b8723",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/ws.max.rpt",
+          "sha256": "74047046d2c6a4bec8e90dd38f8dbe2580beab448b3352c3594586b004a3d3ac",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/ws.min.rpt",
+          "sha256": "02db97c79e85ab508260e70de55c85551299e3d0911eb3014fe39360b4b5495d",
+          "size_bytes": 210
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/checks.rpt",
+          "sha256": "8df20db8f748e1dbd37d28d23029ec805b5a40c558657beb523ee9d9f547523e",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/clock.rpt",
+          "sha256": "7f49afd56062fd73dc027412af847a086673061daf8925b966b7e5e6c1cfdd3e",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/max.rpt",
+          "sha256": "376a755606fb4322856619f2e240049ea3fc3004fb183e054868c26ef5d4f6ad",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/min.rpt",
+          "sha256": "8f301d7fa17e0eb7fa17569868f3740d450e17a5fd97c26d0a2265ac890e437c",
+          "size_bytes": 75036
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/tns.max.rpt",
+          "sha256": "fe327ed65e8cc3db97fbffdef5c25ac618cc7bc5853637f6d838a35c6e42b2d8",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/tns.min.rpt",
+          "sha256": "ee704a943991eb9741cf0b4b56c93a9776caeb605a3424f218bfd740142928da",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/ws.max.rpt",
+          "sha256": "fe2e07fbfe43880b94ce22be83e5f723f729f4f11b8701279d1d5c1eae6bcd3f",
+          "size_bytes": 210
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/ws.min.rpt",
+          "sha256": "a2837e5f13bb07df0bf66386c6647a9ac8c9ed0280f738974a533dbdee8fc80a",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/checks.rpt",
+          "sha256": "c63e34af1952717bad7107ba9a625f0600e93eb0b32be0a9130b8fa42fa05f6c",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/clock.rpt",
+          "sha256": "77f1b16a6b661667b2786402ce93aa3bf368f98114a18a42c9ecf69781ddd722",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/max.rpt",
+          "sha256": "f58ee9e0bf32ba76f21b538124efd22f3ddd628f75bb901766fb6ed806c4a898",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/min.rpt",
+          "sha256": "4d2d3eb0892fa343a338b30f478bcffa459b9dc9296d368c433e649b4100bc87",
+          "size_bytes": 75035
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/tns.max.rpt",
+          "sha256": "c37e10d07dd2fce1c86cd3a72e12ddb782b51a5e6da96e5ed462f8439ce09c65",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/tns.min.rpt",
+          "sha256": "d2e011159a09cb3e87fd0ad6ec8c4d96af619b1502ff25dc1d849e36c443fb50",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/ws.max.rpt",
+          "sha256": "4e96395ce7ff7aa925b281dc473c24884e25684fb217d727f8965a46071aeafc",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/ws.min.rpt",
+          "sha256": "d52dadbc187c4012f7c9235da203be0a12558d8df2f122b9d93b30274b942150",
+          "size_bytes": 210
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/checks.rpt",
+          "sha256": "f0323c1dd945f115e75a582aa893e0538867aa7192b5173a6072dc61f63221f7",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/clock.rpt",
+          "sha256": "82407d1dcf95acad5108c154aaaea63922927f1b3802f45c0b0c805d68d24810",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/max.rpt",
+          "sha256": "af85dd6d4f56acf5f64919112341cb70119bec2c94daae9cdd7f03fe37505a0b",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/min.rpt",
+          "sha256": "4e50fe701e823af1f43b805c36c350c3afc4dfff70a1f0e186d790db4fd8b881",
+          "size_bytes": 75035
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/tns.max.rpt",
+          "sha256": "e09d9bd64c68f75bb36c5e5fa0d7cbf3e37007f0fac36c077bc03c69a09095d3",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/tns.min.rpt",
+          "sha256": "37adb114f28a39b82a3f1e1c666a0e057b9f32c3482d1b5e28b8b34fb66c4532",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/ws.max.rpt",
+          "sha256": "0b709dcadd392516609261f751e34dbabf3102b5241926ad27d64d9d37451ce7",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/ws.min.rpt",
+          "sha256": "5faf505a90cd561f5d82b4b87c52df1cb63d1e0a7f0763407ce85a3298d3e408",
+          "size_bytes": 210
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/checks.rpt",
+          "sha256": "0b22d464dee9bc225c9740e194a95be642603cc5c18943d16a97d2d753379f76",
+          "size_bytes": 7158
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/clock.rpt",
+          "sha256": "7930c353b1b0b240778c726417c4307d7c2db897de0a422d69cb465ca5b076aa",
+          "size_bytes": 1240
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/max.rpt",
+          "sha256": "b52e028a95ae238c6448b26cdf7e72ea1b6fd88a07f2df5da0efc76d169ace25",
+          "size_bytes": 71949
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/min.rpt",
+          "sha256": "414a61279150f1d1be6909feac8a28663f4f91eb2acbc8f969e1c71a4f7a783f",
+          "size_bytes": 75036
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/tns.max.rpt",
+          "sha256": "62292ca88994c259d36d136f6d66f4d1150930fb196adc8607d058e2e80b0abd",
+          "size_bytes": 205
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/tns.min.rpt",
+          "sha256": "6a441470fbb28085daadd1a4c0455339db4f4d0377a8a5e373206f10247d2534",
+          "size_bytes": 204
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/ws.max.rpt",
+          "sha256": "50f51e832d0db8c6bb546aeb71ec5a8c497c8bde93ce81f6e007dfd4cec9f099",
+          "size_bytes": 211
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/ws.min.rpt",
+          "sha256": "2ef2e6eb9f7f0554fdd45940b12423bd6753317c5698dac49f0e89e6769b7428",
+          "size_bytes": 209
+        },
+        {
+          "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/summary.rpt",
+          "sha256": "b3a3eb296bc22a913d107eb530cb814e5916a7bbbfd07637285557cb3708ac4d",
+          "size_bytes": 3904
+        }
+      ],
+      "unit_evidence": [
+        {
+          "corner": "max_ff_n40C_1v95",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/phase0_counter__max_ff_n40C_1v95.lib",
+            "sha256": "fb9a2e48116783372269581ccb4531457e30e0c71a06f90397c4245c651da8a3",
+            "size_bytes": 10455
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "max_ss_100C_1v60",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/phase0_counter__max_ss_100C_1v60.lib",
+            "sha256": "dd765a35694e22ba4b84d3788f26d0e7c1be35eac728ac8c609c2b345ff22da2",
+            "size_bytes": 10457
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "max_tt_025C_1v80",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/phase0_counter__max_tt_025C_1v80.lib",
+            "sha256": "2f4313deed6eed74e3c2a6a8a9b5a02ee735950647b7d266661015b7eeb55a7f",
+            "size_bytes": 10455
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "min_ff_n40C_1v95",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/phase0_counter__min_ff_n40C_1v95.lib",
+            "sha256": "7b6d191eaafa8c6bddb4045573fcc2516a0676fa55f87821b6d0cb47b0a16e7a",
+            "size_bytes": 10455
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "min_ss_100C_1v60",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/phase0_counter__min_ss_100C_1v60.lib",
+            "sha256": "994fdee521f97daad9ac5df71553ef6fe5ef47f0bbfe488d848641fc38e8ef1b",
+            "size_bytes": 10457
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "min_tt_025C_1v80",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/phase0_counter__min_tt_025C_1v80.lib",
+            "sha256": "0175094698b5babf969a73167167fab62c993943d40d3b0ffd85f10fcf8f1db1",
+            "size_bytes": 10455
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "nom_ff_n40C_1v95",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/phase0_counter__nom_ff_n40C_1v95.lib",
+            "sha256": "c95e407c156acd967368d690bdf56b56e99d9f563b250d844cd8a6f08c84a451",
+            "size_bytes": 10455
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "nom_ss_100C_1v60",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/phase0_counter__nom_ss_100C_1v60.lib",
+            "sha256": "c241e9aac624d306d255e3ef2d939072ac1b3194a7ad429a7d06c3e2dc048c98",
+            "size_bytes": 10457
+          },
+          "source_key": "time_unit"
+        },
+        {
+          "corner": "nom_tt_025C_1v80",
+          "units": "ns",
+          "source": {
+            "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/phase0_counter__nom_tt_025C_1v80.lib",
+            "sha256": "d1982364baae3f1cc2e2835dcc98c1b38a3795a8bb96fe90f3b2b58bb0dde383",
+            "size_bytes": 10455
+          },
+          "source_key": "time_unit"
+        }
+      ],
+      "unavailable": [
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:max_ff_n40C_1v95"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:max_ss_100C_1v60"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:max_tt_025C_1v80"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:min_ff_n40C_1v95"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:min_ss_100C_1v60"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:min_tt_025C_1v80"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:nom_ff_n40C_1v95"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:nom_ss_100C_1v60"
+        },
+        {
+          "value": null,
+          "status": "UNAVAILABLE",
+          "raw_representation": "inf",
+          "reason": "Non-finite tool output; no finite timing quantity can be reported",
+          "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+          "source_key": "timing__setup_r2r__ws__corner:nom_tt_025C_1v80"
+        }
+      ]
+    },
+    "area": [
+      {
+        "value": 528.006,
+        "units": "um^2",
+        "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/74-misc-reportmanufacturability/state_out.json",
+        "source_key": "design__instance__area"
+      },
+      {
+        "value": 1252.45,
+        "units": "um^2",
+        "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/74-misc-reportmanufacturability/state_out.json",
+        "source_key": "design__core__area"
+      },
+      {
+        "value": 2688.29,
+        "units": "um^2",
+        "source": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/74-misc-reportmanufacturability/state_out.json",
+        "source_key": "design__die__area"
+      }
+    ],
+    "gds": {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/final/gds/phase0_counter.gds",
+      "sha256": "cd2814c40ca236c4470d174eb3d3e40f5c1290ea2aefeafd7a83802a0f58ceb7",
+      "size_bytes": 224970
+    },
+    "gds_source_view": {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/56-magic-streamout/phase0_counter.gds",
+      "sha256": "cd2814c40ca236c4470d174eb3d3e40f5c1290ea2aefeafd7a83802a0f58ceb7",
+      "size_bytes": 224970
+    },
+    "supplemental_r2r_timing": {
+      "execution": {
+        "record": "results/raw/phase0/STA_DIAGNOSTIC_001/r2r.command.json",
+        "argv": [
+          "wsl",
+          "-d",
+          "Ubuntu",
+          "--exec",
+          "bash",
+          "scripts/phase0_docker.sh",
+          "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e",
+          "/home/huawei/.local/share/model2gds-codex/pdks",
+          "env",
+          "PHASE0_STA_ENV=/work/results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/_env_ThreadPoolExecutor-4_7.tcl",
+          "sta",
+          "-no_splash",
+          "-exit",
+          "scripts/phase0_r2r_sta.tcl"
+        ],
+        "returncode": 0,
+        "log": {
+          "path": "results/raw/phase0/STA_DIAGNOSTIC_001/r2r.log",
+          "sha256": "bdfb7c0d3c4be683ac66602479a39a2cfeebd7b658fc2dfc10fd453b3c9db124",
+          "size_bytes": 32622
+        },
+        "started_at": "2026-09-27T08:57:47.369633+00:00",
+        "finished_at": "2026-09-27T08:57:49.397397+00:00"
+      },
+      "saved_environment": {
+        "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/_env_ThreadPoolExecutor-4_7.tcl",
+        "sha256": "d0c2324459338425c7eec83bc4f5c5559f232155854dcb928c4c5b1000d15c13",
+        "size_bytes": 10784
+      },
+      "setup_worst_slack": {
+        "value": 17.111315,
+        "units": "ns",
+        "source": "results/raw/phase0/STA_DIAGNOSTIC_001/r2r.log",
+        "source_key": "PHASE0_R2R_SETUP_WS_NS",
+        "corner": "max_ss_100C_1v60"
+      },
+      "semantics": "Supplemental OpenSTA max-delay query from register clock pins to register data pins using the saved post-route corner environment, libraries, netlist, SDC and SPEF; kept separate from native OpenLane metrics. No frequency is derived."
+    },
+    "container_image_digest": "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e"
+  },
+  "environment": {
+    "pass": true,
+    "environments": [
+      {
+        "host": {
+          "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+          "system": "Linux",
+          "release": "6.6.87.2-microsoft-standard-WSL2",
+          "machine": "x86_64",
+          "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+          "cwd": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/02f806e3657098252c9d54d0f14df300a2f99077f41ed7d35fceb8bf3063820d"
+        },
+        "tools": {
+          "git": {
+            "available": true,
+            "command": [
+              "git",
+              "--version"
+            ],
+            "output": "git version 2.43.0",
+            "returncode": 0
+          },
+          "python": {
+            "available": true,
+            "command": [
+              "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/02f806e3657098252c9d54d0f14df300a2f99077f41ed7d35fceb8bf3063820d/.venv/bin/python",
+              "--version"
+            ],
+            "output": "Python 3.12.3",
+            "returncode": 0
+          },
+          "docker": {
+            "available": true,
+            "command": [
+              "docker",
+              "--version"
+            ],
+            "output": "Docker version 29.4.2, build 055a478",
+            "returncode": 0
+          },
+          "nix": {
+            "available": false,
+            "command": [
+              "nix",
+              "--version"
+            ],
+            "output": null,
+            "returncode": null
+          },
+          "openlane": {
+            "available": false,
+            "command": [
+              "openlane",
+              "--version"
+            ],
+            "output": null,
+            "returncode": null
+          },
+          "yosys": {
+            "available": false,
+            "command": [
+              "yosys",
+              "-V"
+            ],
+            "output": null,
+            "returncode": null
+          },
+          "iverilog": {
+            "available": false,
+            "command": [
+              "iverilog",
+              "-V"
+            ],
+            "output": null,
+            "returncode": null
+          },
+          "verilator": {
+            "available": true,
+            "command": [
+              "verilator",
+              "--version"
+            ],
+            "output": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)",
+            "returncode": 0
+          },
+          "openroad": {
+            "available": false,
+            "command": [
+              "openroad",
+              "-version"
+            ],
+            "output": null,
+            "returncode": null
+          },
+          "klayout": {
+            "available": false,
+            "command": [
+              "klayout",
+              "-v"
+            ],
+            "output": null,
+            "returncode": null
+          }
+        },
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_wsl_ready.log",
+          "sha256": "65ff4c5e5d8d9c2464ff7536c0e22bf908f76170902859750e4445b65a952a54",
+          "size_bytes": 2239
+        }
+      },
+      {
+        "host": {
+          "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+          "system": "Linux",
+          "release": "6.6.87.2-microsoft-standard-WSL2",
+          "machine": "x86_64",
+          "python": "3.11.9 (main, Apr  2 2024, 08:25:04) [GCC 13.2.0]",
+          "cwd": "/work"
+        },
+        "tools": {
+          "git": {
+            "available": true,
+            "command": [
+              "git",
+              "--version"
+            ],
+            "output": "git version 2.44.1",
+            "returncode": 0
+          },
+          "python": {
+            "available": true,
+            "command": [
+              "/nix/store/ss2cw3sxbrwwx9jl0rrppbw4kgcmgi2n-python3-3.11.9-env/bin/python3.11",
+              "--version"
+            ],
+            "output": "Python 3.11.9",
+            "returncode": 0
+          },
+          "docker": {
+            "available": false,
+            "command": [
+              "docker",
+              "--version"
+            ],
+            "output": null,
+            "returncode": null
+          },
+          "nix": {
+            "available": true,
+            "command": [
+              "nix",
+              "--version"
+            ],
+            "output": "warning: $HOME ('/tmp') is not owned by you, falling back to the one defined in the 'passwd' file ('/var/empty')\nnix (Nix) 2.18.2",
+            "returncode": 0
+          },
+          "openlane": {
+            "available": true,
+            "command": [
+              "openlane",
+              "--version"
+            ],
+            "output": "OpenLane v2.3.10\n\nCopyright \u00a92020-2023 Efabless Corporation and other contributors.\n\nAvailable under the Apache License, version 2. Included with the source code,\nbut you can also get a copy at https://www.apache.org/licenses/LICENSE-2.0\n\nIncluded tools and utilities may be distributed under stricter licenses.",
+            "returncode": 0
+          },
+          "yosys": {
+            "available": true,
+            "command": [
+              "yosys",
+              "-V"
+            ],
+            "output": "Yosys 0.46 (git sha1 e97731b9dda91fa5fa53ed87df7c34163ba59a41, clang++ 17.0.6 -fPIC -O3)",
+            "returncode": 0
+          },
+          "iverilog": {
+            "available": true,
+            "command": [
+              "iverilog",
+              "-V"
+            ],
+            "output": "Icarus Verilog version 12.0 (stable) ()\n\nCopyright (c) 2000-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n\nIcarus Verilog Preprocessor version 12.0 (stable) ()\n\nCopyright (c) 1999-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n\nIcarus Verilog Parser/Elaborator version 12.0 (stable) ()\n\nCopyright (c) 1998-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n\n FLAGS DLL vvp.tgt\nvvp.tgt: Icarus Verilog VVP Code Generator 12.0 (stable) ()\n\nCopyright (c) 2001-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.",
+            "returncode": 0
+          },
+          "verilator": {
+            "available": true,
+            "command": [
+              "verilator",
+              "--version"
+            ],
+            "output": "Verilator 5.018 2023-10-30 rev UNKNOWN.REV",
+            "returncode": 0
+          },
+          "openroad": {
+            "available": true,
+            "command": [
+              "openroad",
+              "-version"
+            ],
+            "output": "edf00dff99f6c40d67a30c0e22a8191c5d2ed9d6",
+            "returncode": 0
+          },
+          "klayout": {
+            "available": true,
+            "command": [
+              "klayout",
+              "-v"
+            ],
+            "output": "KLayout 0.29.4",
+            "returncode": 0
+          }
+        },
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        }
+      }
+    ],
+    "tools": {
+      "git": {
+        "output": "git version 2.44.1",
+        "command": [
+          "git",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.git"
+      },
+      "python": {
+        "output": "Python 3.11.9",
+        "command": [
+          "/nix/store/ss2cw3sxbrwwx9jl0rrppbw4kgcmgi2n-python3-3.11.9-env/bin/python3.11",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.python"
+      },
+      "docker": {
+        "output": "Docker version 29.4.2, build 055a478",
+        "command": [
+          "docker",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_wsl_ready.log",
+          "sha256": "65ff4c5e5d8d9c2464ff7536c0e22bf908f76170902859750e4445b65a952a54",
+          "size_bytes": 2239
+        },
+        "source_key": "tools.docker"
+      },
+      "verilator": {
+        "output": "Verilator 5.018 2023-10-30 rev UNKNOWN.REV",
+        "command": [
+          "verilator",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.verilator"
+      },
+      "nix": {
+        "output": "warning: $HOME ('/tmp') is not owned by you, falling back to the one defined in the 'passwd' file ('/var/empty')\nnix (Nix) 2.18.2",
+        "command": [
+          "nix",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.nix"
+      },
+      "openlane": {
+        "output": "OpenLane v2.3.10\n\nCopyright \u00a92020-2023 Efabless Corporation and other contributors.\n\nAvailable under the Apache License, version 2. Included with the source code,\nbut you can also get a copy at https://www.apache.org/licenses/LICENSE-2.0\n\nIncluded tools and utilities may be distributed under stricter licenses.",
+        "command": [
+          "openlane",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.openlane"
+      },
+      "yosys": {
+        "output": "Yosys 0.46 (git sha1 e97731b9dda91fa5fa53ed87df7c34163ba59a41, clang++ 17.0.6 -fPIC -O3)",
+        "command": [
+          "yosys",
+          "-V"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.yosys"
+      },
+      "iverilog": {
+        "output": "Icarus Verilog version 12.0 (stable) ()\n\nCopyright (c) 2000-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n\nIcarus Verilog Preprocessor version 12.0 (stable) ()\n\nCopyright (c) 1999-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n\nIcarus Verilog Parser/Elaborator version 12.0 (stable) ()\n\nCopyright (c) 1998-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n\n FLAGS DLL vvp.tgt\nvvp.tgt: Icarus Verilog VVP Code Generator 12.0 (stable) ()\n\nCopyright (c) 2001-2021 Stephen Williams (steve@icarus.com)\n\n  This program is free software; you can redistribute it and/or modify\n  it under the terms of the GNU General Public License as published by\n  the Free Software Foundation; either version 2 of the License, or\n  (at your option) any later version.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.\n\n  You should have received a copy of the GNU General Public License along\n  with this program; if not, write to the Free Software Foundation, Inc.,\n  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.",
+        "command": [
+          "iverilog",
+          "-V"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.iverilog"
+      },
+      "openroad": {
+        "output": "edf00dff99f6c40d67a30c0e22a8191c5d2ed9d6",
+        "command": [
+          "openroad",
+          "-version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.openroad"
+      },
+      "klayout": {
+        "output": "KLayout 0.29.4",
+        "command": [
+          "klayout",
+          "-v"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/doctor_container.log",
+          "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+          "size_bytes": 5977
+        },
+        "source_key": "tools.klayout"
+      },
+      "simulation_verilator": {
+        "output": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)",
+        "command": [
+          "wsl",
+          "-d",
+          "Ubuntu",
+          "--exec",
+          "verilator",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/verilator_version.log",
+          "sha256": "26daf9ad1ba36ee1c20cab9a869d0a1fbb8117230c80c78ec2d8cf597f64c4a5",
+          "size_bytes": 48
+        }
+      },
+      "opensta": {
+        "output": "2.6.0",
+        "command": [
+          "wsl",
+          "-d",
+          "Ubuntu",
+          "--exec",
+          "bash",
+          "scripts/phase0_docker.sh",
+          "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e",
+          "/home/huawei/.local/share/model2gds-codex/pdks",
+          "sta",
+          "-version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/opensta_version.log",
+          "sha256": "6693435eadb673dda297a0652d241e293e361200bc40db949cf2501d18dd01ee",
+          "size_bytes": 6
+        }
+      },
+      "magic": {
+        "output": "8.3.489",
+        "command": [
+          "wsl",
+          "-d",
+          "Ubuntu",
+          "--exec",
+          "bash",
+          "scripts/phase0_docker.sh",
+          "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e",
+          "/home/huawei/.local/share/model2gds-codex/pdks",
+          "magic",
+          "--version"
+        ],
+        "source": {
+          "path": "results/raw/phase0/diagnostics/magic_version.log",
+          "sha256": "c73c88028d1d831291f62c29595c0af00a16c54d52bc51334b483a7c6884248b",
+          "size_bytes": 8
+        }
+      }
+    },
+    "pdk": {
+      "observed": {
+        "revision": "0fe599b2afb6708d281543108caf8310912f54af",
+        "output": "open_pdks 0fe599b2afb6708d281543108caf8310912f54af"
+      },
+      "source": {
+        "path": "results/raw/phase0/diagnostics/pdk_sources.log",
+        "sha256": "b3691aa3d806a1e2d2040cc0666fd571d3916f8a6e6a3c0eb3662a5b2676d347",
+        "size_bytes": 51
+      },
+      "supporting_evidence": {
+        "volare_revision": {
+          "output": "0fe599b2afb6708d281543108caf8310912f54af",
+          "source": {
+            "path": "results/raw/phase0/diagnostics/volare_output.log",
+            "sha256": "2df10cf215983934142ba4fcdb2b9178ec811f2e2e80e5d2c9b6784b1444f924",
+            "size_bytes": 40
+          }
+        },
+        "active_realpath": {
+          "output": "/home/huawei/.local/share/model2gds-codex/pdks/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A",
+          "source": {
+            "path": "results/raw/phase0/diagnostics/pdk_realpath.log",
+            "sha256": "d59835e79d35d71cb7902fff5f82a4061ec0a1ba7a5196d20551fd12961afd0e",
+            "size_bytes": 119
+          }
+        }
+      }
+    },
+    "container_image": {
+      "id": "sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e",
+      "repository_digests": [
+        "ghcr.io/efabless/openlane2@sha256:37c3bd4ea0534a276cb2deb88d601044857bad2807b9bc5b36efe9d02c62624e"
+      ],
+      "source": {
+        "path": "results/raw/phase0/diagnostics/docker_image_inspect.log",
+        "sha256": "11e2f0aaec47fda7c1566bd4a997a3db11d0239d4b00ceb51570d702ba709c9b",
+        "size_bytes": 4475
+      }
+    }
+  },
+  "pass": true,
+  "raw_sources": [
+    {
+      "path": "results/raw/phase0/PHYS_002/openlane.command.json",
+      "sha256": "3dd4e7d988268594e19e0a435ace69864c881bf2da2aae75eea8a8d0910d68b3",
+      "size_bytes": 923
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/openlane.log",
+      "sha256": "67e17bf705b770e1886ec4844492cd6faa74dc63fc94f7ee6c4a843326150117",
+      "size_bytes": 1114161
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/checks.rpt",
+      "sha256": "b24193c8da664dc15df5676e6ab1a69d73599945b8377aab5ddfb0a53d560489",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/clock.rpt",
+      "sha256": "b3b70d0acba8ec64d291e3c5cfe5c73623ebc2aa5cf2e2062383be6abac208a5",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/max.rpt",
+      "sha256": "bcc0faee346c85b57abdb1c7d1c4b6136943c41bcb97c60c4efabbd960390cdd",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/min.rpt",
+      "sha256": "8cc9da7b4d09a65d82f13008512bc08517df7532fdc25c58ef0d28d0b885dd13",
+      "size_bytes": 75035
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/phase0_counter__max_ff_n40C_1v95.lib",
+      "sha256": "fb9a2e48116783372269581ccb4531457e30e0c71a06f90397c4245c651da8a3",
+      "size_bytes": 10455
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/tns.max.rpt",
+      "sha256": "76a5c15ea700725ae9635019a6ed2ca07f8d16855059a033824c06d80e376ffe",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/tns.min.rpt",
+      "sha256": "af5565e24e34574afef2b3450a406f96bd53b88ad55e3b6e6e3dbff8dedd2219",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/ws.max.rpt",
+      "sha256": "62b2d889d0b94de99238f73d8f8da777be0f995d759918420cb9f6dcdab646d3",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ff_n40C_1v95/ws.min.rpt",
+      "sha256": "558543a393491df84fef1e0b4ce07244649729698ce6ac2f3b7828fd73653dd8",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/_env_ThreadPoolExecutor-4_7.tcl",
+      "sha256": "d0c2324459338425c7eec83bc4f5c5559f232155854dcb928c4c5b1000d15c13",
+      "size_bytes": 10784
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/checks.rpt",
+      "sha256": "aeab6455a92f27ee081944f773118f9c90f8860d7b14183cfcf6b90969418eaa",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/clock.rpt",
+      "sha256": "6965a7cc26c5c1e1d7fb10a037400d16c8f0568c8948e2dd9fc7f11a693c3e4e",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/max.rpt",
+      "sha256": "54b369331428a8e7296d1686c0fe9b675088f5f94f95e3b4672f24e38567861a",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/min.rpt",
+      "sha256": "fbb763617307997b7cd270119a9b1f30028a4cf5dbcceb8ecff1f40065364fec",
+      "size_bytes": 75035
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/phase0_counter__max_ss_100C_1v60.lib",
+      "sha256": "dd765a35694e22ba4b84d3788f26d0e7c1be35eac728ac8c609c2b345ff22da2",
+      "size_bytes": 10457
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/tns.max.rpt",
+      "sha256": "96969700a310391e17cecb00ab857ed8d0bdb72825a212e14f42c3e74629e7e6",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/tns.min.rpt",
+      "sha256": "43631fe1f7fcc9c60ec0a22c6d28e4da03dd569319aeb2deaeffef9de76c51f6",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/ws.max.rpt",
+      "sha256": "885b5c94abaed35febe4c7cb25695612426237c61cd70a1ce9a4d08678f25edd",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_ss_100C_1v60/ws.min.rpt",
+      "sha256": "17240b7299d0be0f0ea9b1b34231ccc868812b3268c0bd1b73892d84ab07109a",
+      "size_bytes": 210
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/checks.rpt",
+      "sha256": "7be4abdd70458dc04d3db7154691a3a873b3b3e5da7077dad8fe3c0a7a4b206d",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/clock.rpt",
+      "sha256": "2b63c8bdebfc1042a662cbf6da809452eae2e8fd9297918d7d62e9bd5416e6ff",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/max.rpt",
+      "sha256": "b993e2f50abc5d7c14f4140d18f8ced573b012c601ea2a79a73495b4740bcfd3",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/min.rpt",
+      "sha256": "e285b9705199f6e0354b1fed95efad91c8e3df386ccdfc3f4e8ac494ff5daf67",
+      "size_bytes": 75036
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/phase0_counter__max_tt_025C_1v80.lib",
+      "sha256": "2f4313deed6eed74e3c2a6a8a9b5a02ee735950647b7d266661015b7eeb55a7f",
+      "size_bytes": 10455
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/tns.max.rpt",
+      "sha256": "418d2bede20e19a164a9f2ed3c09b9256673107c2b48cf89799c610ff1d7802d",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/tns.min.rpt",
+      "sha256": "579c652f679fe33e8e5cfe4529e51f8736e0c2b82bb72e0994c4c9a8f4cb4bca",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/ws.max.rpt",
+      "sha256": "e32d60504fc8afaef7262b4f28f4100ebf8ba18a0e9bb10cd5dbd530137e06b4",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/max_tt_025C_1v80/ws.min.rpt",
+      "sha256": "e6a0bcdbaf7782ece419658e7f7fa12dcb7e06a9d544565ed9643c0ad3c49267",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/checks.rpt",
+      "sha256": "65019a08c397b433d80e71e14e1f58b33fd8c0ff3d33898c7d0f373f55874cd0",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/clock.rpt",
+      "sha256": "e161ad31a3bbc87c26cefbd4af21440dfa2e543d0f62d85feaa42aac35d4ce94",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/max.rpt",
+      "sha256": "44e3c8f578346db1e0f7fa8624b19e0d9149ef8a41d02b26c0959a7d68f34d98",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/min.rpt",
+      "sha256": "73e75a1aea92f3774ce8b8bba8371583acf2c7c8de2da3dc99819b2d9fbd1887",
+      "size_bytes": 75035
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/phase0_counter__min_ff_n40C_1v95.lib",
+      "sha256": "7b6d191eaafa8c6bddb4045573fcc2516a0676fa55f87821b6d0cb47b0a16e7a",
+      "size_bytes": 10455
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/tns.max.rpt",
+      "sha256": "b048d22ca86dd0023ba3329e6564cee43717a28106510e57795e70fa246e9747",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/tns.min.rpt",
+      "sha256": "587f0c55fe0209a2d348fab9ff63c908110343280555acfa493a9971d66953ec",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/ws.max.rpt",
+      "sha256": "fb8f2b1833714691a9b56fe64133e1cc0d267612c5d358474822334aade3ad30",
+      "size_bytes": 210
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ff_n40C_1v95/ws.min.rpt",
+      "sha256": "14edfd749f9e503370917c21837a76426035592824ea4f12285d29cf033a3950",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/checks.rpt",
+      "sha256": "e8c8aa68830ab2eec3da15034816510a88dc83d232bd9cef76ae4add2f178707",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/clock.rpt",
+      "sha256": "cc5c862306425c12e9d3f210e86a78f587f58aaa9e9a913eed7ccf55b0c05ebc",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/max.rpt",
+      "sha256": "b2051c912f42b8d056beed16ea379b8bfd92ea9f06a63f57d07ebcec56f2a358",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/min.rpt",
+      "sha256": "896217be667ac74c4ac031005eaf990740060350c5390dac13ac8369d2f7f71e",
+      "size_bytes": 75035
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/phase0_counter__min_ss_100C_1v60.lib",
+      "sha256": "994fdee521f97daad9ac5df71553ef6fe5ef47f0bbfe488d848641fc38e8ef1b",
+      "size_bytes": 10457
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/tns.max.rpt",
+      "sha256": "6f18a61253ea77b5afc13830c1748f07d9504986ffa6c49d0984e3f13b084e6f",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/tns.min.rpt",
+      "sha256": "dba5c13a2470404ab1f7490957a18cca7d263df13784af820bd441fc120b8723",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/ws.max.rpt",
+      "sha256": "74047046d2c6a4bec8e90dd38f8dbe2580beab448b3352c3594586b004a3d3ac",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_ss_100C_1v60/ws.min.rpt",
+      "sha256": "02db97c79e85ab508260e70de55c85551299e3d0911eb3014fe39360b4b5495d",
+      "size_bytes": 210
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/checks.rpt",
+      "sha256": "8df20db8f748e1dbd37d28d23029ec805b5a40c558657beb523ee9d9f547523e",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/clock.rpt",
+      "sha256": "7f49afd56062fd73dc027412af847a086673061daf8925b966b7e5e6c1cfdd3e",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/max.rpt",
+      "sha256": "376a755606fb4322856619f2e240049ea3fc3004fb183e054868c26ef5d4f6ad",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/min.rpt",
+      "sha256": "8f301d7fa17e0eb7fa17569868f3740d450e17a5fd97c26d0a2265ac890e437c",
+      "size_bytes": 75036
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/phase0_counter__min_tt_025C_1v80.lib",
+      "sha256": "0175094698b5babf969a73167167fab62c993943d40d3b0ffd85f10fcf8f1db1",
+      "size_bytes": 10455
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/tns.max.rpt",
+      "sha256": "fe327ed65e8cc3db97fbffdef5c25ac618cc7bc5853637f6d838a35c6e42b2d8",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/tns.min.rpt",
+      "sha256": "ee704a943991eb9741cf0b4b56c93a9776caeb605a3424f218bfd740142928da",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/ws.max.rpt",
+      "sha256": "fe2e07fbfe43880b94ce22be83e5f723f729f4f11b8701279d1d5c1eae6bcd3f",
+      "size_bytes": 210
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/min_tt_025C_1v80/ws.min.rpt",
+      "sha256": "a2837e5f13bb07df0bf66386c6647a9ac8c9ed0280f738974a533dbdee8fc80a",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/checks.rpt",
+      "sha256": "c63e34af1952717bad7107ba9a625f0600e93eb0b32be0a9130b8fa42fa05f6c",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/clock.rpt",
+      "sha256": "77f1b16a6b661667b2786402ce93aa3bf368f98114a18a42c9ecf69781ddd722",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/max.rpt",
+      "sha256": "f58ee9e0bf32ba76f21b538124efd22f3ddd628f75bb901766fb6ed806c4a898",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/min.rpt",
+      "sha256": "4d2d3eb0892fa343a338b30f478bcffa459b9dc9296d368c433e649b4100bc87",
+      "size_bytes": 75035
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/phase0_counter__nom_ff_n40C_1v95.lib",
+      "sha256": "c95e407c156acd967368d690bdf56b56e99d9f563b250d844cd8a6f08c84a451",
+      "size_bytes": 10455
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/tns.max.rpt",
+      "sha256": "c37e10d07dd2fce1c86cd3a72e12ddb782b51a5e6da96e5ed462f8439ce09c65",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/tns.min.rpt",
+      "sha256": "d2e011159a09cb3e87fd0ad6ec8c4d96af619b1502ff25dc1d849e36c443fb50",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/ws.max.rpt",
+      "sha256": "4e96395ce7ff7aa925b281dc473c24884e25684fb217d727f8965a46071aeafc",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ff_n40C_1v95/ws.min.rpt",
+      "sha256": "d52dadbc187c4012f7c9235da203be0a12558d8df2f122b9d93b30274b942150",
+      "size_bytes": 210
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/checks.rpt",
+      "sha256": "f0323c1dd945f115e75a582aa893e0538867aa7192b5173a6072dc61f63221f7",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/clock.rpt",
+      "sha256": "82407d1dcf95acad5108c154aaaea63922927f1b3802f45c0b0c805d68d24810",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/max.rpt",
+      "sha256": "af85dd6d4f56acf5f64919112341cb70119bec2c94daae9cdd7f03fe37505a0b",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/min.rpt",
+      "sha256": "4e50fe701e823af1f43b805c36c350c3afc4dfff70a1f0e186d790db4fd8b881",
+      "size_bytes": 75035
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/phase0_counter__nom_ss_100C_1v60.lib",
+      "sha256": "c241e9aac624d306d255e3ef2d939072ac1b3194a7ad429a7d06c3e2dc048c98",
+      "size_bytes": 10457
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/tns.max.rpt",
+      "sha256": "e09d9bd64c68f75bb36c5e5fa0d7cbf3e37007f0fac36c077bc03c69a09095d3",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/tns.min.rpt",
+      "sha256": "37adb114f28a39b82a3f1e1c666a0e057b9f32c3482d1b5e28b8b34fb66c4532",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/ws.max.rpt",
+      "sha256": "0b709dcadd392516609261f751e34dbabf3102b5241926ad27d64d9d37451ce7",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_ss_100C_1v60/ws.min.rpt",
+      "sha256": "5faf505a90cd561f5d82b4b87c52df1cb63d1e0a7f0763407ce85a3298d3e408",
+      "size_bytes": 210
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/checks.rpt",
+      "sha256": "0b22d464dee9bc225c9740e194a95be642603cc5c18943d16a97d2d753379f76",
+      "size_bytes": 7158
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/clock.rpt",
+      "sha256": "7930c353b1b0b240778c726417c4307d7c2db897de0a422d69cb465ca5b076aa",
+      "size_bytes": 1240
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/max.rpt",
+      "sha256": "b52e028a95ae238c6448b26cdf7e72ea1b6fd88a07f2df5da0efc76d169ace25",
+      "size_bytes": 71949
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/min.rpt",
+      "sha256": "414a61279150f1d1be6909feac8a28663f4f91eb2acbc8f969e1c71a4f7a783f",
+      "size_bytes": 75036
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/phase0_counter__nom_tt_025C_1v80.lib",
+      "sha256": "d1982364baae3f1cc2e2835dcc98c1b38a3795a8bb96fe90f3b2b58bb0dde383",
+      "size_bytes": 10455
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/tns.max.rpt",
+      "sha256": "62292ca88994c259d36d136f6d66f4d1150930fb196adc8607d058e2e80b0abd",
+      "size_bytes": 205
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/tns.min.rpt",
+      "sha256": "6a441470fbb28085daadd1a4c0455339db4f4d0377a8a5e373206f10247d2534",
+      "size_bytes": 204
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/ws.max.rpt",
+      "sha256": "50f51e832d0db8c6bb546aeb71ec5a8c497c8bde93ce81f6e007dfd4cec9f099",
+      "size_bytes": 211
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/nom_tt_025C_1v80/ws.min.rpt",
+      "sha256": "2ef2e6eb9f7f0554fdd45940b12423bd6753317c5698dac49f0e89e6769b7428",
+      "size_bytes": 209
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/state_out.json",
+      "sha256": "d8efb36d5bb736b5760acb4fee0b9e876d163c1308d7c3a4c72066b4e3759143",
+      "size_bytes": 20036
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/54-openroad-stapostpnr/summary.rpt",
+      "sha256": "b3a3eb296bc22a913d107eb530cb814e5916a7bbbfd07637285557cb3708ac4d",
+      "size_bytes": 3904
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/56-magic-streamout/phase0_counter.gds",
+      "sha256": "cd2814c40ca236c4470d174eb3d3e40f5c1290ea2aefeafd7a83802a0f58ceb7",
+      "size_bytes": 224970
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/74-misc-reportmanufacturability/state_out.json",
+      "sha256": "ae5419fe960fb7139f24d50cabe14d9a5f9bf5589d83f9dd46bedb381b8f3ee8",
+      "size_bytes": 22147
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/final/gds/phase0_counter.gds",
+      "sha256": "cd2814c40ca236c4470d174eb3d3e40f5c1290ea2aefeafd7a83802a0f58ceb7",
+      "size_bytes": 224970
+    },
+    {
+      "path": "results/raw/phase0/PHYS_002/smoke/openlane/runs/RUN_002/resolved.json",
+      "sha256": "64c23419ef5e8d3836a0dfa81d0f17635a862fcdb649641f9d66fb72ebd4fd77",
+      "size_bytes": 90601
+    },
+    {
+      "path": "results/raw/phase0/SIM_001/compile.command.json",
+      "sha256": "e4143a7e52e09ffea8eba7e35eb24f5970cf39871f63a130990d9446ca8a2041",
+      "size_bytes": 637
+    },
+    {
+      "path": "results/raw/phase0/SIM_001/compile.log",
+      "sha256": "725297c2029dfd706cc1fbc1e58247e2a1911a53ea5a84bbb1adc3e2afae6b7a",
+      "size_bytes": 2911
+    },
+    {
+      "path": "results/raw/phase0/SIM_001/simulation.command.json",
+      "sha256": "5dbdd91c4d84058bd8b06be2afcc1ac3b3eaf0070aa986858e601fe5b1db667b",
+      "size_bytes": 459
+    },
+    {
+      "path": "results/raw/phase0/SIM_001/simulation.log",
+      "sha256": "1864214ed4b99edf6a741adf4dd7b19d7764eadc240f8d754c942aaff5af963a",
+      "size_bytes": 74
+    },
+    {
+      "path": "results/raw/phase0/STA_DIAGNOSTIC_001/r2r.command.json",
+      "sha256": "fca1c0d5f4ac76511f44f0b959063e5e0d5717e2c65c364c8c3da719d151440e",
+      "size_bytes": 858
+    },
+    {
+      "path": "results/raw/phase0/STA_DIAGNOSTIC_001/r2r.log",
+      "sha256": "bdfb7c0d3c4be683ac66602479a39a2cfeebd7b658fc2dfc10fd453b3c9db124",
+      "size_bytes": 32622
+    },
+    {
+      "path": "results/raw/phase0/SYN_001/phase0_counter_synth.v",
+      "sha256": "0da64d085dce409bce7cba224fafc258e1db45b930303bb5756a8832c7acefae",
+      "size_bytes": 433
+    },
+    {
+      "path": "results/raw/phase0/SYN_001/yosys.command.json",
+      "sha256": "02bc61ab93b6c67c5349884d21f9a31a21545e6f395de67887156e137470c8a0",
+      "size_bytes": 661
+    },
+    {
+      "path": "results/raw/phase0/SYN_001/yosys.log",
+      "sha256": "0dca1308c890513153381d7c5b86edbb3178deb8c7ebf43786c74b3aa54cbfdc",
+      "size_bytes": 6222
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/docker_image_inspect.command.json",
+      "sha256": "677185b4c9fc490f38315c205c567aa841d94f56fe7152827360d6ccfebb6a68",
+      "size_bytes": 498
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/docker_image_inspect.log",
+      "sha256": "11e2f0aaec47fda7c1566bd4a997a3db11d0239d4b00ceb51570d702ba709c9b",
+      "size_bytes": 4475
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/doctor_container.command.json",
+      "sha256": "2bc3886726babb3f2cab835af1720e070319a5d9902040ec4a55c879c3e54f38",
+      "size_bytes": 742
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/doctor_container.log",
+      "sha256": "d418e5657b65e3f91c6770afcd8163c622405d805954d2190820afaaf04be0ed",
+      "size_bytes": 5977
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/doctor_wsl_ready.command.json",
+      "sha256": "24be153475fca136113390ce7a546185385e9354f6040ffd9a9d94a2e0476eb4",
+      "size_bytes": 543
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/doctor_wsl_ready.log",
+      "sha256": "65ff4c5e5d8d9c2464ff7536c0e22bf908f76170902859750e4445b65a952a54",
+      "size_bytes": 2239
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/magic_version.command.json",
+      "sha256": "16d478ab149efef0d80d40567d713ae21e17267ef178f6097f4d17070cd33ed4",
+      "size_bytes": 644
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/magic_version.log",
+      "sha256": "c73c88028d1d831291f62c29595c0af00a16c54d52bc51334b483a7c6884248b",
+      "size_bytes": 8
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/opensta_version.command.json",
+      "sha256": "f643047f04b5fd242ad0a618572d1167351d97da55be0b62b0d1aaf1c5c5eaeb",
+      "size_bytes": 643
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/opensta_version.log",
+      "sha256": "6693435eadb673dda297a0652d241e293e361200bc40db949cf2501d18dd01ee",
+      "size_bytes": 6
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/pdk_realpath.command.json",
+      "sha256": "a97e958326268747ea4bc1da2b25ceb7b7dbda07ccb78969681e1c7fc052ce8f",
+      "size_bytes": 494
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/pdk_realpath.log",
+      "sha256": "d59835e79d35d71cb7902fff5f82a4061ec0a1ba7a5196d20551fd12961afd0e",
+      "size_bytes": 119
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/pdk_sources.command.json",
+      "sha256": "67fffefa5a0bd87e9aeceaead55947ac4c4ac481e70b14c04f9d010789dd352b",
+      "size_bytes": 485
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/pdk_sources.log",
+      "sha256": "b3691aa3d806a1e2d2040cc0666fd571d3916f8a6e6a3c0eb3662a5b2676d347",
+      "size_bytes": 51
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/verilator_version.command.json",
+      "sha256": "8d1d3af30184b3c644dedc0dabf952ed6ada9abf9d8df9e77fdb19d404c9748c",
+      "size_bytes": 444
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/verilator_version.log",
+      "sha256": "26daf9ad1ba36ee1c20cab9a869d0a1fbb8117230c80c78ec2d8cf597f64c4a5",
+      "size_bytes": 48
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/volare_output.command.json",
+      "sha256": "81d10536880a940ef3d2eb4972d6585d62c30c9088bf4c04e240a619b84f7539",
+      "size_bytes": 573
+    },
+    {
+      "path": "results/raw/phase0/diagnostics/volare_output.log",
+      "sha256": "2df10cf215983934142ba4fcdb2b9178ec811f2e2e80e5d2c9b6784b1444f924",
+      "size_bytes": 40
+    },
+    {
+      "path": "results/raw/phase0/selection.json",
+      "sha256": "8661c5e78c1b166a59e57d8193dea028147de26d85ee6129c1e9ae41b28421da",
+      "size_bytes": 1809
+    }
+  ],
+  "evidence_recorded_through": "2026-09-27T08:57:49.397397+00:00"
+}
