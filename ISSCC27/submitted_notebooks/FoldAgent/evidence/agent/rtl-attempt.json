@@ -1,0 +1,89 @@
+{
+  "id": "attempt-733acbf4f901461e89b5a6ef84a67b58",
+  "task_id": "logic-folding-round1:rtl-implementation",
+  "ordinal": 1,
+  "status": "succeeded",
+  "input_deliveries": {
+    "design": "fold-design",
+    "specification": "fold-spec"
+  },
+  "brief": {
+    "objective": "Deliver the authorized P0 compute-only split of immutable R while preserving the frozen interface, storage capacity and cycle behavior.",
+    "deliverables": [
+      "rtl.snapshot@1 containing rtl/lb_feedback.sv with wire-only lb_feedback, lb_l0 and lb_l1; system instances named L0 and L1.",
+      "docs/implementation/physical-change.md documenting storage ownership, the compute cut and actual endpoint cells."
+    ],
+    "responsibilities": [
+      "Read complete input manifests, detailed design, CSIR, spec/folding-spec.json and spec/contract.md; verify revision consistency and report conflicting authorities without choosing silently.",
+      "Keep PHY ports, mapping/configuration, request/response state, four weight rows, input/output banks and job/consume control in L0; keep all original non-PHY package ports, 32 signed8x8 products, eight tile reductions and eight signed32 accumulators in L1.",
+      "Route every host signal through L1 using reverse-direction link_<original_name> ports, including clock/reset; retain original host names on L0.",
+      "Preserve exactly fold_x[31:0], fold_w[255:0], fold_start, fold_consume and fold_next[255:0] as the compute cut, with specified start/consume behavior and combinational accumulator-plus-tile results.",
+      "Preserve 352 payload bytes, synchronous reset, last-tile errors, independent response delays, repair and backpressure; provide real retained TX buf_4/RX buf_2 endpoints on all 725 functional links, including clock/reset.",
+      "Use simulation-only library behavior under `ifndef SYNTHESIS; run quick lint/elaboration and publish through the exact native output protocol within the three-RTL-attempt authorization."
+    ],
+    "exclusions": [
+      "Do not modify frozen specifications, checkers, tools or vendor IP; add wrapper state, another block, pipelines, serialization or fewer MACs.",
+      "Do not execute independent numerical, performance or physical qualification, or begin P1/P2 without subsequent user resume and captured physical feedback."
+    ],
+    "completion_criteria": [
+      "The frozen P0 topology, ownership, links, arithmetic and external behavior are implemented with clean available lint/elaboration evidence.",
+      "Hard gates synthesizable-rtl-present and split-rationale pass at their declared paths.",
+      "Publish the declared rtl output only within its existing output and write boundaries."
+    ],
+    "collaboration": [
+      "task:logic-folding-round1:full-design-integration receives the immutable P0 snapshot and split rationale.",
+      "Functional feedback repairs remain within the fixed P0 split; physical feedback permits later candidates only when the existing feedback_resume_authorized condition is true."
+    ]
+  },
+  "brief_digest": "sha256:7e79170df371e226b1f30b68c9cb0e76d1ee11b83553b7204a679460ddaad3da",
+  "permission": {
+    "read_paths": [
+      "spec/**",
+      "rtl/**",
+      "chisel/**",
+      "integration/**",
+      "vendor/**",
+      "ip/**",
+      ".chip_nebula/ip-library/**",
+      "reports/physical-analysis/**",
+      "reports/baseline/**",
+      "reports/physical-l0/**",
+      "reports/physical-l1/**"
+    ],
+    "write_paths": [
+      "rtl/**",
+      "chisel/**",
+      "build/rtl/**",
+      "docs/implementation/**"
+    ],
+    "tools": [
+      "git",
+      "make",
+      "python3",
+      "sbt",
+      "verilator",
+      "iverilog",
+      "yosys"
+    ]
+  },
+  "framework": "codex",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "medium",
+  "executor": "agent",
+  "timeout_seconds": 1800,
+  "session_id": "01a161d7-8010-7623-89d8-d2fa64effaab",
+  "workspace_commit": "21d9646982e70e2851b19d6168db119c6cab4270",
+  "verdict": "pass",
+  "created_at": "2026-10-22T04:21:10.509463+00:00",
+  "finished_at": "2026-10-22T04:26:15.913581+00:00",
+  "delivery": {
+    "task_id": "logic-folding-round1:rtl-implementation",
+    "output_name": "rtl",
+    "artifact_id": "artifact-32c9bfb69288415f845f416e8db7b854",
+    "attempt_id": "attempt-733acbf4f901461e89b5a6ef84a67b58",
+    "accepted_at": "2026-10-22T04:26:15.913207+00:00"
+  },
+  "output_protocol": "NEBULA_OUTPUT: {\"rtl\":{\"type\":\"rtl.snapshot\",\"schema_version\":1,\"module\":\"lb_feedback\"}}\nTASK COMPLETED",
+  "rtl_package_path": "design/rtl/lb_feedback.sv",
+  "rtl_sha256": "36bf0acc00c85c46c988b135f438fb7ef1233999fb915603cce9d1e16d27b6cc"
+}

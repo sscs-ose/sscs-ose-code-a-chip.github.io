@@ -1,0 +1,318 @@
+{
+  "workflow_id": "logic-folding-round1",
+  "tasks": [
+    {
+      "id": "logic-folding-round1:rtl-implementation",
+      "key": "rtl-implementation",
+      "executor": "agent",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "brief": {
+        "objective": "Deliver the authorized P0 compute-only split of immutable R while preserving the frozen interface, storage capacity and cycle behavior.",
+        "deliverables": [
+          "rtl.snapshot@1 containing rtl/lb_feedback.sv with wire-only lb_feedback, lb_l0 and lb_l1; system instances named L0 and L1.",
+          "docs/implementation/physical-change.md documenting storage ownership, the compute cut and actual endpoint cells."
+        ],
+        "responsibilities": [
+          "Read complete input manifests, detailed design, CSIR, spec/folding-spec.json and spec/contract.md; verify revision consistency and report conflicting authorities without choosing silently.",
+          "Keep PHY ports, mapping/configuration, request/response state, four weight rows, input/output banks and job/consume control in L0; keep all original non-PHY package ports, 32 signed8x8 products, eight tile reductions and eight signed32 accumulators in L1.",
+          "Route every host signal through L1 using reverse-direction link_<original_name> ports, including clock/reset; retain original host names on L0.",
+          "Preserve exactly fold_x[31:0], fold_w[255:0], fold_start, fold_consume and fold_next[255:0] as the compute cut, with specified start/consume behavior and combinational accumulator-plus-tile results.",
+          "Preserve 352 payload bytes, synchronous reset, last-tile errors, independent response delays, repair and backpressure; provide real retained TX buf_4/RX buf_2 endpoints on all 725 functional links, including clock/reset.",
+          "Use simulation-only library behavior under `ifndef SYNTHESIS; run quick lint/elaboration and publish through the exact native output protocol within the three-RTL-attempt authorization."
+        ],
+        "exclusions": [
+          "Do not modify frozen specifications, checkers, tools or vendor IP; add wrapper state, another block, pipelines, serialization or fewer MACs.",
+          "Do not execute independent numerical, performance or physical qualification, or begin P1/P2 without subsequent user resume and captured physical feedback."
+        ],
+        "completion_criteria": [
+          "The frozen P0 topology, ownership, links, arithmetic and external behavior are implemented with clean available lint/elaboration evidence.",
+          "Hard gates synthesizable-rtl-present and split-rationale pass at their declared paths.",
+          "Publish the declared rtl output only within its existing output and write boundaries."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:full-design-integration receives the immutable P0 snapshot and split rationale.",
+          "Functional feedback repairs remain within the fixed P0 split; physical feedback permits later candidates only when the existing feedback_resume_authorized condition is true."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:full-design-integration",
+      "key": "full-design-integration",
+      "executor": "tool",
+      "framework": "",
+      "model": "",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Deliver a reproducible integrated P0 top preserving the released component snapshot and frozen technology boundaries.",
+        "deliverables": [
+          "rtl.integration@1 containing required integration wiring, address map, compile-order filelist and integration/dependencies.lock.json.",
+          "Lint, elaboration and bounded smoke-test evidence under reports/integration/**."
+        ],
+        "responsibilities": [
+          "Consume the declared design, specification, constraints and RTL inputs without changing their semantics or component set.",
+          "Lock exact consumed sources and technology views, platform, corner and installation using the prescribed dependency-manifest schema; honor explicit allow_flop_memory=true.",
+          "Establish reproducible simulation and synthesis elaboration with the specified endpoint-cell models and real technology definitions.",
+          "Complete the role-required smoke coverage applicable to the frozen interface within 20 directed transactions; document inapplicable address or byte-mask cases without inventing interfaces."
+        ],
+        "exclusions": [
+          "Do not redesign the P0 split, modify immutable RTL snapshots or vendor assets, introduce external IP, or write outside the existing integration permissions."
+        ],
+        "completion_criteria": [
+          "The four declared integration results are complete: wiring, reproducibility manifests, clean lint/elaboration and bounded smoke evidence.",
+          "Publish the integration output through the fixed integrate executor with existing dependencies, permissions and output paths unchanged."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:rtl-implementation supplies the component snapshot and resolves component-owned questions.",
+          "task:logic-folding-round1:functional-performance-verify receives the sole integrated DUT snapshot.",
+          "task:logic-folding-round1:synthesize receives the reproducible source and dependency baseline."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:functional-performance-verify",
+      "key": "functional-performance-verify",
+      "executor": "tool",
+      "framework": "",
+      "model": "",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Independently establish P0 functional correctness, acceptance coverage and cycle performance against the frozen integrated DUT.",
+        "deliverables": [
+          "environment: verification.environment@3 describing maintainable verification sources and compatibility.",
+          "report: verification.report@3 with acceptance traceability, reproducible commands, direct evidence, performance results and reports/verification/result_summary.json.",
+          "The required NEBULA_OUTPUT environment/report object and identical structured payload at reports/verification/report.json."
+        ],
+        "responsibilities": [
+          "Use the declared specification and acceptance plan as oracle and rtl.integration as the only DUT; preserve frozen checker and acceptance-source integrity.",
+          "Cover all eight acceptance requirements, including all 65,536 configuration encodings, 73 legal maps, five seeds of 1,000 tasks, signed arithmetic, capacity, reset, overlap, backpressure and error behavior.",
+          "Measure all 162 frozen workloads: steady DRAM supply and completion intervals must not increase against the accepted reference; report added latency separately under the folding-specific supersession.",
+          "Deliver a minimal consolidated regression and distinct test-count, acceptance and coverage measurements, with evidence scope and reasons for unmeasured metrics.",
+          "Keep backend obligations explicitly deferred with responsible stages; distinguish pre-synthesis passage from complete physical acceptance."
+        ],
+        "exclusions": [
+          "Do not modify the DUT, frozen checker/specification or add unrelated interface requirements; do not count deferred physical obligations as passed."
+        ],
+        "completion_criteria": [
+          "Every acceptance point has a supported stage verdict and directly inspectable evidence; passed reports include the required evidence-manifest digest and non-empty shell-command strings.",
+          "verification-result-summary passes with all declared metrics and measured test/acceptance counts.",
+          "engineering-verdict passes against reports/verification/report.json without failed or unsupported requirements/checks.",
+          "Publish both declared outputs within existing write permissions through the fixed verify executor."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:full-design-integration supplies the immutable integrated DUT.",
+          "task:logic-folding-round1:rtl-implementation receives functional or throughput defect feedback within the fixed P0 split.",
+          "task:logic-folding-round1:synthesize receives the verification report required by its passed-verdict release.",
+          "task:logic-folding-round1:independent-acceptance receives the acceptance and performance evidence."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:synthesize",
+      "key": "synthesize",
+      "executor": "tool",
+      "framework": "",
+      "model": "",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Deliver separately mapped L0 and L1 netlists with retained physical endpoints and closed pre-layout setup timing under frozen constraints.",
+        "deliverables": [
+          "netlist@1 containing reproducible mapped netlists, synthesis logs, timing evidence and reports/synthesis/result_summary.json.",
+          "reports/synthesis/memory_mapping.json and a complete synthesis-warning disposition."
+        ],
+        "responsibilities": [
+          "Require the released verification report to have verdict=passed before synthesizing the declared integrated snapshot.",
+          "Apply frozen Sky130HD TT25C/1.8V, 100ns and declared I/O constraints; retain real endpoint cells and valid clock/reset connectivity.",
+          "Report both physical tops, their total cell area and minimum setup slack; distinguish Liberty cell area from LEF footprint and describe timing conditions.",
+          "Account for every RTL memory's capacity, ports, timing and implementation under explicit allow_flop_memory=true; preserve all storage and arithmetic resources.",
+          "Report required setup/hold metrics honestly, keeping final joint setup/hold qualification separate."
+        ],
+        "exclusions": [
+          "Do not alter frozen RTL, verification conclusions or timing thresholds; do not publish a netlist with known negative gated setup slack or claim final physical qualification."
+        ],
+        "completion_criteria": [
+          "synthesis-result-summary passes with every required metric and measured cell count, cell area and macro count.",
+          "setup-timing-closure passes with timing.setup_slack >= 0 in reports/synthesis/result_summary.json.",
+          "The declared netlist output contains reproducible evidence for both physical tops and remains within existing permissions."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:full-design-integration supplies sources and locked dependencies.",
+          "task:logic-folding-round1:functional-performance-verify supplies the passed verification release.",
+          "task:logic-folding-round1:physical-l0 and task:logic-folding-round1:physical-l1 receive their respective mapped tops.",
+          "task:logic-folding-round1:physical-analysis receives resource, endpoint and timing evidence."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:physical-l0",
+      "key": "physical-l0",
+      "executor": "tool",
+      "framework": "",
+      "model": "",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Produce the frozen P0 short physical screen for L0 without extending authorization to final implementation.",
+        "deliverables": [
+          "layout@1 containing L0 short-screen databases, checkpoints, measurements and tool evidence under build/physical-l0/** and reports/physical-l0/**."
+        ],
+        "responsibilities": [
+          "Use the declared synthesized L0 and frozen physical conditions, applying the required openroad-physical-closure skill within the authorized short-screen boundary.",
+          "Preserve source lineage, actual stage reached, endpoint connectivity, spatial/resource measurements, timing conditions and resumable checkpoints.",
+          "Keep screen completion distinct from routed qualification; retain unknowns for measurements outside the screen.",
+          "Retain ownership of later approved screens and selected full implementation without executing them now."
+        ],
+        "exclusions": [
+          "Do not modify the input netlist, foundry views, constraints or gates; do not run unapproved full implementation or claim final qualification from a short screen."
+        ],
+        "completion_criteria": [
+          "The fixed physical-l0 executor produces the declared short-screen evidence and checkpoints within existing permissions.",
+          "Reported status and measurements match the actual stage and database; any later full implementation remains subject to all existing closure and export contracts.",
+          "Deliver the existing layout output without adding or weakening hard gates."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:synthesize supplies the mapped L0 baseline.",
+          "task:logic-folding-round1:physical-analysis receives traceable L0 screen evidence and measurement gaps."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:physical-l1",
+      "key": "physical-l1",
+      "executor": "tool",
+      "framework": "",
+      "model": "",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Produce the frozen P0 short physical screen for L1 without extending authorization to final implementation.",
+        "deliverables": [
+          "layout@1 containing L1 short-screen databases, checkpoints, measurements and tool evidence under build/physical-l1/** and reports/physical-l1/**."
+        ],
+        "responsibilities": [
+          "Use the declared synthesized L1 and frozen physical conditions, applying the required openroad-physical-closure skill within the authorized short-screen boundary.",
+          "Preserve source lineage, actual stage reached, endpoint connectivity, spatial/resource measurements, timing conditions and resumable checkpoints.",
+          "Keep screen completion distinct from routed qualification; retain unknowns for measurements outside the screen.",
+          "Retain ownership of later approved screens and selected full implementation without executing them now."
+        ],
+        "exclusions": [
+          "Do not modify the input netlist, foundry views, constraints or gates; do not run unapproved full implementation or claim final qualification from a short screen."
+        ],
+        "completion_criteria": [
+          "The fixed physical-l1 executor produces the declared short-screen evidence and checkpoints within existing permissions.",
+          "Reported status and measurements match the actual stage and database; any later full implementation remains subject to all existing closure and export contracts.",
+          "Deliver the existing layout output without adding or weakening hard gates."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:synthesize supplies the mapped L1 baseline.",
+          "task:logic-folding-round1:physical-analysis receives traceable L1 screen evidence and measurement gaps."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:baseline-controls",
+      "key": "baseline-controls",
+      "executor": "tool",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Establish same-condition S0 and Sarea short-screen controls from immutable reference R for comparison with P0.",
+        "deliverables": [
+          "report: timing.report@1 containing control synthesis, short-screen evidence and comparison-ready measurements under build/baseline/** and reports/baseline/**."
+        ],
+        "responsibilities": [
+          "Use reference commit fb5a23d8d9d60f956cb4599d4e6b84e67cb1077b and the frozen S0/Sarea conditions.",
+          "Reuse only exact checked functional evidence while obtaining fresh synthesis and physical-condition measurements.",
+          "Trace each result to its reference input, geometry, stage, database and tool receipt; preserve missing measurements as unknown."
+        ],
+        "exclusions": [
+          "Do not modify reference R, substitute unmatched control conditions, or run selected final full controls before user resume."
+        ],
+        "completion_criteria": [
+          "Both S0 and Sarea have traceable same-condition short-screen records suitable for P0 comparison.",
+          "Publish the existing report output through the fixed baseline executor within its declared permissions, clearly separating screen completion from qualification."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:physical-analysis receives control evidence, comparison conditions and measurement limitations."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:physical-analysis",
+      "key": "physical-analysis",
+      "executor": "tool",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Assess the complete two-block P0 physical checkpoint against same-condition controls and capture actionable feedback for later authorized work.",
+        "deliverables": [
+          "report: timing.report@1 under reports/physical-analysis/** aggregating L0/L1 checkpoints, hotspots, connectivity, timing, resource costs and S0/Sarea comparisons."
+        ],
+        "responsibilities": [
+          "Consume the declared L0, L1, synthesis, baseline and constraint artifacts with exact measurement lineage.",
+          "Review both blocks and boundary connectivity together; distinguish per-block observations from joint timing qualification.",
+          "Preserve unknown values and stage limitations; state which physical obligations remain unqualified.",
+          "Capture P0 feedback without generating P1; retain the existing feedback routes and require subsequent user authorization before feedback_resume_authorized can enable them."
+        ],
+        "exclusions": [
+          "Do not change RTL, physical inputs, thresholds or dependencies; infer missing measurements, claim final closure from screens, or automatically resume candidate development."
+        ],
+        "completion_criteria": [
+          "The fixed analyze executor publishes a traceable combined assessment with explicit control comparisons, gaps and P0 feedback.",
+          "The declared report output remains within its existing write boundary and does not activate later-candidate feedback without authorization."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:baseline-controls supplies S0/Sarea evidence.",
+          "task:logic-folding-round1:physical-l0 and task:logic-folding-round1:physical-l1 supply actual screen checkpoints.",
+          "task:logic-folding-round1:synthesize supplies mapped-resource and pre-layout timing evidence.",
+          "task:logic-folding-round1:rtl-implementation receives captured feedback subject to the existing authorization condition.",
+          "task:logic-folding-round1:independent-acceptance receives the combined physical assessment."
+        ]
+      },
+      "frozen": true
+    },
+    {
+      "id": "logic-folding-round1:independent-acceptance",
+      "key": "independent-acceptance",
+      "executor": "tool",
+      "framework": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "",
+      "brief": {
+        "objective": "Audit and close the reviewed P0 checkpoint, reporting functional/performance acceptance separately from physical qualification and pausing before P1/P2.",
+        "deliverables": [
+          "report: timing.report@1 under reports/checkpoint/** containing the P0 acceptance audit, physical qualification status, outstanding obligations and actual native model usage."
+        ],
+        "responsibilities": [
+          "Audit every required acceptance point against the declared verification and physical reports and their direct evidence.",
+          "Keep test passage, performance compliance, workflow completion and physical qualification distinct; retain unknown or deferred obligations.",
+          "Report actual metered native token use without imposing a cap or substituting estimates.",
+          "Publish checkpoint completion to the workflow through the declared report and stop pending subsequent user resume."
+        ],
+        "exclusions": [
+          "Do not modify upstream evidence, weaken gates, fabricate measurements, authorize feedback resume or start P1/P2.",
+          "Do not treat unperformed full routing, extracted joint timing or signoff checks as passed; short-screen evidence cannot establish final physical qualification."
+        ],
+        "completion_criteria": [
+          "The fixed checkpoint executor publishes the complete evidence-linked P0 audit within reports/checkpoint/**.",
+          "Functional/performance conclusions and physical qualification are independently stated, actual usage is reported, and all remaining obligations are explicit.",
+          "The workflow pauses after P0 with no automatic P1/P2 execution."
+        ],
+        "collaboration": [
+          "task:logic-folding-round1:functional-performance-verify supplies acceptance and cycle-performance evidence.",
+          "task:logic-folding-round1:physical-analysis supplies the combined physical assessment and control comparisons.",
+          "Report final completion directly to the workflow through the declared checkpoint report; no additional Task is created."
+        ]
+      },
+      "frozen": true
+    }
+  ]
+}

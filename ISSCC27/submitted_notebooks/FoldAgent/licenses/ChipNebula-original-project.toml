@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chip-nebula"
+version = "0.1.8"
+description = "Chip Nebula - Multi-Agent Collaboration Platform for Chip Frontend Design"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Proprietary"}
+authors = [
+    {name = "Chip Nebula Team"}
+]
+keywords = ["chip-design", "eda", "agent", "pipeline", "rtl"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "pyyaml>=6.0",
+    "psutil>=5.9.0",
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "ansi2html>=1.8.0",
+    # Compact SpecIR uses Z3 to prove choice overlap and coverage.  Keeping it
+    # in the base install makes compiler verdicts independent of the host.
+    "z3-solver>=4.13",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-mock>=3.12",
+    "trio>=0.25",
+]
+desktop = [
+    "pyinstaller>=6.0",
+    "klayout>=0.30.12,<0.31",
+]
+gds = ["klayout>=0.30.12,<0.31"]
+
+[project.scripts]
+chip-nebula = "chip_nebula.cli.commands:main"
+chip-nebula-desktop-server = "chip_nebula.dashboard.desktop_server:main"
+specir = "chip_nebula.csir.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["chip_nebula.dashboard.frontend*"]
+
+[tool.setuptools.package-data]
+chip_nebula = ["dashboard/static/**/*", "configs/**/*"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["**/__pycache__/*", "**/*.pyc", "**/*.pyo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src/chip_nebula"]
+omit = ["tests/*", "*/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]
