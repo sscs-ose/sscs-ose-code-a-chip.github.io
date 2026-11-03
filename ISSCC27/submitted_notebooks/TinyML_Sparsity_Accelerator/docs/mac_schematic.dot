@@ -1,0 +1,23 @@
+digraph "mac" {
+label="mac";
+rankdir="LR";
+remincross=true;
+n3 [ shape=octagon, label="act", color="black", fontcolor="black"];
+n4 [ shape=octagon, label="clk", color="black", fontcolor="black"];
+n5 [ shape=octagon, label="enable", color="black", fontcolor="black"];
+n6 [ shape=octagon, label="prod", color="black", fontcolor="black"];
+n7 [ shape=octagon, label="rst_n", color="black", fontcolor="black"];
+n8 [ shape=octagon, label="wt", color="black", fontcolor="black"];
+c12 [ shape=record, label="{{<p9> A|<p10> B}|$3\n$mul|{<p11> Y}}",  ];
+c17 [ shape=record, label="{{<p13> ARST|<p14> CLK|<p15> D}|$10\n$adff|{<p16> Q}}",  ];
+c19 [ shape=record, label="{{<p9> A|<p10> B|<p18> S}|$4\n$mux|{<p11> Y}}",  ];
+c19:p11:e -> c17:p15:w [color="black", fontcolor="black", style="setlinewidth(3)", label=""];
+c12:p11:e -> c19:p10:w [color="black", fontcolor="black", style="setlinewidth(3)", label=""];
+n3:e -> c12:p9:w [color="black", fontcolor="black", style="setlinewidth(3)", label=""];
+n4:e -> c17:p14:w [color="black", fontcolor="black", label=""];
+n5:e -> c19:p18:w [color="black", fontcolor="black", label=""];
+c17:p16:e -> n6:w [color="black", fontcolor="black", style="setlinewidth(3)", label=""];
+n6:e -> c19:p9:w [color="black", fontcolor="black", style="setlinewidth(3)", label=""];
+n7:e -> c17:p13:w [color="black", fontcolor="black", label=""];
+n8:e -> c12:p10:w [color="black", fontcolor="black", style="setlinewidth(3)", label=""];
+}
