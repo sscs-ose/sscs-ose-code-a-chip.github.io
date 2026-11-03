@@ -1,0 +1,160 @@
+# Process Design Kits
+
+Process Design Kits, or PDKs, are files provided by a foundry that enables chips
+to be implemented for a specific foundry process.
+
+LibreLane supports multiple process design kits, so long that an LibreLane PDK
+configuration file is made to support them.
+
+## Specifying your PDK
+
+There are multiple ways to specify a PDK from the command-line interface,
+ordered by priority (from highest to lowest):
+
+* Within the `config.json` file: Recommended only for designs that are compatible
+  with exactly one PDK.
+* The `--pdk` command-line flag
+* The `PDK` environment variable
+* The default PDK, i.e., the
+  [Skywater/Google 130nm PDK](https://github.com/google/skywater-pdk).
+
+## Standard Cell Libraries
+
+Standard cells are small silicon patterns that are used to implement basic
+functionality throughout your design that have already been designed and
+analyzed for timing and other physical information. For example, the standard
+cell `sky130_fd_sc_hd__and1` implements a logical AND.
+
+Each PDK comes bundled with collections of standard cells known as "standard
+cell libraries" or SCLs for short, some of which are foundry-provided and some
+of which are third-party. Each LibreLane PDK configuration specifies a default
+standard cell library, so you don't have to worry about picking one- but if you
+want to anyway, ordered by priority (from highest to lowest):
+
+* Within the `config.json` file
+* The `--scl` command-line flag
+* The `STD_CELL_LIBRARY` environment variable
+* The default SCL as dictated by the LibreLane PDK configuration files.
+  * For sky130, that's `sky130_fd_sc_hd`.
+
+## Building, location and downloading
+
+Most open-source PDKs are not usable in their default formats. This is the
+reason we rely on Open PDKs to build the PDK, which will not only place it in a
+LibreLane-friendly layout but also generate views of the PDK that are usable by
+the aforementioned tools.
+
+Because of extended build times,
+the [Google/Skywater 130nm PDK](https://github.com/google/skywater-pdk) and the
+[Google/GlobalFoundries 180nm PDK](https://github.com/google/gf180mcu-pdk),
+are built and cached using [Ciel](https://github.com/fossi-foundation/ciel),
+a version manager by the LibreLane team built on top of Open PDKs.
+
+There are multiple variants of each PDK (reflecting different metal stack
+configurations):
+
+* `sky130`
+  * `sky130A`: The default. 5 metal layers and a local interconnect.
+  * `sky130B`: Similar to `sky130A`, but also includes a Resistive RAM (ReRAM)
+    layer between `metal1` and `metal2`. See
+    [here](https://sky130-fd-pr-reram.readthedocs.io/en/latest/background.html)
+    for more information. This affects timing as, for example, `via1` between
+    `metal1` and `metal2` is twice as tall.
+
+Both variants are supported by LibreLane, though sky130A has better-calibrated
+timing extraction.
+
+```{tip}
+The variants are identical on the
+[front end of line](https://en.wikipedia.org/wiki/Front_end_of_line) (FEOL), but
+have different
+[back end of line](https://en.wikipedia.org/wiki/Back_end_of_line) (BEOL)
+processes, one for `A` and one for `B`.
+
+Efabless-run shuttles (including chipIgnite and Google MPW) were "split-lot",
+i.e., two identical wafers come out of FEOL are then subjected to different BEOL
+processes. Designs targeting a specific variant are packaged only from the
+appropriate wafer, with its "twin" on the other wafer, which has timing issues
+at best and is a dead chip at worst, is discarded.
+
+This meant you could use either variant on any Efabless `sky130` shuttle
+(but not within the same design.) For advice on which variant you should use
+today, please consult with your shuttle provider.
+```
+
+* `gf180mcu`
+  * ~~`gf180mcuA`: 3 metal layers.~~
+  * ~~`gf180mcuB`: 4 metal layers.~~
+  * ~~`gf180mcuC`: 5 metal layers.~~
+  * `gf180mcuD`: The default. 5 metal layers, with a slightly thicker top metal
+    layer. The thinner top metal layer has issues with delamination on the pads
+    according to GlobalFoundries.
+
+[GFMPW0](https://platform.efabless.com/shuttles/GFMPW-0) was run on `C`,
+but any and all future shuttles based on the Google/GlobalFoundries 180nm
+process will require `gf180mcuD` as per GlobalFoundry's recommendation. `A`
+and `B` were never used and are not supported by LibreLane.
+
+LibreLane is tested with a specific revision of Open PDKs. By default, LibreLane
+will attempt to download a build done with that revision using Ciel to the
+**PDK root**.
+
+## The PDK Root
+
+The PDK root is a directory containing all of your open-source PDKs. LibreLane
+is configured to use the PDK root at the following options (from highest to
+lowest priority)"
+
+* The `--pdk-root` command-line flag
+* The `PDK_ROOT` environment variable
+* A folder named `.ciel` in your home directory.
+
+The PDK root stores downloaded versions of the PDK as well as the Ciel metadata
+information.
+
+Each PDK family, e.g., `sky130` or `gf180mcu`, has one active version at a time.
+Versions of the PDKs are exactly equal to the `open_pdks` revision they were
+built with.
+
+(porting-pdks)=
+
+### Using non-Ciel PDKs
+
+```{note}
+It is highly recommended to use LibreLane 3.0 from the `dev` branch if you're
+porting new PDKs for use with LibreLane.
+
+LibreLane 2.4, the current version as of the time of writing, makes a number
+of assumptions favoring the Open PDKs distributed using Ciel.
+```
+
+If you want to use PDKs without Ciel (built manually), you will need to pass
+this flag:
+
+`--manual-pdk`
+
+This will bypassing checking and attempting to download the PDK using Ciel, so
+you can add custom PDKs to the PDK root.
+
+The PDKs must provide the following:
+
+* An LibreLane PDK configuration file at the path
+  `{pdk_root}/{pdk}/libs.tech/librelane/config.tcl`.
+
+This Tcl-based (sorry) config file must include values for all non-optional
+variables in the {ref}`univ_flow_cvars_pdk`.
+
+* An standard cell library configuration file at the path
+  `{pdk_root}/{pdk}/libs.tech/librelane/{scl}/config.tcl`.
+
+This Tcl-based config file must include values for all non-optional variables in
+the {ref}`univ_flow_cvars_scl`.
+
+The PDK must also include any step-specific PDK variables for the `Classic` flow
+to be compatible with the `Classic` flow.
+
+…the most prudent approach at the moment would be to replicate the configuration
+files in the IHP Open PDK and modify them to fit your own platform:
+
+- <https://github.com/IHP-GmbH/IHP-Open-PDK/blob/main/ihp-sg13g2/libs.tech/librelane>
+  <sup>([permalink](https://github.com/IHP-GmbH/IHP-Open-PDK/tree/62c1d640dc1c91f57bc1a8e4e08e537a7a105ae8/ihp-sg13g2/libs.tech/librelane))</sup>
