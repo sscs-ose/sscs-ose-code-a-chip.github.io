@@ -1,0 +1,36 @@
+GlitchScope Phase B2 — Network Load and Slew Propagation
+
+Purpose
+-------
+Close the first physically meaningful multi-cell timing loop on top of the
+frozen B1H1 real-SKY130 Liberty authority.
+
+B2 adds only:
+1. Automatic capacitive load derivation:
+     sum of downstream Liberty input-pin capacitances
+   + optional explicit wire capacitance
+   + optional explicit primary-output load.
+2. Event-by-event propagation of NLDM output transition time as the downstream
+   input slew.
+3. Per-primary-input slew override while preserving a global default.
+4. Fail-closed handling of simultaneous multi-input timing ambiguity.
+5. Synthetic exact regressions plus a real SKY130 INV->NAND2->BUF path whose
+   simulator timing is checked against an independent step-by-step reference.
+
+B2 deliberately does NOT add:
+- interconnect extraction or geometry-derived wire capacitance
+- Verilog parsing
+- SDF
+- inertial/pulse rejection
+- energy/power attribution
+- sequential timing
+- multi-input simultaneous-delay resolution
+- persistent cross-epoch event queues
+
+Frozen from B1H1
+----------------
+- event/pulse/genealogy semantics
+- Liberty parser and bilinear interpolation
+- B1 real-library propagation authority
+- all A0/A1/A2/B0/B1 regressions
+- real Liberty SHA-256 authority

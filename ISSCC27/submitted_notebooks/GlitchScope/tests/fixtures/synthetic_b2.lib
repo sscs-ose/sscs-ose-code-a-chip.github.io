@@ -1,0 +1,51 @@
+library (synthetic_b2) {
+  time_unit : "1ns";
+  capacitive_load_unit (1.0, "pf");
+
+  cell (INVX1) {
+    pin (A) { direction : input; capacitance : 0.0015; }
+    pin (Y) { direction : output; function : "!A";
+      timing () {
+        related_pin : "A"; timing_sense : negative_unate; timing_type : combinational;
+        cell_rise (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.020,0.060","0.040,0.080"); }
+        cell_fall (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.030,0.070","0.050,0.090"); }
+        rise_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.010,0.018","0.018,0.026"); }
+        fall_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.012,0.020","0.020,0.028"); }
+      }
+    }
+  }
+
+  cell (NAND2X1) {
+    pin (A) { direction : input; capacitance : 0.0020; }
+    pin (B) { direction : input; capacitance : 0.0030; }
+    pin (Y) { direction : output; function : "!(A&B)";
+      timing () {
+        related_pin : "A"; timing_sense : negative_unate; timing_type : combinational;
+        cell_rise (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.025,0.065","0.055,0.095"); }
+        cell_fall (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.035,0.075","0.065,0.105"); }
+        rise_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.011,0.019","0.023,0.031"); }
+        fall_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.013,0.021","0.025,0.033"); }
+      }
+      timing () {
+        related_pin : "B"; timing_sense : negative_unate; timing_type : combinational;
+        cell_rise (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.027,0.067","0.057,0.097"); }
+        cell_fall (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.037,0.077","0.067,0.107"); }
+        rise_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.012,0.020","0.024,0.032"); }
+        fall_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.014,0.022","0.026,0.034"); }
+      }
+    }
+  }
+
+  cell (BUFX1) {
+    pin (A) { direction : input; capacitance : 0.0010; }
+    pin (X) { direction : output; function : "A";
+      timing () {
+        related_pin : "A"; timing_sense : positive_unate; timing_type : combinational;
+        cell_rise (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.018,0.058","0.038,0.078"); }
+        cell_fall (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.022,0.062","0.042,0.082"); }
+        rise_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.009,0.017","0.017,0.025"); }
+        fall_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.005"); values ("0.011,0.019","0.019,0.027"); }
+      }
+    }
+  }
+}

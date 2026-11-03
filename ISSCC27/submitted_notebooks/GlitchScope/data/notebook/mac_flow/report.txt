@@ -1,0 +1,16 @@
+GlitchScope report  (M2, 130 cells, 18 flops, 303 cycles @ 5000 ps)
+  output check vs testbench: 3020/3020 match
+  functional energy :    584.0 fJ/cycle
+  glitch energy     :    422.3 fJ/cycle  (42.0 % of dynamic)
+  glitches          : generated 1269, propagated 3382, merged 674, filtered 1634
+  top glitch CONSUMERS (where energy is burnt): _206_ 4.6%, _197_ 3.9%, _211_ 3.6%, _214_ 3.5%, _225_ 3.4%
+  WHERE TO FIX (interventional suppression potential, % of glitch energy removed if the gate were glitch-free):
+      _181_ 10.7%, _183_ 10.4%, _197_ 9.7%, _213_ 8.4%, _186_ 8.3%, _206_ 7.8%
+    fixing these 6 together removes 40.0% (naive sum of singles would claim 55.3%)
+    Shapley share of that joint saving: _181_ 7.7%, _183_ 4.5%, _197_ 5.0%, _213_ 8.9%, _186_ 9.5%, _206_ 4.4%
+    best joint fix set (greedy): _181_ (10.7%) -> _186_ (19.9%) -> _213_ (29.1%) -> _197_ (35.3%) -> _175_ (38.8%) -> _211_ (42.0%)
+  glitch energy by input/state toggles (fJ per toggle): acc[3] 89.8, acc[5] 79.4, acc[7] 99.5, acc[2] 84.0, rb[2] 63.7, acc[4] 74.3
+  HOW TO FIX (function-preserving edits, exact re-simulation): _186_: driver _132_ (pin A): resize inv_1 -> inv_2 + _213_: swap pins A<->B  ->  total -0.07 %, glitch -0.28 %, settle 2488->2488 ps
+  GROUPS (Groups by logic depth (8 bands)): depth 007-008 58.2%, depth 009-010 41.4%, depth 005-006 32.3%, depth 011-012 17.4%, depth 003-004 17.0%, depth 013-014 12.1%; together 98.8%
+  wrote data/notebook/mac_flow/glitch_waves.vcd (GTKWave) and glitch_activity.saif (OpenSTA read_saif)
+  open data/notebook/mac_flow/report.html in a browser for the interactive report

@@ -1,0 +1,22 @@
+GlitchScope Phase B3 — M0 global chronological temporal closure
+
+Purpose:
+Close the remaining time-engine prerequisite before any inertial pulse model.
+
+Scientific change:
+- TransportSimulator now places external stimulus epochs and scheduled internal
+  transport events on one chronological time axis.
+- A later PI epoch may arrive while older internal events are still pending.
+- True M0 transport preserves those older events; they are not cancelled.
+- Internal TraceEvent epoch provenance follows the causal related-pin event.
+- Same-time distinct stimulus epochs fail closed; users must combine them into
+  one atomic epoch.
+- Non-overlapping behavior remains regression-compatible with A0-B2.
+
+Explicitly NOT in B3:
+- no inertial pulse rejection
+- no SPICE calibration
+- no energy/power attribution
+- no Liberty parser change
+- no load model change
+- no genealogy algorithm change

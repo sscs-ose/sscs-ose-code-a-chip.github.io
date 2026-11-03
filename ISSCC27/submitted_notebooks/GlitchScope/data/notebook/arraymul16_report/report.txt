@@ -1,0 +1,16 @@
+GlitchScope report  (M2, 2368 cells, 0 flops, 24 vectors @ 2000 ps)
+  stimulus: 24 random vectors (seed 7) (no output check)
+  functional energy :  10784.1 fJ/cycle
+  glitch energy     :  69603.3 fJ/cycle  (86.6 % of dynamic)
+  glitches          : generated 618, propagated 7815, merged 64894, filtered 18960
+  top glitch CONSUMERS (where energy is burnt): rf_c01_g4 0.3%, r15c01_g7 0.2%, rf_c02_g4 0.2%, rf_c03_g4 0.2%, rf_c03_g3 0.2%
+  WHERE TO FIX (interventional suppression potential, % of glitch energy removed if the gate were glitch-free):
+      r05c11_g4 1.9%, r06c10_g3 1.3%, r05c07_g7 1.1%, r05c08_g7 0.9%, r06c07_g3 0.9%, r05c08_g6 0.8%
+    fixing these 6 together removes 4.5% (naive sum of singles would claim 6.9%)
+    Shapley share of that joint saving: r05c11_g4 1.6%, r06c10_g3 0.5%, r05c07_g7 1.2%, r05c08_g7 0.7%, r06c07_g3 0.5%, r05c08_g6 0.1%
+    best joint fix set (greedy): r05c11_g4 (1.9%) -> r05c07_g7 (3.0%) -> r06c07_g3 (4.0%) -> r05c08_g6 (4.3%) -> r06c10_g3 (4.5%) -> r06c10_g2 (4.6%)
+  input/state-bit attribution skipped: needs >= 96 cycles/vectors for 32 inputs; got 24
+  HOW TO FIX (function-preserving edits, exact re-simulation): driver r05c11_g3 (pin A): resize nor2_1 -> nor2_4  ->  total -0.00 %, glitch -0.01 %, settle 8329->8328 ps
+  GROUPS (Groups by instance-name pattern ^(pp|r\d\d|rf)): r09 48.7%, r10 48.0%, r08 47.7%, r11 46.3%, r07 46.0%, r12 43.2%; together 78.5%
+  wrote data/notebook/arraymul16_report/glitch_waves.vcd (GTKWave) and glitch_activity.saif (OpenSTA read_saif)
+  open data/notebook/arraymul16_report/report.html in a browser for the interactive report

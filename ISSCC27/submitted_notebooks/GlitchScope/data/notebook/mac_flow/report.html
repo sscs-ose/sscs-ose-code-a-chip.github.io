@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mac glitch report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: a bench-instrument readout. Identity strip, one summary band, then
+   single-column sections (where -> how -> evidence), data in tabular mono. */
+:root {
+  --bg: #f6f7f8; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #7b7a75;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --accent: #2a78d6; --fun: #2a78d6; --glitch: #eb6834; --filtered: #1baf7a;
+  --good: #0ca30c; --good-ink: #006300; --warn: #fab219; --bad: #d03b3b;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f0f0f; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #95938c;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --accent: #3987e5; --fun: #3987e5; --glitch: #d95926; --filtered: #199e70;
+  --good: #0ca30c; --good-ink: #0ca30c; --warn: #fab219; --bad: #e66767; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f0f0f; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #95938c;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --accent: #3987e5; --fun: #3987e5; --glitch: #d95926; --filtered: #199e70;
+  --good: #0ca30c; --good-ink: #0ca30c; --warn: #fab219; --bad: #e66767; color-scheme: dark; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--font-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 40px; }
+header.id { display: grid; gap: 10px; }
+.eyebrow { font: 500 12px/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 600 clamp(28px, 4.2vw, 40px)/1.1 var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font: 600 22px/1.2 var(--font-display); margin: 0; text-wrap: balance; }
+h3 { font: 600 15px/1.3 var(--font-body); margin: 0; }
+p { margin: 0; max-width: 68ch; color: var(--ink-2); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 13px/1.4 var(--font-data); color: var(--ink-2); }
+.tags b { color: var(--ink); font-weight: 500; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font: 500 12px/1 var(--font-body); padding: 5px 9px;
+  border-radius: 999px; border: 1px solid var(--ring); background: var(--surface); color: var(--ink); white-space: nowrap; }
+.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; font-style: normal; }
+section { display: grid; gap: 16px; min-width: 0; }
+.lede { display: grid; gap: 6px; }
+.band { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr); gap: 28px; align-items: center;
+  background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 22px; }
+.hero-num { font: 600 64px/1 var(--font-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.hero-num small { font-size: 24px; color: var(--ink-2); margin-left: 2px; }
+.hero-cap { font-size: 13px; color: var(--ink-2); margin-top: 6px; }
+.kv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 18px; }
+.kv div { display: grid; gap: 2px; min-width: 0; }
+.kv span { font-size: 12px; color: var(--muted); }
+.kv b { font: 500 17px/1.2 var(--font-data); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 18px; min-width: 0; display: grid; gap: 12px; align-content: start; }
+.chart { width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.legend i.dash { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; width: 16px; }
+.legend i.line { height: 0; border-top: 2px solid var(--accent); border-radius: 0; width: 16px; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.tbl { overflow-x: auto; border: 1px solid var(--ring); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+th { font: 500 12px/1.3 var(--font-body); color: var(--muted); letter-spacing: .02em; position: sticky; top: 0; background: var(--surface); }
+th[data-k] { cursor: pointer; user-select: none; }
+th[data-k]:hover, th[data-k]:focus-visible { color: var(--ink); }
+th .arr { opacity: .7; margin-left: 4px; }
+td.num, th.num { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+td.mono { font-family: var(--font-data); }
+td.textwrap { white-space: normal; min-width: 22ch; max-width: 46ch; }
+.bar { display: inline-block; vertical-align: middle; height: 8px; border-radius: 0 4px 4px 0; background: var(--accent); margin-right: 8px; }
+.bar.neg { background: var(--muted); }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+input[type=search] { font: 14px var(--font-body); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--axis);
+  background: var(--surface); color: var(--ink); min-width: 0; width: min(320px, 100%); }
+input[type=search]:focus-visible, button:focus-visible, th[data-k]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.tab { font: 500 13px var(--font-body); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--ring);
+  background: transparent; color: var(--ink-2); cursor: pointer; }
+button.tab[aria-pressed="true"] { background: var(--surface); color: var(--ink); border-color: var(--axis); }
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; }
+.muted { color: var(--muted); font-size: 12px; }
+.callout { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; display: grid; gap: 4px; }
+.callout b { font-family: var(--font-data); font-weight: 500; }
+.files { font: 13px/1.8 var(--font-data); color: var(--ink-2); columns: 2 260px; }
+#tip { position: fixed; pointer-events: none; z-index: 10; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--ring); border-radius: 8px; padding: 8px 10px; font: 12.5px/1.45 var(--font-body);
+  box-shadow: 0 6px 24px rgba(0,0,0,.14); max-width: 280px; }
+#tip b { font-family: var(--font-data); font-weight: 500; }
+.axis text, .lab { fill: var(--muted); font: 11px var(--font-data); }
+.lab.ink { fill: var(--ink-2); }
+footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--grid); padding-top: 18px; }
+@media (max-width: 760px) {
+  .band, .split { grid-template-columns: minmax(0, 1fr); }
+  .kv { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-num { font-size: 52px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="tip" hidden></div>
+<script id="gs-data" type="application/json">{"design":{"top":"mac","cells":130,"flops":18,"cycles":303,"total_cycles":303,"parasitics":"none (pin capacitance only)","stimulus":"testbench VCD","clock_period_ps":5000.0,"model":"M2","output_check":{"checked":3020,"mismatches":0},"library":"sky130_fd_sc_hd__tt_025C_1v80","vdd":1.8,"calibration":"glitchscope/data/m2_model.json","uncalibrated_cells":{},"proxy_calibrated_cells":{}},"totals":{"E_functional_fJ":176955.7407086819,"E_glitch_fired_fJ":119099.81642075244,"E_glitch_filtered_fJ":8862.207609534735,"E_glitch_fJ":127962.02403028717,"E_total_fJ":304917.76473896904,"glitch_fraction":0.4196607703058286},"counts":{"functional_transitions":12754,"glitch_transitions":10650,"reruns":195,"GENERATED":1269,"PROPAGATED":3382,"MERGED":674,"FILTERED":1634},"cells":[{"cell":"_181_","lib":"sky130_fd_sc_hd__xor2_1","gsp":0.10678644446319394,"shapley":0.07667204770337929,"structural":0.10069031334171173,"consumed":0.02590921408436594},{"cell":"_183_","lib":"sky130_fd_sc_hd__xor2_1","gsp":0.10420413002800671,"shapley":0.045281156094193344,"structural":0.025092716879786103,"consumed":0.028687519879175328},{"cell":"_197_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.09709601512246362,"shapley":0.04955634156780888,"structural":0.0487342143696951,"consumed":0.03947577488431806},{"cell":"_213_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.08413496207085785,"shapley":0.08939015311874961,"structural":0.02293336658782015,"consumed":0.02627850537598029},{"cell":"_186_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.08285294557385076,"shapley":0.09472396878799307,"structural":0.0622118250592928,"consumed":0.028680362084079886},{"cell":"_206_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.0779814505800381,"shapley":0.04402854238376236,"structural":0.012101719613827583,"consumed":0.04623730757545851},{"cell":"_175_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.07432421205038962,"shapley":null,"structural":0.06981402103577625,"consumed":0.02456204083324843},{"cell":"_211_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.06098699550271296,"shapley":null,"structural":0.014953760550085828,"consumed":0.036207920825172116},{"cell":"_214_","lib":"sky130_fd_sc_hd__inv_1","gsp":0.05669970614567647,"shapley":null,"structural":0.0,"consumed":0.03461015026482577},{"cell":"_184_","lib":"sky130_fd_sc_hd__nand2_1","gsp":0.05642053872168878,"shapley":null,"structural":0.027895787756332613,"consumed":0.008096222324387725},{"cell":"_225_","lib":"sky130_fd_sc_hd__xor2_1","gsp":0.05614275106353274,"shapley":null,"structural":0.023194940975646568,"consumed":0.03376969986578453},{"cell":"_162_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.05256794673508325,"shapley":null,"structural":0.024049136496243885,"consumed":0.010383324222034467},{"cell":"_212_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":0.052453502420923226,"shapley":null,"structural":0.0012303017334678922,"consumed":0.025562223369671216},{"cell":"_185_","lib":"sky130_fd_sc_hd__nand2_1","gsp":0.04996030623571954,"shapley":null,"structural":0.001644871394251125,"consumed":0.019887886913670605},{"cell":"_223_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.04546785602505061,"shapley":null,"structural":0.051190987461047686,"consumed":0.014720001746550776},{"cell":"_188_","lib":"sky130_fd_sc_hd__nand2_1","gsp":0.04451504042649748,"shapley":null,"structural":0.005568218086342238,"consumed":0.0073218531062856675},{"cell":"_145_","lib":"sky130_fd_sc_hd__xor2_1","gsp":0.04441422800894972,"shapley":null,"structural":0.06020284942596984,"consumed":0.012511922042482844},{"cell":"_148_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.040174928466725886,"shapley":null,"structural":0.011629391486496226,"consumed":0.005823061490124916},{"cell":"_163_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":0.03925252209341688,"shapley":null,"structural":0.021080937595238273,"consumed":0.004885122389661012},{"cell":"_204_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.039089582109187324,"shapley":null,"structural":0.030401767462135732,"consumed":0.01834141506666979},{"cell":"_164_","lib":"sky130_fd_sc_hd__inv_1","gsp":0.0343673997037559,"shapley":null,"structural":0.0,"consumed":0.010798385671276585},{"cell":"_205_","lib":"sky130_fd_sc_hd__and2_1","gsp":0.03282006087451331,"shapley":null,"structural":0.00976143967026345,"consumed":0.016332945293389304},{"cell":"_187_","lib":"sky130_fd_sc_hd__inv_1","gsp":0.03239410088703417,"shapley":null,"structural":0.0,"consumed":0.01678376481322079},{"cell":"_216_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":0.029774619597114266,"shapley":null,"structural":0.0012128344035851587,"consumed":0.01415960247983299},{"cell":"_192_","lib":"sky130_fd_sc_hd__xor2_1","gsp":0.0282567320073916,"shapley":null,"structural":0.03432314257344572,"consumed":0.012907463856685794},{"cell":"_149_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":0.02741383856887675,"shapley":null,"structural":0.02578917089790631,"consumed":0.004074261878019736},{"cell":"_158_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.025623167616066797,"shapley":null,"structural":0.034791688119583164,"consumed":0.0060744321312995115},{"cell":"_160_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.02391351570498092,"shapley":null,"structural":0.014388107337139973,"consumed":0.005238578225620293},{"cell":"_195_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":0.021030630533312406,"shapley":null,"structural":0.021871652022908635,"consumed":0.007012323698477769},{"cell":"_194_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.02031965582398813,"shapley":null,"structural":0.005429322426096159,"consumed":0.005858864657517421},{"cell":"_208_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":0.016213493175727716,"shapley":null,"structural":0.0001507735610623997,"consumed":0.008697560438016665},{"cell":"_203_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":0.01619301295962463,"shapley":null,"structural":0.002437163448276466,"consumed":0.004908732706929328},{"cell":"_202_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.012910218012415299,"shapley":null,"structural":0.012828340057885957,"consumed":0.009002852366035196},{"cell":"_226_","lib":"sky130_fd_sc_hd__inv_1","gsp":0.010225019356157458,"shapley":null,"structural":0.0,"consumed":0.007412880937218509},{"cell":"_210_","lib":"sky130_fd_sc_hd__nor2_1","gsp":0.006328378026117852,"shapley":null,"structural":0.0018307452591202018,"consumed":0.011714567262655264},{"cell":"_155_","lib":"sky130_fd_sc_hd__xor2_1","gsp":0.0011608195458019481,"shapley":null,"structural":0.0011608195458019507,"consumed":0.0011608195458019507},{"cell":"_143_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":0.0011035039450834738,"shapley":null,"structural":0.0011035039450834783,"consumed":0.0011035039450834783},{"cell":"_199_","lib":"sky130_fd_sc_hd__xor2_1","gsp":0.0007554597056979545,"shapley":null,"structural":0.0007554597056979597,"consumed":0.0007554597056979597},{"cell":"_232_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.0012662667134702783,"consumed":0.022177610324113504},{"cell":"_228_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.0031871278876563483,"consumed":0.022099828165786956},{"cell":"_230_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.0016311381938902234,"consumed":0.02187616039039816},{"cell":"_234_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.0007953652724927538,"consumed":0.019441208567422957},{"cell":"_231_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.0012801471599694445,"consumed":0.017818119397680975},{"cell":"_233_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.0014968574491593463,"consumed":0.017359041751482833},{"cell":"_217_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.003212548313707647,"consumed":0.016597574891065597},{"cell":"_259_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.0045321438569181395,"consumed":0.01619652174275439},{"cell":"_245_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.0018858793943343647,"consumed":0.015720079929304458},{"cell":"_248_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.011901811114504002,"consumed":0.015551380283784897},{"cell":"_229_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.0007169218904683185,"consumed":0.01532389112314819},{"cell":"_236_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.0020097826875538293,"consumed":0.014189032848155906},{"cell":"_227_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.0012251822115384493,"consumed":0.01368058509816151},{"cell":"_257_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.0037661907282269453,"consumed":0.01240608070293544},{"cell":"_254_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.0025420815993515513,"consumed":0.012094062556260856},{"cell":"_235_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.003110867996882245,"consumed":0.011301521493998856},{"cell":"_255_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.006835341653941761,"consumed":0.010195698435544019},{"cell":"_209_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.001801598512512527,"consumed":0.008919959196581126},{"cell":"_258_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.00038901440942394996,"consumed":0.007950508712901302},{"cell":"_251_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.004849635821751879,"consumed":0.007422899381408179},{"cell":"_215_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.0025732592785053573,"consumed":0.007409168271484632},{"cell":"_238_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.0034261548871142382,"consumed":0.0070839961977484135},{"cell":"_176_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.003987387880879235,"consumed":0.007031140037992361},{"cell":"_247_","lib":"sky130_fd_sc_hd__inv_1","gsp":null,"shapley":null,"structural":0.0,"consumed":0.00659935793813143},{"cell":"_246_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":null,"shapley":null,"structural":0.010671627642538387,"consumed":0.006411357641002725},{"cell":"_218_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.014701875480096079,"consumed":0.005391743012711992},{"cell":"_198_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.005041930101516539,"consumed":0.0051663092218179165},{"cell":"_224_","lib":"sky130_fd_sc_hd__or2_1","gsp":null,"shapley":null,"structural":0.00730246432764357,"consumed":0.005152197201748615},{"cell":"_253_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.00045461887944353514,"consumed":0.00456967377723335},{"cell":"_196_","lib":"sky130_fd_sc_hd__inv_1","gsp":null,"shapley":null,"structural":0.0,"consumed":0.0045487224397797454},{"cell":"_241_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.013864156256635915,"consumed":0.003746689479029394},{"cell":"_200_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.020057230242458358,"consumed":0.003362311192426348},{"cell":"_252_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.0,"consumed":0.0032881101434647834},{"cell":"_174_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":null,"shapley":null,"structural":0.00294502464670033,"consumed":0.0031884332618027753},{"cell":"_256_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.00023629848299356349,"consumed":0.0031837039786360424},{"cell":"_244_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.006879815122443359,"consumed":0.002996891701400866},{"cell":"_222_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":null,"shapley":null,"structural":0.012859158320355795,"consumed":0.002809486634988473},{"cell":"_171_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":null,"shapley":null,"structural":0.017074194730572166,"consumed":0.0025828032641137875},{"cell":"_207_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":9.480978690427914e-05,"consumed":0.0024629669788346084},{"cell":"_243_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":null,"shapley":null,"structural":0.006515255045357939,"consumed":0.002314691020988008},{"cell":"_250_","lib":"sky130_fd_sc_hd__xnor2_1","gsp":null,"shapley":null,"structural":0.0020015228983992044,"consumed":0.0020693932154404416},{"cell":"_157_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.003213095301608222,"consumed":0.0017957923822712366},{"cell":"_182_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.0037537998833240866,"consumed":0.0014700210616869324},{"cell":"_161_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.0015079121062192289,"consumed":0.001244305919712867},{"cell":"_242_","lib":"sky130_fd_sc_hd__and2_1","gsp":null,"shapley":null,"structural":0.0036752140047186274,"consumed":0.0011950124943784178},{"cell":"_249_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.003358592613897557,"consumed":0.001164821335794763},{"cell":"_172_","lib":"sky130_fd_sc_hd__inv_1","gsp":null,"shapley":null,"structural":0.0,"consumed":0.0009093875772191792},{"cell":"_165_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":8.672120580157717e-05,"consumed":0.0008427568581933266},{"cell":"_150_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.00012994795775034403,"consumed":0.0008012436940183432},{"cell":"_159_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.0003511625623860448,"consumed":0.0007666518998858904},{"cell":"_169_","lib":"sky130_fd_sc_hd__xor2_1","gsp":null,"shapley":null,"structural":0.0007159590814705564,"consumed":0.0007159590814705564},{"cell":"_144_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.0059952393602775165,"consumed":0.0005805825401214795},{"cell":"_180_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.0005073877874552802,"consumed":0.0005073877874552802},{"cell":"_193_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.00022100927972996392,"consumed":0.0003705688199908187},{"cell":"_146_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.0019038858458490285,"consumed":0.0003695146016299619},{"cell":"_178_","lib":"sky130_fd_sc_hd__nand2_1","gsp":null,"shapley":null,"structural":0.00035730077313921927,"consumed":0.00035730077313921927},{"cell":"_237_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.00015744170510214678,"consumed":0.00021164643394106804},{"cell":"_221_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":0.0018521160071329698,"consumed":0.00017368161114834267},{"cell":"_179_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":0.00016274475828196097,"consumed":0.00016274475828196097},{"cell":"_201_","lib":"sky130_fd_sc_hd__or2_1","gsp":null,"shapley":null,"structural":0.0001563629547652189,"consumed":0.0001563629547652189},{"cell":"_170_","lib":"sky130_fd_sc_hd__o21ai_0","gsp":null,"shapley":null,"structural":3.819990693984785e-05,"consumed":0.00015095185072520607},{"cell":"_173_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":5.508401948711694e-07,"consumed":0.00013648710315742474},{"cell":"_219_","lib":"sky130_fd_sc_hd__a21oi_1","gsp":null,"shapley":null,"structural":0.00013566250454579768,"consumed":0.00013566250454579768},{"cell":"_142_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":5.928497632941396e-05,"consumed":5.928497632941396e-05},{"cell":"_154_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":3.796601675639053e-05,"consumed":3.796601675639053e-05},{"cell":"_138_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":3.124577860903862e-05,"consumed":3.124577860903862e-05},{"cell":"_168_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":1.2493091475800112e-05,"consumed":1.2493091475800112e-05},{"cell":"_191_","lib":"sky130_fd_sc_hd__nor2_1","gsp":null,"shapley":null,"structural":7.265329072183024e-07,"consumed":7.265329072183024e-07}],"attribution":{"top":["_181_","_183_","_197_","_213_","_186_","_206_"],"joint":0.39965220965588655,"naive":0.5530559478384109,"greedy":[["_181_",0.10678644446319394],["_186_",0.19919193255717244],["_213_",0.2913946441842359],["_197_",0.35332346024466893],["_175_",0.38817347603610886],["_211_",0.4197372019703038]],"certified":true,"evaluations":85,"screened":38,"single_greedy":[0.10678644446319394,0.08285294557385076,0.08413496207085785,0.09709601512246362,0.07432421205038962,0.06098699550271296]},"groups":{"rows":[{"group":"depth 007-008","size":21,"gsp":0.5824018858085941,"shapley":0.42033414956424286,"structural":0.34895955925019034},{"group":"depth 009-010","size":16,"gsp":0.4142140386481423,"shapley":0.17977077634958935,"structural":0.10004246546323307},{"group":"depth 005-006","size":17,"gsp":0.32298497092635065,"shapley":0.1396688829715027,"structural":0.2885314531911184},{"group":"depth 011-012","size":9,"gsp":0.17374286672754702,"shapley":0.06848250354740092,"structural":0.013778995347930792},{"group":"depth 003-004","size":23,"gsp":0.17041945686480908,"shapley":0.11604541242062673,"structural":0.2042412951951996},{"group":"depth 013-014","size":8,"gsp":0.121318454922267,"shapley":0.06385089218345133,"structural":0.03292025695573453},{"group":"depth 015-016","size":4,"gsp":0.03225352101506555,"shapley":null,"structural":0.006999189690015595},{"group":"depth 001-002","size":32,"gsp":0.00452678490658203,"shapley":null,"structural":0.004526784906582043}],"top":["depth 007-008","depth 009-010","depth 005-006","depth 011-012","depth 003-004","depth 013-014"],"joint":0.9881526170368138,"naive":1.7850816738977102,"greedy":[["depth 007-008",0.5824018858085941],["depth 009-010",0.7198491104327036],["depth 005-006",0.8423946414229835],["depth 003-004",0.9138081634694857],["depth 013-014",0.9670678946798771],["depth 011-012",0.9881526170368138]],"label":"Groups by logic depth (8 bands)"},"whatif":{"rows":[{"cell":"_181_","libcell":"xor2_1","edit":"resize xor2_1 -> xor2_2","kind":"resize","steps_resimulated":244,"dE_glitch_fJ":394.7746902932122,"dE_functional_fJ":2916.6928291114455,"dE_total_fJ":3311.4675194046577,"dE_total_pct":1.0860198723546022,"dE_glitch_pct":0.30850925755892505,"settle_before_ps":2487.601,"settle_after_ps":2508.444,"qualifies":false},{"cell":"_181_","libcell":"xor2_1","edit":"resize xor2_1 -> xor2_4","kind":"resize","steps_resimulated":244,"dE_glitch_fJ":532.3577958773385,"dE_functional_fJ":8685.481110805296,"dE_total_fJ":9217.83890668262,"dE_total_pct":3.023057352717293,"dE_glitch_pct":0.41602795822558686,"settle_before_ps":2487.601,"settle_after_ps":2573.527,"qualifies":false},{"cell":"_181_","libcell":"xor2_1","edit":"swap pins A<->B","kind":"pin swap","steps_resimulated":244,"dE_glitch_fJ":491.86715564510087,"dE_functional_fJ":19.809831197926542,"dE_total_fJ":511.6769868429983,"dE_total_pct":0.16780819158930593,"dE_glitch_pct":0.3843852575578841,"settle_before_ps":2487.601,"settle_after_ps":2506.403,"qualifies":false},{"cell":"_181_","libcell":"xor2_1","edit":"driver _147_ (pin A): resize nand2_1 -> nand2_2","kind":"driver resize","steps_resimulated":124,"dE_glitch_fJ":804.4465746373608,"dE_functional_fJ":392.65560385904973,"dE_total_fJ":1197.102178496425,"dE_total_pct":0.3925983714071984,"dE_glitch_pct":0.6286604019696947,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_181_","libcell":"xor2_1","edit":"driver _147_ (pin A): resize nand2_1 -> nand2_4","kind":"driver resize","steps_resimulated":124,"dE_glitch_fJ":1301.5850891993105,"dE_functional_fJ":1118.314668008854,"dE_total_fJ":2419.899757208186,"dE_total_pct":0.7936237363145404,"dE_glitch_pct":1.017165130876048,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_181_","libcell":"xor2_1","edit":"driver _148_ (pin B): resize xnor2_1 -> xnor2_2","kind":"driver resize","steps_resimulated":197,"dE_glitch_fJ":372.6079467886593,"dE_functional_fJ":2622.4167228035803,"dE_total_fJ":2995.0246695922397,"dE_total_pct":0.9822401368303977,"dE_glitch_pct":0.29118634970986956,"settle_before_ps":2487.601,"settle_after_ps":2523.059,"qualifies":false},{"cell":"_181_","libcell":"xor2_1","edit":"driver _148_ (pin B): resize xnor2_1 -> xnor2_4","kind":"driver resize","steps_resimulated":197,"dE_glitch_fJ":1465.0974985727808,"dE_functional_fJ":7664.762340972229,"dE_total_fJ":9129.85983954501,"dE_total_pct":2.9942039773775755,"dE_glitch_pct":1.1449471119853565,"settle_before_ps":2487.601,"settle_after_ps":2626.032,"qualifies":false},{"cell":"_186_","libcell":"xnor2_1","edit":"resize xnor2_1 -> xnor2_2","kind":"resize","steps_resimulated":249,"dE_glitch_fJ":1025.4213362428563,"dE_functional_fJ":2930.9307619858882,"dE_total_fJ":3956.352098228759,"dE_total_pct":1.297514463158837,"dE_glitch_pct":0.8013481687349293,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_186_","libcell":"xnor2_1","edit":"resize xnor2_1 -> xnor2_4","kind":"resize","steps_resimulated":249,"dE_glitch_fJ":4860.39586430935,"dE_functional_fJ":8730.864463169157,"dE_total_fJ":13591.260327478522,"dE_total_pct":4.457352735454293,"dE_glitch_pct":3.798311179541009,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_186_","libcell":"xnor2_1","edit":"swap pins A<->B","kind":"pin swap","steps_resimulated":249,"dE_glitch_fJ":122.5151291385555,"dE_functional_fJ":3.227177857479546,"dE_total_fJ":125.74230699602049,"dE_total_pct":0.04123810467509648,"dE_glitch_pct":0.09574335047213503,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_186_","libcell":"xnor2_1","edit":"driver _132_ (pin A): resize inv_1 -> inv_2","kind":"driver resize","steps_resimulated":132,"dE_glitch_fJ":-219.10605794507137,"dE_functional_fJ":124.19658772015828,"dE_total_fJ":-94.90947022489854,"dE_total_pct":-0.03112625146853864,"dE_glitch_pct":-0.1712274087609082,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":true},{"cell":"_186_","libcell":"xnor2_1","edit":"driver _132_ (pin A): resize inv_1 -> inv_4","kind":"driver resize","steps_resimulated":132,"dE_glitch_fJ":-349.0042643994748,"dE_functional_fJ":693.9017518832698,"dE_total_fJ":344.89748748380225,"dE_total_pct":0.11311164102854376,"dE_glitch_pct":-0.27274050019470575,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_186_","libcell":"xnor2_1","edit":"driver _162_ (pin B): resize xnor2_1 -> xnor2_2","kind":"driver resize","steps_resimulated":230,"dE_glitch_fJ":1071.9744187676406,"dE_functional_fJ":2606.438811410597,"dE_total_fJ":3678.4132301782665,"dE_total_pct":1.2063623886680548,"dE_glitch_pct":0.8377285580555652,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_186_","libcell":"xnor2_1","edit":"driver _162_ (pin B): resize xnor2_1 -> xnor2_4","kind":"driver resize","steps_resimulated":230,"dE_glitch_fJ":-366.294273956446,"dE_functional_fJ":7547.500935826771,"dE_total_fJ":7181.206661870325,"dE_total_pct":2.355128986340937,"dE_glitch_pct":-0.28625232894858577,"settle_before_ps":2487.601,"settle_after_ps":2498.927,"qualifies":false},{"cell":"_213_","libcell":"xnor2_1","edit":"resize xnor2_1 -> xnor2_2","kind":"resize","steps_resimulated":255,"dE_glitch_fJ":3008.2624771132396,"dE_functional_fJ":2586.994368063315,"dE_total_fJ":5595.256845176569,"dE_total_pct":1.835005202129335,"dE_glitch_pct":2.350902543086703,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_213_","libcell":"xnor2_1","edit":"resize xnor2_1 -> xnor2_4","kind":"resize","steps_resimulated":255,"dE_glitch_fJ":6921.500368634166,"dE_functional_fJ":7628.45911754726,"dE_total_fJ":14549.95948618144,"dE_total_pct":4.7717651015306455,"dE_glitch_pct":5.409026952399507,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_213_","libcell":"xnor2_1","edit":"swap pins A<->B","kind":"pin swap","steps_resimulated":255,"dE_glitch_fJ":-149.92139617916837,"dE_functional_fJ":7.822177553840447,"dE_total_fJ":-142.09921862534247,"dE_total_pct":-0.04660247288215213,"dE_glitch_pct":-0.11716085089720343,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":true},{"cell":"_213_","libcell":"xnor2_1","edit":"driver _164_ (pin A): resize inv_1 -> inv_2","kind":"driver resize","steps_resimulated":169,"dE_glitch_fJ":239.45194710734359,"dE_functional_fJ":669.9021792873973,"dE_total_fJ":909.3541263947554,"dE_total_pct":0.2982293036200191,"dE_glitch_pct":0.18712735197957484,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_213_","libcell":"xnor2_1","edit":"driver _164_ (pin A): resize inv_1 -> inv_4","kind":"driver resize","steps_resimulated":169,"dE_glitch_fJ":1882.8166853439034,"dE_functional_fJ":2196.934238044705,"dE_total_fJ":4079.7509233886376,"dE_total_pct":1.3379840059109676,"dE_glitch_pct":1.4713870772302429,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_213_","libcell":"xnor2_1","edit":"driver _175_ (pin B): resize xnor2_1 -> xnor2_2","kind":"driver resize","steps_resimulated":219,"dE_glitch_fJ":2246.2184122018516,"dE_functional_fJ":1764.5227736532397,"dE_total_fJ":4010.7411858550913,"dE_total_pct":1.3153517602651215,"dE_glitch_pct":1.7553789331045568,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false},{"cell":"_213_","libcell":"xnor2_1","edit":"driver _175_ (pin B): resize xnor2_1 -> xnor2_4","kind":"driver resize","steps_resimulated":219,"dE_glitch_fJ":3463.290944891589,"dE_functional_fJ":5225.184976362099,"dE_total_fJ":8688.475921253703,"dE_total_pct":2.8494489091810205,"dE_glitch_pct":2.706499034488441,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":false}],"best":[{"cell":"_186_","libcell":"xnor2_1","edit":"driver _132_ (pin A): resize inv_1 -> inv_2","kind":"driver resize","steps_resimulated":132,"dE_glitch_fJ":-219.10605794507137,"dE_functional_fJ":124.19658772015828,"dE_total_fJ":-94.90947022489854,"dE_total_pct":-0.03112625146853864,"dE_glitch_pct":-0.1712274087609082,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":true},{"cell":"_213_","libcell":"xnor2_1","edit":"swap pins A<->B","kind":"pin swap","steps_resimulated":255,"dE_glitch_fJ":-149.92139617916837,"dE_functional_fJ":7.822177553840447,"dE_total_fJ":-142.09921862534247,"dE_total_pct":-0.04660247288215213,"dE_glitch_pct":-0.11716085089720343,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"qualifies":true}],"combined":{"cell":"_186_+_213_","libcell":"","edit":"_186_: driver _132_ (pin A): resize inv_1 -> inv_2 + _213_: swap pins A<->B","kind":"combined","steps_resimulated":261,"dE_glitch_fJ":-355.5887700060557,"dE_functional_fJ":132.01806119378307,"dE_total_fJ":-223.57070881227264,"dE_total_pct":-0.07332164100168609,"dE_glitch_pct":-0.2778861718550903,"settle_before_ps":2487.601,"settle_after_ps":2487.601},"recommended":{"cell":"_186_+_213_","libcell":"","edit":"_186_: driver _132_ (pin A): resize inv_1 -> inv_2 + _213_: swap pins A<->B","kind":"combined","steps_resimulated":261,"dE_glitch_fJ":-355.5887700060557,"dE_functional_fJ":132.01806119378307,"dE_total_fJ":-223.57070881227264,"dE_total_pct":-0.07332164100168609,"dE_glitch_pct":-0.2778861718550903,"settle_before_ps":2487.601,"settle_after_ps":2487.601,"recommended_as":"combined"}},"optimize":null,"inputs":[{"name":"acc[3]","fj":89.7937029314283,"rate":0.4389438943894389,"share":0.09332895896561653},{"name":"acc[5]","fj":79.41460406093171,"rate":0.44554455445544555,"share":0.08378244740555368},{"name":"acc[7]","fj":99.49158289297978,"rate":0.3432343234323432,"share":0.08086090150012633},{"name":"acc[2]","fj":84.04751059212931,"rate":0.38613861386138615,"share":0.07684747731836121},{"name":"rb[2]","fj":63.74496759299019,"rate":0.5082508250825083,"share":0.0767159247730947},{"name":"acc[4]","fj":74.26380068451877,"rate":0.43564356435643564,"share":0.076607272858049},{"name":"acc[6]","fj":66.10520774460203,"rate":0.4158415841584158,"share":0.06509162572989917},{"name":"rb[0]","fj":49.85913401574644,"rate":0.5148514851485149,"share":0.06078385337680685},{"name":"ra[1]","fj":42.28721860386123,"rate":0.49174917491749176,"share":0.04923957416056475},{"name":"ra[2]","fj":39.87332779214021,"rate":0.4884488448844885,"share":0.04611721765076148},{"name":"b[0]","fj":37.760868807141016,"rate":0.5148514851485149,"share":0.046034716772842786},{"name":"rb[3]","fj":36.93655305010413,"rate":0.5214521452145214,"share":0.0456070887135633},{"name":"a[1]","fj":35.192524637559174,"rate":0.49174917491749176,"share":0.04097845599687585},{"name":"acc[8]","fj":62.71043833957824,"rate":0.20462046204620463,"share":0.030384383230243187},{"name":"a[0]","fj":22.617165110053396,"rate":0.4884488448844885,"share":0.026158858158539362},{"name":"b[3]","fj":20.671069398412126,"rate":0.5214521452145214,"share":0.025523423763413343}],"cycles":{"fun":[0,70.622,0,0,345.925,484.882,280.743,387.611,633.401,419.733,280.35,90.813,599.504,393.488,875.285,395.905,573.172,734.415,734.802,457.559,574.121,737.909,619.402,800.673,587.618,194.183,416.845,598.198,679.04,622.029,745.529,701.672,859.624,545.211,671.451,185.101,592.874,455.864,319.276,435.922,563.771,747.554,651.272,438.898,630.488,624.631,502.778,457.158,304.361,688.699,903.477,486.583,714.701,834.938,65.699,0,789.424,616.804,625.445,550.635,564.497,756.141,722.875,712.804,418.358,208.099,738.83,587.087,979.174,592.0,651.997,533.213,528.651,451.669,654.509,292.362,695.286,923.576,609.588,471.62,321.838,98.116,242.569,659.413,667.907,595.623,754.987,788.584,854.069,669.025,195.812,177.3,0,486.972,510.168,533.043,565.378,558.983,654.108,691.461,732.065,709.396,655.771,290.029,233.603,650.276,733.689,750.335,716.728,511.332,496.543,462.436,850.438,833.406,595.82,220.359,370.667,743.393,293.2,437.534,533.847,805.927,658.719,331.971,459.02,22.405,677.443,554.233,787.35,602.843,725.192,714.155,695.394,783.53,725.553,89.533,233.603,396.016,499.607,615.407,897.664,910.191,893.089,685.915,766.171,650.51,1091.295,834.722,828.753,478.768,182.562,615.208,797.747,835.048,831.956,388.31,444.253,673.892,300.577,498.605,675.017,665.402,410.011,782.211,677.573,686.142,958.483,749.195,737.159,836.932,189.912,310.961,462.013,818.209,542.186,834.234,448.734,543.18,840.3,655.134,616.432,639.028,582.618,598.722,704.982,548.315,493.636,697.62,903.498,506.262,659.836,793.131,794.024,701.053,994.801,501.783,573.319,685.649,584.787,447.018,645.649,588.263,598.722,735.774,694.979,495.677,656.195,832.617,521.33,716.16,774.41,795.042,765.882,422.23,351.018,776.478,531.68,866.945,512.577,484.902,511.79,474.567,845.274,588.574,545.33,703.879,730.478,606.7,650.017,588.631,513.702,788.703,800.542,676.782,639.224,255.58,787.749,766.1,607.892,750.518,897.046,620.695,280.514,773.98,720.871,639.142,694.8,985.276,732.218,651.195,560.176,526.564,574.867,781.229,572.407,204.444,175.312,662.608,938.388,560.132,385.205,714.918,622.264,792.01,578.941,688.497,500.557,308.31,363.402,459.392,555.391,457.334,621.186,694.621,855.154,423.104,640.047,554.004,600.277,768.736,921.294,611.581,201.591,38.586,546.558,367.824,502.801,556.727,643.284,639.906,632.307,948.7,552.164,732.032,393.882,582.44,768.059,773.45,620.499,312.645,463.109,690.961,652.294],"glitch":[0.0,0.0,0.0,0.0,0.0,451.13,368.935,7.826,440.523,373.931,0.0,379.711,168.008,134.502,263.87,812.817,432.482,427.135,620.812,747.388,347.959,321.027,467.087,387.562,141.992,163.118,140.444,303.698,293.816,253.39,371.932,481.298,856.551,660.14,407.336,899.867,55.82,190.796,842.091,418.151,2.7,399.886,497.146,615.312,515.769,541.676,308.84,331.578,310.22,613.063,327.105,494.479,533.991,314.269,243.174,0.0,28.212,272.746,218.562,516.442,526.619,859.186,529.846,236.57,633.748,0.0,441.043,119.266,577.942,474.14,386.978,570.654,30.896,498.849,0.0,544.198,708.507,465.743,800.114,482.034,406.323,0.0,134.331,211.116,733.062,853.682,644.275,555.395,516.119,594.172,0.0,155.543,0.0,0.0,316.769,621.396,785.951,552.201,551.658,739.099,783.717,610.013,176.188,436.667,87.643,146.443,810.818,430.816,244.221,1054.581,559.605,210.247,389.653,389.24,254.39,108.979,258.398,350.029,805.672,1.909,420.264,1265.47,486.893,341.9,379.344,240.57,293.73,267.988,366.039,400.461,136.31,540.346,433.074,1175.557,715.836,494.068,87.643,107.487,446.02,259.526,714.406,563.54,935.226,706.446,506.848,487.436,589.997,588.864,861.616,179.417,0.0,424.695,341.033,664.722,482.749,100.261,427.496,514.928,447.13,418.163,658.223,623.045,0.0,332.612,336.587,412.547,1006.211,672.647,483.607,386.512,436.008,0.0,197.995,393.387,437.612,600.258,188.9,792.414,1078.155,401.322,380.631,463.1,11.474,518.216,534.723,489.132,0.0,978.966,1058.91,259.813,136.928,593.025,396.335,621.497,593.649,664.915,579.025,578.427,240.794,478.99,384.207,361.169,568.872,619.547,560.639,276.57,330.248,632.198,308.863,352.671,600.964,667.209,815.011,325.699,26.689,851.246,893.215,676.602,770.583,209.109,402.013,322.394,415.496,490.96,391.628,532.819,483.135,480.184,390.09,355.638,452.029,412.139,887.192,952.33,558.541,233.899,211.082,641.961,251.072,441.176,224.482,0.0,756.928,725.414,494.294,226.252,626.305,750.345,232.892,872.328,260.197,74.541,602.705,567.362,247.067,458.392,0.0,222.541,300.352,219.064,629.958,470.4,284.181,725.648,130.772,502.514,616.219,213.534,359.782,65.46,257.138,169.738,475.228,785.589,456.015,343.111,372.442,593.471,333.211,733.908,625.143,313.14,265.822,16.892,20.057,146.454,4.717,328.821,741.92,561.368,145.27,613.276,367.006,267.433,334.79,92.361,756.58,535.474,726.662,0.0,691.348,240.227,335.348]},"files":["report.html","report.txt","summary.json","glitch_cells.csv","glitch_inputs.csv","fix_suggestions.csv","glitch_waves.vcd","glitch_activity.saif"],"version":"0.1.0-a0","generated":"2026-10-13 09:18"}</script>
+<script>
+(function () {
+"use strict";
+const D = JSON.parse(document.getElementById("gs-data").textContent);
+const $ = (s, el) => (el || document).querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct = (v, d) => v == null ? "–" : (100 * v).toFixed(d == null ? (Math.abs(v) < 0.01 && v !== 0 ? 2 : 1) : d) + " %";
+const spct = (v, d) => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(d == null ? 2 : d) + " %";
+const fj = v => v >= 1e4 ? (v / 1e3).toFixed(1) + " pJ" : v.toFixed(1) + " fJ";
+const T = D.totals, G = D.design, n = Math.max(1, G.cycles || D.cycles.fun.length);
+const tip = $("#tip");
+function showTip(e, h) { tip.innerHTML = h; tip.hidden = false; moveTip(e); }
+function moveTip(e) { const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + w > innerWidth - 8) x = e.clientX - w - 14; if (y + h > innerHeight - 8) y = e.clientY - h - 14;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px"; }
+function hideTip() { tip.hidden = true; }
+function hoverable(el, html) { el.addEventListener("mouseenter", e => showTip(e, html)); el.addEventListener("mousemove", moveTip);
+  el.addEventListener("mouseleave", hideTip); }
+const svgNS = "http://www.w3.org/2000/svg";
+function S(tag, attrs, parent) { const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function niceMax(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); const m = v / p;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p; }
+
+/* ---------- page skeleton ---------- */
+const app = $("#app");
+const oc = G.output_check || {};
+const ocChip = oc.checked ? (oc.mismatches === 0
+  ? `<span class="chip"><i style="background:var(--good)"></i>Outputs match testbench · ${oc.checked}/${oc.checked}</span>`
+  : `<span class="chip"><i style="background:var(--bad)"></i>${oc.mismatches} output mismatches of ${oc.checked}</span>`) : "";
+const unc = Object.keys(G.uncalibrated_cells || {}), prox = Object.keys(G.proxy_calibrated_cells || {});
+app.insertAdjacentHTML("beforeend", `
+<header class="id">
+  <div class="eyebrow">GlitchScope ${esc(D.version)} · glitch power report</div>
+  <h1>${esc(G.top)}</h1>
+  <div class="tags"><span><b>${G.cells}</b> cells</span><span><b>${G.flops || 0}</b> flops</span>
+    <span><b>${n}</b> ${G.flops ? "clock cycles" : "vectors"}</span>
+    ${G.clock_period_ps ? `<span>period <b>${(+G.clock_period_ps).toFixed(0)} ps</b></span>` : ""}
+    <span>pulse model <b>${esc(G.model)}</b></span><span>SKY130 HD · TT 25 °C 1.80 V</span></div>
+  <div class="tools">${ocChip}${unc.length ? `<span class="chip"><i style="background:var(--warn)"></i>${unc.length} cell types without pulse calibration</span>` : ""}</div>
+</header>
+<section class="band" aria-label="Summary">
+  <div><div class="hero-num">${(100 * T.glitch_fraction).toFixed(1)}<small>%</small></div>
+    <div class="hero-cap">of dynamic energy is spent on glitches</div></div>
+  <div class="kv">
+    <div><span>Glitch energy / ${G.flops ? "cycle" : "vector"}</span><b>${fj(T.E_glitch_fJ / n)}</b></div>
+    <div><span>Functional energy / ${G.flops ? "cycle" : "vector"}</span><b>${fj(T.E_functional_fJ / n)}</b></div>
+    <div><span>Glitch transitions</span><b>${(D.counts.glitch_transitions || 0).toLocaleString()}</b></div>
+    <div><span>Generated · propagated</span><b>${(D.counts.GENERATED || 0).toLocaleString()} · ${(D.counts.PROPAGATED || 0).toLocaleString()}</b></div>
+    <div><span>Merged · filtered</span><b>${(D.counts.MERGED || 0).toLocaleString()} · ${(D.counts.FILTERED || 0).toLocaleString()}</b></div>
+    <div><span>Filtered-pulse energy</span><b>${pct(T.E_glitch_filtered_fJ / (T.E_glitch_fJ || 1))} of glitch</b></div>
+  </div>
+</section>`);
+
+/* ---------- energy per cycle ---------- */
+const secE = document.createElement("section");
+secE.innerHTML = `<div class="lede"><h2>Energy per ${G.flops ? "clock cycle" : "vector"}</h2>
+  <p>Functional transitions are the ones the logic needs. Everything above them is glitch energy: extra transitions and pulses that the gates filtered but still paid for.</p></div>
+  <div class="panel"><div class="legend"><span><i style="background:var(--fun)"></i>Functional</span><span><i style="background:var(--glitch)"></i>Glitch</span></div>
+  <div class="chart" id="c-cycles"></div></div>`;
+app.appendChild(secE);
+
+function drawCycles() {
+  const el = $("#c-cycles"); el.innerHTML = "";
+  let F = D.cycles.fun, Gl = D.cycles.glitch, step = 1;
+  const W = Math.max(300, el.clientWidth), H = 220, m = {l: 54, r: 8, t: 8, b: 26};
+  const maxBars = Math.floor((W - m.l - m.r) / 3);
+  if (F.length > maxBars) { step = Math.ceil(F.length / maxBars);
+    const agg = a => { const o = []; for (let i = 0; i < a.length; i += step) { let s = 0, c = 0;
+      for (let j = i; j < Math.min(a.length, i + step); j++) { s += a[j]; c++; } o.push(s / c); } return o; };
+    F = agg(F); Gl = agg(Gl); }
+  const N = F.length, ymax = niceMax(Math.max(1e-9, ...F.map((f, i) => f + Gl[i])));
+  const svg = S("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Functional and glitch energy per step"}, el);
+  const iw = W - m.l - m.r, ih = H - m.t - m.b, bw = iw / N, gap = bw > 4 ? 1 : 0;
+  const ax = S("g", {class: "axis"}, svg);
+  for (let k = 0; k <= 4; k++) { const v = ymax * k / 4, y = m.t + ih - ih * k / 4;
+    S("line", {x1: m.l, x2: W - m.r, y1: y, y2: y, stroke: k ? "var(--grid)" : "var(--axis)", "stroke-width": 1}, ax);
+    S("text", {x: m.l - 8, y: y + 4, "text-anchor": "end"}, ax).textContent = v >= 1000 ? (v / 1000).toFixed(1) + " pJ" : v.toFixed(0) + " fJ"; }
+  const ticks = Math.min(6, N);
+  for (let k = 0; k < ticks; k++) { const i = Math.round(k * (N - 1) / Math.max(1, ticks - 1));
+    S("text", {x: m.l + (i + .5) * bw, y: H - 8, "text-anchor": "middle"}, ax).textContent = (i * step + 1); }
+  for (let i = 0; i < N; i++) {
+    const x = m.l + i * bw, hf = ih * F[i] / ymax, hg = ih * Gl[i] / ymax, w = Math.max(.6, bw - gap);
+    const g = S("g", {}, svg);
+    S("rect", {x, y: m.t + ih - hf, width: w, height: hf, fill: "var(--fun)"}, g);
+    S("rect", {x, y: m.t + ih - hf - hg, width: w, height: Math.max(0, hg - (hg > 2 && bw > 4 ? 1 : 0)), fill: "var(--glitch)"}, g);
+    const hit = S("rect", {x: x - 1, y: m.t, width: bw + 2, height: ih, fill: "transparent"}, g);
+    const lab = step > 1 ? `${G.flops ? "Cycles" : "Vectors"} ${i * step + 1}–${Math.min(D.cycles.fun.length, (i + 1) * step)} (mean)` : `${G.flops ? "Cycle" : "Vector"} ${i + 1}`;
+    hoverable(hit, `${lab}<br>Functional <b>${fj(F[i])}</b><br>Glitch <b>${fj(Gl[i])}</b> · ${pct(Gl[i] / Math.max(1e-12, F[i] + Gl[i]))}`);
+  }
+}
+
+/* ---------- where to fix ---------- */
+const A = D.attribution;
+function drawJoint(el, R, unitWord) {
+  // cumulative saving of the greedy fix set vs the naive sum of single savings
+  el.innerHTML = "";
+  const W = Math.max(280, el.clientWidth), H = 220, m = {l: 44, r: 12, t: 12, b: 30};
+  const k = R.greedy.length, act = [0, ...R.greedy.map(g => g[1])];
+  const naive = [0]; R.single_greedy.forEach((v, i) => naive.push(naive[i] + v));
+  const ymax = niceMax(Math.max(...act, ...naive, 0.01));
+  const svg = S("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Joint saving versus naive sum"}, el);
+  const iw = W - m.l - m.r, ih = H - m.t - m.b, X = i => m.l + iw * i / Math.max(1, k), Y = v => m.t + ih - ih * v / ymax;
+  const ax = S("g", {class: "axis"}, svg);
+  for (let t = 0; t <= 4; t++) { const v = ymax * t / 4;
+    S("line", {x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), stroke: t ? "var(--grid)" : "var(--axis)"}, ax);
+    S("text", {x: m.l - 6, y: Y(v) + 4, "text-anchor": "end"}, ax).textContent = (+(100 * v).toFixed(1)) + "%"; }
+  for (let i = 0; i <= k; i++) S("text", {x: X(i), y: H - 10, "text-anchor": "middle"}, ax).textContent = i;
+  const path = a => a.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+  S("path", {d: path(naive), fill: "none", stroke: "var(--muted)", "stroke-width": 2, "stroke-dasharray": "5 4"}, svg);
+  S("path", {d: path(act), fill: "none", stroke: "var(--accent)", "stroke-width": 2}, svg);
+  act.forEach((v, i) => { if (!i) return;
+    const c = S("circle", {cx: X(i), cy: Y(v), r: 4.5, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2}, svg);
+    const hit = S("circle", {cx: X(i), cy: Y(v), r: 12, fill: "transparent"}, svg);
+    hoverable(hit, `Fix ${i} ${unitWord}${i > 1 ? "s" : ""} (+ <b>${esc(R.greedy[i - 1][0])}</b>)<br>Joint saving <b>${pct(v)}</b><br>Naive sum would claim ${pct(naive[i])}`); });
+  S("text", {x: X(k) - 4, y: Y(act[k]) - 10, "text-anchor": "end", class: "lab ink"}, svg).textContent = pct(act[k]) + " joint";
+  if (Math.abs(Y(naive[k]) - Y(act[k])) > 14)
+    S("text", {x: X(k) - 4, y: Y(naive[k]) - 8, "text-anchor": "end", class: "lab"}, svg).textContent = pct(naive[k]) + " naive";
+}
+
+function sortableTable(cols, rows, opts) {
+  opts = opts || {};
+  const wrap = document.createElement("div"); wrap.className = "tbl";
+  const t = document.createElement("table"); wrap.appendChild(t);
+  let key = opts.sort || null, dir = opts.dir || -1, filter = "";
+  function render() {
+    let rs = rows.filter(r => !filter || cols.some(c => c.search && String(r[c.k] || "").toLowerCase().includes(filter)));
+    if (key) rs = rs.slice().sort((a, b) => { const x = a[key], y = b[key];
+      if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
+      return (typeof x === "string" ? x.localeCompare(y) : x - y) * dir; });
+    const lim = opts.limit || 1e9;
+    t.innerHTML = "<thead><tr>" + cols.map(c => `<th ${c.sort !== false ? `data-k="${c.k}" tabindex="0"` : ""} class="${c.num ? "num" : ""}" scope="col">${esc(c.label)}${key === c.k ? `<span class="arr">${dir < 0 ? "↓" : "↑"}</span>` : ""}</th>`).join("") + "</tr></thead><tbody>" +
+      rs.slice(0, lim).map(r => "<tr>" + cols.map(c => `<td class="${c.num ? "num" : c.cls || ""}">${c.fmt ? c.fmt(r[c.k], r) : esc(r[c.k] == null ? "–" : r[c.k])}</td>`).join("") + "</tr>").join("") +
+      (rs.length > lim ? `<tr><td colspan="${cols.length}" class="note">${rs.length - lim} more rows — refine the search to see them</td></tr>` : "") +
+      (rs.length ? "" : `<tr><td colspan="${cols.length}" class="note">No rows match.</td></tr>`) + "</tbody>";
+    t.querySelectorAll("th[data-k]").forEach(th => { const go = () => { const k = th.dataset.k; dir = key === k ? -dir : -1; key = k; render(); };
+      th.addEventListener("click", go); th.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
+  }
+  render();
+  return {el: wrap, setFilter: f => { filter = f.trim().toLowerCase(); render(); }};
+}
+const barCell = (max) => (v) => v == null ? "–" : `<span class="bar ${v < 0 ? "neg" : ""}" style="width:${Math.max(1, 64 * Math.abs(v) / max).toFixed(1)}px"></span>${pct(v)}`;
+
+if (A || D.groups) {
+  const sec = document.createElement("section");
+  const R = A;
+  let lede = `<div class="lede"><h2>Where to fix</h2><p>Suppression potential is measured, not traced: GlitchScope re-simulates the design with a gate made glitch-free (it switches once, straight to its final value) and reports how much glitch energy disappears. Fixes interact, so the saving of a set is measured as a set.</p></div>`;
+  sec.innerHTML = lede;
+  if (D.groups) {
+    const Gr = D.groups, mx = Math.max(...Gr.rows.map(r => Math.abs(r.gsp)), 1e-9);
+    const p = document.createElement("div"); p.className = "split";
+    p.innerHTML = `<div class="panel"><h3>Groups: best joint fix set</h3><div class="legend"><span><i class="line"></i>Measured joint saving</span><span><i class="dash"></i>Naive sum of single savings</span></div><div class="chart" id="c-gjoint"></div>
+      <p class="note" id="n-gjoint"></p></div>`;
+    const tb = sortableTable([
+      {k: "group", label: "Group", cls: "mono", search: true},
+      {k: "size", label: "Cells", num: true},
+      {k: "gsp", label: "Suppression potential", num: true, fmt: barCell(mx)},
+      {k: "structural", label: "Traced credit", num: true, fmt: v => pct(v)}], Gr.rows, {sort: "gsp", limit: 24});
+    const box = document.createElement("div"); box.className = "panel"; box.innerHTML = "<h3>All groups</h3>"; box.appendChild(tb.el);
+    p.appendChild(box); sec.appendChild(p);
+    Gr.single_greedy = Gr.greedy.map(g => (Gr.rows.find(r => r.group === g[0]) || {}).gsp || 0);
+    p.querySelector("#n-gjoint").innerHTML = `${esc(Gr.label)}. Best joint set: ${Gr.greedy.map(g => esc(g[0])).join(" → ")} removes <b>${pct(Gr.greedy[Gr.greedy.length - 1][1])}</b> of glitch energy; adding their single savings would claim ${pct(Gr.single_greedy.reduce((a, b) => a + b, 0))}.`;
+  }
+  if (R) {
+    const p = document.createElement("div"); p.className = "split";
+    p.innerHTML = `<div class="panel"><h3>Cells: best joint fix set</h3><div class="legend"><span><i class="line"></i>Measured joint saving</span><span><i class="dash"></i>Naive sum of single savings</span></div><div class="chart" id="c-joint"></div>
+      <p class="note">Best joint set: ${R.greedy.map(g => esc(g[0])).join(" → ")} removes <b>${pct(R.greedy.length ? R.greedy[R.greedy.length - 1][1] : 0)}</b> of glitch energy; their single savings add up to ${pct(R.single_greedy.reduce((a, b) => a + b, 0))}.${R.certified ? "" : " Large design: the search evaluated the " + R.screened + " most promising cells, so the ranking is not guaranteed exhaustive."}</p></div>
+      <div class="panel"><h3>What the numbers mean</h3>
+      <div class="callout"><b>Suppression potential</b><span>Glitch energy removed if this gate alone were glitch-free. Ranks where to fix.</span></div>
+      <div class="callout"><b>Shapley share</b><span>Fair split of the joint saving of the top cells, interactions included. Shares add up to the joint saving.</span></div>
+      <div class="callout"><b>Traced credit</b><span>Shown for comparison only: the usual trace-and-sum method, crediting each glitch back to the gate that started it. It can miss gates that would be the best fixes.</span></div>
+      <div class="callout"><b>Energy consumed</b><span>Glitch energy burnt at the gate's own output. Where the power goes, not where to fix it.</span></div></div>`;
+    sec.appendChild(p);
+  }
+  const mx = Math.max(...D.cells.map(r => Math.abs(r.gsp || 0)), 1e-9);
+  const tb = sortableTable([
+    {k: "cell", label: "Cell", cls: "mono", search: true},
+    {k: "lib", label: "Library cell", cls: "mono", search: true, fmt: v => esc((v || "").replace("sky130_fd_sc_hd__", ""))},
+    {k: "gsp", label: "Suppression potential", num: true, fmt: barCell(mx)},
+    {k: "shapley", label: "Shapley share", num: true, fmt: v => pct(v)},
+    {k: "structural", label: "Traced credit", num: true, fmt: v => pct(v)},
+    {k: "consumed", label: "Energy consumed", num: true, fmt: v => pct(v)}], D.cells, {sort: R ? "gsp" : "consumed", limit: 30});
+  const box = document.createElement("div"); box.className = "panel";
+  box.innerHTML = `<div class="tools" style="justify-content:space-between"><h3>Cells</h3><input type="search" id="q-cells" placeholder="Filter by cell or library cell" aria-label="Filter cells"></div>`;
+  box.appendChild(tb.el); sec.appendChild(box);
+  app.appendChild(sec);
+  box.querySelector("#q-cells").addEventListener("input", e => tb.setFilter(e.target.value));
+}
+
+/* ---------- how to fix ---------- */
+if (D.whatif) {
+  const Wf = D.whatif, sec = document.createElement("section");
+  const rec = Wf.recommended, comb = Wf.combined;
+  const status = r => r.dE_total_fJ < 0
+    ? (r.settle_after_ps <= r.settle_before_ps + 1e-6 ? `<span class="chip"><i style="background:var(--good)"></i>Saves energy</span>`
+                                                       : `<span class="chip"><i style="background:var(--warn)"></i>Saves energy, slower</span>`)
+    : `<span class="chip"><i style="background:var(--bad)"></i>Costs energy</span>`;
+  sec.innerHTML = `<div class="lede"><h2>How to fix</h2><p>Each edit keeps the logic function and is measured by re-simulating every ${G.flops ? "cycle" : "vector"} it can affect: resizing the gate, swapping its symmetric input pins, or resizing the gates that drive it. Settling time is the latest transition seen after the ${G.flops ? "clock edge" : "input change"}, a timing hint rather than sign-off STA.</p></div>`;
+  if (rec) {
+    const c = rec, together = rec.recommended_as === "combined";
+    const interf = !together && comb ? `<p class="note">Applying the best edit of every cell together was also measured (${spct(comb.dE_total_pct)} total): the edits interfere, so the single best edit is recommended.</p>` : "";
+    sec.insertAdjacentHTML("beforeend", `<div class="panel"><h3>${together ? "Recommended edits, applied together" : "Recommended edit"}</h3>
+      <div class="kv"><div><span>Total dynamic energy</span><b>${spct(c.dE_total_pct)}</b></div>
+      <div><span>Glitch energy</span><b>${spct(c.dE_glitch_pct)}</b></div>
+      <div><span>Worst settling time</span><b>${c.settle_before_ps.toFixed(0)} → ${c.settle_after_ps.toFixed(0)} ps</b></div></div>
+      <p class="note">${together ? "" : "For cell " + esc(c.cell) + ": "}${esc(c.edit)}</p>${interf}</div>`);
+  } else {
+    sec.insertAdjacentHTML("beforeend", `<div class="panel"><h3>No local edit pays off</h3><p class="note">None of the evaluated resizes or pin swaps lowered total energy without slowing the design. The glitches here come from path structure; see the joint fix sets above.</p></div>`);
+  }
+  const tb = sortableTable([
+    {k: "cell", label: "For cell", cls: "mono", search: true},
+    {k: "edit", label: "Edit", cls: "textwrap", search: true},
+    {k: "dE_total_pct", label: "Δ total energy", num: true, fmt: v => spct(v)},
+    {k: "dE_glitch_pct", label: "Δ glitch energy", num: true, fmt: v => spct(v)},
+    {k: "settle_after_ps", label: "Settling (ps)", num: true, fmt: (v, r) => `${r.settle_before_ps.toFixed(0)} → ${v.toFixed(0)}`},
+    {k: "steps_resimulated", label: G.flops ? "Cycles re-run" : "Vectors re-run", num: true},
+    {k: "dE_total_fJ", label: "Verdict", sort: false, fmt: (v, r) => status(r)}], Wf.rows, {sort: "dE_total_pct", dir: 1, limit: 40});
+  const box = document.createElement("div"); box.className = "panel";
+  box.innerHTML = `<div class="tools" style="justify-content:space-between"><h3>All evaluated edits</h3><input type="search" id="q-edits" placeholder="Filter by cell or edit" aria-label="Filter edits"></div>`;
+  box.appendChild(tb.el); sec.appendChild(box); app.appendChild(sec);
+  box.querySelector("#q-edits").addEventListener("input", e => tb.setFilter(e.target.value));
+}
+
+/* ---------- reduce it: register placement ---------- */
+if (D.optimize && D.optimize.rows.length) {
+  const O = D.optimize, sec = document.createElement("section");
+  const o = O.rows[0], g = O.rows.find(r => r.chosen);
+  sec.innerHTML = `<div class="lede"><h2>Reduce it: register placement</h2><p>The registers are moved${O.latency ? ` (and ${O.latency} pipeline stage${O.latency > 1 ? "s" : ""} added)` : ""} so that they stop glitches where they cost most, keeping the clock period. Every candidate netlist is re-simulated with the same stimulus, its outputs checked against the original on every cycle, and its total energy measured: logic, glitches, and the flip-flops with their share of the clock tree. ${O.measured} placements were measured.</p></div>`;
+  if (g) {
+    sec.insertAdjacentHTML("beforeend", `<div class="panel"><h3>Written to optimized.v</h3>
+      <div class="kv"><div><span>Total energy per cycle</span><b>${spct(100 * (g.total / o.total - 1), 1)}</b></div>
+      <div><span>Glitch energy</span><b>${o.glitch.toFixed(0)} → ${g.glitch.toFixed(0)} fJ</b></div>
+      <div><span>Flip-flops</span><b>${o.flops} → ${g.flops}</b></div></div>
+      <p class="note">Same function and ${O.latency ? `+${O.latency} cycle` : "the same"} latency, verified cycle by cycle. Confirm timing and power after place and route.</p></div>`);
+  } else {
+    sec.insertAdjacentHTML("beforeend", `<div class="panel"><h3>Keep the registers where they are</h3><p class="note">No measured placement lowered total energy: the extra flip-flops would cost more than the glitches they remove.</p></div>`);
+  }
+  const tb = sortableTable([
+    {k: "design", label: "Register placement"},
+    {k: "total", label: "Total (fJ/cycle)", num: true, fmt: (v, r) => `${v.toFixed(0)} <span class="muted">${r === o ? "" : spct(100 * (v / o.total - 1), 1)}</span>`},
+    {k: "glitch", label: "Glitch", num: true, fmt: v => v.toFixed(0)},
+    {k: "functional", label: "Functional", num: true, fmt: v => v.toFixed(0)},
+    {k: "registers", label: "Flip-flops + clock", num: true, fmt: v => v.toFixed(0)},
+    {k: "flops", label: "Flip-flops", num: true},
+    {k: "period_ps", label: "Critical path (ps)", num: true, fmt: v => v.toFixed(0)}], O.rows, {sort: "total", dir: 1});
+  const box = document.createElement("div"); box.className = "panel"; box.appendChild(tb.el); sec.appendChild(box);
+  app.appendChild(sec);
+}
+
+/* ---------- inputs ---------- */
+if (D.inputs && D.inputs.length) {
+  const sec = document.createElement("section");
+  sec.innerHTML = `<div class="lede"><h2>Which input bits trigger glitches</h2><p>A least-squares fit of each ${G.flops ? "cycle" : "vector"}'s glitch energy on which inputs and register bits toggled. Useful for data-dependent power: operand gating, encoding, or reordering.</p></div>`;
+  const mx = Math.max(...D.inputs.map(r => Math.abs(r.fj)), 1e-9);
+  const tb = sortableTable([
+    {k: "name", label: "Input or state bit", cls: "mono", search: true},
+    {k: "fj", label: "Glitch energy per toggle", num: true, fmt: v => `<span class="bar ${v < 0 ? "neg" : ""}" style="width:${Math.max(1, 64 * Math.abs(v) / mx).toFixed(1)}px"></span>${v.toFixed(1)} fJ`},
+    {k: "rate", label: "Toggle rate", num: true, fmt: v => pct(v, 0)},
+    {k: "share", label: "Share of glitch energy", num: true, fmt: v => pct(v)}], D.inputs, {sort: "share"});
+  sec.appendChild(tb.el); app.appendChild(sec);
+}
+
+/* ---------- footer ---------- */
+app.insertAdjacentHTML("beforeend", `<footer>
+  ${D.files.length ? `<div><b>Files written next to this report</b><div class="files">${D.files.map(esc).join("<br>")}</div></div>` : ""}
+  <div>Event-driven simulation with Liberty NLDM timing; pulse filtering by the SPICE-calibrated M2 model (ngspice + SKY130A); energy from Liberty internal power plus ½CV², scaled per cell to SPICE where calibrated.${prox.length ? " Drive-strength variants without their own calibration use the same function's calibration: " + esc(prox.join(", ")) + "." : ""} Generated ${esc(D.generated)}.</div>
+</footer>`);
+
+function drawAll() { drawCycles(); if (A) drawJoint($("#c-joint"), A, "cell"); if (D.groups) drawJoint($("#c-gjoint"), D.groups, "group"); }
+drawAll();
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 120); });
+})();
+</script>
+</body>
+</html>

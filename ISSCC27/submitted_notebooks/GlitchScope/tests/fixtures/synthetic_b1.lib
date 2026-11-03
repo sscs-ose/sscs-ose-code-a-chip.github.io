@@ -1,0 +1,39 @@
+library (synthetic_b1) {
+  time_unit : "1ns";
+  capacitive_load_unit (1.0000000000, "pf");
+
+  cell (INVX1) {
+    pin (A) { direction : input; capacitance : 0.002; }
+    pin (Y) { direction : output; function : "!A";
+      timing () {
+        related_pin : "A"; timing_sense : negative_unate; timing_type : combinational;
+        cell_rise (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.020, 0.040", "0.040, 0.060"); }
+        cell_fall (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.030, 0.050", "0.050, 0.070"); }
+        rise_transition (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.012, 0.016", "0.020, 0.024"); }
+        fall_transition (t) { index_1 ("0.010, 0.030"); index_2 ("0.001, 0.003"); values ("0.014, 0.018", "0.022, 0.026"); }
+      }
+    }
+  }
+
+  cell (NAND2X1) {
+    pin (A) { direction : input; capacitance : 0.002; }
+    pin (B) { direction : input; capacitance : 0.003; }
+    pin (Y) { direction : output; function : "!(A&B)";
+      timing () {
+        related_pin : "A"; timing_sense : negative_unate; timing_type : combinational; when : "B";
+        cell_rise (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.021,0.041","0.041,0.061"); }
+        cell_fall (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.031,0.051","0.051,0.071"); }
+        rise_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.013,0.017","0.021,0.025"); }
+        fall_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.015,0.019","0.023,0.027"); }
+      }
+      timing () {
+        related_pin : "B"; timing_sense : negative_unate; timing_type : combinational; when : "A";
+        cell_rise (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.025,0.045","0.045,0.065"); }
+        cell_fall (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.035,0.055","0.055,0.075"); }
+        rise_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.014,0.018","0.022,0.026"); }
+        fall_transition (t) { index_1 ("0.010,0.030"); index_2 ("0.001,0.003"); values ("0.016,0.020","0.024,0.028"); }
+      }
+      timing () { related_pin : "A"; timing_type : setup_rising; }
+    }
+  }
+}

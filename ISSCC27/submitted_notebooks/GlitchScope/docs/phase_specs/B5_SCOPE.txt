@@ -1,0 +1,37 @@
+GlitchScope Phase B5 — real mixed-sense multi-arc disambiguation
+
+Problem closed:
+Real SKY130 XOR2/XNOR2 have two propagation arcs per related input pin:
+one positive_unate and one negative_unate. Earlier B1-B4 correctly failed
+closed because both unconditional arcs were active.
+
+B5 selection policy:
+1. Restrict to output pin + related input pin.
+2. Evaluate Liberty "when" conditions using the current pin state.
+3. If the input transition is known, remove unate arcs whose timing_sense
+   is inconsistent with the logically observed output transition.
+4. Require exactly one remaining arc.
+5. Interpolate only that arc.
+
+This is not a heuristic and does not infer hidden electrical state. The
+logical simulator already determines the old/new output values; B5 simply
+uses the Liberty timing_sense contract to select the compatible arc.
+
+Fail-closed cases remain:
+- duplicate same-sense active arcs
+- multiple non_unate active arcs
+- no sense-consistent active arc
+- missing related-pin identity for multi-input cells
+
+Real qualification:
+- sky130_fd_sc_hd__xor2_1
+- sky130_fd_sc_hd__xnor2_1
+- A and B related pins
+- other input = 0 and 1
+- input rising and falling
+= 16 real state/transition cases
+
+Explicitly deferred:
+- SPICE-calibrated M2 pulse survival
+- internal_power energy attribution
+- mapped structural-Verilog ingestion
