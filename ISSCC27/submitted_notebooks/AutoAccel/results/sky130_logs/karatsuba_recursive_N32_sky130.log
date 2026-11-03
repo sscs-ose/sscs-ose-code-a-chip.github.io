@@ -1,0 +1,1485 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69+ (git sha1 9f09efcdb-dirty, Release, GNU /home/conda/feedstock_root/build_artifacts/bld/rattler-build_yosys_1788957668/build_env/bin/x86_64-conda-linux-gnu-c++ 15.3.0) [github.com/conda-forge/yosys-feedstock at main]
+
+-- Running command `read_liberty -lib pdk/sky130hd_tt.lib; read_verilog -sv rtl/multiplier/conventional_multiplier.sv rtl/multiplier/karatsuba_recursive.sv; hierarchy -top karatsuba_recursive_multiplier -chparam N 32; proc; flatten; opt_expr; opt_clean; check; opt -nodffe -nosdff; fsm; opt; memory; opt_clean; wreduce; opt -purge; alumacc; share; opt; memory -nomap; opt_clean; techmap; opt -fast; dfflibmap -liberty pdk/sky130hd_tt.lib; abc -liberty pdk/sky130hd_tt.lib -script scripts/abc_area.script; setundef -zero; clean -purge; stat -liberty pdk/sky130hd_tt.lib; ltp' --
+
+1. Executing Liberty frontend: pdk/sky130hd_tt.lib
+Imported 428 cell types from liberty file.
+
+2. Executing Verilog-2005 frontend: rtl/multiplier/conventional_multiplier.sv
+Parsing SystemVerilog input from `rtl/multiplier/conventional_multiplier.sv' to AST representation.
+Generating RTLIL representation for module `\conventional_multiplier'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: rtl/multiplier/karatsuba_recursive.sv
+Parsing SystemVerilog input from `rtl/multiplier/karatsuba_recursive.sv' to AST representation.
+Generating RTLIL representation for module `\karatsuba_recursive_multiplier'.
+Successfully finished Verilog frontend.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \N = 32
+
+5. Executing AST frontend in derive mode using pre-parsed AST for module `\karatsuba_recursive_multiplier'.
+Parameter \N = 32
+Generating RTLIL representation for module `$paramod\karatsuba_recursive_multiplier\N=s32'00000000000000000000000000100000'.
+
+5.1. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     \conventional_multiplier
+Parameter \N = 16
+Parameter \THRESHOLD = 8
+
+5.2. Executing AST frontend in derive mode using pre-parsed AST for module `\karatsuba_recursive_multiplier'.
+Parameter \N = 16
+Parameter \THRESHOLD = 8
+Generating RTLIL representation for module `$paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier'.
+Parameter \N = 16
+Parameter \THRESHOLD = 8
+Found cached RTLIL representation for module `$paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier'.
+Parameter \N = 17
+
+5.3. Executing AST frontend in derive mode using pre-parsed AST for module `\conventional_multiplier'.
+Parameter \N = 17
+Generating RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+
+5.4. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     $paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier
+Used module:         \conventional_multiplier
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000010001
+Parameter \N = 9
+
+5.5. Executing AST frontend in derive mode using pre-parsed AST for module `\conventional_multiplier'.
+Parameter \N = 9
+Generating RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+Parameter \N = 8
+Parameter \THRESHOLD = 8
+
+5.6. Executing AST frontend in derive mode using pre-parsed AST for module `\karatsuba_recursive_multiplier'.
+Parameter \N = 8
+Parameter \THRESHOLD = 8
+Generating RTLIL representation for module `$paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier'.
+Parameter \N = 8
+Parameter \THRESHOLD = 8
+Found cached RTLIL representation for module `$paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier'.
+
+5.7. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     $paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier
+Used module:         $paramod\conventional_multiplier\N=s32'00000000000000000000000000001001
+Used module:         $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier
+Used module:             \conventional_multiplier
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000010001
+Parameter \N = 8
+
+5.8. Executing AST frontend in derive mode using pre-parsed AST for module `\conventional_multiplier'.
+Parameter \N = 8
+Generating RTLIL representation for module `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000'.
+Warning: Replacing memory \shifted_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:19
+Warning: Replacing memory \partial_prod with list of registers. See rtl/multiplier/conventional_multiplier.sv:17
+
+5.9. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     $paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier
+Used module:         $paramod\conventional_multiplier\N=s32'00000000000000000000000000001001
+Used module:         $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier
+Used module:             $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000010001
+
+5.10. Analyzing design hierarchy..
+Top module:  \karatsuba_recursive_multiplier
+Used module:     $paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier
+Used module:         $paramod\conventional_multiplier\N=s32'00000000000000000000000000001001
+Used module:         $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier
+Used module:             $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000
+Used module:     $paramod\conventional_multiplier\N=s32'00000000000000000000000000010001
+Removing unused module `$paramod\karatsuba_recursive_multiplier\N=s32'00000000000000000000000000100000'.
+Removing unused module `\conventional_multiplier'.
+Removed 2 unused modules.
+
+6. Executing PROC pass (convert processes to netlists).
+
+6.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `$paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$63'.
+Removing empty process `$paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$63'.
+Found and cleaned up 1 empty switch in `\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$54'.
+Removing empty process `karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$54'.
+Found and cleaned up 1 empty switch in `$paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$198'.
+Removing empty process `$paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.$proc$rtl/multiplier/karatsuba_recursive.sv:22$198'.
+Cleaned up 3 empty switches.
+
+6.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+6.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 74 assignments to connections.
+
+6.4. Executing PROC_INIT pass (extract init attributes).
+
+6.5. Executing PROC_ARST pass (detect async resets in processes).
+
+6.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+6.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$196'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$194'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$192'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$190'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$188'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$186'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$184'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$182'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$180'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$178'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$176'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$174'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$172'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$170'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$168'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$166'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$164'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$162'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:25$151'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$149'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$147'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$145'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$143'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$141'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$139'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$137'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$135'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$133'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$131'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$129'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$127'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$125'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$123'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$121'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$119'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$117'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$115'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$113'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$111'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$109'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$107'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$105'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$103'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$101'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$99'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$97'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$95'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$93'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$91'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$89'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$87'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$85'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$83'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:25$64'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$239'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$237'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$235'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$233'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$231'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$229'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$227'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$225'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$223'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$221'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$219'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$217'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$215'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$213'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$211'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$209'.
+Creating decoders for process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$199'.
+
+6.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[8]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$196'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[8]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$194'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$192'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$190'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$188'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$186'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$184'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$182'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$180'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$178'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$176'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$174'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$172'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$170'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$168'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$166'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\shifted_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$164'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\partial_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$162'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.\P' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:25$151'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[16]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$149'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[16]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$147'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[15]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$145'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[15]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$143'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[14]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$141'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[14]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$139'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[13]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$137'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[13]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$135'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[12]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$133'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[12]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$131'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[11]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$129'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[11]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$127'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[10]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$125'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[10]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$123'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[9]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$121'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[9]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$119'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[8]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$117'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[8]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$115'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$113'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$111'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$109'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$107'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$105'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$103'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$101'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$99'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$97'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$95'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$93'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$91'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$89'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$87'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\shifted_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$85'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\partial_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$83'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.\P' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:25$64'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$239'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[7]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$237'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$235'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[6]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$233'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$231'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[5]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$229'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$227'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[4]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$225'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$223'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[3]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$221'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$219'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[2]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$217'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$215'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[1]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$213'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\shifted_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$211'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\partial_prod[0]' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$209'.
+No latch inferred for signal `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.\P' from process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$199'.
+
+6.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+6.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+6.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$196'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$194'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$192'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$190'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$188'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$186'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$184'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$182'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$180'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$178'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$176'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$174'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$172'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$170'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$168'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$166'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:19$164'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:17$162'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.$proc$rtl/multiplier/conventional_multiplier.sv:25$151'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$149'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$147'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$145'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$143'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$141'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$139'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$137'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$135'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$133'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$131'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$129'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$127'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$125'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$123'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$121'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$119'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$117'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$115'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$113'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$111'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$109'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$107'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$105'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$103'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$101'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$99'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$97'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$95'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$93'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$91'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$89'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$87'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:19$85'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:17$83'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.$proc$rtl/multiplier/conventional_multiplier.sv:25$64'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$239'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$237'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$235'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$233'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$231'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$229'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$227'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$225'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$223'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$221'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$219'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$217'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$215'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$213'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:19$211'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:17$209'.
+Removing empty process `$paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.$proc$rtl/multiplier/conventional_multiplier.sv:25$199'.
+Cleaned up 0 empty switches.
+
+6.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.
+<suppressed ~9 debug messages>
+Optimizing module $paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.
+<suppressed ~17 debug messages>
+Optimizing module $paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier.
+<suppressed ~2 debug messages>
+Optimizing module karatsuba_recursive_multiplier.
+<suppressed ~2 debug messages>
+Optimizing module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.
+<suppressed ~8 debug messages>
+Optimizing module $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.
+
+7. Executing FLATTEN pass (flatten design).
+Deleting now unused module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001001.
+Deleting now unused module $paramod\conventional_multiplier\N=s32'00000000000000000000000000010001.
+Deleting now unused module $paramod$874daf39b57bb55923e0845a4f47a275e1cb073c\karatsuba_recursive_multiplier.
+Deleting now unused module $paramod\conventional_multiplier\N=s32'00000000000000000000000000001000.
+Deleting now unused module $paramod$9d19d5c215173d7162414fd388beed209b596e67\karatsuba_recursive_multiplier.
+<suppressed ~7 debug messages>
+
+8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+<suppressed ~7 debug messages>
+
+9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 0 unused cells and 318 unused wires.
+<suppressed ~8 debug messages>
+
+10. Executing CHECK pass (checking for obvious problems).
+Checking module karatsuba_recursive_multiplier...
+Found and reported 0 problems.
+
+11. Executing OPT pass (performing simple optimizations).
+
+11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 158 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+11.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~134 debug messages>
+
+11.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+11.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 158 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+11.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+11.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+11.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+11.9. Finished fast OPT passes. (There is nothing left to do.)
+
+12. Executing FSM pass (extract and optimize FSM).
+
+12.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+12.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+12.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+12.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+12.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+12.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+12.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+12.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+13. Executing OPT pass (performing simple optimizations).
+
+13.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+13.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 158 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+13.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~134 debug messages>
+
+13.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+13.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 158 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+13.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+13.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+13.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+13.9. Finished fast OPT passes. (There is nothing left to do.)
+
+14. Executing MEMORY pass.
+
+14.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+14.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+14.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+14.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+14.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+14.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+14.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+14.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+14.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+14.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+14.11. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+15. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+16. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 66) from port A of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$52 ($add).
+Removed top 16 bits (of 66) from port B of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$52 ($add).
+Removed top 1 bits (of 66) from port Y of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$52 ($add).
+Removed top 1 bits (of 66) from port A of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$53 ($add).
+Removed top 34 bits (of 66) from port B of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$53 ($add).
+Removed top 2 bits (of 66) from port Y of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$53 ($add).
+Removed top 1 bits (of 65) from port A of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$53 ($add).
+Removed top 9 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+Removed top 8 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+Removed top 7 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+Removed top 7 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+Removed top 7 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+Removed top 6 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+Removed top 6 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+Removed top 6 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+Removed top 5 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+Removed top 5 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+Removed top 5 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+Removed top 4 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+Removed top 4 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+Removed top 4 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+Removed top 3 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+Removed top 3 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+Removed top 3 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+Removed top 2 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+Removed top 2 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+Removed top 2 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+Removed top 1 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+Removed top 1 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 ($add).
+Removed top 1 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 ($add).
+Removed top 1 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+Removed top 2 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+Removed top 3 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+Removed top 4 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+Removed top 5 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+Removed top 6 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+Removed top 8 bits (of 16) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 7 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 6 bits (of 16) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 1 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+Removed top 2 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+Removed top 3 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+Removed top 4 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+Removed top 5 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+Removed top 6 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+Removed top 8 bits (of 16) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 7 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 6 bits (of 16) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 2 bits (of 34) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 8 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 1 bits (of 34) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 1 bits (of 34) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 18 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 2 bits (of 34) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 1 bits (of 33) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 9 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+Removed top 8 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+Removed top 7 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+Removed top 7 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+Removed top 7 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+Removed top 6 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+Removed top 6 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+Removed top 6 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+Removed top 5 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+Removed top 5 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+Removed top 5 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+Removed top 4 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+Removed top 4 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+Removed top 4 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+Removed top 3 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+Removed top 3 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+Removed top 3 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+Removed top 2 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+Removed top 2 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+Removed top 2 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+Removed top 1 bits (of 18) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+Removed top 1 bits (of 18) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 ($add).
+Removed top 1 bits (of 18) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 ($add).
+Removed top 1 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+Removed top 2 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+Removed top 3 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+Removed top 4 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+Removed top 5 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+Removed top 6 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+Removed top 8 bits (of 16) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 7 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 6 bits (of 16) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 1 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+Removed top 2 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+Removed top 3 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+Removed top 4 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+Removed top 5 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+Removed top 6 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+Removed top 8 bits (of 16) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 7 bits (of 16) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 6 bits (of 16) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+Removed top 2 bits (of 34) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 8 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 1 bits (of 34) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 1 bits (of 34) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 18 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 2 bits (of 34) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 1 bits (of 33) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+Removed top 1 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$82 ($add).
+Removed top 2 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$81 ($add).
+Removed top 3 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$80 ($add).
+Removed top 4 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$79 ($add).
+Removed top 5 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$78 ($add).
+Removed top 6 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$77 ($add).
+Removed top 7 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$76 ($add).
+Removed top 8 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$75 ($add).
+Removed top 9 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$74 ($add).
+Removed top 10 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$73 ($add).
+Removed top 11 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$72 ($add).
+Removed top 12 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$71 ($add).
+Removed top 13 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$70 ($add).
+Removed top 14 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$69 ($add).
+Removed top 15 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$68 ($add).
+Removed top 17 bits (of 34) from port A of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$67 ($add).
+Removed top 16 bits (of 34) from port B of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$67 ($add).
+Removed top 15 bits (of 34) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$67 ($add).
+Removed top 1 bits (of 65) from port Y of cell karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$52 ($add).
+Removed top 1 bits (of 33) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 1 bits (of 33) from port Y of cell karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+Removed top 6 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155_Y.
+Removed top 7 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154_Y.
+Removed top 2 bits (of 34) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$61_Y.
+Removed top 6 bits (of 16) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202_Y.
+Removed top 6 bits (of 16) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202_Y.
+Removed top 6 bits (of 16) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202_Y.
+Removed top 6 bits (of 16) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202_Y.
+Removed top 2 bits (of 34) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$61_Y.
+Removed top 1 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160_Y.
+Removed top 15 bits (of 34) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$67_Y.
+Removed top 2 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159_Y.
+Removed top 3 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158_Y.
+Removed top 4 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157_Y.
+Removed top 1 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160_Y.
+Removed top 2 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159_Y.
+Removed top 3 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158_Y.
+Removed top 4 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157_Y.
+Removed top 5 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156_Y.
+Removed top 6 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155_Y.
+Removed top 7 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154_Y.
+Removed top 5 bits (of 18) from wire karatsuba_recursive_multiplier.$flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156_Y.
+Removed top 2 bits (of 66) from wire karatsuba_recursive_multiplier.$add$rtl/multiplier/karatsuba_recursive.sv:69$52_Y.
+
+17. Executing OPT pass (performing simple optimizations).
+
+17.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+17.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 158 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+17.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~134 debug messages>
+
+17.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+17.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 158 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+17.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+17.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 13 unused cells and 143 unused wires.
+<suppressed ~132 debug messages>
+
+17.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+17.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+17.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~134 debug messages>
+
+17.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+17.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 145 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+17.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+17.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+17.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+17.16. Finished fast OPT passes. (There is nothing left to do.)
+
+18. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module karatsuba_recursive_multiplier:
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$73 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$75 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:59$55 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:60$56 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$67 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.$sub$rtl/multiplier/karatsuba_recursive.sv:67$57 ($sub).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58 ($sub).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$82 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$81 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$74 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$68 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:59$55 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:60$56 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$69 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.$sub$rtl/multiplier/karatsuba_recursive.sv:67$57 ($sub).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58 ($sub).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$62 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$80 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$79 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$78 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$77 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$76 ($add).
+  creating $macc model for $add$rtl/multiplier/karatsuba_recursive.sv:59$46 ($add).
+  creating $macc model for $add$rtl/multiplier/karatsuba_recursive.sv:60$47 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$70 ($add).
+  creating $macc model for $sub$rtl/multiplier/karatsuba_recursive.sv:67$48 ($sub).
+  creating $macc model for $sub$rtl/multiplier/karatsuba_recursive.sv:67$49 ($sub).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$71 ($add).
+  creating $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$72 ($add).
+  creating $macc model for $add$rtl/multiplier/karatsuba_recursive.sv:69$52 ($add).
+  creating $macc model for $add$rtl/multiplier/karatsuba_recursive.sv:69$53 ($add).
+  merging $macc model for $add$rtl/multiplier/karatsuba_recursive.sv:69$52 into $add$rtl/multiplier/karatsuba_recursive.sv:69$53.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$71 into $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$72.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$70 into $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$72.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$69 into $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$72.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$68 into $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$72.
+  merging $macc model for $sub$rtl/multiplier/karatsuba_recursive.sv:67$48 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$82 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$81 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$80 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$79 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$78 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$77 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$76 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$75 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$74 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$73 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$72 into $sub$rtl/multiplier/karatsuba_recursive.sv:67$49.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 into $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 into $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$62.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.$sub$rtl/multiplier/karatsuba_recursive.sv:67$57 into $flatten\gen_karatsuba_step.u_hi.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58.
+  merging $macc model for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 into $flatten\gen_karatsuba_step.u_hi.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$154 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$155 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$156 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$157 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$158 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$159 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$160 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$207 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$206 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$205 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$204 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$203 into $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$61 into $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$62.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.$sub$rtl/multiplier/karatsuba_recursive.sv:67$57 into $flatten\gen_karatsuba_step.u_lo.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58.
+  merging $macc model for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$161 into $flatten\gen_karatsuba_step.u_lo.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:59$55.
+  creating $alu model for $macc $add$rtl/multiplier/karatsuba_recursive.sv:59$46.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202.
+  creating $alu model for $macc $add$rtl/multiplier/karatsuba_recursive.sv:60$47.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$67.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:60$56.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:59$55.
+  creating $alu model for $macc $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:60$56.
+  creating $macc cell for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208: $auto$alumacc.cc:399:replace_macc$270
+  creating $macc cell for $add$rtl/multiplier/karatsuba_recursive.sv:69$53: $auto$alumacc.cc:399:replace_macc$271
+  creating $macc cell for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:69$62: $auto$alumacc.cc:399:replace_macc$272
+  creating $macc cell for $flatten\gen_karatsuba_step.u_lo.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58: $auto$alumacc.cc:399:replace_macc$273
+  creating $macc cell for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:69$62: $auto$alumacc.cc:399:replace_macc$274
+  creating $macc cell for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208: $auto$alumacc.cc:399:replace_macc$275
+  creating $macc cell for $sub$rtl/multiplier/karatsuba_recursive.sv:67$49: $auto$alumacc.cc:399:replace_macc$276
+  creating $macc cell for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208: $auto$alumacc.cc:399:replace_macc$277
+  creating $macc cell for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$208: $auto$alumacc.cc:399:replace_macc$278
+  creating $macc cell for $flatten\gen_karatsuba_step.u_hi.$sub$rtl/multiplier/karatsuba_recursive.sv:67$58: $auto$alumacc.cc:399:replace_macc$279
+  creating $alu cell for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:60$56: $auto$alumacc.cc:548:replace_alu$280
+  creating $alu cell for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:59$55: $auto$alumacc.cc:548:replace_alu$283
+  creating $alu cell for $flatten\gen_karatsuba_step.u_lo.$add$rtl/multiplier/karatsuba_recursive.sv:60$56: $auto$alumacc.cc:548:replace_alu$286
+  creating $alu cell for $flatten\gen_karatsuba_step.u_mid.$add$rtl/multiplier/conventional_multiplier.sv:30$67: $auto$alumacc.cc:548:replace_alu$289
+  creating $alu cell for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202: $auto$alumacc.cc:548:replace_alu$292
+  creating $alu cell for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_lo.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202: $auto$alumacc.cc:548:replace_alu$295
+  creating $alu cell for $add$rtl/multiplier/karatsuba_recursive.sv:60$47: $auto$alumacc.cc:548:replace_alu$298
+  creating $alu cell for $flatten\gen_karatsuba_step.u_lo.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202: $auto$alumacc.cc:548:replace_alu$301
+  creating $alu cell for $add$rtl/multiplier/karatsuba_recursive.sv:59$46: $auto$alumacc.cc:548:replace_alu$304
+  creating $alu cell for $flatten\gen_karatsuba_step.u_hi.$add$rtl/multiplier/karatsuba_recursive.sv:59$55: $auto$alumacc.cc:548:replace_alu$307
+  creating $alu cell for $flatten\gen_karatsuba_step.u_hi.\gen_karatsuba_step.u_hi.\gen_base_case.u_base.$add$rtl/multiplier/conventional_multiplier.sv:30$202: $auto$alumacc.cc:548:replace_alu$310
+  created 11 $alu and 10 $macc cells.
+
+19. Executing SHARE pass (SAT-based resource sharing).
+
+20. Executing OPT pass (performing simple optimizations).
+
+20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 145 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~134 debug messages>
+
+20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 145 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+20.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+20.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 57 unused cells and 57 unused wires.
+<suppressed ~61 debug messages>
+
+20.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+20.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+20.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \karatsuba_recursive_multiplier..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~134 debug messages>
+
+20.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \karatsuba_recursive_multiplier.
+Performed a total of 0 changes.
+
+20.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 88 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Removed a total of 0 cells.
+
+20.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+20.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+20.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+
+20.16. Finished fast OPT passes. (There is nothing left to do.)
+
+21. Executing MEMORY pass.
+
+21.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+21.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+21.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+21.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+21.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+21.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+21.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+21.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+21.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+21.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+22. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+
+23. Executing TECHMAP pass (map to technology primitives).
+
+23.1. Executing Verilog-2005 frontend: /home/z/.micromamba/eda/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/home/z/.micromamba/eda/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+23.2. Continuing TECHMAP pass.
+Using template $paramod$9befa12646ab1d64090f7cfa4f3c72972b2004e7\_90_alu for cells of type $alu.
+Using template $paramod$4ccbe221165818e15f326ddee3d1183c7924e12f\_90_alu for cells of type $alu.
+Using template $paramod$081ba1a4a7201ecdb44563d3c3bd7013d1ebf4eb\_90_alu for cells of type $alu.
+Using template $paramod$997095b0d0841f90940aeb655a2c287938600ca1\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[0] (9 bits, unsigned)
+  sub \gen_karatsuba_step.u_hi.gen_karatsuba_step.Z0 (16 bits, unsigned)
+  sub \gen_karatsuba_step.u_hi.gen_karatsuba_step.Z2 (16 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[8] 8'00000000 } (17 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[7] 7'0000000 } (16 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[6] 6'000000 } (15 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[5] 5'00000 } (14 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[4] 4'0000 } (13 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[3] 3'000 } (12 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[2] 2'00 } (11 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_mid.partial_prod[1] 1'0 } (10 bits, unsigned)
+  add $auto$wreduce.cc:513:run$254 [9:0] (10 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[7] 7'0000000 } (15 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[6] 6'000000 } (14 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[5] 5'00000 } (13 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[4] 4'0000 } (12 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[3] 3'000 } (11 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[2] 2'00 } (10 bits, unsigned)
+  add $auto$wreduce.cc:513:run$252 [9:0] (10 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[7] 7'0000000 } (15 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[6] 6'000000 } (14 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[5] 5'00000 } (13 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[4] 4'0000 } (12 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[3] 3'000 } (11 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_hi.gen_base_case.u_base.partial_prod[2] 2'00 } (10 bits, unsigned)
+  add $auto$wreduce.cc:513:run$257 [18:0] (19 bits, unsigned)
+  sub \gen_karatsuba_step.Z0 (32 bits, unsigned)
+  sub \gen_karatsuba_step.Z2 (32 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[16] 16'0000000000000000 } (33 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[15] 15'000000000000000 } (32 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[14] 14'00000000000000 } (31 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[13] 13'0000000000000 } (30 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[12] 12'000000000000 } (29 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[11] 11'00000000000 } (28 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[10] 10'0000000000 } (27 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[9] 9'000000000 } (26 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[8] 8'00000000 } (25 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[7] 7'0000000 } (24 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[6] 6'000000 } (23 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[5] 5'00000 } (22 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[4] 4'0000 } (21 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[3] 3'000 } (20 bits, unsigned)
+  add { \gen_karatsuba_step.u_mid.partial_prod[2] 2'00 } (19 bits, unsigned)
+  add $auto$wreduce.cc:513:run$251 [9:0] (10 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[7] 7'0000000 } (15 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[6] 6'000000 } (14 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[5] 5'00000 } (13 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[4] 4'0000 } (12 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[3] 3'000 } (11 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[2] 2'00 } (10 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.Z2 16'0000000000000000 } (32 bits, unsigned)
+  add \gen_karatsuba_step.u_hi.gen_karatsuba_step.Z0 (16 bits, unsigned)
+  add { \gen_karatsuba_step.u_hi.gen_karatsuba_step.middle 8'00000000 } (26 bits, unsigned)
+  add \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[0] (9 bits, unsigned)
+  sub \gen_karatsuba_step.u_lo.gen_karatsuba_step.Z0 (16 bits, unsigned)
+  sub \gen_karatsuba_step.u_lo.gen_karatsuba_step.Z2 (16 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[8] 8'00000000 } (17 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[7] 7'0000000 } (16 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[6] 6'000000 } (15 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[5] 5'00000 } (14 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[4] 4'0000 } (13 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[3] 3'000 } (12 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[2] 2'00 } (11 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_mid.partial_prod[1] 1'0 } (10 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.Z2 16'0000000000000000 } (32 bits, unsigned)
+  add \gen_karatsuba_step.u_lo.gen_karatsuba_step.Z0 (16 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.middle 8'00000000 } (26 bits, unsigned)
+  add { \gen_karatsuba_step.Z2 32'00000000000000000000000000000000 } (64 bits, unsigned)
+  add \gen_karatsuba_step.Z0 (32 bits, unsigned)
+  add { \gen_karatsuba_step.middle 16'0000000000000000 } (50 bits, unsigned)
+  add $auto$wreduce.cc:513:run$253 [9:0] (10 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[7] 7'0000000 } (15 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[6] 6'000000 } (14 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[5] 5'00000 } (13 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[4] 4'0000 } (12 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[3] 3'000 } (11 bits, unsigned)
+  add { \gen_karatsuba_step.u_lo.gen_karatsuba_step.u_lo.gen_base_case.u_base.partial_prod[2] 2'00 } (10 bits, unsigned)
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001111 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010000 for cells of type $fa.
+Using template $paramod$6df0329addda9228fcc2546de2aaf14ad26c98e1\_90_alu for cells of type $alu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001001 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010010 for cells of type $fa.
+Using template $paramod$12350b8c8422a70d10b7db4eaae1202a7148b784\_90_alu for cells of type $alu.
+Using template $paramod$fbc7873bff55778c0b3173955b7e4bce1d9d6834\_90_alu for cells of type $alu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010011 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000011000 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000011111 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000110 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000011110 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000100010 for cells of type $fa.
+Using template $paramod$dbef6e48cd28208af1b77a9bd7dfc80580f16131\_90_alu for cells of type $alu.
+Using template $paramod$039520c137afc9cd69dd56c3fb11a4e1fbe5f664\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001010 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001001 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010011 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010001 for cells of type $lcu.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $and.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000100000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000100000 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010010 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000100010 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000001000000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000001000000 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~3651 debug messages>
+
+24. Executing OPT pass (performing simple optimizations).
+
+24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module karatsuba_recursive_multiplier.
+<suppressed ~4217 debug messages>
+
+24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\karatsuba_recursive_multiplier'.
+Computing hashes of 6342 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Computing hashes of 6267 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+Computing hashes of 6266 cells of `\karatsuba_recursive_multiplier'.
+Finding duplicate cells in `\karatsuba_recursive_multiplier'.
+<suppressed ~228 debug messages>
+Removed a total of 76 cells.
+
+24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \karatsuba_recursive_multiplier..
+Removed 377 unused cells and 1787 unused wires.
+<suppressed ~378 debug messages>
+
+24.5. Finished fast OPT passes.
+
+25. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sky130_fd_sc_hd__dfxtp_1 (noninv, pins=3, area=20.02) is a direct match for cell type $_DFF_P_.
+  cell sky130_fd_sc_hd__dfrtn_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_NN0_.
+  cell sky130_fd_sc_hd__dfrtp_1 (noninv, pins=4, area=25.02) is a direct match for cell type $_DFF_PN0_.
+  cell sky130_fd_sc_hd__dfstp_1 (noninv, pins=4, area=26.28) is a direct match for cell type $_DFF_PN1_.
+  cell sky130_fd_sc_hd__edfxtp_1 (noninv, pins=4, area=30.03) is a direct match for cell type $_DFFE_PP_.
+  cell sky130_fd_sc_hd__dfbbn_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_NNN_.
+  cell sky130_fd_sc_hd__dfbbp_1 (noninv, pins=6, area=32.53) is a direct match for cell type $_DFFSR_PNN_.
+  cell sky130_fd_sc_hd__dlxtn_1 (noninv, pins=3, area=15.01) is a direct match for cell type $_DLATCH_N_.
+  cell sky130_fd_sc_hd__lpflow_inputisolatch_1 (noninv, pins=3, area=13.76) is a direct match for cell type $_DLATCH_P_.
+  cell sky130_fd_sc_hd__dlrtn_1 (noninv, pins=4, area=17.52) is a direct match for cell type $_DLATCH_NN0_.
+  cell sky130_fd_sc_hd__dlrtp_1 (noninv, pins=4, area=16.27) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    \sky130_fd_sc_hd__dfxtp_1 _DFF_P_ (.CLK( C), .D( D), .Q( Q));
+    \sky130_fd_sc_hd__dfrtn_1 _DFF_NN0_ (.CLK_N( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sky130_fd_sc_hd__dfrtp_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    \sky130_fd_sc_hd__dfstp_1 _DFF_PN1_ (.CLK( C), .D( D), .Q( Q), .SET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    \sky130_fd_sc_hd__edfxtp_1 _DFFE_PP_ (.CLK( C), .D( D), .DE( E), .Q( Q));
+    \sky130_fd_sc_hd__dfbbn_1 _DFFSR_NNN_ (.CLK_N( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    \sky130_fd_sc_hd__dfbbp_1 _DFFSR_PNN_ (.CLK( C), .D( D), .Q( Q), .Q_N(~Q), .RESET_B( R), .SET_B( S));
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    \sky130_fd_sc_hd__dlxtn_1 _DLATCH_N_ (.D( D), .GATE_N( E), .Q( Q));
+    \sky130_fd_sc_hd__lpflow_inputisolatch_1 _DLATCH_P_ (.D( D), .Q( Q), .SLEEP_B( E));
+    \sky130_fd_sc_hd__dlrtn_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sky130_fd_sc_hd__dlrtp_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+25.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~24 debug messages>
+Mapping DFF/DLATCH cells in module `\karatsuba_recursive_multiplier':
+
+26. Executing ABC pass (technology mapping using ABC).
+
+26.1. Extracting gate netlist of module `\karatsuba_recursive_multiplier' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache-1001/yosys_merged_931a5023.scl (1 files)
+
+26.1.1. Executed ABC.
+Extracted 5889 gates and 5954 wires to a netlist network with 64 inputs and 64 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep  9 2026 12:41:08)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache-1001/yosys_merged_931a5023.scl 
+ABC: Warning: Detected 9 multi-output cells (for example, "sky130_fd_sc_hd__fa_1").
+ABC: + source /home/z/my-project/repo-autoaccel/scripts/abc_area.script 
+ABC: WireLoad = "none"  Gates =   7141 ( 13.4 %)   Cap =  6.0 ff (  1.9 %)   Area =    44480.16 ( 86.6 %)   Delay = 12208.25 ps  (  8.2 %)               
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+26.1.2. Re-integrating ABC results.
+ABC RESULTS:   sky130_fd_sc_hd__a2111o_1 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__a2111oi_0 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a211o_2 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a211oi_1 cells:       16
+ABC RESULTS:   sky130_fd_sc_hd__a21boi_0 cells:       55
+ABC RESULTS:   sky130_fd_sc_hd__a21o_2 cells:       20
+ABC RESULTS:   sky130_fd_sc_hd__a21oi_1 cells:      521
+ABC RESULTS:   sky130_fd_sc_hd__a221oi_1 cells:        5
+ABC RESULTS:   sky130_fd_sc_hd__a22oi_1 cells:       15
+ABC RESULTS:   sky130_fd_sc_hd__a311o_2 cells:        2
+ABC RESULTS:   sky130_fd_sc_hd__a31o_2 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a31oi_1 cells:       13
+ABC RESULTS:   sky130_fd_sc_hd__a32oi_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__a41oi_1 cells:       10
+ABC RESULTS:   sky130_fd_sc_hd__and2_2 cells:       37
+ABC RESULTS:   sky130_fd_sc_hd__and3_2 cells:       44
+ABC RESULTS:   sky130_fd_sc_hd__clkinv_1 cells:      958
+ABC RESULTS:   sky130_fd_sc_hd__maj3_1 cells:      294
+ABC RESULTS:   sky130_fd_sc_hd__nand2_1 cells:     1419
+ABC RESULTS:   sky130_fd_sc_hd__nand3_1 cells:      506
+ABC RESULTS:   sky130_fd_sc_hd__nand3b_1 cells:       43
+ABC RESULTS:   sky130_fd_sc_hd__nand4_1 cells:       67
+ABC RESULTS:   sky130_fd_sc_hd__nor2_1 cells:     1143
+ABC RESULTS:   sky130_fd_sc_hd__nor3_1 cells:       57
+ABC RESULTS:   sky130_fd_sc_hd__nor3b_1 cells:        1
+ABC RESULTS:   sky130_fd_sc_hd__nor4_1 cells:        4
+ABC RESULTS:   sky130_fd_sc_hd__o2111a_1 cells:        6
+ABC RESULTS:   sky130_fd_sc_hd__o2111ai_1 cells:       14
+ABC RESULTS:   sky130_fd_sc_hd__o211a_1 cells:       35
+ABC RESULTS:   sky130_fd_sc_hd__o211ai_1 cells:       53
+ABC RESULTS:   sky130_fd_sc_hd__o21a_1 cells:       94
+ABC RESULTS:   sky130_fd_sc_hd__o21ai_0 cells:      248
+ABC RESULTS:   sky130_fd_sc_hd__o21bai_1 cells:       43
+ABC RESULTS:   sky130_fd_sc_hd__o221ai_1 cells:        8
+ABC RESULTS:   sky130_fd_sc_hd__o22ai_1 cells:       14
+ABC RESULTS:   sky130_fd_sc_hd__o2bb2ai_1 cells:       33
+ABC RESULTS:   sky130_fd_sc_hd__o31ai_1 cells:        3
+ABC RESULTS:   sky130_fd_sc_hd__or2_2 cells:       40
+ABC RESULTS:   sky130_fd_sc_hd__or2b_2 cells:        5
+ABC RESULTS:   sky130_fd_sc_hd__xnor2_1 cells:      407
+ABC RESULTS:   sky130_fd_sc_hd__xnor3_4 cells:      246
+ABC RESULTS:   sky130_fd_sc_hd__xor2_1 cells:      621
+ABC RESULTS:   sky130_fd_sc_hd__xor3_4 cells:       35
+ABC RESULTS:        internal signals:     5826
+ABC RESULTS:           input signals:       64
+ABC RESULTS:          output signals:       64
+Removing temp directory.
+Removing global temp directory.
+
+27. Executing SETUNDEF pass (replace undef values with defined constants).
+Removed 0 unused cells and 1337 unused wires.
+
+28. Printing statistics.
+
+=== karatsuba_recursive_multiplier ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     7080        - wires
+     7205        - wire bits
+        3        - public wires
+      128        - public wire bits
+        3        - ports
+      128        - port bits
+     7141 4.45E+04 cells
+        2   22.522   sky130_fd_sc_hd__a2111o_1
+        1    8.758   sky130_fd_sc_hd__a2111oi_0
+        1    10.01   sky130_fd_sc_hd__a211o_2
+       16  120.115   sky130_fd_sc_hd__a211oi_1
+       55  412.896   sky130_fd_sc_hd__a21boi_0
+       20  175.168   sky130_fd_sc_hd__a21o_2
+      521 2.61E+03   sky130_fd_sc_hd__a21oi_1
+        5   43.792   sky130_fd_sc_hd__a221oi_1
+       15  112.608   sky130_fd_sc_hd__a22oi_1
+        2   22.522   sky130_fd_sc_hd__a311o_2
+        1    8.758   sky130_fd_sc_hd__a31o_2
+       13   81.328   sky130_fd_sc_hd__a31oi_1
+        1    8.758   sky130_fd_sc_hd__a32oi_1
+       10   87.584   sky130_fd_sc_hd__a41oi_1
+       37  277.766   sky130_fd_sc_hd__and2_2
+       44  330.317   sky130_fd_sc_hd__and3_2
+      958  3.6E+03   sky130_fd_sc_hd__clkinv_1
+      294 2.94E+03   sky130_fd_sc_hd__maj3_1
+     1419 5.33E+03   sky130_fd_sc_hd__nand2_1
+      506 2.53E+03   sky130_fd_sc_hd__nand3_1
+       43   322.81   sky130_fd_sc_hd__nand3b_1
+       67  419.152   sky130_fd_sc_hd__nand4_1
+     1143 4.29E+03   sky130_fd_sc_hd__nor2_1
+       57  285.274   sky130_fd_sc_hd__nor3_1
+        1    7.507   sky130_fd_sc_hd__nor3b_1
+        4   25.024   sky130_fd_sc_hd__nor4_1
+        6   67.565   sky130_fd_sc_hd__o2111a_1
+       14  122.618   sky130_fd_sc_hd__o2111ai_1
+       35  350.336   sky130_fd_sc_hd__o211a_1
+       53  397.882   sky130_fd_sc_hd__o211ai_1
+       94  705.677   sky130_fd_sc_hd__o21a_1
+      248  1241.19   sky130_fd_sc_hd__o21ai_0
+       43   322.81   sky130_fd_sc_hd__o21bai_1
+        8   70.067   sky130_fd_sc_hd__o221ai_1
+       14   87.584   sky130_fd_sc_hd__o22ai_1
+       33  289.027   sky130_fd_sc_hd__o2bb2ai_1
+        3   22.522   sky130_fd_sc_hd__o31ai_1
+       40   250.24   sky130_fd_sc_hd__or2_2
+        5   43.792   sky130_fd_sc_hd__or2b_2
+      407 3.56E+03   sky130_fd_sc_hd__xnor2_1
+      246 6.46E+03   sky130_fd_sc_hd__xnor3_4
+      621 5.44E+03   sky130_fd_sc_hd__xor2_1
+       35  963.424   sky130_fd_sc_hd__xor3_4
+
+   Chip area for module '\karatsuba_recursive_multiplier': 44480.160000
+     of which used for sequential elements: 0.000000 (0.00%)
+
+29. Executing LTP pass (find longest path).
+
+Longest topological path in karatsuba_recursive_multiplier (length=92):
+    0: \B [9]
+    1: $abc$12425$new_n210 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12507)
+    2: $abc$12425$new_n211 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12508)
+    3: $abc$12425$new_n212 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12509)
+    4: $abc$12425$new_n272 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12569)
+    5: $abc$12425$new_n274 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12571)
+    6: $abc$12425$new_n277 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12574)
+    7: $abc$12425$new_n279 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12576)
+    8: $abc$12425$new_n280 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12577)
+    9: $abc$12425$new_n282 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12579)
+   10: $abc$12425$new_n283 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12580)
+   11: $abc$12425$new_n284 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12581)
+   12: $abc$12425$new_n300 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12597)
+   13: $abc$12425$new_n301 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12598)
+   14: $abc$12425$new_n304 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12601)
+   15: $abc$12425$new_n309 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12606)
+   16: $abc$12425$new_n310 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12607)
+   17: $abc$12425$new_n335 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12632)
+   18: $abc$12425$new_n352 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12649)
+   19: $abc$12425$new_n354 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12651)
+   20: $abc$12425$new_n410 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12707)
+   21: $abc$12425$new_n411 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12708)
+   22: $abc$12425$new_n469 (via $abc$12425$auto$blifparse.cc:397:parse_blif$12766)
+   23: $abc$12425$new_n1111 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13408)
+   24: $abc$12425$new_n1116 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13413)
+   25: $abc$12425$new_n1117 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13414)
+   26: $abc$12425$new_n1118 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13415)
+   27: $abc$12425$new_n1119 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13416)
+   28: $abc$12425$new_n1159 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13456)
+   29: $abc$12425$new_n1161 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13458)
+   30: $abc$12425$new_n1162 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13459)
+   31: $abc$12425$new_n1164 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13461)
+   32: $abc$12425$new_n1175 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13472)
+   33: $abc$12425$new_n1310 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13607)
+   34: $abc$12425$new_n1311 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13608)
+   35: $abc$12425$new_n1432 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13729)
+   36: $abc$12425$new_n1434 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13731)
+   37: $abc$12425$new_n1441 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13738)
+   38: $abc$12425$new_n1442 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13739)
+   39: $abc$12425$new_n1454 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13751)
+   40: $abc$12425$new_n1558 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13855)
+   41: $abc$12425$new_n1563 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13860)
+   42: $abc$12425$new_n1586 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13883)
+   43: $abc$12425$new_n1587 (via $abc$12425$auto$blifparse.cc:397:parse_blif$13884)
+   44: $abc$12425$new_n1928 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14225)
+   45: $abc$12425$new_n2154 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14451)
+   46: $abc$12425$new_n2155 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14452)
+   47: $abc$12425$new_n2156 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14453)
+   48: $abc$12425$new_n2157 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14454)
+   49: $abc$12425$new_n2170 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14467)
+   50: $abc$12425$new_n2172 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14469)
+   51: $abc$12425$new_n2174 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14471)
+   52: $abc$12425$new_n2176 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14473)
+   53: $abc$12425$new_n2187 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14484)
+   54: $abc$12425$new_n2188 (via $abc$12425$auto$blifparse.cc:397:parse_blif$14485)
+   55: $abc$12425$new_n4414 (via $abc$12425$auto$blifparse.cc:397:parse_blif$16711)
+   56: $abc$12425$new_n4415 (via $abc$12425$auto$blifparse.cc:397:parse_blif$16712)
+   57: $abc$12425$new_n4416 (via $abc$12425$auto$blifparse.cc:397:parse_blif$16713)
+   58: $abc$12425$new_n6418 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18715)
+   59: $abc$12425$new_n6421 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18718)
+   60: $abc$12425$new_n6424 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18721)
+   61: $abc$12425$new_n6426 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18723)
+   62: $abc$12425$new_n6430 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18727)
+   63: $abc$12425$new_n6458 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18755)
+   64: $abc$12425$new_n6563 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18860)
+   65: $abc$12425$new_n6564 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18861)
+   66: $abc$12425$new_n6596 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18893)
+   67: $abc$12425$new_n6597 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18894)
+   68: $abc$12425$new_n6598 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18895)
+   69: $abc$12425$new_n6604 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18901)
+   70: $abc$12425$new_n6605 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18902)
+   71: $abc$12425$new_n6606 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18903)
+   72: $abc$12425$new_n6669 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18966)
+   73: $abc$12425$new_n6670 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18967)
+   74: $abc$12425$new_n6672 (via $abc$12425$auto$blifparse.cc:397:parse_blif$18969)
+   75: $abc$12425$new_n6721 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19018)
+   76: $abc$12425$new_n6725 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19022)
+   77: $abc$12425$new_n6726 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19023)
+   78: $abc$12425$new_n6728 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19025)
+   79: $abc$12425$new_n6986 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19283)
+   80: $abc$12425$new_n6987 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19284)
+   81: $abc$12425$new_n6988 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19285)
+   82: $abc$12425$new_n7055 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19352)
+   83: $abc$12425$new_n7056 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19353)
+   84: $abc$12425$new_n7058 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19355)
+   85: $abc$12425$new_n7071 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19368)
+   86: $abc$12425$new_n7072 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19369)
+   87: $abc$12425$new_n7085 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19382)
+   88: $abc$12425$new_n7249 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19546)
+   89: $abc$12425$new_n7251 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19548)
+   90: $abc$12425$new_n7261 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19558)
+   91: $abc$12425$new_n7262 (via $abc$12425$auto$blifparse.cc:397:parse_blif$19559)
+   92: \P [55] (via $abc$12425$auto$blifparse.cc:397:parse_blif$19561)
+
+Warnings: 2 unique messages, 8 total
+End of script. Logfile hash: 88279a936d, time: 1.49s, user: 0.68s, system: 0.07s, MEM: 64.36 MB peak
+Yosys 0.69+ (git sha1 9f09efcdb-dirty, Release, GNU /home/conda/feedstock_root/build_artifacts/bld/rattler-build_yosys_1788957668/build_env/bin/x86_64-conda-linux-gnu-c++ 15.3.0) [github.com/conda-forge/yosys-feedstock at main]
+Time spent: 54% 1x abc (0 sec), 7% 24x opt_clean (0 sec), ...
+
+=== STDERR ===
